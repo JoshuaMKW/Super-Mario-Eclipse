@@ -30,3 +30,13 @@
 *.exe
 *.out
 *.app
+
+#Compilers
+compiler/*.dll
+compiler/*c.exe
+
+#Python Cache
+__pycache__
+
+#Nintendo Dol
+*.dol

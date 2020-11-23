@@ -53,8 +53,6 @@ class Compiler(object):
             else:
                 cmdtype = f"-output-code={self.dest}"
 
-        print(cmdtype)
-
         if isinstance(src, str):
             subprocess.run(f"\"{self.prog}\" \"{src}\" {self.options} tmp.o")
             output = subprocess.run(f"\"{self.kamek}\" tmp.o  gpr_saving.o -static=0x{ARENASTART:08X} {cmdtype}",
@@ -100,7 +98,7 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    worker = Compiler(os.path.join("compiler", "Kamek.exe"), os.path.join("compiler", "mwcceppc.exe"), "-gccinc -gccext on -enum int -fp hard -use_lmw_stmw on -O3,p -c -rostr -sdata 0 -sdata2 0 -o", args.dest, args.map)
+    worker = Compiler(os.path.join("compiler", "Kamek.exe"), os.path.join("compiler", "mwcceppc.exe"), "-gccinc -gccext on -enum int -fp hard -use_lmw_stmw on -O4,p -c -rostr -sdata 0 -sdata2 0 -o", args.dest, args.map)
     worker.run(args.src, args.dolfile)
 
     print("\nCompiled Successfully\n")

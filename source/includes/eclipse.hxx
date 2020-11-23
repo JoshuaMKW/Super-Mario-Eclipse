@@ -7,28 +7,6 @@
 #define PI 3.14159265f
 
 /*
-struct floats
-{
-    float _0_0;
-    float _0_5;
-    float _0_9375;
-    float _1_0;
-    float _3_0;
-    float _10_0;
-    float _20_0;
-    float _40_0;
-    float _75_0;
-    float _100_0;
-    float _180_0;
-    float _300_0;
-    float _1000000_0;
-    float pi;
-};
-
-extern floats my_floats;
-*/
-
-/*
 void *operator new(size_t size)
 {
     return __nw__FUli(size, 32);

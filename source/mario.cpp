@@ -116,99 +116,23 @@ void TMario::setCustomAttributes()
     }
 }
 
-//0x8029D7FC  **INITIALIZE 4 MARIOS**
-/*
-lis r12, gInfo@h
-ori r12, r12, gInfo@l + 0x3C
-lwz r11, 0 (r12)
-cmpwi r11, 0
-bne- no_init
-li r11, 0
-stw r29, -0x60D8 (r13)
-stw r29, -0x60B8 (r13)
-stb r11, 0x10 (r12)
-no_init:
-lbz r11, 0x10 (r12)
-addi r10, r11, 1
-slwi r11, r11, 2
-stwx r29, r12, r11
-lbz r9, 0x11 (r12)
-cmpw r10, r9
-blt skipreset
-li r10, 0
-skipreset:
-stb r10, 0x10 (r12)
-mr r3, r29
-*/
+s16 shadowCrashPatch()
+{
+    register s16 *boneInfo;
+    __asm { mr boneInfo, r4 };
 
-//kWrite32(0x8029D800, 0x4180FFE4);
-//kWrite32(0x8029D804, 0x60000000);
-
-//0x80276AB8  **INITVALUES 4 MARIOS**
-/*
-
-stb r3, 0x535 (r30)
-sth r0, 0x556 (r30)
-
-lis r12, gInfo@h
-ori r12, r12, gInfo@l + 0x3C
-lwz r11, 0 (r12)
-cmpw r11, r30
-bne+ isMultiMario
-li r11, 0
-stb r11, 0x10 (r12)
-isMultiMario:
-lbz r11, 0x10 (r12)
-addi r10, r11, 1
-slwi r11, r11, 2
-lwzx r30, r12, r11
-mr r3, r30
-lbz r9, 0x11 (r12)
-cmpw r10, r9
-blt skipreset
-li r10, 0
-skipreset:
-stb r10, 0x10 (r12)
-*/
-
-//kWrite32(0x80276ABC, 0x4180FC10);
-
-//0x80276C90 LOAD VALUES 4 MARIOS
-/*
-
-mtlr r12
-blrl
-
-lis r12, gInfo@h
-ori r12, r12, gInfo@l + 0x3C
-lwz r11, 0 (r12)
-cmpw r11, r31
-bne+ isMultiMario
-li r11, 0
-stb r11, 0x10 (r12)
-isMultiMario:
-lbz r11, 0x10 (r12)
-addi r10, r11, 1
-slwi r11, r11, 2
-lwzx r3, r12, r11
-lbz r9, 0x11 (r12)
-cmpw r10, r9
-blt skipreset
-
-li r10, 0
-b pass
-
-skipreset:
-stb r10, 0x10 (r12)
-lwz r12, 0 (r30)
-lwz r12, 0x10 (r30)
-mtlr r12
-blrl
-
-pass:
-
-0x8
-*/
+    int index;
+    if (!boneInfo)
+    {
+        index = 0;
+    }
+    else
+    {
+        index = boneInfo[0x18];
+    }
+    return index;
+}
+kmCall(0x802320E0, &shadowCrashPatch);
 
 //0x8024D2C4
 /*
@@ -301,6 +225,7 @@ void manageExtraJumps(TMario *gpMario)
     }
     stateMachine__6TMarioFv(gpMario);
 }
+kmCall(0x8024E02C, &manageExtraJumps);
 
 //0x80254884, 0x8025474C, 0x802546E4, 0x802546B0, 0x80254540 -> 0x800050E8
 /*

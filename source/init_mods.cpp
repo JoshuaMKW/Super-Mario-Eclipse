@@ -7,7 +7,7 @@
 u32 *createCharacterHeap(u32 *newHeap, u32 size, u32 *rootHeap, u32 unk_1)
 {
     gInfo.mCharacterHeap = (u32 *)create__10JKRExpHeapFUlP7JKRHeapb(0x200000, (u32 *)*(u32 *)JKRRootHeap, false);
-    //hmalloc(gInfo.mCharacterHeap, 0x1FFF00, 32);
+    strcpy((char *)0x803A4284, "/data/chr%d.arc");
     u32 *gameHeap = (u32 *)create__10JKRExpHeapFPvUlP7JKRHeapb(newHeap, size - 0x200000, rootHeap, unk_1);
     return (u32 *)gameHeap;
 }
@@ -207,7 +207,7 @@ void initShineShadow()
     TWaterManager *gpWaterManager = (TWaterManager *)*(u32 *)TWaterManagerInstance;
     TFlagManager *gpFlagManager = (TFlagManager *)*(u32 *)TFlagManagerInstance;
 
-    if (!file || file->FileHeader.mIsShineShadow == false)
+    if (!file || !file->FileHeader.mIsShineShadow)
         return;
 
     if (gpFlagManager->Type4Flag.mShineCount < MAX_SHINES)
@@ -240,7 +240,7 @@ void initShineShadow()
         gInfo.Light.mLightType = 0;
     }
 }
-kmCall(0x80280180, &initShineShadow);
+kmBranch(0x80280180, &initShineShadow);
 
 //0x802B7A4C
 void initSoundBank(u8 areaID, u8 episodeID)
@@ -491,7 +491,7 @@ void initCardColors()
         gpMarDirector->mGCConsole->mWaterRightPanel.A = lerp<u8>(0, file->Fludd.mWaterColor.A, 0.8125);
     }
 }
-kmCall(0x8029CCB0, &initCardColors);
+kmBranch(0x8029CCB0, &initCardColors);
 
 /*This works by taking the target id and matching it to the
 / ID of the first entry to have the same home ID as the target.
@@ -630,3 +630,4 @@ kmWrite32(0x8028113C, 0xC002F824);
 kmWrite32(0x8024BC10, 0x48000068);
 //Flood Till Corona Beat
 kmWrite32(0x8029961C, 0x38840077);
+

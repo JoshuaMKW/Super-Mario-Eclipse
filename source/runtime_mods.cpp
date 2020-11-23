@@ -27,14 +27,14 @@ TMarDirector *xyzModifierMario(TMarDirector *gpMarDirector)
         }
         else
         {
-            gpMario->mState = TMario::STATE::IDLE;
+            gpMario->mState = TMario::SA_IDLE;
         }
         *(bool *)0x80003ED0 = false;
     }
 
     if (*(bool *)0x80003ED0 == true)
     {
-        gpMario->mState = TMario::STATE::IDLE | TMario::STATE::CUTSCENE;
+        gpMario->mState = TMario::SA_IDLE | TMario::SA_CUTSCENE;
         float speedMultiplier = lerp<float>(1, 2, gpMario->mController->getRAnalogf());
         gpMario->mCoordinates.x += ((gpMario->mController->getMainStickAnalogX() * 83) * speedMultiplier);
         gpMario->mCoordinates.z -= ((gpMario->mController->getMainStickAnalogY() * 83) * speedMultiplier);
@@ -49,64 +49,6 @@ TMarDirector *xyzModifierMario(TMarDirector *gpMarDirector)
         }
     }
     return gpMarDirector;
-}
-
-//0x802A8064
-/*
-u32 set_debugger()
-{
-    TMario *gpMario = (TMario *)*(u32 *)TMarioInstance;
-    TFlagManager *gpFlagManager = (TFlagManager *)*(u32 *)TFlagManagerInstance;
-    TWaterManager *gpWaterManager = (TWaterManager *)*(u32 *)TWaterManagerInstance;
-
-    if (!gpWaterManager || !gpMario || ((u32 *)gpMario->mController < MEM1_LO || (u32 *)gpMario->mController >= MEM1_HI))
-    {
-        return 0;
-    }
-
-    if (gpMario->mController->Buttons.mBButton && gpMario->mController->Buttons.mDPadUp)
-    {
-        gpWaterManager->mLayerCount += 1;
-    }
-    else if (gpMario->mController->Buttons.mBButton && gpMario->mController->Buttons.mDPadDown)
-    {
-        gpWaterManager->mLayerCount -= 1;
-    }
-    else if (gpMario->mController->Buttons.mBButton && gpMario->mController->Buttons.mDPadRight)
-    {
-        gpFlagManager->Type4Flag.mShineCount += 1;
-    }
-    else if (gpMario->mController->Buttons.mBButton && gpMario->mController->Buttons.mDPadLeft)
-    {
-        gpFlagManager->Type4Flag.mShineCount -= 1;
-    }
-    else if (gpMario->mController->Buttons.mXButton && gpMario->mController->Buttons.mDPadUp)
-    {
-        *(s16 *)0x8027C90E += 1;
-        if (*(s16 *)0x8027C90E > 7)
-        {
-            *(s16 *)0x8027C90E = 7;
-        }
-        flushAddr((void *)0x8027C90C);
-    }
-    else if (gpMario->mController->Buttons.mXButton && gpMario->mController->Buttons.mDPadDown)
-    {
-        *(s16 *)0x8027C90E -= 1;
-        if (*(s16 *)0x8027C90E < 0)
-        {
-            *(s16 *)0x8027C90E = 0;
-        }
-        flushAddr((void *)0x8027C90C);
-    }
-    return 0;
-}
-*/
-
-//0x80243940
-TMario *warpMario(TMario *gpMario)
-{
-    warpInEffect__6TMarioFv(gpMario);
-    return gpMario;
 }
 #endif
 
@@ -124,6 +66,7 @@ bool SMS_IsExMap()
                 gpApplication->mCurrentScene.mAreaID <= TGameSequence::AREA::COROEX6);
     }
 }
+kmBranch(0x802A8B58, &SMS_IsExMap);
 
 //0x802A8B30
 bool SMS_IsMultiplayerMap()
@@ -138,6 +81,7 @@ bool SMS_IsMultiplayerMap()
         return (gpMarDirector->mAreaID == TGameSequence::AREA::TEST10 && gpMarDirector->mEpisodeID == 0);
     }
 }
+kmBranch(0x802A8B30, &SMS_IsMultiplayerMap);
 
 //0x802A8AFC
 bool SMS_IsDivingMap()
@@ -154,6 +98,7 @@ bool SMS_IsDivingMap()
                 gpMarDirector->mAreaID == TGameSequence::AREA::MAREUNDERSEA);
     }
 }
+kmBranch(0x802A8AFC, &SMS_IsDivingMap);
 
 //0x802A8AE0
 bool SMS_IsOptionMap()
@@ -168,50 +113,57 @@ bool SMS_IsOptionMap()
         return (gpMarDirector->mAreaID == 15);
     }
 }
+kmBranch(0x802A8AE0, &SMS_IsOptionMap);
 
 //0x801BD664
 void manageShineVanish(JGeometry::TVec3<float> *marioPos)
 {
+    register TShine *gpShine;
+    __asm { mr gpShine, r30 };
+
     TMarDirector *gpMarDirector = (TMarDirector *)*(u32 *)TMarDirectorInstance;
     TMario *gpMario = (TMario *)*(u32 *)TMarioInstance;
-    TShine *gpShine = gpMarDirector->mCollectedShine;
 
-    if (gpShine->mSize.x - 0.01055 <= 0)
+    if (gpShine->mSize.x - 0.011 <= 0)
     {
-        gpShine->mSize = {1, 1, 1};
-        gpShine->mGlowSize = {1, 1, 1};
-        gpShine->mRotation.y = 0;
+        gpShine->mSize = JGeometry::TVec3<float>(1.0f, 1.0f, 1.0f);
+        gpShine->mGlowSize = JGeometry::TVec3<float>(1.0f, 1.0f, 1.0f);
+        gpShine->mRotation.y = 0.0f;
+        makeObjDefault__11TMapObjBaseFv(gpShine);
         makeObjDead__11TMapObjBaseFv(gpShine);
     }
-    else if (gpMario->mState != TMario::STATE::SHINE_C)
+    else if (gpMario->mState != TMario::SA_SHINE_C)
     {
         gpShine->mCoordinates.y += 4;
-        gpShine->mSize.x -= 0.01055;
-        gpShine->mSize.y -= 0.01055;
-        gpShine->mSize.z -= 0.01055;
-        gpShine->mGlowSize.x -= 0.01055;
-        gpShine->mGlowSize.y -= 0.01055;
-        gpShine->mGlowSize.z -= 0.01055;
-        gpShine->mRotation.y += 3;
+        gpShine->mSize.x -= 0.011f;
+        gpShine->mSize.y -= 0.011f;
+        gpShine->mSize.z -= 0.011f;
+        gpShine->mGlowSize.x -= 0.011f;
+        gpShine->mGlowSize.y -= 0.011f;
+        gpShine->mGlowSize.z -= 0.011f;
+        gpShine->mRotation.y += 3.0f;
     }
     else
     {
         gpShine->mCoordinates = *marioPos;
     }
 }
-
-//kWrite32(0x801BD668, 0x48000568);
+kmCall(0x801BD664, &manageShineVanish);
+kmWrite32(0x801BD668, 0x48000568);
 
 //0x802413E0
 void isKillEnemiesShine(TConductor *gpConductor, JGeometry::TVec3<float> *gpMarioCoordinates, float range)
 {
-    TMario *gpMario = (TMario *)*(u32 *)TMarioInstance;
+    register TMario *gpMario;
+    __asm { mr gpMario, r31 };
+
     TShine *gpShine = (TShine *)gpMario->mGrabTarget;
     if ((gpShine->mType & 0x10) == false)
     {
         killEnemiesWithin__10TConductorFRCQ29JGeometry8TVec3_f(gpConductor, gpMarioCoordinates, range);
     }
 }
+kmCall(0x802413E0, &isKillEnemiesShine);
 
 void restoreMario(TMarDirector *gpMarDirector, u32 curState)
 {
@@ -224,9 +176,9 @@ void restoreMario(TMarDirector *gpMarDirector, u32 curState)
 
     u8 *curSaveCard = (u8 *)(gpMarDirector->sNextState[0x118 / 4]);
 
-    if (curState != TMarDirector::STATUS::NORMAL ||
-        gpMarDirector->mLastState != TMarDirector::STATUS::SAVE_CARD ||
-        gpMario->mState != TMario::STATE::SHINE_C)
+    if (curState != TMarDirector::NORMAL ||
+        gpMarDirector->mLastState != TMarDirector::SAVE_CARD ||
+        gpMario->mState != TMario::SA_SHINE_C)
         return;
 
     if (curSaveCard[0x2E9] != 1)
@@ -237,14 +189,15 @@ void restoreMario(TMarDirector *gpMarDirector, u32 curState)
         }
         else
         {
-            gpMario->mState = TMario::STATE::IDLE;
+            gpMario->mState = TMario::SA_IDLE;
         }
-        startStageBGM__10MSMainProcFUcUc();
+        stopBGM__5MSBgmFUlUl(BGM_GET_SHINE);
+        startBGM__5MSBgmFUl(*(u32 *)StageBGM);
         endDemoCamera__15CPolarSubCameraFv(gpCamera);
     }
     else
     {
-        gpMarDirector->mGameState |= TMarDirector::STATE::WARP_OUT;
+        gpMarDirector->mGameState |= TMarDirector::WARP_OUT;
     }
 }
 
@@ -254,6 +207,7 @@ void checkBootOut(TMarDirector *gpMarDirector, u32 curState)
     restoreMario(gpMarDirector, curState);
     currentStateFinalize__12TMarDirectorFUc(gpMarDirector, curState);
 }
+kmCall(0x802995BC, &checkBootOut);
 
 //0x80293B10
 void extendShineIDLogic(TFlagManager *gpFlagManager, u32 flagID)
@@ -444,7 +398,7 @@ float velocityCoordinatePatches(float floorCoordinateY)
 {
     TMario *gpMario = (TMario *)*(u32 *)TMarioInstance;
 
-    if (gpMario->mState != TMario::STATE::IDLE)
+    if (gpMario->mState != TMario::SA_IDLE)
     { //Y storage
         gpMario->mSpeed.y = 0;
     }

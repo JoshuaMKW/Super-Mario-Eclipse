@@ -1,0 +1,1 @@
+python build.py source/collision.cpp source/mario.cpp source/init_mods.cpp --dolfile Start.dol --dest "C:\Users\Kyler-Josh\Desktop\SME_ROOT_KAMEK\root\&&systemdata\Start.dol" --map "linker/linker-map.txt" --defines MAX_SHINES=300,SME_RELEASE --startaddr 0x80427800 --dump

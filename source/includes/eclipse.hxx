@@ -4,6 +4,8 @@
 #include "k_stdlib/kamek.h"
 #include "define.hxx"
 
+#define __VERSION__ "ALPHA"
+
 #define PI 3.14159265f
 
 /*

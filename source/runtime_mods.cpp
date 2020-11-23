@@ -233,21 +233,89 @@ u32 shineObjectStringMod() {
     return shineStatus;
 }*/
 
-kmWritePointer(0x803DEE50, &shineFlagManager);
+void shineFlagSetter(TFlagManager *gpFlagManager, u32 flag, s32 val)
+{
+    if (flag < 0x60400)
+    {
+        flag &= 0xFFFF;
+        if (flag < 0x40)
+        {
+            ((u32 *)&gpFlagManager->Type6Flag)[flag] = val;
+        }
+        else
+        {
+            u32 shiftedFlag = flag >> 3;
+            u32 mask = (flag & 7);
+            u8 *flagField = &((u8 *)&gpFlagManager->Type6Flag)[shiftedFlag];
+
+            *flagField &= 1 << mask;
+            *flagField |= (val & 1) << mask;
+        }
+        
+    }
+}
+kmWritePointer(0x803DEE50, &shineFlagSetter);
+
+bool shineFlagGetter(TFlagManager *gpFlagManager, u32 flag)
+{
+    if (flag < 0x60400)
+    {
+        flag &= 0xFFFF;
+        if (flag < 0x40)
+        {
+            return ((u32 *)&gpFlagManager->Type6Flag)[flag];
+        }
+        else
+        {
+            u32 shiftedFlag = flag >> 3;
+            u32 mask = (flag & 7);
+            u8 *flagField = &((u8 *)&gpFlagManager->Type6Flag)[shiftedFlag];
+
+            return (*flagField >> mask) & 1;
+        }
+        
+    }
+}
+kmWritePointer(0x803DEE7C, &shineFlagGetter);
+
+//0x802946D4
+u32 shineSetClamper(TFlagManager *gpFlagManager, u32 flag)
+{
+    flag &= 0xCFFFF;
+    if (flag >= 120)
+    {
+        flag -= 0x10000;
+    }
+    return flag;
+}
+kmCall(0x802946D4, &shineClamper);
+
+//0x8029474C
+u32 shineGetClamper(TFlagManager *gpFlagManager, u32 flag)
+{
+    flag &= 0xCFFFF;
+    if (flag >= 120)
+    {
+        flag -= 0x10000;
+    }
+    return getFlag__12TFlagManagerCFUl(gpFlagManager, flag);
+}
+kmWrite32(0x80294744, 0x60000000)
+kmCall(0x8029474C, &shineClamper);
 
 /*Shine casts, fix light*/
 kmWrite32(0x80412548, (float)MAX_SHINES);
 kmWrite32(0x80293AF8, 0x3BFF03E7);
 kmWrite32(0x802946B8, 0x280003E7);
-kmWrite32(0x8017BE78, 0x5464037E);
-kmWrite32(0x8017BEF4, 0x5464037E);
-kmWrite32(0x8017BF34, 0x5464037E);
-kmWrite32(0x801BCE30, 0x5464037E);
-kmWrite32(0x801FF850, 0x5404037E);
+kmWrite32(0x8017BE78, 0x5464033E);
+kmWrite32(0x8017BEF4, 0x5464033E);
+kmWrite32(0x8017BF34, 0x5464033E);
+kmWrite32(0x801BCE30, 0x5464033E);
+kmWrite32(0x801FF850, 0x5404033E);
 kmWrite32(0x802946B4, 0x5480043E);
 kmWrite32(0x80294730, 0x5480043E);
 kmWrite32(0x80294734, 0x280003E7);
-kmWrite32(0x80297BA0, 0x5404037E);
+kmWrite32(0x80297BA0, 0x5404033E);
 kmWrite32(0x80294FCC, 0x418200C8);
 kmWrite32(0x8029519C, 0x418200C8);
 

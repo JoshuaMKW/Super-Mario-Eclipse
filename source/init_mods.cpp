@@ -1,7 +1,12 @@
 #include "includes/file_utils.hxx"
 
-//0x803A428A
-//.asciz "chr%d.arc"
+//0x8000561C
+void printInfo(TApplication * gpApplication)
+{
+    OSReport("Super Mario Eclipse %s - %d Shines; Build Date: %s %s", __VERSION__, MAX_SHINES, __DATE__, __TIME__);
+    initialize__12TApplicationFv(gpApplication);
+}
+kmCall(0x8000561C, &printInfo);
 
 //0x802A750C
 u32 *createCharacterHeap(u32 *newHeap, u32 size, u32 *rootHeap, u32 unk_1)

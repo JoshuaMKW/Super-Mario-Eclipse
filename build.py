@@ -142,7 +142,7 @@ if __name__ == "__main__":
 
     if args.defines.strip() != "":
         defines = args.defines.split(",")
-        defines = " " + " ".join([f"-define {d}" for d in defines])
+        defines = " " + " ".join([f"-D{d}" for d in defines])
     else:
         defines = " "
 

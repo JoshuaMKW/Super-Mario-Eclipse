@@ -1122,8 +1122,12 @@ public:
     u32 _11[0x1C / 4];                    //0x00D4
     TEggYoshi *mEgg;                      //0x00F0
 
+    bool isMounted();
+    static bool isMounted(TMario *gpMario);
     bool isGreenYoshi();
+    static bool isGreenYoshi(TMario *gpMario);
     bool isGreenYoshiMounted();
+    static bool isGreenYoshiMounted(TMario *gpMario);
     static bool isGreenYoshiAscendingWater(TMario *gpMario);
 };
 

@@ -2,20 +2,46 @@
 
 #include "eclipse.hxx"
 
-bool TYoshi::isGreenYoshi() {
+bool TYoshi::isMounted()
+{
+    return this->mState == TYoshi::MOUNTED;
+}
+
+bool TYoshi::isMounted(TMario *gpMario)
+{
+    return gpMario->mYoshi->mState == TYoshi::MOUNTED;
+}
+
+bool TYoshi::isGreenYoshi()
+{
     return this->mType == TYoshi::TYPE::GREEN;
 }
 
-bool TYoshi::isGreenYoshiMounted() {
+bool TYoshi::isGreenYoshi(TMario *gpMario)
+{
+    return gpMario->mYoshi->isGreenYoshi();
+}
+
+bool TYoshi::isGreenYoshiMounted()
+{
     return this->isGreenYoshi() && this->mState == TYoshi::STATE::MOUNTED;
 }
 
-bool TYoshi::isGreenYoshiAscendingWater(TMario* gpMario) {
+bool TYoshi::isGreenYoshiMounted(TMario *gpMario)
+{
+    return gpMario->mYoshi->isGreenYoshiMounted();
+}
+
+bool TYoshi::isGreenYoshiAscendingWater(TMario *gpMario)
+{
     if (!(gpMario->mAttributes.mIsWater) ||
         !gpMario->mController->isPressed(TMarioGamePad::BUTTONS::A) ||
-        !gpMario->mYoshi->isGreenYoshiMounted()) {
+        !gpMario->mYoshi->isGreenYoshiMounted())
+    {
         return false;
-    } else {
+    }
+    else
+    {
         return true;
     }
 }

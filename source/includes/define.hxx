@@ -2,6 +2,10 @@
 
 #include "funcs.hxx"
 
+#ifndef MAX_SHINES
+#define MAX_SHINES 120
+#endif
+
 #define malloc(size, alignment) __nw__FUli(size, alignment)
 #define hmalloc(heap, size, alignment) __nw__FUlP7JKRHeapi(size, heap, alignment)
 #define calloc(size, alignment) memset(malloc(size, alignment), 0, size)
@@ -52,7 +56,6 @@
 #define DVD_STATE_WAITING 2
 #define DVD_STATE_WRONG_DISK 6
 
-#define MAX_SHINES 300
 #define MEM1_LO (u32 *)0x80000000
 #define MEM1_HI (u32 *)0x81800000
 

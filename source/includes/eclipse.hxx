@@ -1839,7 +1839,7 @@ public:
         } FluddAttrs;
 
         float mWaterHealthMultiplier;   //0x005C
-        char *mNameOffset;              //0x0060
+        s32 mNameOffset;                //0x0060
         float mThrowPowerMultiplier;    //0x0064
         float mSlideStrengthMultiplier; //0x0068
         s16 mWallHangMax;               //0x006C

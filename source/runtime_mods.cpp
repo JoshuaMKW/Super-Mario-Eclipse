@@ -218,6 +218,7 @@ void extendShineIDLogic(TFlagManager *gpFlagManager, u32 flagID)
         flagID = 0;
     getFlag__12TFlagManagerCFUl(gpFlagManager, flagID);
 }
+kmCall(0x80293B10, &extendShineIDLogic);
 
 /*Needs to be input as gecko code
 u32 shineObjectStringMod() {
@@ -232,22 +233,23 @@ u32 shineObjectStringMod() {
     return shineStatus;
 }*/
 
-/*Shine casts, fix light
-kWrite32(0x80412548, (u32)300.0f);
-kWrite32(0x80293AF8, 0x3BFF03E7);
-kWrite32(0x802946B8, 0x280003E7);
-kWrite32(0x8017BE78, 0x5464037E);
-kWrite32(0x8017BEF4, 0x5464037E);
-kWrite32(0x8017BF34, 0x5464037E);
-kWrite32(0x801BCE30, 0x5464037E);
-kWrite32(0x801FF850, 0x5404037E);
-kWrite32(0x802946B4, 0x5480043E);
-kWrite32(0x80294730, 0x5480043E);
-kWrite32(0x80294734, 0x280003E7);
-kWrite32(0x80297BA0, 0x5404037E);
-kWrite32(0x80294FCC, 0x418200C8);
-kWrite32(0x8029519C, 0x418200C8);
-*/
+kmWritePointer(0x803DEE50, &shineFlagManager);
+
+/*Shine casts, fix light*/
+kmWrite32(0x80412548, (float)MAX_SHINES);
+kmWrite32(0x80293AF8, 0x3BFF03E7);
+kmWrite32(0x802946B8, 0x280003E7);
+kmWrite32(0x8017BE78, 0x5464037E);
+kmWrite32(0x8017BEF4, 0x5464037E);
+kmWrite32(0x8017BF34, 0x5464037E);
+kmWrite32(0x801BCE30, 0x5464037E);
+kmWrite32(0x801FF850, 0x5404037E);
+kmWrite32(0x802946B4, 0x5480043E);
+kmWrite32(0x80294730, 0x5480043E);
+kmWrite32(0x80294734, 0x280003E7);
+kmWrite32(0x80297BA0, 0x5404037E);
+kmWrite32(0x80294FCC, 0x418200C8);
+kmWrite32(0x8029519C, 0x418200C8);
 
 //0x80294334
 void extendFlagManagerLoad(JSUInputStream &stream)
@@ -255,8 +257,9 @@ void extendFlagManagerLoad(JSUInputStream &stream)
     read__14JSUInputStreamFPvl(&stream, (*(u32 *)TFlagManagerInstance + 0x1F4), 0x8C);
     stream.skip(0x120);
 }
+kmCall(0x80294334, &extendFlagManagerLoad);
+kmWrite32(0x80294338 0x48000010);
 
-//kWrite32(0x802939BC, 0x48000014);
 
 //0x802939B8
 void extendFlagManagerSave(JSUOutputStream &stream)
@@ -264,8 +267,9 @@ void extendFlagManagerSave(JSUOutputStream &stream)
     write__15JSUOutputStreamFPCvl(&stream, (*(u32 *)TFlagManagerInstance + 0x1F4), 0x8C);
     stream.skip(0x120);
 }
+kmCall(0x802939B8, &extendFlagManagerSave);
+kmWrite32(0x802939BC, 0x48000014);
 
-//kWrite32(0x80294338 0x48000010);
 
 //0x8027C6A4
 bool manageLightSize()
@@ -390,10 +394,13 @@ bool manageLightSize()
         gpLightCoordinates->y = gpMarioCoordinates->y + gInfo.Light.mShineShadowCoordinates.y;
         gpLightCoordinates->z = gpMarioCoordinates->z + gInfo.Light.mShineShadowCoordinates.z;
     }
-    return !(gInfo.Light.mLightType == 0 || gpMarDirector->mAreaID == TGameSequence::AREA::OPTION);
+    return gInfo.Light.mLightType != 0 && gpMarDirector->mAreaID != TGameSequence::AREA::OPTION;
 }
+kmCall(0x8027C6A4, &manageLightSize);
+kmWrite32(0x8027C6A8, 0x28030001);
 
 //0x802571F0
+/*
 float velocityCoordinatePatches(float floorCoordinateY)
 {
     TMario *gpMario = (TMario *)*(u32 *)TMarioInstance;
@@ -410,12 +417,15 @@ float velocityCoordinatePatches(float floorCoordinateY)
     asm("lfs 0, -0x0EC8 (2)");
     return floorCoordinateY;
 }
+*/
 
+/*
 //0x8028113C
 bool infiniteFlutterPatch(float yVelocity)
 {
     return (yVelocity < -1);
 }
+*/
 
 /*0x8018987C
 addi r3, r31, 0
@@ -426,6 +436,7 @@ bctrl
 lwz r0, 0x000C (sp)
 */
 //0x80004A6C
+/*
 float downWarpPatch(TMario *gpMario, float yVelocity)
 {
     if (yVelocity < -100)
@@ -437,6 +448,7 @@ float downWarpPatch(TMario *gpMario, float yVelocity)
         return yVelocity;
     }
 }
+*/
 
 /*0x8018987C
 addi r3, r31, 0
@@ -446,6 +458,7 @@ mtctr r4
 bctrl
 lwz r0, 0x000C (sp)
 */
+/*
 float upWarpPatch(TMario *gpMario, float yVelocity)
 {
     if (yVelocity > 1000000)
@@ -457,6 +470,7 @@ float upWarpPatch(TMario *gpMario, float yVelocity)
         return yVelocity;
     }
 }
+*/
 
 //MESSAGE MODIFICATIONS
 
@@ -472,7 +486,7 @@ static inline u32 bmgVarLen(char *src)
 }
 
 //NOTE: Must send to new buffer
-void replaceFmtSpecifier(char *buffer, char *src, char *fmt, char *sample)
+void replaceFmtSpecifier(char *buffer, char *src, const char *fmt, const char *sample)
 {
     strcpy(buffer, src);
 
@@ -501,6 +515,7 @@ void replaceFmtSpecifier(char *buffer, char *src, char *fmt, char *sample)
 void formatMessage(Talk2D2 *talker, char *msgfield, u32 *entrydata)
 {
     TFlagManager *gpFlagManager = (TFlagManager *)*(u32 *)TFlagManagerInstance;
+    TMario *gpMario = (TMario *)*(u32 *)TMarioInstance;
 
     char *msgbuffer = (char *)hcalloc(*(u32 *)JKRSystemHeap, 1024, 32);
     char buffer[64];
@@ -515,100 +530,72 @@ void formatMessage(Talk2D2 *talker, char *msgfield, u32 *entrydata)
 
     OSTicksToCalendarTime(OSGetTime(), calendarTime);
 
-    if (calendarTime->mHours == 0)
-        sprintf(time, (char *)0x800048EA, calendarTime->mHours + 12, calendarTime->mMinutes);
-    else if (calendarTime->mHours < 12)
-        sprintf(time, (char *)0x800048EA, calendarTime->mHours % 13, calendarTime->mMinutes);
-    else if (calendarTime->mHours == 12)
-        sprintf(time, (char *)0x800048DF, calendarTime->mHours, calendarTime->mMinutes);
+    if (calendarTime->hour == 0)
+        sprintf(time, (char *)"%u:%02u AM", calendarTime->hour + 12, calendarTime->min);
+    else if (calendarTime->hour < 12)
+        sprintf(time, (char *)"%u:%02u AM", calendarTime->hour % 13, calendarTime->min);
+    else if (calendarTime->hour == 12)
+        sprintf(time, (char *)"%u:%02u PM", calendarTime->hour, calendarTime->min);
     else
-        sprintf(time, (char *)0x800048DF, (calendarTime->mHours + 1) % 13, calendarTime->mMinutes);
+        sprintf(time, (char *)"%u:%02u PM", (calendarTime->hour + 1) % 13, calendarTime->min);
 
-    sprintf(date, (char *)0x800048F5, calendarTime->mMonth + 1, calendarTime->mDayOfMonth, calendarTime->mYear);
+    sprintf(date, (char *)"%u/%u/%u", calendarTime->mon + 1, calendarTime->mday, calendarTime->year);
 
     memset(msgbuffer, 0, sizeof(msgbuffer));
     strcpy(msgbuffer, basemsg);
 
     //%
     memset(fmt, 0, sizeof(fmt));
-    strcpy(fmt, (char *)0x803E780B);
 
     //name%
-    strcat(fmt, (char *)0x800048D0);
-    strcat(fmt, (char *)0x803E780B);
+    strcat(fmt, (char *)"%name%");
 
-    if (gInfo.mCharacterFile)
-        replaceFmtSpecifier(msgbuffer, msgbuffer, fmt, gInfo.mCharacterFile->mCharacterName);
+    if (gpMario->mCustomInfo->mParams)
+        replaceFmtSpecifier(msgbuffer, msgbuffer, fmt, (char *)(&gpMario->mCustomInfo->mParams + gpMario->mCustomInfo->mParams->Attributes.mNameOffset));
     else
-        replaceFmtSpecifier(msgbuffer, msgbuffer, fmt, (char *)0x80416688);
+        replaceFmtSpecifier(msgbuffer, msgbuffer, fmt, "Mario");
 
     //%
     memset(fmt, 0, sizeof(fmt));
-    strcpy(fmt, (char *)0x803E780B);
+    strcpy(fmt, "%shine%");
 
-    //shine%
-    strcat(fmt, (char *)0x80412EB8);
-    strcat(fmt, (char *)0x803E780B);
-
-    sprintf(buffer, (char *)0x800048FE, gpFlagManager->Type4Flag.mShineCount);
+    sprintf(buffer, "%u", gpFlagManager->Type4Flag.mShineCount);
 
     replaceFmtSpecifier(msgbuffer, msgbuffer, fmt, buffer);
 
     //%
     memset(fmt, 0, sizeof(fmt));
-    strcpy(fmt, (char *)0x803E780B);
+    strcpy(fmt, "%bcoin%");
 
-    //bcoin%
-    strcat(fmt, (char *)0x803E7885);
-    strcat(fmt, (char *)0x80412EB0);
-    strcat(fmt, (char *)0x803E780B);
-
-    sprintf(buffer, (char *)0x800048FE, gpFlagManager->Type4Flag.mBlueCoinCount);
+    sprintf(buffer, "%u", gpFlagManager->Type4Flag.mBlueCoinCount);
 
     replaceFmtSpecifier(msgbuffer, msgbuffer, fmt, buffer);
 
     //%
     memset(fmt, 0, sizeof(fmt));
-    strcpy(fmt, (char *)0x803E780B);
+    strcpy(fmt, "%rcoin%");
 
-    //rcoin%
-    strcat(fmt, (char *)0x803E78BB);
-    strcat(fmt, (char *)0x80412EB0);
-    strcat(fmt, (char *)0x803E780B);
-
-    sprintf(buffer, (char *)0x800048FE, gpFlagManager->Type6Flag.mRedCoinCount);
+    sprintf(buffer, "%u", gpFlagManager->Type6Flag.mRedCoinCount);
 
     replaceFmtSpecifier(msgbuffer, msgbuffer, fmt, buffer);
 
     //%
     memset(fmt, 0, sizeof(fmt));
-    strcpy(fmt, (char *)0x803E780B);
+    strcpy(fmt, "%coin%");
 
-    //coin%
-    strcat(fmt, (char *)0x80412EB0);
-    strcat(fmt, (char *)0x803E780B);
-
-    sprintf(buffer, (char *)0x800048FE, gpFlagManager->Type4Flag.mGoldCoinCount);
+    sprintf(buffer, "%u", gpFlagManager->Type4Flag.mGoldCoinCount);
 
     replaceFmtSpecifier(msgbuffer, msgbuffer, fmt, buffer);
 
     //%
     memset(fmt, 0, sizeof(fmt));
-    strcpy(fmt, (char *)0x803E780B);
-
-    //time%
-    strcat(fmt, (char *)0x800048D5);
-    strcat(fmt, (char *)0x803E780B);
+    strcpy(fmt, "%time%");
 
     replaceFmtSpecifier(msgbuffer, msgbuffer, fmt, time);
 
     //%
     memset(fmt, 0, sizeof(fmt));
-    strcpy(fmt, (char *)0x803E780B);
-
-    //date%
-    strcat(fmt, (char *)0x800048DA);
-    strcat(fmt, (char *)0x803E780B);
+    strcpy(fmt, "%date%");
 
     replaceFmtSpecifier(msgbuffer, msgbuffer, fmt, date);
 

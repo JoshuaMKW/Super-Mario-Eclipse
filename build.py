@@ -1,15 +1,22 @@
 import argparse
+import atexit
 import os
+import shutil
 import subprocess
 import sys
 
 from dolreader import DolFile, write_uint32
 
-ARENASTART = 0x80427800
+TMPDIR = "tmp-Kamek"
+
+@atexit.register
+def clean_resources():
+    if os.path.isdir(TMPDIR):
+        shutil.rmtree(TMPDIR)
 
 class Compiler(object):
 
-    def __init__(self, kamek: str, compiler: str, options: str, dest: str = "src.kmk", linker: str = None):
+    def __init__(self, kamek: str, compiler: str, options: str, dest: str = None, linker: str = None, dump: bool = False, startaddr: int = 0x80000000):
         if options.strip().endswith(".o"):
             options = " ".join(options.split(" ")[:-1])
         
@@ -18,33 +25,53 @@ class Compiler(object):
         self.options = options
         self.dest = dest
         self.linker = linker
+        self.dump = dump
+        self.startaddr = startaddr
 
-    @staticmethod
-    def alloc_from_heap(dol: DolFile, size: int):
+    def alloc_from_heap(self, dol: DolFile, size: int):
         size = (size + 31) & -32
         dol.seek(0x80341E74)
-        write_uint32(dol, 0x3C600000 | (((ARENASTART + size) >> 16) & 0xFFFF))
-        write_uint32(dol, 0x60630000 | ((ARENASTART + size) & 0xFFFF))
+        write_uint32(dol, 0x3C600000 | (((self.startaddr + size) >> 16) & 0xFFFF))
+        write_uint32(dol, 0x60630000 | ((self.startaddr + size) & 0xFFFF))
 
         dol.seek(0x80341EAC)
-        write_uint32(dol, 0x3C600000 | (((ARENASTART + size) >> 16) & 0xFFFF))
-        write_uint32(dol, 0x60630000 | ((ARENASTART + size) & 0xFFFF))
+        write_uint32(dol, 0x3C600000 | (((self.startaddr + size) >> 16) & 0xFFFF))
+        write_uint32(dol, 0x60630000 | ((self.startaddr + size) & 0xFFFF))
 
     def run(self, src: str, dol: str = None):
-        if dol is not None:
-            if self.dest != "src.kmk":
-                _pth = self.dest
-            else:
-                _pth = os.path.join("KAMEK-BUILD", os.path.basename(dol))
+        if not os.path.isdir("KAMEK-BUILD"):
+            os.mkdir("KAMEK-BUILD")
 
-            if os.path.isfile(_pth):
-                os.remove(_pth)
+        if not os.path.isdir(TMPDIR):
+            os.mkdir(TMPDIR)
+
+        dumpCode = os.path.join("KAMEK-BUILD", "source.code")
+        tmpDumpCode = os.path.join(TMPDIR, "source.tmp")
+        linkableObjects = [os.path.join("objects", f) for f in os.listdir("objects") if os.path.isfile(os.path.join("objects", f)) and os.path.splitext(f)[1] == ".o"]
+
+        if dol is not None:
+            if self.dest is None:
+                self.dest = os.path.join("KAMEK-BUILD", os.path.basename(dol))
+
+            if not os.path.isdir(os.path.dirname(self.dest)):
+                os.makedirs(self.dest, exist_ok=True)
+
+            if os.path.isfile(self.dest):
+                os.remove(self.dest)
 
             if self.linker:
-                cmdtype = f"-externals={self.linker} -input-dol={dol} -output-dol={_pth} -output-code=code.tmp"
+                cmdtype = f"-externals={self.linker} -input-dol={dol} -output-dol={self.dest}"
             else:
-                cmdtype = f"-input-dol={dol} -output-dol={_pth} -output-code=code.tmp"
+                cmdtype = f"-input-dol={dol} -output-dol={self.dest}"
+
+            if self.dump:
+                cmdtype += f" -output-code={dumpCode} -output-code={tmpDumpCode}"
+            else:
+                cmdtype += f" -output-code={tmpDumpCode}"
         else:
+            if self.dest is None:
+                self.dest = dumpCode
+
             if os.path.isfile(self.dest):
                 os.remove(self.dest)
 
@@ -54,35 +81,47 @@ class Compiler(object):
                 cmdtype = f"-output-code={self.dest}"
 
         if isinstance(src, str):
-            subprocess.run(f"\"{self.prog}\" \"{src}\" {self.options} tmp.o")
-            output = subprocess.run(f"\"{self.kamek}\" tmp.o  gpr_saving.o -static=0x{ARENASTART:08X} {cmdtype}",
+            tmpfile = os.path.join(TMPDIR, f"tmp.o")
+            output = subprocess.run(f"\"{self.prog}\" \"{src}\" {self.options} {tmpfile}",
                                     universal_newlines=True,
                                     capture_output=True)
 
             if output.stderr:
-                os.remove("tmp.o")
+                raise RuntimeError(output.stderr)
+
+            objects = tmpfile + " " + " ".join(linkableObjects)
+            output = subprocess.run(f"\"{self.kamek}\" {objects} -static=0x{self.startaddr:08X} {cmdtype}",
+                                    universal_newlines=True,
+                                    capture_output=True)
+
+            if output.stderr:
                 raise RuntimeError(output.stderr)
         else:
             object_files = []
             for i in range(len(src)):
-                subprocess.run(f"\"{self.prog}\" \"{src[i]}\" {self.options} tmp{i}.o")
-                object_files.append(f"tmp{i}.o")
+                tmpfile = os.path.join(TMPDIR, f"tmp{i}.o")
+                output = subprocess.run(f"\"{self.prog}\" \"{src[i]}\" {self.options} {tmpfile}",
+                                        universal_newlines=True,
+                                        capture_output=True)
 
-            objects = " ".join(object_files)
-            output = subprocess.run(f"\"{self.kamek}\" {objects} gpr_saving.o -static=0x{ARENASTART:08X} {cmdtype}",
+                if output.stderr:
+                    raise RuntimeError(output.stderr)
+
+                object_files.append(tmpfile)
+
+            objects = " ".join(object_files) + " " + " ".join(linkableObjects)
+            output = subprocess.run(f"\"{self.kamek}\" {objects} -static=0x{self.startaddr:08X} {cmdtype}",
                                     universal_newlines=True,
                                     capture_output=True)
             
             if output.stderr:
-                for i in range(len(src)):
-                    os.remove(f"tmp{i}.o")
                 raise RuntimeError(output.stderr)
 
         if dol is not None:
-            with open(_pth, "rb") as dolfile:
+            with open(self.dest, "rb") as dolfile:
                 _doldata = DolFile(dolfile)
             
-            self.alloc_from_heap(_doldata, os.stat("code.tmp").st_size + 0x500)
+            self.alloc_from_heap(_doldata, os.stat(tmpDumpCode).st_size + 0x500)
             with open(self.dest, "wb") as dest:
                 _doldata.save(dest)
 
@@ -95,10 +134,26 @@ if __name__ == "__main__":
     parser.add_argument("--dolfile", help="SMS NTSC-U DOL")
     parser.add_argument("--map", help="Linker map")
     parser.add_argument("--dest", help="Destination file")
+    parser.add_argument("--dump", help="Dump raw code to bin file during dol patching", action="store_true")
+    parser.add_argument("--defines", help="Definitions before compile; Input definitions as a comma separated list", default=" ")
+    parser.add_argument("--startaddr", help="Starting address for the linker and code", default="0x80000000")
 
     args = parser.parse_args()
 
-    worker = Compiler(os.path.join("compiler", "Kamek.exe"), os.path.join("compiler", "mwcceppc.exe"), "-gccinc -gccext on -enum int -fp hard -use_lmw_stmw on -O4,p -c -rostr -sdata 0 -sdata2 0 -o", args.dest, args.map)
+    if args.defines.strip() != "":
+        defines = args.defines.split(",")
+        defines = " " + " ".join([f"-define {d}" for d in defines])
+    else:
+        defines = " "
+
+    worker = Compiler(os.path.join("compiler", "Kamek.exe"),
+                      os.path.join("compiler", "mwcceppc.exe"),
+                      f"-gccinc -gccext on -enum int -fp hard -use_lmw_stmw on -O4,p -c -rostr -sdata 0 -sdata2 0{defines} -o",
+                      dest=args.dest,
+                      linker=args.map,
+                      dump=args.dump,
+                      startaddr=int(args.startaddr, 16))
+
     worker.run(args.src, args.dolfile)
 
     print("\nCompiled Successfully\n")

@@ -46,3 +46,6 @@ KAMEK-BUILD
 
 #ISO Data
 gamedata/*
+
+#Debug objects
+tmp-Kamek/

@@ -1,21 +1,25 @@
 #include "includes/eclipse.hxx"
 
+//0x80299230
 void setStageOnExit(TGameSequence* gpSequence, s8 stage, s8 episode) {
     TApplication* gpApplication = (TApplication*)TApplicationInstance;
     TMarioGamePad* gpGamePad = gpApplication->mGamePad1;
 
-    if (gpGamePad->Buttons.mZButton) {
+    if (gpGamePad->isPressed(TMarioGamePad::Z)) {
         stage = gpApplication->mCurrentScene.mAreaID;
         episode = -1;
     }
     set__13TGameSequenceFUcUcQ26JDrama10TFlagT_U(gpSequence, stage, episode);
 }
+kmCall(0x80299230, &setStageOnExit);
 
+//0x80175F58
 void startEpisodeSelect(void* selectMenu) {
     TApplication* gpApplication = (TApplication*)TApplicationInstance;
     TMarioGamePad* gpGamePad = gpApplication->mGamePad1;
 
-    if (!gpGamePad->Buttons.mZButton) {
+    if (!gpGamePad->isPressed(TMarioGamePad::Z)) {
         startOpenWindow__11TSelectMenuFv(selectMenu);
     }
 }
+kmCall(0x80175F58, &startEpisodeSelect);

@@ -41,7 +41,7 @@ u32 setIsValid(u32 musicID)
 bool startStreamedBGM(u32 musicID, bool loopMusic)
 {
     char buffer[0x20];
-    u32 handle = 0x803FDB7C;
+    void *handle = (void *)0x803FDB7C;
 
     sprintf(buffer, (char *)0x80004A41, (musicID & 0x3FF)); //"/AudioRes/Streams/Music/%d.adp"
 
@@ -59,7 +59,7 @@ bool startStreamedBGM(u32 musicID, bool loopMusic)
 bool startStreamedSFX(u32 sfxID)
 {
     char buffer[0x20];
-    u32 handle = 0x803FDB7C;
+    void *handle = (void *)0x803FDB7C;
 
     sprintf(buffer, (char *)0x80004A20, (sfxID & 0x3FF)); //"/AudioRes/Streams/SFX/%d.adp"
 

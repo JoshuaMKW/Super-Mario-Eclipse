@@ -8,6 +8,7 @@ bool isAnyFileComplete(TCardBookmarkInfo* bookmark) {
     return false;
 }
 
+//0x802B1794
 u32 setFileCompleteBool(TCardManager* gpCardManager) {
     u32 status = getBookmarkInfos___12TCardManagerFv(gpCardManager);
     if (gpCardManager->mBookMarks) {
@@ -15,6 +16,7 @@ u32 setFileCompleteBool(TCardManager* gpCardManager) {
     }
     return status;
 }
+kmCall(0x802B1794, &setFileCompleteBool);
 
 //0x80164DE4
 void newGamePlus(TFlagManager* gpFlagManager, u32* stream) {
@@ -23,7 +25,7 @@ void newGamePlus(TFlagManager* gpFlagManager, u32* stream) {
     if (gpFlagManager->Type4Flag.mShineCount < 120 || (gpFlagManager->Type1Flag.m1Type[0xE] & 0x80) == 0) {
         return;
     }
-    if (gpMario->mController->Buttons.mRButton && gpMario->mController->Buttons.mLButton) {
+    else if (gpMario->mController->isPressed(TMarioGamePad::R) && gpMario->mController->isPressed(TMarioGamePad::L)) {
         gpFlagManager->Type6Flag.CustomFlags.mIsGamePlus = true;
         //Type 1
         memset(gpFlagManager->Type1Flag.m1Type, 0, 0x77);
@@ -53,7 +55,7 @@ void newGamePlus(TFlagManager* gpFlagManager, u32* stream) {
         gpFlagManager->Type4Flag.mShineCount = 0;
         gpFlagManager->Type4Flag.mBlueCoinCount = 0;
         gpFlagManager->Type4Flag.mGoldCoinCount = 0;
-        gpFlagManager->Type4Flag.mSecondNozzle = TURBO_NOZZLE;
+        gpFlagManager->Type4Flag.mSecondNozzle = TWaterGun::Turbo;
 
         //Type 5
         gpFlagManager->Type5Flag.mShineSpawned = false;
@@ -142,7 +144,7 @@ void isGPlusNozzleBox(TNozzleBox* gpNozzleBox) {
     if (gpFlagManager->Type6Flag.CustomFlags.mIsGamePlus == false) {
         return;
     }
-    if (gpNozzleBox->mNozzleToRegen == HOVER_NOZZLE) {
-        makeObjDead__11TMapObjBaseFv((TMapObjBase*)gpNozzleBox);
+    if (gpNozzleBox->mNozzleToRegen == TWaterGun::Hover) {
+        makeObjDead__11TMapObjBaseFv(gpNozzleBox);
     }
 }

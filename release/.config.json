@@ -1,0 +1,63 @@
+{
+    "userfiles": [
+        {
+            "system/*.*": {
+                "destination": "&&systemdata/",
+                "rename": ""
+            }
+        },
+        {
+            "smeconfigs/*.sme": {
+                "destination": "data/scene/sme/",
+                "rename": ""
+            }
+        },
+        {
+            "characters/chr*.[as][rz][cs]": {
+                "destination": "data/",
+                "rename": ""
+            }
+        },
+        {
+            "stages/*.[as][rz][cs]": {
+                "destination": "data/scene/",
+                "rename": ""
+            }
+        },
+        {
+            "thps/*.thp": {
+                "destination": "data/",
+                "rename": ""
+            }
+        },
+        {
+            "globals/*.?*": {
+                "destination": "data/",
+                "rename": ""
+            }
+        },
+        {
+            "opening.bnr": {
+                "destination": "",
+                "rename": ""
+            }
+        },
+        {
+            "mario[EJU][PSU].map": {
+                "destination": "",
+                "rename": ""
+            }
+        }
+    ],
+    "rename": {
+        "data/mario.szs": "chr0.szs",
+        "data/game_6.szs": "game_6.szs"
+    },
+    "delete": {},
+    "ignore": [
+        ".config.json",
+        "opening.png",
+        "opening.json"
+    ],
+    "gamebanner": "opening.png"
+}

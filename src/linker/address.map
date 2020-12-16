@@ -1,5 +1,6 @@
 memset=0x80003100
 memcpy=0x800031F4
+__div2u=0x803382F8
 toupper=0x80338F3C
 tolower=0x80338F64
 wcstombs=0x80339268

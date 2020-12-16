@@ -41,11 +41,11 @@ class TDarkZhine
 
     enum PoundingState
     {
-        INACTIVE = 0,
-        DROPPING = 11,
-        SHOCKING = 22,
-        GROUNDROLL = 33,
-        RISING = 44
+        INACTIVE,
+        DROPPING,
+        SHOCKING,
+        GROUNDROLL,
+        RISING
     };
 
     TBossGesso mBossInfo;
@@ -148,9 +148,9 @@ public:
 
     bool isTargetInRangeToHome(JGeometry::TVec3<float> home, float r)
     {
-        return (fabsf__Ff(this->mTarget->mCoordinates.x - home.x) +
-                fabsf__Ff(this->mTarget->mCoordinates.y - home.y) +
-                fabsf__Ff(this->mTarget->mCoordinates.z - home.z) <
+        return (fabsf(this->mTarget->mCoordinates.x - home.x) +
+                fabsf(this->mTarget->mCoordinates.y - home.y) +
+                fabsf(this->mTarget->mCoordinates.z - home.z) <
                 r);
     }
 
@@ -182,7 +182,7 @@ public:
     PoundingState advanceDropAttack(TPollutionManager *gpPollutionManager, TMario *gpMario)
     {
 
-        if (getPoundingStatus() == PoundingState::DROPPING)
+        if (getPoundingStatus() == TDarkZhine::DROPPING)
         {
             this->mBossInfo.mGravity = 1;
             this->mBossInfo.mSpeed.x = 0;
@@ -212,32 +212,32 @@ public:
                     this->mBossInfo.mGoopLevel += 0x20;
                 }
 
-                setPoundingStatus(PoundingState::SHOCKING);
+                setPoundingStatus(TDarkZhine::SHOCKING);
                 setStatusTimer(getShockingTimerMax());
             }
         }
-        else if (getPoundingStatus() == PoundingState::SHOCKING)
+        else if (getPoundingStatus() == TDarkZhine::SHOCKING)
         {
-            if (!(gpMario->mState & TMario::STATE::AIRBORN) &&
+            if (!(gpMario->mState & TMario::SA_AIRBORN) &&
                 isTargetInRangeToHome(this->mBossInfo.mCoordinates, getShockRadius()) &&
-                (gpMario->mState != TMario::STATE::KNCK_LND &&
+                (gpMario->mState != TMario::SA_KNCK_LND &&
                  gpMario->mState != 0x4045C))
             {
                 decHP__6TMarioFi(gpMario, 1);
-                changePlayerStatus__6TMarioFUlUlb(gpMario, TMario::STATE::KNCK_LND, 0, 0);
+                changePlayerStatus__6TMarioFUlUlb(gpMario, TMario::SA_KNCK_LND, 0, 0);
             }
 
             if (getStatusTimer() <= 0)
             {
-                setPoundingStatus(PoundingState::GROUNDROLL);
+                setPoundingStatus(TDarkZhine::GROUNDROLL);
                 setStatusTimer(getRollingTimerMax());
             }
         }
-        else if (getPoundingStatus() == PoundingState::GROUNDROLL)
+        else if (getPoundingStatus() == TDarkZhine::GROUNDROLL)
         {
             if (this->mBossInfo.mCoordinates.y - this->mBossInfo.mFloorBelow->mMaxHeight > 100)
             {
-                setPoundingStatus(PoundingState::RISING);
+                setPoundingStatus(TDarkZhine::RISING);
                 this->mBossInfo.mGravity *= (-1 * getRisingRate() * getSpeedMultiplier());
             }
             else if (getRollingTimer() > 0)
@@ -257,12 +257,12 @@ public:
             }
             else
             {
-                setPoundingStatus(PoundingState::RISING);
+                setPoundingStatus(TDarkZhine::RISING);
                 this->mBossInfo.mCoordinates.y += 1;
                 this->mBossInfo.mGravity *= (-1 * getRisingRate() * getSpeedMultiplier());
             }
         }
-        else if (getPoundingStatus() == PoundingState::RISING)
+        else if (getPoundingStatus() == TDarkZhine::RISING)
         {
             float averageFloorHeight = (this->mBossInfo.mFloorBelow->mMaxHeight +
                                         this->mBossInfo.mFloorBelow->mMinHeight) /
@@ -275,12 +275,12 @@ public:
             {
 
                 this->mBossInfo.mGravity *= (-1 * getRisingRate() * getSpeedMultiplier());
-                setPoundingStatus(PoundingState::INACTIVE);
+                setPoundingStatus(TDarkZhine::INACTIVE);
             }
         }
         else
         {
-            setPoundingStatus(PoundingState::INACTIVE);
+            setPoundingStatus(TDarkZhine::INACTIVE);
         }
         setStatusTimer(getStatusTimer() - 1);
         return getPoundingStatus();
@@ -289,14 +289,12 @@ public:
     void advanceGoopDroplet()
     {
         TBGPolDrop *pollutionDrop = this->mBossInfo.mPollutionDrop;
-        JGeometry::TVec3<float> launchVelocity;
+        JGeometry::TVec3<float> launchVelocity(this->mBossInfo.mSpeed.x,
+                                               this->mBossInfo.mSpeed.y/2,
+                                               this->mBossInfo.mSpeed.z);
 
-        if (pollutionDrop->mStatus == pollutionDrop->DropStatus::DEAD)
+        if (pollutionDrop->mStatus == TBGPolDrop::DEAD)
         {
-            launchVelocity = {this->mBossInfo.mSpeed.x,
-                                this->mBossInfo.mSpeed.y/2,
-                                this->mBossInfo.mSpeed.z};
-
             launch__10TBGPolDropFRCQ29JGeometry8TVec3_f(this->mBossInfo.mPollutionDrop,
                                                         this->mBossInfo.mCoordinates,
                                                         launchVelocity);
@@ -354,7 +352,7 @@ public:
             setIsFollowMario(false);
         }
 
-        if (getPoundingStatus() == PoundingState::DROPPING || getPoundingStatus() == PoundingState::INACTIVE)
+        if (getPoundingStatus() == TDarkZhine::DROPPING || getPoundingStatus() == TDarkZhine::INACTIVE)
             moveObject__10TLiveActorFv((TLiveActor *)this);
 
         if (getIsFollowMario() == true)
@@ -365,7 +363,7 @@ public:
             if (getPoundingTimer() <= 0 && this->mBossInfo.mCoordinates.y - averageFloorHeight < getMaxPoundingHeight())
             {
                 setIsPounding(true);
-                setPoundingStatus(PoundingState::DROPPING);
+                setPoundingStatus(TDarkZhine::DROPPING);
                 setPoundingTimer(getPoundingTimerMax());
             }
 
@@ -383,7 +381,7 @@ public:
             this->mBossInfo.mSpeed.z = this->mGroundSpeed * cosf(angleToRadians(this->mBossInfo.mRotation.y));
         }
         else if (isTargetInRangeToHome(this->mBossInfo.mCoordinates, getShockRadius()) &&
-                 getPoundingStatus() != PoundingState::GROUNDROLL)
+                 getPoundingStatus() != TDarkZhine::GROUNDROLL)
         {
             this->mGroundSpeed -= (getAccelerationRate() * this->mSpeedMultiplier);
             if (this->mGroundSpeed < 0)
@@ -395,7 +393,7 @@ public:
 
         if (isTargetInRangeToHome(this->mBossInfo.mCoordinates, getShockRadius()))
         {
-            if (getIsPounding() && advanceDropAttack(gpPollutionManager, gpMario) == PoundingState::INACTIVE)
+            if (getIsPounding() && advanceDropAttack(gpPollutionManager, gpMario) == TDarkZhine::INACTIVE)
                 setIsPounding(false);
             else
                 this->mBossInfo.mGravity = 0;
@@ -403,7 +401,7 @@ public:
         else
         {
             setIsPounding(false);
-            setPoundingStatus(PoundingState::INACTIVE);
+            setPoundingStatus(TDarkZhine::INACTIVE);
             this->mBossInfo.mCoordinates = getBoundingPoint();
         }
     }

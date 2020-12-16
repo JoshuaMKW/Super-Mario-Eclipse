@@ -1,4 +1,4 @@
-#include "eclipse.hxx"
+#include "includes/eclipse.hxx"
 
 //0x80027548
 void modifyRangeToSize(float *params, float *saveParams)
@@ -9,7 +9,7 @@ void modifyRangeToSize(float *params, float *saveParams)
     //Custom code here
     if (gpMario->mCustomInfo->mParams)
     {
-        if (!gpMario->mYoshi || gpMario->mYoshi->mState != TYoshi::STATE::MOUNTED || gpMario->mCustomInfo->mParams->Attributes.mSizeMultiplier > 1)
+        if (!gpMario->mYoshi || gpMario->mYoshi->mState != TYoshi::MOUNTED || gpMario->mCustomInfo->mParams->Attributes.mSizeMultiplier > 1)
         {
             params[0x8 / 4] *= (float)((float)(gpMario->mCustomInfo->mParams->Attributes.mSizeMultiplier * 0.5) + (float)(1 - 0.5));
             params[0xC / 4] *= (float)((float)(gpMario->mCustomInfo->mParams->Attributes.mSizeMultiplier * 0.5) + (float)(1 - 0.5));

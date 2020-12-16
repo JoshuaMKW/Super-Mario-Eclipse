@@ -1,4 +1,14 @@
 #include "includes/file_utils.hxx"
+
+extern void initializeMemProtection();
+
+/*
+extern OSThread gGctThread;
+extern u8 gGctThreadStack[0x256];
+*/
+extern OSAlarm gctAlarm;
+extern void setUserCodes(OSAlarm *alarm, OSContext *context);
+
 CustomInfo gInfo;
 
 bool gIsCheatsEnabled = false;
@@ -24,7 +34,22 @@ void printInfo(TApplication * gpApplication)
     #else
         OSReport("Super Mario Eclipse %s [RELEASE] - %d Shines; Build Date: %s %s\n", __VERSION__, MAX_SHINES, __DATE__, __TIME__);
     #endif
+
+    initializeMemProtection();
     initialize__12TApplicationFv(gpApplication);
+
+    #ifdef SME_DEBUG
+        //OSReport("Creating codehandler neutralizing thread OSCreateThread(%p, %p, 0, %p, 0x%X, 18, 0)\n", &gGctThread, &setUserCodes, gGctThreadStack + sizeof(gGctThreadStack), sizeof(gGctThreadStack));
+        OSReport("Codeblocker - Creating OSAlarm at %p", &gctAlarm);
+    #endif
+
+    OSCreateAlarm(&gctAlarm);
+    OSSetPeriodicAlarm(&gctAlarm, OSGetTime(), OSMillisecondsToTicks(10), &setUserCodes);
+
+    /*
+    OSCreateThread(&gGctThread, &setUserCodes, (void *)0, gGctThreadStack + sizeof(gGctThreadStack), sizeof(gGctThreadStack), 18, 0);
+    OSResumeThread(&gGctThread);
+    */
 }
 kmCall(0x8000561C, &printInfo);
 
@@ -203,7 +228,7 @@ u32 *initFileMods()
     }
     else
     {
-        OSReport("Failure: No SME configuration could be loaded", gInfo.mFile);
+        OSReport("Failure: No SME configuration could be loaded\n", gInfo.mFile);
     }
 
     if (characterID >= 0)

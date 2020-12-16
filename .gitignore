@@ -43,3 +43,6 @@ __pycache__
 
 #Build path
 KAMEK-BUILD
+
+#ISO Data
+gamedata/*

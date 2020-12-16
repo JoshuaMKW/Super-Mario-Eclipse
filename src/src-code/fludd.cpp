@@ -33,12 +33,14 @@ TWaterGun::NOZZLETYPE changeNozzleIfSet(TWaterGun* gpFludd, TWaterGun::NOZZLETYP
 */
 
 //0x8014206C
-bool hasWaterCardOpen(TGCConsole2 *gcConsole)
+bool hasWaterCardOpen()
 {
-    //mr r3, r31
+    register TGCConsole2 *gcConsole;
+    __asm { mr gcConsole, r31 };
+
     TMario *gpMario = (TMario *)*(u32 *)TMarioInstance;
 
-    if (gpMario->mYoshi->mState != TYoshi::STATE::MOUNTED && gpMario->mCustomInfo->mParams)
+    if (gpMario->mYoshi->mState != TYoshi::MOUNTED && gpMario->mCustomInfo->mParams)
     {
         gpMario->mAttributes.mHasFludd = gpMario->mCustomInfo->mParams->Attributes.mCanUseFludd;
     }
@@ -47,18 +49,18 @@ bool hasWaterCardOpen(TGCConsole2 *gcConsole)
         gpMario->mAttributes.mHasFludd = true;
     }
 
-    if (gpMario->mYoshi->mState != TYoshi::STATE::MOUNTED &&
-        gpMario->mAttributes.mHasFludd == false &&
-        gcConsole->mWaterCardFalling == false &&
-        gcConsole->mIsWaterCard == true)
+    if (gpMario->mYoshi->mState != TYoshi::MOUNTED &&
+        !gpMario->mAttributes.mHasFludd &&
+        !gcConsole->mWaterCardFalling &&
+        gcConsole->mIsWaterCard)
     {
-
         startDisappearTank__11TGCConsole2Fv(gcConsole);
     }
 
     return gcConsole->mIsWaterCard;
-    //mr r0, r3
 }
+kmCall(0x8014206C, &hasWaterCardOpen);
+kmWrite32(0x80142070, 0x28030000);
 
 //0x80283058
 bool canCollectFluddItem(TMario *gpMario)
@@ -68,18 +70,14 @@ bool canCollectFluddItem(TMario *gpMario)
     else
         return onYoshi__6TMarioCFv(gpMario);
 }
+kmCall(0x80283058, &canCollectFluddItem);
 
 //0x8024E710
-/*
-__push_stack r30, 0x20, TRUE
-mr r4, r30
-__call r0, 0x800050E0
-__pop_stack r30, 0x20, TRUE
-*/
-
-//0x800050E0
-void sprayGoopMap(TPollutionManager *gpPollutionManager, TMario *gpMario, float x, float y, float z, float r)
+void sprayGoopMap(TPollutionManager *gpPollutionManager, float x, float y, float z, float r)
 {
+    register TMario *gpMario;
+    __asm { mr gpMario, r30 };
+
     MarioParamsFile *localfile = gpMario->mCustomInfo->mParams;
     if (localfile && localfile->Attributes.FluddAttrs.mCleaningType != localfile->NONE)
     {
@@ -93,6 +91,7 @@ void sprayGoopMap(TPollutionManager *gpPollutionManager, TMario *gpMario, float 
         }
     }
 }
+kmCall(0x8024E710, &sprayGoopMap);
 
 //0x800FED3C
 bool canCleanSeals(TWaterManager *gpWaterManager)
@@ -101,6 +100,8 @@ bool canCleanSeals(TWaterManager *gpWaterManager)
     MarioParamsFile *localfile = gpMario->mCustomInfo->mParams;
     return (gpWaterManager->mWaterCardType != 0 || (localfile && localfile->Attributes.FluddAttrs.mCanCleanSeals));
 }
+kmCall(0x800FED3C, &canCleanSeals);
+kmWrite32(0x800FED40, 0x2C030000);
 
 //0x8024D560
 void bindFluddtojoint(TWaterGun *gpFludd, Mtx *joint)
@@ -112,9 +113,8 @@ void bindFluddtojoint(TWaterGun *gpFludd, Mtx *joint)
     if (localfile)
     {
         index = localfile->Attributes.FluddAttrs.mBindToJointID[(u8)gpFludd->mCurrentNozzle] * 0x30;
-        joint = gpFludd->mMario->mModelData->mModel->mJointArray[index];
+        joint = *gpFludd->mMario->mModelData->mModel->mJointArray + index;
     }
     setBaseTRMtx__9TWaterGunFPA4_f(gpFludd, joint);
 }
-
-//0x800FED40 -> 2C030000
+kmCall(0x8024D560, &bindFluddtojoint);

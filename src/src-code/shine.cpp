@@ -11,8 +11,10 @@ void manageShineVanish(JGeometry::TVec3<float> *marioPos)
 
     if (gpShine->mSize.x - 0.011 <= 0)
     {
+        gpShine->mSize = JGeometry::TVec3<float>(1.0f, 1.0f, 1.0f);
+        gpShine->mGlowSize = JGeometry::TVec3<float>(1.0f, 1.0f, 1.0f);
+        gpShine->mRotation.y = 0.0f;
         setAnmFromIndex__12MActorAnmBlkFiPUs(gpShine->mActorData->mBckInfo, -1);
-        makeObjDefault__11TMapObjBaseFv(gpShine);
         kill__6TShineFv(gpShine);
     }
     else if (gpMario->mState != TMario::SA_SHINE_C)

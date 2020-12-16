@@ -7,22 +7,6 @@
 #define __VERSION__ "ALPHA"
 #define PI 3.14159265f
 
-static bool isDigit(char *chr)
-{
-    return *chr >= '0' && *chr <= '9';
-}
-
-static bool isDigit(char chr)
-{
-    return chr >= '0' && chr <= '9';
-}
-
-static inline void flushAddr(void *addr)
-{
-    dcbf(addr);
-    icbi(addr);
-}
-
 template <typename T>
 struct RGB
 {
@@ -50,6 +34,7 @@ class TMario;
 class TYoshi;
 class TWaterGun;
 class Vector3D;
+class CustomInfo;
 
 struct AreaEpisodeArray
 {
@@ -328,7 +313,7 @@ class J3DModel
 public:
     u32 _00[0x14 / 4];          //0x0000
     Quaternion mSizeMultiplier; //0x0014
-    u32 _01[0x40 / 4];          //0x0018
+    u32 _01[0x34 / 4];          //0x0024
     Mtx *mJointArray[];         //0x0058
 };
 
@@ -434,7 +419,7 @@ class MActor
 {
 
 public:
-    u32 _00[0xC / 4];   //0x0000
+    u32 _00[0xC / 4];       //0x0000
     MActorAnmBck *mBckInfo; //0x000C
 };
 
@@ -501,10 +486,32 @@ public:
         bool mIsObjDead : 1;
     } DrawInfo; //0x00F0
 
-    u32 _00[0x8 / 4];  //0x00F4
-    u16 mState;        //0x00FC
-    u16 _01;           //0x00FE
-    u32 _02[0x30 / 4]; //0x0100
+    u32 _00[0x8 / 4]; //0x00F4
+    u16 mState;       //0x00FC
+    u16 _01;          //0x00FE
+    u32 _02;          //0x0100
+    s32 mStateTimer;  //0x0104
+    u32 mMapObjID;    //0x0134
+};
+
+class TMapObjGeneral : public TMapObjBase
+{
+public:
+    u32 _01;   //0x0138
+    u32 _02;   //0x013C
+    float _03; //0x0140
+    float _04; //0x0144
+};
+
+class TMapObjBall : public TMapObjGeneral
+{
+
+public:
+    u32 _00[0x40 / 4];           //0x0138
+    float mKickedVSpeed;         //0x0178
+    u32 _01[0x14 / 4];           //0x017C
+    float mAdditionalHeldHeight; //0x0190
+    u32 _02[2];                  //0x0194
 };
 
 class TSpineEnemy : public TLiveActor
@@ -1027,7 +1034,7 @@ class TNozzleBox : public TMapObjBase
 {
 
 public:
-    u32 _00[0x18 / 4];        //0x0130
+    u32 _00[0x10 / 4];        //0x0138
     u32 mNozzleToRegen;       //0x0148
     TMapObjBase *mNozzleItem; //0x014C
     float mThrowLength;       //0x0150
@@ -1040,13 +1047,17 @@ public:
     u16 _04;                  //0x0162
 };
 
+class TResetFruit : public TMapObjBall
+{
+};
+
 class TEggYoshi : public TMapObjBase
 {
 
 public:
-    u32 _00[0x18 / 4]; //0x0130
+    u32 _00[0x10 / 4]; //0x0138
     MActor *mActor;    //0x0148
-    s32 mWantedFruit;  //0x014C
+    u32 mWantedFruit;  //0x014C
     TMario *mMario;    //0x0150
 };
 
@@ -1493,8 +1504,6 @@ class TShine : public TMapObjBase
 {
 
 public:
-    u32 _00;                           //0x0130
-    u32 mObjectID;                     //0x0134
     u32 _01[0x1C / 4];                 //0x0138
     u32 mType;                         //0x0154
     u32 _02[0x38 / 4];                 //0x0158
@@ -1633,6 +1642,18 @@ public:
     u32 _04[0x8 / 4];               //0x0038
     u32 *mJKRExpHeapHi;             //0x0040
 };
+
+extern CustomInfo gInfo;
+extern bool gIsCheatsEnabled;
+
+extern float angleToRadians(float angle);
+extern float radiansToAngle(float rad);
+extern JGeometry::TVec3<float> getTriCenter(JGeometry::TVec3<float> a, JGeometry::TVec3<float> b, JGeometry::TVec3<float> c);
+extern u32 *branchToAddr(u32 *baddr);
+extern float sigmoidCurve(float x, float f, float r, float c, float b);
+extern bool isDigit(char *chr);
+extern bool isDigit(char chr);
+extern void flushAddr(void *addr);
 
 class SMEFile
 {
@@ -1868,16 +1889,6 @@ public:
     } Attributes;
 };
 
-inline float angleToRadians(float angle)
-{
-    return (PI / 180.0f) * angle;
-}
-
-inline float radiansToAngle(float rad)
-{
-    return (180.0f / PI) * rad;
-}
-
 template <typename T>
 inline T lerp(T a, T b, float factor)
 {
@@ -1888,36 +1899,6 @@ template <typename T>
 inline T getYAngleBetween(JGeometry::TVec3<float> a, JGeometry::TVec3<float> b)
 {
     return (T)radiansToAngle(atan2f(b.x - a.x, b.z - a.z));
-}
-
-inline JGeometry::TVec3<float> getTriCenter(JGeometry::TVec3<float> a, JGeometry::TVec3<float> b, JGeometry::TVec3<float> c)
-{
-    JGeometry::TVec3<float> center((a.x + b.x + c.x) / 3.0f, (a.y + b.y + c.y) / 3.0f, (a.z + b.z + c.z) / 3.0f);
-    return center;
-}
-
-inline u32 branchToAddr(u32 *bAddr)
-{
-    s32 offset;
-    if (*bAddr & 0x2000000)
-        offset = (*bAddr & 0x3FFFFFD) - 0x4000000;
-    else
-        offset = *bAddr & 0x3FFFFFD;
-    return (u32)bAddr + offset;
-}
-
-/*
-/ r = roof (max value)
-/ b = steepness
-/ c = x offset
-/ f = floor (min value)
-/
-/ Graphing Calculator: https://www.desmos.com/calculator/kn9tpwdan5
-*/
-static float sigmoidCurve(float x, float f, float r, float c, float b)
-{
-    float roof = fabsf(r - f);
-    return f + (roof / (1.0f + expf((b * -1.0f) * (x - c))));
 }
 
 class Vector3D
@@ -2094,8 +2075,5 @@ struct CustomInfo
     WarpCollisionList *mWarpColPreserveArray; //0x0070
     u32 *mGame6Heap;                          //0x0074
 };
-
-extern CustomInfo gInfo;
-extern bool gIsCheatsEnabled;
 
 #endif

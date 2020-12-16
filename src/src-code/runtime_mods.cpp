@@ -123,7 +123,7 @@ bool manageLightSize()
     JGeometry::TVec3<float> *gpLightCoordinates = (JGeometry::TVec3<float> *)ShineShadowCoordinates;
     JGeometry::TVec3<float> *gpMarioCoordinates = (JGeometry::TVec3<float> *)*(u32 *)TMarioCoordinates;
 
-    if (!file)
+    if (!file || !file->GlobalFlags.mIsShineShadow)
     {
         return (gpMarDirector->mAreaID == 1);
     }

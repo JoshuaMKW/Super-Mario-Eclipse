@@ -1,31 +1,35 @@
 import argparse
 import atexit
-import os
 import shutil
 import subprocess
-import sys
+
+from io import BytesIO
+from pathlib import Path
 
 from dolreader import DolFile, write_uint32
 
-TMPDIR = "tmp-Kamek"
+TMPDIR = Path("tmp-Kamek")
 
 @atexit.register
 def clean_resources():
-    if os.path.isdir(TMPDIR):
-        shutil.rmtree(TMPDIR)
+    if TMPDIR.is_dir():
+        pass#shutil.rmtree(TMPDIR)
 
 class Compiler(object):
 
-    def __init__(self, compilerPath: str, options: str, dest: str = None, linker: str = None, dump: bool = False, startaddr: int = 0x80000000):
+    def __init__(self, compilerPath: Path, options: str, dest: Path = None, linker: Path = None, dump: bool = False, startaddr: int = 0x80000000):
         if options.strip().endswith(".o"):
             options = " ".join(options.split(" ")[:-1])
+
+        if isinstance(compilerPath, str):
+            compilerPath = Path(compilerPath)
 
         self.compilers = {}
         self._init_compilers(compilerPath)
         
         self.options = options
-        self.dest = dest
-        self.linker = linker
+        self.dest = Path(dest) if isinstance(dest, str) else dest
+        self.linker = Path(linker) if isinstance(linker, str) else linker
         self.dump = dump
         self.startaddr = startaddr
 
@@ -39,35 +43,48 @@ class Compiler(object):
         write_uint32(dol, 0x3C600000 | (((self.startaddr + size) >> 16) & 0xFFFF))
         write_uint32(dol, 0x60630000 | ((self.startaddr + size) & 0xFFFF))
 
-    def run(self, src: str, dol: str = None):
+    def run(self, src: Path, dol: Path = None):
         _kamek = self.compilers["Kamek"]
         _codewarriorCpp = self.compilers["mwcceppc"]
         _codewarriorAsm = self.compilers["mwasmeppc"]
 
-        if not os.path.isdir("KAMEK-BUILD"):
-            os.mkdir("KAMEK-BUILD")
+        buildDir = Path("KAMEK-BUILD")
+        if not buildDir.exists():
+            buildDir.mkdir()
 
-        if not os.path.isdir(TMPDIR):
-            os.mkdir(TMPDIR)
+        if not TMPDIR.exists():
+            TMPDIR.mkdir()
 
-        dumpCode = os.path.join("KAMEK-BUILD", "source.code")
-        tmpDumpCode = os.path.join(TMPDIR, "source.tmp")
-        linkableObjects = [os.path.join("objects", f) for f in os.listdir("objects") if os.path.isfile(os.path.join("objects", f)) and os.path.splitext(f)[1] == ".o"]
+        if isinstance(src, str):
+            src = Path(src)
+
+        if isinstance(dol, str):
+            dol = Path(dol)
+
+        if self.dest is None:
+            self.dest = buildDir / dol.name
+
+        if self.linker is not None:
+            self.linker = Path(self.linker)
+
+        dumpCode = buildDir / "source.code"
+        tmpDumpCode = TMPDIR / "source.tmp"
+        tmpDumpDol = TMPDIR / self.dest.name
+
+        preCompilesDir = Path("src/objects")
+        linkableObjects = [str((preCompilesDir / f).resolve()) for f in preCompilesDir.iterdir() if f.is_file() and f.suffix == ".o"]
 
         if dol is not None:
-            if self.dest is None:
-                self.dest = os.path.join("KAMEK-BUILD", os.path.basename(dol))
+            if not self.dest.parent.exists():
+                self.dest.mkdir(parents=True, exist_ok=True)
 
-            if not os.path.isdir(os.path.dirname(self.dest)):
-                os.makedirs(self.dest, exist_ok=True)
-
-            if os.path.isfile(self.dest):
-                os.remove(self.dest)
+            if self.dest.is_file():
+                self.dest.unlink()
 
             if self.linker:
-                cmdtype = f"-externals={self.linker} -input-dol={dol} -output-dol={self.dest}"
+                cmdtype = f"-externals={self.linker.resolve()} -input-dol={dol.resolve()} -output-dol={tmpDumpDol}"
             else:
-                cmdtype = f"-input-dol={dol} -output-dol={self.dest}"
+                cmdtype = f"-input-dol={dol.resolve()} -output-dol={tmpDumpDol}"
 
             if self.dump:
                 cmdtype += f" -output-code={dumpCode} -output-code={tmpDumpCode}"
@@ -77,58 +94,80 @@ class Compiler(object):
             if self.dest is None:
                 self.dest = dumpCode
 
-            if os.path.isfile(self.dest):
-                os.remove(self.dest)
+            if self.dest.is_file():
+                self.dest.unlink()
 
             if self.linker:
-                cmdtype = f"-externals={self.linker} -output-code={self.dest}"
+                cmdtype = f"-externals={self.linker.resolve()} -output-code={tmpDumpCode}"
             else:
-                cmdtype = f"-output-code={self.dest}"
+                cmdtype = f"-output-code={tmpDumpCode}"
 
-        if isinstance(src, str):
-            tmpfile = os.path.join(TMPDIR, f"tmp.o")
-            subprocess.run(f"\"{_codewarriorCpp}\" \"{src}\" {self.options} {tmpfile}")
+        print("Compiling source code...\n")
 
-            objects = tmpfile + " " + " ".join(linkableObjects)
-            output = subprocess.run(f"\"{_kamek}\" {objects} -static=0x{self.startaddr:08X} {cmdtype}",
-                                    universal_newlines=True,
-                                    capture_output=True)
+        _errors = []
 
-            if output.stderr:
-                raise RuntimeError(output.stderr)
+        if src.is_file() and f.suffix not in (".h", ".hpp", ".hxx"):
+            tmpfile = TMPDIR / "tmp.o"
+            if f.suffix == ".s":
+                output = subprocess.run(f"\"{_codewarriorAsm.resolve()}\" \"{src.resolve()}\" -o {tmpfile}", capture_output=True, text=True)
+            else:
+                output = subprocess.run(f"\"{_codewarriorCpp.resolve()}\" \"{src.resolve()}\" {self.options} {tmpfile}", capture_output=True, text=True)
+
+            if output.stdout.strip() != "":
+                _errors.append(output.stdout.strip())
+                print(f"✘   {src}")
+            else:
+                objects = str(tmpfile) + " " + " ".join(linkableObjects)
+                print(f"✔   {src}")
+
+        elif src.is_dir():
+            objects = []
+            for i, f in enumerate(src.rglob("*")):
+                tmpfile = TMPDIR / f"tmp{i}.o"
+                if f.is_file() and f.suffix not in (".h", ".hpp", ".hxx"):
+                    if f.suffix == ".s":
+                        output = subprocess.run(f"\"{_codewarriorAsm.resolve()}\" \"{f.resolve()}\" -o {tmpfile}", capture_output=True, text=True)
+                    else:
+                        output = subprocess.run(f"\"{_codewarriorCpp.resolve()}\" \"{f.resolve()}\" {self.options} {tmpfile}", capture_output=True, text=True)
+
+                    if output.stdout.strip() != "":
+                        _errors.append(output.stdout.strip())
+                        print(f"✘   {f}")
+                    else:
+                        print(f"✔   {f}")
+                        objects.append(str(tmpfile))
+
+            objects = " ".join(objects)
+
+        if len(_errors) > 0:
+            print("\n--WARNING--")
+            print("\n".join(_errors))
+
+        print("\nLinking objects...")
+        output = subprocess.run(f"\"{_kamek.resolve()}\" {objects} -static=0x{self.startaddr:08X} {cmdtype}",
+                                universal_newlines=True,
+                                capture_output=True)
+
+        if output.stderr:
+            err = output.stderr.splitlines()[1].split(": ")[-1]
+            msg = f"\nFailed!\nReason: {err}"
+            print(msg)
         else:
-            object_files = []
-            for i in range(len(src)):
-                tmpfile = os.path.join(TMPDIR, f"tmp{i}.o")
-                if os.path.splitext(src[i])[1] == ".s":
-                    subprocess.run(f"\"{_codewarriorAsm}\" \"{src[i]}\" -o {tmpfile}")
-                else:
-                    subprocess.run(f"\"{_codewarriorCpp}\" \"{src[i]}\" {self.options} {tmpfile}")
-
-                object_files.append(tmpfile)
-
-            objects = " ".join(object_files) + " " + " ".join(linkableObjects)
-            output = subprocess.run(f"\"{_kamek}\" {objects} -static=0x{self.startaddr:08X} {cmdtype}",
-                                    universal_newlines=True,
-                                    capture_output=True)
-            
-            if output.stderr:
-                raise RuntimeError(output.stderr)
+            print("\nSuccess!")
 
         if dol is not None:
-            with open(self.dest, "rb") as dolfile:
-                _doldata = DolFile(dolfile)
+            _doldata = DolFile(BytesIO(tmpDumpDol.read_bytes()))
             
-            self.alloc_from_heap(_doldata, os.stat(tmpDumpCode).st_size + 0x500)
-            with open(self.dest, "wb") as dest:
+            self.alloc_from_heap(_doldata, tmpDumpCode.stat().st_size + 0x5000)
+            with self.dest.open("wb") as dest:
                 _doldata.save(dest)
 
         return
 
-    def _init_compilers(self, path: str):
-        for file in os.listdir(path):
-            if os.path.isfile(os.path.join(path, file)) and os.path.splitext(file)[1] == ".exe":
-                self.compilers[os.path.splitext(os.path.basename(file))[0]] = os.path.join(path, file)
+    def _init_compilers(self, path: Path):
+        for f in path.iterdir():
+            if f.is_file() and f.suffix == ".exe":
+                self.compilers[f.stem] = f
 
 def main():
     parser = argparse.ArgumentParser("SMS-Patcher", description="C++ Patcher for SMS NTSC-U, using Kamek by Treeki")
@@ -145,12 +184,12 @@ def main():
 
     if args.defines.strip() != "":
         defines = args.defines.split(",")
-        defines = " " + " ".join([f"-D{d}" for d in defines])
+        defines = " ".join([f"-D{d}" for d in defines])
     else:
-        defines = " "
+        defines = ""
 
-    worker = Compiler("compiler",
-                      f"-Cpp_exceptions off -gccinc -gccext on -enum int -fp hard -use_lmw_stmw on -O4,p -c -rostr -sdata 0 -sdata2 0{defines} -o",
+    worker = Compiler(Path("src/compiler"),
+                      f"-Cpp_exceptions off -gccinc -gccext on -enum int -fp hard -use_lmw_stmw on -O4,p -c -rostr -sdata 0 -sdata2 0 {defines} -o",
                       dest=args.dest,
                       linker=args.map,
                       dump=args.dump,

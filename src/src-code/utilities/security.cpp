@@ -1,5 +1,5 @@
 #include "types.h"
-#include <os.h>
+#include "os.h"
 
 #define MEM_MARR0 0xCC004000
 #define MEM_MARR1 0xCC004004
@@ -7,7 +7,7 @@
 #define MEM_MARR3 0xCC00400C
 #define MEM_MARR_CONTROL 0xCC004010
 
-static enum ACCESS {
+enum ACCESS {
     DENIED,
     READ,
     WRITE,

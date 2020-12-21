@@ -37,10 +37,10 @@ def read_uint32(f):
 def write_uint32(f, val):
     f.write(struct.pack(">I", val))
 
-def read_float(f):
+def read_f32(f):
     return struct.unpack(">f", f.read(4))[0]
 
-def write_float(f, val):
+def write_f32(f, val):
     f.write(struct.pack(">f", val))
 
 def read_double(f):

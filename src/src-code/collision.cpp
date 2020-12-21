@@ -1,4 +1,9 @@
-#include "includes/eclipse.hxx"
+#include "sms/JGeometry.hxx"
+
+#include "sms/actor/Mario.hxx"
+
+#include "Vector3D.hxx"
+#include "SME.hxx"
 
 //Twirl Bounce Collision
 
@@ -54,32 +59,32 @@ rlwinm. r0, r0, 0, 20, 20
 */
 
 //0x8025246C
-void checkIsGlideBounce(TMario *gpMario)
+void checkIsGlideBounce(TMario *player)
 {
-    if ((gpMario->mFloorTriangle->mCollisionType & 0x7FFF) == 16007 || (gpMario->mFloorTriangle->mCollisionType & 0x7FFF) == 17007)
+    if ((player->mFloorTriangle->mCollisionType & 0x7FFF) == 16007 || (player->mFloorTriangle->mCollisionType & 0x7FFF) == 17007)
     {
         TBGCheckData *spoofCol = (TBGCheckData *)__nw__FUli(sizeof(TBGCheckData), 32);
-        memcpy(spoofCol, gpMario->mFloorTriangle, sizeof(TBGCheckData));
+        memcpy(spoofCol, player->mFloorTriangle, sizeof(TBGCheckData));
         spoofCol->mCollisionType = 7;
-        checkEnforceJump__6TMarioFv(gpMario, spoofCol);
+        checkEnforceJump__6TMarioFv(player, spoofCol);
 
-        gpMario->mCustomInfo->mTerminalVelocity = -20.0f * gpMario->mGravity;
-        gpMario->mCustomInfo->CollisionFlags.mIsSpinBounce = true;
-        changePlayerStatus__6TMarioFUlUlb(gpMario, TMario::SA_JUMPSPIN1, 0, 0);
+        player->mCustomInfo->mTerminalVelocity = -20.0f * player->mGravity;
+        player->mCustomInfo->CollisionFlags.mIsSpinBounce = true;
+        changePlayerStatus__6TMarioFUlUlb(player, TMario::SA_JUMPSPIN1, 0, 0);
     }
 }
 
 //0x80004A94
-void checkRestoreHealth(TMario *gpMario)
+void checkRestoreHealth(TMario *player)
 {
-    if (gpMario->mCustomInfo->mCollisionTimer <= 0)
+    if (player->mCustomInfo->mCollisionTimer <= 0)
     {
-        incHP__6TMarioFi(gpMario, 1);
-        gpMario->mCustomInfo->mCollisionTimer = gpMario->mFloorTriangle->mValue4;
+        incHP__6TMarioFi(player, 1);
+        player->mCustomInfo->mCollisionTimer = player->mFloorTriangle->mValue4;
     }
     else
     {
-        gpMario->mCustomInfo->mCollisionTimer -= 1;
+        player->mCustomInfo->mCollisionTimer -= 1;
     }
 }
 
@@ -97,35 +102,35 @@ u16 checkIsRestoreTypeNoFallDamage(TBGCheckData *floor)
 }
 
 //0x80004A98
-void checkIsCannonType(TMario *gpMario)
+void checkIsCannonType(TMario *player)
 {
-    if (!gpMario->mController->isPressed(TMarioGamePad::DPAD_UP) ||
-        !gpMario->mCustomInfo->CollisionFlags.mIsFaceUsed)
+    if (!player->mController->isPressed(TMarioGamePad::DPAD_UP) ||
+        !player->mCustomInfo->CollisionFlags.mIsFaceUsed)
         return;
 
-    if ((gpMario->mFloorTriangle->mCollisionType & 0x7FFF) == 16080 || (gpMario->mFloorTriangle->mCollisionType & 0x7FFF) == 17080)
+    if ((player->mFloorTriangle->mCollisionType & 0x7FFF) == 16080 || (player->mFloorTriangle->mCollisionType & 0x7FFF) == 17080)
     {
-        changePlayerStatus__6TMarioFUlUlb(gpMario, TMario::SA_TRIPLE_J, 0, 0);
-        emitParticle__6TMarioFis(gpMario, TMario::E_GROUND_SHARP_SHOCK);
-        emitParticle__6TMarioFis(gpMario, TMario::E_GROUND_SMOKE_PLUME);
-        gpMario->mForwardSpeed = (u8)(gpMario->mFloorTriangle->mValue4 >> 8);
-        gpMario->mCoordinates.y += 1.0f;
-        gpMario->mSpeed.y = (u8)gpMario->mFloorTriangle->mValue4;
-        gpMario->mCustomInfo->CollisionFlags.mIsDisableInput = true;
-        gpMario->mController->setEnabled(false);
-        gpMario->mCustomInfo->CollisionFlags.mIsFaceUsed = true;
+        changePlayerStatus__6TMarioFUlUlb(player, TMario::SA_TRIPLE_J, 0, 0);
+        emitParticle__6TMarioFis(player, TMario::E_GROUND_SHARP_SHOCK);
+        emitParticle__6TMarioFis(player, TMario::E_GROUND_SMOKE_PLUME);
+        player->mForwardSpeed = (u8)(player->mFloorTriangle->mValue4 >> 8);
+        player->mPosition.y += 1.0f;
+        player->mSpeed.y = (u8)player->mFloorTriangle->mValue4;
+        player->mCustomInfo->CollisionFlags.mIsDisableInput = true;
+        player->mController->setEnabled(false);
+        player->mCustomInfo->CollisionFlags.mIsFaceUsed = true;
     }
 }
 
 //0x80004A9C
-void changeNozzleType(TMario *gpMario, u16 type)
+void changeNozzleType(TMario *player, u16 type)
 {
-    if (gpMario->mCustomInfo->CollisionFlags.mIsFaceUsed || !isMario__6TMarioFv(gpMario))
+    if (player->mCustomInfo->CollisionFlags.mIsFaceUsed || !isMario__6TMarioFv(player))
     {
         return;
     }
 
-    gpMario->mAttributes.mHasFludd = gpMario->mFloorTriangle->mValue4 == 1;
+    player->mAttributes.mHasFludd = player->mFloorTriangle->mValue4 == 1;
 
     TWaterGun::NOZZLETYPE nozzle = TWaterGun::Hover;
     if (type >= 17090)
@@ -133,245 +138,245 @@ void changeNozzleType(TMario *gpMario, u16 type)
     else
         nozzle = (TWaterGun::NOZZLETYPE)(type - 16090);
 
-    changeNozzle__9TWaterGunFQ29TWaterGun11TNozzleTypeb(gpMario->mFludd, nozzle, 1);
-    gpMario->mCustomInfo->CollisionFlags.mIsFaceUsed = true;
+    changeNozzle__9TWaterGunFQ29TWaterGun11TNozzleTypeb(player->mFludd, nozzle, 1);
+    player->mCustomInfo->CollisionFlags.mIsFaceUsed = true;
 }
 
 //0x80004AA0
-void boostPadCol(TMario *gpMario)
+void boostPadCol(TMario *player)
 {
-    //gpMario->mForwardSpeed = gpMario->mFloorTriangle->mValue4;
-    if (gpMario->mState == TMario::SA_IDLE || !gpMario->mCustomInfo->CollisionFlags.mIsFaceUsed)
+    //player->mForwardSpeed = player->mFloorTriangle->mValue4;
+    if (player->mState == TMario::SA_IDLE || !player->mCustomInfo->CollisionFlags.mIsFaceUsed)
     {
-        changePlayerStatus__6TMarioFUlUlb(gpMario, TMario::SA_RUNNING, 0, 0);
-        startVoice__6TMarioFUl(gpMario, TMario::V_JUMP);
+        changePlayerStatus__6TMarioFUlUlb(player, TMario::SA_RUNNING, 0, 0);
+        startVoice__6TMarioFUl(player, TMario::V_JUMP);
     }
 }
 
 //0x80004AA4
-void setGravityCol(TMario *gpMario)
+void setGravityCol(TMario *player)
 {
-    gpMario->mGravity = (float)(gpMario->mFloorTriangle->mValue4) / 100.0f;
+    player->mGravity = (f32)(player->mFloorTriangle->mValue4) / 100.0f;
 }
 
 //0x80004AA8
-void antiGravityCol(TMario *gpMario)
+void antiGravityCol(TMario *player)
 {
-    if ((gpMario->mCoordinates.y - gpMario->mFloorTriangle->mMaxHeight) > gpMario->mFloorTriangle->mValue4 &&
-        gpMario->mFloorTriangle->mValue4 != 0)
+    if ((player->mPosition.y - player->mFloorTriangle->mMaxHeight) > player->mFloorTriangle->mValue4 &&
+        player->mFloorTriangle->mValue4 != 0)
     {
         return;
     }
-    gpMario->mSpeed.y = 10.0f;
-    if ((gpMario->mState & TMario::SA_AIRBORN) == false)
+    player->mSpeed.y = 10.0f;
+    if ((player->mState & TMario::SA_AIRBORN) == false)
     {
-        gpMario->mCoordinates.y += 1.0f;
-        changePlayerStatus__6TMarioFUlUlb(gpMario, TMario::SA_FALL, 0, 0);
+        player->mPosition.y += 1.0f;
+        changePlayerStatus__6TMarioFUlUlb(player, TMario::SA_FALL, 0, 0);
     }
 }
 
-void warpToLinkedCol(TMario *gpMario)
+void warpToLinkedCol(TMario *player)
 {
-    CPolarSubCamera *gpCamera = (CPolarSubCamera *)*(u32 *)CPolarSubCameraInstance;
-    TBGCheckData *linkedCol = gInfo.mWarpColArray->resolveCollisionWarp(gpMario->mFloorTriangle);
+    TBGCheckData *linkedCol = gInfo.mWarpColArray->resolveCollisionWarp(player->mFloorTriangle);
+    Vector3D colTriangle(&linkedCol->mVertexA, &linkedCol->mVertexB, &linkedCol->mVertexC);
 
     if (!linkedCol)
     {
-        gpMario->mCustomInfo->mCollisionTimer = 0;
+        player->mCustomInfo->mCollisionTimer = 0;
         return;
     }
 
-    float speed = Vector3D::getResultant(gpMario->mSpeed);
+    f32 speed = player->mSpeed.resultant();
 
     if (speed > 1.0f)
     {
-        gpMario->mCustomInfo->mCollisionTimer = 0;
+        player->mCustomInfo->mCollisionTimer = 0;
         return;
     }
 
-    if (!gpMario->mCustomInfo->CollisionFlags.mIsFaceUsed)
+    if (!player->mCustomInfo->CollisionFlags.mIsFaceUsed)
     {
-        if (gpMario->mCustomInfo->mCollisionTimer > 140)
+        if (player->mCustomInfo->mCollisionTimer > 140)
         {
-            gpMario->mCoordinates = getTriCenter(linkedCol->mVertexA, linkedCol->mVertexB, linkedCol->mVertexC);
-            gpMario->mFloorTriangle = linkedCol;
-            gpMario->mFloorTriangleCopy = linkedCol;
-            gpMario->mFloorBelow = gpMario->mCoordinates.y;
-            gpMario->mCustomInfo->CollisionFlags.mIsFaceUsed = true;
-            gpMario->mCustomInfo->mCollisionTimer = 0;
-            startSoundActor__6TMarioFUl(gpMario, TMario::V_JUMP);
+            player->mPosition = colTriangle.center();
+            player->mFloorTriangle = linkedCol;
+            player->mFloorTriangleCopy = linkedCol;
+            player->mFloorBelow = player->mPosition.y;
+            player->mCustomInfo->CollisionFlags.mIsFaceUsed = true;
+            player->mCustomInfo->mCollisionTimer = 0;
+            startSoundActor__6TMarioFUl(player, TMario::V_JUMP);
 
-            gpCamera->mCoordinates.x = lerp<float>(gpCamera->mCoordinates.x, gpMario->mCoordinates.x, 0.9375f);
-            gpCamera->mCoordinates.y = gpMario->mCoordinates.y + 300.0f;
-            gpCamera->mCoordinates.z = lerp<float>(gpCamera->mCoordinates.z, gpMario->mCoordinates.z, 0.9375f);
+            gpCamera->mPosition.x = lerp<f32>(gpCamera->mPosition.x, player->mPosition.x, 0.9375f);
+            gpCamera->mPosition.y = player->mPosition.y + 300.0f;
+            gpCamera->mPosition.z = lerp<f32>(gpCamera->mPosition.z, player->mPosition.z, 0.9375f);
 
-            gpCamera->mHorizontalAngle = getYAngleBetween<u16>(gpMario->mCoordinates, gpCamera->mCoordinates) * 182;
+            gpCamera->mHorizontalAngle = (u16)Vector3D::bearingAngleY(player->mPosition, gpCamera->mPosition) * 182;
         }
-        else if (gpMario->mCustomInfo->mCollisionTimer > 80)
+        else if (player->mCustomInfo->mCollisionTimer > 80)
         {
-            gpMario->mCustomInfo->CollisionFlags.mIsDisableInput = true;
-            gpMario->mController->setEnabled(false);
-            emitGetEffect__6TMarioFv(gpMario);
+            player->mCustomInfo->CollisionFlags.mIsDisableInput = true;
+            player->mController->setEnabled(false);
+            emitGetEffect__6TMarioFv(player);
         }
     }
     else
     {
-        if (gpMario->mCustomInfo->mCollisionTimer > 60)
+        if (player->mCustomInfo->mCollisionTimer > 60)
         {
-            gpMario->mCustomInfo->CollisionFlags.mIsDisableInput = false;
-            gpMario->mController->setEnabled(false);
+            player->mCustomInfo->CollisionFlags.mIsDisableInput = false;
+            player->mController->setEnabled(false);
         }
     }
-    gpMario->mCustomInfo->mCollisionTimer += 1;
+    player->mCustomInfo->mCollisionTimer += 1;
 }
 
-void warpToLinkedColPreserve(TMario *gpMario, bool fluid)
+void warpToLinkedColPreserve(TMario *player, bool fluid)
 {
-    CPolarSubCamera *gpCamera = (CPolarSubCamera *)*(u32 *)CPolarSubCameraInstance;
-    TBGCheckData *linkedCol = gInfo.mWarpColArray->resolveCollisionWarp(gpMario->mFloorTriangle);
+    TBGCheckData *linkedCol = gInfo.mWarpColArray->resolveCollisionWarp(player->mFloorTriangle);
+    Vector3D colTriangle(&linkedCol->mVertexA, &linkedCol->mVertexB, &linkedCol->mVertexC);
 
     if (!linkedCol) return;
 
-    if (!gpMario->mCustomInfo->CollisionFlags.mIsFaceUsed)
+    if (!player->mCustomInfo->CollisionFlags.mIsFaceUsed)
     {
-        gpMario->mFloorTriangle = linkedCol;
-        gpMario->mFloorTriangleCopy = linkedCol;
-        gpMario->mCustomInfo->CollisionFlags.mIsFaceUsed = true;
+        player->mFloorTriangle = linkedCol;
+        player->mFloorTriangleCopy = linkedCol;
+        player->mCustomInfo->CollisionFlags.mIsFaceUsed = true;
 
-        gpMario->mCoordinates = getTriCenter(linkedCol->mVertexA, linkedCol->mVertexB, linkedCol->mVertexC);
+        player->mPosition = colTriangle.center();
 
-        gpCamera->mCoordinates.x = lerp<float>(gpCamera->mCoordinates.x, gpMario->mCoordinates.x, 0.9375f);
-        gpCamera->mCoordinates.y = gpMario->mCoordinates.y + 300.0f;
-        gpCamera->mCoordinates.z = lerp<float>(gpCamera->mCoordinates.z, gpMario->mCoordinates.z, 0.9375f);
+        gpCamera->mPosition.x = lerp<f32>(gpCamera->mPosition.x, player->mPosition.x, 0.9375f);
+        gpCamera->mPosition.y = player->mPosition.y + 300.0f;
+        gpCamera->mPosition.z = lerp<f32>(gpCamera->mPosition.z, player->mPosition.z, 0.9375f);
 
-        gpCamera->mHorizontalAngle = getYAngleBetween<u16>(gpMario->mCoordinates, gpCamera->mCoordinates) * 182;
+        gpCamera->mHorizontalAngle = (u16)Vector3D::bearingAngleY(player->mPosition, gpCamera->mPosition) * 182;
 
-        JGeometry::TVec3<float> colNormal = Vector3D::getNormal(linkedCol->mVertexA, linkedCol->mVertexB, linkedCol->mVertexC);
-        JGeometry::TVec3<float> colUnit = Vector3D::getUnitVector(colNormal);
+        JGeometry::TVec3<f32> colNormal = colTriangle.normal();
+        JGeometry::TVec3<f32> colUnit = colNormal.unitVector();
 
-        float magnitude = fabsf__Ff(gpMario->mSpeed.x) + fabsf__Ff(gpMario->mSpeed.y) + fabsf__Ff(gpMario->mSpeed.z);
+        f32 magnitude = fabsf__Ff(player->mSpeed.x) + fabsf__Ff(player->mSpeed.y) + fabsf__Ff(player->mSpeed.z);
 
-        gpMario->mAngle.y = Vector3D::getNormalAngle<u16>(colNormal) * 182;
-        setPlayerVelocity__6TMarioFf(gpMario, magnitude * colUnit.x + magnitude * colUnit.z);
-        gpMario->mSpeed.y = magnitude * colUnit.y;
+        player->mAngle.y = (u16)colNormal.getNormalAngle() * 182;
+        setPlayerVelocity__6TMarioFf(player, magnitude * colUnit.x + magnitude * colUnit.z);
+        player->mSpeed.y = magnitude * colUnit.y;
 
-        gpMario->mCoordinates.x += 40.0f * colUnit.x;
-        gpMario->mCoordinates.y += 40.0f * colUnit.y;
-        gpMario->mCoordinates.z += 40.0f * colUnit.z;
+        player->mPosition.x += 40.0f * colUnit.x;
+        player->mPosition.y += 40.0f * colUnit.y;
+        player->mPosition.z += 40.0f * colUnit.z;
 
-        changePlayerStatus__6TMarioFUlUlb(gpMario, TMario::SA_FALL, 0, 0);
+        changePlayerStatus__6TMarioFUlUlb(player, TMario::SA_FALL, 0, 0);
     }
     else
     {
-        gpMario->mCustomInfo->CollisionFlags.mIsFaceUsed = (!gpMario->mController->isFramePressed(TMarioGamePad::DPAD_DOWN) && !fluid);
+        player->mCustomInfo->CollisionFlags.mIsFaceUsed = (!player->mController->isFramePressed(TMarioGamePad::DPAD_DOWN) && !fluid);
     }
 }
 
-inline void resetValuesOnStateChange(TMario *gpMario)
+inline void resetValuesOnStateChange(TMario *player)
 {
-    switch (gpMario->mPrevState)
+    switch (player->mPrevState)
     {
     case (TMario::SA_JUMPSPIN1):
-        gpMario->mCustomInfo->mTerminalVelocity = -75.0f * gpMario->mGravity;
-        gpMario->mCustomInfo->CollisionFlags.mIsSpinBounce = false;
+        player->mCustomInfo->mTerminalVelocity = -75.0f * player->mGravity;
+        player->mCustomInfo->CollisionFlags.mIsSpinBounce = false;
     case (TMario::SA_TRIPLE_J):
-        gpMario->mCustomInfo->CollisionFlags.mIsDisableInput = false;
-        gpMario->mController->setEnabled(true);
+        player->mCustomInfo->CollisionFlags.mIsDisableInput = false;
+        player->mController->setEnabled(true);
     }
-    if (gpMario->mCustomInfo->CollisionFlags.mIsDisableInput)
+    if (player->mCustomInfo->CollisionFlags.mIsDisableInput)
     { //Patches pausing/map escaping the controller lock
-        gpMario->mController->setEnabled(false);
+        player->mController->setEnabled(false);
     }
 }
 
-inline void resetValuesOnGroundContact(TMario *gpMario)
+inline void resetValuesOnGroundContact(TMario *player)
 {
-    if ((gpMario->mState & TMario::SA_AIRBORN) == false)
+    if ((player->mState & TMario::SA_AIRBORN) == false)
     {
-        gpMario->mCustomInfo->mTerminalVelocity = -75.0f * gpMario->mGravity;
-        gpMario->mCustomInfo->CollisionFlags.mIsAirborn = false;
-        gpMario->mCustomInfo->CollisionFlags.mIsDisableInput = false;
+        player->mCustomInfo->mTerminalVelocity = -75.0f * player->mGravity;
+        player->mCustomInfo->CollisionFlags.mIsAirborn = false;
+        player->mCustomInfo->CollisionFlags.mIsDisableInput = false;
     }
 }
 
-inline void resetValuesOnAirborn(TMario *gpMario)
+inline void resetValuesOnAirborn(TMario *player)
 {
-    if ((gpMario->mState & TMario::SA_AIRBORN) == false)
+    if ((player->mState & TMario::SA_AIRBORN) == false)
     {
         return;
     }
 }
 
-inline void resetValuesOnCollisionChange(TMario *gpMario)
+inline void resetValuesOnCollisionChange(TMario *player)
 {
-    if (gpMario->mFloorTriangle->mCollisionType != gpMario->mCustomInfo->mPrevCollision)
+    if (player->mFloorTriangle->mCollisionType != player->mCustomInfo->mPrevCollision)
     {
-        gpMario->mCustomInfo->mPrevCollision = gpMario->mFloorTriangle->mCollisionType;
-        gpMario->mCustomInfo->CollisionFlags.mIsFaceUsed = false;
-        gpMario->mCustomInfo->mCollisionTimer = 0;
+        player->mCustomInfo->mPrevCollision = player->mFloorTriangle->mCollisionType;
+        player->mCustomInfo->CollisionFlags.mIsFaceUsed = false;
+        player->mCustomInfo->mCollisionTimer = 0;
     }
 }
 
 //0x802500B8
-u32 updateCollisionContext(TMario *gpMario)
+u32 updateCollisionContext(TMario *player)
 {
-    resetValuesOnStateChange(gpMario);
-    resetValuesOnGroundContact(gpMario);
-    resetValuesOnAirborn(gpMario);
-    resetValuesOnCollisionChange(gpMario);
+    resetValuesOnStateChange(player);
+    resetValuesOnGroundContact(player);
+    resetValuesOnAirborn(player);
+    resetValuesOnCollisionChange(player);
 
-    float marioCollisionHeight = *(float *)0x80415CC4;
-    if (gpMario->mCustomInfo->mParams)
-        marioCollisionHeight *= gpMario->mCustomInfo->mParams->Attributes.mSizeMultiplier;
+    f32 marioCollisionHeight = *(f32 *)0x80415CC4;
+    if (player->mCustomInfo->mParams)
+        marioCollisionHeight *= player->mCustomInfo->mParams->Attributes.mSizeMultiplier;
 
-    if (gpMario->mCeilingAbove - gpMario->mFloorBelow < marioCollisionHeight &&
-        gpMario->mRoofTriangle &&
-        !(gpMario->mState & TMario::SA_AIRBORN))
+    if (player->mCeilingAbove - player->mFloorBelow < marioCollisionHeight &&
+        player->mRoofTriangle &&
+        !(player->mState & TMario::SA_AIRBORN))
     {
-        loserExec__6TMarioFv(gpMario);
+        loserExec__6TMarioFv(player);
     }
     return 1;
 }
 
 u16 masterGroundCollisionHandler(TBGCheckData *colTriangle)
 {
-    register TMario *gpMario;
-    __asm { mr gpMario, r29 };
+    register TMario *player;
+    __asm { mr player, r29 };
 
     u16 type = colTriangle->mCollisionType & 0x7FFF;
     switch (type)
     {
     case 16007:
     case 17007:
-        checkRestoreHealth(gpMario);
+        checkRestoreHealth(player);
         break;
     case 16010:
     case 17010:
-        checkRestoreHealth(gpMario);
+        checkRestoreHealth(player);
         break;
     case 16020:
     case 17020:
-        boostPadCol(gpMario);
+        boostPadCol(player);
         break;
     case 16021:
     case 17021:
-        setGravityCol(gpMario);
+        setGravityCol(player);
         break;
     case 16040:
     case 17040:
-        warpToLinkedCol(gpMario);
+        warpToLinkedCol(player);
         break;
     case 16041:
     case 16042:
-        warpToLinkedColPreserve(gpMario, false);
+        warpToLinkedColPreserve(player, false);
         break;
     case 17041:
     case 17042:
-        warpToLinkedColPreserve(gpMario, true);
+        warpToLinkedColPreserve(player, true);
         break;
     case 16080:
     case 17080:
-        checkIsCannonType(gpMario);
+        checkIsCannonType(player);
         break;
     case 16090:
     case 16091:
@@ -385,24 +390,24 @@ u16 masterGroundCollisionHandler(TBGCheckData *colTriangle)
     case 17093:
     case 17094:
     case 17095:
-        changeNozzleType(gpMario, type);
+        changeNozzleType(player, type);
         break;
     }
     return type;
 }
 
-u32 masterAllCollisionHandler(TMario *gpMario)
+u32 masterAllCollisionHandler(TMario *player)
 {
-    u16 type = gpMario->mFloorTriangle->mCollisionType & 0x7FFF;
+    u16 type = player->mFloorTriangle->mCollisionType & 0x7FFF;
     switch (type)
     {
     case 16022:
     case 17022:
-        setGravityCol(gpMario);
+        setGravityCol(player);
         break;
     case 16023:
     case 17023:
-        antiGravityCol(gpMario);
+        antiGravityCol(player);
         break;
     case 16190:
     case 16191:
@@ -416,10 +421,10 @@ u32 masterAllCollisionHandler(TMario *gpMario)
     case 17193:
     case 17194:
     case 17195:
-        changeNozzleType(gpMario, type);
+        changeNozzleType(player, type);
         break;
     }
-    return gpMario->mState;
+    return player->mState;
 }
 
 kmCall(0x80250CA0, &masterGroundCollisionHandler);

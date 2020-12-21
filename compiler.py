@@ -1,10 +1,11 @@
 import argparse
 import atexit
+import json
 import shutil
 import subprocess
 
 from io import BytesIO
-from pathlib import Path
+from pathlib import Path, PosixPath
 
 from dolreader import DolFile, write_uint32
 
@@ -32,6 +33,12 @@ class Compiler(object):
         self.linker = Path(linker) if isinstance(linker, str) else linker
         self.dump = dump
         self.startaddr = startaddr
+        self.includes = ""
+
+        self._init_includes()
+
+        #print(self.includes)
+        #raise SystemExit
 
     def alloc_from_heap(self, dol: DolFile, size: int):
         size = (size + 31) & -32
@@ -106,12 +113,14 @@ class Compiler(object):
 
         _errors = []
 
+        print(f"\"{_codewarriorCpp.resolve()}\" {self.includes} {self.options}")
+
         if src.is_file() and f.suffix not in (".h", ".hpp", ".hxx"):
             tmpfile = TMPDIR / "tmp.o"
             if f.suffix == ".s":
-                output = subprocess.run(f"\"{_codewarriorAsm.resolve()}\" \"{src.resolve()}\" -o {tmpfile}", capture_output=True, text=True)
+                output = subprocess.run(f"\"{_codewarriorAsm.resolve()}\" \"{src.resolve()}\" {self.includes} -o {tmpfile}", capture_output=True, text=True)
             else:
-                output = subprocess.run(f"\"{_codewarriorCpp.resolve()}\" \"{src.resolve()}\" {self.options} {tmpfile}", capture_output=True, text=True)
+                output = subprocess.run(f"\"{_codewarriorCpp.resolve()}\" \"{src.resolve()}\" {self.includes} {self.options} -o {tmpfile}", capture_output=True, text=True)
 
             if output.stdout.strip() != "":
                 _errors.append(output.stdout.strip())
@@ -126,15 +135,15 @@ class Compiler(object):
                 tmpfile = TMPDIR / f"tmp{i}.o"
                 if f.is_file() and f.suffix not in (".h", ".hpp", ".hxx"):
                     if f.suffix == ".s":
-                        output = subprocess.run(f"\"{_codewarriorAsm.resolve()}\" \"{f.resolve()}\" -o {tmpfile}", capture_output=True, text=True)
+                        output = subprocess.run(f"\"{_codewarriorAsm.resolve()}\" \"{f.resolve()}\" {self.includes} -o {tmpfile}", capture_output=True, text=True)
                     else:
-                        output = subprocess.run(f"\"{_codewarriorCpp.resolve()}\" \"{f.resolve()}\" {self.options} {tmpfile}", capture_output=True, text=True)
+                        output = subprocess.run(f"\"{_codewarriorCpp.resolve()}\" \"{f.resolve()}\" {self.includes} {self.options} -o {tmpfile}", capture_output=True, text=True)
 
                     if output.stdout.strip() != "":
                         _errors.append(output.stdout.strip())
-                        print(f"✘   {f}")
+                        #print(f"✘   {f}")
                     else:
-                        print(f"✔   {f}")
+                        #print(f"✔   {f}")
                         objects.append(str(tmpfile))
 
             objects = " ".join(objects)
@@ -169,6 +178,24 @@ class Compiler(object):
             if f.is_file() and f.suffix == ".exe":
                 self.compilers[f.stem] = f
 
+    def _init_includes(self):
+        cppConfig = Path(".vscode/c_cpp_properties.json")
+
+        if cppConfig.exists():
+            with cppConfig.open("r") as config:
+                jsonData = json.load(config)
+
+            for include in jsonData["configurations"][0]["includePath"]:
+                if include.endswith("**"):
+                    continue
+
+
+                include = Path(include.replace(r"${workspaceFolder}", str(Path.cwd())))
+                self.includes += f"-i {include} "
+
+            if len(self.includes) > 0:
+                self.includes = f"-I- {self.includes}"
+
 def main():
     parser = argparse.ArgumentParser("SMS-Patcher", description="C++ Patcher for SMS NTSC-U, using Kamek by Treeki")
 
@@ -189,7 +216,7 @@ def main():
         defines = ""
 
     worker = Compiler(Path("src/compiler"),
-                      f"-Cpp_exceptions off -gccinc -gccext on -enum int -fp hard -use_lmw_stmw on -O4,p -c -rostr -sdata 0 -sdata2 0 {defines} -o",
+                      f"-Cpp_exceptions off -gccinc -gccext on -enum int -fp hard -use_lmw_stmw on -O4,p -c -rostr -sdata 0 -sdata2 0 {defines}",
                       dest=args.dest,
                       linker=args.map,
                       dump=args.dump,

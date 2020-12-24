@@ -1,4 +1,5 @@
-#include "../includes/eclipse.hxx"
+#include "types.h"
+#include "os.h"
 
 #define MEM_MARR0 0xCC004000
 #define MEM_MARR1 0xCC004004
@@ -6,7 +7,7 @@
 #define MEM_MARR3 0xCC00400C
 #define MEM_MARR_CONTROL 0xCC004010
 
-static enum ACCESS {
+enum ACCESS {
     DENIED,
     READ,
     WRITE,
@@ -89,13 +90,11 @@ void initializeMemProtection()
     OSProtectRange(2, (void *)0x80003100, 0x36FF00, READ);
 }
 
-/*
-OSThread gGctThread;
-u8 gGctThreadStack[0x256];
-*/
-
 OSAlarm gctAlarm;
-OSStopwatch gctStopwatch;
+
+#ifdef SME_DEBUG
+    OSStopwatch gctStopwatch;
+#endif
 
 static u32 enabledmagic = 0x00D0C0DE;
 static u32 disabledmagic = 0x00D0DEAD;
@@ -103,7 +102,9 @@ static u32 *cachedAddr = NULL;
 
 void *setUserCodes(OSAlarm *alarm, OSContext *context)
 {
-    OSStartStopwatch(&gctStopwatch);
+    #ifdef SME_DEBUG
+        OSStartStopwatch(&gctStopwatch);
+    #endif
     
     u32 *searchcontext = (u32 *)0x80001C00;
     u32 searchlength = (0x80003000 - 0x80001C00) >> 2;
@@ -114,7 +115,7 @@ void *setUserCodes(OSAlarm *alarm, OSContext *context)
     {
         for (u32 i = 0; i < searchlength; ++i)
         {
-            if (searchcontext[i] == enabledmagic)
+            if (searchcontext[i] == enabledmagic && searchcontext[i + 1] == enabledmagic)
             {
                 matched = true;
                 searchcontext = &searchcontext[i];
@@ -131,9 +132,14 @@ void *setUserCodes(OSAlarm *alarm, OSContext *context)
 
     if (matched)
     {
-        *searchcontext = disabledmagic;
+        searchcontext[0] = disabledmagic;
+        searchcontext[1] = disabledmagic;
     }
 
-    OSStopStopwatch(&gctStopwatch);
+    #ifdef SME_DEBUG
+        OSStopStopwatch(&gctStopwatch);
+        if (gctStopwatch.mHits % 60000 == 0) OSDumpStopwatch(&gctStopwatch);
+    #endif
+
     return NULL;
 }

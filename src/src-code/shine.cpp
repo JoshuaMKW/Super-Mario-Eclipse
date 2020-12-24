@@ -1,83 +1,81 @@
-#include "includes/eclipse.hxx"
+#include "sms/JGeometry.hxx"
+#include "sms/game/Conductor.hxx"
+
+#include "SME.hxx"
 
 //0x801BD664
-void manageShineVanish(JGeometry::TVec3<float> *marioPos)
+void manageShineVanish(JGeometry::TVec3<f32> *marioPos)
 {
-    register TShine *gpShine;
-    __asm { mr gpShine, r30 };
+    register TShine *shine;
+    __asm { mr shine, r30 };
 
-    TMarDirector *gpMarDirector = (TMarDirector *)*(u32 *)TMarDirectorInstance;
-    TMario *gpMario = (TMario *)*(u32 *)TMarioInstance;
-
-    if (gpShine->mSize.x - 0.011 <= 0)
+    if (shine->mSize.x - 0.011f <= 0)
     {
-        gpShine->mSize = JGeometry::TVec3<float>(1.0f, 1.0f, 1.0f);
-        gpShine->mGlowSize = JGeometry::TVec3<float>(1.0f, 1.0f, 1.0f);
-        gpShine->mRotation.y = 0.0f;
-        setAnmFromIndex__12MActorAnmBlkFiPUs(gpShine->mActorData->mBckInfo, -1);
-        kill__6TShineFv(gpShine);
+        shine->mSize = JGeometry::TVec3<f32>(1.0f, 1.0f, 1.0f);
+        shine->mGlowSize = JGeometry::TVec3<f32>(1.0f, 1.0f, 1.0f);
+        shine->mRotation.y = 0.0f;
+        setAnmFromIndex__12MActorAnmBlkFiPUs(shine->mActorData->mBckInfo, -1);
+        kill__6TShineFv(shine);
     }
-    else if (gpMario->mState != TMario::SA_SHINE_C)
+    else if (gpMarioAddress->mState != TMario::SA_SHINE_C)
     {
-        gpShine->mCoordinates.y += 4;
-        gpShine->mSize.x -= 0.011f;
-        gpShine->mSize.y -= 0.011f;
-        gpShine->mSize.z -= 0.011f;
-        gpShine->mGlowSize.x -= 0.011f;
-        gpShine->mGlowSize.y -= 0.011f;
-        gpShine->mGlowSize.z -= 0.011f;
-        gpShine->mRotation.y += 3.0f;
+        shine->mPosition.y += 4.0f;
+        shine->mSize.x -= 0.011f;
+        shine->mSize.y -= 0.011f;
+        shine->mSize.z -= 0.011f;
+        shine->mGlowSize.x -= 0.011f;
+        shine->mGlowSize.y -= 0.011f;
+        shine->mGlowSize.z -= 0.011f;
+        shine->mRotation.y += 3.0f;
     }
     else
     {
-        gpShine->mCoordinates = *marioPos;
+        shine->mPosition = *marioPos;
     }
 }
 kmCall(0x801BD664, &manageShineVanish);
 kmWrite32(0x801BD668, 0x48000568);
 
 //0x802413E0
-void isKillEnemiesShine(TConductor *gpConductor, JGeometry::TVec3<float> *gpMarioCoordinates, float range)
+void isKillEnemiesShine(TConductor *gpConductor, JGeometry::TVec3<f32> *playerCoordinates, f32 range)
 {
-    register TMario *gpMario;
-    __asm { mr gpMario, r31 };
+    register TMario *player;
+    __asm { mr player, r31 };
 
-    TShine *gpShine = (TShine *)gpMario->mGrabTarget;
-    if ((gpShine->mType & 0x10) == false)
+    TShine *shine = (TShine *)player->mGrabTarget;
+    if ((shine->mType & 0x10) == false)
     {
-        killEnemiesWithin__10TConductorFRCQ29JGeometry8TVec3_f(gpConductor, gpMarioCoordinates, range);
+        killEnemiesWithin__10TConductorFRCQ29JGeometry8TVec3_f(gpConductor, playerCoordinates, range);
     }
 }
 kmCall(0x802413E0, &isKillEnemiesShine);
 
 void restoreMario(TMarDirector *gpMarDirector, u32 curState)
 {
-    TShine *gpShine = (TShine *)gpMarDirector->mCollectedShine;
-    TMario *gpMario = (TMario *)*(u32 *)TMarioInstance;
-    CPolarSubCamera *gpCamera = (CPolarSubCamera *)*(u32 *)CPolarSubCameraInstance;
+    TShine *shine = (TShine *)gpMarDirector->mCollectedShine;
 
-    if (!gpShine || !(gpShine->mType & 0x10) || !gpMarDirector->sNextState)
+    if (!shine || !(shine->mType & 0x10) || !gpMarDirector->sNextState)
         return;
 
     u8 *curSaveCard = (u8 *)(gpMarDirector->sNextState[0x118 / 4]);
 
     if (curState != TMarDirector::NORMAL ||
         gpMarDirector->mLastState != TMarDirector::SAVE_CARD ||
-        gpMario->mState != TMario::SA_SHINE_C)
+        gpMarioAddress->mState != TMario::SA_SHINE_C)
         return;
 
     if (curSaveCard[0x2E9] != 1)
     {
-        if (SMS_isDivingMap__Fv() || (gpMario->mPrevState & 0x20D0) == 0x20D0)
+        if (SMS_isDivingMap__Fv() || (gpMarioAddress->mPrevState & 0x20D0) == 0x20D0)
         {
-            gpMario->mState = gpMario->mPrevState;
+            gpMarioAddress->mState = gpMarioAddress->mPrevState;
         }
         else
         {
-            gpMario->mState = TMario::SA_IDLE;
+            gpMarioAddress->mState = TMario::SA_IDLE;
         }
         stopBGM__5MSBgmFUlUl(BGM_GET_SHINE);
-        startBGM__5MSBgmFUl(*(u32 *)StageBGM);
+        startBGM__5MSBgmFUl(gStageBGM);
         endDemoCamera__15CPolarSubCameraFv(gpCamera);
     }
     else
@@ -109,17 +107,17 @@ kmCall(0x80293B10, &extendShineIDLogic);
 //0x801BCC98
 u32 shineObjectStringMod(JSUInputStream *stream, u8 *dst, u32 size)
 {
-    register TShine *gpShine;
-    __asm { mr gpShine, r30 };
+    register TShine *shine;
+    __asm { mr shine, r30 };
 
-    if (gpShine->mType == 1)
+    if (shine->mType == 1)
     {
         if (strcmp("nbnorm", (const char *)(dst + 4)) == 0) {
-            gpShine->mType = 0x10;
+            shine->mType = 0x10;
         } else if (strcmp("nbquik", (const char *)(dst + 4)) == 0) {
-            gpShine->mType = 0x12;
+            shine->mType = 0x12;
         } else if (strcmp("nbdemo", (const char *)(dst + 4)) == 0) {
-            gpShine->mType = 0x11;
+            shine->mType = 0x11;
         }
     }
     read__14JSUInputStreamFPvl(stream, dst, size);
@@ -196,7 +194,7 @@ kmWrite32(0x80294744, 0x60000000);
 kmCall(0x8029474C, &shineGetClamper);
 
 /*Shine casts, fix light*/
-kmWrite32(0x80412548, (float)MAX_SHINES);
+kmWrite32(0x80412548, (f32)MAX_SHINES);
 kmWrite32(0x80293AF8, 0x3BFF03E7);
 kmWrite32(0x802946B8, 0x280003E7);
 kmWrite32(0x8017BE78, 0x5464037E);
@@ -212,7 +210,7 @@ kmWrite32(0x80297BA0, 0x5404037E);
 //0x80294334
 void extendFlagManagerLoad(JSUInputStream &stream)
 {
-    read__14JSUInputStreamFPvl(&stream, (*(u32 *)TFlagManagerInstance + 0x1F4), 0x8C);
+    read__14JSUInputStreamFPvl(&stream, ((u8 *)gpFlagManager + 0x1F4), 0x8C);
     stream.skip(0x120);
 }
 kmCall(0x80294334, &extendFlagManagerLoad);
@@ -222,7 +220,7 @@ kmWrite32(0x80294338, 0x48000010);
 //0x802939B8
 void extendFlagManagerSave(JSUOutputStream &stream)
 {
-    write__15JSUOutputStreamFPCvl(&stream, (*(u32 *)TFlagManagerInstance + 0x1F4), 0x8C);
+    write__15JSUOutputStreamFPCvl(&stream, ((u8 *)gpFlagManager + 0x1F4), 0x8C);
     stream.skip(0x120);
 }
 kmCall(0x802939B8, &extendFlagManagerSave);
@@ -244,10 +242,10 @@ kmCall(0x80297BD8, &thinkSetBootFlag);
 
 u32 loadAfterMaskState()
 {
-    register TShine *gpShine;
-    __asm { mr gpShine, r31 };
+    register TShine *shine;
+    __asm { mr shine, r31 };
 
-    return gpShine->mType & 0xF;
+    return shine->mType & 0xF;
 }
 kmCall(0x801BCD20, &loadAfterMaskState);
 kmWrite32(0x801BCD24, 0x28030002);
@@ -255,10 +253,10 @@ kmWrite32(0x801BCD24, 0x28030002);
 //0x801BCEEC
 void setKillState()
 {
-    register TShine *gpShine;
-    __asm { mr gpShine, r31 };
+    register TShine *shine;
+    __asm { mr shine, r31 };
 
-    gpShine->mType = (gpShine->mType & 0x10) | 1;
+    shine->mType = (shine->mType & 0x10) | 1;
 }
 kmCall(0x801BCEEC, &setKillState);
 

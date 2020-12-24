@@ -37,7 +37,7 @@ class FilePatcher(Compiler):
             raise ValueError(f"Unknown patcher state {self.state}")
 
         super().__init__(Path("src/compiler"),
-                         "-Cpp_exceptions off -gccinc -gccext on -enum int -fp hard -use_lmw_stmw on -O4,p -c -rostr -sdata 0 -sdata2 0 {} -o",
+                         "-Cpp_exceptions off -gccinc -gccext on -enum int -fp hard -use_lmw_stmw on -O4,p -c -rostr -sdata 0 -sdata2 0 {}",
                          self._get_matching_filepath(destDol),
                          Path("src/linker/address.map"),
                          False,

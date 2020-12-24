@@ -1,5 +1,48 @@
-#include "includes/yoshi.hxx"
-extern CustomInfo gInfo;
+#include "SME.hxx"
+
+bool TYoshi::isMounted()
+{
+    return this->mState == TYoshi::MOUNTED;
+}
+
+bool TYoshi::isMounted(TMario *player)
+{
+    return player->mYoshi->mState == TYoshi::MOUNTED;
+}
+
+bool TYoshi::isGreenYoshi()
+{
+    return this->mType == TYoshi::GREEN;
+}
+
+bool TYoshi::isGreenYoshi(TMario *player)
+{
+    return player->mYoshi->isGreenYoshi();
+}
+
+bool TYoshi::isGreenYoshiMounted()
+{
+    return this->isGreenYoshi() && this->mState == TYoshi::MOUNTED;
+}
+
+bool TYoshi::isGreenYoshiMounted(TMario *player)
+{
+    return player->mYoshi->isGreenYoshiMounted();
+}
+
+bool TYoshi::isGreenYoshiAscendingWater(TMario *player)
+{
+    if (!(player->mAttributes.mIsWater) ||
+        !player->mController->isPressed(TMarioGamePad::A) ||
+        !player->mYoshi->isGreenYoshiMounted())
+    {
+        return false;
+    }
+    else
+    {
+        return true;
+    }
+}
 
 kmWrite32(0x8026E068, 0x2C000001); //Turn green when out of juice
 kmWrite32(0x8026E0A0, 0x60000000); //No flickering
@@ -7,9 +50,9 @@ kmWrite32(0x8026EE14, 0x4800020C); //Yoshi can't starve
 
 //--------Water--Volatility--------//
 
-bool isYoshiDie(TMario *gpMario)
+bool isYoshiDie(TMario *player)
 {
-    return !gpMario->mYoshi->isGreenYoshi();
+    return !player->mYoshi->isGreenYoshi();
 }
 
 kmCall(0x8026EB00, &isYoshiDie);
@@ -38,13 +81,11 @@ kmCall(0x801BC868, &isYoshiEggNeedFruit);
 //0x801BC8B4
 u8 isYoshiEggFree(TEggYoshi *gpEgg, THitActor *gpFruit)
 {
-    TMario *gpMario = (TMario *)*(u32 *)TMarioInstance;
-
     if (gpEgg->mState == 14 || gpEgg->mState == 6)
     {
         return 0;
     }
-    else if (gpMario->mCustomInfo->mParams && !gpMario->mCustomInfo->mParams->Attributes.mCanRideYoshi)
+    else if (gpMarioAddress->mCustomInfo->mParams && !gpMarioAddress->mCustomInfo->mParams->Attributes.mCanRideYoshi)
     {
         return 0;
     }
@@ -72,38 +113,38 @@ kmWrite32(0x801BC8D0, 0x48000134);
 //0x8024D68C
 bool isYoshiMaintainFluddModel()
 {
-    register TMario *gpMario;
-    __asm { mr gpMario, r31 };
+    register TMario *player;
+    __asm { mr player, r31 };
 
-    if (gpMario->mYoshi->mState == TYoshi::MOUNTED)
-        return (gpMario->mCustomInfo->FluddHistory.mHadFludd & gpMario->mAttributes.mHasFludd);
+    if (player->mYoshi->mState == TYoshi::MOUNTED)
+        return (player->mCustomInfo->FluddHistory.mHadFludd & player->mAttributes.mHasFludd);
     else
-        return gpMario->mAttributes.mHasFludd;
+        return player->mAttributes.mHasFludd;
 }
 kmCall(0x8024D68C, &isYoshiMaintainFluddModel);
 kmWrite32(0x8024D690, 0x2C030000);
 
 //0x8024F240
-void isYoshiDrown(TYoshi *gpYoshi)
+void isYoshiDrown(TYoshi *yoshi)
 {
-    if (!gpYoshi->isGreenYoshi())
+    if (!yoshi->isGreenYoshi())
     {
-        disappear__6TYoshiFv(gpYoshi);
+        disappear__6TYoshiFv(yoshi);
     }
 }
 kmCall(0x8024F240, &isYoshiDrown);
 
-bool canMountYoshi(u32 state, JGeometry::TVec3<float> *yoshiCoordinates)
+bool canMountYoshi(u32 state, JGeometry::TVec3<f32> *yoshiCoordinates)
 {
-    register TMario *gpMario;
-    __asm { mr gpMario, r31 };
+    register TMario *player;
+    __asm { mr player, r31 };
 
-    if (gpMario->mCustomInfo->mParams)
+    if (player->mCustomInfo->mParams)
     {
         if (state & TMario::SA_WATERBORN)
-            return gpMario->mCustomInfo->mParams->Attributes.mCanRideYoshi;
+            return player->mCustomInfo->mParams->Attributes.mCanRideYoshi;
         else
-            return ((state & TMario::SA_AIRBORN) && gpMario->mCustomInfo->mParams->Attributes.mCanRideYoshi);
+            return ((state & TMario::SA_AIRBORN) && player->mCustomInfo->mParams->Attributes.mCanRideYoshi);
     }
     else
     {
@@ -112,9 +153,9 @@ bool canMountYoshi(u32 state, JGeometry::TVec3<float> *yoshiCoordinates)
 }
 
 //0x802810F8
-bool canMountYoshiWrapper(u32 state, JGeometry::TVec3<float> *yoshiCoordinates)
+bool canMountYoshiWrapper(u32 state, JGeometry::TVec3<f32> *yoshiCoordinates)
 {
-    register JGeometry::TVec3<float> *tmp;
+    register JGeometry::TVec3<f32> *tmp;
     __asm { mr tmp, r4 };
 
     bool canMount = canMountYoshi(state, yoshiCoordinates);
@@ -127,13 +168,13 @@ kmWrite32(0x802810FC, 0x2C030000);
 //0x8026E810
 void fixYoshiJuiceDecrement()
 {
-    register TYoshi *gpYoshi;
-    __asm { mr gpYoshi, r30 };
+    register TYoshi *yoshi;
+    __asm { mr yoshi, r30 };
 
-    TMario *gpMario = gpYoshi->mMario;
-    if (gpMario->mFludd->mIsEmitWater && gpYoshi->isMounted())
+    TMario *player = yoshi->mMario;
+    if (player->mFludd->mIsEmitWater && yoshi->isMounted())
     {
-        gpYoshi->mCurJuice -= gpMario->mFludd->mEmitInfo[0x18 / 4];
+        yoshi->mCurJuice -= player->mFludd->mEmitInfo[0x18 / 4];
     }
 }
 kmCall(0x8026E810, &fixYoshiJuiceDecrement);
@@ -141,11 +182,11 @@ kmCall(0x8026E810, &fixYoshiJuiceDecrement);
 //0x8024E58C
 void canYoshiSpray(TWaterGun *gpWaterGun)
 {
-    TMario *gpMario = gpWaterGun->mMario;
-    if (!gpMario->mYoshi)
+    TMario *player = gpWaterGun->mMario;
+    if (!player->mYoshi)
         return;
 
-    if (!gpMario->mYoshi->isGreenYoshiMounted())
+    if (!player->mYoshi->isGreenYoshiMounted())
     {
         emit__9TWaterGunFv(gpWaterGun);
     }
@@ -153,61 +194,60 @@ void canYoshiSpray(TWaterGun *gpWaterGun)
 kmCall(0x8024E58C, &canYoshiSpray);
 
 //0x80273198
-u32 calcYoshiSwimVelocity(TMario *gpMario, u32 arg1)
+u32 calcYoshiSwimVelocity(TMario *player, u32 arg1)
 {
-
     if (!gInfo.mFile || !gInfo.mFile->GlobalFlags.mIsYoshi)
     {
-        return jumpProcess__6TMarioFi(gpMario, arg1);
+        return jumpProcess__6TMarioFi(player, arg1);
     }
     else if (gInfo.mFile->Yoshi.mYoshiHungry)
     {
-        return jumpProcess__6TMarioFi(gpMario, arg1);
+        return jumpProcess__6TMarioFi(player, arg1);
     }
 
-    if (!gpMario->mYoshi)
-        return jumpProcess__6TMarioFi(gpMario, arg1);
+    if (!player->mYoshi)
+        return jumpProcess__6TMarioFi(player, arg1);
 
-    if (!gpMario->mYoshi->isGreenYoshiMounted())
-        return jumpProcess__6TMarioFi(gpMario, arg1);
+    if (!player->mYoshi->isGreenYoshiMounted())
+        return jumpProcess__6TMarioFi(player, arg1);
 
-    if (gpMario->mController->isPressed(TMarioGamePad::A))
+    if (player->mController->isPressed(TMarioGamePad::A))
     {
-        if (gInfo.Mario.yoshiWaterSpeed.y > 12)
+        if (player->mCustomInfo->mYoshiWaterSpeed.y > 12)
         {
-            gInfo.Mario.yoshiWaterSpeed.y = 12;
+            player->mCustomInfo->mYoshiWaterSpeed.y = 12;
         }
         else
         {
-            gInfo.Mario.yoshiWaterSpeed.y += 0.34375;
+            player->mCustomInfo->mYoshiWaterSpeed.y += 0.34375;
         }
     }
     else
     {
-        if (gInfo.Mario.yoshiWaterSpeed.y < -12)
+        if (player->mCustomInfo->mYoshiWaterSpeed.y < -12)
         {
-            gInfo.Mario.yoshiWaterSpeed.y = -12;
+            player->mCustomInfo->mYoshiWaterSpeed.y = -12;
         }
         else
         {
-            gInfo.Mario.yoshiWaterSpeed.y -= 0.34375;
+            player->mCustomInfo->mYoshiWaterSpeed.y -= 0.34375;
         }
     }
-    gpMario->mSpeed.y = gInfo.Mario.yoshiWaterSpeed.y;
-    return jumpProcess__6TMarioFi(gpMario, arg1);
+    player->mSpeed.y = player->mCustomInfo->mYoshiWaterSpeed.y;
+    return jumpProcess__6TMarioFi(player, arg1);
 }
 kmCall(0x80273198, &calcYoshiSwimVelocity);
 
 //0x80270078
 void isYoshiWaterFlutter()
 {
-    register TYoshi *gpYoshi;
+    register TYoshi *yoshi;
     register int animID;
 
-    __asm { mr gpYoshi, r29 };
+    __asm { mr yoshi, r29 };
     __asm { mr animID, r30 };
 
-    if (gInfo.mFile && gInfo.mFile->GlobalFlags.mIsYoshi && gInfo.mFile->Yoshi.mYoshiHungry && TYoshi::isGreenYoshiAscendingWater(gpYoshi->mMario))
+    if (gInfo.mFile && gInfo.mFile->GlobalFlags.mIsYoshi && gInfo.mFile->Yoshi.mYoshiHungry && TYoshi::isGreenYoshiAscendingWater(yoshi->mMario))
     {
         animID = 9;
     }
@@ -217,31 +257,31 @@ void isYoshiWaterFlutter()
 kmCall(0x80270078, &isYoshiWaterFlutter);
 
 //0x8026FE84 NEEDS ADDI R4, R3, 0
-u32 isYoshiValidWaterFlutter(s32 anmIdx, u32 unk1, TMario *gpMario)
+u32 isYoshiValidWaterFlutter(s32 anmIdx, u32 unk1, TMario *player)
 {
     if (!gInfo.mFile || !gInfo.mFile->GlobalFlags.mIsYoshi)
     {
-        return gpMario->mState;
+        return player->mState;
     }
     else if (gInfo.mFile->Yoshi.mYoshiHungry)
     {
-        return gpMario->mState;
+        return player->mState;
     }
 
-    if (TYoshi::isGreenYoshiAscendingWater(gpMario))
+    if (TYoshi::isGreenYoshiAscendingWater(player))
     {
-        return gpMario->mState & 0xFFFFFBFF | TMario::SA_AIRBORN;
+        return player->mState & 0xFFFFFBFF | TMario::SA_AIRBORN;
     }
     else
     {
-        return gpMario->mState;
+        return player->mState;
     }
 }
 
 //0x8024E788
-bool isYoshiValidDrip(TYoshi *gpYoshi)
+bool isYoshiValidDrip(TYoshi *yoshi)
 {
-    return gpYoshi->isMounted() && !gpYoshi->isGreenYoshi();
+    return yoshi->isMounted() && !yoshi->isGreenYoshi();
 }
 kmCall(0x8024E788, &isYoshiValidDrip);
 
@@ -267,25 +307,25 @@ u32 checkFreeEggCard(MActorAnmBck *bckData)
 kmCall(0x801BC380, &checkFreeEggCard);
 
 //0x8028121C
-void saveNozzles(TYoshi *gpYoshi)
+void saveNozzles(TYoshi *yoshi)
 {
-    TMario *gpMario = gpYoshi->mMario;
-    gpMario->mCustomInfo->FluddHistory.mMainNozzle = gpMario->mFludd->mCurrentNozzle;
-    gpMario->mCustomInfo->FluddHistory.mSecondNozzle = gpMario->mFludd->mSecondNozzle;
-    gpMario->mCustomInfo->FluddHistory.mWaterLevel = gpMario->mFludd->mCurrentWater;
-    gpMario->mCustomInfo->FluddHistory.mHadFludd = gpMario->mAttributes.mHasFludd;
-    ride__6TYoshiFv(gpYoshi);
+    TMario *player = yoshi->mMario;
+    player->mCustomInfo->FluddHistory.mMainNozzle = player->mFludd->mCurrentNozzle;
+    player->mCustomInfo->FluddHistory.mSecondNozzle = player->mFludd->mSecondNozzle;
+    player->mCustomInfo->FluddHistory.mWaterLevel = player->mFludd->mCurrentWater;
+    player->mCustomInfo->FluddHistory.mHadFludd = player->mAttributes.mHasFludd;
+    ride__6TYoshiFv(yoshi);
 }
 kmCall(0x8028121C, &saveNozzles);
 
 //0x8024EC18
-void restoreNozzles(TMario *gpMario)
+void restoreNozzles(TMario *player)
 {
-    float factor = (float)gpMario->mCustomInfo->FluddHistory.mWaterLevel / (float)gpMario->mFludd->mNozzleList[(u8)gpMario->mCustomInfo->FluddHistory.mMainNozzle]->mMaxWater;
-    changeNozzle__9TWaterGunFQ29TWaterGun11TNozzleTypeb(gpMario->mFludd, gpMario->mCustomInfo->FluddHistory.mSecondNozzle, 1);
-    normalizeNozzle__6TMarioFv(gpMario);
-    gpMario->mFludd->mCurrentWater = gpMario->mFludd->mNozzleList[(u8)gpMario->mFludd->mCurrentNozzle]->mMaxWater * factor;
-    gpMario->mAttributes.mHasFludd = gpMario->mCustomInfo->FluddHistory.mHadFludd;
+    f32 factor = (f32)player->mCustomInfo->FluddHistory.mWaterLevel / (f32)player->mFludd->mNozzleList[(u8)player->mCustomInfo->FluddHistory.mMainNozzle]->mMaxWater;
+    changeNozzle__9TWaterGunFQ29TWaterGun11TNozzleTypeb(player->mFludd, player->mCustomInfo->FluddHistory.mSecondNozzle, 1);
+    normalizeNozzle__6TMarioFv(player);
+    player->mFludd->mCurrentWater = player->mFludd->mNozzleList[(u8)player->mFludd->mCurrentNozzle]->mMaxWater * factor;
+    player->mAttributes.mHasFludd = player->mCustomInfo->FluddHistory.mHadFludd;
 }
 kmCall(0x8024EC18, &restoreNozzles);
 

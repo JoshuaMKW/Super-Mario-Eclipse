@@ -3,8 +3,6 @@
 .global shadowCrashPatch
 .global animationFreezeCheck
 
-//NOTE: Doesnt work...
-
 shadowCrashPatch:
     cmpwi r4, 0
     li r0, 0

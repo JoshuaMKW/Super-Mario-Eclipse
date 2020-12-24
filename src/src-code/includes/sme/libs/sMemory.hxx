@@ -9,15 +9,15 @@
 
 namespace Memory
 {
-    inline void *malloc(size_t size, size_t alignment) { return __nw__FUli(size, alignment); }
-    inline void *hmalloc(JKRHeap *heap, size_t size, size_t alignment) { return __nw__FUlP7JKRHeapi(size, heap, alignment); }
-    inline void *calloc(size_t size, size_t alignment) { return __nw__FUli(size, alignment); }
-    inline void *hcalloc(JKRHeap *heap, size_t size, size_t alignment) { return __nw__FUlP7JKRHeapi(size, heap, alignment); }
-    inline void free(void *ptr) { __dl__FPv(ptr); }
+    inline void *malloc(const size_t size, const size_t alignment) { return __nw__FUli(size, alignment); }
+    inline void *hmalloc(const JKRHeap *heap, const size_t size, const size_t alignment) { return __nw__FUlP7JKRHeapi(size, heap, alignment); }
+    inline void *calloc(const size_t size, const size_t alignment) { return __nw__FUli(size, alignment); }
+    inline void *hcalloc(const JKRHeap *heap, const size_t size, const size_t alignment) { return __nw__FUlP7JKRHeapi(size, heap, alignment); }
+    inline void free(const void *ptr) { __dl__FPv(ptr); }
 
     namespace PPC
     {
-        u32 *getBranchDest(u32 *bAddr)
+        inline u32 *getBranchDest(u32 *bAddr)
         {
             s32 offset;
             if (*bAddr & 0x2000000)

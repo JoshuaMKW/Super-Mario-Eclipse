@@ -37,9 +37,6 @@ class Compiler(object):
 
         self._init_includes()
 
-        #print(self.includes)
-        #raise SystemExit
-
     def alloc_from_heap(self, dol: DolFile, size: int):
         size = (size + 31) & -32
         dol.seek(0x80341E74)
@@ -113,8 +110,6 @@ class Compiler(object):
 
         _errors = []
 
-        print(f"\"{_codewarriorCpp.resolve()}\" {self.includes} {self.options}")
-
         if src.is_file() and f.suffix not in (".h", ".hpp", ".hxx"):
             tmpfile = TMPDIR / "tmp.o"
             if f.suffix == ".s":
@@ -141,9 +136,9 @@ class Compiler(object):
 
                     if output.stdout.strip() != "":
                         _errors.append(output.stdout.strip())
-                        #print(f"✘   {f}")
+                        print(f"✘   {f}")
                     else:
-                        #print(f"✔   {f}")
+                        print(f"✔   {f}")
                         objects.append(str(tmpfile))
 
             objects = " ".join(objects)

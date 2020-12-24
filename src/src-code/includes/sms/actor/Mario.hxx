@@ -13,6 +13,29 @@
 
 #include "params/MarioParams.hxx"
 
+struct TMarioAnimeData
+{
+    enum FLUDD
+    {
+        FLUDD_ENABLED = 68,
+        FLUDD_DISABLED = 200
+    };
+
+    enum HAND
+    {
+        HAND_A,
+        HAND_B,
+        HAND_C
+    };
+
+    u8 mAnimID;
+    u8 mFluddEnabled;  //Note: ENUM? 68 = enabled, 200 = disabled
+    u8 mAnmTexPattern; //Note: 23 is the max value allowed
+    u8 mMarioHand;     //Note: 1, 2, and 3 seem to be valid values, this determines the hand model used(?)
+    u8 unk_1;          //Note: If bit 30 is set, it seems to activate a bit flag to multiple pointers, likely mtx related
+    u8 unk_2;          //Note: Value seems to be set but is never used?
+};
+
 class TMarioCap
 {
 };
@@ -75,9 +98,11 @@ public:
 
     struct
     {
-        u16 _00 : 14;
+        u16 _00 : 8;
+        bool mDisable : 1;
+        u8 _01 : 5;
         bool mReadInput : 1;
-        u8 _01 : 1;
+        u8 _02 : 1;
     } State; //0x00E2
 
     u16 _E4;
@@ -191,13 +216,13 @@ public:
         ST_SLIP = 0x80,
         ST_GAMEOVER = 0x400,
         ST_UP_GROUND_POUND = 0x800,
-        ST_HASHELMET_FOLLOWCAMERA = 0x00001000,
-        ST_HASHELMET = 0x00002000,
-        ST_HASFLUDD = 0x00008000,
-        ST_SPLASH = 0x00010000,
-        ST_PUDDLE = 0x00020000,
-        ST_SHIRT = 0x00100000,
-        ST_GONE = 0x00200000
+        ST_HASHELMET_FOLLOWCAMERA = 0x1000,
+        ST_HASHELMET = 0x2000,
+        ST_HASFLUDD = 0x8000,
+        ST_SPLASH = 0x10000,
+        ST_PUDDLE = 0x20000,
+        ST_SHIRT = 0x100000,
+        ST_GONE = 0x200000
     };
 
     enum VOICE

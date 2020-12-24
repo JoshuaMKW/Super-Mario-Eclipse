@@ -6,7 +6,7 @@
 #include "sms/nozzle/NozzleBase.hxx"
 #include "sms/nozzle/NozzleTrigger.hxx"
 
-#include "sms/actor/Mario.hxx"
+class TMario;
 
 class TWaterGun
 {

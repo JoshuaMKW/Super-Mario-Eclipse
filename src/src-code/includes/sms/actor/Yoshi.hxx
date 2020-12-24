@@ -2,10 +2,12 @@
 #define YOSHI_H
 
 #include "types.h"
+#include "sms/actor/MActor.hxx"
 #include "sms/JDrama.hxx"
 #include "sms/JGeometry.hxx"
-#include "sms/actor/Mario.hxx"
 #include "sms/object/EggYoshi.hxx"
+
+class TMario;
 
 class TYoshi
 {

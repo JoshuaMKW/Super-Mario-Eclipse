@@ -2,8 +2,10 @@
 #define EGGYOSHI_H
 
 #include "types.h"
+#include "sms/actor/MActor.hxx"
 #include "sms/mapobj/MapObjBase.hxx"
-#include "sms/actor/Mario.hxx"
+
+class TMario;
 
 class TEggYoshi : public TMapObjBase
 {

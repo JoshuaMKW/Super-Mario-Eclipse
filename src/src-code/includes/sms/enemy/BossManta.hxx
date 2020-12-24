@@ -4,7 +4,7 @@
 #include "types.h"
 #include "sms/actor/SpineEnemy.hxx"
 
-class TBossManta : TSpineEnemy
+class TBossManta : public TSpineEnemy
 {
 
 public:

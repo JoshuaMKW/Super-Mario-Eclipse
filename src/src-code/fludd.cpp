@@ -1,3 +1,4 @@
+#include "sms/actor/Mario.hxx"
 #include "sms/nozzle/Watergun.hxx"
 
 #include "SME.hxx"
@@ -33,6 +34,13 @@ TWaterGun::NOZZLETYPE changeNozzleIfSet(TWaterGun* gpFludd, TWaterGun::NOZZLETYP
     //mflr r0
 }
 */
+
+//0x80248F14
+bool isPumpOK(TMarioAnimeData *animeData)
+{
+    return (animeData->mFluddEnabled != animeData->FLUDD_DISABLED && gpMarioAddress->mCustomInfo->mCurJump > 1);
+}
+kmBranch(0x80248F14, &isPumpOK);
 
 //0x8014206C
 bool hasWaterCardOpen()

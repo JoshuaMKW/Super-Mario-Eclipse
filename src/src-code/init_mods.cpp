@@ -152,13 +152,14 @@ SMEFile *loadSMEConfig(const char *stage)
     OSReport("Attempting to load local config %s...\n", path);
     SMEFile *file = SMEFile::loadFile(path);
 
-    if (!file)
-    {
-        SMEFile::parseExtension(path, "/data/scene/sme/", stage, true);
+    if (file) return file;
+    
+    SMEFile::parseExtension(path, "/data/scene/sme/", stage, true);
 
-        OSReport("Failure: Now attempting to load global config %s...\n", path);
-        file = SMEFile::loadFile(path);
-    }
+    OSReport("Failure: Now attempting to load global config %s...\n", path);
+    file = SMEFile::loadFile(path);
+    
+    return file;
 }
 
 //0x802998B4
@@ -200,7 +201,7 @@ u32 *initFileMods()
 
     char buffer[32];
 
-    free(gInfo.mFile); //Free the file allocation
+    Memory::free(gInfo.mFile); //Free the file allocation
     resetGlobalValues();
 
     gInfo.mFile = loadSMEConfig(getStageName(&gpApplication));
@@ -624,7 +625,7 @@ u32 *switchHUDOnStageLoad(char *curArchive, u32 *gameUI)
 
     if (DVDConvertPathToEntrynum(buffer) >= 0)
     {
-        free(gpMarDirector->mGame6Data);
+        Memory::free(gpMarDirector->mGame6Data);
         *gameUI = loadToMainRAM__12JKRDvdRipperFPCcPUc15JKRExpandSwitchUlP7JKRHeapQ212JKRDvdRipper15EAllocDirectionUlPi(buffer, 0, 1, 0, gpMarDirector->mGame6Data, 1, 0, 0);
     }
 

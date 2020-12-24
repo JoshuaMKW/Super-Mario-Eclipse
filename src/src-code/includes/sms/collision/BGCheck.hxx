@@ -3,7 +3,8 @@
 
 #include "types.h"
 #include "sms/JGeometry.hxx"
-#include "sms/actor/BaseActor.hxx"
+
+class TLiveActor;
 
 class TBGCheckData
 {

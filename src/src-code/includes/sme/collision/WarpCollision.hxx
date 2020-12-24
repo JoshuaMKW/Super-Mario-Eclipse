@@ -68,7 +68,6 @@ public:
 
         JGeometry::TVec3<f32> a;
         JGeometry::TVec3<f32> b;
-        JGeometry::TVec3<f32> _set;
         index = -1;
 
         for (u32 i = 0; i <= index; ++i)
@@ -77,10 +76,10 @@ public:
             targetVector.b = members[i].mColTriangle->mVertexB;
             targetVector.c = members[i].mColTriangle->mVertexC;
 
-            a = colVector.center();
-            b = targetVector.center();
+            JGeometry::TVec3<f32> a(colVector.center());
+            JGeometry::TVec3<f32> b(targetVector.center());
 
-            _set = JGeometry::TVec3<f32>(b.x - a.x, b.y - a.y, b.z - a.z);
+            JGeometry::TVec3<f32> _set(b.x - a.x, b.y - a.y, b.z - a.z);
 
             if (_set.magnitude() < nearestDist)
             {

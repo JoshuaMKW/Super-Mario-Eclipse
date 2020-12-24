@@ -2,16 +2,21 @@
 
 class TCheatHandler
 {
-    void *mCallback;
+    void *mSuccessCallback;
+    void *mFailureCallback;
     u16 *mInputList;
     TMarioGamePad *mGamePad;
     s8 mInputIndex;
     bool mActive;
 
+
+
+public:
     TCheatHandler()
     {
         this->mInputList = NULL;
-        this->mCallback = NULL;
+        this->mSuccessCallback = NULL;
+        this->mFailureCallback = NULL;
         this->mGamePad = NULL;
         this->mActive = false;
         this->mInputIndex = 0;
@@ -26,8 +31,7 @@ class TCheatHandler
         this->mActive = false;
         this->mInputIndex = 0;
     }
-
-public:
+    
     void setInputList(u16 *inputList) { this->mInputList = inputList; }
     void setSuccessCallBack(void *callback) { this->mSuccessCallback = callback; }
     void setFailureCallBack(void *callback) { this->mFailureCallback = callback; }
@@ -49,7 +53,7 @@ public:
         {
             this->mInputIndex = -1;
             this->mActive = false;
-            void (*callback)(TCheatHandler *) = this->mFailureCallback;
+            void (*callback)(TCheatHandler *) = reinterpret_cast<void(*)(TCheatHandler *)>(this->mFailureCallback);
             callback(this);
             return;
         }
@@ -58,7 +62,7 @@ public:
         {
             this->mInputIndex = -1;
             this->mActive = true;
-            void (*callback)(TCheatHandler *) = this->mSuccessCallback;
+            void (*callback)(TCheatHandler *) = reinterpret_cast<void(*)(TCheatHandler *)>(this->mSuccessCallback);
             callback(this);
             return;
         }

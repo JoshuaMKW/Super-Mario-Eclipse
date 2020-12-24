@@ -18,14 +18,10 @@
 /
 / Graphing Calculator: https://www.desmos.com/calculator/kn9tpwdan5
 */
-f32 sigmoidCurve(f32 x, f32 f, f32 r, f32 c, f32 b)
-{
-    float roof = fabsf(r - f);
-    return f + (roof / (1.0f + expf((b * -1.0f) * (x - c))));
-}
+extern f32 sigmoidCurve(f32 x, f32 f, f32 r, f32 c, f32 b);
 
 template <typename T>
-T lerp(T a, T b, f32 f)
+inline T lerp(T a, T b, f32 f)
 {
     return a + f * (b - a);
 }

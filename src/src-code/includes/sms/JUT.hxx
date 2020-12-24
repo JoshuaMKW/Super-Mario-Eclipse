@@ -13,7 +13,7 @@ namespace JUtility
     {
     public:
         TColor();
-        TColor(u8 R, u8 G, u8 B, u8 A)
+        TColor(const u8 R, const u8 G, const u8 B, const u8 A)
         {
             this->R = R;
             this->G = G;
@@ -21,12 +21,13 @@ namespace JUtility
             this->A = A;
         }
 
-        void operator =(TColor &other)
+        TColor &operator =(const TColor &other)
         {
             this->R = other.R;
             this->G = other.G;
             this->B = other.B;
             this->A = other.A;
+            return *this;
         }
 
         u8 R; // _0

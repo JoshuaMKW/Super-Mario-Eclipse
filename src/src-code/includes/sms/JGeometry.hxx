@@ -27,10 +27,11 @@ namespace JGeometry
             this->y = v->y;
         }
 
-        void operator =(TVec2<T> &other)
+        TVec2<T> &operator =(const TVec2<T> &other)
         {
             this->x = other.x;
             this->y = other.y;
+            return *this;
         }
 
         T magnitude()
@@ -81,11 +82,12 @@ namespace JGeometry
             this->z = v->z;
         }
 
-        void operator =(TVec3<T> &other)
+        TVec3<T> &operator =(const TVec3<T> &other)
         {
             this->x = other.x;
             this->y = other.y;
             this->z = other.z;
+            return *this;
         }
 
         T magnitude()
@@ -148,7 +150,7 @@ namespace JGeometry
 
         TVec4() {}
 
-        TVec4(T x, T y, T z, T w)
+        TVec4(const T x, const T y, const T z, const T w)
         {
             this->x = x;
             this->y = y;
@@ -156,7 +158,7 @@ namespace JGeometry
             this->w = w;
         }
 
-        TVec4(TVec4<T> *v)
+        TVec4(const TVec4<T> *v)
         {
             this->x = v->x;
             this->y = v->y;
@@ -164,12 +166,13 @@ namespace JGeometry
             this->w = v->w;
         }
 
-        void operator =(TVec4<T> &other)
+        TVec4<T> &operator =(const TVec4<T> &other)
         {
             this->x = other.x;
             this->y = other.y;
             this->z = other.z;
             this->w = other.w;
+            return *this;
         }
 
         T magnitude()
@@ -207,7 +210,7 @@ namespace JGeometry
 
         TQuat4() {}
 
-        TQuat4(T x, T y, T z, T w)
+        TQuat4(const T x, const T y, const T z, const T w)
         {
             this->x = x;
             this->y = y;
@@ -215,7 +218,7 @@ namespace JGeometry
             this->w = w;
         }
 
-        TQuat4(TQuat4<T> *v)
+        TQuat4(const TQuat4<T> *v)
         {
             this->x = v->x;
             this->y = v->y;
@@ -223,12 +226,13 @@ namespace JGeometry
             this->w = v->w;
         }
 
-        void operator =(JGeometry::TQuat4<T> &other)
+        TQuat4<T> &operator =(const TQuat4<T> &other)
         {
             this->x = other.x;
             this->y = other.y;
             this->z = other.z;
             this->w = other.w;
+            return *this;
         }
     };
 

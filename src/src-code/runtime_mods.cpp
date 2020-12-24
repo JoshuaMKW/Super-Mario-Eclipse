@@ -344,7 +344,7 @@ void replaceFmtSpecifier(char *buffer, char *src, const char *fmt, const char *s
 //0x80153DE8, 0x80153E1C
 void formatMessage(Talk2D2 *talker, char *msgfield, u32 *entrydata)
 {
-    char *msgbuffer = (char *)hcalloc(sSystemHeap, 1024, 32);
+    char *msgbuffer = (char *)Memory::hcalloc(sSystemHeap, 1024, 32);
     char buffer[64];
     char fmt[16];
 
@@ -428,8 +428,8 @@ void formatMessage(Talk2D2 *talker, char *msgfield, u32 *entrydata)
 
     setupTextBox__8TTalk2D2FPCvP12JMSMesgEntry(talker, newmsg, entrydata);
 
-    free(msgbuffer);
-    free(calendarTime);
+    Memory::free(msgbuffer);
+    Memory::free(calendarTime);
 }
 
 void maintainYoshi(TYoshi *gpYoshi)

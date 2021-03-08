@@ -1,5 +1,4 @@
-#ifndef WATERMANAGER_H
-#define WATERMANAGER_H
+#pragma once
 
 #include "types.h"
 #include "sms/JUT.hxx"
@@ -37,5 +36,3 @@ public:
     u8 _09;                  //0x5E46
     JUtility::TColor mColor; //0x5E47
 };
-
-#endif

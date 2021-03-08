@@ -1,5 +1,4 @@
-#ifndef CONDUCTOR_H
-#define CONDUCTOR_H
+#pragma once
 
 #include "types.h"
 

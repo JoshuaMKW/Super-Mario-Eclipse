@@ -1,5 +1,4 @@
-#ifndef POLLUTIONOBJ_H
-#define POLLUTIONOBJ_H
+#pragma once
 
 #include "types.h"
 #include "sms/pollution/PollutionPos.hxx"
@@ -13,5 +12,3 @@ public:
     u32 _00[0x10 / 4];       //0x0020
     u32 mCleanedDegree;      //0x0030
 };
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef TALK2D2_H
-#define TALK2D2_H
+#pragma once
 
 #include "types.h"
 
@@ -15,5 +14,3 @@ public:
     u32 lastMsgIndex;   //0x0274
     u32 curMsgIndex;    //0x0278
 };
-
-#endif

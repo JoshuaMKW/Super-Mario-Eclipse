@@ -1,14 +1,14 @@
-#ifndef COIN_H
-#define COIN_H
+#pragma once
 
 #include "types.h"
 #include "sms/JDrama.hxx"
-#include "sms/actor/BaseActor.hxx"
+#include "sms/actor/HitActor.hxx"
 #include "sms/actor/Item.hxx"
 
 class TCoin : public TItem
 {
 public:
+	TCoin(const char *);
 	virtual ~TCoin();
 
 	virtual void loadAfter();
@@ -21,5 +21,3 @@ public:
 
 	u32 _154;
 };
-
-#endif

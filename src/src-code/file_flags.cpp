@@ -6,28 +6,28 @@ bool isAnyFileComplete(TCardBookmarkInfo *bookmark)
 {
     for (u32 i = 0; i < 3; ++i)
     {
-        if (bookmark->FileData[i].mShineCount >= MAX_SHINES)
+        if (bookmark->FileData[i].mShineCount >= SME_MAX_SHINES)
             return true;
     }
     return false;
 }
 
 //0x802B1794
-u32 setFileCompleteBool(TCardManager *gpCardManager)
+s32 setFileCompleteBool(TCardManager *gpCardManager)
 {
-    u32 status = getBookmarkInfos___12TCardManagerFv(gpCardManager);
+    s32 ret = getBookmarkInfos___12TCardManagerFv(gpCardManager);
     if (gpCardManager->mBookMarks)
     {
-        gInfo.mIsCompletionRewards = isAnyFileComplete(gpCardManager->mBookMarks);
+        gInfo.Context.mIsCompletionRewards = isAnyFileComplete(gpCardManager->mBookMarks);
     }
-    return status;
+    return ret;
 }
 kmCall(0x802B1794, &setFileCompleteBool);
 
 //0x80164DE4
-void newGamePlus(TFlagManager *flagManager, u32 *stream)
+void newGamePlus(TFlagManager *flagManager, JSUMemoryInputStream &stream)
 {
-    load__12TFlagManagerFR20JSUMemoryInputStream(flagManager, stream);
+    flagManager->load(stream);
     if (flagManager->Type4Flag.mShineCount < 120 || (flagManager->Type1Flag.m1Type[0xE] & 0x80) == 0)
     {
         return;
@@ -147,7 +147,7 @@ pass:
 
 void isGPlusNozzleBox(TNozzleBox *gpNozzleBox)
 {
-    if (!gpFlagManager->Type6Flag.CustomFlags.mIsGamePlus)
+    if (!TFlagManager::smInstance->Type6Flag.CustomFlags.mIsGamePlus)
     {
         return;
     }

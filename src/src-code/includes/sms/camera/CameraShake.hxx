@@ -1,5 +1,4 @@
-#ifndef TCAMERASHAKE_H
-#define TCAMERASHAKE_H
+#pragma once
 
 #include "types.h"
 
@@ -37,5 +36,3 @@ public:
     u16 _32; // padding?
     u8 _34[0x6A8 - 0x34];
 };
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef TOPTIONRUMBLEUNIT_H
-#define TOPTIONRUMBLEUNIT_H
+#pragma once
 
 #include "types.h"
 #include "sms/J2D.hxx"
@@ -31,5 +30,3 @@ public:
     f32 mAnimSizeFactor; //0x00A0
     */
 };
-
-#endif

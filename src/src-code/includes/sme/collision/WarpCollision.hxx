@@ -1,13 +1,10 @@
-#ifndef WARPCOLLISION_H
-#define WARPCOLLISION_H
+#pragma once
 
 #include "types.h"
 #include "sms/JGeometry.hxx"
-#include "sms/SMS.hxx"
-
 #include "sms/collision/BGCheck.hxx" 
 
-#include "Vector3D.hxx"
+#include "libs/sGeometry.hxx"
 
 class CollisionLink
 {
@@ -17,13 +14,8 @@ public:
     u8 mTargetID;               //0x0004
     u8 mThisID;                 //0x0005
 
-    CollisionLink() {}
-    CollisionLink(TBGCheckData *tri, u8 targetID, u8 selfID)
-    {
-        this->mColTriangle = tri;
-        this->mTargetID = targetID;
-        this->mThisID = selfID;
-    }
+    CollisionLink() = default;
+    CollisionLink(TBGCheckData *tri, u8 targetID, u8 selfID) : mColTriangle(tri), mTargetID(targetID), mThisID(selfID) {}
 };
 
 class WarpCollisionList
@@ -37,22 +29,22 @@ public:
     TBGCheckData *resolveCollisionWarp(TBGCheckData *colTriangle)
     {
         if ((u8)(colTriangle->mValue4 >> 8) == 0xFF)
-            return NULL;
+            return nullptr;
 
         return this->getNearestTarget(colTriangle);
     }
 
     TBGCheckData *getNearestTarget(TBGCheckData *colTriangle)
     {
-        Vector3D colVector;
-        Vector3D targetVector;
+        TVectorTriangle colVector;
+        TVectorTriangle targetVector;
 
         colVector.a = colTriangle->mVertexA;
         colVector.b = colTriangle->mVertexB;
         colVector.c = colTriangle->mVertexC;
 
         CollisionLink members[0xFF];
-        f32 nearestDist = 10000000.0f;
+        f32 nearestDist = 10000000000.0f;
         s32 index = 0;
 
         for (u32 i = 0; i < this->arrayLength; ++i)
@@ -88,10 +80,8 @@ public:
             }
         }
         if (index == -1)
-            return NULL;
+            return nullptr;
 
         return members[index].mColTriangle;
     }
 };
-
-#endif

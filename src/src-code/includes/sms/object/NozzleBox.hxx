@@ -1,5 +1,4 @@
-#ifndef NOZZLEBOX_H
-#define NOZZLEBOX_H
+#pragma once
 
 #include "types.h"
 #include "sms/mapobj/MapObjGeneral.hxx"
@@ -21,5 +20,3 @@ public:
     u16 _03;            //0x0160
     u16 _04;            //0x0162
 };
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef SPINEBASE_H
-#define SPINEBASE_H
+#pragma once
 
 #include "types.h"
 
@@ -18,5 +17,3 @@ public:
     u32 mStateTimer;   //0x0020
     void *mVTable;     //0x0024
 };
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef GRAPHTRACER_H
-#define GRAPHTRACER_H
+#pragma once
 
 #include "types.h"
 #include "sms/node/GraphWeb.hxx"
@@ -15,5 +14,3 @@ public:
     f32 _01;
     f32 _02;
 };
-
-#endif

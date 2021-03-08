@@ -1,5 +1,4 @@
-#ifndef JSUSTREAM_H
-#define JSUSTREAM_H
+#pragma once
 
 #include "types.h"
 
@@ -92,5 +91,3 @@ public:
 	u32 length;	  // _C
 	u32 position; // _10
 };
-
-#endif

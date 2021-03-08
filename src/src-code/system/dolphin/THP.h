@@ -8,13 +8,13 @@ extern "C"
 {
 #endif
 
-    struct VideoInfo
+    typedef struct VideoInfo
     {
-        u32 h;
-        u32 w;
-    };
+        u32 mHeight;
+        u32 mWidth;
+    } VideoInfo;
 
-    struct GXRenderModeObj
+    typedef struct GXRenderModeObj
     {
         u32 _0; // some VI shit
         u16 _4;
@@ -29,7 +29,7 @@ extern "C"
         u8 _17;
         u8 _18[12][2];
         u8 _19[7];
-    };
+    } GXRenderModeObj;
 
     bool THPPlayerInit(u32);
     bool THPPlayerOpen(u8 *, u32);

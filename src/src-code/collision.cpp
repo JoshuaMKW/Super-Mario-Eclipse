@@ -1,78 +1,31 @@
 #include "sms/JGeometry.hxx"
-
 #include "sms/actor/Mario.hxx"
 
-#include "Vector3D.hxx"
+#include "libs/sGeometry.hxx"
 #include "SME.hxx"
 
-//Twirl Bounce Collision
-
-//0x802523D4
-/*
-lhz r0, 0 (r3)
-cmplwi r0, 16007
-beq bounce
-cmplwi r0, 17007
-bne pass
-bounce:
-li r0, 7
-pass:
-*/
-
-//0x80252430
-/*
-lwz r6, 0xE0 (r31)
-lhz r6, 0 (r6)
-cmplwi r6, 16007
-beq bounce
-cmplwi r6, 17007
-bne pass
-bounce:
-ori r0, r0, 0x800
-pass:
-rlwinm. r0, r0, 0, 20, 20
-*/
-
-//0x80254750
-/*
-.set .LCPI3_0, 0x800034F0
-
-        stwu 1, -16(1)
-        lbz 4, 328(30)
-        andi. 4, 4, 32
-        beq     0, .LBB3_2
-        lwz 4, 224(30)
-        lis 5, 17200
-        lha 4, 2(4)
-        stw 5, 8(1)
-        xoris 4, 4, 32768
-        stw 4, 12(1)
-        lis 4, .LCPI3_0@ha
-        lfd 0, 8(1)
-        lfs 1, .LCPI3_0@l(4)
-        fsub 0, 0, 1
-        frsp 0, 0
-.LBB3_2:
-        stfs 0, 168(30)
-        li 4, 30902
-        addi 1, 1, 16
-*/
-
-//0x8025246C
 void checkIsGlideBounce(TMario *player)
 {
     if ((player->mFloorTriangle->mCollisionType & 0x7FFF) == 16007 || (player->mFloorTriangle->mCollisionType & 0x7FFF) == 17007)
     {
-        TBGCheckData *spoofCol = (TBGCheckData *)__nw__FUli(sizeof(TBGCheckData), 32);
-        memcpy(spoofCol, player->mFloorTriangle, sizeof(TBGCheckData));
-        spoofCol->mCollisionType = 7;
-        checkEnforceJump__6TMarioFv(player, spoofCol);
+        TBGCheckData *_oldCol = player->mFloorTriangle;
+        u16 _oldType = _oldCol->mCollisionType;
+        _oldCol->mCollisionType = 7;
+
+        checkEnforceJump__6TMarioFv(player);
+        _oldCol->mCollisionType = _oldType;
 
         player->mCustomInfo->mTerminalVelocity = -20.0f * player->mGravity;
         player->mCustomInfo->CollisionFlags.mIsSpinBounce = true;
         changePlayerStatus__6TMarioFUlUlb(player, TMario::SA_JUMPSPIN1, 0, 0);
     }
+    else
+    {
+        checkEnforceJump__6TMarioFv(player);
+    }
 }
+kmCall(0x80258334, &checkIsGlideBounce);
+kmCall(0x80264CFC, &checkIsGlideBounce);
 
 //0x80004A94
 void checkRestoreHealth(TMario *player)
@@ -178,7 +131,7 @@ void antiGravityCol(TMario *player)
 void warpToLinkedCol(TMario *player)
 {
     TBGCheckData *linkedCol = gInfo.mWarpColArray->resolveCollisionWarp(player->mFloorTriangle);
-    Vector3D colTriangle(&linkedCol->mVertexA, &linkedCol->mVertexB, &linkedCol->mVertexC);
+    TVectorTriangle colTriangle(&linkedCol->mVertexA, &linkedCol->mVertexB, &linkedCol->mVertexC);
 
     if (!linkedCol)
     {
@@ -210,7 +163,7 @@ void warpToLinkedCol(TMario *player)
             gpCamera->mPosition.y = player->mPosition.y + 300.0f;
             gpCamera->mPosition.z = lerp<f32>(gpCamera->mPosition.z, player->mPosition.z, 0.9375f);
 
-            gpCamera->mHorizontalAngle = (u16)Vector3D::bearingAngleY(player->mPosition, gpCamera->mPosition) * 182;
+            gpCamera->mHorizontalAngle = (u16)TVectorTriangle::bearingAngleY(player->mPosition, gpCamera->mPosition) * 182;
         }
         else if (player->mCustomInfo->mCollisionTimer > 80)
         {
@@ -233,7 +186,7 @@ void warpToLinkedCol(TMario *player)
 void warpToLinkedColPreserve(TMario *player, bool fluid)
 {
     TBGCheckData *linkedCol = gInfo.mWarpColArray->resolveCollisionWarp(player->mFloorTriangle);
-    Vector3D colTriangle(&linkedCol->mVertexA, &linkedCol->mVertexB, &linkedCol->mVertexC);
+    TVectorTriangle colTriangle(&linkedCol->mVertexA, &linkedCol->mVertexB, &linkedCol->mVertexC);
 
     if (!linkedCol) return;
 
@@ -249,7 +202,7 @@ void warpToLinkedColPreserve(TMario *player, bool fluid)
         gpCamera->mPosition.y = player->mPosition.y + 300.0f;
         gpCamera->mPosition.z = lerp<f32>(gpCamera->mPosition.z, player->mPosition.z, 0.9375f);
 
-        gpCamera->mHorizontalAngle = (u16)Vector3D::bearingAngleY(player->mPosition, gpCamera->mPosition) * 182;
+        gpCamera->mHorizontalAngle = (u16)TVectorTriangle::bearingAngleY(player->mPosition, gpCamera->mPosition) * 182;
 
         JGeometry::TVec3<f32> colNormal = colTriangle.normal();
         JGeometry::TVec3<f32> colUnit = colNormal.unitVector();
@@ -340,8 +293,8 @@ u32 updateCollisionContext(TMario *player)
 
 u16 masterGroundCollisionHandler(TBGCheckData *colTriangle)
 {
-    register TMario *player;
-    __asm { mr player, r29 };
+    TMario *player;
+    asm volatile ( "mr %0, r29" : "=r"(player));
 
     u16 type = colTriangle->mCollisionType & 0x7FFF;
     switch (type)

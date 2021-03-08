@@ -1,5 +1,5 @@
 #include "printf.h"
-#include "sms/sound/MSound.hxx"
+#include "sms/sound/MSBGM.hxx"
 
 #include "SME.hxx"
 
@@ -94,14 +94,14 @@ bool streamAudio(MSStageInfo ID, u8 type, bool loopAudio)
 //0x80016ABC
 void initMusic()
 {
-    if (!gInfo.mFile)
+    if (SMEFile::mStageConfig.FileHeader.mMAGIC != SMEFile::MAGIC)
         return;
         
     DVDFileInfo *handle = (DVDFileInfo *)0x803FDB7C;
 
-    if (!gInfo.mIsAudioStreaming && (gInfo.mFile->Music.mMusicID & 0x400))
+    if (!gInfo.mIsAudioStreaming && (SMEFile::mStageConfig.Music.mMusicID & 0x400))
     {
-        startStreamedBGM(gInfo.mFile->Music.mMusicID, true);
+        startStreamedBGM((MSStageInfo)SMEFile::mStageConfig.Music.mMusicID, true);
     }
     if (gInfo.mIsAudioStreaming && !gInfo.mIsAudioStreamAllowed)
     {

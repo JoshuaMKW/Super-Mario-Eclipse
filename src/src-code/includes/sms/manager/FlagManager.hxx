@@ -1,5 +1,4 @@
-#ifndef FLAGMANAGER_H
-#define FLAGMANAGER_H
+#pragma once
 
 #include "types.h"
 
@@ -7,6 +6,38 @@ class TFlagManager
 {
 
 public:
+    void correctFlag();
+    void correctOptFlag();
+    void decFlag(u32 flag, s32 num);
+    void firstStart();
+    bool getBlueCoinFlag(s8 stageID, u8) const;
+    bool getBool(u32 flag) const;
+    u32 getFlag(size_t flag) const;
+    bool getShineFlag(s8 stageID) const;
+    u8 getNozzleRight(u8, u8) const;
+    void incFlag(u32 flag, s32 num);
+    void incGoldCoinFlag(s8 stageID, s32);
+    void incMario(s32 num);
+    void load(JSUMemoryInputStream &);
+    void loadOption(JSUMemoryInputStream &);
+    void resetCard();
+    void resetGame();
+    void resetOpt();
+    void resetStage();
+    void restore();
+    void save(JSUMemoryOutputStream &);
+    void saveFail();
+    void saveOption(JSUMemoryOutputStream &);
+    void saveSuccess();
+    void setBlueCoinFlag(s8 stageID, u8);
+    void setBool(bool, u32 flag);
+    void setFlag(size_t flag, s32 value);
+    void setShineFlag(s8 stageID);
+    void setNozzleRight(u8, u8);
+    void start(JKRHeap *);
+
+    static TFlagManager *smInstance;
+
     struct
     {
         u8 m1Type[0x76]; //0x0000
@@ -86,7 +117,7 @@ public:
         s32 mShadowMarioEvent;    //0x0100
         u32 _01[0xF0 / 4];        //0x0104
         u8 mCustomShineIDs[0x80]; //0x01F4
-        //TODO: RESIZE BASED ON `MAX_SHINES'
+        //TODO: RESIZE BASED ON `SME_MAX_SHINES'
         struct
         {
             bool mIsGamePlus : 1; //0x0274
@@ -127,9 +158,4 @@ public:
     u8 mType1FlagSave[120];   //0x02A8
     u8 mType2FlagSave[84];    //0x0320
     s64 mSavedTimeOnLastSave; //0x0378
-
-    void resetStage();
-    void resetGame();
 };
-
-#endif

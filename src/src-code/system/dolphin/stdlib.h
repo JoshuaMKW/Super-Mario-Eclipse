@@ -8,6 +8,8 @@ extern "C"
 {
 #endif
 
+#define offsetof(st, m) ((size_t)&(((st *)0)->m))
+
     int abs(int);
     long labs(long);
     int atoi(const char *str);

@@ -1,5 +1,4 @@
-#ifndef ITEM_H
-#define ITEM_H
+#pragma once
 
 #include "types.h"
 #include "sms/mapobj/MapObjGeneral.hxx"
@@ -11,5 +10,3 @@ public:
     s32 mKillTimer; // _14C
     u32 _150;
 };
-
-#endif

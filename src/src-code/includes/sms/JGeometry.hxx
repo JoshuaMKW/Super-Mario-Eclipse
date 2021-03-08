@@ -1,5 +1,4 @@
-#ifndef JGEOMETRY_H
-#define JGEOMETRY_H
+#pragma once
 
 #include "math.h"
 #include "MTX.h"
@@ -237,5 +236,3 @@ namespace JGeometry
     };
 
 }; // namespace JGeometry
-
-#endif

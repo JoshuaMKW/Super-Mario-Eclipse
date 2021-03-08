@@ -1,4 +1,11 @@
-#include <OS.h>
+#include "OS.h"
+#include "math.h"
+
+OSBootInfo BootInfo;
+u32 BI2DebugFlag;
+u32 BI2DebugFlagHolder;
+u32 AreWeInitialized;
+void *OSExceptionTable;
 
 void OSSetPeriodicAlarm(OSAlarm *alarm, OSTime start, OSTime period, OSAlarmHandler handler)
 {
@@ -7,7 +14,7 @@ void OSSetPeriodicAlarm(OSAlarm *alarm, OSTime start, OSTime period, OSAlarmHand
     alarm->mStart = start;
     alarm->mPeriod = period;
 
-    InsertAlarm(alarm, OSGetTime() - start, handler);
+    InsertAlarm(alarm, start - OSGetTime(), handler);
 
     OSRestoreInterrupts(iStatus);
 };

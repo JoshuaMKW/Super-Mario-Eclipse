@@ -1,5 +1,4 @@
-#ifndef APPLICATION_H
-#define APPLICATION_H
+#pragma once
 
 #include "types.h"
 #include "sms/JDrama.hxx"
@@ -15,6 +14,20 @@ class TApplication
 {
 
 public:
+    TApplication();
+
+    void checkAdditionalMovie();
+    void crTimeAry();
+    void drawDVDErr();
+    void finalize();
+    void gameLoop();
+    void initialize();
+    void initialize_bootAfter();
+    void initialize_nlogoAfter();
+    void mountStageArchive();
+    void proc();
+    void setupThreadFuncLogo();
+
     u32 _00;                        //0x0000
     TMarDirector *mMarDirector;     //0x0004
     u16 _01;                        //0x0008
@@ -32,6 +45,8 @@ public:
     TSMSFader *mFader;              //0x0034
     u32 _04[0x8 / 4];               //0x0038
     u32 *mJKRExpHeapHi;             //0x0040
+
 };
 
-#endif
+void SetupThreadFuncLogo(void *);
+void SetupThreadFuncBoot(void *);

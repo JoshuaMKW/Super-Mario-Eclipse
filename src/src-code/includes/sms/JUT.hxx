@@ -1,5 +1,4 @@
-#ifndef JUT_H
-#define JUT_H
+#pragma once
 
 #include "types.h"
 #include "OS.h"
@@ -7,19 +6,15 @@
 
 #include "sms/JKR.hxx"
 
+class ResFONT;
+
 namespace JUtility
 {
     class TColor
     {
     public:
         TColor();
-        TColor(const u8 R, const u8 G, const u8 B, const u8 A)
-        {
-            this->R = R;
-            this->G = G;
-            this->B = B;
-            this->A = A;
-        }
+		void set(u8 r, u8 g, u8 b, u8 a);
 
         TColor &operator =(const TColor &other)
         {
@@ -40,6 +35,8 @@ namespace JUtility
 class JUTPoint
 {
 public:
+    JUTPoint();
+
     u32 X; // _0
     u32 Y; // _4
 };
@@ -47,6 +44,19 @@ public:
 class JUTRect
 {
 public:
+    JUTRect();
+	JUTRect(s32 x, s32 y, s32 width, s32 height);
+	
+	void set(s32 x, s32 y, s32 width, s32 height);
+	void copy(const JUTRect &);
+	void add(s32, s32);
+	u32 intersect(const JUTRect &);
+	void move(s32 x, s32 y);
+	void resize(s32 width, s32 height);
+	void reform(s32, s32, s32, s32);
+	void normalize();
+	bool isEmpty() const;
+
     s32 X;       // _0
     s32 Y;       // _4
     s32 mHeight; // _8
@@ -57,7 +67,16 @@ public:
 class JUTFont
 {
 public:
-    u32 *vTable; // _0
+    JUTFont();
+	~JUTFont();
+	
+	void initiate(); // nullsub
+	void setCharColor(JUtility::TColor);
+	void setGradColor(JUtility::TColor, JUtility::TColor);
+	void drawString_size_scale(f32, f32, f32, f32, const char *, u32, bool);
+	void setGX(JUtility::TColor, JUtility::TColor);
+
+    u32 _0;
     u8 _4;
     u8 _5; // padding?
     u8 _6; // ^^
@@ -73,11 +92,18 @@ public:
 class JUTResFont : public JUTFont
 {
 public:
+    JUTResFont(const u32 *, JKRArchive *); // ResFont
+	~JUTResFont();
+	
+	void initiate(const u32 *, JKRArchive *); // ResFont
+	void setGX();
+	void setGX(JUtility::TColor, JUtility::TColor);
+
     u32 _1C;
     u32 _20;
     u8 _24[0x44 - 0x24]; // GXTexObj
     u32 _44;
-    u32 _48;
+    ResFONT *mFont;
     u32 _4C; // padding?
     u32 _50;
     u32 _54;
@@ -96,7 +122,8 @@ enum EPadPort
     Port1,
     Port2,
     Port3,
-    Port4
+    Port4,
+    PortRecorder
 };
 
 enum EStickMode
@@ -114,7 +141,11 @@ enum WhichStick
 class JUTGamePad : public JKRDisposer
 {
 public:
+    JUTGamePad(EPadPort port);
 	virtual ~JUTGamePad();
+
+	void assign();
+	void update();
 
     enum BUTTONS
     {
@@ -143,8 +174,14 @@ public:
     class CButton
     {
     public:
-        u32 mInput; // _0
-        u32 mFrameInput;
+        CButton();
+
+		void clear();
+		void update(const PADStatus *, u32);
+		void setRepeat(u32, u32, u32);
+
+        BUTTONS mInput; // _0
+        BUTTONS mFrameInput;
         u32 _8;
         u8 mAnalogA;  // _C
         u8 mAnalogB;  // _D
@@ -163,6 +200,12 @@ public:
     class CStick
     {
     public:
+        CStick();
+
+		void clear();
+		u32 update(s8, s8, EStickMode, WhichStick);
+		u32 getButton();
+
         f32 mStickX;
         f32 mStickY;
         f32 mLengthFromNeutral;
@@ -173,6 +216,12 @@ public:
     class CRumble
     {
     public:
+        void clear(JUTGamePad *);
+		static void stopMotor(s32);
+		static void stopMotorHard(s32);
+		void update(u16);
+		void setEnable(u32);
+
         u32 _0;
         u32 _4;
         u32 _8;
@@ -190,7 +239,8 @@ public:
     CStick mCStick;       // _58
     CRumble mCumble;      // _68
     u16 mPort;            // _78
-    u16 _7A;              // padding?
+    u8 mPortConnected;    // _79
+    u8 _7A;
     JSUPtrLink mPtrLink;  // _7C
     u32 _8C;
     u32 _90;
@@ -203,10 +253,20 @@ public:
     OSTick  mResetTime; // _A0
 };
 
+class ResNTab
+{
+};
+
 class JUTNameTab
 {
 public:
-    u32 *mResTab; // ResNTab*
+    JUTNameTab(const ResNTab *); // ResNTab*
+
+	s32 getIndex(const char *name) const;
+	u16 calcKeyCode(const char *name) const;
+	char* getName(const u16);
+
+    ResNTab *mResTab; // ResNTab*
     u32 _4;
     u16 _8;
 };
@@ -214,6 +274,15 @@ public:
 class JUTDirectPrint
 {
 public:
+    JUTDirectPrint();
+
+	void start();
+	void erase(int, int, int, int);
+	void drawChar(int, int, int);
+	void changeFrameBuffer(void *buffer, u16, u16);
+	void drawString(u16, u16, char *);
+	void drawString_f(u16, u16, const char *, ...);
+
     void *mBuffer; // _0
     u16 _4;
     u16 _6;
@@ -224,15 +293,52 @@ public:
     void *_14;
 };
 
+class JUTConsole : public JKRDisposer
+{
+public:
+    enum EConsoleType
+    {
+    };
+
+    JUTConsole(unsigned int, unsigned int, bool);
+    ~JUTConsole();
+
+    void clear();
+    JUTConsole *create(unsigned int, void *, u32);
+    void doDraw(JUTConsole::EConsoleType) const;
+    u32 getLineFromObjectSize(u32, unsigned int);
+    u32 getLineOffset() const;
+    u32 getUsedLine() const;
+    void print(const char *);
+    void print_f(const char *, ...);
+    void scroll(int);
+
+    u8 _00[0x4E];
+};
+
 class JUTException : public JKRThread
 {
 public:
-    virtual ~JUTException();
+    JUTException(JUTDirectPrint *printer);
+	virtual ~JUTException();
 
 	virtual void run();
+
+	static void appendMapFile(char *mapPath);
+    void create(JUTDirectPrint *);
+	void createFB();
+    void errorHandler(u16, OSContext *, u32, u32);
+	void printContext(u16, OSContext *, u32, u32);
+	static bool queryMapAddress(char *, u32, s32, u32 *, u32 *, char *, u32, bool, bool);
+
+    void showFloat(OSContext *);
+    void showGPR(OSContext *);
+    void showGPRMap(OSContext *);
+    void showMapInfo_subroutine(u32, bool);
+    void showStack(OSContext *);
 
     u32 _60;
     JUTDirectPrint *mPrinter; // _64
 };
 
-#endif
+void JUTConsole_print_f_va_(void);

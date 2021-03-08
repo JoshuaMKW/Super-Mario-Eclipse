@@ -31,10 +31,6 @@
 *.out
 *.app
 
-#Compilers
-compiler/*.dll
-compiler/*c.exe
-
 #Python Cache
 __pycache__
 
@@ -49,3 +45,14 @@ gamedata/*
 
 #Debug objects
 tmp-Kamek/
+*.ilk
+*.pdb
+
+#Clang template
+clang-guide.txt
+
+#log
+log.txt
+
+#compiler
+src/compiler/

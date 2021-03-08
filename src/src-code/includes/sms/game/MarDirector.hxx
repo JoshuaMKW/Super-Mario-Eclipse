@@ -1,31 +1,66 @@
-#ifndef MARDIRECTOR_H
-#define MARDIRECTOR_H
+#pragma once
 
 #include "types.h"
 #include "GCConsole2.hxx"
 
-#include "sms/object/DemoCannon.hxx"
+#include "sms/actor/Yoshi.hxx"
 #include "sms/actor/item/Shine.hxx"
+#include "sms/actor/item/Coin.hxx"
+#include "sms/game/GCConsole2.hxx"
+#include "sms/JDrama.hxx"
+#include "sms/JGeometry.hxx"
+#include "sms/object/DemoCannon.hxx"
 
-class TMarDirector
+class TMarDirector : public JDrama::TDirector
 {
-
 public:
     enum STATUS
     {
-        INTRO_INIT = 0,
-        INTRO_PLAYING = 1,
-        NORMAL = 4,
-        PAUSE_MENU = 5,
-        SAVE_CARD = 11
+        SA_INTRO_INIT = 0,
+        SA_INTRO_PLAYING = 1,
+        SA_NORMAL = 4,
+        SA_PAUSE_MENU = 5,
+        SA_SAVE_CARD = 11
     };
 
     enum STATE
     {
-        WARP_OUT = 2
+        ST_WARP_OUT = 2
     };
 
-    u32 _00[0x4C / 4];       //0x0000
+    TMarDirector();
+    ~TMarDirector();
+
+    virtual s32 direct();
+    virtual JStage::TObject *JSGFindObject(const char *, JStage::TEObject) const;
+
+    void moveStage();
+    void updateGameMode();
+    void nextStateInitialize(s8);
+    void setMario();
+    void currentStateFinalize(s8);
+    void changeState();
+    void fireStreamingMovie(s8);
+    void fireEndDemoCamera();
+    void fireStartDemoCamera(char const *, JGeometry::TVec3<f32> const *, u32, f32, bool, u32 (*)(u32, u32), u32, JDrama::TActor *, JDrama::TFlagT<s16>);
+    void setNextStage(s16 stageID, JDrama::TActor *);
+    void movement();
+    void fireRideYoshi(TYoshi *);
+    void fireGetStar(TShine *);
+    void fireGetNozzle(u32 *); // TItemNozzle
+    void fireGetBlueCoin(TCoin *);
+    void movement_game();
+    u32* findNearestTalkNPC();
+    u32 createObjects(); // returns 0
+    void setupObjects();
+    bool thpInit();
+    void loadParticleMario();
+    void loadParticle();
+    void initLoadParticle();
+    void loadResource();
+
+
+    u32 _00[0x28 / 4];       //0x0024
     u16 mGameState;          //0x004C
     u16 _02;                 //0x004E
     u32 _03[0x14 / 4];       //0x0050
@@ -52,5 +87,3 @@ public:
     u32 _15;                 //0x0258
     TShine *mCollectedShine; //0x025C
 };
-
-#endif

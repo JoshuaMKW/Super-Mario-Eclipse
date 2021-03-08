@@ -1,5 +1,4 @@
-#ifndef SMSFADER_H
-#define SMSFADER_H
+#pragma once
 
 #include "types.h"
 #include "sms/JUT.hxx"
@@ -21,5 +20,3 @@ public:
     f32 mFadeTime;         //0x0028
     f32 _02;               //0x002C
 };
-
-#endif

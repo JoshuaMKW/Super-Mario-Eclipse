@@ -1,5 +1,4 @@
-#ifndef J3D_H
-#define J3D_H
+#pragma once
 
 #include "types.h"
 #include "MTX.h"
@@ -187,11 +186,12 @@ public:
 	J3DModelData *data; // _4
 	u32 _8;
 	u32 _C;
+	u32 _10;
 	JGeometry::TVec3<f32> mSizeMultiplier;
 	Mtx _20;
 	u32 _50;
 	u32 _54;
-	Mtx *mJointArray;
+	Mtx44 *mJointArray;
 	u32 _5C;
 	u32 _60;
 	u32 _64;
@@ -369,5 +369,3 @@ public:
 	u32 _40;
 	u32 _44;
 };
-
-#endif

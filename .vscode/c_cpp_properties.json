@@ -4,6 +4,7 @@
             "name": "Win32",
             "includePath": [
                 "${workspaceFolder}/src/src-code/system/dolphin",
+                "${workspaceFolder}/src/src-code/system/Kuribo/sdk",
                 "${workspaceFolder}/src/src-code/includes/sme",
                 "${workspaceFolder}/src/src-code/includes"
             ],
@@ -13,10 +14,10 @@
                 "_UNICODE"
             ],
             "windowsSdkVersion": "10.0.19041.0",
-            "compilerPath": "${workspaceFolder}/src/compiler/mwcceppc.exe",
+            "compilerPath": "C:/Program Files/LLVM/bin/clang.exe",
             "intelliSenseMode": "clang-x64",
-            "cppStandard": "c++98",
-            "cStandard": "c99"
+            "cppStandard": "c++20",
+            "cStandard": "c17"
         }
     ],
     "version": 4

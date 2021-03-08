@@ -10,7 +10,6 @@ extern "C"
 
     u32 tolower(u32 c);
     u32 toupper(u32 c);
-
     u32 isxdigit(u32 c);
     u32 isupper(u32 c);
     u32 isspace(u32 c);

@@ -1,5 +1,4 @@
-#ifndef EGGYOSHI_H
-#define EGGYOSHI_H
+#pragma once
 
 #include "types.h"
 #include "sms/actor/MActor.hxx"
@@ -16,5 +15,3 @@ public:
     u32 mWantedFruit;  //0x014C
     TMario *mMario;    //0x0150
 };
-
-#endif

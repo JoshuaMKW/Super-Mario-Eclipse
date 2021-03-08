@@ -1,5 +1,4 @@
-#ifndef MAPOBJBALL_H
-#define MAPOBJBALL_H
+#pragma once
 
 #include "types.h"
 #include "sms/mapobj/MapObjGeneral.hxx"
@@ -14,5 +13,3 @@ public:
     f32 mAdditionalHeldHeight; //0x0190
     u32 _02[2];                  //0x0194
 };
-
-#endif

@@ -1,1 +1,1 @@
-python build.py source/collision.cpp source/mario.cpp source/init_mods.cpp source/asmfuncs.s source/flagmanager.cpp source/runtime_mods.cpp source/yoshi.cpp source/shine.cpp --dolfile Start.dol --dest "C:\Users\Kyler-Josh\Desktop\SME_ROOT_KAMEK\root\&&systemdata\Star 
+python build.py "C:\Users\Kyler-Josh\3D Objects\Dolphin\Dolphin-Games\Super Mario Eclipse ROOT\root" -s 80427800 -b D --shines 300 --boot DOL

@@ -1,10 +1,7 @@
-#ifndef POLLUTIONMANAGER_H
-#define POLLUTIONMANAGER_H
+#pragma once
 
 #include "types.h"
 
 class TPollutionManager
 {
 };
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef BOSSMANTA_H
-#define BOSSMANTA_H
+#pragma once
 
 #include "types.h"
 #include "sms/actor/SpineEnemy.hxx"
@@ -16,5 +15,3 @@ public:
     u32 mDamageCounter;      //0x019C
     u32 mInvincibilityTimer; //0x01A0
 };
-
-#endif

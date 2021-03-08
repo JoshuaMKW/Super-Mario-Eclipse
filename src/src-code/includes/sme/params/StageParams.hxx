@@ -1,5 +1,4 @@
-#ifndef STAGEPARAMS_H
-#define STAGEPARAMS_H
+#pragma once
 
 #include "types.h"
 #include "DVD.h"
@@ -10,17 +9,19 @@
 #include "sms/sound/MSound.hxx"
 
 #include "libs/sMemory.hxx"
+#include "libs/sString.hxx"
 
 class SMEFile
 {
+    static bool openFile(const char *path);
 
 public:
     struct
     {
-        char mMAGIC[4];    //0x0000 ("CODE")
-        u32 *mLoadAddress; //0x0004
-        u32 mFileSize;     //0x0008
-        void *mCallBack;   //0x000C
+        u32 mMAGIC;         //0x0000 ("CODE")
+        void *mLoadAddress; //0x0004
+        u32 mFileSize;      //0x0008
+        void *mCallBack;    //0x000C
     } FileHeader;
 
     struct
@@ -97,13 +98,13 @@ public:
 
     struct
     {
-        f32 mVolume;          //0x007C
-        f32 mSpeed;           //0x0080
-        f32 mPitch;           //0x0084
-        bool mPlayMusic;      //0x0088
-        MSStageInfo mMusicID; //0x0089
-        u8 mAreaID;           //0x008B
-        u8 mEpisodeID;        //0x008C
+        f32 mVolume;     //0x007C
+        f32 mSpeed;      //0x0080
+        f32 mPitch;      //0x0084
+        bool mPlayMusic; //0x0088
+        u16 mMusicID;    //0x0089
+        u8 mAreaID;      //0x008B
+        u8 mEpisodeID;   //0x008C
         u8 _8D;
         u16 _8E;
     } Music;
@@ -116,72 +117,10 @@ public:
         bool mIsColorWater;           //0x0096
     } Fludd;
 
-    static SMEFile *loadFile(char *stringPath)
-    {
-        DVDFileInfo handle;
-        char buffer[(sizeof(SMEFile) + 63) & -32];
-        SMEFile *tmp = (SMEFile *)(((u32)buffer + 31) & -32);
+    static constexpr u32 MAGIC = 0x434F4445;
+    static SMEFile mStageConfig;
 
-        for (u32 i = 0; DVDGetDriveStatus() != DVD_STATE_END; ++i)
-        {
-            if (i > 100000)
-            {
-                return NULL;
-            }
-        }
-
-        if (!DVDOpen(stringPath, &handle))
-            return NULL;
-
-        if (DVDReadPrio(&handle, tmp, 32, 0, 2) < DVD_ERROR_OK)
-        {
-            DVDClose(&handle);
-            return NULL;
-        }
-
-        if (tmp->FileHeader.mMAGIC == "CODE")
-        {
-            DVDClose(&handle);
-            return NULL;
-        }
-
-        u32 *loadAddress;
-        if (tmp->FileHeader.mLoadAddress == NULL)
-        {
-            loadAddress = (u32 *)Memory::malloc(sizeof(SMEFile) + 31, 32); //Create an allocation
-        }
-        else
-        {
-            loadAddress = tmp->FileHeader.mLoadAddress;
-        }
-
-        if (DVDReadPrio(&handle, loadAddress, tmp->FileHeader.mFileSize, 0, 2) < DVD_ERROR_OK)
-        {
-            DVDClose(&handle);
-            return NULL;
-        }
-        DVDClose(&handle);
-        return (SMEFile *)loadAddress;
-    }
-
-    static char *parseExtension(char *dst, const char *path, const char *stage, bool generalize = false)
-    {
-        u32 i = 0;
-        strcpy(dst, path);
-        strcat(dst, stage);
-
-        while (dst[i] != '\0' && dst[i] != '.')
-        {
-            if (generalize && isdigit(dst[i]))
-            {
-                strcpy(&dst[i], "+.sme");
-                return dst;
-            }
-            ++i;
-        }
-        strcpy(&dst[i], ".sme");
-        return dst;
-    }
+    static bool load(const char *stageName);
+    static void reset() { memset(&SMEFile::mStageConfig, 0, sizeof(SMEFile)); };
+    static char *withSMEExtension(char *dst, const char *stage, bool generalize = false);
 };
-
-#endif

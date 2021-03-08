@@ -1,12 +1,14 @@
 #include "sms/JGeometry.hxx"
+#include "sms/actor/item/Shine.hxx"
 #include "sms/game/Conductor.hxx"
+#include "sms/sound/MSBGM.hxx"
 
 #include "SME.hxx"
 
 //0x801BD664
 void manageShineVanish(JGeometry::TVec3<f32> *marioPos)
 {
-    register TShine *shine;
+    TShine *shine;
     __asm { mr shine, r30 };
 
     if (shine->mSize.x - 0.011f <= 0)
@@ -39,7 +41,7 @@ kmWrite32(0x801BD668, 0x48000568);
 //0x802413E0
 void isKillEnemiesShine(TConductor *gpConductor, JGeometry::TVec3<f32> *playerCoordinates, f32 range)
 {
-    register TMario *player;
+    TMario *player;
     __asm { mr player, r31 };
 
     TShine *shine = (TShine *)player->mGrabTarget;
@@ -59,8 +61,8 @@ void restoreMario(TMarDirector *gpMarDirector, u32 curState)
 
     u8 *curSaveCard = (u8 *)(gpMarDirector->sNextState[0x118 / 4]);
 
-    if (curState != TMarDirector::NORMAL ||
-        gpMarDirector->mLastState != TMarDirector::SAVE_CARD ||
+    if (curState != TMarDirector::SA_NORMAL ||
+        gpMarDirector->mLastState != TMarDirector::SA_SAVE_CARD ||
         gpMarioAddress->mState != TMario::SA_SHINE_C)
         return;
 
@@ -74,13 +76,13 @@ void restoreMario(TMarDirector *gpMarDirector, u32 curState)
         {
             gpMarioAddress->mState = TMario::SA_IDLE;
         }
-        stopBGM__5MSBgmFUlUl(BGM_GET_SHINE);
-        startBGM__5MSBgmFUl(gStageBGM);
+        MSBgm::stopBGM(BGM_GET_SHINE, 20);
+        MSBgm::startBGM(gStageBGM);
         endDemoCamera__15CPolarSubCameraFv(gpCamera);
     }
     else
     {
-        gpMarDirector->mGameState |= TMarDirector::WARP_OUT;
+        gpMarDirector->mGameState |= TMarDirector::ST_WARP_OUT;
     }
 }
 
@@ -94,50 +96,49 @@ kmCall(0x802995BC, &checkBootOut);
 kmWrite32(0x80297BE8, 0x60848200);
 
 //0x80293B10
-void extendShineIDLogic(TFlagManager *gpFlagManager, u32 flagID)
+u32 extendShineIDLogic(TFlagManager *flagManager, u32 flagID)
 {
     if ((flagID & 0xFFFF) > 0x77)
         flagID += (0x60040 - 0x78);
     if (flagID > 0x60334)
         flagID = 0;
-    getFlag__12TFlagManagerCFUl(gpFlagManager, flagID);
+    return flagManager->getFlag(flagID);
 }
 kmCall(0x80293B10, &extendShineIDLogic);
 
 //0x801BCC98
 u32 shineObjectStringMod(JSUInputStream *stream, u8 *dst, u32 size)
 {
-    register TShine *shine;
+    TShine *shine;
     __asm { mr shine, r30 };
 
     if (shine->mType == 1)
     {
-        if (strcmp("nbnorm", (const char *)(dst + 4)) == 0) {
+        if (strcmp("nbnorm", (const char *)(dst + 4)) == 0)
             shine->mType = 0x10;
-        } else if (strcmp("nbquik", (const char *)(dst + 4)) == 0) {
+        else if (strcmp("nbquik", (const char *)(dst + 4)) == 0)
             shine->mType = 0x12;
-        } else if (strcmp("nbdemo", (const char *)(dst + 4)) == 0) {
+        else if (strcmp("nbdemo", (const char *)(dst + 4)) == 0)
             shine->mType = 0x11;
-        }
     }
     read__14JSUInputStreamFPvl(stream, dst, size);
 }
 kmCall(0x801BCC98, &shineObjectStringMod);
 
-void shineFlagSetter(TFlagManager *gpFlagManager, u32 flag, s32 val)
+void shineFlagSetter(TFlagManager *flagManager, u32 flag, s32 val)
 {
     if (flag < 0x60400)
     {
         flag &= 0xFFFF;
         if (flag < 0x40)
         {
-            ((u32 *)&gpFlagManager->Type6Flag)[flag] = val;
+            ((u32 *)&flagManager->Type6Flag)[flag] = val;
         }
         else
         {
             u32 shiftedFlag = flag >> 3;
             u32 mask = (flag & 7);
-            u8 *flagField = &((u8 *)&gpFlagManager->Type6Flag)[shiftedFlag];
+            u8 *flagField = &((u8 *)&flagManager->Type6Flag)[shiftedFlag];
 
             *flagField &= 1 << mask;
             *flagField |= (val & 1) << mask;
@@ -146,20 +147,20 @@ void shineFlagSetter(TFlagManager *gpFlagManager, u32 flag, s32 val)
 }
 kmWritePointer(0x803DEE50, &shineFlagSetter);
 
-bool shineFlagGetter(TFlagManager *gpFlagManager, u32 flag)
+u32 shineFlagGetter(TFlagManager *flagManager, u32 flag)
 {
     if (flag < 0x60400)
     {
         flag &= 0xFFFF;
         if (flag < 0x40)
         {
-            return ((u32 *)&gpFlagManager->Type6Flag)[flag];
+            return ((u32 *)&flagManager->Type6Flag)[flag];
         }
         else
         {
             u32 shiftedFlag = flag >> 3;
             u32 mask = (flag & 7);
-            u8 *flagField = &((u8 *)&gpFlagManager->Type6Flag)[shiftedFlag];
+            u8 *flagField = &((u8 *)&flagManager->Type6Flag)[shiftedFlag];
 
             return (*flagField >> mask) & 1;
         }
@@ -169,10 +170,10 @@ bool shineFlagGetter(TFlagManager *gpFlagManager, u32 flag)
 kmWritePointer(0x803DEE7C, &shineFlagGetter);
 
 //0x802946D4
-u32 shineSetClamper(TFlagManager *gpFlagManager, u32 flag)
+u32 shineSetClamper(TFlagManager *flagManager, u32 flag)
 {
     flag &= 0x7FFFF;
-    if (flag >= 120)
+    if (flag >= 0x10078)
     {
         flag -= 0x10000;
     }
@@ -181,20 +182,20 @@ u32 shineSetClamper(TFlagManager *gpFlagManager, u32 flag)
 kmCall(0x802946D4, &shineSetClamper);
 
 //0x8029474C
-u32 shineGetClamper(TFlagManager *gpFlagManager, u32 flag)
+u32 shineGetClamper(TFlagManager *flagManager, u32 flag)
 {
     flag &= 0x7FFFF;
-    if (flag >= 120)
+    if (flag >= 0x10078)
     {
         flag -= 0x10000;
     }
-    return getFlag__12TFlagManagerCFUl(gpFlagManager, flag);
+    return flagManager->getFlag(flag);
 }
 kmWrite32(0x80294744, 0x60000000);
 kmCall(0x8029474C, &shineGetClamper);
 
 /*Shine casts, fix light*/
-kmWrite32(0x80412548, (f32)MAX_SHINES);
+kmWrite32(0x80412548, (f32)SME_MAX_SHINES);
 kmWrite32(0x80293AF8, 0x3BFF03E7);
 kmWrite32(0x802946B8, 0x280003E7);
 kmWrite32(0x8017BE78, 0x5464037E);
@@ -210,7 +211,7 @@ kmWrite32(0x80297BA0, 0x5404037E);
 //0x80294334
 void extendFlagManagerLoad(JSUInputStream &stream)
 {
-    read__14JSUInputStreamFPvl(&stream, ((u8 *)gpFlagManager + 0x1F4), 0x8C);
+    read__14JSUInputStreamFPvl(&stream, ((u8 *)TFlagManager::smInstance + 0x1F4), 0x8C);
     stream.skip(0x120);
 }
 kmCall(0x80294334, &extendFlagManagerLoad);
@@ -220,7 +221,7 @@ kmWrite32(0x80294338, 0x48000010);
 //0x802939B8
 void extendFlagManagerSave(JSUOutputStream &stream)
 {
-    write__15JSUOutputStreamFPCvl(&stream, ((u8 *)gpFlagManager + 0x1F4), 0x8C);
+    write__15JSUOutputStreamFPCvl(&stream, ((u8 *)TFlagManager::smInstance + 0x1F4), 0x8C);
     stream.skip(0x120);
 }
 kmCall(0x802939B8, &extendFlagManagerSave);
@@ -229,20 +230,20 @@ kmWrite32(0x802939BC, 0x48000014);
 //0x80297BD8
 void thinkSetBootFlag(void *shineFader, u32 unk_1, u32 unk_2)
 {
-    register TMarDirector *gpMarDirector;
+    TMarDirector *gpMarDirector;
     __asm { mr gpMarDirector, r31 };
     
     if ((gpMarDirector->mCollectedShine->mType & 0x10) == false)
     {
         registFadeout__11TShineFaderFUsUs(shineFader, unk_1, unk_2);
-        gpMarDirector->mGameState |= TMarDirector::WARP_OUT;
+        gpMarDirector->mGameState |= TMarDirector::ST_WARP_OUT;
     }
 }
 kmCall(0x80297BD8, &thinkSetBootFlag);
 
 u32 loadAfterMaskState()
 {
-    register TShine *shine;
+    TShine *shine;
     __asm { mr shine, r31 };
 
     return shine->mType & 0xF;
@@ -253,7 +254,7 @@ kmWrite32(0x801BCD24, 0x28030002);
 //0x801BCEEC
 void setKillState()
 {
-    register TShine *shine;
+    TShine *shine;
     __asm { mr shine, r31 };
 
     shine->mType = (shine->mType & 0x10) | 1;

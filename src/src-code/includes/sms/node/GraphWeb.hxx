@@ -1,5 +1,4 @@
-#ifndef GRAPHWEB_H
-#define GRAPHWEB_H
+#pragma once
 
 #include "types.h"
 #include "sms/node/RailNode.hxx"
@@ -15,5 +14,3 @@ public:
     u32 _00[0x8 / 4];     //0x0010
     void *mVTable;        //0x0018
 };
-
-#endif

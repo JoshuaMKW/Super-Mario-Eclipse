@@ -1,0 +1,2 @@
+3.6.0:
+    - Source containing mixed labels and inlined data (.long, .word, etc) can cause the assembly to fail. This is caused by the compiler this program wraps, and can not be fixed.

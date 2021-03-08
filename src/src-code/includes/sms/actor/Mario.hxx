@@ -1,11 +1,10 @@
-#ifndef MARIO_H
-#define MARIO_H
+#pragma once
 
 #include "types.h"
 #include "sms/JGeometry.hxx"
 #include "sms/J3D.hxx"
 
-#include "sms/actor/BaseActor.hxx"
+#include "sms/actor/TakeActor.hxx"
 #include "sms/actor/Yoshi.hxx"
 #include "sms/m3d/M3UModel.hxx"
 #include "sms/collision/BGCheck.hxx"
@@ -28,8 +27,8 @@ struct TMarioAnimeData
         HAND_C
     };
 
-    u8 mAnimID;
-    u8 mFluddEnabled;  //Note: ENUM? 68 = enabled, 200 = disabled
+    u16 mAnimID;
+    u16 mFluddEnabled; //Note: ENUM? 68 = enabled, 200 = disabled
     u8 mAnmTexPattern; //Note: 23 is the max value allowed
     u8 mMarioHand;     //Note: 1, 2, and 3 seem to be valid values, this determines the hand model used(?)
     u8 unk_1;          //Note: If bit 30 is set, it seems to activate a bit flag to multiple pointers, likely mtx related
@@ -69,11 +68,35 @@ public:
 
 struct TMarioControllerWork
 {
-    u32 _0; // unk
-    u32 _4;
-    u32 _8;
-    u8 _C[0x1C - 0xC]; // unk
-    f32 _1C;
+    enum BUTTONS
+    {
+        R = 0x20,
+        A = 0x100,
+        B = 0x200
+    };
+
+    s16 mStickHS16;
+    s16 mStickVS16;
+    BUTTONS mInput;
+    BUTTONS mFrameInput;
+    u8 mAnalogRU8;
+    u8 mAnalogLU8;
+    u16 _0E;
+    f32 mStickH;
+    f32 mStickV;
+    f32 mStickDist;
+    f32 mAnalogL;
+    f32 mAnalogR;
+
+    bool isPressed(BUTTONS input)
+    {
+        return (this->mInput & input) != 0;
+    }
+
+    bool isFramePressed(BUTTONS input)
+    {
+        return (this->mFrameInput & input) != 0;
+    }
 };
 
 class TMarioGamePad : public JUTGamePad
@@ -89,7 +112,7 @@ public:
     f32 stickY; // _C4
     f32 _C8;
     f32 _CC;
-    u32 _D0;
+    u32 mMeaning;
     u32 _D4;
     u32 _D8;
     u16 _DC;
@@ -145,7 +168,7 @@ class TMario : public TTakeActor
 {
 
 public:
-    enum STATE
+    enum State
     {
         SA_NUMBER = 0x0000000F,
         SA_DOJUMP = 0x00000080,
@@ -175,10 +198,12 @@ public:
         SA_DIVE = 0x0080088A,
         SA_DIVEJUMP = 0x02000889,
         SA_DIVESLIDE = 0x00800456,
+        SA_GOOPSLIDE = 0x0084045D,
         SA_CLIMB = 0x18100340,
         SA_CLIMBUP = 0x10100343,
         SA_WALLJUMP = 0x02000886,
         SA_WALLSLIDE = 0x000008A7,
+        SA_ROOFHANG = 0x00200349,
         SA_HANG = 0x3800034B,
         SA_HANGCLIMB = 0x3000054F,
         SA_SLAMSTART = 0x008008A9,
@@ -203,10 +228,13 @@ public:
         SA_SLIDE_R1 = 0x000008A6, // Recover from slide by flipping
         SA_SLIDE_R2 = 0x00000386, // Recover from slide by getting up
         SA_R_SPRAY = 0x0C008220,  // Recover from spray
-        SA_G_POUND = 0x008008A9   // Ground pounding
+        SA_G_POUND = 0x008008A9,  // Ground pounding
+        SA_NPC_PUTDOWN = 0x80000387,
+        SA_NPC_THROW = 0x80000588,
+        SA_NPC_JUMPTHROW = 0x820008AB
     };
 
-    enum STATUS
+    enum Status
     {
         ST_ALIVE = 0x1,
         ST_SEWER_FLOOR = 0x2,
@@ -225,15 +253,16 @@ public:
         ST_GONE = 0x200000
     };
 
-    enum VOICE
+    enum Voice
     {
         V_CANNON_WAIL = 30911,
         V_TRIPLE_JUMP = 30902,
         V_JUMP = 30891,
         V_DIVE_OUT = 30897,
+        V_FALL_LEDGE_GRAB = 30944
     };
 
-    enum ANIMATION
+    enum Animation
     {
         A_WALLHANG = 0x33,
         A_FALL = 0x4C,
@@ -243,7 +272,7 @@ public:
         A_SPINJUMP = 0xF4
     };
 
-    enum EFFECT
+    enum Effect
     {
         E_SMOKE_CLOUD = 0x1,
         E_ROCKET_SPRAY_MIST = 0x2,
@@ -265,29 +294,33 @@ public:
         E_WATER_RIPPLE = 0x30
     };
 
-    u32 _00[0xC / 4];                 //0x0070
-    u32 mState;                       //0x007C
-    u32 mPrevState;                   //0x0080
-    u16 mSubState;                    //0x0084
-    u16 mSubStateTimer;               //0x0086
-    u32 _01;                          //0x0088
-    f32 mBaseAcceleration;            //0x008C
-    u16 mAccelerationDirection;       //0x0090
-    u16 _02;                          //0x0092
-    JGeometry::TVec3<u16> mAngle;     //0x0094
-    u16 _03;                          //0x009A
-    u32 _04[0x8 / 4];                 //0x009C
-    JGeometry::TVec3<f32> mSpeed;     //0x00A4
-    f32 mForwardSpeed;                //0x00B0
-    u32 _05[0x24 / 4];                //0x00B4
-    TBGCheckData *mWallTriangle;      //0x00D8
-    TBGCheckData *mRoofTriangle;      //0x00DC
-    TBGCheckData *mFloorTriangle;     //0x00E0
-    TBGCheckData *mFloorTriangleCopy; //0x00E4
-    f32 mCeilingAbove;                //0x00E8
-    f32 mFloorBelow;                  //0x00EC
-    f32 mWaterHeight;                 //0x00F0
-    u32 _07[0x24 / 4];                //0x00F4
+    u32 _00;                               //0x0070
+    u32 mActionState;                      //0x0074
+    u32 mJumpingState;                     //0x0078
+    u32 mState;                            //0x007C
+    u32 mPrevState;                        //0x0080
+    u16 mSubState;                         //0x0084
+    u16 mSubStateTimer;                    //0x0086
+    u32 _01;                               //0x0088
+    f32 mBaseAcceleration;                 //0x008C
+    u16 mAccelerationDirection;            //0x0090
+    u16 _02;                               //0x0092
+    JGeometry::TVec3<u16> mAngle;          //0x0094
+    u16 _03;                               //0x009A
+    u32 _04[0x8 / 4];                      //0x009C
+    JGeometry::TVec3<f32> mSpeed;          //0x00A4
+    f32 mForwardSpeed;                     //0x00B0
+    u32 _05[0x24 / 4];                     //0x00B4
+    TBGCheckData *mWallTriangle;           //0x00D8
+    TBGCheckData *mRoofTriangle;           //0x00DC
+    TBGCheckData *mFloorTriangle;          //0x00E0
+    TBGCheckData *mFloorTriangleCopy;      //0x00E4
+    f32 mCeilingAbove;                     //0x00E8
+    f32 mFloorBelow;                       //0x00EC
+    f32 mWaterHeight;                      //0x00F0
+    u32 _07[0x14 / 4];                     //0x00F4
+    TMarioControllerWork *mControllerWork; //0x0108
+    u32 _07a[0xC / 4];                     //0x010C
 
     struct
     {
@@ -345,7 +378,10 @@ public:
     u16 mOBTimer;                  //0x02BA
     u32 _15[0xC8 / 4];             //0x02BC
     TTakeActor *mGrabTarget;       //0x0384
-    u32 _16[0xC / 4];              //0x0388
+    u8 _16;                        //0x0388
+    u8 mSurfGessoID;               //0x0389
+    u16 _16a;                      //0x038A
+    u32 _16b[0x8 / 4];             //0x038C
     J3DDrawBuffer *mDrawBufferA;   //0x0394
     J3DDrawBuffer *mDrawBufferB;   //0x0398
     u32 _17[0xC / 4];              //0x039C
@@ -357,15 +393,19 @@ public:
     TWaterGun *mFludd;             //0x03E4
     u32 _20[0x8 / 4];              //0x03E8
     TYoshi *mYoshi;                //0x03F0
-    MarioParams *mCustomInfo;      //0x03F4
-    u32 _21[0x104 / 4];            //0x03F8
+    void *mSurfGesso;              //0x03F4
+    u32 _20a[0x8 / 4];             //0x03F8
+    MarioParams *mCustomInfo;      //0x0400
+    u32 _21[0xF8 / 4];             //0x0404
     TMarioGamePad *mController;    //0x04FC
     u32 _22[0x8C / 4];             //0x0500
     u16 mMaxHealth;                //0x058C
     u16 _23;                       //0x058E
     u32 _24[0x10 / 4];             //0x0590
     f32 mMaxGroundSpeed;           //0x05A0
-    u32 _25[0x22C / 4];            //0x05A4
+    u32 _25[0x10 / 4];             //0x05A4
+    f32 mTurboNozzleSpeed;         //0x05B4
+    u32 _25a[0x218 / 4];           //0x05B8
     f32 mBaseBounceSpeed1;         //0x07D0
     u32 _26[0x10 / 4];             //0x07D4
     f32 mBaseBounceSpeed2;         //0x07E4
@@ -375,7 +415,9 @@ public:
     f32 mThrowPower;               //0x0820
     u32 _29[0x9C / 4];             //0x0824
     f32 mMaxFallNoDamage;          //0x08C0
-    u32 _30[0xC4 / 4];             //0x08C4
+    u32 _30[0x24 / 4];             //0x08C4
+    f32 mWallBonkThreshold;        //0x08E8
+    u32 _30a[0x9C / 4];            //0x08EC
     u16 mOBStep;                   //0x0988
     u16 _31;                       //0x098A
     u32 _32[0x10 / 4];             //0x098C
@@ -383,19 +425,41 @@ public:
     u16 _33;                       //0x099E
     u32 _34[0x178 / 4];            //0x09A0
     f32 mGravity;                  //0x0B18
-    u32 _35[0x38 / 4];             //0x0B1C
+    u32 _35[0x10 / 4];             //0x0B1C
+    f32 mTwirlGravity;             //0x0B2C
+    u32 _35a[0x24 / 4];            //0x0B30
     f32 mAirborneHSpeedMul;        //0x0B54
     u32 _36[0x10 / 4];             //0x0B58
-    f32 mDefaultAccelerationMul;   //0x0B68
+    f32 mJumpAccelMul;             //0x0B68
     u32 _37[0x24 / 4];             //0x0B6C
     f32 mSideFlipStrength;         //0x0B90
-    u32 _38[0xEC / 4];             //0x0B94
+    u32 _38[0x60 / 4];             //0x0B94
+    f32 mTurboJumpFSpeed;          //0x0BF4
+    u32 _38a[0x10 / 4];            //0x0BF8
+    f32 mTurboJumpYSpeed;          //0x0C08
+    u32 _38b[0x74 / 4];            //0x0C0C
     f32 mHipDropSpeedSlow;         //0x0C80
     u32 _39[0x10 / 4];             //0x0C84
     f32 mHipDropSpeedFast;         //0x0C94
-    u32 _40[0x4A8 / 4];            //0x0C98
-    f32 mWaterJumpHeightDifMax;    //0x1140
-    u32 _41[0x24 / 4];             //0x1144
+    u32 _40[0x1DC / 4];            //0x0C98
+    f32 mDiveStartSpeed;           //0x0E74
+    u32 _40a[0x68 / 4];            //0x0E78
+    f32 mRunSlowdownFactor;        //0x0EE0
+    u32 _40aa[0x10 / 4];           //0x0EE4
+    f32 mRunSlowdownFactor2;       //0x0EF4
+    u32 _40b[0xC4 / 4];            //0x0EF8
+    f32 mWaterMaxDiffToInteract;   //0x0FBC
+    u32 _40c[0x144 / 4];           //0x0FC0
+    f32 mWaterHighBuoyant;         //0x1104
+    u32 _40d[0x10 / 4];            //0x1108
+    f32 mWaterLowBuoyant;          //0x1118
+    u32 _40e[0x10 / 4];            //0x111C
+    f32 mWaterYSpdMultiplier;      //0x112C
+    u32 _40f[0x10 / 4];            //0x1130
+    f32 mWaterJumpHeightDiffMax;   //0x1140
+    u32 _41[0x10 / 4];             //0x1144
+    f32 mWaterEntryMaxHeight;      //0x1154
+    u32 _41a[0x10 / 4];            //0x1158
     f32 mOceanOfs;                 //0x1168
     u32 _42[0x100 / 4];            //0x116C
     f32 mWaterHealthDrainSpd;      //0x126C
@@ -409,14 +473,20 @@ public:
     u32 _47[0x10 / 4];             //0x12DC
     s16 mWallHangTimer;            //0x12EC
     u32 _48[0x124 / 4];            //0x12F0
-    f32 mTRopeAirborneAccelMul;    //0x1414
-    u32 _49[0xE04 / 4];            //0x1418
+    f32 mTRopeJumpAccelMul;        //0x1414
+    u32 _49[0x1DC / 4];            //0x1418
+    f32 mPoleClimbSpeedMul;        //0x15F4
+    u32 _49a[0x38 / 4];            //0x15F8
+    f32 mPoleGrabDistPadding;      //0x1630
+    u32 _49b[0xB38 / 4];           //0x1634
+    f32 mHoverYSpdMultiplier;      //0x216C
+    u32 _49c[0x98 / 4];            //0x2170
+    f32 mFSpeedYoshiMul;           //0x2208
+    u32 _50[0x10 / 4];             //0x220C
     f32 mVSpeedYoshiMul;           //0x221C
-    u32 _50[0x4C / 4];             //0x2220
+    u32 _51[0x4C / 4];             //0x2220
     f32 mFSpeedFlutterMul;         //0x226C
-    u32 _51[0x10 / 4];             //0x2270
+    u32 _52[0x10 / 4];             //0x2270
     f32 mBSpeedFlutterMul;         //0x2280
-    u32 _52[0x200C / 4];           //0x2284
+    u32 _53[0x200C / 4];           //0x2284
 };
-
-#endif

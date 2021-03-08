@@ -26,6 +26,31 @@ extern "C"
 #define OSRoundUp32B(x) (((u32)(x) + 32 - 1) & ~(32 - 1))
 #define OSRoundDown32B(x) (((u32)(x)) & ~(32 - 1))
 
+#define OS_CONSOLE_TYPE *(u32 *)0x8000002C
+
+#define OS_CONSOLE_RETAIL1 0x00000001
+#define OS_CONSOLE_HW2 0x00000002
+#define OS_CONSOLE_PRODUCTION 0x00000003
+#define OS_CONSOLE_RESERVED 0x00000004
+#define OS_CONSOLE_DEV_MAC 0x10000000
+#define OS_CONSOLE_DEV_PC 0x10000001
+#define OS_CONSOLE_DEV_ARTHUR 0x10000002
+#define OS_CONSOLE_DEV_MINNOW 0x10000003
+#define OS_CONSOLE_DEV_KIT1 0x10000004
+#define OS_CONSOLE_DEV_KIT2 0x10000005
+#define OS_CONSOLE_DEV_KIT3 0x10000006
+#define OS_CONSOLE_DEV_RESERVED 0x10000007
+#define OS_CONSOLE_TDEV_HW2 0x10000005
+#define OS_CONSOLE_TDEV_NEWEST 0x10000006
+#define OS_CONSOLE_TDEV_RESERVED 0x20000007
+
+#define OS_TVMODE_NTSC 0
+#define OS_TVMODE_PAL 1
+#define OS_TVMODE_DEBUG 2
+#define OS_TVMODE_DEBUGPAL 3
+#define OS_TVMODE_MPAL 4
+#define OS_TVMODE_PAL60 5
+
     typedef u32 OSTick;
     typedef u64 OSTime;
     typedef s32 OSPriority; // 0 is highest priority, 31 is lowest
@@ -112,7 +137,7 @@ extern "C"
         OSThreadLink mLinkActive;
         u8 *mStackBase;
         u32 *mStackEnd;
-    };
+    } OSThread;
 
     typedef struct OSMutex
     {
@@ -120,7 +145,7 @@ extern "C"
         OSThread *mThread;    // _8
         s32 mLockCount;       // _C
         OSMutexLink mLink;    // _10
-    };
+    } OSMutex;
 
     typedef struct OSCond
     {
@@ -137,7 +162,7 @@ extern "C"
         OSTime mPeriod;
         OSTime mStart;
         void *mQueue;
-    };
+    } OSAlarm;
 
     typedef struct OSStopwatch
     {
@@ -149,6 +174,30 @@ extern "C"
         OSTime mLast;
         BOOL mActive;
     } OSStopwatch;
+
+    typedef struct OSBootInfo
+    {
+        char mGameCode[4];
+        char mMakerCode[2];
+        u8 mDiskID;
+        u8 mDiskVersion;
+        u8 mStreamingEnabled;
+        u8 mStreamBufSize;
+        u8 _0A[0xF];
+        u32 mDVDMagic;
+        u32 mBootMagic;
+        u32 mVersion;
+        u32 mPhysicalMemSize;
+        u32 mConsoleType;
+        void *mArenaLo;
+        void *mArenaHi;
+        void *mFSTTable;
+        u32 mFSTMaxLength;
+        u32 mDebuggerPresent;
+        u32 mDebuggerMask;
+        u32 mExceptionHook;
+        u32 _mTempLR;
+    } OSBootInfo;
 
     void OSInit();
     void OSExceptionInit();
@@ -177,7 +226,7 @@ extern "C"
     void OSSetAlarm(OSAlarm *alarm, OSTime tick, OSAlarmHandler handler);
     void OSSetPeriodicAlarm(OSAlarm *alarm, OSTime start, OSTime period, OSAlarmHandler handler);
     void InsertAlarm(OSAlarm *alarm, OSTime time, OSAlarmHandler handler);
-    void OSCancelAlarm();
+    void OSCancelAlarm(OSAlarm *alarm);
 
     void OSYieldThread();
     BOOL OSCreateThread(OSThread *thread, void *(*funcToThread)(void *), void *parameter, void *stack, u32 stackSize, OSPriority priority, u16 attributes);

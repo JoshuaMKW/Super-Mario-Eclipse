@@ -1,5 +1,4 @@
-#ifndef TOPTIONSUBTITLEUNIT_H
-#define TOPTIONSUBTITLEUNIT_H
+#pragma once
 
 #include "types.h"
 #include "sms/J2D.hxx"
@@ -16,5 +15,3 @@ public:
     u32 *_C;
     u32 _10;
 };
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef BGCHECK_H
-#define BGCHECK_H
+#pragma once
 
 #include "types.h"
 #include "sms/JGeometry.hxx"
@@ -48,5 +47,3 @@ public:
     u16 _10;
     u16 _12;
 };
-
-#endif

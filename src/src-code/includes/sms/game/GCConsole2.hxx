@@ -1,5 +1,4 @@
-#ifndef GCCONSOLE2_H
-#define GCCONSOLE2_H
+#pragma once
 
 #include "types.h"
 #include "sms/JUT.hxx"
@@ -33,5 +32,3 @@ public:
     u32 mWaterCardTopHeight;           //0x02B8
     u32 _10[0x34 / 4];                 //0x02BC
 };
-
-#endif

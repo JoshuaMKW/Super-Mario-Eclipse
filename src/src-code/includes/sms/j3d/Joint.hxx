@@ -1,5 +1,4 @@
-#ifndef TJOINT_H
-#define TJOINT_H
+#pragma once
 
 #include "types.h"
 #include "sms/JDrama.hxx"
@@ -40,5 +39,3 @@ public:
     J3DModel *mModel;                  // _28
     MActor *mActor;                    // _2C
 };
-
-#endif

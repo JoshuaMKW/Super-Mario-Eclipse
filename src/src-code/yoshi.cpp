@@ -70,7 +70,7 @@ kmWrite32(0x8026F220, 0x41820164);
 //0x801BC868
 bool isYoshiEggNeedFruit(THitActor *gpFruit)
 {
-    if (!gInfo.mFile || !gInfo.mFile->GlobalFlags.mIsYoshi || !gInfo.mFile->Yoshi.mIsEggFree)
+    if (SMEFile::mStageConfig.FileHeader.mMAGIC != SMEFile::MAGIC || !SMEFile::mStageConfig.GlobalFlags.mIsYoshi || !SMEFile::mStageConfig.Yoshi.mIsEggFree)
     {
         return isFruit__11TMapObjBaseFP9THitActor(gpFruit);
     }
@@ -89,7 +89,7 @@ u8 isYoshiEggFree(TEggYoshi *gpEgg, THitActor *gpFruit)
     {
         return 0;
     }
-    else if (!gInfo.mFile || !gInfo.mFile->GlobalFlags.mIsYoshi || !gInfo.mFile->Yoshi.mIsEggFree)
+    else if (SMEFile::mStageConfig.FileHeader.mMAGIC != SMEFile::MAGIC || !SMEFile::mStageConfig.GlobalFlags.mIsYoshi || !SMEFile::mStageConfig.Yoshi.mIsEggFree)
     {
         if (gpEgg->mWantedFruit != gpFruit->mObjectID)
             return 2;
@@ -113,7 +113,7 @@ kmWrite32(0x801BC8D0, 0x48000134);
 //0x8024D68C
 bool isYoshiMaintainFluddModel()
 {
-    register TMario *player;
+    TMario *player;
     __asm { mr player, r31 };
 
     if (player->mYoshi->mState == TYoshi::MOUNTED)
@@ -136,7 +136,7 @@ kmCall(0x8024F240, &isYoshiDrown);
 
 bool canMountYoshi(u32 state, JGeometry::TVec3<f32> *yoshiCoordinates)
 {
-    register TMario *player;
+    TMario *player;
     __asm { mr player, r31 };
 
     if (player->mCustomInfo->mParams)
@@ -155,11 +155,9 @@ bool canMountYoshi(u32 state, JGeometry::TVec3<f32> *yoshiCoordinates)
 //0x802810F8
 bool canMountYoshiWrapper(u32 state, JGeometry::TVec3<f32> *yoshiCoordinates)
 {
-    register JGeometry::TVec3<f32> *tmp;
-    __asm { mr tmp, r4 };
-
     bool canMount = canMountYoshi(state, yoshiCoordinates);
-    __asm { mr r4, tmp };
+    __asm volatile { mr r4, yoshiCoordinates };
+
     return canMount;
 }
 kmCall(0x802810F8, &canMountYoshiWrapper);
@@ -168,13 +166,13 @@ kmWrite32(0x802810FC, 0x2C030000);
 //0x8026E810
 void fixYoshiJuiceDecrement()
 {
-    register TYoshi *yoshi;
+    TYoshi *yoshi;
     __asm { mr yoshi, r30 };
 
     TMario *player = yoshi->mMario;
     if (player->mFludd->mIsEmitWater && yoshi->isMounted())
     {
-        yoshi->mCurJuice -= player->mFludd->mEmitInfo[0x18 / 4];
+        yoshi->mCurJuice -= player->mFludd->mEmitInfo->mEmitCount;
     }
 }
 kmCall(0x8026E810, &fixYoshiJuiceDecrement);
@@ -196,11 +194,11 @@ kmCall(0x8024E58C, &canYoshiSpray);
 //0x80273198
 u32 calcYoshiSwimVelocity(TMario *player, u32 arg1)
 {
-    if (!gInfo.mFile || !gInfo.mFile->GlobalFlags.mIsYoshi)
+    if (SMEFile::mStageConfig.FileHeader.mMAGIC != SMEFile::MAGIC || !SMEFile::mStageConfig.GlobalFlags.mIsYoshi)
     {
         return jumpProcess__6TMarioFi(player, arg1);
     }
-    else if (gInfo.mFile->Yoshi.mYoshiHungry)
+    else if (SMEFile::mStageConfig.Yoshi.mYoshiHungry)
     {
         return jumpProcess__6TMarioFi(player, arg1);
     }
@@ -239,31 +237,37 @@ u32 calcYoshiSwimVelocity(TMario *player, u32 arg1)
 kmCall(0x80273198, &calcYoshiSwimVelocity);
 
 //0x80270078
-void isYoshiWaterFlutter()
+u32 isYoshiWaterFlutter()
 {
-    register TYoshi *yoshi;
-    register int animID;
+    TYoshi *yoshi;
+    u32 animID;
 
     __asm { mr yoshi, r29 };
     __asm { mr animID, r30 };
 
-    if (gInfo.mFile && gInfo.mFile->GlobalFlags.mIsYoshi && gInfo.mFile->Yoshi.mYoshiHungry && TYoshi::isGreenYoshiAscendingWater(yoshi->mMario))
+    if (SMEFile::mStageConfig.FileHeader.mMAGIC == SMEFile::MAGIC && SMEFile::mStageConfig.GlobalFlags.mIsYoshi && SMEFile::mStageConfig.Yoshi.mYoshiHungry && TYoshi::isGreenYoshiAscendingWater(yoshi->mMario))
     {
         animID = 9;
     }
-    __asm { mr r30, animID };
-    __asm { clrlwi r0, animID, 16 };
+
+    if ((animID & 0xFFFF) == 24)
+        animID = 15;
+
+    return animID;
 }
 kmCall(0x80270078, &isYoshiWaterFlutter);
+kmWrite32(0x8027007C, 0x7C7E1B78);
+kmWrite32(0x80270080, 0x60000000);
+kmWrite32(0x80270084, 0x60000000);
 
 //0x8026FE84 NEEDS ADDI R4, R3, 0
 u32 isYoshiValidWaterFlutter(s32 anmIdx, u32 unk1, TMario *player)
 {
-    if (!gInfo.mFile || !gInfo.mFile->GlobalFlags.mIsYoshi)
+    if (SMEFile::mStageConfig.FileHeader.mMAGIC != SMEFile::MAGIC || !SMEFile::mStageConfig.GlobalFlags.mIsYoshi)
     {
         return player->mState;
     }
-    else if (gInfo.mFile->Yoshi.mYoshiHungry)
+    else if (SMEFile::mStageConfig.Yoshi.mYoshiHungry)
     {
         return player->mState;
     }
@@ -288,7 +292,7 @@ kmCall(0x8024E788, &isYoshiValidDrip);
 //0x801BC128
 void initFreeEggCard(MActorAnmBck *bckData)
 {
-    if (!gInfo.mFile || !gInfo.mFile->GlobalFlags.mIsYoshi || !gInfo.mFile->Yoshi.mIsEggFree)
+    if (SMEFile::mStageConfig.FileHeader.mMAGIC != SMEFile::MAGIC || !SMEFile::mStageConfig.GlobalFlags.mIsYoshi || !SMEFile::mStageConfig.Yoshi.mIsEggFree)
         return;
 
     bckData->mFrameRate = 11;
@@ -298,7 +302,7 @@ kmBranch(0x801BC128, &initFreeEggCard);
 //0x801BC380
 u32 checkFreeEggCard(MActorAnmBck *bckData)
 {
-    if (!gInfo.mFile || !gInfo.mFile->GlobalFlags.mIsYoshi || !gInfo.mFile->Yoshi.mIsEggFree)
+    if (SMEFile::mStageConfig.FileHeader.mMAGIC != SMEFile::MAGIC || !SMEFile::mStageConfig.GlobalFlags.mIsYoshi || !SMEFile::mStageConfig.Yoshi.mIsEggFree)
         return 0;
 
     bckData->mFrameRate = 11;

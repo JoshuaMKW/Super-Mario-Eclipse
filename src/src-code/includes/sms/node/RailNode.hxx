@@ -1,5 +1,4 @@
-#ifndef RAILNODE_H
-#define RAILNODE_H
+#pragma once
 
 #include "types.h"
 #include "sms/JGeometry.hxx"
@@ -14,5 +13,3 @@ public:
     s16 mNeighborIDs[8];             //0x0014
     f32 mNeightborDistances[8];    //0x0024
 };
-
-#endif

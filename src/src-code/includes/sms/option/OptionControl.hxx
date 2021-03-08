@@ -1,5 +1,4 @@
-#ifndef TOPTIONCONTROL_H
-#define TOPTIONCONTROL_H
+#pragma once
 
 #include "types.h"
 #include "sms/J2D.hxx"
@@ -30,5 +29,3 @@ public:
     u8 _1B;                             // ^^
     u32 _1C;
 };
-
-#endif

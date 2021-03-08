@@ -1,5 +1,4 @@
-#ifndef TCAMERAMARIODATA_H
-#define TCAMERAMARIODATA_H
+#pragma once
 
 #include "types.h"
 
@@ -15,5 +14,3 @@ public:
     u32 _18;
     f32 _1C;
 };
-
-#endif

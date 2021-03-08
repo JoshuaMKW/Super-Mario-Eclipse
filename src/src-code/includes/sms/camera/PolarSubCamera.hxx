@@ -1,5 +1,4 @@
-#ifndef POLARSUBCAMERA_H
-#define POLARSUBCAMERA_H
+#pragma once
 
 #include "types.h"
 #include "sms/JDrama.hxx"
@@ -16,5 +15,3 @@ public:
     u16 mHorizontalAngle;         //0x00A6
     f32 mInterpolateDistance;   //0x00A8
 };
-
-#endif

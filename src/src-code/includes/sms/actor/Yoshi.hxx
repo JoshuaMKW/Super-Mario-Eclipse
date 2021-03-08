@@ -1,5 +1,4 @@
-#ifndef YOSHI_H
-#define YOSHI_H
+#pragma once
 
 #include "types.h"
 #include "sms/actor/MActor.hxx"
@@ -68,5 +67,3 @@ public:
     static bool isGreenYoshiMounted(TMario *gpMario);
     static bool isGreenYoshiAscendingWater(TMario *gpMario);
 };
-
-#endif

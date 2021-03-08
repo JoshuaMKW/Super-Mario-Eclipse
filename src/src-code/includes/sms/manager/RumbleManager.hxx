@@ -1,5 +1,4 @@
-#ifndef RUMBLEMANAGER_H
-#define RUMBLEMANAGER_H
+#pragma once
 
 #include "types.h"
 
@@ -19,5 +18,3 @@ public:
     u32 _28;
     u32 *_2C;
 };
-
-#endif

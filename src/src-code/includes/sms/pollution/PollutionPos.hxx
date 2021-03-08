@@ -1,10 +1,7 @@
-#ifndef POLLUTIONPOS_H
-#define POLLUTIONPOS_H
+#pragma once
 
 #include "types.h"
 
 class TPollutionPos
 {
 };
-
-#endif

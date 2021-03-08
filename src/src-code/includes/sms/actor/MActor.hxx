@@ -1,5 +1,4 @@
-#ifndef MACTOR_H
-#define MACTOR_H
+#pragma once
 
 #include "types.h"
 
@@ -56,5 +55,3 @@ public:
 	u8 _43; // ^^
 	u32 mLightType; // _44
 };
-
-#endif

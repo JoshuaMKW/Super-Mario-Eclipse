@@ -1,5 +1,4 @@
-#ifndef GAMESEQUENCE_H
-#define GAMESEQUENCE_H
+#pragma once
 
 #include "types.h"
 
@@ -63,7 +62,5 @@ public:
 
     u8 mAreaID;
     u8 mEpisodeID;
-    u16 _00;
+    JDrama::TFlagT<u16> mFlag;
 };
-
-#endif

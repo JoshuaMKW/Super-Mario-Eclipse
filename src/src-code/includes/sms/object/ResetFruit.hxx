@@ -1,5 +1,4 @@
-#ifndef RESETFRUIT_H
-#define RESETFRUIT_H
+#pragma once
 
 #include "types.h"
 #include "sms/mapobj/MapObjBall.hxx"
@@ -16,5 +15,3 @@ public:
         BANANA = 0x40000394
     };
 };
-
-#endif

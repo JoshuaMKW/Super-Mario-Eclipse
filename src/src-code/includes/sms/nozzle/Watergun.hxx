@@ -1,5 +1,4 @@
-#ifndef WATERGUN_H
-#define WATERGUN_H
+#pragma once
 
 #include "types.h"
 #include "sms/JGeometry.hxx"
@@ -7,6 +6,14 @@
 #include "sms/nozzle/NozzleTrigger.hxx"
 
 class TMario;
+
+class TWaterEmitInfo
+{
+
+public:
+    u32 _00[0x18 / 4];
+    s32 mEmitCount; //0x0018
+};
 
 class TWaterGun
 {
@@ -42,10 +49,12 @@ public:
     u32 _14[0x8 / 4];                      //0x1C88
     JGeometry::TVec3<f32> mGeometry[10];   //0x1C90
     u32 _15;                               //0x1D08
-    u32 *mEmitInfo;                        //0x1D0C
+    TWaterEmitInfo *mEmitInfo;             //0x1D0C
+    u32 _16;                               //0x1D10
     char *mPrmPath;                        //0x1D14
     char *mRocketPath;                     //0x1D18
-    u32 _16[0xA0 / 4];                     //0x1D1C
+    u32 _17[0x24 / 4];                     //0x1D1C
+    float mHoverMaxHeight;                 //0x1D40
+    u32 _18[0x78 / 4];                     //0x1D44
+    //1DBC
 };
-
-#endif

@@ -12,7 +12,6 @@
 #define DVD_RESETHARD 0
 #define DVD_RESETNONE 2
 #define DVD_RESETSOFT 1
-#define DVD_SetUserData(block, data) ((block)->usrdata = (data))
 #define DVD_SPINMOTOR_ACCEPT 0x00004000
 #define DVD_SPINMOTOR_CHECKDISK 0x00008000
 #define DVD_SPINMOTOR_DOWN 0x00000000
@@ -44,58 +43,57 @@ extern "C"
 
     typedef struct DVDDiskID
     {
-        char name[0x04];     // _0
-        char company[0x02];  // _4
-        u8 diskNum;          // _6
-        u8 version;          // _7
-        u8 streaming;        // _8
-        u8 streamBufferSize; // _9
-        u8 pad[0x16];        // _A
+        char mName[0x04];     // _0
+        char mCompany[0x02];  // _4
+        u8 mDiskNum;          // _6
+        u8 mVersion;          // _7
+        u8 mStreaming;        // _8
+        u8 mStreamBufferSize; // _9
+        u8 mPad[0x16];        // _A
     } DVDDiskID;
 
     typedef struct DVDCommandBlock
     {
-        DVDCommandBlock *nextBlock; // _0
-        DVDCommandBlock *prevBlock; // _4
-        u32 curCommand;             // _8
-        s32 curState;               // _C
-        u32 offset;                 // _10
-        u32 length;                 // _14
-        void *address;              // _18
-        u32 curTransferSize;        // _1C
-        u32 transferredSize;        // _20
-        DVDDiskID *diskID;          // _24
-        DVDCBCallback cb;           // _28
-        void *data;                 // _2C
-    };
+        DVDCommandBlock *mNextBlock; // _0
+        DVDCommandBlock *mPrevBlock; // _4
+        u32 mCurCommand;             // _8
+        s32 mCurState;               // _C
+        u32 mOffset;                 // _10
+        u32 mLength;                 // _14
+        void *mAddress;              // _18
+        u32 mCurTransferSize;        // _1C
+        u32 mTransferredSize;        // _20
+        DVDDiskID *mDiskID;          // _24
+        DVDCBCallback mCB;           // _28
+        void *mData;                 // _2C
+    } DVDCommandBlock;
 
     typedef struct DVDFileInfo
     {
-        DVDCommandBlock cmdBlock; // _0
-        u32 start;                // _30
-        u32 len;                  // _34
-        DVDCallback cb;           // _38
-    };
+        DVDCommandBlock mCmdBlock; // _0
+        u32 mStart;                // _30
+        u32 mLen;                  // _34
+        DVDCallback mCB;           // _38
+    } DVDFileInfo;
 
     // credit to arookas
     typedef struct DVDDriveInfo
     {
-        u16 revisionLevel; // _0
-        u16 deviceCode;    // _2
-        u16 releaseDate;   // _4
-        u8 pad[0x18];
+        u16 mRevisionLevel; // _0
+        u16 mDeviceCode;    // _2
+        u16 mReleaseDate;   // _4
+        u8 mPad[0x18];
     } DVDDriveInfo;
-
 
     void DVDInit();
 
-    s32 DVDConvertPathToEntrynum(char *path);
-    bool DVDOpen(char *name, DVDFileInfo *info);
+    s32 DVDConvertPathToEntrynum(const char *path);
+    bool DVDOpen(const char *name, DVDFileInfo *info);
     bool DVDFastOpen(s32 entryNum, DVDFileInfo *info);
     bool DVDClose(DVDFileInfo *info);
 
-    bool DVDGetCurrentDir(char *path, u32 maxLength);
-    bool DVDChangeDir(char *directoryName);
+    bool DVDGetCurrentDir(const char *path, u32 maxLength);
+    bool DVDChangeDir(const char *directoryName);
 
     bool DVDReadAsyncPrio(DVDFileInfo *info, void *address, s32 length, s32 offset, DVDCallback cb, s32 priority);
     s32 DVDReadPrio(DVDFileInfo *info, void *address, s32 length, s32 offset, s32 priority);

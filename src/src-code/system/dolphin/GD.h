@@ -5,10 +5,10 @@
 
 typedef struct _GDLObj
 {
-    u8 *start; // _0
-    u32 len;   // _4
-    u8 *ptr;   // _8
-    u8 *top;   // _C
+    u8 *mStart; // _0
+    u32 mLen;   // _4
+    u8 *mPtr;   // _8
+    u8 *mTop;   // _C
 } GDLObj;
 
 extern GDLObj *__GDCurrentDL;

@@ -1,11 +1,10 @@
-#ifndef MAP_H
-#define MAP_H
+#pragma once
 
 #include "types.h"
 #include "sms/JDrama.hxx"
 
 #include "sms/collision/BGCheck.hxx"
-#include "sms/collision/MapCollision.hxx"
+#include "sms/collision/MapCollisionData.hxx"
 
 class TMapWarp
 {
@@ -37,5 +36,3 @@ public:
     TMapWarp *mMapWarp;                //0x0014
     TMapXlu *mMapXlu;                  //0x0018
 };
-
-#endif

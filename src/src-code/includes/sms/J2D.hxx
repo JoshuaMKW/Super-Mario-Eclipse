@@ -1,5 +1,4 @@
-#ifndef J2D_H
-#define J2D_H
+#pragma once
 
 #include "types.h"
 #include "MTX.h"
@@ -7,11 +6,27 @@
 #include "sms/JSUStream.hxx"
 #include "sms/JUT.hxx"
 
-typedef u32 *ResFONT; // just to be more percise
+class ResFONT
+{  
+};
 
 class J2DGrafContext
 {
 public:
+    J2DGrafContext(int, int, int, int);
+	J2DGrafContext(const JUTRect &);
+	~J2DGrafContext();
+
+    void place(const JUTRect &);
+	void place(int, int, int, int);
+	void setPort();
+	void setup2D();
+	void setScissor();
+	void setLookat();
+
+	void scissor(const JUTRect &);
+	void fillBox(const JUTRect &);
+
     u32 *vTable; // _0
     u32 _4; // padding?
     JUTRect _8;
@@ -41,6 +56,14 @@ public:
 class J2DOrthoGraph : public J2DGrafContext
 {
 public:
+    J2DOrthoGraph(u32, u32, u32, u32);
+	J2DOrthoGraph(const JUTRect &);
+	~J2DOrthoGraph();
+
+	void setPort();
+	void setLookat();
+	void scissorBounds(JUTRect *, JUTRect *);
+
     JUTRect _D8;
     u32 _DC;
     u32 _E0;
@@ -52,11 +75,30 @@ public:
 class J2DPane
 {
 public:
-    u32 *vTable; // _0
+    J2DPane();
+	J2DPane(J2DPane *, s16, bool, u32, const JUTRect &);
+	J2DPane(s16, u32, const JUTRect &);
+	J2DPane(J2DPane *, JSURandomInputStream *, bool);
+	virtual ~J2DPane();
+	
+	virtual void drawSelf(int, int, Mtx *);
+	virtual bool setConnectParent(bool);
+	virtual void drawSelf(int, int);
+	virtual void resize(int, int);
+	virtual void move(int, int);
+	virtual void add(int, int);
+	virtual u32* search(u32);
+	virtual void makeMatrix(int, int);
+
+	void draw(int, int, const J2DGrafContext *, bool);
+	void clip(const JUTRect &);
+	void setCullBack(u32); // GXCullback
+	void setBasePosition(u32); // J2DBasePosition
+
     u16 _4;
     u16 _6;       // padding?
     u32 id;       // _8
-    u8 isVisible; // _C
+    bool isVisible; // _C
     u8 _D;        // padding?
     u8 _E;        // ^^
     u8 _F;        // ^^
@@ -83,9 +125,9 @@ public:
 
 enum J2DTextBoxHBinding
 {
-    Center,
-    Right,
-    Left
+    HBindingCenter,
+    HBindingRight,
+    HBindingLeft
 };
 
 enum J2DTextBoxVBinding
@@ -105,15 +147,27 @@ enum J2DBinding
 
 enum J2DWrapMode
 {
-    None,
-    Clamp,
-    Repeat,
-    Mirror,
+    WrapNone,
+    WrapClamp,
+    WrapRepeat,
+    WrapMirror,
 };
 
 class J2DScreen : public J2DPane
 {
 public:
+    virtual ~J2DScreen();
+
+	virtual void drawSelf(int, int, Mtx *);
+	virtual u32* search(u32);
+
+	void makeHiearachyPanes(J2DPane *, JSURandomInputStream *, bool, bool, bool, u32 *);
+	u32 makeUserPane(s16, J2DPane *, JSURandomInputStream *);
+	u32 makeUserPane(u32, J2DPane *, JSURandomInputStream *);
+
+	void stop();
+	void draw(u32, u32, const J2DGrafContext *);
+
     u8 _EC;
     u8 _ED; // padding?
     u8 _EE; // ^^
@@ -125,30 +179,66 @@ public:
 
 class J2DSetScreen : public J2DScreen
 {
+public:
+    J2DSetScreen(const char *, JKRArchive *);
+
+	void makeHiearachyPanes(J2DPane *, JSURandomInputStream *, bool, bool, bool, u32 *);
 };
 
 class J2DTextBox : public J2DPane
 {
 public:
-    JUTFont *font; // _EC
+    J2DTextBox(const ResFONT *, const char *);
+	J2DTextBox(J2DPane *, JSURandomInputStream *, bool);
+	J2DTextBox(u32, const JUTRect &, const ResFONT *, const char *, J2DTextBoxHBinding, J2DTextBoxVBinding);
+	virtual ~J2DTextBox();
+	
+	virtual void resize(int, int);
+	virtual bool setConnectParent(bool);
+	virtual void drawSelf(int, int);
+	virtual void drawSelf(int, int, Mtx *);
+
+	void initiate(const ResFONT *, const char *, J2DTextBoxHBinding, J2DTextBoxVBinding);
+	
+	char *getStringPtr() const;
+	size_t setString(const char *, ...);
+	void setFont(JUTFont *);
+	void draw(int, int);
+
+    JUTFont *mFont; // _EC
     u32 _F0;
     u32 _F4;
-    J2DTextBoxHBinding hBinding; // _F8
-    J2DTextBoxVBinding vBinding; // _FC
-    u32 *strPtr;
+    J2DTextBoxHBinding mHBinding; // _F8
+    J2DTextBoxVBinding mVBinding; // _FC
+    u32 *mStrPtr;
     u32 _104;
     u32 _108;
-    u32 _10C;
-    u32 _110;
+    JUtility::TColor mColor;
+    JUtility::TColor mGradient;
     u32 _114;
     u32 _118;
     u32 _11C;
     u32 _120;
+    bool mInitialized;
 };
 
 class J2DPicture : public J2DPane
 {
 public:
+    J2DPicture(J2DPane *, JSURandomInputStream *, bool);
+	virtual ~J2DPicture();
+
+	virtual void drawSelf(int, int);
+	virtual void drawSelf(int, int, Mtx *);
+
+	void drawFullSet(int, int, int, int, J2DBinding, u32, bool, J2DWrapMode, J2DWrapMode, Mtx *);
+	void draw(int, int, int, int, bool, bool, bool);
+	void drawTexCoord(int, int, int, int, f32, f32, f32, f32, f32, f32, f32, f32, Mtx *);
+	void setTevMode();
+	void swap(f32 &, f32 &);
+	void setBlendKonstColor();
+	void setBlendKonstAlpha();
+
     u32 *_EC;
     u8 _F0[0xFC - 0xF0];
     u8 _FC; // padding?
@@ -169,11 +259,22 @@ public:
 class J2DPrint
 {
 public:
-    u32 *vTable;        // _0
+    J2DPrint(JUTFont *, int, int, JUtility::TColor, JUtility::TColor);
+	J2DPrint(JUTFont *, int);
+	virtual ~J2DPrint();
+
+	void initiate();
+	void private_initiate(JUTFont *, int, int, JUtility::TColor, JUtility::TColor);
+	static void setBuffer(u32);
+	void locate(int, int);
+	void setFontSize();
+	void print(int, int, const char *, ...);
+	void print(int, int, u8, const char *, ...);
+	void getWidth(const char *, ...);
+	void printReturn(const char *, int, int, J2DTextBoxHBinding, J2DTextBoxVBinding, int, int, u8);
+    
     JUTFont *font; // _4
     u32 _8;
     u32 _C;
-    // there's more
+    u8 _10[0x38];
 };
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef M3UMODEL_H
-#define M3UMODEL_H
+#pragma once
 
 #include "types.h"
 #include "sms/J3D.hxx"
@@ -18,5 +17,3 @@ public:
     u8 _43;         // ^^
     u32 mLightType; // _44
 };
-
-#endif

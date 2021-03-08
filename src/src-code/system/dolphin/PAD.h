@@ -16,16 +16,16 @@ extern "C"
 
     struct PADStatus
     {
-        u16 button;      // _0
-        u8 stickX;       // _2
-        u8 stickY;       // _3
-        u8 subStickX;    // c stick X (_4)
-        u8 subStickY;    // c stick Y (_5)
-        u8 triggerLeft;  // left trigger pressure (_6)
-        u8 triggerRight; // right trigger pressure (_7)
-        u8 analogA;      // _8
-        u8 analogB;      // _9
-        u8 curError;     // some odd number based on some constant (_10)
+        u16 mButton;      // _0
+        u8 mStickX;       // _2
+        u8 mStickY;       // _3
+        u8 mSubStickX;    // C Stick X (_4)
+        u8 mSubStickY;    // C Stick Y (_5)
+        u8 mTriggerLeft;  // Left trigger pressure (_6)
+        u8 mTriggerRight; // Right trigger pressure (_7)
+        u8 mAnalogA;      // _8
+        u8 mAnalogB;      // _9
+        u8 mCurError;     // Some odd number based on some constant (_10)
     };
 
     bool PADReset(u32 mask);

@@ -4,6 +4,8 @@
 #include "types.h"
 
 #define PI 3.14159265f
+#define Max(a, b) (((a) > (b)) ? (a) : (b))
+#define Min(a, b) (((a) < (b)) ? (a) : (b))
 
 #ifdef __cplusplus
 extern "C"

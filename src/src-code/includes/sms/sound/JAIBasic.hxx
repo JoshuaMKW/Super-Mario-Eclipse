@@ -1,5 +1,4 @@
-#ifndef JAIBASIC_H
-#define JAIBASIC_H
+#pragma once
 
 #include "types.h"
 #include "sms/sound/JAISound.hxx"
@@ -7,6 +6,21 @@
 class JAIBasic
 {
 public:
+    JAIBasic();
+
+    virtual void initStream();
+    virtual void makeSound(u32);
+    virtual bool getMapInfoFxline(u32);
+    virtual bool getMapInfoGround(u32);
+    virtual f32 getMapInfoFxParameter(u32);
+    virtual void sendPlayingSeCommand();
+    virtual void sendSeAllParameter(JAISound *);
+    virtual void setSeExtParameter(JAISound *);
+    virtual bool setRegisterTrackCallback();
+    virtual void checkStream();
+    virtual void checkNextFrameSe();
+    virtual void loadGroupWave(s64);
+
     u32 _0;
     u32 *vTable; // _4
     u8 _8[0x38 - 0x8];
@@ -19,5 +33,3 @@ public:
     char *mParamStreamPath; // _74
     u32 _78;
 };
-
-#endif

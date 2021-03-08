@@ -1,10 +1,12 @@
-#ifndef MARIOPARAMS_H
-#define MARIOPARAMS_H
+#pragma once
 
 #include "types.h"
+#include "mem.h"
+
 #include "sms/JGeometry.hxx"
 #include "sms/JUT.hxx"
 #include "sms/actor/Mario.hxx"
+#include "funcs.hxx"
 
 class MarioParamsFile
 {
@@ -17,7 +19,7 @@ public:
         GOOP
     };
 
-    struct
+    struct Attributes
     {
         u8 mJumpCount;             //0x0000
         bool mCanRideYoshi;        //0x0001
@@ -42,7 +44,7 @@ public:
         f32 mMultiJumpFSpeedMulti; //0x0038
         f32 mSpeedMultiplier;      //0x003C
 
-        struct
+        struct FluddAttrs
         {
             bool mCanUseNozzle[8];        //0x0040
             JUtility::TColor mWaterColor; //0x0048
@@ -63,16 +65,24 @@ public:
         bool mGoopAffected;           //0x006E
         bool mCanHoldNPCs;            //0x006F
         bool mCanClimbWalls;          //0x0070
-
+        s16 mMaxClimbQuarterFrames;   //0x0072
     } Attributes;
-
-    void initializeMario(TMario *player);
 };
 
-struct MarioParams
+class MarioParams
 {
-    MarioParamsFile *mParams; //0x0000
-    f32 mTerminalVelocity;    //0x0004
+    TMario *mPlayer; //0x0000
+
+public:
+    MarioParams() {}
+    MarioParams(TMario *player, bool isMario)
+    {
+        this->init(player, isMario);
+    }
+
+    MarioParamsFile *mParams;      //0x0004
+    MarioParamsFile *_mBaseParams; //0x0008
+    f32 mTerminalVelocity;         //0x000C
 
     struct
     {
@@ -82,51 +92,88 @@ struct MarioParams
         bool mIsDisableInput : 1;
         u16 _00 : 16;
         u8 _01 : 4;
-    } CollisionFlags; //0x0008
+    } CollisionFlags; //0x0010
 
-    u16 mPrevCollision;  //0x000A
-    s32 mCollisionTimer; //0x000C
-    bool mCollisionUsed; //0x0010
-    u8 mMaxJumps;        //0x0011
-    u8 mCurJump;         //0x0012
-    s8 mPlayerID;        //0x0013
+    u16 mPrevCollision;          //0x0014
+    s32 mCollisionTimer;         //0x0016
+    bool mCollisionUsed;         //0x001A
+    u8 mMaxJumps;                //0x001B
+    u8 mCurJump;                 //0x001C
+    s8 mPlayerID;                //0x001D
+    s16 mClimbQuarterFramesLeft; //0x001E
+    bool mIsClimbTired;          //0x0020
 
     struct
     {
-        u8 mMainNozzle;   //0x0014
-        u8 mSecondNozzle; //0x0015
-        s32 mWaterLevel;  //0x0016
-        bool mHadFludd;   //0x001A
-        u8 _00;           //0x001B
-    } FluddHistory;       //0x0014
+        u8 mMainNozzle;   //0x0024
+        u8 mSecondNozzle; //0x0025
+        s32 mWaterLevel;  //0x0026
+        bool mHadFludd;   //0x002A
+    } FluddHistory;
 
-    f32 mSizeContext;              //0x001C
-    MarioParamsFile *_mBaseParams; //0x0020
+    f32 mSizeContext; //0x002C
 
     struct
     {
         f32 mGravity;
+        f32 mTwirlGravity;
+        f32 mDiveStartSpeed;
         f32 mBaseBounce1;
         f32 mBaseBounce2;
         f32 mBaseBounce3;
         f32 mMaxFallNoDamage;
         f32 mThrowPower;
-
+        f32 mAttackHeight;
+        f32 mAttackRadius;
+        f32 mReceiveHeight;
+        f32 mReceiveRadius;
         f32 mOceanOfs;
-        f32 mWaterJumpHeightDifMax;
+        f32 mWaterJumpHeightDiffMax;
+        f32 mWaterMaxDiffToInteract;
+        f32 mWaterEntryMaxHeight;
         f32 mWaterHealthDrainSpd;
         f32 mWaterHealthScubaDrainSpd;
-        f32 _00[5];
-    } DefaultAttrs; //0x0024
-
-    bool _mFirstParamsDone; //0x0060
+        f32 mWaterYSpdMultiplier;
+        f32 mWaterHighBuoyant;
+        f32 mWaterLowBuoyant;
+        f32 mCollisionHeight;
+        f32 mCollisionWidth;
+        f32 mRunSpeedMulti;
+        f32 mMaxGroundSpeed;
+        f32 mHipDropSpeedSlow;
+        f32 mHipDropSpeedFast;
+        f32 mPoleGrabDistPadding;
+        f32 mPoleClimbSpeedMul;
+        f32 mHoverYSpdMultiplier;
+        f32 mHoverMaxHeight;
+        f32 mTurboNozzleSpeed;
+        f32 mTurboJumpFSpeed;
+        f32 mTurboJumpYSpeed;
+    } DefaultAttrs; //0x002C
 
     JGeometry::TVec3<f32> mYoshiWaterSpeed;
 
-    bool isMario();
-    bool canUseNozzle(u8 nozzle);
-    char *getPlayerName();
-    u16 getPlayerKey();
-};
+private:
+    bool mIsEMario;
+    bool mFirstParamsDone; //0x0060
+    bool mInitialized;
 
-#endif
+    //FUNCS
+
+    void _setDefaults();
+
+public:
+    const MarioParamsFile *getFile() const { return this->_mBaseParams; };
+    const TMario *getPlayer() const { return this->mPlayer; };
+    const u16 getPlayerKey() { return calcKeyCode__Q26JDrama8TNameRefFPCc(this->getPlayerName()); };
+    bool isMario() const { return !this->mIsEMario; };
+    bool isInitialized() const { return this->mInitialized; };
+    void reset() { memcpy(this->mParams, this, (sizeof(MarioParamsFile))); };
+
+    bool canUseNozzle(TWaterGun::NOZZLETYPE nozzle) const;
+    const char *getPlayerName() const;
+    void init(TMario *player, bool isMario);
+    void update();
+    bool setFile(MarioParamsFile *data);
+    void setPlayer(TMario *player);
+};

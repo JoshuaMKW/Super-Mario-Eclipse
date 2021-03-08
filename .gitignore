@@ -44,7 +44,7 @@ KAMEK-BUILD
 gamedata/*
 
 #Debug objects
-tmp-Kamek/
+tmp-*/
 *.ilk
 *.pdb
 
@@ -56,3 +56,6 @@ log.txt
 
 #compiler
 src/compiler/
+
+#Kuribo
+!tools/KuriboConverter/*

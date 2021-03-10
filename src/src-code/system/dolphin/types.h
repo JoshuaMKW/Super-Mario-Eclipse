@@ -22,7 +22,7 @@ typedef volatile u8 vu8;
 typedef volatile f64 vf64;
 typedef volatile f32 vf32;
 
-typedef unsigned int size_t;
+typedef unsigned long size_t;
 typedef int BOOL;
 
 #define NULL 0

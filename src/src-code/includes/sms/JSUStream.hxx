@@ -65,6 +65,7 @@ class JSURandomInputStream : public JSUInputStream
 
 class JSUMemoryInputStream : public JSURandomInputStream
 {
+public:
 	void *_8;
 	u32 length;	  // _C
 	u32 position; // _10

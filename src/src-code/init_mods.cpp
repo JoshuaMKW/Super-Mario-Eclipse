@@ -74,16 +74,16 @@ u32 setupMarioDatas(char *filepath)
 
     switch (gpGamePad->getInput())
     {
-    case TMarioGamePad::DPAD_UP:
+    case TMarioGamePad::Buttons::DPAD_UP:
         id = 1;
         break;
-    case TMarioGamePad::DPAD_DOWN:
+    case TMarioGamePad::Buttons::DPAD_DOWN:
         id = 2;
         break;
-    case TMarioGamePad::DPAD_LEFT:
+    case TMarioGamePad::Buttons::DPAD_LEFT:
         id = 3;
         break;
-    case TMarioGamePad::DPAD_RIGHT:
+    case TMarioGamePad::Buttons::DPAD_RIGHT:
         id = 4;
         break;
     default:
@@ -143,19 +143,19 @@ u32 *initFileMods()
 
         switch (gpGamePad->getInput())
         {
-        case TMarioGamePad::Z:
+        case TMarioGamePad::Buttons::Z:
             characterID = 0;
             break;
-        case TMarioGamePad::DPAD_UP:
+        case TMarioGamePad::Buttons::DPAD_UP:
             characterID = 1;
             break;
-        case TMarioGamePad::DPAD_DOWN:
+        case TMarioGamePad::Buttons::DPAD_DOWN:
             characterID = 2;
             break;
-        case TMarioGamePad::DPAD_LEFT:
+        case TMarioGamePad::Buttons::DPAD_LEFT:
             characterID = 3;
             break;
-        case TMarioGamePad::DPAD_RIGHT:
+        case TMarioGamePad::Buttons::DPAD_RIGHT:
             characterID = 4;
             break;
         default:
@@ -558,9 +558,9 @@ u32 *switchHUDOnStageLoad(char *curArchive, u32 *gameUI)
 {
     char buffer[32];
 
-    if (gpApplication.mGamePad1->isPressed(TMarioGamePad::DPAD_UP))
+    if (gpApplication.mGamePad1->isPressed(TMarioGamePad::Buttons::DPAD_UP))
         TFlagManager::smInstance->Type6Flag.CustomFlags.mHUDElement = 1;
-    else if (gpApplication.mGamePad1->isPressed(TMarioGamePad::DPAD_DOWN))
+    else if (gpApplication.mGamePad1->isPressed(TMarioGamePad::Buttons::DPAD_DOWN))
         TFlagManager::smInstance->Type6Flag.CustomFlags.mHUDElement = 0;
 
     sprintf(buffer, "/data/game_%d.arc", TFlagManager::smInstance->Type6Flag.CustomFlags.mHUDElement); //"/data/game_%d.arc"

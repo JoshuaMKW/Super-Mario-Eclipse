@@ -19,7 +19,7 @@ class TWaterGun
 {
 
 public:
-    enum NOZZLETYPE
+    enum NozzleType
     {
         Spray,
         Rocket,

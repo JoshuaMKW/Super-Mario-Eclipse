@@ -68,7 +68,7 @@ public:
 
 struct TMarioControllerWork
 {
-    enum BUTTONS
+    enum Buttons
     {
         R = 0x20,
         A = 0x100,
@@ -77,8 +77,8 @@ struct TMarioControllerWork
 
     s16 mStickHS16;
     s16 mStickVS16;
-    BUTTONS mInput;
-    BUTTONS mFrameInput;
+    Buttons mInput;
+    Buttons mFrameInput;
     u8 mAnalogRU8;
     u8 mAnalogLU8;
     u16 _0E;
@@ -88,12 +88,12 @@ struct TMarioControllerWork
     f32 mAnalogL;
     f32 mAnalogR;
 
-    bool isPressed(BUTTONS input)
+    bool isPressed(Buttons input)
     {
         return (this->mInput & input) != 0;
     }
 
-    bool isFramePressed(BUTTONS input)
+    bool isFramePressed(Buttons input)
     {
         return (this->mFrameInput & input) != 0;
     }
@@ -143,12 +143,12 @@ public:
         return this->mButtons.mFrameInput;
     }
 
-    bool isPressed(BUTTONS input)
+    bool isPressed(Buttons input)
     {
         return this->mButtons.mInput & input;
     }
 
-    bool isFramePressed(BUTTONS input)
+    bool isFramePressed(Buttons input)
     {
         return this->mButtons.mFrameInput & input;
     }
@@ -381,7 +381,8 @@ public:
     u8 _16;                        //0x0388
     u8 mSurfGessoID;               //0x0389
     u16 _16a;                      //0x038A
-    u32 _16b[0x8 / 4];             //0x038C
+    f32 mHolderHeightDiff;         //0x038C
+    u32 _16b;                      //0x0390
     J3DDrawBuffer *mDrawBufferA;   //0x0394
     J3DDrawBuffer *mDrawBufferB;   //0x0398
     u32 _17[0xC / 4];              //0x039C

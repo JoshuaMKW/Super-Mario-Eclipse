@@ -58,7 +58,7 @@ bool SMEFile::load(const char *stage)
     if (SMEFile::openFile(configPath))
     {   
         #ifdef SME_DEBUG
-            OSReport("Success: SME config loaded at %p\n", this);
+            OSReport("Success: SME config loaded at %p\n", &mStageConfig);
         #endif
 
         return true;

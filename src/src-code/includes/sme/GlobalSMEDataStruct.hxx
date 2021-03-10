@@ -32,7 +32,7 @@ struct GlobalSMEDataStruct
     struct
     {
         LightContext mLightType;
-        u16 mPrevShineCount;
+        s32 mPrevShineCount;
         bool mSizeMorphing;
         JGeometry::TVec3<f32> mShineShadowCoordinates;
         f32 mPrevSize;

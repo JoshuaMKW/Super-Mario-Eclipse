@@ -155,7 +155,6 @@ public:
 
 private:
     bool mIsEMario;
-    bool mFirstParamsDone; //0x0060
     bool mInitialized;
 
     //FUNCS
@@ -170,7 +169,7 @@ public:
     bool isInitialized() const { return this->mInitialized; };
     void reset() { memcpy(this->mParams, this, (sizeof(MarioParamsFile))); };
 
-    bool canUseNozzle(TWaterGun::NOZZLETYPE nozzle) const;
+    bool canUseNozzle(TWaterGun::NozzleType nozzle) const;
     const char *getPlayerName() const;
     void init(TMario *player, bool isMario);
     void update();

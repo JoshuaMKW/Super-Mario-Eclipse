@@ -54,7 +54,7 @@ const char *MarioParams::getPlayerName() const
     }
 }
 
-bool MarioParams::canUseNozzle(TWaterGun::NOZZLETYPE nozzle) const
+bool MarioParams::canUseNozzle(TWaterGun::NozzleType nozzle) const
 {
     if (this->mParams)
     {

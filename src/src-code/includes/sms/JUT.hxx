@@ -147,7 +147,7 @@ public:
 	void assign();
 	void update();
 
-    enum BUTTONS
+    enum Buttons
     {
         MAINSTICK_UP = 0x8000000,
         MAINSTICK_DOWN = 0x4000000,
@@ -180,8 +180,8 @@ public:
 		void update(const PADStatus *, u32);
 		void setRepeat(u32, u32, u32);
 
-        BUTTONS mInput; // _0
-        BUTTONS mFrameInput;
+        Buttons mInput; // _0
+        Buttons mFrameInput;
         u32 _8;
         u8 mAnalogA;  // _C
         u8 mAnalogB;  // _D

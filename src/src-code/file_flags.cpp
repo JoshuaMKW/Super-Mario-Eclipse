@@ -2,7 +2,7 @@
 
 #include "SME.hxx"
 
-bool isAnyFileComplete(TCardBookmarkInfo *bookmark)
+static bool isAnyFileComplete(TCardBookmarkInfo *bookmark)
 {
     for (u32 i = 0; i < 3; ++i)
     {
@@ -12,27 +12,25 @@ bool isAnyFileComplete(TCardBookmarkInfo *bookmark)
     return false;
 }
 
-//0x802B1794
+// 0x802B1794
+// extern -> SME.cpp
 s32 setFileCompleteBool(TCardManager *gpCardManager)
 {
     s32 ret = getBookmarkInfos___12TCardManagerFv(gpCardManager);
     if (gpCardManager->mBookMarks)
-    {
         gInfo.Context.mIsCompletionRewards = isAnyFileComplete(gpCardManager->mBookMarks);
-    }
     return ret;
 }
-kmCall(0x802B1794, &setFileCompleteBool);
 
 //0x80164DE4
 void newGamePlus(TFlagManager *flagManager, JSUMemoryInputStream &stream)
 {
     flagManager->load(stream);
     if (flagManager->Type4Flag.mShineCount < 120 || (flagManager->Type1Flag.m1Type[0xE] & 0x80) == 0)
-    {
         return;
-    }
-    else if (gpMarioAddress->mController->isPressed(TMarioGamePad::R) && gpMarioAddress->mController->isPressed(TMarioGamePad::L))
+
+    else if (gpMarioAddress->mController->isPressed(TMarioGamePad::Buttons::R) &&
+             gpMarioAddress->mController->isPressed(TMarioGamePad::Buttons::L))
     {
         flagManager->Type6Flag.CustomFlags.mIsGamePlus = true;
         //Type 1
@@ -148,11 +146,8 @@ pass:
 void isGPlusNozzleBox(TNozzleBox *gpNozzleBox)
 {
     if (!TFlagManager::smInstance->Type6Flag.CustomFlags.mIsGamePlus)
-    {
         return;
-    }
+
     if (gpNozzleBox->mNozzleToRegen == TWaterGun::Hover)
-    {
         makeObjDead__11TMapObjBaseFv(gpNozzleBox);
-    }
 }

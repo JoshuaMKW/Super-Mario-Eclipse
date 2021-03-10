@@ -57,7 +57,7 @@ public:
     void doAttackUnison();
     void gotTentacleDamage();
     void *getBasNameTable() const;
-    void init(void *); //TLiveManager
+    void init(TLiveManager *);
     bool is2ndFightNow() const;
     void launchPolDrop();
     f32 lenFromToeToMario();

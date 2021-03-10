@@ -43,79 +43,79 @@
 .global _restgpr_31
 
 _savegpr_14:
-    stw      r14, -0x4C(r11)
+    stw      14, -0x4C(11)
 _savegpr_15:
-    stw      r15, -0x48(r11)
+    stw      15, -0x48(11)
 _savegpr_16:
-    stw      r16, -0x44(r11)
+    stw      16, -0x44(11)
 _savegpr_17:
-    stw      r17, -0x40(r11)
+    stw      17, -0x40(11)
 _savegpr_18:
-    stw      r18, -0x3C(r11)
+    stw      18, -0x3C(11)
 _savegpr_19:
-    stw      r19, -0x38(r11)
+    stw      19, -0x38(11)
 _savegpr_20:
-    stw      r20, -0x34(r11)
+    stw      20, -0x34(11)
 _savegpr_21:
-    stw      r21, -0x30(r11)
+    stw      21, -0x30(11)
 _savegpr_22:
-    stw      r22, -0x2C(r11)
+    stw      22, -0x2C(11)
 _savegpr_23:
-    stw      r23, -0x28(r11)
+    stw      23, -0x28(11)
 _savegpr_24:
-    stw      r24, -0x24(r11)
+    stw      24, -0x24(11)
 _savegpr_25:
-    stw      r25, -0x20(r11)
+    stw      25, -0x20(11)
 _savegpr_26:
-    stw      r26, -0x1C(r11)
+    stw      26, -0x1C(11)
 _savegpr_27:
-    stw      r27, -0x18(r11)
+    stw      27, -0x18(11)
 _savegpr_28:
-    stw      r28, -0x14(r11)
+    stw      28, -0x14(11)
 _savegpr_29:
-    stw      r29, -0x10(r11)
+    stw      29, -0x10(11)
 _savegpr_30:
-    stw      r30, -0xC(r11)
+    stw      30, -0xC(11)
 _savegpr_31:
-    stw      r31, -0x8(r11)
+    stw      31, -0x8(11)
     blr
 
 _restgpr_14:
-    lwz      r14, -0x4C(r11)
+    lwz      14, -0x4C(11)
 _restgpr_15:
-    lwz      r15, -0x48(r11)
+    lwz      15, -0x48(11)
 _restgpr_16:
-    lwz      r16, -0x44(r11)
+    lwz      16, -0x44(11)
 _restgpr_17:
-    lwz      r17, -0x40(r11)
+    lwz      17, -0x40(11)
 _restgpr_18:
-    lwz      r18, -0x3C(r11)
+    lwz      18, -0x3C(11)
 _restgpr_19:
-    lwz      r19, -0x38(r11)
+    lwz      19, -0x38(11)
 _restgpr_20:
-    lwz      r20, -0x34(r11)
+    lwz      20, -0x34(11)
 _restgpr_21:
-    lwz      r21, -0x30(r11)
+    lwz      21, -0x30(11)
 _restgpr_22:
-    lwz      r22, -0x2C(r11)
+    lwz      22, -0x2C(11)
 _restgpr_23:
-    lwz      r23, -0x28(r11)
+    lwz      23, -0x28(11)
 _restgpr_24:
-    lwz      r24, -0x24(r11)
+    lwz      24, -0x24(11)
 _restgpr_25:
-    lwz      r25, -0x20(r11)
+    lwz      25, -0x20(11)
 _restgpr_26:
-    lwz      r26, -0x1C(r11)
+    lwz      26, -0x1C(11)
 _restgpr_27:
-    lwz      r27, -0x18(r11)
+    lwz      27, -0x18(11)
 _restgpr_28:
-    lwz      r28, -0x14(r11)
+    lwz      28, -0x14(11)
 _restgpr_29:
-    lwz      r29, -0x10(r11)
+    lwz      29, -0x10(11)
 _restgpr_30:
-    lwz      r30, -0xC(r11)
+    lwz      30, -0xC(11)
 _restgpr_31:
-    lwz      r31, -0x8(r11)
+    lwz      31, -0x8(11)
     blr
 
 //---------------------------//
@@ -161,77 +161,77 @@ _restgpr_31:
 .global _restfpr_31
 
 _savefpr_14:
-    stfd      f14, -0x90(r11)
+    stfd      14, -0x90(11)
 _savefpr_15:
-    stfd      f15, -0x88(r11)
+    stfd      15, -0x88(11)
 _savefpr_16:
-    stfd      f16, -0x80(r11)
+    stfd      16, -0x80(11)
 _savefpr_17:
-    stfd      f17, -0x78(r11)
+    stfd      17, -0x78(11)
 _savefpr_18:
-    stfd      f18, -0x70(r11)
+    stfd      18, -0x70(11)
 _savefpr_19:
-    stfd      f19, -0x68(r11)
+    stfd      19, -0x68(11)
 _savefpr_20:
-    stfd      f20, -0x60(r11)
+    stfd      20, -0x60(11)
 _savefpr_21:
-    stfd      f21, -0x58(r11)
+    stfd      21, -0x58(11)
 _savefpr_22:
-    stfd      f22, -0x50(r11)
+    stfd      22, -0x50(11)
 _savefpr_23:
-    stfd      f23, -0x48(r11)
+    stfd      23, -0x48(11)
 _savefpr_24:
-    stfd      f24, -0x40(r11)
+    stfd      24, -0x40(11)
 _savefpr_25:
-    stfd      f25, -0x38(r11)
+    stfd      25, -0x38(11)
 _savefpr_26:
-    stfd      f26, -0x30(r11)
+    stfd      26, -0x30(11)
 _savefpr_27:
-    stfd      f27, -0x28(r11)
+    stfd      27, -0x28(11)
 _savefpr_28:
-    stfd      f28, -0x20(r11)
+    stfd      28, -0x20(11)
 _savefpr_29:
-    stfd      f29, -0x18(r11)
+    stfd      29, -0x18(11)
 _savefpr_30:
-    stfd      f30, -0x10(r11)
+    stfd      30, -0x10(11)
 _savefpr_31:
-    stfd      f31, -0x8(r11)
+    stfd      31, -0x8(11)
     blr
 
 _restfpr_14:
-    lfd      f14, -0x90(r11)
+    lfd      14, -0x90(11)
 _restfpr_15:
-    lfd      f15, -0x88(r11)
+    lfd      15, -0x88(11)
 _restfpr_16:
-    lfd      f16, -0x80(r11)
+    lfd      16, -0x80(11)
 _restfpr_17:
-    lfd      f17, -0x78(r11)
+    lfd      17, -0x78(11)
 _restfpr_18:
-    lfd      f18, -0x70(r11)
+    lfd      18, -0x70(11)
 _restfpr_19:
-    lfd      f19, -0x68(r11)
+    lfd      19, -0x68(11)
 _restfpr_20:
-    lfd      f20, -0x60(r11)
+    lfd      20, -0x60(11)
 _restfpr_21:
-    lfd      f21, -0x58(r11)
+    lfd      21, -0x58(11)
 _restfpr_22:
-    lfd      f22, -0x50(r11)
+    lfd      22, -0x50(11)
 _restfpr_23:
-    lfd      f23, -0x48(r11)
+    lfd      23, -0x48(11)
 _restfpr_24:
-    lfd      f24, -0x40(r11)
+    lfd      24, -0x40(11)
 _restfpr_25:
-    lfd      f25, -0x38(r11)
+    lfd      25, -0x38(11)
 _restfpr_26:
-    lfd      f26, -0x30(r11)
+    lfd      26, -0x30(11)
 _restfpr_27:
-    lfd      f27, -0x28(r11)
+    lfd      27, -0x28(11)
 _restfpr_28:
-    lfd      f28, -0x20(r11)
+    lfd      28, -0x20(11)
 _restfpr_29:
-    lfd      f29, -0x18(r11)
+    lfd      29, -0x18(11)
 _restfpr_30:
-    lfd      f30, -0x10(r11)
+    lfd      30, -0x10(11)
 _restfpr_31:
-    lfd      f31, -0x8(r11)
+    lfd      31, -0x8(11)
     blr

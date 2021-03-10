@@ -26,11 +26,11 @@ static void xyzModifierMario()
     if ((void *)gpMarioAddress->mController < (void *)0x80000000 || (u32 *)gpMarioAddress->mController >= (void *)0x81800000)
         return;
 
-    if (gpMarioAddress->mController->isFramePressed(TMarioGamePad::DPAD_RIGHT) && !inXYZMode)
+    if (gpMarioAddress->mController->isFramePressed(TMarioGamePad::Buttons::DPAD_RIGHT) && !inXYZMode)
     {
         inXYZMode = true;
     }
-    else if (gpMarioAddress->mController->isFramePressed(TMarioGamePad::DPAD_RIGHT) && inXYZMode)
+    else if (gpMarioAddress->mController->isFramePressed(TMarioGamePad::Buttons::DPAD_RIGHT) && inXYZMode)
     {
         gpMarioAddress->mState = TMario::SA_IDLE;
         inXYZMode = false;
@@ -43,11 +43,11 @@ static void xyzModifierMario()
         gpMarioAddress->mPosition.x += ((gpMarioAddress->mController->mControlStick.mStickX * 83) * speedMultiplier);
         gpMarioAddress->mPosition.z -= ((gpMarioAddress->mController->mControlStick.mStickY * 83) * speedMultiplier);
 
-        if (gpMarioAddress->mController->isPressed(TMarioGamePad::DPAD_DOWN))
+        if (gpMarioAddress->mController->isPressed(TMarioGamePad::Buttons::DPAD_DOWN))
         {
             gpMarioAddress->mPosition.y -= (83 * speedMultiplier);
         }
-        else if (gpMarioAddress->mController->isPressed(TMarioGamePad::DPAD_UP))
+        else if (gpMarioAddress->mController->isPressed(TMarioGamePad::Buttons::DPAD_UP))
         {
             gpMarioAddress->mPosition.y += (83 * speedMultiplier);
         }
@@ -56,17 +56,18 @@ static void xyzModifierMario()
 }
 
 // this is ran once
-static void onSetup(TMarDirector* director)
+// extern -> SME.cpp
+void onSetup(TMarDirector* director)
 {
     gDebugTextBox = new (gInfo.mGlobalsHeap, 4) J2DTextBox(gpSystemFont->mFont, "Debug Mode");
 
 	// run replaced call
 	director->setupObjects();
 }
-//kmCall(0x802998B8, &onSetup);
 
 // this is ran every frame
-static s32 onUpdate(TMarDirector* director)
+// extern -> SME.cpp
+s32 onUpdate(TMarDirector* director)
 {
     xyzModifierMario();
     //drawCheatText(); //currently bugged
@@ -74,17 +75,17 @@ static s32 onUpdate(TMarDirector* director)
     // run replaced call
 	return director->direct();
 }
-//kmCall(0x802A616C, &onUpdate);
 
 // this is ran when drawing is needed
-static void draw2D(J2DOrthoGraph *graph)
+// extern -> SME.cpp
+void onDraw2D(J2DOrthoGraph *graph)
 {
 	// run replaced call
 	graph->setup2D();
 }
-kmCall(0x80143F14, &draw2D);
 
-//0x802A8B58
+// 0x802A8B58
+// extern -> SME.cpp
 bool SMS_IsExMap()
 {
     if (SMEFile::mStageConfig.FileHeader.mMAGIC == SMEFile::MAGIC)
@@ -97,9 +98,9 @@ bool SMS_IsExMap()
                 gpApplication.mCurrentScene.mAreaID <= TGameSequence::COROEX6);
     }
 }
-kmBranch(0x802A8B58, &SMS_IsExMap);
 
-//0x802A8B30
+// 0x802A8B30
+// extern -> SME.cpp
 bool SMS_IsMultiplayerMap()
 {
     if (SMEFile::mStageConfig.FileHeader.mMAGIC == SMEFile::MAGIC)
@@ -111,9 +112,9 @@ bool SMS_IsMultiplayerMap()
         return (gpMarDirector->mAreaID == TGameSequence::TEST10 && gpMarDirector->mEpisodeID == 0);
     }
 }
-kmBranch(0x802A8B30, &SMS_IsMultiplayerMap);
 
-//0x802A8AFC
+// 0x802A8AFC
+// extern -> SME.cpp
 bool SMS_IsDivingMap()
 {
     if (SMEFile::mStageConfig.FileHeader.mMAGIC == SMEFile::MAGIC)
@@ -127,9 +128,9 @@ bool SMS_IsDivingMap()
                 gpMarDirector->mAreaID == TGameSequence::MAREUNDERSEA);
     }
 }
-kmBranch(0x802A8AFC, &SMS_IsDivingMap);
 
-//0x802A8AE0
+// 0x802A8AE0
+// extern -> SME.cpp
 bool SMS_IsOptionMap()
 {
     if (SMEFile::mStageConfig.FileHeader.mMAGIC == SMEFile::MAGIC)
@@ -141,125 +142,106 @@ bool SMS_IsOptionMap()
         return (gpMarDirector->mAreaID == 15);
     }
 }
-kmBranch(0x802A8AE0, &SMS_IsOptionMap);
 
-//0x8027C6A4
+// 0x8027C6A4
+// extern -> SME.cpp
 bool manageLightSize()
 {
-    if (SMEFile::mStageConfig.FileHeader.mMAGIC != SMEFile::MAGIC || !SMEFile::mStageConfig.GlobalFlags.mIsShineShadow)
-    {
+    if (SMEFile::mStageConfig.FileHeader.mMAGIC != SMEFile::MAGIC ||
+        !SMEFile::mStageConfig.GlobalFlags.mIsShineShadow)
         return (gpMarDirector->mAreaID == 1);
-    }
 
-    if (gInfo.Light.mLightType == LightContext::STATIC)
+    s32 &CurrentShineCount = TFlagManager::smInstance->Type4Flag.mShineCount;
+    s32 &PrevShineCount = gInfo.Light.mPrevShineCount;
+    switch (gInfo.Light.mLightType)
     {
+    case LightContext::STATIC: {
         if (SMEFile::mStageConfig.Light.mDarkLevel != 255)
-        {
             gpModelWaterManager->mDarkLevel = SMEFile::mStageConfig.Light.mDarkLevel;
-        }
-        else if (TFlagManager::smInstance->Type4Flag.mShineCount < SME_MAX_SHINES)
-        {
-            gpModelWaterManager->mDarkLevel = lerp<u8>(30, 190, (f32)TFlagManager::smInstance->Type4Flag.mShineCount / (f32)SME_MAX_SHINES);
-        }
+        else if (CurrentShineCount < SME_MAX_SHINES)
+            gpModelWaterManager->mDarkLevel = lerp<u8>(30, 190,
+                                                       static_cast<f32>(CurrentShineCount) /
+                                                           static_cast<f32>(SME_MAX_SHINES));
         else
         {
             if (gpModelWaterManager->mDarkLevel < 255)
-            {
                 gpModelWaterManager->mDarkLevel += 1;
-            }
             else
-            {
                 gInfo.Light.mLightType = LightContext::DISABLED;
-            }
         }
 
         gShineShadowPos = gInfo.Light.mShineShadowCoordinates;
 
-        f32 sigOfs;
-        f32 sigStrength;
-        f32 next;
-        f32 prev;
-        f32 cur;
+        f32 sigOfs = 300.0f;
+        f32 sigStrength = CurrentShineCount >= PrevShineCount ? 0.04f : -0.04f;
 
-        sigOfs = 300.0f;
-        if (TFlagManager::smInstance->Type4Flag.mShineCount > gInfo.Light.mPrevShineCount)
-        {
-            sigStrength = 0.04f;
-        }
-        else if (TFlagManager::smInstance->Type4Flag.mShineCount < gInfo.Light.mPrevShineCount)
-        {
-            sigStrength = -0.04f;
-        }
+        if (!gInfo.Light.mSizeMorphing &&
+            CurrentShineCount == PrevShineCount)
+            break;
 
-        if (!gInfo.Light.mSizeMorphing && TFlagManager::smInstance->Type4Flag.mShineCount > gInfo.Light.mPrevShineCount)
+        if (CurrentShineCount > PrevShineCount)
         {
             gInfo.Light.mPrevSize = gpModelWaterManager->mSize;
             gInfo.Light.mNextSize = gpModelWaterManager->mSize;
 
-            for (u32 i = 0; i < (TFlagManager::smInstance->Type4Flag.mShineCount - gInfo.Light.mPrevShineCount); ++i)
-            {
-                gInfo.Light.mNextSize += (10000.0f / SME_MAX_SHINES) + (gInfo.Light.mPrevShineCount + i) * 2.0f;
-            }
+            for (u32 i = 0; i < (CurrentShineCount - PrevShineCount); ++i)
+                gInfo.Light.mNextSize += (10000.0f / SME_MAX_SHINES) + (PrevShineCount + i) * 2.0f;
 
             gInfo.Light.mSizeMorphing = true;
             gInfo.Light.mStepContext = 0.0f;
         }
-        else if (!gInfo.Light.mSizeMorphing && TFlagManager::smInstance->Type4Flag.mShineCount < gInfo.Light.mPrevShineCount)
+        else if (CurrentShineCount < PrevShineCount)
         {
             gInfo.Light.mPrevSize = gpModelWaterManager->mSize;
             gInfo.Light.mNextSize = gpModelWaterManager->mSize;
 
-            for (u32 i = 0; i < (gInfo.Light.mPrevShineCount - TFlagManager::smInstance->Type4Flag.mShineCount); ++i)
-            {
-                gInfo.Light.mNextSize -= (10000.0f / SME_MAX_SHINES) + (gInfo.Light.mPrevShineCount - i) * 2.0f;
-            }
+            for (u32 i = 0; i < (PrevShineCount - CurrentShineCount); ++i)
+                gInfo.Light.mNextSize -= (10000.0f / SME_MAX_SHINES) + (PrevShineCount - i) * 2.0f;
 
             gInfo.Light.mSizeMorphing = true;
             gInfo.Light.mStepContext = 0.0f;
         }
 
-        if (gInfo.Light.mSizeMorphing)
-        {
-            next = gInfo.Light.mNextSize;
-            prev = gInfo.Light.mPrevSize;
-            cur = sigmoidCurve(gInfo.Light.mStepContext, prev, next, sigOfs, sigStrength);
+        f32 cur = sigmoidCurve(gInfo.Light.mStepContext, gInfo.Light.mPrevSize,
+                               gInfo.Light.mNextSize, sigOfs, sigStrength);
 
-            if (gpModelWaterManager->mSize > 70000.0f)
-            {
-                gpModelWaterManager->mSize = 70000.0f;
-                gInfo.Light.mSizeMorphing = false;
-            }
-            else if (gpModelWaterManager->mSize < 0.0f)
-            {
-                gpModelWaterManager->mSize = 0.0f;
-                gInfo.Light.mSizeMorphing = false;
-            }
-            else if (cur != gInfo.Light.mNextSize && cur != gInfo.Light.mPrevSize)
-            {
-                gpModelWaterManager->mSize = cur;
-                gpModelWaterManager->mSphereStep = cur / 2.0f;
-                gInfo.Light.mStepContext += 1.0f;
-            }
-            else
-            {
-                gpModelWaterManager->mSize = cur;
-                gpModelWaterManager->mSphereStep = cur / 2.0f;
-                gInfo.Light.mPrevShineCount = TFlagManager::smInstance->Type4Flag.mShineCount;
-                gInfo.Light.mSizeMorphing = false;
-            }
+        if (gpModelWaterManager->mSize > 70000.0f)
+        {
+            gpModelWaterManager->mSize = 70000.0f;
+            gInfo.Light.mSizeMorphing = false;
         }
+        else if (gpModelWaterManager->mSize < 0.0f)
+        {
+            gpModelWaterManager->mSize = 0.0f;
+            gInfo.Light.mSizeMorphing = false;
+        }
+        else if (cur != gInfo.Light.mNextSize && cur != gInfo.Light.mPrevSize)
+        {
+            gpModelWaterManager->mSize = cur;
+            gpModelWaterManager->mSphereStep = cur / 2.0f;
+            gInfo.Light.mStepContext += 1.0f;
+        }
+        else
+        {
+            gpModelWaterManager->mSize = cur;
+            gpModelWaterManager->mSphereStep = cur / 2.0f;
+            PrevShineCount = CurrentShineCount;
+            gInfo.Light.mSizeMorphing = false;
+        }
+        break;
     }
-    else if (gInfo.Light.mLightType == LightContext::FOLLOWPLAYER)
-    {
+    case LightContext::FOLLOWPLAYER: {
         gpModelWaterManager->mDarkLevel = SMEFile::mStageConfig.Light.mDarkLevel;
         gShineShadowPos.x = gpMarioPos->x + gInfo.Light.mShineShadowCoordinates.x;
         gShineShadowPos.y = gpMarioPos->y + gInfo.Light.mShineShadowCoordinates.y;
         gShineShadowPos.z = gpMarioPos->z + gInfo.Light.mShineShadowCoordinates.z;
+        break;
+    }
+    default:
+        break;
     }
     return gInfo.Light.mLightType != LightContext::DISABLED && gpMarDirector->mAreaID != TGameSequence::OPTION;
 }
-kmCall(0x8027C6A4, &manageLightSize);
-kmWrite32(0x8027C6A8, 0x28030001);
 
 //0x802571F0
 /*
@@ -326,9 +308,10 @@ f32 upWarpPatch(TMario *gpMario, f32 yVelocity)
 }
 */
 
-//MESSAGE MODIFICATIONS
+// MESSAGE MODIFICATIONS //
 
-//0x80153DE8, 0x80153E1C
+// 0x80153DE8, 0x80153E1C
+// extern -> SME.cpp
 void formatTalkMessage(Talk2D2 *talker, char *msgfield, u32 *entrydata)
 {
     String *fmtMessage = new String(1024);
@@ -343,10 +326,8 @@ void formatTalkMessage(Talk2D2 *talker, char *msgfield, u32 *entrydata)
 
     delete fmtMessage;
 }
-kmCall(0x80153DE8, &formatTalkMessage);
-kmCall(0x80153E1C, &formatTalkMessage);
 
-void maintainYoshi(TYoshi *yoshi)
+static void maintainYoshi(TYoshi *yoshi)
 {
     if (yoshi->isGreenYoshi())
     {
@@ -360,6 +341,8 @@ void maintainYoshi(TYoshi *yoshi)
     }
 }
 
+// 0x8024D3A8
+// extern -> SME.cpp
 void realTimeCustomAttrsHandler(TMario *player)
 {
     if (player->mCustomInfo->isInitialized() && player->mCustomInfo->isMario())
@@ -369,4 +352,3 @@ void realTimeCustomAttrsHandler(TMario *player)
 
     setPositions__6TMarioFv(player);
 }
-kmCall(0x8024D3A8, &realTimeCustomAttrsHandler);

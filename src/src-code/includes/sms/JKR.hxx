@@ -30,7 +30,10 @@ public:
 	JKRHeap(void *, u32, JKRHeap *, bool);
 	virtual ~JKRHeap();
 	
+	virtual void *alloc(size_t, int) = 0;
 	virtual void freeAll();
+	virtual u32 dump_sort();
+	virtual u32 changeGroupID(u8);
 
 	void becomeSystemHeap();
 	void becomeCurrentHeap();
@@ -44,8 +47,6 @@ public:
 	void dispose(void *, void *);
 	void dispose();
 	static u32* copyMemory(void *, void *, u32);
-	u32 dump_sort();
-	u32 changeGroupID(u8 newID);
 	u32 getCurrentGroupId();
 
 	u8 _18[0x30 - 0x18];
@@ -405,4 +406,4 @@ void *operator new[](size_t blocksize);
 void *operator new[](size_t blocksize, int align);
 void *operator new[](size_t blocksize, JKRHeap *heap, int align);
 void operator delete(void *block);
-void s(void *block);
+void operator delete[](void *block);

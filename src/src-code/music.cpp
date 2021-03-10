@@ -37,7 +37,7 @@ bool isValidBGM(MSStageInfo musicID)
 //0x80016998
 u32 setIsValid(MSStageInfo musicID)
 {
-    gInfo.mIsAudioStreamAllowed = isValidBGM(musicID);
+    gInfo.Context.mIsAudioStreamAllowed = isValidBGM(musicID);
     return musicID & 0x3FF;
 }
 
@@ -46,7 +46,7 @@ bool startStreamedBGM(MSStageInfo musicID, bool loopMusic)
     char buffer[0x20];
     DVDFileInfo *handle = (DVDFileInfo *)0x803FDB7C;
 
-    sprintf(buffer, "/AudioRes/Streams/Music/%d.adp", (musicID & 0x3FF));
+    sprintf(buffer, "/AudioRes/Streams/Music/%u.adp", (musicID & 0x3FF));
 
     if (!DVDOpen(buffer, handle))
         return false;
@@ -55,7 +55,7 @@ bool startStreamedBGM(MSStageInfo musicID, bool loopMusic)
     DVDPrepareStreamAsync(handle, 0, 0, (DVDCallback)0x803184E4);
 
     if (!loopMusic)
-        DVDStopStreamAtEndAsync(&handle->cmdBlock, 0);
+        DVDStopStreamAtEndAsync(&handle->mCmdBlock, 0);
     return true;
 }
 
@@ -64,13 +64,13 @@ bool startStreamedSFX(u32 sfxID)
     char buffer[0x20];
     DVDFileInfo *handle = (DVDFileInfo *)0x803FDB7C;
 
-    sprintf(buffer, "/AudioRes/Streams/SFX/%d.adp", (sfxID & 0x3FF));
+    sprintf(buffer, "/AudioRes/Streams/SFX/%lu.adp", (sfxID & 0x3FF));
 
     if (!DVDOpen(buffer, handle))
         return false;
 
     DVDPrepareStreamAsync(handle, 0, 0, (DVDCallback)0x803184E4);
-    DVDStopStreamAtEndAsync(&handle->cmdBlock, 0);
+    DVDStopStreamAtEndAsync(&handle->mCmdBlock, 0);
 
     return true;
 }
@@ -80,13 +80,9 @@ bool streamAudio(MSStageInfo ID, u8 type, bool loopAudio)
     if (ID & 0x400)
     {
         if (type == 0)
-        {
             return startStreamedBGM(ID, loopAudio);
-        }
         else if (type == 1)
-        {
             return startStreamedSFX(ID);
-        }
     }
     return false;
 }
@@ -99,14 +95,13 @@ void initMusic()
         
     DVDFileInfo *handle = (DVDFileInfo *)0x803FDB7C;
 
-    if (!gInfo.mIsAudioStreaming && (SMEFile::mStageConfig.Music.mMusicID & 0x400))
-    {
+    if (!gInfo.Context.mIsAudioStreaming && (SMEFile::mStageConfig.Music.mMusicID & 0x400))
         startStreamedBGM((MSStageInfo)SMEFile::mStageConfig.Music.mMusicID, true);
-    }
-    if (gInfo.mIsAudioStreaming && !gInfo.mIsAudioStreamAllowed)
+
+    if (gInfo.Context.mIsAudioStreaming && !gInfo.Context.mIsAudioStreamAllowed)
     {
-        DVDCancelStreamAsync(&handle->cmdBlock, 0);
-        gInfo.mIsAudioStreaming = false;
+        DVDCancelStreamAsync(&handle->mCmdBlock, 0);
+        gInfo.Context.mIsAudioStreaming = false;
     }
 }
 
@@ -115,10 +110,10 @@ void stopMusicOnStop()
 {
     DVDFileInfo *handle = (DVDFileInfo *)0x803FDB7C;
 
-    if (gInfo.mIsAudioStreaming)
+    if (gInfo.Context.mIsAudioStreaming)
     {
-        DVDCancelStreamAsync(&handle->cmdBlock, 0);
-        gInfo.mIsAudioStreaming = false;
+        DVDCancelStreamAsync(&handle->mCmdBlock, 0);
+        gInfo.Context.mIsAudioStreaming = false;
     }
 }
 
@@ -127,10 +122,10 @@ void stopMusicOnStageExit(TMarioGamePad *gamepad)
 {
     DVDFileInfo *handle = (DVDFileInfo *)0x803FDB7C;
 
-    if (gInfo.mIsAudioStreaming)
+    if (gInfo.Context.mIsAudioStreaming)
     {
-        DVDCancelStreamAsync(&handle->cmdBlock, 0);
-        gInfo.mIsAudioStreaming = false;
+        DVDCancelStreamAsync(&handle->mCmdBlock, 0);
+        gInfo.Context.mIsAudioStreaming = false;
     }
     reset__9RumbleMgrFv(gamepad);
 }

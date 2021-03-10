@@ -4,8 +4,8 @@
 
 class TCheatHandler
 {
-    void *mSuccessCallback;
-    void *mFailureCallback;
+    void (*mSuccessCallback)(TCheatHandler *);
+    void (*mFailureCallback)(TCheatHandler *);
     u16 *mInputList;
     TMarioGamePad *mGamePad;
     s8 mInputIndex;
@@ -13,11 +13,11 @@ class TCheatHandler
 
 public:
     TCheatHandler();
-    TCheatHandler(u16 *inputList, TMarioGamePad *gamepad, void *successCallback, void *failureCallback);
+    TCheatHandler(u16 *inputList, TMarioGamePad *gamepad, void (*successCallback)(TCheatHandler *), void (*failureCallback)(TCheatHandler *));
     
     void setInputList(u16 *inputList) { this->mInputList = inputList; }
-    void setSuccessCallBack(void *callback) { this->mSuccessCallback = callback; }
-    void setFailureCallBack(void *callback) { this->mFailureCallback = callback; }
+    void setSuccessCallBack(void (*callback)(TCheatHandler *)) { this->mSuccessCallback = callback; }
+    void setFailureCallBack(void (*callback)(TCheatHandler *)) { this->mFailureCallback = callback; }
     void setGamePad(TMarioGamePad *gamePad) { this->mGamePad = gamePad; }
 
     constexpr bool isActive() const { return (this->mActive && this->mInputIndex < 0); }

@@ -1,6 +1,9 @@
 #include "types.h"
 
-BOOL isxdigit(u32 c)
+
+#ifdef __CWCC__
+
+int isxdigit(int c)
 {
     if (c >= '0' && c <= '9')
         return TRUE;
@@ -12,7 +15,7 @@ BOOL isxdigit(u32 c)
     return FALSE;
 }
 
-BOOL isupper(u32 c)
+int isupper(int c)
 {
     if (c >= 'A' && c <= 'Z')
         return TRUE;
@@ -20,7 +23,7 @@ BOOL isupper(u32 c)
     return FALSE;
 }
 
-BOOL isspace(u32 c)
+int isspace(int c)
 {
     if (c >= '\t' && c <= '\r')
         return TRUE;
@@ -30,7 +33,7 @@ BOOL isspace(u32 c)
     return FALSE;
 }
 
-BOOL ispunct(u32 c)
+int ispunct(int c)
 {
     if (c >= '!' && c <= '/')
         return TRUE;
@@ -46,7 +49,7 @@ BOOL ispunct(u32 c)
     return FALSE;
 }
 
-BOOL isprint(u32 c)
+int isprint(int c)
 {
     if (c >= ' ' && c <= '~')
         return TRUE;
@@ -56,7 +59,7 @@ BOOL isprint(u32 c)
     return FALSE;
 }
 
-BOOL islower(u32 c)
+int islower(int c)
 {
     if (c >= 'a' && c <= 'z')
         return TRUE;
@@ -64,7 +67,7 @@ BOOL islower(u32 c)
     return FALSE;
 }
 
-BOOL isgraph(u32 c)
+int isgraph(int c)
 {
     if (c >= '!' && c <= '~')
         return TRUE;
@@ -74,7 +77,7 @@ BOOL isgraph(u32 c)
     return FALSE;
 }
 
-BOOL isdigit(u32 c)
+int isdigit(int c)
 {
     if (c >= '0' && c <= '9')
         return TRUE;
@@ -82,7 +85,7 @@ BOOL isdigit(u32 c)
     return FALSE;
 }
 
-BOOL iscntrl(u32 c)
+int iscntrl(int c)
 {
     if (c >= 0 && c <= 0x1F)
         return TRUE;
@@ -92,7 +95,7 @@ BOOL iscntrl(u32 c)
     return FALSE;
 }
 
-BOOL isalpha(u32 c)
+int isalpha(int c)
 {
     if (c >= 'a' && c <= 'z')
         return TRUE;
@@ -102,7 +105,7 @@ BOOL isalpha(u32 c)
     return FALSE;
 }
 
-BOOL isalnum(u32 c)
+int isalnum(int c)
 {
     if (c >= '0' && c <= '9')
         return TRUE;
@@ -113,3 +116,5 @@ BOOL isalnum(u32 c)
 
     return FALSE;
 }
+
+#endif

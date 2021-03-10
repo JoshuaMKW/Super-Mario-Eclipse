@@ -6,6 +6,17 @@
 #include "OS.h"
 #include "sms/JKR.hxx"
 
+void *operator new(size_t size, JKRHeap *heap) noexcept
+{
+    if (heap)
+        return heap->alloc(size, 4);
+    
+    if (JKRHeap::sCurrentHeap)
+        return JKRHeap::sCurrentHeap->alloc(size, 4);
+    
+    return nullptr;
+}
+
 namespace Cache
 {
     inline void flush(void *addr, size_t size)
@@ -183,5 +194,3 @@ namespace Memory
         void freeAll();
     };
 } // namespace Memory
-
-#endif

@@ -12,7 +12,7 @@ class TYoshi
 {
 
 public:
-    enum TYPE
+    enum Color
     {
         GREEN,
         ORANGE,
@@ -20,7 +20,7 @@ public:
         PINK
     };
 
-    enum STATE
+    enum State
     {
         EGG = 0,
         DROWNING = 3,

@@ -1,5 +1,3 @@
-#pragma once
-
 #include "GlobalSMEDataStruct.hxx"
 
 TMario *GlobalSMEDataStruct::getPlayerByID(u8 id) const

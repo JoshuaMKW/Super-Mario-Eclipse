@@ -24,7 +24,7 @@ mflr r0
 */
 
 /*0x8026A164
-TWaterGun::NOZZLETYPE changeNozzleIfSet(TWaterGun* gpFludd, TWaterGun::NOZZLETYPE nozzle, bool normalize) {
+TWaterGun::NozzleType changeNozzleIfSet(TWaterGun* gpFludd, TWaterGun::NozzleType nozzle, bool normalize) {
     if (gpFludd->mMario->mCustomInfo->mParams) {
         if (!gpFludd->mMario->mCustomInfo->mParams->Attributes.FluddAttrs.mCanUseNozzle[(u8)nozzle]) {
             nozzle = gpFludd->mCurrentNozzle;
@@ -37,54 +37,50 @@ TWaterGun::NOZZLETYPE changeNozzleIfSet(TWaterGun* gpFludd, TWaterGun::NOZZLETYP
 
 static bool sIsTriggerNozzleDead;
 
-//0x80248F14
-static bool isPumpOK(TMarioAnimeData *animeData)
+// 0x80248F14
+// extern -> SME.cpp
+bool isPumpOK(TMarioAnimeData *animeData)
 {
-    return (animeData->mFluddEnabled != animeData->FLUDD_DISABLED && gpMarioAddress->mCustomInfo->mCurJump <= 1);
+    return (animeData->mFluddEnabled != TMarioAnimeData::FLUDD::FLUDD_DISABLED &&
+            gpMarioAddress->mCustomInfo->mCurJump <= 1);
 }
-kmBranch(0x80248F14, &isPumpOK);
-kmWrite16(0x803DCA02, TMarioAnimeData::FLUDD_ENABLED);
 
-//0x8014206C
-static bool hasWaterCardOpen()
+// 0x8014206C
+// extern -> SME.cpp
+bool hasWaterCardOpen()
 {
     TGCConsole2 *gcConsole;
-    asm volatile ( "mr %0, r31" : "=r"(gcConsole));
+    SME_FROM_GPR(r31, gcConsole);
 
-    if (gpMarioAddress->mYoshi->mState != TYoshi::MOUNTED && gpMarioAddress->mCustomInfo->mParams)
-    {
-        gpMarioAddress->mAttributes.mHasFludd = gpMarioAddress->mCustomInfo->mParams->Attributes.mCanUseFludd;
-    }
+    if (gpMarioAddress->mYoshi->mState != TYoshi::State::MOUNTED &&
+        gpMarioAddress->mCustomInfo->mParams)
+        gpMarioAddress->mAttributes.mHasFludd =
+            gpMarioAddress->mCustomInfo->mParams->Attributes.mCanUseFludd;
     else
-    {
         gpMarioAddress->mAttributes.mHasFludd = true;
-    }
 
-    if (gpMarioAddress->mYoshi->mState != TYoshi::MOUNTED &&
+    if (gpMarioAddress->mYoshi->mState != TYoshi::State::MOUNTED &&
         !gpMarioAddress->mAttributes.mHasFludd &&
         !gcConsole->mWaterCardFalling &&
         gcConsole->mIsWaterCard)
-    {
         startDisappearTank__11TGCConsole2Fv(gcConsole);
-    }
 
     return gcConsole->mIsWaterCard;
 }
-kmCall(0x8014206C, &hasWaterCardOpen);
-kmWrite32(0x80142070, 0x28030000);
 
-//0x80283058
-static bool canCollectFluddItem(TMario *player)
+// 0x80283058
+// extern -> SME.cpp
+bool canCollectFluddItem(TMario *player)
 {
     if (player->mCustomInfo->mParams)
-        return (onYoshi__6TMarioCFv(player) || !player->mCustomInfo->mParams->Attributes.mCanUseFludd);
+        return onYoshi__6TMarioCFv(player) ||
+               !player->mCustomInfo->mParams->Attributes.mCanUseFludd;
     else
         return onYoshi__6TMarioCFv(player);
 }
-kmCall(0x80283058, &canCollectFluddItem);
 
-//0x8024E710
-static void sprayGoopMap(TPollutionManager *gpPollutionManager, TMario *player, f32 x, f32 y, f32 z, f32 r)
+static void sprayGoopMap(TPollutionManager *gpPollutionManager, TMario *player,
+                         f32 x, f32 y, f32 z, f32 r)
 {
     if (!player->mCustomInfo->isMario() || !player->mCustomInfo->isInitialized())
         clean__17TPollutionManagerFffff(gpPollutionManager, x, y, z, r);
@@ -93,89 +89,86 @@ static void sprayGoopMap(TPollutionManager *gpPollutionManager, TMario *player, 
     if (localfile && localfile->Attributes.FluddAttrs.mCleaningType != localfile->NONE)
     {
         if (localfile->Attributes.FluddAttrs.mCleaningType == localfile->CLEAN)
-        {
             clean__17TPollutionManagerFffff(gpPollutionManager, x, y, z, r);
-        }
         else if (localfile->Attributes.FluddAttrs.mCleaningType == localfile->GOOP)
-        {
             stamp__17TPollutionManagerFUsffff(gpPollutionManager, 1, x, y, z, r);
-        }
     }
 }
 
-static void sprayGoopMapWrapGlobalMar(TPollutionManager *gpPollutionManager, f32 x, f32 y, f32 z, f32 r)
+// 0x800678C4, 0x801A3ED0, 0x801B42D8, 0x8027F7DC, 0x8027F94C,
+// extern -> SME.cpp
+void sprayGoopMapWrapGlobalMar(TPollutionManager *gpPollutionManager,
+                               f32 x, f32 y, f32 z, f32 r)
 {
     sprayGoopMap(gpPollutionManager, gpMarioAddress, x, y, z, r);
 }
 
-static void sprayGoopMapWrapMar30(TPollutionManager *gpPollutionManager, f32 x, f32 y, f32 z, f32 r)
+// 0x8024E710
+// extern -> SME.cpp
+void sprayGoopMapWrapMar30(TPollutionManager *gpPollutionManager,
+                           f32 x, f32 y, f32 z, f32 r)
 {
     TMario *player;
-    asm volatile ( "mr %0, r30" : "=r"(player));
+    SME_FROM_GPR(r30, player);
 
     sprayGoopMap(gpPollutionManager, player, x, y, z, r);
 }
 
-kmCall(0x800678C4, &sprayGoopMapWrapGlobalMar);
-kmCall(0x801A3ED0, &sprayGoopMapWrapGlobalMar);
-kmCall(0x801B42D8, &sprayGoopMapWrapGlobalMar);
-kmCall(0x8024E710, &sprayGoopMapWrapMar30);
-kmCall(0x8027F7DC, &sprayGoopMapWrapGlobalMar);
-kmCall(0x8027F94C, &sprayGoopMapWrapGlobalMar);
-
-//0x800FED3C
-static bool canCleanSeals(TWaterManager *gpWaterManager)
+// 0x800FED3C
+// extern -> SME.cpp
+bool canCleanSeals(TWaterManager *gpWaterManager)
 {
     MarioParamsFile *localfile = gpMarioAddress->mCustomInfo->mParams;
-    return (gpWaterManager->mWaterCardType != 0 || (localfile && localfile->Attributes.FluddAttrs.mCanCleanSeals));
+    return gpWaterManager->mWaterCardType != 0 ||
+           (localfile && localfile->Attributes.FluddAttrs.mCanCleanSeals);
 }
-kmCall(0x800FED3C, &canCleanSeals);
-kmWrite32(0x800FED40, 0x2C030000);
 
-//0x8024D53C
-static TWaterGun *bindFluddtojoint()
+// 0x8024D53C
+// extern -> SME.cpp
+TWaterGun *bindFluddtojoint()
 {
     TMario *player;
-    asm volatile ( "mr %0, r31" : "=r"(player));
+    SME_FROM_GPR(r31, player);
 
     MarioParamsFile *localfile = player->mCustomInfo->mParams;
 
     if (localfile)
-    {
-        player->mBindBoneIDArray[1] = localfile->Attributes.FluddAttrs.mBindToJointID[(u8)player->mFludd->mCurrentNozzle];
-    }
+        player->mBindBoneIDArray[1] =
+            localfile->Attributes.FluddAttrs.mBindToJointID[(u8)player->mFludd->mCurrentNozzle];
+
     return player->mFludd;
 }
-kmCall(0x8024D53C, &bindFluddtojoint);
 
-static void checkExecWaterGun(TWaterGun *fludd)
+// 0x80262580
+// extern -> SME.cpp
+void checkExecWaterGun(TWaterGun *fludd)
 {
-    if (fludd->mCurrentNozzle == TWaterGun::Spray || fludd->mCurrentNozzle == TWaterGun::Yoshi || fludd->mCurrentNozzle == TWaterGun::Underwater)
+    if (fludd->mCurrentNozzle == TWaterGun::NozzleType::Spray ||
+        fludd->mCurrentNozzle == TWaterGun::NozzleType::Yoshi ||
+        fludd->mCurrentNozzle == TWaterGun::NozzleType::Underwater)
     {
         emit__9TWaterGunFv(fludd);
         return;
     }
 
     if (!sIsTriggerNozzleDead)
-    {
         emit__9TWaterGunFv(fludd);
-    }
 }
-kmCall(0x8024E548, &checkExecWaterGun);
 
-static void killTriggerNozzle()
+// 0x80262580
+// extern -> SME.cpp
+void killTriggerNozzle()
 {
     TNozzleTrigger *nozzle;
-    asm volatile ( "mr %0, r29" : "=r"(nozzle));
+    SME_FROM_GPR(r29, nozzle);
 
     nozzle->mSprayState = TNozzleTrigger::DEAD;
-    if (nozzle->mFludd->mCurrentNozzle == TWaterGun::Hover || nozzle->mFludd->mCurrentNozzle == TWaterGun::Rocket || nozzle->mFludd->mCurrentNozzle == TWaterGun::Turbo)
-    {
+    if (nozzle->mFludd->mCurrentNozzle == TWaterGun::NozzleType::Hover ||
+        nozzle->mFludd->mCurrentNozzle == TWaterGun::NozzleType::Rocket ||
+        nozzle->mFludd->mCurrentNozzle == TWaterGun::NozzleType::Turbo)
         sIsTriggerNozzleDead = true;
-    }
     
 }
-kmCall(0x8026C370, &killTriggerNozzle);
 
 static void checkSpamHover(TNozzleTrigger *nozzle, u32 r4, TWaterEmitInfo *emitInfo)
 {
@@ -190,7 +183,8 @@ static void checkSpamHover(TNozzleTrigger *nozzle, u32 r4, TWaterEmitInfo *emitI
     if ((nozzle->mMaxSprayQuarterFrames - nozzle->mSprayQuarterFramesLeft) >= 20)
         return;
 
-    if (!player->mControllerWork->mAnalogR < 0.9f || !player->mControllerWork->isFramePressed(TMarioControllerWork::A))
+    if (!(player->mControllerWork->mAnalogR < 0.9f) ||
+        !player->mControllerWork->isFramePressed(TMarioControllerWork::A))
         return;
 
     if (nozzle->mFludd->mCurrentWater < 510)
@@ -209,32 +203,28 @@ static void checkSpamHover(TNozzleTrigger *nozzle, u32 r4, TWaterEmitInfo *emitI
     return;
 }
 
-static void spamHoverWrapper(TNozzleTrigger *nozzle, u32 r4, TWaterEmitInfo *emitInfo)
+// 0x80262580
+// extern -> SME.cpp
+void spamHoverWrapper(TNozzleTrigger *nozzle, u32 r4, TWaterEmitInfo *emitInfo)
 {
     void (*virtualFunc)(TNozzleTrigger *, u32, TWaterEmitInfo *);
-    asm volatile ( "mr %0, r12" : "=r"(virtualFunc));
+    SME_FROM_GPR(r12, virtualFunc);
 
     checkSpamHover(nozzle, r4, emitInfo);
     virtualFunc(nozzle, r4, emitInfo);
 }
-kmCall(0x8026C018, &spamHoverWrapper);
 
-
-static bool checkAirNozzle()
+// 0x80262580
+// extern -> SME.cpp
+bool checkAirNozzle()
 {
     TMario *player;
-    asm volatile ( "mr %0, r31" : "=r"(player));
+    SME_FROM_GPR(r31, player);
     
     sIsTriggerNozzleDead &= (player->mState & TMario::SA_AIRBORN) != 0;
 
-    TNozzleTrigger *nozzle = (TNozzleTrigger *)getCurrentNozzle__9TWaterGunCFv(player->mFludd);
-
     if (player->mFludd->mCurrentNozzle == TWaterGun::Spray || player->mFludd->mCurrentNozzle == TWaterGun::Yoshi || player->mFludd->mCurrentNozzle == TWaterGun::Underwater)
-    {
         return player->mState != TMario::SA_HOVER_F;
-    }
 
     return (!(player->mState & TMario::SA_AIRBORN) || !sIsTriggerNozzleDead);
 }
-kmCall(0x80262580, &checkAirNozzle);
-kmWrite32(0x80262584, 0x2C030000);

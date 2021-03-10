@@ -8,19 +8,19 @@ extern "C"
 {
 #endif
 
-    u32 tolower(u32 c);
-    u32 toupper(u32 c);
-    u32 isxdigit(u32 c);
-    u32 isupper(u32 c);
-    u32 isspace(u32 c);
-    u32 ispunct(u32 c);
-    u32 isprint(u32 c);
-    u32 islower(u32 c);
-    u32 isgraph(u32 c);
-    u32 isdigit(u32 c);
-    u32 iscntrl(u32 c);
-    u32 isalpha(u32 c);
-    u32 isalnum(u32 c);
+    int tolower(int c);
+    int toupper(int c);
+    int isxdigit(int c);
+    int isupper(int c);
+    int isspace(int c);
+    int ispunct(int c);
+    int isprint(int c);
+    int islower(int c);
+    int isgraph(int c);
+    int isdigit(int c);
+    int iscntrl(int c);
+    int isalpha(int c);
+    int isalnum(int c);
 
 #ifdef __cplusplus
 }

@@ -95,9 +95,8 @@ size_t Memory::ArenaBlock::tailRealSize() const
 
     ArenaBlock *block = this->next();
     while (block)
-    {
         size += block->size() + sizeof(ArenaBlock);
-    }
+
     return size;
 }
 
@@ -107,13 +106,9 @@ void Memory::ArenaBlock::free()
     ArenaBlock *nextBlock = this->next();
 
     if (nextBlock)
-    {
         nextBlock->mPrev = prevBlock;
-    }
     if (prevBlock)
-    {
         prevBlock->mNext = nextBlock;
-    }
 }
 
 // -- ArenaHeap -- //
@@ -128,6 +123,7 @@ Memory::ArenaHeap::ArenaHeap(size_t size)
     else
         *(u32 *)0x80000034 -= size;
 }
+
 Memory::ArenaHeap::ArenaHeap(size_t size, void *cb)
 {
     size = (size + 3) & -4;
@@ -140,6 +136,7 @@ Memory::ArenaHeap::ArenaHeap(size_t size, void *cb)
 
     this->mCallback = cb;
 }
+
 Memory::ArenaHeap::~ArenaHeap()
 {
     if (JKRHeap::mUserRamEnd)
@@ -162,9 +159,8 @@ void *Memory::ArenaHeap::alloc(const size_t size, const size_t alignment, bool i
     if (!this->canAlloc(size, alignment))
     {
         if (this->mCallback)
-        {
             ((void (*)(ArenaHeap *, size_t, size_t))this->mCallback)(this, this->size(), (sizeof(ArenaBlock) + size + (alignment-1)) & -alignment);
-        }
+            
         return nullptr;
     }
 
@@ -239,8 +235,7 @@ constexpr size_t Memory::ArenaHeap::size() const
 
     ArenaBlock *block = this->mHeadBlock;
     if (block)
-    {
         size -= block->tailRealSize();
-    }
+
     return size;
 }

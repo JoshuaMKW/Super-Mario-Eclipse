@@ -21,6 +21,10 @@
 #define SME_MAX_SHINES 120
 #endif
 
+#ifndef KURIBO_NO_TYPES
+#define KURIBO_NO_TYPES
+#endif
+
 #define STRINGIZE(x) STRINGIZE_(x)
 #define STRINGIZE_(x) #x
 
@@ -28,6 +32,7 @@
 #define SME_TO_GPR(reg, var)   asm volatile ("mr " #reg ", %0" : : "r"(var))
 #define SME_FROM_FPR(reg, var) asm volatile ("fmr %0, " #reg : "=r"(var))
 #define SME_TO_FPR(reg, var)   asm volatile ("fmr " #reg ", %0" : : "r"(var))
+
 
 /* Misc compiler info */
 #define SME_VERSION "v0.4a"
@@ -41,20 +46,19 @@
 #endif
 
 #ifdef __cplusplus
+#if __cplusplus >= 201103L
+#define offsetof(t, d) __builtin_offsetof(t, d)
+#else
+#define offsetof(t, d) ((size_t)&(((t *)0)->d))
+#endif
 #define SME_EXTERN_C extern "C"
 #else
 #define SME_EXTERN_C extern
 #endif
 
-//__ppc_eabi_init.c
-SME_EXTERN_C void __init_kamek_user();
-
-//init_mods.cpp
+// init_mods.cpp
 extern GlobalSMEDataStruct gInfo;
 extern TCheatHandler gDebugModeHandler;
-
-//StageParams.cpp
-extern SMEFile SMEFile::mStageConfig;
 
 SME_EXTERN_C OSBootInfo BootInfo;
 inline bool isGameEmulated() { return BootInfo.mConsoleType == OS_CONSOLE_DEV_KIT3; }

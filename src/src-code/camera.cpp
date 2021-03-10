@@ -3,7 +3,7 @@
 
 #include "SME.hxx"
 
-//0x80027548
+// 0x80027548
 // extern -> SME.cpp
 void modifyCameraRangeToSize(f32 *params, f32 *saveParams)
 {
@@ -20,4 +20,3 @@ void modifyCameraRangeToSize(f32 *params, f32 *saveParams)
         }
     }
 }
-kmBranch(0x80027548, &modifyRangeToSize);

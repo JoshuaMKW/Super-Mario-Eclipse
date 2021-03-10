@@ -57,16 +57,17 @@ extern "C"
     typedef u32 OSHeapHandle;
     typedef void *OSMessage;
 
+    typedef struct OSAlarm OSAlarm;
+    typedef struct OSContext OSContext;
     typedef struct OSMutex OSMutex;
     typedef struct OSThread OSThread;
-    typedef struct OSAlarm OSAlarm;
 
     typedef struct OSCalendarTime
     {
         u32 sec, min, hour, mday, mon, year, wday, yday, msec, usec;
     } OSCalendarTime;
 
-    typedef void *OSAlarmHandler;
+    typedef void (*OSAlarmHandler)(OSAlarm *, OSContext *);
 
     typedef struct OSThreadQueue
     {
@@ -240,7 +241,7 @@ extern "C"
     void OSWakeupThread(OSThreadQueue *queue);
     OSPriority OSGetThreadPriority(OSThread *thread);
 
-    void OSInitStopwatch(OSStopwatch *watch, char *name);
+    void OSInitStopwatch(OSStopwatch *watch, const char *name);
     void OSStartStopwatch(OSStopwatch *watch);
     OSTime OSCheckStopwatch(OSStopwatch *watch);
     void OSStopStopwatch(OSStopwatch *watch);

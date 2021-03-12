@@ -8,9 +8,9 @@ DCDisable:                              # @DCDisable
     .cfi_startproc
 # %bb.0:                                # %entry
     sync
-    mfspr 3, HID0
-    andi. 3, 3, -0x4000
-    mtspr HID0, 3
+    mfspr 3, 1008
+    rlwinm 3, 3, 0, 18, 16
+    mtspr 1008, 3
     blr
 .Lfunc_end0:
 	.size	DCDisable, .Lfunc_end0-.Lfunc_begin0
@@ -25,9 +25,9 @@ ICDisable:                              # @ICDisable
     .cfi_startproc
 # %bb.0:                                # %entry
     sync
-    mfspr 3, HID0
-    andi. 3, 3, -0x8000
-    mtspr HID0, 3
+    mfspr 3, 1008
+    rlwinm 3, 3, 0, 17, 15
+    mtspr 1008, 3
     blr
 .Lfunc_end1:
 	.size	ICDisable, .Lfunc_end1-.Lfunc_begin1

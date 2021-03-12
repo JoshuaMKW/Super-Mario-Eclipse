@@ -19,7 +19,7 @@ void checkIsGlideBounce(TMario *player)
 
         player->mCustomInfo->mTerminalVelocity = -20.0f * player->mGravity;
         player->mCustomInfo->CollisionFlags.mIsSpinBounce = true;
-        changePlayerStatus__6TMarioFUlUlb(player, TMario::SA_JUMPSPIN1, 0, 0);
+        changePlayerStatus__6TMarioFUlUlb(player, TMario::State::JUMPSPIN1, 0, 0);
     }
     else
         checkEnforceJump__6TMarioFv(player);
@@ -50,21 +50,21 @@ static void checkRestoreHealth(TMario *player)
 
 static void checkIsCannonType(TMario *player)
 {
-    if (!player->mController->isPressed(TMarioGamePad::Buttons::DPAD_UP) ||
+    if (!player->mController->mButtons.mInput & TMarioGamePad::Buttons::DPAD_UP ||
         !player->mCustomInfo->CollisionFlags.mIsFaceUsed)
         return;
 
     if ((player->mFloorTriangle->mCollisionType & 0x7FFF) == 16080 ||
         (player->mFloorTriangle->mCollisionType & 0x7FFF) == 17080)
     {
-        changePlayerStatus__6TMarioFUlUlb(player, TMario::SA_TRIPLE_J, 0, 0);
-        emitParticle__6TMarioFis(player, TMario::E_GROUND_SHARP_SHOCK);
-        emitParticle__6TMarioFis(player, TMario::E_GROUND_SMOKE_PLUME);
+        changePlayerStatus__6TMarioFUlUlb(player, TMario::State::TRIPLE_J, 0, 0);
+        emitParticle__6TMarioFis(player, TMario::Effect::GROUND_SHARP_SHOCK);
+        emitParticle__6TMarioFis(player, TMario::Effect::GROUND_SMOKE_PLUME);
         player->mForwardSpeed = (u8)(player->mFloorTriangle->mValue4 >> 8);
         player->mPosition.y += 1.0f;
         player->mSpeed.y = (u8)player->mFloorTriangle->mValue4;
         player->mCustomInfo->CollisionFlags.mIsDisableInput = true;
-        player->mController->setEnabled(false);
+        player->mController->State.mReadInput = false;
         player->mCustomInfo->CollisionFlags.mIsFaceUsed = true;
     }
 }
@@ -89,10 +89,10 @@ static void changeNozzleType(TMario *player, u16 type)
 static void boostPadCol(TMario *player)
 {
     player->mForwardSpeed = player->mFloorTriangle->mValue4;
-    if (player->mState == TMario::SA_IDLE || !player->mCustomInfo->CollisionFlags.mIsFaceUsed)
+    if (player->mState == TMario::State::IDLE || !player->mCustomInfo->CollisionFlags.mIsFaceUsed)
     {
-        changePlayerStatus__6TMarioFUlUlb(player, TMario::SA_RUNNING, 0, 0);
-        startVoice__6TMarioFUl(player, TMario::V_JUMP);
+        changePlayerStatus__6TMarioFUlUlb(player, TMario::State::RUNNING, 0, 0);
+        startVoice__6TMarioFUl(player, TMario::Voice::JUMP);
     }
 }
 
@@ -108,10 +108,10 @@ static void antiGravityCol(TMario *player)
         return;
 
     player->mSpeed.y = 10.0f;
-    if ((player->mState & TMario::SA_AIRBORN) == false)
+    if ((player->mState & TMario::State::AIRBORN) == false)
     {
         player->mPosition.y += 1.0f;
-        changePlayerStatus__6TMarioFUlUlb(player, TMario::SA_FALL, 0, 0);
+        changePlayerStatus__6TMarioFUlUlb(player, TMario::State::FALL, 0, 0);
     }
 }
 
@@ -144,7 +144,7 @@ static void warpToLinkedCol(TMario *player)
             player->mFloorBelow = player->mPosition.y;
             player->mCustomInfo->CollisionFlags.mIsFaceUsed = true;
             player->mCustomInfo->mCollisionTimer = 0;
-            startSoundActor__6TMarioFUl(player, TMario::V_JUMP);
+            startSoundActor__6TMarioFUl(player, TMario::Voice::JUMP);
 
             gpCamera->mPosition.x = lerp<f32>(gpCamera->mPosition.x, player->mPosition.x, 0.9375f);
             gpCamera->mPosition.y = player->mPosition.y + 300.0f;
@@ -155,7 +155,7 @@ static void warpToLinkedCol(TMario *player)
         else if (player->mCustomInfo->mCollisionTimer > 80)
         {
             player->mCustomInfo->CollisionFlags.mIsDisableInput = true;
-            player->mController->setEnabled(false);
+            player->mController->State.mReadInput = false;
             emitGetEffect__6TMarioFv(player);
         }
     }
@@ -164,7 +164,7 @@ static void warpToLinkedCol(TMario *player)
         if (player->mCustomInfo->mCollisionTimer > 60)
         {
             player->mCustomInfo->CollisionFlags.mIsDisableInput = false;
-            player->mController->setEnabled(false);
+            player->mController->State.mReadInput = false;
         }
     }
     player->mCustomInfo->mCollisionTimer += 1;
@@ -207,32 +207,32 @@ static void warpToLinkedColPreserve(TMario *player, bool fluid)
         player->mPosition.y += 40.0f * colUnit.y;
         player->mPosition.z += 40.0f * colUnit.z;
 
-        changePlayerStatus__6TMarioFUlUlb(player, TMario::SA_FALL, 0, 0);
+        changePlayerStatus__6TMarioFUlUlb(player, TMario::State::FALL, 0, 0);
     }
     else
         player->mCustomInfo->CollisionFlags.mIsFaceUsed =
-            (!player->mController->isFramePressed(TMarioGamePad::Buttons::DPAD_DOWN) && !fluid);
+            (!player->mController->mButtons.mFrameInput & TMarioGamePad::Buttons::DPAD_DOWN && !fluid);
 }
 
 static inline void resetValuesOnStateChange(TMario *player)
 {
     switch (player->mPrevState)
     {
-    case (TMario::SA_JUMPSPIN1):
+    case (TMario::State::JUMPSPIN1):
         player->mCustomInfo->mTerminalVelocity = -75.0f * player->mGravity;
         player->mCustomInfo->CollisionFlags.mIsSpinBounce = false;
-    case (TMario::SA_TRIPLE_J):
+    case (TMario::State::TRIPLE_J):
         player->mCustomInfo->CollisionFlags.mIsDisableInput = false;
-        player->mController->setEnabled(true);
+        player->mController->State.mReadInput = true;
     }
     if (player->mCustomInfo->CollisionFlags.mIsDisableInput)
         //Patches pausing/map escaping the controller lock
-        player->mController->setEnabled(false);
+        player->mController->State.mReadInput = false;
 }
 
 static inline void resetValuesOnGroundContact(TMario *player)
 {
-    if (!(player->mState & TMario::SA_AIRBORN))
+    if (!(player->mState & TMario::State::AIRBORN))
     {
         player->mCustomInfo->mTerminalVelocity = -75.0f * player->mGravity;
         player->mCustomInfo->CollisionFlags.mIsAirborn = false;
@@ -242,7 +242,7 @@ static inline void resetValuesOnGroundContact(TMario *player)
 
 static inline void resetValuesOnAirborn(TMario *player)
 {
-    if (!(player->mState & TMario::SA_AIRBORN))
+    if (!(player->mState & TMario::State::AIRBORN))
         return;
 }
 
@@ -271,7 +271,7 @@ u32 updateCollisionContext(TMario *player)
 
     if (player->mCeilingAbove - player->mFloorBelow < marioCollisionHeight &&
         player->mRoofTriangle &&
-        !(player->mState & TMario::SA_AIRBORN))
+        !(player->mState & TMario::State::AIRBORN))
     {
         loserExec__6TMarioFv(player);
     }

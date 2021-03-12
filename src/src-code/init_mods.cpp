@@ -16,6 +16,8 @@ extern void setUserCodes(OSAlarm *alarm, OSContext *context);
 GlobalSMEDataStruct gInfo;
 Memory::Protection::MemoryMap gCodeProtector;
 
+// 0x80005328
+// extern -> SME.cpp
 void initCodeProtection()
 {
     OSInit();
@@ -27,37 +29,9 @@ void initCodeProtection()
 }
 kmCall(0x80005328, &initCodeProtection);
 
-//0x8000561C
-void printInfo(TApplication * gpApplication)
-{
-    #ifdef SME_DEBUG
-        OSReport("============================\n"
-                 "Super Mario Eclipse %s [DEBUG]\n"
-                 "    Shines:     %d\n"
-                 "    Build Date: %s %s\n"
-                 "============================\n", __VERSION__, SME_MAX_SHINES, __DATE__, __TIME__);
-        OSReport("Codeblocker - Creating OSAlarm at %p; Calls %p every %0.4f seconds\n", &gctAlarm, &setUserCodes, 0.001f);
-        //OSReport("Actor flags offset = %X\n", offsetof(JDrama::TNameRef, mKeyCode));
-        //OSReport("Actor position offset = %X\n", offsetof(JDrama::TPlacement, mPosition));
-        OSReport("Actor size offset = %X\n", offsetof(JDrama::TActor, mSize));
-        OSInitStopwatch(&gctStopwatch, "Codeblocker");
-    #else
-        OSReport("============================\n"
-                 "Super Mario Eclipse %s [RELEASE]\n"
-                 "    Shines:     %d\n"
-                 "    Build Date: %s %s\n"
-                 "============================\n", __VERSION__, SME_MAX_SHINES, __DATE__, __TIME__);
-    #endif
-
-    OSCreateAlarm(&gctAlarm);
-    OSSetPeriodicAlarm(&gctAlarm, OSGetTime(), OSMillisecondsToTicks(1), &setUserCodes);
-
-    gpApplication->initialize();
-}
-kmCall(0x8000561C, &printInfo);
-
-//0x802A750C
-static u32 *createGlobalHeaps(u32 *newHeap, u32 size, u32 *rootHeap, u32 unk_1)
+// 0x802A750C
+// extern -> SME.cpp
+u32 *createGlobalHeaps(u32 *newHeap, u32 size, u32 *rootHeap, u32 unk_1)
 {
     gInfo.mCharacterHeap = (JKRHeap *)create__10JKRExpHeapFUlP7JKRHeapb(0x200000, JKRHeap::sRootHeap, false);
     gInfo.mGlobalsHeap = (JKRHeap *)create__10JKRExpHeapFUlP7JKRHeapb(0x10000, JKRHeap::sRootHeap, false);
@@ -66,13 +40,14 @@ static u32 *createGlobalHeaps(u32 *newHeap, u32 size, u32 *rootHeap, u32 unk_1)
 }
 kmCall(0x802A750C, &createGlobalHeaps);
 
-//0x802A7140
+// 0x802A7140
+// extern -> SME.cpp
 u32 setupMarioDatas(char *filepath)
 {
     TMarioGamePad *gpGamePad = gpApplication.mGamePad1;
     u32 id;
 
-    switch (gpGamePad->getInput())
+    switch (gpGamePad->mButtons.mInput)
     {
     case TMarioGamePad::Buttons::DPAD_UP:
         id = 1;
@@ -95,7 +70,8 @@ u32 setupMarioDatas(char *filepath)
 }
 kmCall(0x802A7140, &setupMarioDatas);
 
-//0x802A716C
+// 0x802A716C
+// extern -> SME.cpp
 u32 *initFirstModel(char *path, u32 unk_1, u32 unk_2, u32 unk_3, JKRHeap *heap, u32 unk_4, u32 unk_5, u32 unk_6)
 {
     if (gInfo.mCharacterHeap)
@@ -134,14 +110,14 @@ void resetGlobalValues()
 u32 *initFileMods()
 {
     u32 *objList;
-    asm volatile ( "mr %0, r26" : "=r"(objList));
+    SME_FROM_GPR(r26, objList);
 
     TMarioGamePad *gpGamePad = gpApplication.mGamePad1;
 
     #ifdef SME_DEBUG
         s8 characterID;
 
-        switch (gpGamePad->getInput())
+        switch (gpGamePad->mButtons.mInput)
         {
         case TMarioGamePad::Buttons::Z:
             characterID = 0;
@@ -165,20 +141,16 @@ u32 *initFileMods()
         s8 characterID = -1;
     #endif
 
-    JKRMemArchive *marioVolumeData = (JKRMemArchive *)getVolume__13JKRFileLoaderFPCc("mario");
-    u32 *params = (u32 *)getResource__10JKRArchiveFPCc(marioVolumeData, "/params.szs");
+    JKRMemArchive *marioVolumeData = reinterpret_cast<JKRMemArchive *>(JKRFileLoader::getVolume("mario"));
+    u8 *params = marioVolumeData->getResource("/params.szs");
 
-    u32 *marioDataField;
-    u32 *marioData;
-    u32 *allocation;
 
     char buffer[32];
     
     resetGlobalValues();
     SMEFile::mStageConfig.reset();
 
-    bool stageConfigLoaded = SMEFile::mStageConfig.load(getStageName(&gpApplication));
-    if (stageConfigLoaded)
+    if (SMEFile::mStageConfig.load(SME::getStageName(&gpApplication)))
     {
         OSReport("Success: SME config loaded at %X\n", SMEFile::mStageConfig);
         if (characterID < 0)
@@ -190,44 +162,50 @@ u32 *initFileMods()
         //Attempt to swap character data
         sprintf(buffer, "/data/chr%d.szs", characterID);
         
-        freeAll__10JKRExpHeapFv(gInfo.mCharacterHeap);
+        gInfo.mCharacterHeap->freeAll();
 
-        marioData = loadArchive(buffer, gInfo.mCharacterHeap);
+        u32 *marioData = SME::loadArchive(buffer, gInfo.mCharacterHeap);
         *(u32 *)gpArcBufferMario = (u32)marioData;
 
-        Memory::hmalloc(gInfo.mCharacterHeap, (0x1F0000 - marioData[1]) & -32, 32);
+        gInfo.mCharacterHeap->alloc((0x1F0000 - marioData[1]) & -32, 32);
 
-        __dt__13JKRMemArchiveFv(marioVolumeData);
-        __ct__13JKRMemArchiveFPvUl15JKRMemBreakFlag(marioVolumeData, *(u32 *)gpArcBufferMario, 0, 0);
+        marioVolumeData->unmountFixed();
+        marioVolumeData->mountFixed((void *)*(u32 *)gpArcBufferMario, JKRMemBreakFlag::UNK_0);
+        //__dt__13JKRMemArchiveFv(marioVolumeData);
+        //__ct__13JKRMemArchiveFPvUl15JKRMemBreakFlag(marioVolumeData, *(u32 *)gpArcBufferMario, 0, 0);
     }
 
+    void *allocation;
     if (params)
     {
-        u32 filesize = getResSize__10JKRArchiveCFPCv(marioVolumeData, params);
-        u32 compressionState = checkCompressed__9JKRDecompFPUc(params);
+        u32 filesize = marioVolumeData->getResSize(params);
+        CompressionType compressionState = JKRDecomp::checkCompressed(params);
 
-        if (compressionState == 2)
+        switch (compressionState)
         {
-            *(u32 *)0x8040E260 = params[0x4 / 4];
-            allocation = (u32 *)alloc__7JKRHeapFUliP7JKRHeap(params[0x4 / 4], 32, *JKRHeap::sCurrentHeap);
-            decompSZS_subroutine__FPUcPUc(params, allocation);
+        case CompressionType::SZS:
+        {
+            *(u32 *)0x8040E260 = params[1];
+            allocation = JKRHeap::alloc(params[1], 32, JKRHeap::sCurrentHeap);
+            decompSZS_subroutine(params, reinterpret_cast<u8 *>(allocation));
             gInfo.mPRMFile = allocation;
         }
-        else if (compressionState == 1)
-        {
+        case CompressionType::SZP:
             gInfo.mPRMFile = nullptr;
-        }
-        else
+        case CompressionType::NONE:
         {
-            allocation = (u32 *)alloc__7JKRHeapFUliP7JKRHeap(filesize, 32, *JKRHeap::sCurrentHeap);
+            allocation = JKRHeap::alloc(filesize, 32, JKRHeap::sCurrentHeap);
             memcpy(allocation, params, filesize);
             gInfo.mPRMFile = allocation;
         }
+        }
 
-        JKRMemArchive *oldParams = (JKRMemArchive *)getVolume__13JKRFileLoaderFPCc("params");
+        JKRMemArchive *oldParams = reinterpret_cast<JKRMemArchive *>(JKRFileLoader::getVolume("params"));
 
-        unmountFixed__13JKRMemArchiveFv(oldParams);
-        mountFixed__13JKRMemArchiveFPv15JKRMemBreakFlag(oldParams, gInfo.mPRMFile, 0);
+        oldParams->unmountFixed();
+        oldParams->mountFixed(gInfo.mPRMFile, JKRMemBreakFlag::UNK_0);
+        //unmountFixed__13JKRMemArchiveFv(oldParams);
+        //mountFixed__13JKRMemArchiveFPv15JKRMemBreakFlag(oldParams, gInfo.mPRMFile, 0);
     }
 
     return objList;
@@ -558,9 +536,9 @@ u32 *switchHUDOnStageLoad(char *curArchive, u32 *gameUI)
 {
     char buffer[32];
 
-    if (gpApplication.mGamePad1->isPressed(TMarioGamePad::Buttons::DPAD_UP))
+    if (gpApplication.mGamePad1->mButtons.mInput & TMarioGamePad::Buttons::DPAD_UP)
         TFlagManager::smInstance->Type6Flag.CustomFlags.mHUDElement = 1;
-    else if (gpApplication.mGamePad1->isPressed(TMarioGamePad::Buttons::DPAD_DOWN))
+    else if (gpApplication.mGamePad1->mButtons.mInput & TMarioGamePad::Buttons::DPAD_DOWN)
         TFlagManager::smInstance->Type6Flag.CustomFlags.mHUDElement = 0;
 
     sprintf(buffer, "/data/game_%d.arc", TFlagManager::smInstance->Type6Flag.CustomFlags.mHUDElement); //"/data/game_%d.arc"

@@ -151,8 +151,8 @@ public:
     void advanceRollMovement(TPollutionManager *gpPollution);
     void canUtilizeTentacles(u32 *TBGTentacle, u32 *unk1, u32 *JDramaGraphics, TDarkZhine *thisZhine);
     static u32 cleanFromSpineBase(u32 *gpNerveBGEye, TSpineBase<TLiveActor> *gpSpineBase);
-    void control(TDarkZhine *thisZhine);
+    void control_(TDarkZhine *thisZhine);
     f32 getAngleToTarget();
     bool isTargetInRangeToHome(JGeometry::TVec3<f32> home, f32 r);
-    void perform(TMario *player);
+    void perform_(TMario *player);
 };

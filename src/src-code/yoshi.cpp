@@ -33,7 +33,7 @@ bool TYoshi::isGreenYoshiMounted(TMario *player)
 bool TYoshi::isGreenYoshiAscendingWater(TMario *player)
 {
     return player->mAttributes.mIsWater &&
-           player->mController->isPressed(TMarioGamePad::Buttons::A) &&
+           player->mController->mButtons.mInput & TMarioGamePad::Buttons::A &&
            player->mYoshi->isGreenYoshiMounted();
 }
 
@@ -107,13 +107,13 @@ bool canMountYoshi(u32 state)
 
     if (player->mCustomInfo->mParams)
     {
-        if (state & TMario::SA_WATERBORN)
+        if (state & TMario::State::WATERBORN)
             return player->mCustomInfo->mParams->Attributes.mCanRideYoshi;
         else
-            return ((state & TMario::SA_AIRBORN) && player->mCustomInfo->mParams->Attributes.mCanRideYoshi);
+            return ((state & TMario::State::AIRBORN) && player->mCustomInfo->mParams->Attributes.mCanRideYoshi);
     }
     else
-        return state & TMario::SA_AIRBORN;
+        return state & TMario::State::AIRBORN;
 }
 
 // 0x80281148
@@ -166,7 +166,7 @@ u32 calcYoshiSwimVelocity(TMario *player, u32 arg1)
     if (!player->mYoshi->isGreenYoshiMounted())
         return jumpProcess__6TMarioFi(player, arg1);
 
-    if (player->mController->isPressed(TMarioGamePad::Buttons::A))
+    if (player->mController->mButtons.mInput & TMarioGamePad::Buttons::A)
     {
         if (player->mCustomInfo->mYoshiWaterSpeed.y > 12)
             player->mCustomInfo->mYoshiWaterSpeed.y = 12;
@@ -215,7 +215,7 @@ u32 isYoshiValidWaterFlutter(s32 anmIdx, u32 unk1, TMario *player)
         return player->mState;
 
     if (TYoshi::isGreenYoshiAscendingWater(player))
-        return (player->mState & 0xFFFFFBFF) | TMario::SA_AIRBORN;
+        return (player->mState & 0xFFFFFBFF) | TMario::State::AIRBORN;
     else
         return player->mState;
 }

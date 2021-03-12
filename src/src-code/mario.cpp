@@ -40,18 +40,18 @@ u32 updateContexts(TMario *player)
 
     bool checkClimbContext = false;
 
-    if ((player->mState & TMario::SA_AIRBORN) == 0 && (player->mState & 0x1C0) != 320)
+    if ((player->mState & TMario::State::AIRBORN) == 0 && (player->mState & 0x1C0) != 320)
         player->mCustomInfo->mClimbQuarterFramesLeft =
             player->mCustomInfo->mParams->Attributes.mMaxClimbQuarterFrames;
     else if ((player->mState & 0x1C0) == 320)
     {
         if ((player->mState & 0x200000) != 0 && player->mRoofTriangle &&
             player->mRoofTriangle->mCollisionType != 266)
-            checkClimbContext = player->mState != TMario::SA_HANG;
+            checkClimbContext = player->mState != TMario::State::HANG;
         else if ((player->mState & 0x200000) == 0 && 
                  player->mWallTriangle &&
                  player->mWallTriangle->mCollisionType != 266)
-            checkClimbContext = player->mState != TMario::SA_HANG;
+            checkClimbContext = player->mState != TMario::State::HANG;
 
         if (checkClimbContext)
         {
@@ -68,7 +68,7 @@ u32 updateContexts(TMario *player)
                                               (float)player->mCustomInfo->mParams->Attributes.mMaxClimbQuarterFrames) < 0.1f)
                 {
                     if (!player->mCustomInfo->mIsClimbTired)
-                        startVoice__6TMarioFUl(player, TMario::V_FALL_LEDGE_GRAB);
+                        startVoice__6TMarioFUl(player, TMario::Voice::FALL_LEDGE_GRAB);
                     
                     player->mCustomInfo->mIsClimbTired = true;
                 }
@@ -92,7 +92,7 @@ u32 carryOrTalkNPC(TBaseNPC *npc)
     if ((*(u32 *)(&npc->mFlags) & 0x840007) != 0)
         return 0;
     
-    if (gpMarioAddress->mState == TMario::SA_IDLE)
+    if (gpMarioAddress->mState == TMario::State::IDLE)
         return 0;
 
     if (!gpMarioAddress->mCustomInfo->isMario() ||
@@ -116,7 +116,7 @@ bool canGrabAtNPC()
     if (npc->mFlags.mCanBeTaken)
         return true;
     
-    if (gpMarioAddress->mState == TMario::SA_IDLE)
+    if (gpMarioAddress->mState == TMario::State::IDLE)
         return false;
 
     if (!gpMarioAddress->mCustomInfo->isMario() || !gpMarioAddress->mCustomInfo->isInitialized())
@@ -133,7 +133,7 @@ bool canCarryNPC()
     if (npc->mFlags.mCanBeTaken)
         return true;
     
-    if (gpMarioAddress->mState == TMario::SA_IDLE)
+    if (gpMarioAddress->mState == TMario::State::IDLE)
         return false;
 
     if (!gpMarioAddress->mCustomInfo->isMario() || !gpMarioAddress->mCustomInfo->isInitialized())
@@ -154,7 +154,7 @@ static TMario *scaleNPCThrowLength(TMario *player, float *params)
         _f11 *= player->mCustomInfo->mParams->Attributes.mThrowPowerMultiplier * ((player->mCustomInfo->mParams->Attributes.mSizeMultiplier * 0.5f) + (1.0f - 0.5f));
     }
     
-    if (player->mState == TMario::SA_NPC_THROW || player->mState == TMario::SA_NPC_JUMPTHROW)
+    if (player->mState == TMario::State::NPC_THROW || player->mState == TMario::State::NPC_JUMPTHROW)
     {
         _f11 *= 4.0f;
     }
@@ -178,8 +178,8 @@ static u32 scaleNPCThrowHeight(u32 _r3, f32 z, f32 y)
         y *= player->mCustomInfo->mParams->Attributes.mThrowPowerMultiplier *
              ((player->mCustomInfo->mParams->Attributes.mSizeMultiplier * 0.5f) + (1.0f - 0.5f));
     
-    if (player->mState == TMario::SA_NPC_THROW ||
-        player->mState == TMario::SA_NPC_JUMPTHROW)
+    if (player->mState == TMario::State::NPC_THROW ||
+        player->mState == TMario::State::NPC_JUMPTHROW)
         y *= 4.0f;
     
     npc->mSpeed.y = y;
@@ -396,7 +396,7 @@ static TBGCheckData *canJumpClingWall(TBGCheckData *wall)
         canCling =
             wall->mCollisionType == 266 ||
                 (player->mCustomInfo->mParams->Attributes.mCanClimbWalls &&
-                 player->mController->isPressed(TMarioGamePad::Buttons::Z));
+                 player->mController->mButtons.mInput & TMarioGamePad::Buttons::Z);
     else
         canCling = wall->mCollisionType == 266;
 
@@ -420,7 +420,7 @@ static TBGCheckData *canUnkActionWall(TBGCheckData *wall)
         canCling =
             wall->mCollisionType == 266 ||
                 (player->mCustomInfo->mParams->Attributes.mCanClimbWalls &&
-                 player->mController->isPressed(TMarioGamePad::Buttons::Z) && 
+                 player->mController->mButtons.mInput & TMarioGamePad::Buttons::Z && 
                  wall->mCollisionType != 5);
     else
         canCling = wall->mCollisionType == 266;
@@ -445,7 +445,7 @@ static TBGCheckData *canRunClingWall(TBGCheckData *wall)
         canCling =
             wall->mCollisionType == 266 ||
                 (player->mCustomInfo->mParams->Attributes.mCanClimbWalls &&
-                 player->mController->isPressed(TMarioGamePad::Buttons::Z) &&
+                 player->mController->mButtons.mInput & TMarioGamePad::Buttons::Z &&
                  wall->mCollisionType != 5);
     else
         canCling = wall->mCollisionType == 266;
@@ -515,7 +515,7 @@ static TBGCheckData *canClimbUnderwater(TBGCheckData *wall)
         canCling =
             wall->mCollisionType == 266 ||
                 (player->mCustomInfo->mParams->Attributes.mCanClimbWalls &&
-                 player->mController->isPressed(TMarioGamePad::Buttons::Z) &&
+                 player->mController->mButtons.mInput & TMarioGamePad::Buttons::Z &&
                  wall->mCollisionType != 5);
     else
         canCling = wall->mCollisionType == 266;
@@ -574,7 +574,7 @@ static u32 patchYStorage()
     TMario *player;
     __asm { mr player, r31 };
 
-    if (player->mState != TMario::SA_IDLE)
+    if (player->mState != TMario::State::IDLE)
         player->mSpeed.y = 0.0f;
 
     return 0;
@@ -590,25 +590,25 @@ static void manageExtraJumps(TMario *player)
         return;
     }
 
-    if ((player->mState & TMario::SA_AIRBORN) == false ||
+    if ((player->mState & TMario::State::AIRBORN) == false ||
         (player->mState & 0x800000) ||
         player->mYoshi->mState == TYoshi::MOUNTED)
         player->mCustomInfo->mCurJump = 1;
     else
     {
-        if (player->mController->isFramePressed(TMarioGamePad::Buttons::A) &&
+        if (player->mController->mButtons.mFrameInput & TMarioGamePad::Buttons::A &&
             player->mCustomInfo->mCurJump < player->mCustomInfo->mMaxJumps &&
-            player->mState != TMario::SA_WALLSLIDE)
+            player->mState != TMario::State::WALLSLIDE)
         {
             if ((player->mCustomInfo->mMaxJumps - player->mCustomInfo->mCurJump) == 1)
             {
-                if (player->mState != TMario::SA_TRIPLE_J)
-                    changePlayerJumping__6TMarioFUlUl(player, TMario::SA_TRIPLE_J, 0);
+                if (player->mState != TMario::State::TRIPLE_J)
+                    changePlayerJumping__6TMarioFUlUl(player, TMario::State::TRIPLE_J, 0);
                 else
-                    setStatusToJumping__6TMarioFUlUl(player, TMario::SA_TRIPLE_J, 0);
+                    setStatusToJumping__6TMarioFUlUl(player, TMario::State::TRIPLE_J, 0);
             }
-            else if ((player->mState - TMario::SA_JUMP) > 1)
-                changePlayerJumping__6TMarioFUlUl(player, TMario::SA_JUMP, 0);
+            else if ((player->mState - TMario::State::JUMP) > 1)
+                changePlayerJumping__6TMarioFUlUl(player, TMario::State::JUMP, 0);
             else
                 changePlayerJumping__6TMarioFUlUl(player, player->mState ^ 1, 0);
             player->mCustomInfo->mCurJump += 1;
@@ -623,7 +623,7 @@ static f32 calcJumpPower(TMario *player, f32 factor, f32 curYVelocity, f32 jumpP
     if (player->mCustomInfo->mParams)
     {
         jumpPower *= player->mCustomInfo->mParams->Attributes.mBaseJumpHeightMulti;
-        if (player->mState & TMario::SA_AIRBORN)
+        if (player->mState & TMario::State::AIRBORN)
         {
             jumpPower *= powf(player->mCustomInfo->mParams->Attributes.mMultiJumpMultiplier, (f32)player->mCustomInfo->mCurJump);
             player->mForwardSpeed *= player->mCustomInfo->mParams->Attributes.mMultiJumpFSpeedMulti;

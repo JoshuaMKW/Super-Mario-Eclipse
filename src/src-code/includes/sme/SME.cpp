@@ -51,6 +51,13 @@ extern void killTriggerNozzle();
 extern void spamHoverWrapper(TNozzleTrigger *nozzle, u32 r4, TWaterEmitInfo *emitInfo);
 extern bool checkAirNozzle();
 
+// init_mods.cpp
+extern void initCodeProtection();
+extern u32 *createGlobalHeaps(u32 *newHeap, u32 size, u32 *rootHeap, u32 unk_1);
+extern u32 setupMarioDatas(char *filepath);
+extern u32 *initFirstModel(char *path, u32 unk_1, u32 unk_2, u32 unk_3, JKRHeap *heap, u32 unk_4, u32 unk_5, u32 unk_6);
+extern u32 *initFileMods();
+
 // mario.cpp
 #include "sms/npc/BaseNPC.hxx"
 extern "C" s16 shadowCrashPatch();
@@ -100,6 +107,7 @@ extern void initFreeEggCard(MActorAnmBck *bckData);
 extern u32 checkFreeEggCard(MActorAnmBck *bckData);
 extern void saveNozzles(TYoshi *yoshi);
 extern void restoreNozzles(TMario *player);
+
 
 // utilities/card.cpp
 extern s32 mountCard(TCardManager *cardManager, bool r4);

@@ -196,7 +196,7 @@ size_t String::erase(size_t pos, size_t len)
     return pos;
 }
 
-constexpr size_t String::find(const char *str, size_t startPos)
+size_t String::find(const char *str, size_t startPos)
 {
     if (startPos >= this->length())
         return String::npos;
@@ -208,7 +208,7 @@ constexpr size_t String::find(const char *str, size_t startPos)
     return addr - this->mString;
 }
 
-constexpr size_t String::find(const char chr, size_t startPos)
+size_t String::find(const char chr, size_t startPos)
 {
     if (startPos >= this->length())
         return String::npos;
@@ -220,7 +220,7 @@ constexpr size_t String::find(const char chr, size_t startPos)
     return addr - this->mString;
 }
 
-constexpr size_t String::findAny(const char list[], size_t startPos)
+size_t String::findAny(const char list[], size_t startPos)
 {
     if (startPos >= this->length())
         return String::npos;

@@ -26,11 +26,11 @@ void TCheatHandler::advanceInput()
 {
     if (!this->mGamePad || !this->mInputList)
         return;
-    else if (this->mGamePad->getFrameInput() == NULL ||
+    else if (this->mGamePad->mButtons.mFrameInput == NULL ||
              this->mInputIndex < 0)
         return;
 
-    if (this->mGamePad->getFrameInput() !=
+    if (this->mGamePad->mButtons.mFrameInput !=
         this->mInputList[static_cast<u8>(this->mInputIndex)])
     {
         this->mInputIndex = -1;

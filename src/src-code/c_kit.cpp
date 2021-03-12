@@ -26,28 +26,28 @@ static void xyzModifierMario()
     if ((void *)gpMarioAddress->mController < (void *)0x80000000 || (u32 *)gpMarioAddress->mController >= (void *)0x81800000)
         return;
 
-    if (gpMarioAddress->mController->isFramePressed(TMarioGamePad::Buttons::DPAD_RIGHT) && !inXYZMode)
+    if (gpMarioAddress->mController->mButtons.mFrameInput & TMarioGamePad::Buttons::DPAD_RIGHT && !inXYZMode)
     {
         inXYZMode = true;
     }
-    else if (gpMarioAddress->mController->isFramePressed(TMarioGamePad::Buttons::DPAD_RIGHT) && inXYZMode)
+    else if (gpMarioAddress->mController->mButtons.mFrameInput & TMarioGamePad::Buttons::DPAD_RIGHT && inXYZMode)
     {
-        gpMarioAddress->mState = TMario::SA_IDLE;
+        gpMarioAddress->mState = TMario::State::IDLE;
         inXYZMode = false;
     }
 
     if (inXYZMode)
     {
-        gpMarioAddress->mState = TMario::SA_IDLE | TMario::SA_CUTSCENE;
+        gpMarioAddress->mState = TMario::State::IDLE | TMario::State::CUTSCENE;
         f32 speedMultiplier = lerp<f32>(1, 2, gpMarioAddress->mController->mButtons.mAnalogR);
         gpMarioAddress->mPosition.x += ((gpMarioAddress->mController->mControlStick.mStickX * 83) * speedMultiplier);
         gpMarioAddress->mPosition.z -= ((gpMarioAddress->mController->mControlStick.mStickY * 83) * speedMultiplier);
 
-        if (gpMarioAddress->mController->isPressed(TMarioGamePad::Buttons::DPAD_DOWN))
+        if (gpMarioAddress->mController->mButtons.mInput & TMarioGamePad::Buttons::DPAD_DOWN)
         {
             gpMarioAddress->mPosition.y -= (83 * speedMultiplier);
         }
-        else if (gpMarioAddress->mController->isPressed(TMarioGamePad::Buttons::DPAD_UP))
+        else if (gpMarioAddress->mController->mButtons.mInput & TMarioGamePad::Buttons::DPAD_UP)
         {
             gpMarioAddress->mPosition.y += (83 * speedMultiplier);
         }
@@ -249,7 +249,7 @@ f32 velocityCoordinatePatches(f32 floorCoordinateY)
 {
     TMario *gpMario = (TMario *)*(u32 *)TMarioInstance;
 
-    if (gpMario->mState != TMario::SA_IDLE)
+    if (gpMario->mState != TMario::State::IDLE)
     { //Y storage
         gpMario->mSpeed.y = 0;
     }

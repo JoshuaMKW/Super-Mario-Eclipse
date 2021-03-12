@@ -20,7 +20,7 @@ void manageShineVanish(JGeometry::TVec3<f32> *marioPos)
         setAnmFromIndex__12MActorAnmBlkFiPUs(shine->mActorData->mBckInfo, -1);
         shine->kill();
     }
-    else if (gpMarioAddress->mState != TMario::SA_SHINE_C)
+    else if (gpMarioAddress->mState != TMario::State::SHINE_C)
     {
         shine->mPosition.y += 4.0f;
         shine->mSize.x -= 0.011f;
@@ -55,9 +55,9 @@ static void restoreMario(TMarDirector *gpMarDirector, u32 curState)
 
     u8 *curSaveCard = (u8 *)(gpMarDirector->sNextState[0x118 / 4]);
 
-    if (curState != TMarDirector::SA_NORMAL ||
-        gpMarDirector->mLastState != TMarDirector::SA_SAVE_CARD ||
-        gpMarioAddress->mState != TMario::SA_SHINE_C)
+    if (curState != TMarDirector::State::NORMAL ||
+        gpMarDirector->mLastState != TMarDirector::State::SAVE_CARD ||
+        gpMarioAddress->mState != TMario::State::SHINE_C)
         return;
 
     if (curSaveCard[0x2E9] != 1)
@@ -65,14 +65,14 @@ static void restoreMario(TMarDirector *gpMarDirector, u32 curState)
         if (SMS_isDivingMap__Fv() || (gpMarioAddress->mPrevState & 0x20D0) == 0x20D0)
             gpMarioAddress->mState = gpMarioAddress->mPrevState;
         else
-            gpMarioAddress->mState = TMario::SA_IDLE;
+            gpMarioAddress->mState = TMario::State::IDLE;
 
         MSBgm::stopBGM(BGM_GET_SHINE, 20);
         MSBgm::startBGM(gStageBGM);
         endDemoCamera__15CPolarSubCameraFv(gpCamera);
     }
     else
-        gpMarDirector->mGameState |= TMarDirector::ST_WARP_OUT;
+        gpMarDirector->mGameState |= TMarDirector::Status::WARP_OUT;
 }
 
 //0x802995BC
@@ -192,7 +192,7 @@ void thinkSetBootFlag(void *shineFader, u32 unk_1, u32 unk_2)
     if ((gpMarDirector->mCollectedShine->mType & 0x10) == false)
     {
         registFadeout__11TShineFaderFUsUs(shineFader, unk_1, unk_2);
-        gpMarDirector->mGameState |= TMarDirector::ST_WARP_OUT;
+        gpMarDirector->mGameState |= TMarDirector::Status::WARP_OUT;
     }
 }
 

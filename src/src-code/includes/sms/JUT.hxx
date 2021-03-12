@@ -145,6 +145,13 @@ public:
 	virtual ~JUTGamePad();
 
 	void assign();
+    void checkResetSwitch();
+    void clearForReset();
+    void init();
+    void initList();
+    void read();
+    bool recalibrate(u32);
+    void setButtonRepeat(u32, u32, u32);
 	void update();
 
     enum Buttons

@@ -6,7 +6,7 @@ void setStageOnExit(TGameSequence *gpSequence, s8 stage, s8 episode)
 {
     TMarioGamePad *gpGamePad = gpApplication.mGamePad1;
 
-    if (gpGamePad->isPressed(TMarioGamePad::Buttons::Z))
+    if (gpGamePad->mButtons.mInput & TMarioGamePad::Buttons::Z)
     {
         stage = gpApplication.mCurrentScene.mAreaID;
         episode = -1;
@@ -20,7 +20,7 @@ void startEpisodeSelect(void *selectMenu)
 {
     TMarioGamePad *gpGamePad = gpApplication.mGamePad1;
 
-    if (!gpGamePad->isPressed(TMarioGamePad::Buttons::Z))
+    if (!gpGamePad->mButtons.mInput & TMarioGamePad::Buttons::Z)
     {
         startOpenWindow__11TSelectMenuFv(selectMenu);
     }

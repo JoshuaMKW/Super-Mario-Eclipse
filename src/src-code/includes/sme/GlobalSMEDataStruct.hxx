@@ -49,12 +49,12 @@ struct GlobalSMEDataStruct
         bool mIsActive[4];
     } PlayerData;
 
-    u32 *mPRMFile;
+    void *mPRMFile;
     WarpCollisionList *mWarpColArray;
     WarpCollisionList *mWarpColPreserveArray;
-    JKRHeap *mCharacterHeap;
-    JKRHeap *mGame6Heap;
-    JKRHeap *mGlobalsHeap;
+    JKRExpHeap *mCharacterHeap;
+    JKRExpHeap *mGame6Heap;
+    JKRExpHeap *mGlobalsHeap;
 
     TMario *getPlayerByID(u8 id) const;
     constexpr bool isMusicBeingStreamed() const { return this->Context.mIsAudioStreaming; };

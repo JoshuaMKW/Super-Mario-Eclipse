@@ -184,7 +184,7 @@ static void checkSpamHover(TNozzleTrigger *nozzle, u32 r4, TWaterEmitInfo *emitI
         return;
 
     if (!(player->mControllerWork->mAnalogR < 0.9f) ||
-        !player->mControllerWork->isFramePressed(TMarioControllerWork::A))
+        !player->mControllerWork->mButtons.mFrameInput & TMarioControllerWork::A)
         return;
 
     if (nozzle->mFludd->mCurrentWater < 510)
@@ -221,10 +221,10 @@ bool checkAirNozzle()
     TMario *player;
     SME_FROM_GPR(r31, player);
     
-    sIsTriggerNozzleDead &= (player->mState & TMario::SA_AIRBORN) != 0;
+    sIsTriggerNozzleDead &= (player->mState & TMario::State::AIRBORN) != 0;
 
     if (player->mFludd->mCurrentNozzle == TWaterGun::Spray || player->mFludd->mCurrentNozzle == TWaterGun::Yoshi || player->mFludd->mCurrentNozzle == TWaterGun::Underwater)
-        return player->mState != TMario::SA_HOVER_F;
+        return player->mState != TMario::State::HOVER_F;
 
-    return (!(player->mState & TMario::SA_AIRBORN) || !sIsTriggerNozzleDead);
+    return (!(player->mState & TMario::State::AIRBORN) || !sIsTriggerNozzleDead);
 }

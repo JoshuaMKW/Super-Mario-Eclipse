@@ -3,10 +3,25 @@
 #include "types.h"
 #include "sms/J3D.hxx"
 
+class M3UMtxCalcSetInfo
+{
+};
+
 class M3UModel
 {
-
 public:
+    virtual void changeMtxCalcAnmTransform(int, u8);
+    virtual void changeAnmTexPattern(int, u8);
+    virtual void setMtxCalc(const M3UMtxCalcSetInfo &);
+    virtual void updateIn();
+    virtual void updateOut();
+    virtual void entryIn();
+    virtual void entryOut();
+
+    void perform(u32, JDrama::TGraphics *);
+    void updateInMotion();
+    void updateInTexPatternAnm();
+
     void *_00[2];      //0x0000
     J3DModel *mModel;  //0x0008
     u32 _01[0x30 / 4]; //0x000C

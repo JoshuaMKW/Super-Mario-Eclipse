@@ -29,8 +29,8 @@ void newGamePlus(TFlagManager *flagManager, JSUMemoryInputStream &stream)
     if (flagManager->Type4Flag.mShineCount < 120 || (flagManager->Type1Flag.m1Type[0xE] & 0x80) == 0)
         return;
 
-    else if (gpMarioAddress->mController->isPressed(TMarioGamePad::Buttons::R) &&
-             gpMarioAddress->mController->isPressed(TMarioGamePad::Buttons::L))
+    else if (gpMarioAddress->mController->mButtons.mInput & TMarioGamePad::Buttons::R &&
+             gpMarioAddress->mController->mButtons.mInput & TMarioGamePad::Buttons::L)
     {
         flagManager->Type6Flag.CustomFlags.mIsGamePlus = true;
         //Type 1

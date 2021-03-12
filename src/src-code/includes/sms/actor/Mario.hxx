@@ -12,6 +12,8 @@
 
 #include "params/MarioParams.hxx"
 
+class TMario;
+
 struct TMarioAnimeData
 {
     enum FLUDD
@@ -27,6 +29,8 @@ struct TMarioAnimeData
         HAND_C
     };
 
+    bool isPumpOK() const;
+
     u16 mAnimID;
     u16 mFluddEnabled; //Note: ENUM? 68 = enabled, 200 = disabled
     u8 mAnmTexPattern; //Note: 23 is the max value allowed
@@ -37,15 +41,31 @@ struct TMarioAnimeData
 
 class TMarioCap
 {
+public:
+    TMarioCap(TMario *);
+
+    virtual perform(u32, JDrama::TGraphics *);
+    
+    void createMirrorModel();
+    void mtxEffectHide();
+    void mtxEffectShow();
 };
 
 class M3UModelMario : public M3UModel
 {
+public:
+    virtual void updateIn() override;
+    virtual void updateOut() override;
+    
+    void changeMtxCalcSIAnmBQAnmTransform(int, int, u8);
+    void updateInMotion() override;
 };
 
 class TMarioSoundValues
 {
 public:
+    TMarioSoundValues();
+
     u32 _0;
     u32 _4;
     u32 _8;
@@ -61,9 +81,6 @@ public:
     u8 _2A;
     u8 _2B;
     u8 _2C;
-    u8 _2D; // padding?
-    u8 _2E; // ^^
-    u8 _2F; // ^^
 };
 
 struct TMarioControllerWork
@@ -87,29 +104,26 @@ struct TMarioControllerWork
     f32 mStickDist;
     f32 mAnalogL;
     f32 mAnalogR;
-
-    bool isPressed(Buttons input)
-    {
-        return (this->mInput & input) != 0;
-    }
-
-    bool isFramePressed(Buttons input)
-    {
-        return (this->mFrameInput & input) != 0;
-    }
 };
 
 class TMarioGamePad : public JUTGamePad
 {
 public:
+    virtual ~TMarioGamePad();
+
+    void onNeutralMarioKey();
+    void read();
+    void reset();
+    void updateMeaning();
+
     f32 _A8;
     f32 _AC;
     f32 _B0;
     f32 _B4;
     f32 _B8;
     f32 _BC;
-    f32 stickX; // _C0
-    f32 stickY; // _C4
+    f32 mStickX; // _C0
+    f32 mStickY; // _C4
     f32 _C8;
     f32 _CC;
     u32 mMeaning;
@@ -132,36 +146,6 @@ public:
     u16 _E6; // padding?
     u32 _E8;
     u32 _EC; // padding?
-
-    u32 getInput()
-    {
-        return this->mButtons.mInput;
-    }
-
-    u32 getFrameInput()
-    {
-        return this->mButtons.mFrameInput;
-    }
-
-    bool isPressed(Buttons input)
-    {
-        return this->mButtons.mInput & input;
-    }
-
-    bool isFramePressed(Buttons input)
-    {
-        return this->mButtons.mFrameInput & input;
-    }
-
-    bool isRecordingInput()
-    {
-        return this->State.mReadInput;
-    }
-
-    void setEnabled(bool state)
-    {
-        this->State.mReadInput = state;
-    }
 };
 
 class TMario : public TTakeActor
@@ -170,128 +154,128 @@ class TMario : public TTakeActor
 public:
     enum State
     {
-        SA_NUMBER = 0x0000000F,
-        SA_DOJUMP = 0x00000080,
-        SA_AIRBORN = 0x00000800,
-        SA_CUTSCENE = 0x00001000,
-        SA_WATERBORN = 0x00002000,
-        SA_RUNNING = 0x04000440,
-        SA_IDLE = 0x0C400201,
-        SA_STOP = 0x0C00023D,
-        SA_SPIN = 0x00000441,
-        SA_JUMPSPIN = 0x00000890,
-        SA_JUMPSPIN1 = 0x00000895,
-        SA_JUMPSPIN2 = 0x00000896,
-        SA_JUMP = 0x02000880,
-        SA_D_JUMP = 0x02000881,
-        SA_TRIPLE_J = 0x00000882,
-        SA_JMP_LAND = 0x04000470,
-        SA_HVY_LAND = 0x04000473,
-        SA_D_LAND = 0x04000472,
-        SA_T_LAND = 0x0800023A,
-        SA_JUMPSIDE = 0x00000880,
-        SA_BOUNCE = 0x00000884,
-        SA_SIDESTEP = 0x0C008220,
-        SA_SIDE_FLIP = 0x00000887,
-        SA_FALL = 0x0000088C,
-        SA_SWIM = 0x000024D7,
-        SA_DIVE = 0x0080088A,
-        SA_DIVEJUMP = 0x02000889,
-        SA_DIVESLIDE = 0x00800456,
-        SA_GOOPSLIDE = 0x0084045D,
-        SA_CLIMB = 0x18100340,
-        SA_CLIMBUP = 0x10100343,
-        SA_WALLJUMP = 0x02000886,
-        SA_WALLSLIDE = 0x000008A7,
-        SA_ROOFHANG = 0x00200349,
-        SA_HANG = 0x3800034B,
-        SA_HANGCLIMB = 0x3000054F,
-        SA_SLAMSTART = 0x008008A9,
-        SA_SLAM = 0x0080023C,
-        SA_SPRAY = 0x0C008220,
-        SA_THROWN = 0x000208B8,
-        SA_HOVER = 0x0000088B,
-        SA_STUCK = 0x0002033C,
-        SA_TALKING = 0x10001308,
-        SA_TURNING = 0x00000444,
-        SA_YOSHI_ESC = 0x0000089C,
-        SA_SHINE_C = 0x00001302, // Collected Shine Sprite
-        SA_DEATH = 0x00020467,
-        SA_DOOR_F_O = 0x00001321, // Door open fail
-        SA_WALL_S_L = 0x04000471,
-        SA_F_KNCK_H = 0x000208B0, // hard knockback from front (bumping into a wall from dive)
-        SA_KNCK_LND = 0x00020462, // Landing from front knockback
-        SA_KNCK_GND = 0x00020466, // Front knockback while grounded
-        SA_FIRE_HIT = 0x000208B7,
-        SA_FIRE_RVR = 0x08000239, // Recover from fire on ground
-        SA_HOVER_F = 0x0000088D,  // Falling from hover
-        SA_SLIDE_R1 = 0x000008A6, // Recover from slide by flipping
-        SA_SLIDE_R2 = 0x00000386, // Recover from slide by getting up
-        SA_R_SPRAY = 0x0C008220,  // Recover from spray
-        SA_G_POUND = 0x008008A9,  // Ground pounding
-        SA_NPC_PUTDOWN = 0x80000387,
-        SA_NPC_THROW = 0x80000588,
-        SA_NPC_JUMPTHROW = 0x820008AB
+        NUMBER = 0x0000000F,
+        DOJUMP = 0x00000080,
+        AIRBORN = 0x00000800,
+        CUTSCENE = 0x00001000,
+        WATERBORN = 0x00002000,
+        RUNNING = 0x04000440,
+        IDLE = 0x0C400201,
+        STOP = 0x0C00023D,
+        SPIN = 0x00000441,
+        JUMPSPIN = 0x00000890,
+        JUMPSPIN1 = 0x00000895,
+        JUMPSPIN2 = 0x00000896,
+        JUMP = 0x02000880,
+        D_JUMP = 0x02000881,
+        TRIPLE_J = 0x00000882,
+        JMP_LAND = 0x04000470,
+        HVY_LAND = 0x04000473,
+        D_LAND = 0x04000472,
+        T_LAND = 0x0800023A,
+        JUMPSIDE = 0x00000880,
+        BOUNCE = 0x00000884,
+        SIDESTEP = 0x0C008220,
+        SIDE_FLIP = 0x00000887,
+        FALL = 0x0000088C,
+        SWIM = 0x000024D7,
+        DIVE = 0x0080088A,
+        DIVEJUMP = 0x02000889,
+        DIVESLIDE = 0x00800456,
+        GOOPSLIDE = 0x0084045D,
+        CLIMB = 0x18100340,
+        CLIMBUP = 0x10100343,
+        WALLJUMP = 0x02000886,
+        WALLSLIDE = 0x000008A7,
+        ROOFHANG = 0x00200349,
+        HANG = 0x3800034B,
+        HANGCLIMB = 0x3000054F,
+        SLAMSTART = 0x008008A9,
+        SLAM = 0x0080023C,
+        SPRAY = 0x0C008220,
+        THROWN = 0x000208B8,
+        HOVER = 0x0000088B,
+        STUCK = 0x0002033C,
+        TALKING = 0x10001308,
+        TURNING = 0x00000444,
+        YOSHI_ESC = 0x0000089C,
+        SHINE_C = 0x00001302, // Collected Shine Sprite
+        DEATH = 0x00020467,
+        DOOR_F_O = 0x00001321, // Door open fail
+        WALL_S_L = 0x04000471,
+        F_KNCK_H = 0x000208B0, // hard knockback from front (bumping into a wall from dive)
+        KNCK_LND = 0x00020462, // Landing from front knockback
+        KNCK_GND = 0x00020466, // Front knockback while grounded
+        FIRE_HIT = 0x000208B7,
+        FIRE_RVR = 0x08000239, // Recover from fire on ground
+        HOVER_F = 0x0000088D,  // Falling from hover
+        SLIDE_R1 = 0x000008A6, // Recover from slide by flipping
+        SLIDE_R2 = 0x00000386, // Recover from slide by getting up
+        R_SPRAY = 0x0C008220,  // Recover from spray
+        G_POUND = 0x008008A9,  // Ground pounding
+        NPC_PUTDOWN = 0x80000387,
+        NPC_THROW = 0x80000588,
+        NPC_JUMPTHROW = 0x820008AB
     };
 
     enum Status
     {
-        ST_ALIVE = 0x1,
-        ST_SEWER_FLOOR = 0x2,
-        ST_INVISIBLE = 0x4,
-        ST_NPC_TALKING = 0x8,
-        ST_LEAVING_WATER = 0x10,
-        ST_SLIP = 0x80,
-        ST_GAMEOVER = 0x400,
-        ST_UP_GROUND_POUND = 0x800,
-        ST_HASHELMET_FOLLOWCAMERA = 0x1000,
-        ST_HASHELMET = 0x2000,
-        ST_HASFLUDD = 0x8000,
-        ST_SPLASH = 0x10000,
-        ST_PUDDLE = 0x20000,
-        ST_SHIRT = 0x100000,
-        ST_GONE = 0x200000
+        ALIVE = 0x1,
+        SEWER_FLOOR = 0x2,
+        INVISIBLE = 0x4,
+        NPC_TALKING = 0x8,
+        LEAVING_WATER = 0x10,
+        SLIP = 0x80,
+        GAMEOVER = 0x400,
+        UP_GROUND_POUND = 0x800,
+        HASHELMET_FOLLOWCAMERA = 0x1000,
+        HASHELMET = 0x2000,
+        HASFLUDD = 0x8000,
+        SPLASH = 0x10000,
+        PUDDLE = 0x20000,
+        SHIRT = 0x100000,
+        GONE = 0x200000
     };
 
     enum Voice
     {
-        V_CANNON_WAIL = 30911,
-        V_TRIPLE_JUMP = 30902,
-        V_JUMP = 30891,
-        V_DIVE_OUT = 30897,
-        V_FALL_LEDGE_GRAB = 30944
+        CANNON_WAIL = 30911,
+        TRIPLE_JUMP = 30902,
+        JUMP = 30891,
+        DIVE_OUT = 30897,
+        FALL_LEDGE_GRAB = 30944
     };
 
     enum Animation
     {
-        A_WALLHANG = 0x33,
-        A_FALL = 0x4C,
-        A_BOUNCE = 0x50,
-        A_IDLE = 0xC3,
-        A_SHINEGET = 0xCD,
-        A_SPINJUMP = 0xF4
+        WALLHANG = 0x33,
+        FALL = 0x4C,
+        BOUNCE = 0x50,
+        IDLE = 0xC3,
+        SHINEGET = 0xCD,
+        SPINJUMP = 0xF4
     };
 
     enum Effect
     {
-        E_SMOKE_CLOUD = 0x1,
-        E_ROCKET_SPRAY_MIST = 0x2,
-        E_ROCKET_SPRAY_DROPS = 0x3,
-        E_BURNING_SMOKE = 0x6,
-        E_GROUND_SHARP_SHOCK = 0x7,
-        E_STARS = 0xC,
-        E_SPARKLE = 0xE,
-        E_WATER_RECHARGE = 0xF,
-        E_GROUND_SHOCK = 0x10,
-        E_GROUND_SMOKE_PLUME = 0x11,
-        E_WARP_IN_BODY_PIECES = 0x24,
-        E_WARP_IN_BELT_PIECES = 0x25,
-        E_WARP_IN_HAT_PIECES = 0x26,
-        E_WARP_IN_RED_PIECES = 0x27,
-        E_WARP_IN_BLUE_PIECES = 0x29,
-        E_WARP_IN_BROWN_PIECES = 0x2A,
-        E_WARP_IN_FLUDD_PIECES = 0x2D,
-        E_WATER_RIPPLE = 0x30
+        SMOKE_CLOUD = 0x1,
+        ROCKET_SPRAY_MIST = 0x2,
+        ROCKET_SPRAY_DROPS = 0x3,
+        BURNING_SMOKE = 0x6,
+        GROUND_SHARP_SHOCK = 0x7,
+        STARS = 0xC,
+        SPARKLE = 0xE,
+        WATER_RECHARGE = 0xF,
+        GROUND_SHOCK = 0x10,
+        GROUND_SMOKE_PLUME = 0x11,
+        WARP_IN_BODY_PIECES = 0x24,
+        WARP_IN_BELT_PIECES = 0x25,
+        WARP_IN_HAT_PIECES = 0x26,
+        WARP_IN_RED_PIECES = 0x27,
+        WARP_IN_BLUE_PIECES = 0x29,
+        WARP_IN_BROWN_PIECES = 0x2A,
+        WARP_IN_FLUDD_PIECES = 0x2D,
+        WATER_RIPPLE = 0x30
     };
 
     u32 _00;                               //0x0070

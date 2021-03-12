@@ -8,7 +8,7 @@ class JSUPtrLink
 {
 public:
 	void *_0;
-	JSUPtrList *ptrList; // _4
+	JSUPtrList *mPtrList; // _4
 	u32 _8;
 	u32 _C;
 };
@@ -18,7 +18,7 @@ class JSUPtrList
 public:
 	u32 _0;
 	u32 _4;
-	s32 numPtrs; // _8
+	s32 mNumPtrs; // _8
 };
 
 template <typename T>
@@ -67,8 +67,8 @@ class JSUMemoryInputStream : public JSURandomInputStream
 {
 public:
 	void *_8;
-	u32 length;	  // _C
-	u32 position; // _10
+	u32 mLength;	  // _C
+	u32 mPosition; // _10
 };
 
 /* OUTPUT */
@@ -89,6 +89,6 @@ class JSUMemoryOutputStream : public JSURandomOutputStream
 {
 public:
 	u32 _8;
-	u32 length;	  // _C
-	u32 position; // _10
+	u32 mLength;	  // _C
+	u32 mPosition; // _10
 };

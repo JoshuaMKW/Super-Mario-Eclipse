@@ -35,7 +35,7 @@ f32 chooseGrabDistancing(M3UModelMario *mModel)
     TMario *player;
     asm volatile ( "mr %0, r31" : "=r"(player));
 
-    if (player->mPrevState & TMario::SA_WATERBORN)
+    if (player->mPrevState & TMario::State::WATERBORN)
     {
         asm volatile ( "mr 3, %0" : : "r"(mModel));
         return 0.0f;
@@ -50,6 +50,6 @@ kmCall(0x8023F964, &chooseGrabDistancing);
 
 bool isGrabWaitOver(TMario *player)
 {
-    return isLast1AnimeFrame__6TMarioFv(player) | (player->mPrevState & TMario::SA_WATERBORN);
+    return isLast1AnimeFrame__6TMarioFv(player) | (player->mPrevState & TMario::State::WATERBORN);
 }
 kmCall(0x8023F9DC, &isGrabWaitOver);

@@ -163,13 +163,13 @@ TDarkZhine::PoundingState TDarkZhine::advanceDropAttack(TPollutionManager *gpPol
     }
     else if (this->poundingStatus() == TDarkZhine::SHOCKING)
     {
-        if (!(player->mState & TMario::SA_AIRBORN) &&
+        if (!(player->mState & TMario::State::AIRBORN) &&
             this->isTargetInRangeToHome(this->mPosition, this->shockRadius()) &&
-            (player->mState != TMario::SA_KNCK_LND &&
+            (player->mState != TMario::State::KNCK_LND &&
                 player->mState != 0x4045C))
         {
             decHP__6TMarioFi(player, 1);
-            changePlayerStatus__6TMarioFUlUlb(player, TMario::SA_KNCK_LND, 0, 0);
+            changePlayerStatus__6TMarioFUlUlb(player, TMario::State::KNCK_LND, 0, 0);
         }
 
         if (this->statusTimer() <= 0)
@@ -248,9 +248,8 @@ void TDarkZhine::advanceGoopDroplet()
     }
 }
 
-void TDarkZhine::perform(TMario *player)
+void TDarkZhine::perform_(TMario *player)
 {
-    f32 targetAngle;
     f32 averageFloorHeight = (this->mFloorBelow->mMaxHeight + this->mFloorBelow->mMinHeight)/2;
 
     if (!this->isPounding())
@@ -440,9 +439,9 @@ kmCall(0x800764CC, &canUtilizeTentacles);
 */
 
 //0x80005000
-void control(TDarkZhine *thisZhine)
+void control_(TDarkZhine *thisZhine)
 {
-    thisZhine->perform(gpMarioAddress);
+    thisZhine->perform_(gpMarioAddress);
 }
 
 //0x800FFFAC = remove tentacles BLR, 0x800764CC perform tentacles?

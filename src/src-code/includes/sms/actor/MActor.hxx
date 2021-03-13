@@ -20,7 +20,7 @@ public:
 
 	J3DFrameCtrl mFrameCtrl;
 	J3DModel *mModel;
-	u32 _1C;
+	void *_1C;
 };
 
 template <typename T>
@@ -162,28 +162,71 @@ public:
 
 class MActor
 {
-
 public:
-    u32 _00[0xC / 4];       //0x0000
-    MActorAnmBck *mBckInfo; //0x000C
-    u32 _10;
-	u32 _14;
-	u32 _18;
-	u32 _1C;
-	u32 _20;
-	u32 _24;
-	u32* _28;
-	u32 _2C;
-	u32 _30;
-	u32 _34;
-	u8 _38;
-	u8 _39;
-	u8 _3A; // padding?
-	u8 _3B; // ^^
+	MActor(MActorAnmData *);
+
+	void calc();
+	void calcAnm();
+	bool checkAnmFileExist(const char *, int);
+	bool checkBckPass(f32);
+	bool checkCurAnm(const char *, int);
+	bool checkCurAnmFromIndex(int, int);
+	bool curAnmEndsNext(int, char *);
+	void entry();
+	void entryIn();
+	void entryOut();
+	void frameUpdate();
+	s32 getCurAnmIdx(int) const;
+	J3DFrameCtrl *getFrameCtrl(int);
+	void initDL();
+	bool isCurAnmAlreadyEnd(int);
+	void matAnmFrameUpdate();
+	void offMakeDL();
+	void perform(u32, JDrama::TGraphics *);
+	void resetDL();
+	void setAnimation(const char *, int);
+	void setBck(const char *);
+	void setBckFromIndex(int);
+	void setBlk(const char *);
+	void setBpk(const char *);
+	void setBpkFromIndex(int);
+	void setBrk(const char *);
+	void setBrkFromIndex(int);
+	void setBtk(const char *);
+	void setBtkFromIndex(int);
+	void setBtp(const char *);
+	void setBtpFromIndex(int);
+	void setFrameRate(f32, int);
+	void setJointCallback(int, int (*)(J3DNode *, int));
+	void setLightData(const TBGCheckData *, const JGeometry::TVec3<f32> &);
+	void setLightID(s16);
+	void setLightType(int);
+	void setModel(J3DModel *, u32);
+	void unlockDLIfNeed();
+	void updateIn();
+	void updateInSubBck();
+	void updateMatAnm();
+	void updateOut();
+	void updateOutSubBck();
+	void viewCalc();
+
+	MActorAnmData *mAnmData;
+	J3DModel *mModel;
+    u32 _08;
+    MActorAnmBck *mBckInfo;
+    size_t mNumParts; //?
+	MActorAnmBpk *mBpkInfo;
+	MActorAnmBtp *mBtpInfo;
+	MActorAnmBtk *mBtkInfo;
+	MActorAnmBrk *mBrkInfo;
+	MActorAnmBlk *mBlkInfo;
+	MActorAnmData **mAnmDataArray;
+	u16 *mPartsList;
+	u16 *mDisplayList;
+	size_t mDisplayListLen; //?
+	bool mUseDisplayList;
+	bool mIsVisible;
 	u32 mLightID; // _3C
 	u8 _40;
-	u8 _41; // padding?
-	u8 _42; // ^^
-	u8 _43; // ^^
 	u32 mLightType; // _44
 };

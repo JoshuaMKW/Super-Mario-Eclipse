@@ -1,7 +1,8 @@
 #pragma once
 
 #include "types.h"
-#include "sms/J3D.hxx"
+#include "sms/JSystem/JDrama.hxx"
+#include "sms/JSystem/J3D/J3DModel.hxx"
 
 class M3UMtxCalcSetInfo
 {

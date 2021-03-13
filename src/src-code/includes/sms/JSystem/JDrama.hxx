@@ -2,11 +2,11 @@
 
 #include "types.h"
 #include "GX.h"
-#include "sms/JGeometry.hxx"
-#include "sms/JStage.hxx"
-#include "sms/JKR.hxx"
-#include "sms/J3D.hxx"
-#include "sms/JSUStream.hxx"
+#include "JGeometry.hxx"
+#include "JStage.hxx"
+#include "J3D/J3DDrawBuffer.hxx"
+#include "JKR/JKRArchivePri.hxx"
+#include "JSU/JSUMemoryStream.hxx"
 
 class TCamConnector;
 

@@ -2,9 +2,11 @@
 
 #include "types.h"
 #include "MTX.h"
-#include "sms/JKR.hxx"
-#include "sms/JSUStream.hxx"
-#include "sms/JUT.hxx"
+#include "../JKR/JKRArchivePri.hxx"
+#include "../JSU/JSUInputStream.hxx"
+#include "../JUT/JUTColor.hxx"
+#include "../JUT/JUTFont.hxx"
+#include "../JUT/JUTRect.hxx"
 
 class ResFONT
 {  

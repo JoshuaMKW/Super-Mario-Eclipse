@@ -1,8 +1,7 @@
 #include "CARD.h"
 #include "string.h"
 #include "printf.h"
-#include "sms/JUT.hxx"
-#include "sms/J2D.hxx"
+#include "sms/JSystem/J2D/J2D.hxx"
 #include "sms/talk/Talk2D2.hxx"
 
 #include "SME.hxx"

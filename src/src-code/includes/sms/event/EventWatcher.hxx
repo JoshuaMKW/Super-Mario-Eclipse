@@ -1,7 +1,7 @@
 #pragma once
 
 #include "types.h"
-#include "sms/JDrama.hxx"
+#include "sms/JSystem/JDrama.hxx"
 #include "sms/spc/SpcTypedBinary.hxx"
 
 class TEventWatcher : public JDrama::TViewObj

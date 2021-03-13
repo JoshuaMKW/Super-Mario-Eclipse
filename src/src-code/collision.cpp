@@ -1,4 +1,4 @@
-#include "sms/JGeometry.hxx"
+#include "sms/JSystem/JGeometry.hxx"
 #include "sms/actor/Mario.hxx"
 
 #include "libs/sGeometry.hxx"

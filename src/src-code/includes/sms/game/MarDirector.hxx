@@ -7,8 +7,8 @@
 #include "sms/actor/item/Shine.hxx"
 #include "sms/actor/item/Coin.hxx"
 #include "sms/game/GCConsole2.hxx"
-#include "sms/JDrama.hxx"
-#include "sms/JGeometry.hxx"
+#include "sms/JSystem/JDrama.hxx"
+#include "sms/JSystem/JGeometry.hxx"
 #include "sms/object/DemoCannon.hxx"
 
 class TMarDirector : public JDrama::TDirector

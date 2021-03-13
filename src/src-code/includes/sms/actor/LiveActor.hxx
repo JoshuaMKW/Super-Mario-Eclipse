@@ -2,9 +2,9 @@
 
 #include "types.h"
 #include "sms/manager/LiveManager.hxx"
-#include "sms/JSUStream.hxx"
-#include "sms/JDrama.hxx"
-#include "sms/JGeometry.hxx"
+#include "sms/JSystem/JSU/JSUMemoryStream.hxx"
+#include "sms/JSystem/JDrama.hxx"
+#include "sms/JSystem/JGeometry.hxx"
 #include "sms/actor/MActor.hxx"
 #include "sms/actor/RidingInfo.hxx"
 #include "sms/actor/SpineBase.hxx"

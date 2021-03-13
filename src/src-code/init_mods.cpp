@@ -1,8 +1,9 @@
 #include "stdlib.h"
 #include "printf.h"
-#include "sms/JDrama.hxx"
-#include "sms/JKR.hxx"
-#include "sms/JUT.hxx"
+#include "sms/JSystem/JDrama.hxx"
+#include "sms/JSystem/JKR/JKRDecomp.hxx"
+#include "sms/JSystem/JKR/JKRHeap.hxx"
+#include "sms/JSystem/JKR/JKRMemArchive.hxx"
 
 #include "SME.hxx"
 
@@ -79,7 +80,7 @@ u32 *initFirstModel(char *path, u32 unk_1, u32 unk_2, u32 unk_3, JKRHeap *heap, 
         heap = gInfo.mCharacterHeap;
         freeAll__10JKRExpHeapFv(gInfo.mCharacterHeap);
     }
-    u32 *file = loadArchive(path, heap);
+    u32 *file = reinterpret_cast<u32 *>(SME::loadArchive(path, heap));
 
     if (file)
         Memory::hmalloc(gInfo.mCharacterHeap, (0x1F0000 - file[1]) & -32, 32);

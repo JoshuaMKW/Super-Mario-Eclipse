@@ -1,6 +1,6 @@
 #pragma once
 
-#include "sms/JGeometry.hxx"
+#include "sms/JSystem/JGeometry.hxx"
 #include "sms/enemy/BossGesso.hxx"
 
 #include "SME.hxx"

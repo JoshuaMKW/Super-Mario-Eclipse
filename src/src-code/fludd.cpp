@@ -184,7 +184,7 @@ static void checkSpamHover(TNozzleTrigger *nozzle, u32 r4, TWaterEmitInfo *emitI
         return;
 
     if (!(player->mControllerWork->mAnalogR < 0.9f) ||
-        !player->mControllerWork->mButtons.mFrameInput & TMarioControllerWork::A)
+        !player->mControllerWork->mFrameInput & TMarioControllerWork::A)
         return;
 
     if (nozzle->mFludd->mCurrentWater < 510)

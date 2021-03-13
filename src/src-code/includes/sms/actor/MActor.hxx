@@ -1,8 +1,9 @@
 #pragma once
 
 #include "types.h"
-#include "sms/J3D.hxx"
-
+#include "sms/JSystem/J3D/J3DAnimation.hxx"
+#include "sms/JSystem/J3D/J3DModel.hxx"
+#include "sms/JSystem/J3D/J3DModelLoader.hxx"
 
 class MActorAnmBase
 {

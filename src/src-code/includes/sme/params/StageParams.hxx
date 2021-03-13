@@ -4,8 +4,8 @@
 #include "DVD.h"
 #include "ctype.h"
 #include "string.h"
-#include "sms/JUT.hxx"
-#include "sms/JGeometry.hxx"
+#include "sms/JSystem/JUT/JUTColor.hxx"
+#include "sms/JSystem/JGeometry.hxx"
 #include "sms/sound/MSound.hxx"
 
 #include "libs/sMemory.hxx"

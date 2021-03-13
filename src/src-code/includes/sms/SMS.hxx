@@ -2,8 +2,10 @@
 
 #include "types.h"
 
-#include "sms/JUT.hxx"
-#include "sms/JGeometry.hxx"
+#include "sms/JSystem/JUT/JUTColor.hxx"
+#include "sms/JSystem/JUT/JUTConsole.hxx"
+#include "sms/JSystem/JUT/JUTResFont.hxx"
+#include "sms/JSystem/JGeometry.hxx"
 
 #include "sms/actor/Mario.hxx"
 #include "sms/camera/PolarSubCamera.hxx"

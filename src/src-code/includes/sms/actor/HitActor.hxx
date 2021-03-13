@@ -1,8 +1,8 @@
 #pragma once
 
 #include "types.h"
-#include "sms/JDrama.hxx"
-#include "sms/JGeometry.hxx"
+#include "sms/JSystem/JDrama.hxx"
+#include "sms/JSystem/JGeometry.hxx"
 
 class THitActor : public JDrama::TActor
 {

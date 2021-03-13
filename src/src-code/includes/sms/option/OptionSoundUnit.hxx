@@ -1,7 +1,7 @@
 #pragma once
 
 #include "types.h"
-#include "sms/J2D.hxx"
+#include "sms/JSystem/J2D/J2D.hxx"
 
 class TOptionSoundUnit
 {

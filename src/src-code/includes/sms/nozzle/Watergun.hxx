@@ -1,7 +1,7 @@
 #pragma once
 
 #include "types.h"
-#include "sms/JGeometry.hxx"
+#include "sms/JSystem/JGeometry.hxx"
 #include "sms/nozzle/NozzleBase.hxx"
 #include "sms/nozzle/NozzleTrigger.hxx"
 

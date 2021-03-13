@@ -1,5 +1,5 @@
 #include "CARD.h"
-#include "sms/J2D.hxx"
+#include "sms/JSystem/J2D/J2D.hxx"
 
 #include "SME.hxx"
 

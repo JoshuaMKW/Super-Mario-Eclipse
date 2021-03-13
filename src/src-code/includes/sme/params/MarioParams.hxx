@@ -3,8 +3,8 @@
 #include "types.h"
 #include "mem.h"
 
-#include "sms/JGeometry.hxx"
-#include "sms/JUT.hxx"
+#include "sms/JSystem/JGeometry.hxx"
+#include "sms/JSystem/JUT/JUTColor.hxx"
 #include "sms/actor/Mario.hxx"
 #include "funcs.hxx"
 

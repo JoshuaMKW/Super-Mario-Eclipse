@@ -1,7 +1,7 @@
 #pragma once
 
 #include "types.h"
-#include "sms/JGeometry.hxx"
+#include "sms/JSystem/JGeometry.hxx"
 #include "sms/actor/Item.hxx"
 
 class TShine : public TItem

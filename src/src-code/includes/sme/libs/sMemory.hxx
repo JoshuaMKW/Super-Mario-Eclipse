@@ -4,7 +4,7 @@
 
 #include "types.h"
 #include "OS.h"
-#include "sms/JKR.hxx"
+#include "sms/JSystem/JKR/JKRHeap.hxx"
 
 void *operator new(size_t size, JKRHeap *heap) noexcept
 {

@@ -1,8 +1,8 @@
 #pragma once
 
 #include "types.h"
-#include "sms/JGeometry.hxx"
-#include "sms/JKR.hxx"
+#include "sms/JSystem/JGeometry.hxx"
+#include "sms/JSystem/JKR/JKRHeap.hxx"
 #include "sms/actor/Mario.hxx"
 
 #include "collision/WarpCollision.hxx"

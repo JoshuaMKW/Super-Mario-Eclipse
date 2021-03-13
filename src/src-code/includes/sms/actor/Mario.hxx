@@ -1,8 +1,8 @@
 #pragma once
 
 #include "types.h"
-#include "sms/JGeometry.hxx"
-#include "sms/J3D.hxx"
+#include "sms/JSystem/JGeometry.hxx"
+#include "sms/JSystem/J3D/J3DDrawBuffer.hxx"
 
 #include "sms/actor/TakeActor.hxx"
 #include "sms/actor/Yoshi.hxx"

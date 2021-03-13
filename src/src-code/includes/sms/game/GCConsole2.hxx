@@ -1,7 +1,7 @@
 #pragma once
 
 #include "types.h"
-#include "sms/JUT.hxx"
+#include "sms/JSystem/JUT/JUTColor.hxx"
 
 class TGCConsole2
 {

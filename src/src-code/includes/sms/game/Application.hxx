@@ -1,8 +1,7 @@
 #pragma once
 
 #include "types.h"
-#include "sms/JDrama.hxx"
-#include "sms/JUT.hxx"
+#include "sms/JSystem/JDrama.hxx"
 #include "sms/game/GameSequence.hxx"
 #include "sms/game/MarDirector.hxx"
 

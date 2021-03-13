@@ -1,7 +1,7 @@
 #pragma once
 
 #include "types.h"
-#include "sms/JDrama.hxx"
+#include "sms/JSystem/JDrama.hxx"
 #include "sms/camera/CameraInbetween.hxx"
 
 class CPolarSubCamera : public JDrama::TLookAtCamera

@@ -1,8 +1,9 @@
 #pragma once
 
 #include "types.h"
-#include "sms/JDrama.hxx"
-#include "sms/J3D.hxx"
+#include "sms/JSystem/JDrama.hxx"
+#include "sms/JSystem/J3D/J3DJoint.hxx"
+#include "sms/JSystem/J3D/J3DModel.hxx"
 #include "sms/actor/MActor.hxx"
 
 class TJointObj

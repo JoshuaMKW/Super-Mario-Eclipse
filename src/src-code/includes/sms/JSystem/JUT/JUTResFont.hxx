@@ -5,7 +5,9 @@
 #include "JUTFont.hxx"
 #include "../JKR/JKRArchivePri.hxx"
 
-class ResFONT;
+class ResFONT
+{  
+};
 
 class JUTResFont : public JUTFont
 {

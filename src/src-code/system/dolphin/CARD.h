@@ -138,7 +138,7 @@ extern "C"
         u32 mOffsetData;
     } CARDStat;
 
-    /*! \typedef struct CARDInfo
+    /*! \typedef struct CARDFileInfo
     \brief structure to hold the fileinformations upon open and for later use.
     \param mChannel CARD slot.
     \param mFilenum file index in the card directory structure.
@@ -146,26 +146,26 @@ extern "C"
     \param mLength length of file.
     \param mBlock block index on memory card.
     */
-    typedef struct CARDInfo
+    typedef struct CARDFileInfo
     {
         s32 mChannel;
         s32 mFileNo;
         s32 mOffset;
         s32 mLength;
         u16 mBlock;
-    } CARDInfo;
+    } CARDFileInfo;
 
     void CARDInit();
 
     void CARDCheck(s32 chan);
     s32 CARDProbeEx(s32 chan, s32 *memSize, s32 *sectSize);
-    s32 CARDGetStatus(s32 chan, s32 fileNo, CARDInfo *stats);
+    s32 CARDGetStatus(s32 chan, s32 fileNo, CARDFileInfo *stats);
 
-    s32 CARDSetStatus(s32 chan, s32 fileNo, CARDInfo *stats);
-    s32 CARDSetStatusAsync(s32 chan, s32 fileNo, CARDInfo *stats, CARDCallback cb);
+    s32 CARDSetStatus(s32 chan, s32 fileNo, CARDFileInfo *stats);
+    s32 CARDSetStatusAsync(s32 chan, s32 fileNo, CARDFileInfo *stats, CARDCallback cb);
 
-    s32 CARDCreate(s32 chan, const char *fileName, s32 size, CARDInfo *file);
-    s32 CARDCreateAsync(s32 chan, const char *fileName, s32 size, CARDInfo *file, CARDCallback cb);
+    s32 CARDCreate(s32 chan, const char *fileName, s32 size, CARDFileInfo *file);
+    s32 CARDCreateAsync(s32 chan, const char *fileName, s32 size, CARDFileInfo *file, CARDCallback cb);
 
     s32 CARDFormat(s32 chan);
     s32 CARDFormatAsync(s32 chan, CARDCallback cb);
@@ -174,14 +174,14 @@ extern "C"
     void CARDMountAsync(s32 chan, void *workArea, CARDCallback detachCB, CARDCallback attachCB);
     s32 CARDUnmount(s32 chan);
 
-    s32 CARDRead(CARDInfo *file, void *buffer, u32 len, u32 ofs);
-    s32 CARDReadAsync(CARDInfo *file, void *buffer, u32 len, u32 ofs, CARDCallback cb);
+    s32 CARDRead(CARDFileInfo *file, void *buffer, u32 len, u32 ofs);
+    s32 CARDReadAsync(CARDFileInfo *file, void *buffer, u32 len, u32 ofs, CARDCallback cb);
 
-    s32 CARDWrite(CARDInfo *file, void *buffer, u32 len, u32 ofs);
-    s32 CARDWriteAsync(CARDInfo *file, void *buffer, u32 len, u32 ofs, CARDCallback cb);
+    s32 CARDWrite(CARDFileInfo *file, void *buffer, u32 len, u32 ofs);
+    s32 CARDWriteAsync(CARDFileInfo *file, void *buffer, u32 len, u32 ofs, CARDCallback cb);
 
-    s32 CARDOpen(s32 chan, const char *filename, CARDInfo *file);
-    s32 CARDClose(CARDInfo *file);
+    s32 CARDOpen(s32 chan, const char *filename, CARDFileInfo *file);
+    s32 CARDClose(CARDFileInfo *file);
 
     s32 CARDFreeBlocks(s32 chan, u16 *freeBlocks, void *unk);
 

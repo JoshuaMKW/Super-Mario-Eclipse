@@ -1,7 +1,7 @@
 #pragma once
 
 #include "types.h"
-#include "sms/JSystem/J2D/J2D.hxx"
+#include "sms/JSystem/J2D/J2DScreen.hxx"
 #include "sms/option/OptionRumbleUnit.hxx"
 #include "sms/option/OptionSoundUnit.hxx"
 #include "sms/option/OptionSubtitleUnit.hxx"

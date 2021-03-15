@@ -111,8 +111,7 @@ extern "C"
         u32 mCTR;       // counter register
         u32 mXER;       // condition indicator register
         f64 mFPR[32];   // f32ing point registers f0-f31
-        u32 mFPSCR_Pad; // f32ing point status -- control
-        u32 mFPSCR;     // f32ing point status -- control
+        f64 mFPSCR;     // f32ing point status -- control
         u32 mSRR0;      // save/store register 0
         u32 mSRR1;      // save/store register 1
         u16 mMode;

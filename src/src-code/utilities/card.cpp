@@ -1,6 +1,4 @@
 #include "CARD.h"
-#include "sms/JSystem/J2D/J2D.hxx"
-
 #include "SME.hxx"
 
 extern String *formatBMG(String *msg);
@@ -14,11 +12,8 @@ class CardHandler
     CARDInfo *mCardInfo;
 
 public:
-    CARDInfo *getInfo()
-    {
-        return this->mCardInfo;
-    }
-
+    CARDInfo *getInfo() const { return this->mCardInfo; }
+    void *getSysArea() const { return this->mSysArea; }
 
 };
 //static u8 sSysArea[CARD_WORKAREA] __attribute__((aligned(32)));

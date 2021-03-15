@@ -18,8 +18,8 @@ public:
 	void normalize();
 	bool isEmpty() const;
 
-    s32 X;       // _0
-    s32 Y;       // _4
-    s32 mHeight; // _8
-    s32 mWidth;  // _C
+    s32 mX;
+    s32 mY;
+    s32 mHeight;
+    s32 mWidth;
 };

@@ -1,68 +1,54 @@
 #pragma once
 
 #include "types.h"
+#include "sms/JSystem/JDrama.hxx"
+#include "sms/JSystem/JUT/JUTRect.hxx"
+#include "sms/option/CardManager.hxx"
 #include "sms/option/OptionControl.hxx"
 
-class TCardBookmarkInfo
+enum TEProgress
 {
-
-public:
-    struct
-    {
-        u32 _00[0x1C / 4]; //0x0000
-        u16 mShineCount;   //0x001C
-        u16 _01;           //0x001E
-    } FileData[3];
+    UNK_0,
+    UNK_1,
+    UNK_2,
+    UNK_3,
+    UNK_4,
+    UNK_5,
+    UNK_6
 };
 
-class TCardManager
+class TCardLoad : public JDrama::TNameRef
 {
-    enum COMMANDS
-    {
-        NOP,
-        FORMAT,
-        CREATE,
-        GETBOOKMARKS,
-        NOP4,
-        LOADBLOCK,
-        SAVEBLOCK,
-        LOADFILE,
-        SAVEFILE,
-        EXIT
-    };
-
-    enum BLOCKS
-    {
-        A,
-        B,
-        C
-    };
-
 public:
-    s32 mChannel;       //0x0000
-    u32 _00[0x120 / 4]; //0x0004
-    u8 _124;
-    bool mMounted;                 //0x0125
-    bool mRefuseOverwriteMount;    //0x0126
-    u8 _127;
-    s32 mLastStatus;               //0x0128
-    void *mCardWorkArea;           //0x012C
-    void *mCARDBlock;              //0x0130
-    u32 _01[0x314 / 4];            //0x0134
-    COMMANDS mCommand;             //0x0448
-    u32 _02[0x20 / 4];             //0x044C
-    TCardBookmarkInfo *mBookMarks; //0x046C
-    BLOCKS mSaveBlock;             //0x0474
-};
+    TCardLoad(const char *);
+    virtual ~TCardLoad();
+    virtual void load(JSUMemoryInputStream &) override;
+    virtual void loadAfter() override;
+    virtual void perform(u32, JDrama::TGraphics *);
 
-class TCardLoad
-{
+    u32 changeMode(s32);
+    void changeScene();
+    s8 drawMessage(TEProgress);
+    s8 drawMessageBM(TEProgress);
+    s8 selectBookmark(TEProgress, TEProgress, bool);
+    void setSelected(u8);
+    void setupScoreScreen();
+    bool titleDraw();
+    s8 waitForAnyKey(TEProgress);
+    s8 waitForAnyKeyBM(TEProgress);
+    s8 waitForChoice(TEProgress, TEProgress, int);
+    s8 waitForChoiceBM(TEProgress, TEProgress, int);
+    s8 waitForStart(TEProgress);
 
-public:
-    u32 _00[0x14 / 4];              //0x0000
+    u16 _0C;
+    TEProgress mProgress;
     u32 mState;                     //0x0014
-    u32 _01[0xA8 / 4];              //0x0018
+    u32 _18[0x98 / 4];              //0x0018
+    u8 mSelected;                   //0x00B0
+    u8 _B1[0xF];
     s32 mFramesOpen;                //0x00C0
-    u32 _02[0x6B0 / 4];             //0x00C4
+    u32 _C4[0x60 / 4];              //0x00C4
+    JUTRect mRects[11];             //0x0124
+    u32 _1D4[0x5A0 / 4];
     TOptionControl *mOptionControl; //0x0774
 };

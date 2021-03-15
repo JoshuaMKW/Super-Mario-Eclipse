@@ -23,13 +23,16 @@ public:
     void updateInMotion();
     void updateInTexPatternAnm();
 
-    void *_00[2];      //0x0000
+    void *_04;      //0x0000
     J3DModel *mModel;  //0x0008
-    u32 _01[0x30 / 4]; //0x000C
+    u32 _0C[0x30 / 4]; //0x000C
     u32 mLightID;      // _3C
     u8 _40;
-    u8 _41;         // padding?
-    u8 _42;         // ^^
-    u8 _43;         // ^^
     u32 mLightType; // _44
+};
+
+class M3UModelCommon
+{
+public:
+    virtual M3UMtxCalcSetInfo *getMtxCalc(const M3UMtxCalcSetInfo &) const;
 };

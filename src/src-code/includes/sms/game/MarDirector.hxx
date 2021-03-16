@@ -14,18 +14,18 @@
 class TMarDirector : public JDrama::TDirector
 {
 public:
-    enum STATUS
+    enum Status
     {
-        SA_INTRO_INIT = 0,
-        SA_INTRO_PLAYING = 1,
-        SA_NORMAL = 4,
-        SA_PAUSE_MENU = 5,
-        SA_SAVE_CARD = 11
+        INTRO_INIT = 0,
+        INTRO_PLAYING = 1,
+        NORMAL = 4,
+        PAUSE_MENU = 5,
+        SAVE_CARD = 11
     };
 
-    enum STATE
+    enum State
     {
-        ST_WARP_OUT = 2
+        WARP_OUT = 2
     };
 
     TMarDirector();

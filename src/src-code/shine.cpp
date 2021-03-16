@@ -12,24 +12,22 @@ void manageShineVanish(JGeometry::TVec3<f32> *marioPos)
     TShine *shine;
     SME_FROM_GPR(r30, shine);
 
+    const JGeometry::TVec3<f32> step(1.0f, 1.0f, 1.0f);
+
     if (shine->mSize.x - 0.011f <= 0)
     {
         shine->mSize = JGeometry::TVec3<f32>(1.0f, 1.0f, 1.0f);
         shine->mGlowSize = JGeometry::TVec3<f32>(1.0f, 1.0f, 1.0f);
         shine->mRotation.y = 0.0f;
-        setAnmFromIndex__12MActorAnmBlkFiPUs(shine->mActorData->mBckInfo, -1);
+        shine->mActorData->mBckInfo->setAnmFromIndex(-1, nullptr);
         shine->kill();
     }
     else if (gpMarioAddress->mState != TMario::State::SHINE_C)
     {
         shine->mPosition.y += 4.0f;
-        shine->mSize.x -= 0.011f;
-        shine->mSize.y -= 0.011f;
-        shine->mSize.z -= 0.011f;
-        shine->mGlowSize.x -= 0.011f;
-        shine->mGlowSize.y -= 0.011f;
-        shine->mGlowSize.z -= 0.011f;
         shine->mRotation.y += 3.0f;
+        shine->mSize.sub(step);
+        shine->mGlowSize.sub(step);
     }
     else
         shine->mPosition = *marioPos;
@@ -55,8 +53,8 @@ static void restoreMario(TMarDirector *gpMarDirector, u32 curState)
 
     u8 *curSaveCard = (u8 *)(gpMarDirector->sNextState[0x118 / 4]);
 
-    if (curState != TMarDirector::State::NORMAL ||
-        gpMarDirector->mLastState != TMarDirector::State::SAVE_CARD ||
+    if (curState != TMarDirector::Status::NORMAL ||
+        gpMarDirector->mLastState != TMarDirector::Status::SAVE_CARD ||
         gpMarioAddress->mState != TMario::State::SHINE_C)
         return;
 
@@ -72,7 +70,7 @@ static void restoreMario(TMarDirector *gpMarDirector, u32 curState)
         endDemoCamera__15CPolarSubCameraFv(gpCamera);
     }
     else
-        gpMarDirector->mGameState |= TMarDirector::Status::WARP_OUT;
+        gpMarDirector->mGameState |= TMarDirector::State::WARP_OUT;
 }
 
 //0x802995BC
@@ -171,6 +169,7 @@ u32 shineGetClamper(TFlagManager *flagManager, u32 flag)
 //0x80294334
 void extendFlagManagerLoad(JSUInputStream &stream)
 {
+    stream.read(((u8 *)TFlagManager::smInstance + 0x1F4), 0x8C);
     read__14JSUInputStreamFPvl(&stream, ((u8 *)TFlagManager::smInstance + 0x1F4), 0x8C);
     stream.skip(0x120);
 }
@@ -179,6 +178,7 @@ void extendFlagManagerLoad(JSUInputStream &stream)
 //0x802939B8
 void extendFlagManagerSave(JSUOutputStream &stream)
 {
+    stream.write(((u8 *)TFlagManager::smInstance + 0x1F4), 0x8C);
     write__15JSUOutputStreamFPCvl(&stream, ((u8 *)TFlagManager::smInstance + 0x1F4), 0x8C);
     stream.skip(0x120);
 }
@@ -192,7 +192,7 @@ void thinkSetBootFlag(void *shineFader, u32 unk_1, u32 unk_2)
     if ((gpMarDirector->mCollectedShine->mType & 0x10) == false)
     {
         registFadeout__11TShineFaderFUsUs(shineFader, unk_1, unk_2);
-        gpMarDirector->mGameState |= TMarDirector::Status::WARP_OUT;
+        gpMarDirector->mGameState |= TMarDirector::State::WARP_OUT;
     }
 }
 

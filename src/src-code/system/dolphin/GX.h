@@ -8,7 +8,7 @@ extern "C"
 {
 #endif
 
-    typedef struct GXRenderModeObj
+    typedef struct _GXRenderModeObj
     {
         u32 mTVMode;
         u16 mFBWidth;
@@ -25,7 +25,7 @@ extern "C"
         u8 mVFilter[7];
     } GXRenderModeObj;
 
-    typedef struct GXColor
+    typedef struct _GXColor
     {
         u8 r;
         u8 g;
@@ -33,7 +33,7 @@ extern "C"
         u8 a;
     } GXColor;
 
-    typedef struct GXColorS10
+    typedef struct _GXColorS10
     {
         s16 r;
         s16 g;
@@ -41,25 +41,25 @@ extern "C"
         s16 a;
     } GXColorS10;
 
-    enum GXTevRegID
+    typedef enum _GXTevRegID
     {
         GX_TEV_PREV,
         GX_TEV_REG0,
         GX_TEV_REG1,
         GX_TEV_REG2,
         GX_MAX_TEV_REG
-    };
+    } GXTevRegID;
 
-    enum GXTevKColorID
+    typedef enum _GXTevKColorID
     {
         GX_KCOLOR0,
         GX_KCOLOR1,
         GX_KCOLOR2,
         GX_KCOLOR3,
         GX_MAX_KCOLOR
-    };
+    } GXTevKColorID;
 
-    enum GXChannelID
+    typedef enum _GXChannelID
     {
         GX_COLOR0,
         GX_COLOR1,
@@ -71,7 +71,7 @@ extern "C"
         GX_ALPHA_BUMP,
         GX_ALPHA_BUMPN,
         GX_COLOR_NULL = 0xFF
-    };
+    } GXChannelID;
 
     void GXSetArray(u32 type, u32 idx, u32 count);
     void GXDrawCube();

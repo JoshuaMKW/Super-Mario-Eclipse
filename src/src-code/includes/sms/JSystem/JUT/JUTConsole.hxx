@@ -26,4 +26,4 @@ public:
     u8 _00[0x4E];
 };
 
-void JUTConsole_print_f_va_(void);
+void JUTConsole_print_f_va_();

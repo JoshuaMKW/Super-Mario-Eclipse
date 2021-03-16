@@ -8936,7 +8936,6 @@
 #define doDraw__10JUTConsoleCFQ210JUTConsole12EConsoleType ((int(*)(...))0x802F5904)
 #define print_f__10JUTConsoleFPCce ((int(*)(...))0x802F5DA8)
 #define print__10JUTConsoleFPCc ((int(*)(...))0x802F5E28)
-#define JUTConsole_print_f_va_ ((int(*)(...))0x802F6038)
 #define scroll__10JUTConsoleFi ((int(*)(...))0x802F6080)
 #define getUsedLine__10JUTConsoleCFv ((int(*)(...))0x802F615C)
 #define getLineOffset__10JUTConsoleCFv ((int(*)(...))0x802F6180)

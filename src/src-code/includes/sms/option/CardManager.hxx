@@ -108,5 +108,3 @@ public:
 };
 
 void cardmain(void *);
-
-size_t you = sizeof(OSThread);

@@ -11,6 +11,7 @@
 #include "sms/actor/TakeActor.hxx"
 #include "sms/collision/BGCheck.hxx"
 #include "sms/sound/MAnmSound.hxx"
+#include "sms/m3d/LodAnm.hxx"
 
 class TMapCollisionManager;
 
@@ -21,10 +22,10 @@ public:
 	TLiveActor(const char *);
 	virtual ~TLiveActor();
 
-	virtual void load(JSUMemoryInputStream &);
-	virtual void perform(u32, JDrama::TGraphics *);
-	virtual bool receiveMessage(THitActor *, u32);
-	virtual Mtx *getTakingMtx();
+	virtual void load(JSUMemoryInputStream &) override;
+	virtual void perform(u32, JDrama::TGraphics *) override;
+	virtual bool receiveMessage(THitActor *, u32) override;
+	virtual Mtx *getTakingMtx() override;
 	virtual bool belongToGround() const;
 	virtual Mtx *getRootJointMtx() const;
 	virtual void init(TLiveManager *);
@@ -51,8 +52,8 @@ public:
 	void initAnmSound();
 	void getJointTransByIndex(int, JGeometry::TVec3<f32> *) const;
 	void calcVelocityToJumpToY(const JGeometry::TVec3<f32> &, f32, f32) const;
-	void initLodAnm(u32 *, int, f32); // TLodAnmIndex
-	u32 *getModel() const;
+	void initLodAnm(const TLodAnmIndex *, int, f32);
+	J3DModel *getModel() const;
 	void calcRideMomentum();
 	void calcRidePos();
 
@@ -60,7 +61,6 @@ public:
 	MActor *mActorData;			//0x0074
 	u32 *_78;					// TMActorKeeper
 	u16 mActorIndex;			// _7C
-	u16 _7E;					// padding
 	MAnmSound *mAnmSound;		// _80
 	char *mBasName;				// _84
 	u32 *_88;
@@ -79,9 +79,6 @@ public:
 	TRidingInfo mRidingInfo; // _D4
 	f32 _E4;
 	u8 _E8;
-	u8 _E9; // padding?
-	u8 _EA; // ^^
-	u8 _EB; // ^^
 	TMapCollisionManager *mColMgr; // _EC
 
 	struct
@@ -99,5 +96,5 @@ public:
 		bool mClipFromScene : 1;
 		u32 _05 : 2;
         bool mIsObjDead : 1;
-	} mFlags;
+	} Flags;
 };

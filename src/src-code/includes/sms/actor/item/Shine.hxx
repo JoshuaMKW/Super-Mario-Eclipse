@@ -6,8 +6,27 @@
 
 class TShine : public TItem
 {
-
 public:
+    TShine(const char *);
+    virtual ~TShine();
+
+    virtual void loadAfter() override;
+    virtual void perform(u32, JDrama::TGraphics *) override;
+    virtual bool receiveMessage(THitActor *, u32) override;
+    virtual void control() override;
+    virtual void kill() override;
+    virtual void initMapObj() override;
+    virtual void loadBeforeInit(JSUMemoryInputStream &) override;
+    virtual void touchPlayer(THitActor *) override;
+    virtual void makeMActors();
+    virtual void appearWithTimeCallback(u32, u32);
+
+    void appearSimple(int);
+    void appearWithDemo(const char *);
+    void appearWithTime(int, int, int, int);
+    void calc();
+    void movingCircle();
+
     u32 mType;                         //0x0154
     u32 _02[0x38 / 4];                 //0x0158
     bool isNormalCamera;               //0x0190
@@ -19,4 +38,13 @@ public:
     u8 _06;                            //0x01B5
     u16 _07;                           //0x01B6
     u32 _08[0x40 / 4];                 //0x01B8
+
+    static f32 mBowRate;
+    static f32 mCircleRate;
+    static f32 mKiraRate;
+    static f32 mPromiLife;
+    static f32 mSenkoRate;
+    static f32 mSpeedDownRate;
+    static f32 mUpSpeed;
+
 };

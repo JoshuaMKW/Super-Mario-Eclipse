@@ -11,12 +11,12 @@ public:
 	TCoin(const char *);
 	virtual ~TCoin();
 
-	virtual void loadAfter();
-	virtual void perform(u32, JDrama::TGraphics *);
-	virtual void appear();
-	virtual void makeObjAppeared();
-	virtual void makeObjDead();
-	virtual void initMapObj();
+	virtual void loadAfter() override;
+	virtual void perform(u32, JDrama::TGraphics *) override;
+	virtual void appear() override;
+	virtual void makeObjAppeared() override;
+	virtual void makeObjDead() override;
+	virtual void initMapObj() override;
 	virtual void taken(THitActor *);
 
 	u32 _154;

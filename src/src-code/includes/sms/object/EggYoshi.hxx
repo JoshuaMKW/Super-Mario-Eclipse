@@ -18,7 +18,7 @@ public:
     virtual void control() override;
     virtual u32 getHitObjNumMax() override;
     virtual void perform(u32, JDrama::TGraphics *) override;
-    virtual bool receiveMessage(THitActor *) override;
+    virtual bool receiveMessage(THitActor *, u32) override;
     virtual void touchActor(THitActor *) override;
 
     u32 decideRandomLoveFruit();

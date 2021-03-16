@@ -23,23 +23,23 @@ public:
 // extern -> SME.cpp
 s32 mountCard(TCardManager *cardManager, bool r4)
 {
-    s32 ret;
     bool tryMount = true;
+    s32 ret = 0;
 
     if (cardManager->mMounted)
-        tryMount = probe__12TCardManagerFv() < -1;
+        tryMount = cardManager->probe() < -1;
 
     if (tryMount)
     {
         cardManager->mChannel = CARD_SLOTA;
 
-        ret = mount___12TCardManagerFb(cardManager, r4);
+        ret = cardManager->mount_(r4);
         if (ret == 0)
             return ret;
 
         cardManager->mChannel = CARD_SLOTB;
 
-        ret = mount___12TCardManagerFb(cardManager, r4);
+        ret = cardManager->mount_(r4);
         if (ret == 0)
             return ret;
 
@@ -47,18 +47,16 @@ s32 mountCard(TCardManager *cardManager, bool r4)
         return ret;
     }
 
-    return 0;
+    return ret;
 }
 
 // extern -> SME.cpp
 s32 probeCard(TCardManager *cardManager)
 {
-    s32 ret;
-
-    ret = probe__12TCardManagerFv();
+    s32 ret = cardManager->probe();
     if (ret == CARD_ERROR_NOCARD)
     {
-        unmount__12TCardManagerFv(cardManager);
+        cardManager->unmount();
         cardManager->mLastStatus = mountCard(cardManager, true);
     }
     return ret;

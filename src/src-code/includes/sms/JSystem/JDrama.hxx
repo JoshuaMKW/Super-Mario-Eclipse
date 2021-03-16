@@ -66,12 +66,13 @@ namespace JDrama
         virtual u32 getType() const;
         virtual void load(JSUMemoryInputStream &stream);
         virtual void save(JSUMemoryOutputStream &stream);
-        virtual void loadAfter(void);
-        virtual void search(const char *);
+        virtual void loadAfter();
         virtual TNameRef *searchF(u16, const char *);
 
         void genObject(JSUMemoryInputStream &stream, JSUMemoryInputStream &);
         u32 getType(JSUMemoryInputStream &stream, JSUMemoryInputStream &);
+        void search(const char *);
+
         static s16 calcKeyCode(const char *);
         
         char *mTypeName; //0x0004
@@ -83,6 +84,8 @@ namespace JDrama
     public:
         TViewObj(const char *);
         virtual ~TViewObj();
+
+        virtual void perform(u32, TGraphics *) = 0;
 		
 		void testPerform(u32, TGraphics *);
 
@@ -94,7 +97,7 @@ namespace JDrama
     public:
         virtual ~TPlacement();
 		
-        virtual void load(JSUMemoryInputStream &stream);
+        virtual void load(JSUMemoryInputStream &);
 
         JGeometry::TVec3<f32> mPosition; //0x0010
         TFlagT<u16> mFlags;              //0x001C
@@ -124,7 +127,19 @@ namespace JDrama
     class TActor : public TPlacement, public JStage::TActor
     {
     public:
-        u32 *mJStageVTable;
+        TActor(const char *);
+        virtual ~TActor();
+
+        virtual u32 getType() const override;
+        virtual void load(JSUMemoryInputStream &) override;
+        virtual void perform(u32, TGraphics *) override;
+        virtual void JSGGetTranslation(Vec *) const override;
+        virtual void JSGSetTranslation(const Vec &) override;
+        virtual void JSGGetScaling(Vec *) const override;
+        virtual void JSGSetScaling(const Vec &) override;
+        virtual void JSGGetRotation(Vec *) const override;
+        virtual void JSGSetRotation(const Vec &) override;
+
         JGeometry::TVec3<f32> mSize;     //0x0024
         JGeometry::TVec3<f32> mRotation; //0x0030
         u32 _02[0x8 / 4];                //0x003C

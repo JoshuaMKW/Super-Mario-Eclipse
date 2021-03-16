@@ -10,10 +10,12 @@ public:
     THitActor(char const *name);
     virtual ~THitActor();
 
-    virtual void perform(u32, JDrama::TGraphics *);
-    virtual bool receiveMessage(THitActor *reciever, u32 message);
+    virtual void perform(u32, JDrama::TGraphics *) override;
+    virtual bool receiveMessage(THitActor *receiver, u32 msg);
 
-    void initHitActor(u32, u16 collisionArrayCap, s32 collisionFlags, f32 attackRadius, f32 attackHeight, f32 receiveRadius, f32 receiveHeight);
+    void initHitActor(u32, u16 collisionArrayCap, int collisionFlags,
+                      f32 attackRadius, f32 attackHeight,
+                      f32 receiveRadius, f32 receiveHeight);
     void calcEntryRadius();
 
     THitActor **mCollidingObjs; //0x0044

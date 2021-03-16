@@ -8,10 +8,10 @@
 
 enum SelectType
 {
-    SELECT_RUMBLE = 0,
-    SELECT_SOUND = 1,
-    SELECT_SUBTITLES = 2,
-    SELECT_UNKNOWN = 3,
+    RUMBLE = 0,
+    SOUND = 1,
+    SUBTITLES = 2,
+    UNKNOWN = 3,
 };
 
 class TOptionControl

@@ -653,6 +653,73 @@ public:
         TParamT<s16> mFogTimeRed;
     };
 
+    struct TMotorParams : public TParams
+    {
+        TMotorParams()
+            : mMotorReturn(25, "mMotorReturn"),
+              mMotorTrample(8, "mMotorTrample"),
+              mMotorHipDrop(15, "mMotorHipDrop"),
+              mMotorWall(6, "mMotorWall")
+        {
+            load("/Mario/MarioMotor.prm");
+        }
+
+        TParamT<s16> mMotorReturn;
+        TParamT<s16> mMotorTrample;
+        TParamT<s16> mMotorHipDrop;
+        TParamT<s16> mMotorWall;
+    };
+
+    struct TParticleParams : public TParams
+    {
+        TParticleParams()
+            : mMeltInWaterMax(0.5f, "mMeltInWaterMax"),
+              mWaveEmitSpeed(5.0f, "mWaveEmitSpeed"),
+              mWaveAlphaDec(5, "mWaveAlphaDec"),
+              mBubbleDepth(10.0f, "mBubbleDepth"),
+              mBodyBubbleSpMin(0.0f, "mBodyBubbleSpMin"),
+              mBodyBubbleSpMax(40.0f, "mBodyBubbleSpMax"),
+              mBodyBubbleEmitMin(0.0f, "mBodyBubbleEmitMin"),
+              mBodyBubbleEmitMax(0.5f, "mBodyBubbleEmitMax"),
+              mBubbleToRipple(0.3f, "mBubbleToRipple"),
+              mToroccoWind(0.001f, "mToroccoWind"),
+              mToroccoSpark(0.001f, "mToroccoSpark")
+        {
+            load("/Mario/MarioParticle.prm");
+        }
+
+        TParamT<f32> mMeltInWaterMax;
+        TParamT<f32> mWaveEmitSpeed;
+        TParamT<s16> mWaveAlphaDec;
+        TParamT<f32> mBubbleDepth;
+        TParamT<f32> mBodyBubbleSpMin;
+        TParamT<f32> mBodyBubbleSpMax;
+        TParamT<f32> mBodyBubbleEmitMin;
+        TParamT<f32> mBodyBubbleEmitMax;
+        TParamT<f32> mBubbleToRipple;
+        TParamT<f32> mToroccoWind;
+        TParamT<f32> mToroccoSpark;
+    };
+
+    struct TEffectParams : public TParams
+    {
+        TEffectParams()
+            : mDashInc(1.0f / 3.0f, "mDashInc"),
+              mDashDec(1.0f / 6.0f, "mDashDec"),
+              mDashMaxBlendInBlur(180, "mDashMaxBlendInBlur"),
+              mDashMaxBlendInIris(180, "mDashMaxBlendInIris"),
+              mDashBlendScale(0.2f, "mDashBlendScale")
+        {
+            load("/Mario/MarioEffect.prm");
+        }
+
+        TParamT<f32> mDashInc;
+        TParamT<f32> mDashDec;
+        TParamT<u8> mDashMaxBlendInBlur;
+        TParamT<u8> mDashMaxBlendInIris;
+        TParamT<f32> mDashBlendScale;
+    };
+
     enum State {
         NUMBER = 0x0000000F,
         DOJUMP = 0x00000080,
@@ -1075,7 +1142,9 @@ public:
     TControllerParams mControllerParams;         //0x2340
     TGraffitoParams mGraffitoParams;             //0x2410
     TDirtyParams mDirtyParams;                   //0x25BC
-    //0x27A4
+    TMotorParams mMotorParams;                   //0x27A4
+    TParticleParams mParticleParams;             //0x27FC
+    TEffectParams mEffectParams;                 //0x28E0
 
     //todo: dirtyparams, graffitoparams, and misc
 

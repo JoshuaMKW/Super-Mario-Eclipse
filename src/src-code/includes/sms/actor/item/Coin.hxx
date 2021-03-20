@@ -17,7 +17,7 @@ public:
 	virtual void makeObjAppeared() override;
 	virtual void makeObjDead() override;
 	virtual void initMapObj() override;
-	virtual void taken(THitActor *);
+	virtual void taken(THitActor *) override;
 
 	u32 _154;
 };

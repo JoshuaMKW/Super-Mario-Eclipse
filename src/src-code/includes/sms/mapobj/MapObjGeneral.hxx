@@ -5,6 +5,7 @@
 #include "sms/JSystem/JGeometry.hxx"
 #include "sms/actor/HitActor.hxx"
 #include "sms/actor/TakeActor.hxx"
+#include "sms/collision/MapCheck.hxx"
 #include "sms/mapobj/MapObjBase.hxx"
 
 class TMapObjGeneral : public TMapObjBase
@@ -16,16 +17,16 @@ public:
     virtual void loadAfter() override;
     virtual void perform(u32, JDrama::TGraphics *) override;
     virtual bool receiveMessage(THitActor *, u32) override;
-    virtual void ensureTakeSituation();
+    virtual void ensureTakeSituation() override;
     virtual void calcRootMatrix() override;
     virtual void control() override;
-    virtual void bind();
-    virtual void kill();
-    virtual void appear();
-    virtual void initMapObj();
-    virtual void checkIllegalAttr() const;
-    virtual void touchPlayer(THitActor *);
-    virtual void touchWater(THitActor *);
+    virtual void bind() override;
+    virtual void kill() override;
+    virtual void appear() override;
+    virtual void initMapObj() override;
+    virtual void checkIllegalAttr() const override;
+    virtual void touchPlayer(THitActor *) override;
+    virtual void touchWater(THitActor *) override;
     virtual s32 getLivingTime() const;
     virtual s32 getFlushTime() const;
     virtual bool isPollutedGround(const JGeometry::TVec3<f32> &) const;

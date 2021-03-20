@@ -8,7 +8,7 @@ class TWaterManager
 
 public:
     u32 _00[0xC / 4];    //0x0000
-    u8 mSprayQuality;    //0x000C
+    u8 mEmitPerFrame;    //0x000C
     u8 _01;              //0x000D
     u16 _02;             //0x000E
     s16 mMaxEmit;        //0x0010

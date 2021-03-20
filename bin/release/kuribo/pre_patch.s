@@ -1,4 +1,30 @@
 #inject(0x80341DE8)
+.set ISPYIIASMH, FALSE
+
+.if ISPYIIASMH == FALSE
+    .macro __set register value
+        .if \value > 0x7FFF || \value < -0x7FFF
+            .if ((\value >> 16) != 0) && ((\value & 0xFFFF) == 0)
+                lis \register, \value@h
+            .else
+                lis \register, \value@h
+                ori \register, \register, \value & 0xFFFF
+            .endif
+        .else
+            li \register, \value
+        .endif
+    .endm
+
+    .macro __call register address
+        .if \address == NONE
+            mtctr \register
+        .else
+            __set \register \address
+            mtctr \register
+        .endif
+        bctrl
+    .endm
+.endif
 
 # SMS NTSC-U Kuribo Loader #
 #     Credits: Riidefi     #

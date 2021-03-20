@@ -6,7 +6,25 @@
 class TItem : public TMapObjGeneral
 {
 public:
+    TItem(char const *);
+	virtual ~TItem();
+	
+	virtual void load(JSUMemoryInputStream &) override;
+	virtual void perform(u32, JDrama::TGraphics *) override;
+	virtual bool receiveMessage(THitActor *, u32) override;
+	virtual void calcRootMatrix() override;
+	virtual void appear() override;
+	virtual void initMapObj() override;
+	virtual void calc() override;
+	virtual void touchPlayer(THitActor *) override;
+	virtual void appearing() override;
+	virtual void appeared() override;
+	virtual void killByTimer(int);
+	virtual void taken(THitActor *);
+
     u32 *_148;
     s32 mKillTimer; // _14C
-    u32 _150;
+    u32 mStateTimerSet; // ?
+
+    static f32 mAppearedScaleSpeed;
 };

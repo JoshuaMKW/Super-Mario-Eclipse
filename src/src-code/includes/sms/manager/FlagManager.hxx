@@ -36,8 +36,6 @@ public:
     void setNozzleRight(u8, u8);
     void start(JKRHeap *);
 
-    static TFlagManager *smInstance;
-
     struct
     {
         u8 m1Type[0x76]; //0x0000
@@ -158,4 +156,6 @@ public:
     u8 mType1FlagSave[120];   //0x02A8
     u8 mType2FlagSave[84];    //0x0320
     s64 mSavedTimeOnLastSave; //0x0378
+
+    static TFlagManager *smInstance;
 };

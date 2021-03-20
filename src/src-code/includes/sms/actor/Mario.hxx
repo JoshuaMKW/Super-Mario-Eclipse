@@ -720,6 +720,56 @@ public:
         TParamT<f32> mDashBlendScale;
     };
 
+    struct TSlipParams : public TParams
+    {
+        TSlipParams(const char *prm)
+            : mSlipFriction(0.9f, "mSlipFriction"),
+              mSlopeAcceleUp(0.0f, "mSlopeAcceleUp"),
+              mSlopeAcceleDown(0.0f, "mSlopeAcceleDown"),
+              mSlideAcceleUp(0.0f, "mSlideAcceleUp"),
+              mSlideAcceleDown(0.0f, "mSlideAcceleDown"),
+              mSlideStopNormal(15.0f, "mSlideStopNormal"),
+              mSlideStopCatch(15.0f, "mSlideStopCatch"),
+              mJumpEnable(true, "mJumpEnable"),
+              mMissJump(true, "mMissJump"),
+              mSlideAngleYSp(512, "mSlideAngleYSp"),
+              mStickSlideMult(0.05, "mStickSlideMult")
+        {
+            load(prm);
+        }
+
+        TParamT<f32> mSlipFriction;
+        TParamT<f32> mSlopeAcceleUp;
+        TParamT<f32> mSlopeAcceleDown;
+        TParamT<f32> mSlideAcceleUp;
+        TParamT<f32> mSlideAcceleDown;
+        TParamT<f32> mSlideStopNormal;
+        TParamT<f32> mSlideStopCatch;
+        TParamT<bool> mJumpEnable;
+        TParamT<bool> mMissJump;
+        TParamT<s16> mSlideAngleYSp;
+        TParamT<f32> mStickSlideMult;
+    };
+
+    struct TUpperBodyParams : public TParams
+    {
+        TUpperBodyParams()
+            : mPumpWaitTime(10, "mPumpWaitTime"),
+              mPumpAnmSpeed(0.01f, "mPumpAnmSpeed"),
+              mHoverHeadAngle(-8192, "mHoverHeadAngle"),
+              mFeelDeepHeadAngle(8192, "mFeelDeepHeadAngle"),
+              mFrontWallHeadAngle(-8192, "mFrontWallHeadAngle")
+        {
+            load("/Mario/DmgEnemyCommon.prm");
+        }
+
+        TParamT<s16> mPumpWaitTime;
+        TParamT<f32> mPumpAnmSpeed;
+        TParamT<s16> mHoverHeadAngle;
+        TParamT<s16> mFeelDeepHeadAngle;
+        TParamT<s16> mFrontWallHeadAngle;
+    };
+
     enum State {
         NUMBER = 0x0000000F,
         DOJUMP = 0x00000080,
@@ -1145,6 +1195,15 @@ public:
     TMotorParams mMotorParams;                   //0x27A4
     TParticleParams mParticleParams;             //0x27FC
     TEffectParams mEffectParams;                 //0x28E0
+    TSlipParams mSlipNormalParams;               //0x294C
+    TSlipParams mSlipOilParams;                  //0x2A30
+    TSlipParams mSlipAllParams;                  //0x2B14
+    TSlipParams mSlipAllSliderParams;            //0x2BF8
+    TSlipParams mSlip45Params;                   //0x2CDC
+    TSlipParams mSlipWaterSlopeParams;           //0x2DC0
+    TSlipParams mSlipWaterGroundParams;          //0x2EA4
+    TSlipParams mSlipYoshiParams;                //0x2F88
+    TUpperBodyParams mUpperBodyParams;           //0x30D8
 
     //todo: dirtyparams, graffitoparams, and misc
 

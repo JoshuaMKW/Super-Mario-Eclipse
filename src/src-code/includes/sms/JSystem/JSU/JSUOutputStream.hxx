@@ -6,12 +6,22 @@
 class JSUOutputStream : public JSUIosBase
 {
 public:
-	u8 _4;
-	u8 _5; // padding?
-	u8 _6; // ^^
-	u8 _7; // ^^
+	virtual ~JSUOutputStream();
+
+	virtual void skip(s32, signed char);
+	virtual void writeData(void *, s32) = 0;
+
+	void write(const void *, s32);
 };
 
 class JSURandomOutputStream : public JSUOutputStream
 {
+public:
+	virtual ~JSURandomOutputStream();
+
+	virtual s32 getLength() const = 0;
+	virtual s32 getPosition() const = 0;
+	virtual s32 seek(s32, JSUStreamSeekFrom);
+	virtual s32 getAvailable() const;
+	virtual s32 seekPos(s32, JSUStreamSeekFrom) = 0;
 };

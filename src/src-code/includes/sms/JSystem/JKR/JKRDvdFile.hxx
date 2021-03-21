@@ -3,19 +3,21 @@
 #include "types.h"
 #include "DVD.h"
 #include "OS.h"
-#include "JKRDisposer.hxx"
+#include "JKRFile.hxx"
 #include "../JSU/JSUList.hxx"
 
-class JKRDvdFile : public JKRDisposer
+class JKRDvdFile : public JKRFile
 {
 public:
+	JKRDvdFile();
 	JKRDvdFile(s32);
+	virtual ~JKRDvdFile();
 
-	virtual bool open(const char *fileName);
-	virtual void close();
-	virtual s32 writeData(void const *addr, s32 length, s32 offset);
-	virtual s32 readData(void *addr, s32 length, s32 offset);
-	virtual s32 getFileSize() const;
+	virtual bool open(const char *fileName) override;
+	virtual void close() override;
+	virtual s32 writeData(void const *addr, s32 length, s32 offset) override;
+	virtual s32 readData(void *addr, s32 length, s32 offset) override;
+	virtual s32 getFileSize() const override;
 	virtual bool open(s32);
 
 	void sync();

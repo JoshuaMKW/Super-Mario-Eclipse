@@ -167,20 +167,18 @@ u32 shineGetClamper(TFlagManager *flagManager, u32 flag)
 }
 
 //0x80294334
-void extendFlagManagerLoad(JSUInputStream &stream)
+void extendFlagManagerLoad(JSUMemoryInputStream &stream)
 {
     stream.read(((u8 *)TFlagManager::smInstance + 0x1F4), 0x8C);
-    read__14JSUInputStreamFPvl(&stream, ((u8 *)TFlagManager::smInstance + 0x1F4), 0x8C);
     stream.skip(0x120);
 }
 
 
 //0x802939B8
-void extendFlagManagerSave(JSUOutputStream &stream)
+void extendFlagManagerSave(JSUMemoryOutputStream &stream)
 {
     stream.write(((u8 *)TFlagManager::smInstance + 0x1F4), 0x8C);
-    write__15JSUOutputStreamFPCvl(&stream, ((u8 *)TFlagManager::smInstance + 0x1F4), 0x8C);
-    stream.skip(0x120);
+    stream.skip(0x120, 0);
 }
 
 //0x80297BD8

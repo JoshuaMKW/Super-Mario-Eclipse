@@ -160,59 +160,59 @@ public:
     {
         TDeParams();
 
-        TParamT<s16> mHPMax;           // Max health
-        TParamT<f32> mRunningMax;      // Max running speed
-        TParamT<f32> mDashMax;         // Turbo Nozzle max speed
-        TParamT<f32> mDashAcc;         // Turbo Nozzle acceleration
-        TParamT<f32> mDashBrake;       // Turbo Nozzle stop speed?
-        TParamT<f32> mDashStartTime;   // Turbo Nozzle start
-        TParamT<f32> mWaitingRotSp;    // Waiting rotation speed
-        TParamT<f32> mRunningRotSpMin; // Running rotation speed
-        TParamT<f32> mRunningRotSpMax; // Running rotation speed max
-        TParamT<f32> mRocketRotSp;     // Rocket Nozzle rotation speed
-        TParamT<f32> mPumpingRotSpMin; // Pumping rotation speed min
-        TParamT<f32> mPumpingRotSpMax; // Pumping rotation speed max
-        TParamT<f32> mInvincibleTime;
-        TParamT<f32> mFootPrintTimerMax;
-        TParamT<f32> mWaterTriggerRate;
-        TParamT<f32> mGraffitoNoDmgTime;
-        TParamT<f32> mRestMax;
-        TParamT<f32> mShadowSize;
-        TParamT<f32> mShadowErase;
-        TParamT<f32> mHoldRadius;
-        TParamT<f32> mDamageRadius;
-        TParamT<f32> mDamageHeight;
-        TParamT<f32> mAttackHeight;
-        TParamT<f32> mTrampleRadius;
-        TParamT<f32> mPushupRadius;
-        TParamT<f32> mPushupHeight;
-        TParamT<f32> mHipdropRadius;
-        TParamT<f32> mQuakeRadius;
-        TParamT<f32> mQuakeHeight;
-        TParamT<f32> mTramplePowStep1;
-        TParamT<f32> mTramplePowStep2;
-        TParamT<f32> mTramplePowStep3;
-        TParamT<f32> mJumpWallHeight;
-        TParamT<f32> mThrowPower;
-        TParamT<f32> mSlipStart;
-        TParamT<f32> mWasOnWaterSlip;
-        TParamT<f32> mInWaterSlip;
-        TParamT<f32> mToroccoRotSp;
-        TParamT<s16> mRecoverTimer;
-        TParamT<s16> mHotTimer;
-        TParamT<f32> mFeelDeep;
-        TParamT<f32> mDamageFallHeight;
-        TParamT<f32> mForceSlipAngle;
-        TParamT<f32> mClashSpeed; // Wall bonk speed?
-        TParamT<f32> mHangWallMovableAngle;
-        TParamT<f32> mColMvMax;
-        TParamT<s16> mNoFreezeTime;   // Wall hang no freeze timer
-        TParamT<s16> mKickFreezeTime; // Wall hang freeze timer
-        TParamT<s16> mSurfStartFreezeTime;
-        TParamT<f32> mSleepingCheckDist;
-        TParamT<f32> mSleepingCheckHeight;
-        TParamT<s16> mIllegalPlaneCtInc; // Death plane timer increment
-        TParamT<s16> mIllegalPlaneTime;  // Death plane timer max
+        TParamRT<s16> mHPMax;           // Max health
+        TParamRT<f32> mRunningMax;      // Max running speed
+        TParamRT<f32> mDashMax;         // Turbo Nozzle max speed
+        TParamRT<f32> mDashAcc;         // Turbo Nozzle acceleration
+        TParamRT<f32> mDashBrake;       // Turbo Nozzle stop speed?
+        TParamRT<f32> mDashStartTime;   // Turbo Nozzle start
+        TParamRT<f32> mWaitingRotSp;    // Waiting rotation speed
+        TParamRT<f32> mRunningRotSpMin; // Running rotation speed
+        TParamRT<f32> mRunningRotSpMax; // Running rotation speed max
+        TParamRT<f32> mRocketRotSp;     // Rocket Nozzle rotation speed
+        TParamRT<f32> mPumpingRotSpMin; // Pumping rotation speed min
+        TParamRT<f32> mPumpingRotSpMax; // Pumping rotation speed max
+        TParamRT<f32> mInvincibleTime;
+        TParamRT<f32> mFootPrintTimerMax;
+        TParamRT<f32> mWaterTriggerRate;
+        TParamRT<f32> mGraffitoNoDmgTime;
+        TParamRT<f32> mRestMax;
+        TParamRT<f32> mShadowSize;
+        TParamRT<f32> mShadowErase;
+        TParamRT<f32> mHoldRadius;
+        TParamRT<f32> mDamageRadius;
+        TParamRT<f32> mDamageHeight;
+        TParamRT<f32> mAttackHeight;
+        TParamRT<f32> mTrampleRadius;
+        TParamRT<f32> mPushupRadius;
+        TParamRT<f32> mPushupHeight;
+        TParamRT<f32> mHipdropRadius;
+        TParamRT<f32> mQuakeRadius;
+        TParamRT<f32> mQuakeHeight;
+        TParamRT<f32> mTramplePowStep1;
+        TParamRT<f32> mTramplePowStep2;
+        TParamRT<f32> mTramplePowStep3;
+        TParamRT<f32> mJumpWallHeight;
+        TParamRT<f32> mThrowPower;
+        TParamRT<f32> mSlipStart;
+        TParamRT<f32> mWasOnWaterSlip;
+        TParamRT<f32> mInWaterSlip;
+        TParamRT<f32> mToroccoRotSp;
+        TParamRT<s16> mRecoverTimer;
+        TParamRT<s16> mHotTimer;
+        TParamRT<f32> mFeelDeep;
+        TParamRT<f32> mDamageFallHeight;
+        TParamRT<f32> mForceSlipAngle;
+        TParamRT<f32> mClashSpeed; // Wall bonk speed?
+        TParamRT<f32> mHangWallMovableAngle;
+        TParamRT<f32> mColMvMax;
+        TParamRT<s16> mNoFreezeTime;   // Wall hang no freeze timer
+        TParamRT<s16> mKickFreezeTime; // Wall hang freeze timer
+        TParamRT<s16> mSurfStartFreezeTime;
+        TParamRT<f32> mSleepingCheckDist;
+        TParamRT<f32> mSleepingCheckHeight;
+        TParamRT<s16> mIllegalPlaneCtInc; // Death plane timer increment
+        TParamRT<s16> mIllegalPlaneTime;  // Death plane timer max
     };
 
     struct TBodyAngleParams : public TParams
@@ -228,12 +228,12 @@ public:
             load(prm);
         }
 
-        TParamT<f32> mHeadRot;
-        TParamT<f32> mWaistRoll;
-        TParamT<f32> mWaistPitch;
-        TParamT<s16> mWaistRollMax;
-        TParamT<s16> mWaistPitchMax;
-        TParamT<s16> mWaistAngleChangeRate;
+        TParamRT<f32> mHeadRot;
+        TParamRT<f32> mWaistRoll;
+        TParamRT<f32> mWaistPitch;
+        TParamRT<s16> mWaistRollMax;
+        TParamRT<s16> mWaistPitchMax;
+        TParamRT<s16> mWaistAngleChangeRate;
     };
 
     struct TAttackParams : public TParams
@@ -245,123 +245,123 @@ public:
             load(prm);
         }
 
-        TParamT<f32> mRadius;
-        TParamT<f32> mHeight;
+        TParamRT<f32> mRadius;
+        TParamRT<f32> mHeight;
     };
 
     struct TJumpParams : public TParams
     {
         TJumpParams();
 
-        TParamT<f32> mGravity;
-        TParamT<f32> mSpinJumpGravity;
-        TParamT<f32> mJumpingMax;
-        TParamT<f32> mJumpSpeedBrake;
-        TParamT<f32> mJumpSpeedAccelControl;
-        TParamT<f32> mJumpSlideControl;
-        TParamT<f32> mTurnJumpForce;
-        TParamT<f32> mFenceSpeed;
-        TParamT<f32> mFireDownForce;
-        TParamT<f32> mFireDownControl;
-        TParamT<f32> mFireBackVelocity;
-        TParamT<f32> mBroadJumpForce;
-        TParamT<f32> mBroadJumpForceY;
-        TParamT<f32> mRotateJumpForceY;
-        TParamT<f32> mPopUpSpeedY;
-        TParamT<f32> mPopUpForceYMult;
-        TParamT<f32> mBackJumpForce;
-        TParamT<f32> mBackJumpForceY;
-        TParamT<f32> mHipAttackSpeedY;
-        TParamT<f32> mSuperHipAttackSpeedY;
-        TParamT<f32> mJumpCatchRotXSp;
-        TParamT<f32> mJumpCatchRotXMax;
-        TParamT<f32> mRotBroadEnableV;
-        TParamT<f32> mRotBroadJumpForce;
-        TParamT<f32> mRotBroadJumpForceY;
-        TParamT<f32> mTrampolineDec;
-        TParamT<f32> mSecJumpEnableSp;
-        TParamT<f32> mSecJumpForce;
-        TParamT<f32> mSecJumpSpeedMult;
-        TParamT<f32> mSecJumpXZMult;
-        TParamT<f32> mTriJumpEnableSp;
-        TParamT<f32> mUltraJumpForce;
-        TParamT<f32> mUltraJumpSpeedMult;
-        TParamT<f32> mUltraJumpXZMult;
-        TParamT<f32> mValleyDepth; // Had 2 of these by accident, validate!
-        TParamT<f32> mThrownAccel;
-        TParamT<f32> mThrownSlide;
-        TParamT<f32> mThrownBrake;
-        TParamT<f32> mTremblePower;
-        TParamT<f32> mTrembleAccele;
-        TParamT<f32> mTrembleBrake;
-        TParamT<s16> mTrembleTime;
-        TParamT<s16> mClashAngle;
-        TParamT<f32> mJumpJumpCatchSp;
-        TParamT<f32> mGetOffYoshiY;
-        TParamT<s16> mSuperHipAttackCt; // Time until super hip attack?
-        TParamT<f32> mGetOffYoshiY;
+        TParamRT<f32> mGravity;
+        TParamRT<f32> mSpinJumpGravity;
+        TParamRT<f32> mJumpingMax;
+        TParamRT<f32> mJumpSpeedBrake;
+        TParamRT<f32> mJumpSpeedAccelControl;
+        TParamRT<f32> mJumpSlideControl;
+        TParamRT<f32> mTurnJumpForce;
+        TParamRT<f32> mFenceSpeed;
+        TParamRT<f32> mFireDownForce;
+        TParamRT<f32> mFireDownControl;
+        TParamRT<f32> mFireBackVelocity;
+        TParamRT<f32> mBroadJumpForce;
+        TParamRT<f32> mBroadJumpForceY;
+        TParamRT<f32> mRotateJumpForceY;
+        TParamRT<f32> mPopUpSpeedY;
+        TParamRT<f32> mPopUpForceYMult;
+        TParamRT<f32> mBackJumpForce;
+        TParamRT<f32> mBackJumpForceY;
+        TParamRT<f32> mHipAttackSpeedY;
+        TParamRT<f32> mSuperHipAttackSpeedY;
+        TParamRT<f32> mJumpCatchRotXSp;
+        TParamRT<f32> mJumpCatchRotXMax;
+        TParamRT<f32> mRotBroadEnableV;
+        TParamRT<f32> mRotBroadJumpForce;
+        TParamRT<f32> mRotBroadJumpForceY;
+        TParamRT<f32> mTrampolineDec;
+        TParamRT<f32> mSecJumpEnableSp;
+        TParamRT<f32> mSecJumpForce;
+        TParamRT<f32> mSecJumpSpeedMult;
+        TParamRT<f32> mSecJumpXZMult;
+        TParamRT<f32> mTriJumpEnableSp;
+        TParamRT<f32> mUltraJumpForce;
+        TParamRT<f32> mUltraJumpSpeedMult;
+        TParamRT<f32> mUltraJumpXZMult;
+        TParamRT<f32> mValleyDepth; // Had 2 of these by accident, validate!
+        TParamRT<f32> mThrownAccel;
+        TParamRT<f32> mThrownSlide;
+        TParamRT<f32> mThrownBrake;
+        TParamRT<f32> mTremblePower;
+        TParamRT<f32> mTrembleAccele;
+        TParamRT<f32> mTrembleBrake;
+        TParamRT<s16> mTrembleTime;
+        TParamRT<s16> mClashAngle;
+        TParamRT<f32> mJumpJumpCatchSp;
+        TParamRT<f32> mGetOffYoshiY;
+        TParamRT<s16> mSuperHipAttackCt; // Time until super hip attack?
+        TParamRT<f32> mGetOffYoshiY;
     };
 
     struct TRunParams : public TParams
     {
         TRunParams();
 
-        TParamT<f32> mMaxSpeed;
-        TParamT<f32> mVelMinusBrake;
-        TParamT<f32> mAddBase;
-        TParamT<f32> mAddVelDiv;
-        TParamT<f32> mDecStartNrmY;
-        TParamT<f32> mDecBrake;
-        TParamT<f32> mSoft2Walk;
-        TParamT<f32> mWalk2Soft;
-        TParamT<f32> mSoftStepAnmMult;
-        TParamT<f32> mRunAnmSpeedBase;
-        TParamT<f32> mRunAnmSpeedMult;
-        TParamT<f32> mMotBlendWalkSp;
-        TParamT<f32> mMotBlendRunSp;
-        TParamT<f32> mSwimDepth;
-        TParamT<f32> mInWaterBrake;
-        TParamT<f32> mInWaterAnmBrake;
-        TParamT<f32> mPumpingSlideSp;
-        TParamT<f32> mPumpingSlideAnmSp;
-        TParamT<f32> mDoJumpCatchSp;
-        TParamT<f32> mTurnNeedSp;
-        TParamT<s16> mDashRotSp;
+        TParamRT<f32> mMaxSpeed;
+        TParamRT<f32> mVelMinusBrake;
+        TParamRT<f32> mAddBase;
+        TParamRT<f32> mAddVelDiv;
+        TParamRT<f32> mDecStartNrmY;
+        TParamRT<f32> mDecBrake;
+        TParamRT<f32> mSoft2Walk;
+        TParamRT<f32> mWalk2Soft;
+        TParamRT<f32> mSoftStepAnmMult;
+        TParamRT<f32> mRunAnmSpeedBase;
+        TParamRT<f32> mRunAnmSpeedMult;
+        TParamRT<f32> mMotBlendWalkSp;
+        TParamRT<f32> mMotBlendRunSp;
+        TParamRT<f32> mSwimDepth;
+        TParamRT<f32> mInWaterBrake;
+        TParamRT<f32> mInWaterAnmBrake;
+        TParamRT<f32> mPumpingSlideSp;
+        TParamRT<f32> mPumpingSlideAnmSp;
+        TParamRT<f32> mDoJumpCatchSp;
+        TParamRT<f32> mTurnNeedSp;
+        TParamRT<s16> mDashRotSp;
     };
 
     struct TSwimParams : public TParams
     {
         TSwimParams();
 
-        TParamT<f32> mStartSp;
-        TParamT<f32> mMoveSp;
-        TParamT<f32> mMoveBrake;
-        TParamT<s16> mSwimmingRotSpMin;
-        TParamT<s16> mSwimmingRotSpMax;
-        TParamT<s16> mPumpingRotSpMin;
-        TParamT<s16> mPumpingRotSpMax;
-        TParamT<f32> mGravity;
-        TParamT<f32> mWaitBouyancy;
-        TParamT<f32> mMoveBouyancy;
-        TParamT<f32> mUpDownBrake;
-        TParamT<f32> mCanJumpDepth;
-        TParamT<f32> mEndDepth;
-        TParamT<f32> mFloatHeight;
-        TParamT<f32> mStartVMult;
-        TParamT<f32> mStartVYMult;
-        TParamT<f32> mRush;
-        TParamT<f32> mAnmBrake;
-        TParamT<f32> mPaddleSpeedUp;
-        TParamT<f32> mPaddleJumpUp;
-        TParamT<f32> mFloatUp;
-        TParamT<f32> mWaterLevelCheckHeight;
-        TParamT<f32> mPaddleDown;
-        TParamT<s16> mWaitSinkTime;
-        TParamT<f32> mCanBreathDepth;
-        TParamT<f32> mWaitSinkSpeed;
-        TParamT<f32> mAirDec;
-        TParamT<f32> mAirDecDive;
-        TParamT<f32> mAirInc;
+        TParamRT<f32> mStartSp;
+        TParamRT<f32> mMoveSp;
+        TParamRT<f32> mMoveBrake;
+        TParamRT<s16> mSwimmingRotSpMin;
+        TParamRT<s16> mSwimmingRotSpMax;
+        TParamRT<s16> mPumpingRotSpMin;
+        TParamRT<s16> mPumpingRotSpMax;
+        TParamRT<f32> mGravity;
+        TParamRT<f32> mWaitBouyancy;
+        TParamRT<f32> mMoveBouyancy;
+        TParamRT<f32> mUpDownBrake;
+        TParamRT<f32> mCanJumpDepth;
+        TParamRT<f32> mEndDepth;
+        TParamRT<f32> mFloatHeight;
+        TParamRT<f32> mStartVMult;
+        TParamRT<f32> mStartVYMult;
+        TParamRT<f32> mRush;
+        TParamRT<f32> mAnmBrake;
+        TParamRT<f32> mPaddleSpeedUp;
+        TParamRT<f32> mPaddleJumpUp;
+        TParamRT<f32> mFloatUp;
+        TParamRT<f32> mWaterLevelCheckHeight;
+        TParamRT<f32> mPaddleDown;
+        TParamRT<s16> mWaitSinkTime;
+        TParamRT<f32> mCanBreathDepth;
+        TParamRT<f32> mWaitSinkSpeed;
+        TParamRT<f32> mAirDec;
+        TParamRT<f32> mAirDecDive;
+        TParamRT<f32> mAirInc;
     };
 
     struct THangFenceParams : public TParams
@@ -377,12 +377,12 @@ public:
             load("/Mario/Hanging.prm");
         }
 
-        TParamT<f32> mMoveSp;
-        TParamT<f32> mAnmRate;
-        TParamT<s16> mRapidTime;
-        TParamT<s16> mLimitTime;
-        TParamT<f32> mAnmRapid;
-        TParamT<f32> mDescentSp;
+        TParamRT<f32> mMoveSp;
+        TParamRT<f32> mAnmRate;
+        TParamRT<s16> mRapidTime;
+        TParamRT<s16> mLimitTime;
+        TParamRT<f32> mAnmRapid;
+        TParamRT<f32> mDescentSp;
     };
 
     struct THangRoofParams : public TParams
@@ -393,29 +393,29 @@ public:
             load("/Mario/HangRoof.prm");
         }
 
-        TParamT<f32> mAnmMult;
+        TParamRT<f32> mAnmMult;
     };
 
     struct TWireParams : public TParams
     {
         TWireParams();
 
-        TParamT<s16> mRotSpeed;
-        TParamT<s16> mRotSpeedTrgHover;
-        TParamT<s16> mRotSpeedTrgTurbo;
-        TParamT<s16> mRotSpeedTrgRocket;
-        TParamT<s16> mRotSpeedMax;
-        TParamT<s16> mRotStop;
-        TParamT<s16> mRotGravity;
-        TParamT<f32> mRotBrake;
-        TParamT<f32> mJumpRate;
-        TParamT<f32> mSwingRate;
-        TParamT<f32> mWireJumpAccelControl;
-        TParamT<f32> mWireJumpSlideControl;
-        TParamT<f32> mWireJumpMult;
-        TParamT<f32> mWireJumpBase;
-        TParamT<f32> mWireSwingBrake;
-        TParamT<f32> mWireSwingMax;
+        TParamRT<s16> mRotSpeed;
+        TParamRT<s16> mRotSpeedTrgHover;
+        TParamRT<s16> mRotSpeedTrgTurbo;
+        TParamRT<s16> mRotSpeedTrgRocket;
+        TParamRT<s16> mRotSpeedMax;
+        TParamRT<s16> mRotStop;
+        TParamRT<s16> mRotGravity;
+        TParamRT<f32> mRotBrake;
+        TParamRT<f32> mJumpRate;
+        TParamRT<f32> mSwingRate;
+        TParamRT<f32> mWireJumpAccelControl;
+        TParamRT<f32> mWireJumpSlideControl;
+        TParamRT<f32> mWireJumpMult;
+        TParamRT<f32> mWireJumpBase;
+        TParamRT<f32> mWireSwingBrake;
+        TParamRT<f32> mWireSwingMax;
     };
 
     struct TPullParams : public TParams
@@ -429,10 +429,10 @@ public:
             load(prm);
         }
 
-        TParamT<f32> mPullRateV;
-        TParamT<f32> mPullRateH;
-        TParamT<f32> mOilPullRateV;
-        TParamT<f32> mOilPullRateH;
+        TParamRT<f32> mPullRateV;
+        TParamRT<f32> mPullRateH;
+        TParamRT<f32> mOilPullRateV;
+        TParamRT<f32> mOilPullRateH;
     };
 
     struct TClimbParams : public TParams
@@ -447,40 +447,40 @@ public:
             load("/Mario/Bar.prm");
         }
 
-        TParamT<f32> mClimbSp;
-        TParamT<f32> mRotateSp;
-        TParamT<f32> mClimbAnmRate;
-        TParamT<f32> mCatchRadius;
-        TParamT<f32> mCatchAngle;
+        TParamRT<f32> mClimbSp;
+        TParamRT<f32> mRotateSp;
+        TParamRT<f32> mClimbAnmRate;
+        TParamRT<f32> mCatchRadius;
+        TParamRT<f32> mCatchAngle;
     };
 
     struct TSurfingParams : public TParams
     {
         TSurfingParams(const char *prm);
 
-        TParamT<f32> mRotMin;
-        TParamT<f32> mRotMax;
-        TParamT<f32> mPowMin;
-        TParamT<f32> mPowMax;
-        TParamT<f32> mAccel;
-        TParamT<f32> mWaistRoll;
-        TParamT<f32> mWaistPitch;
-        TParamT<s16> mWaistRollMax;
-        TParamT<s16> mWaistPitchMax;
-        TParamT<f32> mRoll;
-        TParamT<f32> mPitch;
-        TParamT<s16> mRollMax;
-        TParamT<s16> mPitchMax;
-        TParamT<f32> mAngleChangeRate;
-        TParamT<f32> mWaistAngleChangeRate;
-        TParamT<f32> mScaleMin;
-        TParamT<f32> mScaleMax;
-        TParamT<f32> mScaleMinSpeed;
-        TParamT<f32> mScaleMaxSpeed;
-        TParamT<f32> mJumpPow;
-        TParamT<f32> mJumpXZRatio;
-        TParamT<f32> mClashSpeed;
-        TParamT<s16> mClashAngle;
+        TParamRT<f32> mRotMin;
+        TParamRT<f32> mRotMax;
+        TParamRT<f32> mPowMin;
+        TParamRT<f32> mPowMax;
+        TParamRT<f32> mAccel;
+        TParamRT<f32> mWaistRoll;
+        TParamRT<f32> mWaistPitch;
+        TParamRT<s16> mWaistRollMax;
+        TParamRT<s16> mWaistPitchMax;
+        TParamRT<f32> mRoll;
+        TParamRT<f32> mPitch;
+        TParamRT<s16> mRollMax;
+        TParamRT<s16> mPitchMax;
+        TParamRT<f32> mAngleChangeRate;
+        TParamRT<f32> mWaistAngleChangeRate;
+        TParamRT<f32> mScaleMin;
+        TParamRT<f32> mScaleMax;
+        TParamRT<f32> mScaleMinSpeed;
+        TParamRT<f32> mScaleMaxSpeed;
+        TParamRT<f32> mJumpPow;
+        TParamRT<f32> mJumpXZRatio;
+        TParamRT<f32> mClashSpeed;
+        TParamRT<s16> mClashAngle;
     };
 
     struct THoverParams : public TParams
@@ -493,9 +493,9 @@ public:
             load("/Mario/HHover.prm");
         }
 
-        TParamT<s16> mRotSp;
-        TParamT<f32> mAccelRate;
-        TParamT<f32> mBrake;
+        TParamRT<s16> mRotSp;
+        TParamRT<f32> mAccelRate;
+        TParamRT<f32> mBrake;
     };
 
     struct TDivingParams : public TParams
@@ -510,11 +510,11 @@ public:
             load("/Mario/Diving.prm");
         }
 
-        TParamT<s16> mRotSp;
-        TParamT<f32> mGravity;
-        TParamT<f32> mAccelControl;
-        TParamT<f32> mSeaBrake;
-        TParamT<f32> mSeaBrakeY;
+        TParamRT<s16> mRotSp;
+        TParamRT<f32> mGravity;
+        TParamRT<f32> mAccelControl;
+        TParamRT<f32> mSeaBrake;
+        TParamRT<f32> mSeaBrakeY;
     };
 
     struct TYoshiParams : public TParams
@@ -533,15 +533,15 @@ public:
             load("/Mario/Yoshi.prm");
         }
 
-        TParamT<f32> mRunYoshiMult;
-        TParamT<f32> mJumpYoshiMult;
-        TParamT<f32> mRotYoshiMult;
-        TParamT<f32> mHeadFront;
-        TParamT<f32> mHeadRadius;
-        TParamT<f32> mHoldOutAccCtrlF;
-        TParamT<f32> mHoldOutAccCtrlB;
-        TParamT<f32> mHoldOutSldCtrl;
-        TParamT<f32> mDecBrake;
+        TParamRT<f32> mRunYoshiMult;
+        TParamRT<f32> mJumpYoshiMult;
+        TParamRT<f32> mRotYoshiMult;
+        TParamRT<f32> mHeadFront;
+        TParamRT<f32> mHeadRadius;
+        TParamRT<f32> mHoldOutAccCtrlF;
+        TParamRT<f32> mHoldOutAccCtrlB;
+        TParamRT<f32> mHoldOutSldCtrl;
+        TParamRT<f32> mDecBrake;
     };
 
     struct TWaterEffectParams : public TParams
@@ -558,13 +558,13 @@ public:
             load("/Mario/WaterEffect.prm");
         }
 
-        TParamT<f32> mJumpIntoMdlEffectSpY;
-        TParamT<f32> mJumpIntoMinY;
-        TParamT<f32> mJumpIntoMaxY;
-        TParamT<f32> mJumpIntoScaleMin;
-        TParamT<f32> mJumpIntoScaleWidth;
-        TParamT<f32> mRunningRippleSpeed;
-        TParamT<f32> mRunningRippleDepth;
+        TParamRT<f32> mJumpIntoMdlEffectSpY;
+        TParamRT<f32> mJumpIntoMinY;
+        TParamRT<f32> mJumpIntoMaxY;
+        TParamRT<f32> mJumpIntoScaleMin;
+        TParamRT<f32> mJumpIntoScaleWidth;
+        TParamRT<f32> mRunningRippleSpeed;
+        TParamRT<f32> mRunningRippleDepth;
     };
 
     struct TControllerParams : public TParams
@@ -584,73 +584,73 @@ public:
             load("/Mario/Controller.prm");
         }
 
-        TParamT<u8> mAnalogLRToZeroVal;
-        TParamT<u8> mAnalogLRToMiddleVal;
-        TParamT<u8> mAnalogLRToMaxVal;
-        TParamT<f32> mAnalogLRMiddleVal;
-        TParamT<f32> mStartToWalkLevel;
-        TParamT<s16> mStickRotateTime;
-        TParamT<s16> mLengthMultTimes;
-        TParamT<f32> mLengthMult;
-        TParamT<f32> mSquatRotMidAnalog;
-        TParamT<f32> mSquatRotMidValue;
+        TParamRT<u8> mAnalogLRToZeroVal;
+        TParamRT<u8> mAnalogLRToMiddleVal;
+        TParamRT<u8> mAnalogLRToMaxVal;
+        TParamRT<f32> mAnalogLRMiddleVal;
+        TParamRT<f32> mStartToWalkLevel;
+        TParamRT<s16> mStickRotateTime;
+        TParamRT<s16> mLengthMultTimes;
+        TParamRT<f32> mLengthMult;
+        TParamRT<f32> mSquatRotMidAnalog;
+        TParamRT<f32> mSquatRotMidValue;
     };
 
     struct TGraffitoParams : public TParams
     {
         TGraffitoParams();
 
-        TParamT<s16> mSinkTime;
-        TParamT<s16> mSinkDmgTime;
-        TParamT<f32> mSinkHeight;
-        TParamT<f32> mSinkMoveMin;
-        TParamT<f32> mSinkMoveMax;
-        TParamT<f32> mSinkRecover;
-        TParamT<f32> mSinkJumpRateMin;
-        TParamT<f32> mSinkJumpRateMax;
-        TParamT<f32> mSinkPumpLimit;
-        TParamT<f32> mSinkDmgDepth;
-        TParamT<f32> mFireHeight;
-        TParamT<s16> mDizzySlipCtMax;
-        TParamT<s16> mDizzyWalkCtMax;
-        TParamT<s16> mDizzyAngleY;
-        TParamT<f32> mDizzyAngleRate;
-        TParamT<f32> mDizzyPowerRate;
-        TParamT<f32> mDizzyPower;
-        TParamT<s16> mFireInvincibleTime;
-        TParamT<s16> mFootEraseTimes;
-        TParamT<f32> mFootEraseSize;
-        TParamT<f32> mFootEraseFront;
+        TParamRT<s16> mSinkTime;
+        TParamRT<s16> mSinkDmgTime;
+        TParamRT<f32> mSinkHeight;
+        TParamRT<f32> mSinkMoveMin;
+        TParamRT<f32> mSinkMoveMax;
+        TParamRT<f32> mSinkRecover;
+        TParamRT<f32> mSinkJumpRateMin;
+        TParamRT<f32> mSinkJumpRateMax;
+        TParamRT<f32> mSinkPumpLimit;
+        TParamRT<f32> mSinkDmgDepth;
+        TParamRT<f32> mFireHeight;
+        TParamRT<s16> mDizzySlipCtMax;
+        TParamRT<s16> mDizzyWalkCtMax;
+        TParamRT<s16> mDizzyAngleY;
+        TParamRT<f32> mDizzyAngleRate;
+        TParamRT<f32> mDizzyPowerRate;
+        TParamRT<f32> mDizzyPower;
+        TParamRT<s16> mFireInvincibleTime;
+        TParamRT<s16> mFootEraseTimes;
+        TParamRT<f32> mFootEraseSize;
+        TParamRT<f32> mFootEraseFront;
     };
 
     struct TDirtyParams : public TParams
     {
         TDirtyParams();
 
-        TParamT<f32> mIncRunning;
-        TParamT<f32> mIncCatching;
-        TParamT<f32> mIncSlipping;
-        TParamT<f32> mDecSwimming;
-        TParamT<f32> mDecWaterHit;
-        TParamT<f32> mDecRotJump;
-        TParamT<f32> mBrakeStartValSlip;
-        TParamT<f32> mBrakeStartValRun;
-        TParamT<s16> mDirtyTimeSlip;
-        TParamT<s16> mDirtyTimeRun;
-        TParamT<f32> mPolSizeSlip;
-        TParamT<f32> mPolSizeRun;
-        TParamT<f32> mPolSizeFootPrint;
-        TParamT<f32> mPolSizeJump;
-        TParamT<f32> mSlopeAngle;
-        TParamT<f32> mDirtyMax;
-        TParamT<f32> mSlipAnmSpeed;
-        TParamT<f32> mSlipRunSp;
-        TParamT<f32> mSlipCatchSp;
-        TParamT<s16> mSlipRotate;
-        TParamT<s16> mSlipCatchRotate;
-        TParamT<f32> mBrakeSlipNoPollute;
-        TParamT<s16> mFogTimeYellow;
-        TParamT<s16> mFogTimeRed;
+        TParamRT<f32> mIncRunning;
+        TParamRT<f32> mIncCatching;
+        TParamRT<f32> mIncSlipping;
+        TParamRT<f32> mDecSwimming;
+        TParamRT<f32> mDecWaterHit;
+        TParamRT<f32> mDecRotJump;
+        TParamRT<f32> mBrakeStartValSlip;
+        TParamRT<f32> mBrakeStartValRun;
+        TParamRT<s16> mDirtyTimeSlip;
+        TParamRT<s16> mDirtyTimeRun;
+        TParamRT<f32> mPolSizeSlip;
+        TParamRT<f32> mPolSizeRun;
+        TParamRT<f32> mPolSizeFootPrint;
+        TParamRT<f32> mPolSizeJump;
+        TParamRT<f32> mSlopeAngle;
+        TParamRT<f32> mDirtyMax;
+        TParamRT<f32> mSlipAnmSpeed;
+        TParamRT<f32> mSlipRunSp;
+        TParamRT<f32> mSlipCatchSp;
+        TParamRT<s16> mSlipRotate;
+        TParamRT<s16> mSlipCatchRotate;
+        TParamRT<f32> mBrakeSlipNoPollute;
+        TParamRT<s16> mFogTimeYellow;
+        TParamRT<s16> mFogTimeRed;
     };
 
     struct TMotorParams : public TParams
@@ -664,10 +664,10 @@ public:
             load("/Mario/MarioMotor.prm");
         }
 
-        TParamT<s16> mMotorReturn;
-        TParamT<s16> mMotorTrample;
-        TParamT<s16> mMotorHipDrop;
-        TParamT<s16> mMotorWall;
+        TParamRT<s16> mMotorReturn;
+        TParamRT<s16> mMotorTrample;
+        TParamRT<s16> mMotorHipDrop;
+        TParamRT<s16> mMotorWall;
     };
 
     struct TParticleParams : public TParams
@@ -688,17 +688,17 @@ public:
             load("/Mario/MarioParticle.prm");
         }
 
-        TParamT<f32> mMeltInWaterMax;
-        TParamT<f32> mWaveEmitSpeed;
-        TParamT<s16> mWaveAlphaDec;
-        TParamT<f32> mBubbleDepth;
-        TParamT<f32> mBodyBubbleSpMin;
-        TParamT<f32> mBodyBubbleSpMax;
-        TParamT<f32> mBodyBubbleEmitMin;
-        TParamT<f32> mBodyBubbleEmitMax;
-        TParamT<f32> mBubbleToRipple;
-        TParamT<f32> mToroccoWind;
-        TParamT<f32> mToroccoSpark;
+        TParamRT<f32> mMeltInWaterMax;
+        TParamRT<f32> mWaveEmitSpeed;
+        TParamRT<s16> mWaveAlphaDec;
+        TParamRT<f32> mBubbleDepth;
+        TParamRT<f32> mBodyBubbleSpMin;
+        TParamRT<f32> mBodyBubbleSpMax;
+        TParamRT<f32> mBodyBubbleEmitMin;
+        TParamRT<f32> mBodyBubbleEmitMax;
+        TParamRT<f32> mBubbleToRipple;
+        TParamRT<f32> mToroccoWind;
+        TParamRT<f32> mToroccoSpark;
     };
 
     struct TEffectParams : public TParams
@@ -713,11 +713,11 @@ public:
             load("/Mario/MarioEffect.prm");
         }
 
-        TParamT<f32> mDashInc;
-        TParamT<f32> mDashDec;
-        TParamT<u8> mDashMaxBlendInBlur;
-        TParamT<u8> mDashMaxBlendInIris;
-        TParamT<f32> mDashBlendScale;
+        TParamRT<f32> mDashInc;
+        TParamRT<f32> mDashDec;
+        TParamRT<u8> mDashMaxBlendInBlur;
+        TParamRT<u8> mDashMaxBlendInIris;
+        TParamRT<f32> mDashBlendScale;
     };
 
     struct TSlipParams : public TParams
@@ -730,25 +730,25 @@ public:
               mSlideAcceleDown(0.0f, "mSlideAcceleDown"),
               mSlideStopNormal(15.0f, "mSlideStopNormal"),
               mSlideStopCatch(15.0f, "mSlideStopCatch"),
-              mJumpEnable(true, "mJumpEnable"),
-              mMissJump(true, "mMissJump"),
+              mJumpEnable(1, "mJumpEnable"),
+              mMissJump(1, "mMissJump"),
               mSlideAngleYSp(512, "mSlideAngleYSp"),
               mStickSlideMult(0.05, "mStickSlideMult")
         {
             load(prm);
         }
 
-        TParamT<f32> mSlipFriction;
-        TParamT<f32> mSlopeAcceleUp;
-        TParamT<f32> mSlopeAcceleDown;
-        TParamT<f32> mSlideAcceleUp;
-        TParamT<f32> mSlideAcceleDown;
-        TParamT<f32> mSlideStopNormal;
-        TParamT<f32> mSlideStopCatch;
-        TParamT<bool> mJumpEnable;
-        TParamT<bool> mMissJump;
-        TParamT<s16> mSlideAngleYSp;
-        TParamT<f32> mStickSlideMult;
+        TParamRT<f32> mSlipFriction;
+        TParamRT<f32> mSlopeAcceleUp;
+        TParamRT<f32> mSlopeAcceleDown;
+        TParamRT<f32> mSlideAcceleUp;
+        TParamRT<f32> mSlideAcceleDown;
+        TParamRT<f32> mSlideStopNormal;
+        TParamRT<f32> mSlideStopCatch;
+        TParamRT<u8> mJumpEnable;
+        TParamRT<u8> mMissJump;
+        TParamRT<s16> mSlideAngleYSp;
+        TParamRT<f32> mStickSlideMult;
     };
 
     struct TUpperBodyParams : public TParams
@@ -763,11 +763,11 @@ public:
             load("/Mario/UpperBody.prm");
         }
 
-        TParamT<s16> mPumpWaitTime;
-        TParamT<f32> mPumpAnmSpeed;
-        TParamT<s16> mHoverHeadAngle;
-        TParamT<s16> mFeelDeepHeadAngle;
-        TParamT<s16> mFrontWallHeadAngle;
+        TParamRT<s16> mPumpWaitTime;
+        TParamRT<f32> mPumpAnmSpeed;
+        TParamRT<s16> mHoverHeadAngle;
+        TParamRT<s16> mFeelDeepHeadAngle;
+        TParamRT<s16> mFrontWallHeadAngle;
     };
 
     struct TDmgEnemyParams : public TParams
@@ -784,13 +784,13 @@ public:
             load(prm);
         }
 
-        TParamT<u8> mDamage;
-        TParamT<u8> mDownType;
-        TParamT<u8> mWaterEmit;
-        TParamT<u8> mMotor;
-        TParamT<f32> mMinSpeed;
-        TParamT<f32> mDirty;
-        TParamT<s16> mInvincibleTime;
+        TParamRT<u8> mDamage;
+        TParamRT<u8> mDownType;
+        TParamRT<u8> mWaterEmit;
+        TParamRT<u8> mMotor;
+        TParamRT<f32> mMinSpeed;
+        TParamRT<f32> mDirty;
+        TParamRT<s16> mInvincibleTime;
     };
 
     struct TDemoParams : public TParams
@@ -807,13 +807,13 @@ public:
             load("/Mario/AutoDemo.prm");
         }
 
-        TParamT<s16> mWarpInBallsDispTime;
-        TParamT<s16> mWarpInBallsTime;
-        TParamT<s16> mWarpInCapturedTime;
-        TParamT<f32> mWarpInTremble;
-        TParamT<f32> mWarpInVecBase;
-        TParamT<f32> mWarpTransTremble;
-        TParamT<s16> mReadRotSp;
+        TParamRT<s16> mWarpInBallsDispTime;
+        TParamRT<s16> mWarpInBallsTime;
+        TParamRT<s16> mWarpInCapturedTime;
+        TParamRT<f32> mWarpInTremble;
+        TParamRT<f32> mWarpInVecBase;
+        TParamRT<f32> mWarpTransTremble;
+        TParamRT<s16> mReadRotSp;
     };
 
     struct TSoundParams : public TParams
@@ -824,7 +824,7 @@ public:
             load("/Mario/Sound.prm");
         }
 
-        TParamT<f32> mStartFallVoiceSpeed;
+        TParamRT<f32> mStartFallVoiceSpeed;
     };
 
     struct TOptionParams : public TParams
@@ -837,9 +837,9 @@ public:
             load("/Mario/Option.prm");
         }
 
-        TParamT<f32> mZ;
-        TParamT<f32> mXMin;
-        TParamT<f32> mXMax;
+        TParamRT<f32> mZ;
+        TParamRT<f32> mXMin;
+        TParamRT<f32> mXMax;
     };
 
     enum State

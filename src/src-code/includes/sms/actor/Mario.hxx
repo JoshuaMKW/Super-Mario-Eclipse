@@ -625,7 +625,34 @@ public:
 
     struct TDirtyParams : public TParams
     {
-        TDirtyParams();
+        TDirtyParams()
+            : mIncRunning(0.1f, "mIncRunning"),
+              mIncCatching(0.3f, "mIncCatching"),
+              mIncSlipping(0.2f, "mIncSlipping"),
+              mDecSwimming(0.5f, "mDecSwimming"),
+              mDecWaterHit(0.2f, "mDecWaterHit"),
+              mDecRotJump(0.1f, "mDecRotJump"),
+              mBrakeStartValSlip(0.99f, "mBrakeStartValSlip"),
+              mBrakeStartValRun(0.98f, "mBrakeStartValRun"),
+              mDirtyTimeSlip(600, "mDirtyTimeSlip"),
+              mDirtyTimeRun(600, "mDirtyTimeRun"),
+              mPolSizeSlip(200.0f, "mPolSizeSlip"),
+              mPolSizeRun(80.0f, "mPolSizeRun"),
+              mPolSizeFootPrint(200.0f, "mPolSizeFootPrint"),
+              mPolSizeJump(200.0f, "mPolSizeJump"),
+              mSlopeAngle(0.99f, "mSlopeAngle"),
+              mDirtyMax(200.0f, "mDirtyMax"),
+              mSlipAnmSpeed(3.0f, "mSlipAnmSpeed"),
+              mSlipRunSp(0.01f, "mSlipRunSp"),
+              mSlipCatchSp(0.01f, "mSlipCatchSp"),
+              mSlipRotate(100, "mSlipRotate"),
+              mSlipCatchRotate(100, "mSlipCatchRotate"),
+              mBrakeSlipNoPollute(0.98f, "mBrakeSlipNoPollute"),
+              mFogTimeYellow(240, "mFogTimeYellow"),
+              mFogTimeRed(600, "mFogTimeRed")
+              {
+            load("/Mario/Dirty.prm");
+        }
 
         TParamRT<f32> mIncRunning;
         TParamRT<f32> mIncCatching;

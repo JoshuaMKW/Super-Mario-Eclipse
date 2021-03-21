@@ -57,6 +57,15 @@ extern u32 *createGlobalHeaps(u32 *newHeap, u32 size, u32 *rootHeap, u32 unk_1);
 extern u32 setupMarioDatas(char *filepath);
 extern u32 *initFirstModel(char *path, u32 unk_1, u32 unk_2, u32 unk_3, JKRHeap *heap, u32 unk_4, u32 unk_5, u32 unk_6);
 extern u32 *initFileMods();
+extern void initShineShadow();
+extern void initSoundBank(u8 areaID, u8 episodeID);
+extern void initMusicTrack();
+extern TMario *fromMarioInit(TMario *player);
+extern bool fromShadowMarioInit();
+extern void initYoshi(void *anmSound, void *r4, u32 r5, f32 f1);
+extern void initCardColors();
+extern u32 initCollisionWarpLinks(char *name, u32 *dest);
+extern void createUIHeap(u32 size, s32 alignment);
 
 // mario.cpp
 #include "sms/npc/BaseNPC.hxx"
@@ -207,6 +216,24 @@ KURIBO_MODULE_BEGIN("Eclipse", "JoshuaMK", __VERSION__ "[" STRINGIZE(SME_MAX_SHI
     KURIBO_PATCH_BL(0x8026C018, spamHoverWrapper);
     KURIBO_PATCH_BL(0x80262580, checkAirNozzle);
     kWrite32(0x80262584, 0x2C030000);
+
+    // init_mods.cpp
+    KURIBO_PATCH_BL(0x80005328, &initCodeProtection);
+    KURIBO_PATCH_BL(0x802A750C, &createGlobalHeaps);
+    KURIBO_PATCH_BL(0x802A7140, &setupMarioDatas);
+    KURIBO_PATCH_BL(0x802A716C, &initFirstModel);
+    KURIBO_PATCH_BL(0x802998B4, &initFileMods);
+    KURIBO_PATCH_BL(0x80280180, &initShineShadow);
+    KURIBO_PATCH_BL(0x802B7A4C, &initSoundBank);
+    KURIBO_PATCH_BL(0x802983F0, &initMusicTrack);
+    KURIBO_PATCH_BL(0x80298420, &initMusicTrack);
+    kWrite32(0x80276C90, 0x60000000);
+    KURIBO_PATCH_BL(0x80276C94, &fromMarioInit);
+    KURIBO_PATCH_BL(0x800397DC, &fromShadowMarioInit);
+    KURIBO_PATCH_BL(0x80271580, &initYoshi);
+    KURIBO_PATCH_BL(0x8029CCB0, &initCardColors);
+    KURIBO_PATCH_BL(0x802B8B20, &initCollisionWarpLinks);
+    KURIBO_PATCH_BL(0x802B57E4, &createUIHeap);
 
     // mario.cpp
     KURIBO_PATCH_BL(0x802320E0, shadowCrashPatch);

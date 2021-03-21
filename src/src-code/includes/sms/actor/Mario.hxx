@@ -760,7 +760,7 @@ public:
               mFeelDeepHeadAngle(8192, "mFeelDeepHeadAngle"),
               mFrontWallHeadAngle(-8192, "mFrontWallHeadAngle")
         {
-            load("/Mario/DmgEnemyCommon.prm");
+            load("/Mario/UpperBody.prm");
         }
 
         TParamT<s16> mPumpWaitTime;
@@ -770,7 +770,80 @@ public:
         TParamT<s16> mFrontWallHeadAngle;
     };
 
-    enum State {
+    struct TDmgEnemyParams : public TParams
+    {
+        TDmgEnemyParams(const char *prm)
+            : mDamage(1, "mDamage"),
+              mDownType(1, "mDownType"),
+              mWaterEmit(0, "mWaterEmit"),
+              mMotor(25, "mMotor"),
+              mMinSpeed(16.0f, "mMinSpeed"),
+              mDirty(0.0f, "mDirty"),
+              mInvincibleTime(300, "mInvincibleTime")
+        {
+            load(prm);
+        }
+
+        TParamT<u8> mDamage;
+        TParamT<u8> mDownType;
+        TParamT<u8> mWaterEmit;
+        TParamT<u8> mMotor;
+        TParamT<f32> mMinSpeed;
+        TParamT<f32> mDirty;
+        TParamT<s16> mInvincibleTime;
+    };
+
+    struct TDemoParams : public TParams
+    {
+        TDemoParams()
+            : mWarpInBallsDispTime(6, "mWarpInBallsDispTime"),
+              mWarpInBallsTime(70, "mWarpInBallsTime"),
+              mWarpInCapturedTime(120, "mWarpInCapturedTime"),
+              mWarpInTremble(15.0f, "mWarpInTremble"),
+              mWarpInVecBase(0.3f, "mWarpInVecBase"),
+              mWarpTransTremble(50.0f, "mWarpTransTremble"),
+              mReadRotSp(1024, "mReadRotSp")
+        {
+            load("/Mario/AutoDemo.prm");
+        }
+
+        TParamT<s16> mWarpInBallsDispTime;
+        TParamT<s16> mWarpInBallsTime;
+        TParamT<s16> mWarpInCapturedTime;
+        TParamT<f32> mWarpInTremble;
+        TParamT<f32> mWarpInVecBase;
+        TParamT<f32> mWarpTransTremble;
+        TParamT<s16> mReadRotSp;
+    };
+
+    struct TSoundParams : public TParams
+    {
+        TSoundParams()
+            : mStartFallVoiceSpeed(60.0f, "mStartFallVoiceSpeed")
+        {
+            load("/Mario/Sound.prm");
+        }
+
+        TParamT<f32> mStartFallVoiceSpeed;
+    };
+
+    struct TOptionParams : public TParams
+    {
+        TOptionParams()
+            : mZ(-1000.0f, "mZ"),
+              mXMin(846.0f, "mXMin"),
+              mXMax(2000.0f, "mXMax")
+        {
+            load("/Mario/Option.prm");
+        }
+
+        TParamT<f32> mZ;
+        TParamT<f32> mXMin;
+        TParamT<f32> mXMax;
+    };
+
+    enum State
+    {
         NUMBER = 0x0000000F,
         DOJUMP = 0x00000080,
         AIRBORN = 0x00000800,
@@ -895,21 +968,21 @@ public:
         WATER_RIPPLE = 0x30
     };
 
-    u32 mActionState;                      //0x0074
-    u32 mJumpingState;                     //0x0078
-    u32 mState;                            //0x007C
-    u32 mPrevState;                        //0x0080
-    u16 mSubState;                         //0x0084
-    u16 mSubStateTimer;                    //0x0086
+    u32 mActionState;   //0x0074
+    u32 mJumpingState;  //0x0078
+    u32 mState;         //0x007C
+    u32 mPrevState;     //0x0080
+    u16 mSubState;      //0x0084
+    u16 mSubStateTimer; //0x0086
     u32 _88;
-    f32 mBaseAcceleration;                 //0x008C
-    u16 mAccelerationDirection;            //0x0090
-    u16 _92; // padding?
-    JGeometry::TVec3<u16> mAngle;          //0x0094
+    f32 mBaseAcceleration;        //0x008C
+    u16 mAccelerationDirection;   //0x0090
+    u16 _92;                      // padding?
+    JGeometry::TVec3<u16> mAngle; //0x0094
     JGeometry::TVec3<u16> _9A;
     u16 _A0;
-    JGeometry::TVec3<f32> mSpeed;          //0x00A4
-    f32 mForwardSpeed;                     //0x00B0
+    JGeometry::TVec3<f32> mSpeed; //0x00A4
+    f32 mForwardSpeed;            //0x00B0
     f32 _B4;
     f32 _B8;
     f32 _BC;
@@ -920,13 +993,13 @@ public:
     f32 _D0;
     u8 _D4;
     u8 _D5;
-    TBGCheckData *mWallTriangle;           //0x00D8
-    TBGCheckData *mRoofTriangle;           //0x00DC
-    TBGCheckData *mFloorTriangle;          //0x00E0
-    TBGCheckData *mFloorTriangleCopy;      //0x00E4
-    f32 mCeilingAbove;                     //0x00E8
-    f32 mFloorBelow;                       //0x00EC
-    f32 mWaterHeight;                      //0x00F0
+    TBGCheckData *mWallTriangle;      //0x00D8
+    TBGCheckData *mRoofTriangle;      //0x00DC
+    TBGCheckData *mFloorTriangle;     //0x00E0
+    TBGCheckData *mFloorTriangleCopy; //0x00E4
+    f32 mCeilingAbove;                //0x00E8
+    f32 mFloorBelow;                  //0x00EC
+    f32 mWaterHeight;                 //0x00F0
     u16 _F4;
     u16 _F6;
     u16 _F8;
@@ -936,9 +1009,9 @@ public:
     u16 _100;
     f32 _104;
     TMarioControllerWork *mControllerWork; //0x0108
-    u32 _10C; //unknown
-    u32 _110; //unknown
-    u32 _114; //unknown
+    u32 _10C;                              //unknown
+    u32 _110;                              //unknown
+    u32 _114;                              //unknown
 
     struct
     {
@@ -984,17 +1057,17 @@ public:
         u32 _00 : 1;
     } mPrevAttributes; //0x011C
 
-    u16 mHealth;                                 //0x0120
-    u16 _122;                                     //0x0122
+    u16 mHealth; //0x0120
+    u16 _122;    //0x0122
     u16 _124;
     u16 _126;
     u16 _128;
-    f32 mWaterHealth;                            //0x012C
-    f32 mMaxWaterHealth;                         //0x0130
-    u32 _134; // unknown
-    u32 _138; // unknown
-    u32 _13C; // unknown
-    u32 _140; // unknown
+    f32 mWaterHealth;    //0x012C
+    f32 mMaxWaterHealth; //0x0130
+    u32 _134;            // unknown
+    u32 _138;            // unknown
+    u32 _13C;            // unknown
+    u32 _140;            // unknown
     u32 _144;
     u32 _148;
     u16 _14C;
@@ -1002,7 +1075,7 @@ public:
     u32 _150; // unknown
     u32 _154;
     u32 _158;
-    f32 mCollisionXZSize;                        //0x015C
+    f32 mCollisionXZSize; //0x015C
     f32 _160;
     f32 _164;
     f32 _168;
@@ -1033,12 +1106,12 @@ public:
     Mtx _250;
     JGeometry::TVec3<f32> mLastPosition; //?       0x0280
     JGeometry::TVec3<f32> mLastRotation; //?       0x028C
-    u32 mInitialWater;                           //0x0298
+    u32 mInitialWater;                   //0x0298
     JGeometry::TVec3<f32> _29C;
-    JGeometry::TVec3<f32> mLastGroundedPos;      //0x02A8
+    JGeometry::TVec3<f32> mLastGroundedPos; //0x02A8
     u32 _2B4;
     u16 _2B8;
-    u16 mOBTimer;                                //0x02BA
+    u16 mOBTimer; //0x02BA
     f32 _2BC;
     u32 _2C0;
     Mtx _2C4;
@@ -1071,41 +1144,41 @@ public:
     u16 _37C; // padding?
     u16 _37E;
     u32 _380;
-    TTakeActor *mGrabTarget;                     //0x0384
+    TTakeActor *mGrabTarget; //0x0384
     u8 _388;
-    u8 mSurfGessoID;                             //0x0389
-    f32 mHolderHeightDiff;                       //0x038C
+    u8 mSurfGessoID;       //0x0389
+    f32 mHolderHeightDiff; //0x038C
     u32 _390;
-    J3DDrawBuffer *mDrawBufferA;                 //0x0394
-    J3DDrawBuffer *mDrawBufferB;                 //0x0398
+    J3DDrawBuffer *mDrawBufferA; //0x0394
+    J3DDrawBuffer *mDrawBufferB; //0x0398
     u32 _39C;
     u32 _3A0;
-    u32 _3A4; // unknown
-    M3UModelMario *mModelData;                   //0x03A8
-    u32 _3AC; // unknown
+    u32 _3A4;                  // unknown
+    M3UModelMario *mModelData; //0x03A8
+    u32 _3AC;                  // unknown
     u32 _3B0;
     u32 _3B4;
     u32 _3B8;
     u32 _3BC;
-    u32 _3C0; // unknown
-    u8 _3C4; // padding?
-    u8 mBindBoneIDArray[12];                     //0x03C5
-    u8 _3D1; // padding?
-    u8 _3D2; // padding?
-    u8 _3D3; // padding?
+    u32 _3C0;                // unknown
+    u8 _3C4;                 // padding?
+    u8 mBindBoneIDArray[12]; //0x03C5
+    u8 _3D1;                 // padding?
+    u8 _3D2;                 // padding?
+    u8 _3D3;                 // padding?
     u16 _3D4;
     u16 _3D6;
     f32 _3D8;
     f32 _3DC;
-    TMarioCap *mCap;                             //0x03E0
-    TWaterGun *mFludd;                           //0x03E4
+    TMarioCap *mCap;   //0x03E0
+    TWaterGun *mFludd; //0x03E4
     u32 _3E8;
     f32 _3EC;
-    TYoshi *mYoshi;                              //0x03F0
-    void *mSurfGesso;                            //0x03F4
+    TYoshi *mYoshi;   //0x03F0
+    void *mSurfGesso; //0x03F4
     void *_3F8;
     void *_3FC;
-    MarioParams *mCustomInfo;                    //0x0400
+    void *_400; //used before for custom pointer
     f32 _404;
     f32 _408;
     f32 _40C;
@@ -1129,7 +1202,7 @@ public:
     f32 _450;
     f32 _454;
     f32 _458;
-    THitActor _474;                              //0x0474
+    THitActor _474;
     u32 _4DC;
     u32 _4E0;
     u32 _4E4;
@@ -1139,8 +1212,8 @@ public:
     f32 _4F0;
     f32 _4F4;
     f32 _4F8;
-    TMarioGamePad *mController;                  //0x04FC
-    TMarioSoundValues mSoundValues;              //0x0500
+    TMarioGamePad *mController;     //0x04FC
+    TMarioSoundValues mSoundValues; //0x0500
     u32 _530;
     u8 _534;
     u16 _536;
@@ -1164,48 +1237,76 @@ public:
     f32 _568;
     f32 _56C;
     f32 _570;
-    TDeParams mDeParams;                         //0x0574
-    TBodyAngleParams mBodyAngleFreeParams;       //0x09A0
-    TBodyAngleParams mBodyAngleWaterGunParams;   //0x0A20
-    TAttackParams mPunchFenceParams;             //0x0AA0
-    TAttackParams mKickRoofParams;               //0x0AD0
-    TJumpParams mJumpParams;                     //0x0B00
-    TRunParams mRunParams;                       //0x0EA0
-    TSwimParams mSwimParams;                     //0x104C
-    THangFenceParams mHangFenceParams;           //0x1298
-    THangRoofParams mHangRoofParams;             //0x1318
-    TWireParams mWireParams;                     //0x1334
-    TPullParams mPullBGBeakParams;               //0x147C
-    TPullParams mPullBGTentacleParams;           //0x14D4
-    TPullParams mPullBGFireWanWanBossTailParams; //0x152C
-    TPullParams mPullFireWanWanTailParams;       //0x1584
-    TSurfingParams mSurfingWaterRedParams;       //0x1648
-    TSurfingParams mSurfingGroundRedParams;      //0x181C
-    TSurfingParams mSurfingWaterYellowParams;    //0x19F0
-    TSurfingParams mSurfingGroundYellowParams;   //0x1BC4
-    TSurfingParams mSurfingWaterGreenParams;     //0x1D98
-    TSurfingParams mSurfingGroundGreenParams;    //0x1F6C
-    THoverParams mHoverParams;                   //0x2140
-    TDivingParams mDivingParams;                 //0x2184
-    TYoshiParams mYoshiParams;                   //0x21F0
-    TWaterEffectParams mWaterEffectParams;       //0x22AC
-    TControllerParams mControllerParams;         //0x2340
-    TGraffitoParams mGraffitoParams;             //0x2410
-    TDirtyParams mDirtyParams;                   //0x25BC
-    TMotorParams mMotorParams;                   //0x27A4
-    TParticleParams mParticleParams;             //0x27FC
-    TEffectParams mEffectParams;                 //0x28E0
-    TSlipParams mSlipNormalParams;               //0x294C
-    TSlipParams mSlipOilParams;                  //0x2A30
-    TSlipParams mSlipAllParams;                  //0x2B14
-    TSlipParams mSlipAllSliderParams;            //0x2BF8
-    TSlipParams mSlip45Params;                   //0x2CDC
-    TSlipParams mSlipWaterSlopeParams;           //0x2DC0
-    TSlipParams mSlipWaterGroundParams;          //0x2EA4
-    TSlipParams mSlipYoshiParams;                //0x2F88
-    TUpperBodyParams mUpperBodyParams;           //0x30D8
-
-    //todo: dirtyparams, graffitoparams, and misc
-
-    //end = 0x4290
+    TDeParams mDeParams;                            //0x0574
+    TBodyAngleParams mBodyAngleFreeParams;          //0x09A0
+    TBodyAngleParams mBodyAngleWaterGunParams;      //0x0A20
+    TAttackParams mPunchFenceParams;                //0x0AA0
+    TAttackParams mKickRoofParams;                  //0x0AD0
+    TJumpParams mJumpParams;                        //0x0B00
+    TRunParams mRunParams;                          //0x0EA0
+    TSwimParams mSwimParams;                        //0x104C
+    THangFenceParams mHangFenceParams;              //0x1298
+    THangRoofParams mHangRoofParams;                //0x1318
+    TWireParams mWireParams;                        //0x1334
+    TPullParams mPullBGBeakParams;                  //0x147C
+    TPullParams mPullBGTentacleParams;              //0x14D4
+    TPullParams mPullBGFireWanWanBossTailParams;    //0x152C
+    TPullParams mPullFireWanWanTailParams;          //0x1584
+    TSurfingParams mSurfingWaterRedParams;          //0x1648
+    TSurfingParams mSurfingGroundRedParams;         //0x181C
+    TSurfingParams mSurfingWaterYellowParams;       //0x19F0
+    TSurfingParams mSurfingGroundYellowParams;      //0x1BC4
+    TSurfingParams mSurfingWaterGreenParams;        //0x1D98
+    TSurfingParams mSurfingGroundGreenParams;       //0x1F6C
+    THoverParams mHoverParams;                      //0x2140
+    TDivingParams mDivingParams;                    //0x2184
+    TYoshiParams mYoshiParams;                      //0x21F0
+    TWaterEffectParams mWaterEffectParams;          //0x22AC
+    TControllerParams mControllerParams;            //0x2340
+    TGraffitoParams mGraffitoParams;                //0x2410
+    TDirtyParams mDirtyParams;                      //0x25BC
+    TMotorParams mMotorParams;                      //0x27A4
+    TParticleParams mParticleParams;                //0x27FC
+    TEffectParams mEffectParams;                    //0x28E0
+    TSlipParams mSlipNormalParams;                  //0x294C
+    TSlipParams mSlipOilParams;                     //0x2A30
+    TSlipParams mSlipAllParams;                     //0x2B14
+    TSlipParams mSlipAllSliderParams;               //0x2BF8
+    TSlipParams mSlip45Params;                      //0x2CDC
+    TSlipParams mSlipWaterSlopeParams;              //0x2DC0
+    TSlipParams mSlipWaterGroundParams;             //0x2EA4
+    TSlipParams mSlipYoshiParams;                   //0x2F88
+    TUpperBodyParams mUpperBodyParams;              //0x306C
+    TDmgEnemyParams mDmgEnemyCommonParams;          //0x30D8
+    TDmgEnemyParams mDmgHamukuriParams;             //0x316C
+    TDmgEnemyParams mDmgNamekuriParams;             //0x3200
+    TDmgEnemyParams mDmgHinokuriParams;             //0x3294
+    TDmgEnemyParams mDmgFireParams;                 //0x3328
+    TDmgEnemyParams mDmgBGTentacleParams;           //0x33BC
+    TDmgEnemyParams mDmgBossEelParams;              //0x3450
+    TDmgEnemyParams mDmgHanachanBossParams;         //0x34E4
+    TDmgEnemyParams mDmgPoihanaParams;              //0x3578
+    TDmgEnemyParams mDmgKillerParams;               //0x360C
+    TDmgEnemyParams mDmgLampTrapIronParams;         //0x36A0
+    TDmgEnemyParams mDmgLampTrapSpikeParams;        //0x3734
+    TDmgEnemyParams mDmgEnemyMarioParams;           //0x37C8
+    TDmgEnemyParams mDmgCannotBreathParams;         //0x385C
+    TDmgEnemyParams mDmgGraffitoFireParams;         //0x38F0
+    TDmgEnemyParams mDmgGraffitoPoisonParams;       //0x3984
+    TDmgEnemyParams mDmgGraffitoElecParams;         //0x3A18
+    TDmgEnemyParams mDmgGraffitoLavaParams;         //0x3AAC
+    TDmgEnemyParams mDmgGraffitoWaterSurfaceParams; //0x3B40
+    TDmgEnemyParams mDmgMapCode0Params;             //0x3BD4
+    TDmgEnemyParams mDmgMapCode1Params;             //0x3C68
+    TDmgEnemyParams mDmgMapCode2Params;             //0x3CFC
+    TDmgEnemyParams mDmgMapCode3Params;             //0x3D90
+    TDmgEnemyParams mDmgMapCode4Params;             //0x3E24
+    TDmgEnemyParams mDmgMapCode5Params;             //0x3EB8
+    TDmgEnemyParams mDmgMapCode6Params;             //0x3F4C
+    TDmgEnemyParams mDmgMapCode7Params;             //0x3FE0
+    TDmgEnemyParams mDmgMapCode8Params;             //0x4074
+    TDmgEnemyParams mDmgMapCode9Params;             //0x4108
+    TDemoParams mDemoParams;                        //0x419C
+    TSoundParams mSoundParams;                      //0x4230
+    TOptionParams mOptionParams;                    //0x424C
 };

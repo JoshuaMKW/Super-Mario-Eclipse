@@ -17,5 +17,5 @@ public:
 	virtual s32 seekPos(s32, JSUStreamSeekFrom) override;
 
     JKRDvdFile *mJKRDvdFile;
-	u32 mPosition; // _C
+	u32 mPosition;
 };

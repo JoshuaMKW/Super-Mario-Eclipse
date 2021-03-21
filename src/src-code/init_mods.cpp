@@ -28,7 +28,6 @@ void initCodeProtection()
     gCodeProtector.setPermission(Memory::Protection::READ);
     gCodeProtector.activate();
 }
-kmCall(0x80005328, &initCodeProtection);
 
 // 0x802A750C
 // extern -> SME.cpp
@@ -39,7 +38,6 @@ u32 *createGlobalHeaps(u32 *newHeap, u32 size, u32 *rootHeap, u32 unk_1)
     u32 *gameHeap = (u32 *)create__10JKRExpHeapFPvUlP7JKRHeapb(newHeap, size - 0x200000, rootHeap, unk_1);
     return (u32 *)gameHeap;
 }
-kmCall(0x802A750C, &createGlobalHeaps);
 
 // 0x802A7140
 // extern -> SME.cpp
@@ -69,7 +67,6 @@ u32 setupMarioDatas(char *filepath)
     sprintf(filepath, "/data/chr%d.szs", id);
     return DVDConvertPathToEntrynum(filepath);
 }
-kmCall(0x802A7140, &setupMarioDatas);
 
 // 0x802A716C
 // extern -> SME.cpp
@@ -89,7 +86,6 @@ u32 *initFirstModel(char *path, u32 unk_1, u32 unk_2, u32 unk_3, JKRHeap *heap, 
         
     return file;
 }
-kmCall(0x802A716C, &initFirstModel);
 
 void resetGlobalValues()
 {
@@ -211,7 +207,6 @@ u32 *initFileMods()
 
     return objList;
 }
-kmCall(0x802998B4, &initFileMods);
 
 //0x80280180
 void initShineShadow()
@@ -250,7 +245,6 @@ void initShineShadow()
         gInfo.Light.mLightType = 0;
     }
 }
-kmBranch(0x80280180, &initShineShadow);
 
 //0x802B7A4C
 void initSoundBank(u8 areaID, u8 episodeID)
@@ -279,8 +273,6 @@ void initMusicTrack()
     }
     startStageBGM__10MSMainProcFUcUc();
 }
-kmCall(0x802983F0, &initMusicTrack);
-kmCall(0x80298420, &initMusicTrack);
 
 void initFludd(TMario *player)
 {
@@ -387,8 +379,6 @@ TMario *fromMarioInit(TMario *player)
     initMario(player, true);
     return player;
 }
-kmWrite32(0x80276C90, 0x60000000);
-kmCall(0x80276C94, &fromMarioInit);
 
 //0x800397DC
 bool fromShadowMarioInit()
@@ -398,7 +388,6 @@ bool fromShadowMarioInit()
     initMario(player, false);
     return SMS_isMultiPlayerMap__Fv();
 }
-kmCall(0x800397DC, &fromShadowMarioInit);
 
 
 //0x80271580
@@ -426,7 +415,6 @@ void initYoshi(void *anmSound, void *r4, u32 r5, f32 f1)
     yoshi->mFlutterAcceleration = SMEFile::mStageConfig.Yoshi.mFlutterAcceleration;
     yoshi->mMaxFlutterTimer = SMEFile::mStageConfig.Yoshi.mMaxFlutterTimer;
 }
-kmCall(0x80271580, &initYoshi);
 
 //0x8029CCB0
 void initCardColors()
@@ -447,7 +435,6 @@ void initCardColors()
         gpMarDirector->mGCConsole->mWaterRightPanel.A = lerp<u8>(0, SMEFile::mStageConfig.Fludd.mWaterColor.A, 0.8125);
     }
 }
-kmBranch(0x8029CCB0, &initCardColors);
 
 /*This works by taking the target id and matching it to the
 / ID of the first entry to have the same home ID as the target.
@@ -492,7 +479,6 @@ u32 initCollisionWarpLinks(char *name, u32 *dest)
 
     return calcKeyCode__Q26JDrama8TNameRefFPCc(name, dest);
 }
-kmCall(0x802B8B20, &initCollisionWarpLinks);
 
 //0x802B57E4
 void createUIHeap(u32 size, s32 alignment)
@@ -500,7 +486,6 @@ void createUIHeap(u32 size, s32 alignment)
     gInfo.mGame6Heap = (JKRHeap *)__nw__FUlP7JKRHeapi(size, JKRHeap::sSystemHeap, 32);
     gpMarDirector->mGame6Data = (u32 *)__nw__FUli(size, alignment);
 }
-kmCall(0x802B57E4, &createUIHeap);
 
 //0x802A72A4
 u32 initHUDElements(char *filepath)
@@ -560,53 +545,3 @@ JKRHeap *useCustomHUDHeap(u32 size, s32 alignment)
 {
     return gInfo.mGame6Heap;
 }
-//kmCall(0x802B57E4, &useCustomHUDHeap);
-
-
-/* PATCHES */
-
-//Restore Chao Seed
-kmWrite32(0x802FD1A0, 0x808D8C70);
-
-//Show Exception Handler
-kmWrite32(0x8029D0BC, 0x60000000);
-
-#ifdef SME_DEBUG
-//Skip FMVs
-kmWrite32(0x802B5E8C, 0x38600001);
-kmWrite32(0x802B5EF4, 0x38600001);
-#endif
-
-#ifdef SME_DEBUG
-//Level Select
-kmWrite32(0x802A6788, 0x3BC00009);
-#endif
-
-//Fix Infinte Flutter
-kmWrite32(0x8028113C, 0xC002F824);
-
-//Remove Dive While Wall Sliding
-kmWrite32(0x8024BC10, 0x48000068);
-
-//Flood Till Corona Beat
-kmWrite32(0x8029961C, 0x38840077);
-
-//Map on D Pad down
-kmWrite32(0x8017A830, 0x5400077B);
-kmWrite32(0x80297A60, 0x5400077B);
-
-//Hover move on roofs
-kmWrite32(0x802569BC, 0xC02300B0);
-
-//Global surfing bloopies
-kmWrite32(0x801B74F8, 0x60000000);
-kmWrite32(0x801B74FC, 0x60000000);
-kmWrite32(0x801B7500, 0x60000000);
-kmWrite32(0x801B7504, 0x60000000);
-kmWrite32(0x801B7508, 0x60000000);
-kmWrite32(0x801B750C, 0x60000000);
-kmWrite32(0x801B7510, 0x387E0780);
-kmWrite32(0x801B7514, 0x4810BA9D);
-kmWrite32(0x801B7518, 0x28030000);
-kmWrite32(0x801B751C, 0x418200A4);
-

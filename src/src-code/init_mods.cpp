@@ -28,18 +28,16 @@ void initCodeProtection()
     gCodeProtector.setPermission(Memory::Protection::READ);
     gCodeProtector.activate();
 }
-kmCall(0x80005328, &initCodeProtection);
 
 // 0x802A750C
 // extern -> SME.cpp
-u32 *createGlobalHeaps(u32 *newHeap, u32 size, u32 *rootHeap, u32 unk_1)
+JKRExpHeap *createGlobalHeaps(void *newHeap, size_t size, JKRHeap *rootHeap, bool unk_1)
 {
-    gInfo.mCharacterHeap = (JKRHeap *)create__10JKRExpHeapFUlP7JKRHeapb(0x200000, JKRHeap::sRootHeap, false);
-    gInfo.mGlobalsHeap = (JKRHeap *)create__10JKRExpHeapFUlP7JKRHeapb(0x10000, JKRHeap::sRootHeap, false);
-    u32 *gameHeap = (u32 *)create__10JKRExpHeapFPvUlP7JKRHeapb(newHeap, size - 0x200000, rootHeap, unk_1);
-    return (u32 *)gameHeap;
+    gInfo.mCharacterHeap = JKRExpHeap::create(0x200000, JKRHeap::sRootHeap, false);
+    gInfo.mGlobalsHeap = JKRExpHeap::create(0x10000, JKRHeap::sRootHeap, false);
+    auto *gameHeap = JKRExpHeap::create(newHeap, size - 0x200000, rootHeap, unk_1);
+    return gameHeap;
 }
-kmCall(0x802A750C, &createGlobalHeaps);
 
 // 0x802A7140
 // extern -> SME.cpp
@@ -69,7 +67,6 @@ u32 setupMarioDatas(char *filepath)
     sprintf(filepath, "/data/chr%d.szs", id);
     return DVDConvertPathToEntrynum(filepath);
 }
-kmCall(0x802A7140, &setupMarioDatas);
 
 // 0x802A716C
 // extern -> SME.cpp
@@ -89,7 +86,6 @@ u32 *initFirstModel(char *path, u32 unk_1, u32 unk_2, u32 unk_3, JKRHeap *heap, 
         
     return file;
 }
-kmCall(0x802A716C, &initFirstModel);
 
 void resetGlobalValues()
 {
@@ -165,7 +161,7 @@ u32 *initFileMods()
         
         gInfo.mCharacterHeap->freeAll();
 
-        u32 *marioData = SME::loadArchive(buffer, gInfo.mCharacterHeap);
+        u32 *marioData = reinterpret_cast<u32 *>(SME::loadArchive(buffer, gInfo.mCharacterHeap));
         *(u32 *)gpArcBufferMario = (u32)marioData;
 
         gInfo.mCharacterHeap->alloc((0x1F0000 - marioData[1]) & -32, 32);
@@ -205,13 +201,10 @@ u32 *initFileMods()
 
         oldParams->unmountFixed();
         oldParams->mountFixed(gInfo.mPRMFile, JKRMemBreakFlag::UNK_0);
-        //unmountFixed__13JKRMemArchiveFv(oldParams);
-        //mountFixed__13JKRMemArchiveFPv15JKRMemBreakFlag(oldParams, gInfo.mPRMFile, 0);
     }
 
     return objList;
 }
-kmCall(0x802998B4, &initFileMods);
 
 //0x80280180
 void initShineShadow()
@@ -233,7 +226,7 @@ void initShineShadow()
         gpModelWaterManager->LightType.mMaskObjects = true;
         gpModelWaterManager->LightType.mShowShadow = true;
 
-        if (SMEFile::mStageConfig.GlobalFlags.mShineShadowFlag == 1)
+        if (SMEFile::mStageConfig.GlobalFlags.mShineShadowFlag == LightContext::FOLLOWPLAYER)
         {
             gInfo.Light.mNextSize = SMEFile::mStageConfig.Light.mSize;
             for (u32 i = 0; i < TFlagManager::smInstance->Type4Flag.mShineCount; ++i)
@@ -247,10 +240,9 @@ void initShineShadow()
     }
     else
     {
-        gInfo.Light.mLightType = 0;
+        gInfo.Light.mLightType = LightContext::DISABLED;
     }
 }
-kmBranch(0x80280180, &initShineShadow);
 
 //0x802B7A4C
 void initSoundBank(u8 areaID, u8 episodeID)
@@ -264,7 +256,6 @@ void initSoundBank(u8 areaID, u8 episodeID)
         setMSoundEnterStage__10MSMainProcFUcUc(SMEFile::mStageConfig.Music.mAreaID, SMEFile::mStageConfig.Music.mEpisodeID);
     }
 }
-kmCall(0x802B7A4C, &initSoundBank);
 
 //0x802983F0
 //0x80298420
@@ -279,8 +270,6 @@ void initMusicTrack()
     }
     startStageBGM__10MSMainProcFUcUc();
 }
-kmCall(0x802983F0, &initMusicTrack);
-kmCall(0x80298420, &initMusicTrack);
 
 void initFludd(TMario *player)
 {
@@ -348,15 +337,15 @@ void initMario(TMario *player, bool isMario)
         player->mCustomInfo->mPlayerID = SMEFile::mStageConfig.GlobalFlags.mPlayerID;
         gInfo.PlayerData.mCurPlayerID[0] = SMEFile::mStageConfig.GlobalFlags.mPlayerID;
 
-        player->mGravity = SMEFile::mStageConfig.Mario.mGravity;
-        player->mBaseBounceSpeed1 = SMEFile::mStageConfig.Mario.mBaseBounce1;
-        player->mBaseBounceSpeed2 = SMEFile::mStageConfig.Mario.mBaseBounce2;
-        player->mBaseBounceSpeed3 = SMEFile::mStageConfig.Mario.mBaseBounce3;
-        player->mMaxFallNoDamage = SMEFile::mStageConfig.Mario.mMaxFallNoDamage;
+        player->mJumpParams.mGravity = SMEFile::mStageConfig.Mario.mGravity;
+        player->mDeParams.mTramplePowStep1 = SMEFile::mStageConfig.Mario.mBaseBounce1;
+        player->mDeParams.mTramplePowStep2 = SMEFile::mStageConfig.Mario.mBaseBounce2;
+        player->mDeParams.mTramplePowStep3 = SMEFile::mStageConfig.Mario.mBaseBounce3;
+        player->mDeParams.mDamageFallHeight = SMEFile::mStageConfig.Mario.mMaxFallNoDamage;
         player->mHealth = SMEFile::mStageConfig.Mario.mHealth;
-        player->mMaxHealth = SMEFile::mStageConfig.Mario.mMaxHealth;
-        player->mOBStep = SMEFile::mStageConfig.Mario.mOBStep;
-        player->mOBMax = SMEFile::mStageConfig.Mario.mOBMax;
+        player->mDeParams.mHPMax = SMEFile::mStageConfig.Mario.mMaxHealth;
+        player->mDeParams.mIllegalPlaneCtInc = SMEFile::mStageConfig.Mario.mOBStep;
+        player->mDeParams.mIllegalPlaneTime = SMEFile::mStageConfig.Mario.mOBMax;
 
         player->mAttributes.mGainHelmet = SMEFile::mStageConfig.GlobalFlags.MarioStates.mMarioHasHelmet;
         player->mAttributes.mHasFludd = SMEFile::mStageConfig.GlobalFlags.MarioStates.mMarioHasFludd;
@@ -381,14 +370,12 @@ void initMario(TMario *player, bool isMario)
 TMario *fromMarioInit(TMario *player)
 {
     TMario *(*virtualFunc)(TMario *);
-    asm volatile ( "mr %0, r12" : "=r"(virtualFunc));
+    SME_FROM_GPR(r12, virtualFunc);
 
     virtualFunc(player); // call vtable func
     initMario(player, true);
     return player;
 }
-kmWrite32(0x80276C90, 0x60000000);
-kmCall(0x80276C94, &fromMarioInit);
 
 //0x800397DC
 bool fromShadowMarioInit()
@@ -398,7 +385,6 @@ bool fromShadowMarioInit()
     initMario(player, false);
     return SMS_isMultiPlayerMap__Fv();
 }
-kmCall(0x800397DC, &fromShadowMarioInit);
 
 
 //0x80271580
@@ -426,7 +412,6 @@ void initYoshi(void *anmSound, void *r4, u32 r5, f32 f1)
     yoshi->mFlutterAcceleration = SMEFile::mStageConfig.Yoshi.mFlutterAcceleration;
     yoshi->mMaxFlutterTimer = SMEFile::mStageConfig.Yoshi.mMaxFlutterTimer;
 }
-kmCall(0x80271580, &initYoshi);
 
 //0x8029CCB0
 void initCardColors()
@@ -447,7 +432,6 @@ void initCardColors()
         gpMarDirector->mGCConsole->mWaterRightPanel.A = lerp<u8>(0, SMEFile::mStageConfig.Fludd.mWaterColor.A, 0.8125);
     }
 }
-kmBranch(0x8029CCB0, &initCardColors);
 
 /*This works by taking the target id and matching it to the
 / ID of the first entry to have the same home ID as the target.
@@ -477,7 +461,7 @@ static void parseWarpLinks(TMapCollisionData *col, WarpCollisionList *links, u32
 }
 
 //0x802B8B20
-u32 initCollisionWarpLinks(char *name, u32 *dest)
+u32 initCollisionWarpLinks(const char *name)
 {
     WarpCollisionList *warpDataArray = (WarpCollisionList *)Memory::malloc(sizeof(WarpCollisionList), 32);
     WarpCollisionList *warpDataPreserveArray = (WarpCollisionList *)Memory::malloc(sizeof(WarpCollisionList), 32);
@@ -490,17 +474,15 @@ u32 initCollisionWarpLinks(char *name, u32 *dest)
         parseWarpLinks(gpMapCollisionData, warpDataPreserveArray, 16041, 1);
     }
 
-    return calcKeyCode__Q26JDrama8TNameRefFPCc(name, dest);
+    return JDrama::TNameRef::calcKeyCode(name);
 }
-kmCall(0x802B8B20, &initCollisionWarpLinks);
 
 //0x802B57E4
 void createUIHeap(u32 size, s32 alignment)
 {
-    gInfo.mGame6Heap = (JKRHeap *)__nw__FUlP7JKRHeapi(size, JKRHeap::sSystemHeap, 32);
-    gpMarDirector->mGame6Data = (u32 *)__nw__FUli(size, alignment);
+    gInfo.mGame6Heap = JKRExpHeap::create(size, JKRHeap::sSystemHeap, false);
+    gpMarDirector->mGame6Data = (u32 *)Memory::malloc(size, alignment);
 }
-kmCall(0x802B57E4, &createUIHeap);
 
 //0x802A72A4
 u32 initHUDElements(char *filepath)
@@ -512,28 +494,24 @@ u32 initHUDElements(char *filepath)
     entrynum = DVDConvertPathToEntrynum(buffer);
 
     if (entrynum < 0)
-    {
         sprintf(filepath, filepath, 0);
-    }
     else
-    {
         strcpy(filepath, buffer);
-    }
 
     return DVDConvertPathToEntrynum(filepath);
 }
 //kmCall(0x802A72A4, &initHUDElements);
 
-static u32 *switchArchive(char *curArchive, void *newArchive)
+static JKRMemArchive *switchArchive(char *curArchive, void *newArchive)
 {
-    u32 *volume = (u32 *)getVolume__13JKRFileLoaderFPCc(curArchive);
-    unmountFixed__13JKRMemArchiveFv(volume);
-    mountFixed__13JKRMemArchiveFPv15JKRMemBreakFlag(volume, newArchive);
+    auto *volume = reinterpret_cast<JKRMemArchive *>(JKRFileLoader::getVolume(curArchive));
+    volume->unmountFixed();
+    volume->mountFixed(newArchive, JKRMemBreakFlag::UNK_0);
     return volume;
 }
 
 //0x80172440
-u32 *switchHUDOnStageLoad(char *curArchive, u32 *gameUI)
+JKRMemArchive *switchHUDOnStageLoad(char *curArchive, u32 *gameUI)
 {
     char buffer[32];
 
@@ -561,52 +539,3 @@ JKRHeap *useCustomHUDHeap(u32 size, s32 alignment)
     return gInfo.mGame6Heap;
 }
 //kmCall(0x802B57E4, &useCustomHUDHeap);
-
-
-/* PATCHES */
-
-//Restore Chao Seed
-kmWrite32(0x802FD1A0, 0x808D8C70);
-
-//Show Exception Handler
-kmWrite32(0x8029D0BC, 0x60000000);
-
-#ifdef SME_DEBUG
-//Skip FMVs
-kmWrite32(0x802B5E8C, 0x38600001);
-kmWrite32(0x802B5EF4, 0x38600001);
-#endif
-
-#ifdef SME_DEBUG
-//Level Select
-kmWrite32(0x802A6788, 0x3BC00009);
-#endif
-
-//Fix Infinte Flutter
-kmWrite32(0x8028113C, 0xC002F824);
-
-//Remove Dive While Wall Sliding
-kmWrite32(0x8024BC10, 0x48000068);
-
-//Flood Till Corona Beat
-kmWrite32(0x8029961C, 0x38840077);
-
-//Map on D Pad down
-kmWrite32(0x8017A830, 0x5400077B);
-kmWrite32(0x80297A60, 0x5400077B);
-
-//Hover move on roofs
-kmWrite32(0x802569BC, 0xC02300B0);
-
-//Global surfing bloopies
-kmWrite32(0x801B74F8, 0x60000000);
-kmWrite32(0x801B74FC, 0x60000000);
-kmWrite32(0x801B7500, 0x60000000);
-kmWrite32(0x801B7504, 0x60000000);
-kmWrite32(0x801B7508, 0x60000000);
-kmWrite32(0x801B750C, 0x60000000);
-kmWrite32(0x801B7510, 0x387E0780);
-kmWrite32(0x801B7514, 0x4810BA9D);
-kmWrite32(0x801B7518, 0x28030000);
-kmWrite32(0x801B751C, 0x418200A4);
-

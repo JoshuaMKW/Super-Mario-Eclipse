@@ -26,13 +26,13 @@ public:
 
     struct
     {
-        bool mIsShineShadow; //0x0010
-        bool mIsMario;       //0x0011
-        bool mIsYoshi;       //0x0012
-        bool mIsMusic;       //0x0013
-        bool mIsFludd;       //0x0014
-        u8 mShineShadowFlag; //0x0015
-        s8 mPlayerID;        //0x0016
+        bool mIsShineShadow;           //0x0010
+        bool mIsMario;                 //0x0011
+        bool mIsYoshi;                 //0x0012
+        bool mIsMusic;                 //0x0013
+        bool mIsFludd;                 //0x0014
+        LightContext mShineShadowFlag; //0x0015
+        s8 mPlayerID;                  //0x0016
 
         struct
         {

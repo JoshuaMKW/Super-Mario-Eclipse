@@ -416,7 +416,7 @@ public:
               mWireSwingBrake(0.99f, "mWireSwingBrake"),
               mWireSwingMax(100.0f, "mWireSwingMax")
         {
-            load("/Mario/HangRoof.prm");
+            load("/Mario/Wire.prm");
         }
 
         TParamRT<s16> mRotSpeed;

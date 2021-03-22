@@ -398,7 +398,26 @@ public:
 
     struct TWireParams : public TParams
     {
-        TWireParams();
+        TWireParams()
+            : mRotSpeed(-8, "mRotSpeed"),
+              mRotSpeedTrgHover(8, "mRotSpeedTrgHover"),
+              mRotSpeedTrgTurbo(1000, "mRotSpeedTrgTurbo"),
+              mRotSpeedTrgRocket(1000, "mRotSpeedTrgRocket"),
+              mRotSpeedMax(1400, "mRotSpeedMax"),
+              mRotStop(100, "mRotStop"),
+              mRotGravity(20, "mRotGravity"),
+              mRotBrake(0.98f, "mRotBrake"),
+              mJumpRate(0.09f, "mJumpRate"),
+              mSwingRate(0.005f, "mSwingRate"),
+              mWireJumpAccelControl(0.01f, "mWireJumpAccelControl"),
+              mWireJumpSlideControl(0.3f, "mWireJumpSlideControl"),
+              mWireJumpMult(5.0f, "mWireJumpMult"),
+              mWireJumpBase(20.0f, "mWireJumpBase"),
+              mWireSwingBrake(0.99f, "mWireSwingBrake"),
+              mWireSwingMax(100.0f, "mWireSwingMax")
+        {
+            load("/Mario/Wire.prm");
+        }
 
         TParamRT<s16> mRotSpeed;
         TParamRT<s16> mRotSpeedTrgHover;

@@ -1,4 +1,3 @@
-#include "types.h"
 
 #include "GlobalSMEDataStruct.hxx"
 #include "CheatHandler.hxx"
@@ -14,8 +13,12 @@
 
 #pragma once
 
+#include "types.h"
 #include "OS.h"
 #include "sms/SMS.hxx"
+#include "sms/JSystem/JGeometry.hxx"
+#include "sms/game/Conductor.hxx"
+#include "sms/sound/MSBGM.hxx"
 
 #ifndef SME_MAX_SHINES
 #define SME_MAX_SHINES 120
@@ -61,4 +64,76 @@ extern GlobalSMEDataStruct gInfo;
 extern TCheatHandler gDebugModeHandler;
 
 SME_EXTERN_C OSBootInfo BootInfo;
+
+namespace SME
+{
+
 inline bool isGameEmulated() { return BootInfo.mConsoleType == OS_CONSOLE_DEV_KIT3; }
+
+namespace Util
+{
+}
+
+namespace Patch
+{
+
+namespace Init
+{
+    //fill out
+}
+
+namespace Music
+{
+u32 setIsValid(MSStageInfo musicID);
+void initMusic();
+void stopMusicOnStop();
+void stopMusicOnStageExit(TMarioGamePad *gamepad);
+}
+
+namespace Shine
+{
+void manageShineVanish(JGeometry::TVec3<f32> *marioPos);
+void isKillEnemiesShine(TConductor *gpConductor, JGeometry::TVec3<f32> *playerCoordinates, f32 range);
+static void restoreMario(TMarDirector *gpMarDirector, u32 curState);
+void checkBootOut(TMarDirector *gpMarDirector, u32 curState);
+u32 extendShineIDLogic(TFlagManager *flagManager, u32 flagID);
+void shineObjectStringMod(JSUInputStream *stream, u8 *dst, u32 size);
+void shineFlagSetter(TFlagManager *flagManager, u32 flag, s32 val);
+u32 shineFlagGetter(TFlagManager *flagManager, u32 flag);
+u32 shineSetClamper(TFlagManager *flagManager, u32 flag);
+u32 shineGetClamper(TFlagManager *flagManager, u32 flag);
+void extendFlagManagerLoad(JSUMemoryInputStream &stream);
+void extendFlagManagerSave(JSUMemoryOutputStream &stream);
+void thinkSetBootFlag(void *shineFader, u32 unk_1, u32 unk_2);
+u32 loadAfterMaskState();
+void setKillState();
+}
+
+namespace Stage
+{
+void setStageOnExit(TGameSequence *gpSequence, s8 stage, s8 episode);
+void startEpisodeSelect(void *selectMenu);
+}
+
+namespace Yoshi
+{
+bool isYoshiDie(TMario *player) { return !player->mYoshi->isGreenYoshi(); }
+bool isYoshiEggNeedFruit(THitActor *gpFruit);
+u8 isYoshiEggFree(TEggYoshi *gpEgg, THitActor *gpFruit);
+bool isYoshiMaintainFluddModel();
+void maybeYoshiDrown(TYoshi *yoshi);
+bool canMountYoshi(u32 state);
+f32 getYoshiYPos_(TYoshi *yoshi);
+void fixYoshiJuiceDecrement();
+void canYoshiSpray(TWaterGun *gpWaterGun);
+u32 calcYoshiSwimVelocity(TMario *player, u32 arg1);
+u32 isYoshiWaterFlutter();
+u32 isYoshiValidWaterFlutter(s32 anmIdx, u32 unk1, TMario *player);
+bool isYoshiValidDrip(TYoshi *yoshi);
+void initFreeEggCard(MActorAnmBck *bckData);
+u32 checkFreeEggCard(MActorAnmBck *bckData);
+void saveNozzles(TYoshi *yoshi);
+void restoreNozzles(TMario *player);
+}
+}
+}

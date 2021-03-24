@@ -1,8 +1,10 @@
 #include "SME.hxx"
 
+using namespace SME;
+
 // 0x80299230
 // extern -> SME.cpp
-void setStageOnExit(TGameSequence *gpSequence, s8 stage, s8 episode)
+void Patch::Stage::setStageOnExit(TGameSequence *gpSequence, s8 stage, s8 episode)
 {
     TMarioGamePad *gpGamePad = gpApplication.mGamePad1;
 
@@ -16,7 +18,7 @@ void setStageOnExit(TGameSequence *gpSequence, s8 stage, s8 episode)
 
 // 0x80175F58
 // extern -> SME.cpp
-void startEpisodeSelect(void *selectMenu)
+void Patch::Stage::startEpisodeSelect(void *selectMenu)
 {
     TMarioGamePad *gpGamePad = gpApplication.mGamePad1;
 

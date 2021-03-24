@@ -17,6 +17,10 @@ extern void setUserCodes(OSAlarm *alarm, OSContext *context);
 GlobalSMEDataStruct gInfo;
 Memory::Protection::MemoryMap gCodeProtector;
 
+namespace Init
+{
+
+}
 // 0x80005328
 // extern -> SME.cpp
 void initCodeProtection()
@@ -334,27 +338,25 @@ void initMario(TMario *player, bool isMario)
 
     if (SMEFile::mStageConfig.FileHeader.mMAGIC == SMEFile::MAGIC && SMEFile::mStageConfig.GlobalFlags.mIsMario)
     {
-        player->mCustomInfo->mPlayerID = SMEFile::mStageConfig.GlobalFlags.mPlayerID;
+        player->mCustomInfo->mPlayerID.set(SMEFile::mStageConfig.GlobalFlags.mPlayerID;
         gInfo.PlayerData.mCurPlayerID[0] = SMEFile::mStageConfig.GlobalFlags.mPlayerID;
 
-        player->mJumpParams.mGravity = SMEFile::mStageConfig.Mario.mGravity;
-        player->mDeParams.mTramplePowStep1 = SMEFile::mStageConfig.Mario.mBaseBounce1;
-        player->mDeParams.mTramplePowStep2 = SMEFile::mStageConfig.Mario.mBaseBounce2;
-        player->mDeParams.mTramplePowStep3 = SMEFile::mStageConfig.Mario.mBaseBounce3;
-        player->mDeParams.mDamageFallHeight = SMEFile::mStageConfig.Mario.mMaxFallNoDamage;
         player->mHealth = SMEFile::mStageConfig.Mario.mHealth;
-        player->mDeParams.mHPMax = SMEFile::mStageConfig.Mario.mMaxHealth;
-        player->mDeParams.mIllegalPlaneCtInc = SMEFile::mStageConfig.Mario.mOBStep;
-        player->mDeParams.mIllegalPlaneTime = SMEFile::mStageConfig.Mario.mOBMax;
+        player->mDeParams.mTramplePowStep1.set(SMEFile::mStageConfig.Mario.mBaseBounce1);
+        player->mDeParams.mTramplePowStep2.set(SMEFile::mStageConfig.Mario.mBaseBounce2);
+        player->mDeParams.mTramplePowStep3.set(SMEFile::mStageConfig.Mario.mBaseBounce3);
+        player->mDeParams.mDamageFallHeight.set(SMEFile::mStageConfig.Mario.mMaxFallNoDamage);
+        player->mDeParams.mHPMax.set(SMEFile::mStageConfig.Mario.mMaxHealth);
+        player->mDeParams.mIllegalPlaneCtInc.set(SMEFile::mStageConfig.Mario.mOBStep);
+        player->mDeParams.mIllegalPlaneTime.set(SMEFile::mStageConfig.Mario.mOBMax);
+        player->mJumpParams.mGravity.set(SMEFile::mStageConfig.Mario.mGravity);
 
-        player->mAttributes.mGainHelmet = SMEFile::mStageConfig.GlobalFlags.MarioStates.mMarioHasHelmet;
-        player->mAttributes.mHasFludd = SMEFile::mStageConfig.GlobalFlags.MarioStates.mMarioHasFludd;
-        player->mAttributes.mIsShineShirt = SMEFile::mStageConfig.GlobalFlags.MarioStates.mMarioHasShirt;
+        player->mAttributes.mGainHelmet.set(SMEFile::mStageConfig.GlobalFlags.MarioStates.mMarioHasHelmet;
+        player->mAttributes.mHasFludd.set(SMEFile::mStageConfig.GlobalFlags.MarioStates.mMarioHasFludd;
+        player->mAttributes.mIsShineShirt.set(SMEFile::mStageConfig.GlobalFlags.MarioStates.mMarioHasShirt;
 
         if (SMEFile::mStageConfig.GlobalFlags.MarioStates.mMarioHasGlasses)
-        {
             wearGlass__6TMarioFv(player);
-        }
     }
 
 

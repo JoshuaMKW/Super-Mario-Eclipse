@@ -8,11 +8,13 @@ namespace JUtility
     {
     public:
         TColor();
+        TColor(u8 r, u8 g, u8 b, u8 a) : r(r), g(g), b(b), a(a) {}
+        
 		void set(u8 r, u8 g, u8 b, u8 a);
 
-        u8 R; // _0
-        u8 G; // _1
-        u8 B; // _2
-        u8 A; // _3
+        u8 r; // _0
+        u8 g; // _1
+        u8 b; // _2
+        u8 a; // _3
     };
 }; // namespace JUtility

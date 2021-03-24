@@ -1,203 +1,281 @@
 #include "OS.h"
-#include "string.h"
 #include "sms/actor/Mario.hxx"
+#include "string.h"
 
 #include "libs/sMath.hxx"
 #include "libs/sMemory.hxx"
 #include "params/MarioParams.hxx"
 
-void MarioParams::setPlayer(TMario *player)
-{
-    this->mPlayer = player;
-    this->_setDefaults();
+using namespace SME::Class;
+
+PlayerParams::PlayerParams(TMario *player, bool isMario) {
+  mPlayer = player;
+  mPlayerID = 0;
+  mIsEMario = !isMario;
+  mFluddHistory.mHadFludd = false;
+  mFluddHistory.mMainNozzle = TWaterGun::Spray;
+  mFluddHistory.mSecondNozzle = TWaterGun::Hover;
+  mFluddHistory.mWaterLevel = 0;
+  mCurJump = 0;
+
+  loadPrm(reinterpret_cast<TCustomParams &>(
+      *JKRFileLoader::getVolume("mario")->getResource("/params.bin")));
+
+  if (mParams->mPlayerHasGlasses.get())
+    wearGlass__6TMarioFv(player);
+
+  scalePlayerAttrs(mParams->mSizeMultiplier.get());
 }
 
-bool MarioParams::setFile(MarioParamsFile *data)
-{
-    if (!data)
-    {
-        this->mInitialized = false;
-        this->_mBaseParams = nullptr;
-        Memory::free(this->mParams);
-        this->mParams = nullptr;
-        return false;
-    }
-
-    this->_mBaseParams = data;
-
-    u32 namelen = strlen(this->getPlayerName());
-    u32 clslen = Max(sizeof(MarioParamsFile), this->_mBaseParams->Attributes.mNameOffset);
-    if (!this->mParams)
-    {
-
-        this->mParams = (MarioParamsFile *)Memory::calloc(OSRoundUp32B(clslen + namelen), 4);
-    }
-    memcpy(this->mParams, this->_mBaseParams, OSRoundUp32B(clslen + namelen));
-
-    this->mInitialized = true;
-    return true;
+void PlayerParams::ParamHistory::applyHistoryTo(TMario *player) {
+  player->mDeParams = mDeParams;
+  player->mBodyAngleFreeParams = mBodyAngleFreeParams;
+  player->mBodyAngleWaterGunParams = mBodyAngleWaterGunParams;
+  player->mPunchFenceParams = mPunchFenceParams;
+  player->mKickRoofParams = mKickRoofParams;
+  player->mJumpParams = mJumpParams;
+  player->mRunParams = mRunParams;
+  player->mSwimParams = mSwimParams;
+  player->mHangFenceParams = mHangFenceParams;
+  player->mHangRoofParams = mHangRoofParams;
+  player->mWireParams = mWireParams;
+  player->mPullBGBeakParams = mPullBGBeakParams;
+  player->mPullBGTentacleParams = mPullBGTentacleParams;
+  player->mPullBGFireWanWanBossTailParams = mPullBGFireWanWanBossTailParams;
+  player->mPullFireWanWanTailParams = mPullFireWanWanTailParams;
+  player->mHoverParams = mHoverParams;
+  player->mDivingParams = mDivingParams;
+  player->mYoshiParams = mYoshiParams;
+  player->mWaterEffectParams = mWaterEffectParams;
+  player->mControllerParams = mControllerParams;
+  player->mGraffitoParams = mGraffitoParams;
+  player->mDirtyParams = mDirtyParams;
+  player->mMotorParams = mMotorParams;
+  player->mParticleParams = mParticleParams;
+  player->mEffectParams = mEffectParams;
+  player->mSlipNormalParams = mSlipNormalParams;
+  player->mSlipOilParams = mSlipOilParams;
+  player->mSlipAllParams = mSlipAllParams;
+  player->mSlipAllSliderParams = mSlipAllSliderParams;
+  player->mSlip45Params = mSlip45Params;
+  player->mSlipWaterSlopeParams = mSlipWaterSlopeParams;
+  player->mSlipWaterGroundParams = mSlipWaterGroundParams;
+  player->mSlipYoshiParams = mSlipYoshiParams;
+  player->mUpperBodyParams = mUpperBodyParams;
 }
 
-const char *MarioParams::getPlayerName() const
-{
-    if (this->mParams)
-    {
-        return (const char *)this->mParams + this->mParams->Attributes.mNameOffset;
-    }
-    else if (this->_mBaseParams)
-    {
-        return (const char *)this->_mBaseParams + this->_mBaseParams->Attributes.mNameOffset;
-    }
-    else
-    {
-        return "Mario";
-    }
+void PlayerParams::ParamHistory::recordFrom(TMario *player) {
+  mDeParams = player->mDeParams;
+  mBodyAngleFreeParams = player->mBodyAngleFreeParams;
+  mBodyAngleWaterGunParams = player->mBodyAngleWaterGunParams;
+  mPunchFenceParams = player->mPunchFenceParams;
+  mKickRoofParams = player->mKickRoofParams;
+  mJumpParams = player->mJumpParams;
+  mRunParams = player->mRunParams;
+  mSwimParams = player->mSwimParams;
+  mHangFenceParams = player->mHangFenceParams;
+  mHangRoofParams = player->mHangRoofParams;
+  mWireParams = player->mWireParams;
+  mPullBGBeakParams = player->mPullBGBeakParams;
+  mPullBGTentacleParams = player->mPullBGTentacleParams;
+  mPullBGFireWanWanBossTailParams = player->mPullBGFireWanWanBossTailParams;
+  mPullFireWanWanTailParams = player->mPullFireWanWanTailParams;
+  mHoverParams = player->mHoverParams;
+  mDivingParams = player->mDivingParams;
+  mYoshiParams = player->mYoshiParams;
+  mWaterEffectParams = player->mWaterEffectParams;
+  mControllerParams = player->mControllerParams;
+  mGraffitoParams = player->mGraffitoParams;
+  mDirtyParams = player->mDirtyParams;
+  mMotorParams = player->mMotorParams;
+  mParticleParams = player->mParticleParams;
+  mEffectParams = player->mEffectParams;
+  mSlipNormalParams = player->mSlipNormalParams;
+  mSlipOilParams = player->mSlipOilParams;
+  mSlipAllParams = player->mSlipAllParams;
+  mSlipAllSliderParams = player->mSlipAllSliderParams;
+  mSlip45Params = player->mSlip45Params;
+  mSlipWaterSlopeParams = player->mSlipWaterSlopeParams;
+  mSlipWaterGroundParams = player->mSlipWaterGroundParams;
+  mSlipYoshiParams = player->mSlipYoshiParams;
+  mUpperBodyParams = player->mUpperBodyParams;
 }
 
-bool MarioParams::canUseNozzle(TWaterGun::NozzleType nozzle) const
-{
-    if (this->mParams)
-    {
-        return this->mParams->Attributes.FluddAttrs.mCanUseNozzle[nozzle];
-    }
-    else if (this->_mBaseParams)
-    {
-        return this->_mBaseParams->Attributes.FluddAttrs.mCanUseNozzle[nozzle];
-    }
-    else
-    {
-        return true;
-    }
+void PlayerParams::ParamHistory::reset() {
+  mHasHistory = false;
+  memset(this, 0, sizeof(ParamHistory));
 }
 
-void MarioParams::_setDefaults()
-{
-    this->DefaultAttrs.mGravity = this->mPlayer->mGravity;
-    this->DefaultAttrs.mTwirlGravity = this->mPlayer->mTwirlGravity;
-    this->DefaultAttrs.mDiveStartSpeed = this->mPlayer->mDiveStartSpeed;
-    this->DefaultAttrs.mBaseBounce1 = this->mPlayer->mBaseBounceSpeed1;
-    this->DefaultAttrs.mBaseBounce2 = this->mPlayer->mBaseBounceSpeed2;
-    this->DefaultAttrs.mBaseBounce3 = this->mPlayer->mBaseBounceSpeed3;
-    this->DefaultAttrs.mMaxFallNoDamage = this->mPlayer->mMaxFallNoDamage;
-    this->DefaultAttrs.mOceanOfs = this->mPlayer->mOceanOfs;
-    this->DefaultAttrs.mThrowPower = this->mPlayer->mThrowPower;
-    this->DefaultAttrs.mWaterHighBuoyant = this->mPlayer->mWaterHighBuoyant;
-    this->DefaultAttrs.mWaterLowBuoyant = this->mPlayer->mWaterLowBuoyant;
-    this->DefaultAttrs.mWaterYSpdMultiplier = this->mPlayer->mWaterYSpdMultiplier;
-    this->DefaultAttrs.mWaterEntryMaxHeight = this->mPlayer->mWaterEntryMaxHeight;
-    this->DefaultAttrs.mWaterMaxDiffToInteract = this->mPlayer->mWaterMaxDiffToInteract;
-    this->DefaultAttrs.mWaterJumpHeightDiffMax = this->mPlayer->mWaterJumpHeightDiffMax;
-    this->DefaultAttrs.mWaterHealthDrainSpd = this->mPlayer->mWaterHealthDrainSpd;
-    this->DefaultAttrs.mWaterHealthScubaDrainSpd = this->mPlayer->mWaterHealthScubaDrainSpd;
-    this->DefaultAttrs.mCollisionHeight = 160.0f;
-    this->DefaultAttrs.mCollisionWidth = 50.0f;
-    this->DefaultAttrs.mMaxGroundSpeed = this->mPlayer->mMaxGroundSpeed;
-    this->DefaultAttrs.mHipDropSpeedSlow = this->mPlayer->mHipDropSpeedSlow;
-    this->DefaultAttrs.mHipDropSpeedFast = this->mPlayer->mHipDropSpeedFast;
-    this->DefaultAttrs.mPoleGrabDistPadding = this->mPlayer->mPoleGrabDistPadding;
-    this->DefaultAttrs.mAttackHeight = this->mPlayer->mAttackHeight;
-    this->DefaultAttrs.mAttackRadius = this->mPlayer->mAttackRadius;
-    this->DefaultAttrs.mReceiveHeight = this->mPlayer->mReceiveHeight;
-    this->DefaultAttrs.mReceiveRadius = this->mPlayer->mReceiveRadius;
-    this->DefaultAttrs.mPoleClimbSpeedMul = this->mPlayer->mPoleClimbSpeedMul;
-    this->DefaultAttrs.mHoverYSpdMultiplier = this->mPlayer->mHoverYSpdMultiplier;
-    this->DefaultAttrs.mHoverMaxHeight = 230.0f;
-    this->DefaultAttrs.mTurboNozzleSpeed = this->mPlayer->mTurboNozzleSpeed;
-    this->DefaultAttrs.mTurboJumpFSpeed = this->mPlayer->mTurboJumpFSpeed;
-    this->DefaultAttrs.mTurboJumpYSpeed = this->mPlayer->mTurboJumpYSpeed;
+void PlayerParams::scalePlayerAttrs(f32 scale) {
+  const float factor = (scale * 0.5f) + (1.0f - 0.5f);
+
+  JGeometry::TVec3<f32> size;
+  mPlayer->JSGGetScaling(reinterpret_cast<Vec *>(&size));
+  size.scale(scale);
+  mPlayer->JSGSetScaling(reinterpret_cast<Vec &>(size));
+  mPlayer->mModelData->mModel->mScale.scale(scale);
+
+  const f32 yoshiAgility =
+      SME::Util::Math::sigmoidCurve(size.y, 0.8f, 5.0f, 1.6f, 5.0f);
+
+#define SCALE_PARAM(param, scale) param.set(param.get() * scale)
+
+  SCALE_PARAM(mPlayer->mDeParams.mRunningMax, factor);
+  SCALE_PARAM(mPlayer->mDeParams.mDashMax, factor);
+  SCALE_PARAM(mPlayer->mDeParams.mShadowSize, scale);
+  SCALE_PARAM(mPlayer->mDeParams.mHoldRadius, scale);
+  SCALE_PARAM(mPlayer->mDeParams.mDamageRadius, scale);
+  SCALE_PARAM(mPlayer->mDeParams.mDamageHeight, scale);
+  SCALE_PARAM(mPlayer->mDeParams.mAttackHeight, scale);
+  SCALE_PARAM(mPlayer->mDeParams.mTrampleRadius, scale);
+  SCALE_PARAM(mPlayer->mDeParams.mPushupRadius, scale);
+  SCALE_PARAM(mPlayer->mDeParams.mPushupHeight, scale);
+  SCALE_PARAM(mPlayer->mDeParams.mHipdropRadius, scale);
+  SCALE_PARAM(mPlayer->mDeParams.mQuakeRadius, scale);
+  SCALE_PARAM(mPlayer->mDeParams.mQuakeHeight, scale);
+  SCALE_PARAM(mPlayer->mDeParams.mJumpWallHeight, factor);
+  SCALE_PARAM(mPlayer->mDeParams.mThrowPower, factor);
+  SCALE_PARAM(mPlayer->mDeParams.mFeelDeep, factor);
+  SCALE_PARAM(mPlayer->mDeParams.mDamageFallHeight, factor);
+  SCALE_PARAM(mPlayer->mDeParams.mClashSpeed, factor);
+  SCALE_PARAM(mPlayer->mDeParams.mSleepingCheckDist, factor);
+  SCALE_PARAM(mPlayer->mDeParams.mSleepingCheckHeight, factor);
+  SCALE_PARAM(mPlayer->mPunchFenceParams.mRadius, factor);
+  SCALE_PARAM(mPlayer->mPunchFenceParams.mHeight, factor);
+  SCALE_PARAM(mPlayer->mKickRoofParams.mRadius, factor);
+  SCALE_PARAM(mPlayer->mKickRoofParams.mHeight, factor);
+  SCALE_PARAM(mPlayer->mJumpParams.mGravity, factor);
+  SCALE_PARAM(mPlayer->mJumpParams.mSpinJumpGravity, factor);
+  SCALE_PARAM(mPlayer->mJumpParams.mJumpingMax, factor);
+  SCALE_PARAM(mPlayer->mJumpParams.mFenceSpeed, factor);
+  SCALE_PARAM(mPlayer->mJumpParams.mFireBackVelocity, factor);
+  SCALE_PARAM(mPlayer->mJumpParams.mBroadJumpForce, factor);
+  SCALE_PARAM(mPlayer->mJumpParams.mBroadJumpForceY, factor);
+  SCALE_PARAM(mPlayer->mJumpParams.mRotateJumpForceY, factor);
+  SCALE_PARAM(mPlayer->mJumpParams.mPopUpSpeedY, factor);
+  SCALE_PARAM(mPlayer->mJumpParams.mBackJumpForce, factor);
+  SCALE_PARAM(mPlayer->mJumpParams.mBackJumpForceY, factor);
+  SCALE_PARAM(mPlayer->mJumpParams.mHipAttackSpeedY, factor);
+  SCALE_PARAM(mPlayer->mJumpParams.mSuperHipAttackSpeedY, factor);
+  SCALE_PARAM(mPlayer->mJumpParams.mRotBroadJumpForce, factor);
+  SCALE_PARAM(mPlayer->mJumpParams.mRotBroadJumpForceY, factor);
+  SCALE_PARAM(mPlayer->mJumpParams.mSecJumpForce, factor);
+  SCALE_PARAM(mPlayer->mJumpParams.mValleyDepth, factor);
+  SCALE_PARAM(mPlayer->mJumpParams.mTremblePower, 1 / factor);
+  SCALE_PARAM(mPlayer->mJumpParams.mTrembleTime, static_cast<s16>(1 / factor));
+  SCALE_PARAM(mPlayer->mJumpParams.mGetOffYoshiY, factor);
+  SCALE_PARAM(mPlayer->mJumpParams.mSuperHipAttackCt,
+              static_cast<s16>(1 / factor));
+  SCALE_PARAM(mPlayer->mRunParams.mMaxSpeed, factor);
+  SCALE_PARAM(mPlayer->mRunParams.mAddBase, factor);
+  SCALE_PARAM(mPlayer->mRunParams.mDecBrake, factor);
+  SCALE_PARAM(mPlayer->mRunParams.mSoft2Walk, factor);
+  SCALE_PARAM(mPlayer->mRunParams.mWalk2Soft, factor);
+  SCALE_PARAM(mPlayer->mRunParams.mSoftStepAnmMult, 1 / factor);
+  SCALE_PARAM(mPlayer->mRunParams.mRunAnmSpeedMult, 1 / factor);
+  SCALE_PARAM(mPlayer->mRunParams.mMotBlendWalkSp, 1 / factor);
+  SCALE_PARAM(mPlayer->mRunParams.mMotBlendRunSp, 1 / factor);
+  SCALE_PARAM(mPlayer->mRunParams.mSwimDepth, factor);
+  SCALE_PARAM(mPlayer->mRunParams.mTurnNeedSp, factor);
+  SCALE_PARAM(mPlayer->mSwimParams.mStartSp, factor);
+  SCALE_PARAM(mPlayer->mSwimParams.mMoveSp, factor);
+  SCALE_PARAM(mPlayer->mSwimParams.mGravity, factor);
+  SCALE_PARAM(mPlayer->mSwimParams.mWaitBouyancy, factor);
+  SCALE_PARAM(mPlayer->mSwimParams.mMoveBouyancy, factor);
+  SCALE_PARAM(mPlayer->mSwimParams.mCanJumpDepth, scale);
+  SCALE_PARAM(mPlayer->mSwimParams.mEndDepth, scale);
+  SCALE_PARAM(mPlayer->mSwimParams.mFloatHeight, scale);
+  SCALE_PARAM(mPlayer->mSwimParams.mRush, factor);
+  SCALE_PARAM(mPlayer->mSwimParams.mPaddleSpeedUp, factor);
+  SCALE_PARAM(mPlayer->mSwimParams.mPaddleJumpUp, factor);
+  SCALE_PARAM(mPlayer->mSwimParams.mFloatUp, factor);
+  SCALE_PARAM(mPlayer->mSwimParams.mPaddleDown, factor);
+  SCALE_PARAM(mPlayer->mSwimParams.mCanBreathDepth, scale);
+  SCALE_PARAM(mPlayer->mSwimParams.mWaitSinkSpeed, factor);
+  SCALE_PARAM(mPlayer->mHangFenceParams.mMoveSp, factor);
+  SCALE_PARAM(mPlayer->mHangFenceParams.mDescentSp, factor);
+  SCALE_PARAM(mPlayer->mPullBGBeakParams.mPullRateV, factor);
+  SCALE_PARAM(mPlayer->mPullBGBeakParams.mPullRateH, factor);
+  SCALE_PARAM(mPlayer->mPullBGBeakParams.mOilPullRateV, factor);
+  SCALE_PARAM(mPlayer->mPullBGBeakParams.mOilPullRateH, factor);
+  SCALE_PARAM(mPlayer->mPullBGTentacleParams.mPullRateV, factor);
+  SCALE_PARAM(mPlayer->mPullBGTentacleParams.mPullRateH, factor);
+  SCALE_PARAM(mPlayer->mPullBGTentacleParams.mOilPullRateV, factor);
+  SCALE_PARAM(mPlayer->mPullBGTentacleParams.mOilPullRateH, factor);
+  SCALE_PARAM(mPlayer->mPullBGFireWanWanBossTailParams.mPullRateV, factor);
+  SCALE_PARAM(mPlayer->mPullBGFireWanWanBossTailParams.mPullRateH, factor);
+  SCALE_PARAM(mPlayer->mPullBGFireWanWanBossTailParams.mOilPullRateV, factor);
+  SCALE_PARAM(mPlayer->mPullBGFireWanWanBossTailParams.mOilPullRateH, factor);
+  SCALE_PARAM(mPlayer->mPullFireWanWanTailParams.mPullRateV, factor);
+  SCALE_PARAM(mPlayer->mPullFireWanWanTailParams.mPullRateH, factor);
+  SCALE_PARAM(mPlayer->mPullFireWanWanTailParams.mOilPullRateV, factor);
+  SCALE_PARAM(mPlayer->mPullFireWanWanTailParams.mOilPullRateH, factor);
+  SCALE_PARAM(mPlayer->mDivingParams.mGravity, factor);
+  SCALE_PARAM(mPlayer->mYoshiParams.mRunYoshiMult, yoshiAgility);
+  SCALE_PARAM(mPlayer->mYoshiParams.mJumpYoshiMult, yoshiAgility);
+  SCALE_PARAM(mPlayer->mYoshiParams.mRotYoshiMult, yoshiAgility);
+  SCALE_PARAM(mPlayer->mWaterEffectParams.mJumpIntoMinY, factor);
+  SCALE_PARAM(mPlayer->mWaterEffectParams.mJumpIntoMaxY, factor);
+  SCALE_PARAM(mPlayer->mWaterEffectParams.mJumpIntoScaleMin, factor);
+  SCALE_PARAM(mPlayer->mWaterEffectParams.mJumpIntoScaleWidth, factor);
+  SCALE_PARAM(mPlayer->mWaterEffectParams.mRunningRippleDepth, factor);
+  SCALE_PARAM(mPlayer->mGraffitoParams.mSinkHeight, factor);
+  SCALE_PARAM(mPlayer->mGraffitoParams.mSinkMoveMin, factor);
+  SCALE_PARAM(mPlayer->mGraffitoParams.mSinkMoveMax, factor);
+  SCALE_PARAM(mPlayer->mGraffitoParams.mSinkRecover, factor);
+  SCALE_PARAM(mPlayer->mGraffitoParams.mFootEraseSize, scale);
+  SCALE_PARAM(mPlayer->mDirtyParams.mPolSizeSlip, scale);
+  SCALE_PARAM(mPlayer->mDirtyParams.mPolSizeRun, scale);
+  SCALE_PARAM(mPlayer->mDirtyParams.mPolSizeFootPrint, scale);
+  SCALE_PARAM(mPlayer->mDirtyParams.mPolSizeJump, scale);
+  SCALE_PARAM(mPlayer->mDirtyParams.mSlipAnmSpeed, 1 / factor);
+  SCALE_PARAM(mPlayer->mDirtyParams.mSlipRunSp, factor);
+  SCALE_PARAM(mPlayer->mDirtyParams.mSlipCatchSp, factor);
+
+#undef SCALE_PARAM
 }
 
-void MarioParams::init(TMario *player, bool isMario)
-{
-    this->mIsEMario = !isMario;
-    this->mPlayerID = 0;
-    this->mMaxJumps = 1;
-    this->mCurJump = 0;
-    this->mTerminalVelocity = -75.0f;
-    this->mYoshiWaterSpeed = JGeometry::TVec3<float>(0.0f, 0.0f, 0.0f);
-    this->mCollisionTimer = 0;
-    this->mPrevCollision = 0;
-    this->mClimbQuarterFramesLeft = 0;
-    this->FluddHistory.mHadFludd = false;
-    this->FluddHistory.mMainNozzle = TWaterGun::Spray;
-    this->FluddHistory.mSecondNozzle = TWaterGun::Hover;
-    this->FluddHistory.mWaterLevel = 0;
-
-    bool hasParams;
-
-    this->setPlayer(player);
-    hasParams = this->setFile((MarioParamsFile *)getResource__10JKRArchiveFPCc(getVolume__13JKRFileLoaderFPCc("mario"), "/params.bin"));
-
-    if (!hasParams) return;
-
-    if (this->_mBaseParams->Attributes.mMarioHasGlasses)
-    {
-        wearGlass__6TMarioFv(player);
-    }
-    this->mClimbQuarterFramesLeft = this->mParams->Attributes.mMaxClimbQuarterFrames;
-    this->update();
+void PlayerParams::setPlayer(TMario *player) {
+  mPlayer = player;
+  mDefaultAttrs.recordFrom(player);
 }
 
-void MarioParams::update()
-{
-    float sizeMultiplier = this->mParams->Attributes.mSizeMultiplier;
-    float scalar = (sizeMultiplier * 0.5f) + (1.0f - 0.5f);
+bool PlayerParams::loadPrm() {
+  mParams->load("/Mario/SME.prm");
+  mInitialized = true;
+  return true;
+}
 
-    if (!this->mPlayer->mYoshi || this->mPlayer->mYoshi->mState != TYoshi::MOUNTED)
-    {
-        this->mPlayer->mSize.x = sizeMultiplier;
-        this->mPlayer->mSize.y = sizeMultiplier;
-        this->mPlayer->mSize.z = sizeMultiplier;
-        this->mPlayer->mModelData->mModel->mSizeMultiplier.x = sizeMultiplier;
-        this->mPlayer->mModelData->mModel->mSizeMultiplier.y = sizeMultiplier;
-        this->mPlayer->mModelData->mModel->mSizeMultiplier.z = sizeMultiplier;
+bool PlayerParams::loadPrm(const char *prm) {
+  mParams->load(prm);
+  mInitialized = true;
+  return true;
+}
 
-        this->mParams->Attributes.mBaseJumpHeightMulti = this->_mBaseParams->Attributes.mBaseJumpHeightMulti * scalar;
-        this->mParams->Attributes.mSpeedMultiplier = this->_mBaseParams->Attributes.mSpeedMultiplier * scalar;
+bool PlayerParams::loadPrm(TCustomParams &data) {
+  memcpy(mParams, &data, sizeof(TCustomParams));
 
-        this->mPlayer->mHealth = Min(this->mPlayer->mHealth, this->mPlayer->mMaxHealth);
+  mInitialized = true;
+  return true;
+}
 
-        this->mPlayer->mOBStep = this->mParams->Attributes.mOBStep;
-        this->mPlayer->mOBMax = this->mParams->Attributes.mOBMax;
-        this->mPlayer->mWallHangTimer = this->mParams->Attributes.mWallHangMax;
-        this->mPlayer->mWallAnimTimer = Max(0, this->mParams->Attributes.mWallHangMax - 400);
-
-        this->mPlayer->mGravity = this->DefaultAttrs.mGravity * this->_mBaseParams->Attributes.mGravityMulti * scalar;
-        this->mPlayer->mTwirlGravity = this->DefaultAttrs.mTwirlGravity * this->mPlayer->mGravity;
-        this->mPlayer->mDiveStartSpeed = this->DefaultAttrs.mDiveStartSpeed * this->mParams->Attributes.mSpeedMultiplier;
-        this->mPlayer->mCustomInfo->mTerminalVelocity = -75.0f * this->mPlayer->mGravity;
-        this->mPlayer->mMaxFallNoDamage = this->DefaultAttrs.mMaxFallNoDamage * this->_mBaseParams->Attributes.mMaxFallNoDamageMulti * scalar;
-        this->mPlayer->mCustomInfo->mMaxJumps = this->mParams->Attributes.mJumpCount;
-
-        this->mPlayer->mWaterHealthDrainSpd = this->DefaultAttrs.mWaterHealthDrainSpd / this->mParams->Attributes.mWaterHealthMultiplier;
-        this->mPlayer->mWaterHealthScubaDrainSpd = this->DefaultAttrs.mWaterHealthScubaDrainSpd / this->mParams->Attributes.mWaterHealthMultiplier;
-        this->mPlayer->mBaseBounceSpeed1 = this->DefaultAttrs.mBaseBounce1 * this->_mBaseParams->Attributes.mBaseBounce1Multi * scalar;
-        this->mPlayer->mBaseBounceSpeed2 = this->DefaultAttrs.mBaseBounce2 * this->_mBaseParams->Attributes.mBaseBounce2Multi * scalar;
-        this->mPlayer->mBaseBounceSpeed3 = this->DefaultAttrs.mBaseBounce3 * this->_mBaseParams->Attributes.mBaseBounce3Multi * scalar;
-        this->mPlayer->mOceanOfs = this->DefaultAttrs.mOceanOfs * this->mPlayer->mSize.y;
-        this->mPlayer->mWaterHighBuoyant = this->DefaultAttrs.mWaterHighBuoyant * scalar;
-        this->mPlayer->mWaterLowBuoyant = this->DefaultAttrs.mWaterLowBuoyant * scalar;
-        this->mPlayer->mWaterYSpdMultiplier = this->DefaultAttrs.mWaterYSpdMultiplier + ((scalar*0.2f) - 0.2f);
-        this->mPlayer->mWaterEntryMaxHeight = this->DefaultAttrs.mWaterEntryMaxHeight * this->mPlayer->mSize.y;
-        this->mPlayer->mWaterMaxDiffToInteract = this->DefaultAttrs.mWaterMaxDiffToInteract * this->mPlayer->mSize.y;
-        this->mPlayer->mWaterJumpHeightDiffMax = this->DefaultAttrs.mWaterJumpHeightDiffMax * this->mPlayer->mSize.y;
-        this->mPlayer->mHipDropSpeedSlow = this->DefaultAttrs.mHipDropSpeedSlow * scalar;
-        this->mPlayer->mHipDropSpeedFast = this->DefaultAttrs.mHipDropSpeedFast * scalar;
-        this->mPlayer->mThrowPower = this->DefaultAttrs.mThrowPower * this->_mBaseParams->Attributes.mThrowPowerMultiplier * scalar;
-        this->mPlayer->mPoleGrabDistPadding = this->DefaultAttrs.mPoleGrabDistPadding * this->mPlayer->mSize.z;
-        this->mPlayer->mAttackHeight = this->DefaultAttrs.mAttackHeight * this->mPlayer->mSize.y;
-        this->mPlayer->mAttackRadius = this->DefaultAttrs.mAttackRadius * this->mPlayer->mSize.z;
-        this->mPlayer->mReceiveHeight = this->DefaultAttrs.mReceiveHeight * this->mPlayer->mSize.y;
-        this->mPlayer->mReceiveRadius = this->DefaultAttrs.mReceiveRadius * this->mPlayer->mSize.z;
-        this->mPlayer->mPoleClimbSpeedMul = this->DefaultAttrs.mPoleClimbSpeedMul * scalar;
-
-        this->mPlayer->mHoverYSpdMultiplier = this->DefaultAttrs.mHoverYSpdMultiplier * scalar;
-        this->mPlayer->mTurboNozzleSpeed = this->DefaultAttrs.mTurboNozzleSpeed * this->mParams->Attributes.mSpeedMultiplier;
-        this->mPlayer->mTurboJumpFSpeed = this->DefaultAttrs.mTurboJumpFSpeed * this->mParams->Attributes.mSpeedMultiplier;
-        this->mPlayer->mTurboJumpYSpeed = this->DefaultAttrs.mTurboJumpYSpeed * scalar;
-        if (this->mPlayer->mFludd)
-        {
-            this->mPlayer->mFludd->mHoverMaxHeight = this->DefaultAttrs.mHoverMaxHeight * scalar;
-        }
-    }
+bool PlayerParams::canUseNozzle(TWaterGun::NozzleType nozzle) const {
+  switch (nozzle) {
+  case TWaterGun::NozzleType::Spray:
+    return mParams->mSprayNozzleUsable.get();
+  case TWaterGun::NozzleType::Rocket:
+    return mParams->mRocketNozzleUsable.get();
+  case TWaterGun::NozzleType::Underwater:
+    return mParams->mUnderwaterNozzleUsable.get();
+  case TWaterGun::NozzleType::Yoshi:
+    return mParams->mYoshiNozzleUsable.get();
+  case TWaterGun::NozzleType::Hover:
+    return mParams->mHoverNozzleUsable.get();
+  case TWaterGun::NozzleType::Turbo:
+    return mParams->mTurboNozzleUsable.get();
+  case TWaterGun::NozzleType::Sniper:
+    return mParams->mSniperNozzleUsable.get();
+  default:
+    return false;
+  }
 }

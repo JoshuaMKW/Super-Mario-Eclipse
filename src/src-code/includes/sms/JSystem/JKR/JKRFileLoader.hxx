@@ -12,7 +12,7 @@ public:
 	
 	virtual void unmount();
 
-	static JKRFileLoader *getVolume(const char *);
+	static JKRArchive *getVolume(const char *);
 	void changeDirectory(const char *dirName);
 	u32* getGlbResource(const char *);
 	u32* getGlbResource(const char *, JKRFileLoader *);

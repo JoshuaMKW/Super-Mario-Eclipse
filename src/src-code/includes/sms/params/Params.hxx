@@ -40,7 +40,7 @@ template <typename T>
 class TParamRT : public TParamT
 {
 public:
-    TParamRT(T param, const char *name) : TParamT(param, name) {}
+    TParamRT(T param, const char *name) {}
 
     void set(T param) {};
 };

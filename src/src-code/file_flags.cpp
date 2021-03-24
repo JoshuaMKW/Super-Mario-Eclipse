@@ -14,12 +14,12 @@ static bool isAnyFileComplete(TCardBookmarkInfo *bookmark)
 
 // 0x802B1794
 // extern -> SME.cpp
-s32 setFileCompleteBool(TCardManager *gpCardManager)
+TCardBookmarkInfo *setFileCompleteBool(TCardManager *cardManager)
 {
-    s32 ret = getBookmarkInfos___12TCardManagerFv(gpCardManager);
-    if (gpCardManager->mBookMarks)
-        gInfo.Context.mIsCompletionRewards = isAnyFileComplete(gpCardManager->mBookMarks);
-    return ret;
+    TCardBookmarkInfo *bookmarkData = cardManager->getBookmarkInfos_();
+    if (bookmarkData)
+        gInfo.Context.mIsCompletionRewards = isAnyFileComplete(bookmarkData);
+    return bookmarkData;
 }
 
 //0x80164DE4

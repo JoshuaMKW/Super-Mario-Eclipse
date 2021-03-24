@@ -40,7 +40,7 @@ T resultant()
 
 T getNormalAngle()
 {
-    return (T)((180.0f / PI) * atan2f(this->x, this->z));
+    return (T)((180.0f /M_PI) * atan2f(this->x, this->z));
 }
 
 TVec3<T> unitVector()

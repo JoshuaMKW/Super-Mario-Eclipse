@@ -5,15 +5,15 @@
 
 namespace JStage
 {
-    enum class TECameraProjection
+    enum TECameraProjection
     {
     };
 
-    enum class TECameraView
+    enum TECameraView
     {
     };
 
-    enum class TEObject
+    enum TEObject
     {
     };
 
@@ -22,14 +22,14 @@ namespace JStage
     public:
         virtual ~TObject();
 
-        virtual u32 JSGGetName() const;
-        virtual u32 JSGGetFlag() const;
-        virtual void JSGSetFlag(u32);
-        virtual u32 JSGGetData(u32, void *, u32) const;
-        virtual void JSGSetData(u32, void const *, u32);
-        virtual void JSGGetParent(TObject **, u32 *) const;
-        virtual void JSGSetParent(TObject *, u32);
-        virtual void JSGSetRelation(bool, TObject *, u32);
+        virtual unsigned long JSGGetName() const;
+        virtual unsigned long JSGGetFlag() const;
+        virtual void JSGSetFlag(unsigned long);
+        virtual unsigned long JSGGetData(unsigned long, void *, unsigned long) const;
+        virtual void JSGSetData(unsigned long, void const *, unsigned long);
+        virtual void JSGGetParent(TObject **, unsigned long *) const;
+        virtual void JSGSetParent(TObject *, unsigned long);
+        virtual void JSGSetRelation(bool, TObject *, unsigned long);
     };
 
     class TSystem : public TObject
@@ -37,11 +37,11 @@ namespace JStage
     public:
         virtual ~TSystem();
         
-        virtual u32 JSGFGetType() const;
-        virtual u32 JSGGetSystemData(u32);
-        virtual void JSGSetSystemData(u32, u32);
+        virtual unsigned long JSGFGetType() const;
+        virtual unsigned long JSGGetSystemData(unsigned long);
+        virtual void JSGSetSystemData(unsigned long, unsigned long);
         virtual TObject *JSGFindObject(const char *, TEObject) const;
-        virtual u32 JSGCreateObject(const char *, TEObject);
+        virtual unsigned long JSGCreateObject(const char *, TEObject);
         virtual void JSGDestroyObject(TObject *);
     };
 
@@ -50,7 +50,7 @@ namespace JStage
     public:
         virtual ~TActor();
 
-        virtual u32 JSGFGetType() const;
+        virtual unsigned long JSGFGetType() const;
         virtual void JSGGetTranslation(Vec *) const;
         virtual void JSGSetTranslation(const Vec &);
         virtual void JSGGetScaling(Vec *) const;
@@ -58,10 +58,10 @@ namespace JStage
         virtual void JSGGetRotation(Vec *) const;
         virtual void JSGSetRotation(const Vec &);
 
-        virtual u32 JSGGetShape() const;
-        virtual void JSGSetShape(u32);
-        virtual u32 JSGGetAnimation() const;
-        virtual void JSGSetAnimation(u32);
+        virtual unsigned long JSGGetShape() const;
+        virtual void JSGSetShape(unsigned long);
+        virtual unsigned long JSGGetAnimation() const;
+        virtual void JSGSetAnimation(unsigned long);
         virtual f32 JSGGetAnimationFrame() const;
         virtual void JSGSetAnimationFrame(f32);
         virtual f32 JSGGetAnimationFrameMax() const;
@@ -95,6 +95,6 @@ namespace JStage
     public:
         virtual ~TAmbientLight();
 
-        virtual u32 JSGFGetType() const;
+        virtual unsigned long JSGFGetType() const;
     };
 };

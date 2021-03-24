@@ -874,18 +874,13 @@ kmWrite32(0x8025B150, 0xFC020840);
 static void checkYSpdForTerminalVelocity()
 {
     TMario *player;
-    __asm { mr player, r31 };
+    SME_FROM_GPR(r31, player);
 
+    const float terminalVelocity = -75.0f * mPlayer->mJumpParams.mGravity.get();
     if (player->mCustomInfo->isInitialized() && player->mCustomInfo->isMario())
-    {
-        if (player->mSpeed.y < player->mCustomInfo->mTerminalVelocity)
-            player->mSpeed.y = player->mCustomInfo->mTerminalVelocity;
-    }
+        player->mSpeed.y = Max(player->mSpeed.y, terminalVelocity);
     else
-    {
-        if (player->mSpeed.y < -75)
-            player->mSpeed.y = -75;
-    }
+        player->mSpeed.y = Max(player->mSpeed.y, -75.0f);
 }
 kmCall(0x80256678, &checkYSpdForTerminalVelocity);
 kmWrite32(0x8025667C, 0x60000000);

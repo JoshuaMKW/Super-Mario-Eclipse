@@ -172,7 +172,7 @@ extern "C"
         OSTime mMin;
         OSTime mMax;
         OSTime mLast;
-        BOOL mActive;
+        bool mActive;
     } OSStopwatch;
 
     typedef struct OSBootInfo
@@ -208,15 +208,15 @@ extern "C"
     void OSTicksToCalendarTime(OSTime time, OSCalendarTime *result);
 
     void OSReport(const char *msg, ...);
-    void OSPanic(u8 *, u32, u8 *, ...);
-    void OSFatal(u32 *, u32 *, const u8 *);
-    void OSResetSystem(u32, u32, BOOL);
+    void OSPanic(char *, u32, char *, ...);
+    void OSFatal(u32 *, u32 *, const char *);
+    void OSResetSystem(u32, u32, bool);
     u32 OSGetResetCode();
     u32 OSGetConsoleType();
 
-    BOOL OSDisableInterrupts();
+    bool OSDisableInterrupts();
     void OSEnableInterrupts();
-    void OSRestoreInterrupts(BOOL enable);
+    void OSRestoreInterrupts(bool enable);
     void OSExceptionInit();
     void OSExceptionVector(u32 unk);
     void OSDefaultExceptionHandler();
@@ -229,10 +229,10 @@ extern "C"
     void OSCancelAlarm(OSAlarm *alarm);
 
     void OSYieldThread();
-    BOOL OSCreateThread(OSThread *thread, void *(*funcToThread)(void *), void *parameter, void *stack, u32 stackSize, OSPriority priority, u16 attributes);
+    bool OSCreateThread(OSThread *thread, void *(*funcToThread)(void *), void *parameter, void *stack, u32 stackSize, OSPriority priority, u16 attributes);
     void OSExitThread(void *);
     void OSCancelThread(OSThread *thread);
-    BOOL OSJoinThread(OSThread *thread, void **);
+    bool OSJoinThread(OSThread *thread, void **);
     void OSDetachThread(OSThread *thread);
     s32 OSResumeThread(OSThread *thread);
     s32 OSSuspendThread(OSThread *thread);
@@ -285,7 +285,7 @@ extern "C"
     void OSInitMutex(OSMutex *mutex);
     void OSLockMutex(OSMutex *mutex);
     void OSUnlockMutex(OSMutex *mutex);
-    BOOL OSTryLockMutex(OSMutex *mutex); // false if failed
+    bool OSTryLockMutex(OSMutex *mutex); // false if failed
     void OSInitCond(OSCond *condition);
     void OSWaitCond(OSCond *condition, OSMutex *mutex);
     void OSSignalCond(OSCond *condition);

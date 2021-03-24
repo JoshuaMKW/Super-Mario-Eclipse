@@ -4,6 +4,8 @@
 #include "stage/FileUtils.hxx"
 #include "funcs.hxx"
 
+#include "libs/sAssert.hxx"
+#include "libs/sLogging.hxx"
 #include "libs/sMath.hxx"
 #include "libs/sMemory.hxx"
 #include "libs/sString.hxx"
@@ -22,20 +24,24 @@
 
 #ifndef SME_MAX_SHINES
 #define SME_MAX_SHINES 120
+#else
+#if SME_MAX_SHINES < 0
+#undef SME_MAX_SHINES
+#define SME_MAX_SHINES 0
+#elif SME_MAX_SHINES > 999
+#undef SME_MAX_SHINES
+#define SME_MAX_SHINES 999
+#endif
 #endif
 
 #ifndef KURIBO_NO_TYPES
 #define KURIBO_NO_TYPES
 #endif
 
-#define STRINGIZE(x) STRINGIZE_(x)
-#define STRINGIZE_(x) #x
-
 #define SME_FROM_GPR(reg, var) asm volatile ("mr %0, " #reg : "=r"(var))
 #define SME_TO_GPR(reg, var)   asm volatile ("mr " #reg ", %0" : : "r"(var))
 #define SME_FROM_FPR(reg, var) asm volatile ("fmr %0, " #reg : "=r"(var))
 #define SME_TO_FPR(reg, var)   asm volatile ("fmr " #reg ", %0" : : "r"(var))
-
 
 /* Misc compiler info */
 #define SME_VERSION "v0.4a"

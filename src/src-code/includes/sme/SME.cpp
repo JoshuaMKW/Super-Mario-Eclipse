@@ -130,34 +130,26 @@ extern void setUserCodes(OSAlarm *alarm, OSContext *context);
     extern OSStopwatch gctStopwatch;
 #endif
 
-KURIBO_MODULE_BEGIN("Eclipse", "JoshuaMK", __VERSION__ "[" STRINGIZE(SME_MAX_SHINES) " Shines]")
+KURIBO_MODULE_BEGIN("Eclipse", "JoshuaMK", __VERSION__ "[" SME_STRINGIZE(SME_MAX_SHINES) " Shines]")
 {
-    #ifdef SME_DEBUG
-	    KURIBO_EXECUTE_ON_LOAD {
-            OSReport("Codeblocker - Creating OSAlarm at %p; Calls %p every %0.4f seconds\n", &gctAlarm, &setUserCodes, 0.001f);
-
-            OSInitStopwatch(&gctStopwatch, "Codeblocker");
-            OSCreateAlarm(&gctAlarm);
-            OSSetPeriodicAlarm(&gctAlarm, OSGetTime(), OSMillisecondsToTicks(1), &setUserCodes);
-            OSReport("Actor flags offset = %X\n", offsetof(JDrama::TNameRef, mKeyCode));
-            OSReport("Actor position offset = %X\n", offsetof(JDrama::TPlacement, mPosition));
-            OSReport("Actor size offset = %X\n", offsetof(JDrama::TActor, mSize));
-        }
-	    KURIBO_EXECUTE_ON_UNLOAD {
-            OSReport("-- Destroying Module --\n");
-            OSStopStopwatch(&gctStopwatch);
-            OSCancelAlarm(&gctAlarm);
-        }
-    #else
-        KURIBO_EXECUTE_ON_LOAD {
-            OSCreateAlarm(&gctAlarm);
-            OSSetPeriodicAlarm(&gctAlarm, OSGetTime(), OSMillisecondsToTicks(1), setUserCodes);
-        }
-        KURIBO_EXECUTE_ON_UNLOAD {
-            OSReport("-- Destroying Module --\n");
-            OSCancelAlarm(&gctAlarm);
-        }
-    #endif
+    KURIBO_EXECUTE_ON_LOAD {
+        SME_DEBUG_LOG("Codeblocker - Creating OSAlarm at %p; Calls %p every %0.4f seconds\n", &gctAlarm, &setUserCodes, 0.001f);
+        #ifdef SME_DEBUG
+        OSInitStopwatch(&gctStopwatch, "Codeblocker");
+        #endif
+        OSCreateAlarm(&gctAlarm);
+        OSSetPeriodicAlarm(&gctAlarm, OSGetTime(), OSMillisecondsToTicks(1), &setUserCodes);
+        SME_DEBUG_LOG("Actor flags offset = %X\n", offsetof(JDrama::TNameRef, mKeyCode));
+        SME_DEBUG_LOG("Actor position offset = %X\n", offsetof(JDrama::TPlacement, mPosition));
+        SME_DEBUG_LOG("Actor size offset = %X\n", offsetof(JDrama::TActor, mSize));
+    }
+    KURIBO_EXECUTE_ON_UNLOAD {
+        SME_DEBUG_LOG("-- Destroying Module --\n");
+        #ifdef SME_DEBUG
+        OSStopStopwatch(&gctStopwatch);
+        #endif
+        OSCancelAlarm(&gctAlarm);
+    }
 
 
     /* -- HOOKS -- */

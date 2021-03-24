@@ -1,6 +1,7 @@
 #include "DVD.h"
 
 #include "params/StageParams.hxx"
+#include "libs/sLogging.hxx"
 #include "libs/sString.hxx"
 
 bool SMEFile::openFile(const char *path)
@@ -42,33 +43,23 @@ bool SMEFile::load(const char *stage)
 
     SMEFile::withSMEExtension(configPath, stage);
 
-    #ifdef SME_DEBUG
-        OSReport("Attempting to load local config %s...\n", configPath);
-    #endif
+    SME_DEBUG_LOG("Attempting to load local config %s...\n", configPath);
 
     if (SMEFile::openFile(configPath))
         return true;
 
     SMEFile::withSMEExtension(configPath, stage, true);
 
-    #ifdef SME_DEBUG
-        OSReport("Failure: Now attempting to load global config %s...\n", configPath);
-    #endif
+    SME_DEBUG_LOG("Failure: Now attempting to load global config %s...\n", configPath);
     
     if (SMEFile::openFile(configPath))
     {   
-        #ifdef SME_DEBUG
-            OSReport("Success: SME config loaded at %p\n", &mStageConfig);
-        #endif
-
+        SME_DEBUG_LOG("Success: SME config loaded at %p\n", &mStageConfig);
         return true;
     }
     else
     {
-        #ifdef SME_DEBUG
-            OSReport("Failure: No SME configuration could be loaded\n");
-        #endif
-
+        SME_DEBUG_LOG("Failure: No SME configuration could be loaded\n");
         return false;
     }
 }

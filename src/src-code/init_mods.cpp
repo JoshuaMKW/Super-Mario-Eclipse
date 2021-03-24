@@ -153,7 +153,7 @@ u32 *initFileMods()
 
     if (SMEFile::mStageConfig.load(SME::getStageName(&gpApplication)))
     {
-        OSReport("Success: SME config loaded at %X\n", SMEFile::mStageConfig);
+        SME_DEBUG_LOG("Success: SME config loaded at %X\n", SMEFile::mStageConfig);
         if (characterID < 0)
             characterID = SMEFile::mStageConfig.GlobalFlags.mPlayerID;
     }

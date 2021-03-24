@@ -1,22 +1,23 @@
+#include <assert.h>
+
 #include "OS.h"
 #include "sms/actor/Mario.hxx"
 #include "string.h"
 
+#include "libs/sAssert.hxx"
 #include "libs/sMath.hxx"
 #include "libs/sMemory.hxx"
 #include "params/MarioParams.hxx"
 
 using namespace SME::Class;
 
-PlayerParams::PlayerParams(TMario *player, bool isMario) {
-  mPlayer = player;
-  mPlayerID = 0;
-  mIsEMario = !isMario;
+PlayerParams::PlayerParams(TMario *player, bool isMario)
+    : mInitialized(true), mPlayer(player), mPlayerID(0), mIsEMario(!isMario),
+      mCurJump(0) {
   mFluddHistory.mHadFludd = false;
   mFluddHistory.mMainNozzle = TWaterGun::Spray;
   mFluddHistory.mSecondNozzle = TWaterGun::Hover;
   mFluddHistory.mWaterLevel = 0;
-  mCurJump = 0;
 
   loadPrm(reinterpret_cast<TCustomParams &>(
       *JKRFileLoader::getVolume("mario")->getResource("/params.bin")));
@@ -28,6 +29,7 @@ PlayerParams::PlayerParams(TMario *player, bool isMario) {
 }
 
 void PlayerParams::ParamHistory::applyHistoryTo(TMario *player) {
+  SME_ASSERT(player != nullptr, "Can't apply param history to a nullptr");
   player->mDeParams = mDeParams;
   player->mBodyAngleFreeParams = mBodyAngleFreeParams;
   player->mBodyAngleWaterGunParams = mBodyAngleWaterGunParams;
@@ -65,6 +67,7 @@ void PlayerParams::ParamHistory::applyHistoryTo(TMario *player) {
 }
 
 void PlayerParams::ParamHistory::recordFrom(TMario *player) {
+  SME_ASSERT(player != nullptr, "Can't record param history from a nullptr");
   mDeParams = player->mDeParams;
   mBodyAngleFreeParams = player->mBodyAngleFreeParams;
   mBodyAngleWaterGunParams = player->mBodyAngleWaterGunParams;
@@ -240,22 +243,13 @@ void PlayerParams::setPlayer(TMario *player) {
   mDefaultAttrs.recordFrom(player);
 }
 
-bool PlayerParams::loadPrm() {
-  mParams->load("/Mario/SME.prm");
-  mInitialized = true;
-  return true;
-}
-
-bool PlayerParams::loadPrm(const char *prm) {
+bool PlayerParams::loadPrm(const char *prm = "/Mario/SME.prm") {
   mParams->load(prm);
-  mInitialized = true;
   return true;
 }
 
 bool PlayerParams::loadPrm(TCustomParams &data) {
-  memcpy(mParams, &data, sizeof(TCustomParams));
-
-  mInitialized = true;
+  *mParams = data;
   return true;
 }
 

@@ -45,7 +45,7 @@ struct TCustomParams : public TParams {
     load("/Mario/SME.prm");
   }
 
-  enum FluddCleanType : u8 { NONE, CLEAN, GOOP };
+  enum class FluddCleanType : u8 { NONE, CLEAN, GOOP };
 
   TParamRT<u8> mMaxJumps;
   TParamRT<bool> mCanRideYoshi;
@@ -152,7 +152,6 @@ public:
   void setPlayer(TMario *player) { mPlayer = player; }
 
   bool canUseNozzle(TWaterGun::NozzleType nozzle) const;
-  bool loadPrm();
   bool loadPrm(const char *prm);
   bool loadPrm(TCustomParams &params);
   void resetPlayer() { mDefaultAttrs.applyHistoryTo(mPlayer); };

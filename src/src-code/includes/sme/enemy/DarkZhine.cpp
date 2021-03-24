@@ -69,7 +69,7 @@ TDarkZhine::TDarkZhine(const char *name, bool hardMode) : TBossGesso(name)
         *(f32 *)0x80410150 *= 1.0f;
     }
     this->mGoopLevel = 0xFF;
-    OSReport("Created Zhine boss at %p; Hard mode = %s", this, this->mHardMode ? "True" : "False");
+    SME_DEBUG_LOG("Created Zhine boss at %p; Hard mode = %s", this, this->mHardMode ? "True" : "False");
 }
 
 TDarkZhine::~TDarkZhine()

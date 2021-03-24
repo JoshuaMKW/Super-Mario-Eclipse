@@ -11,7 +11,7 @@
 #define SME_CONCATENATE_(a, b) a##b
 #define SME_CONCATENATE(a, b) SME_CONCATENATE_(a, b)
 
-#define SME_DEBUG_LOG(msg, ...) 
+#define SME_DEBUG_LOG(...) 
 #ifdef SME_DEBUG
-OSReport(msg, ...)
+OSReport(__VA_ARGS__)
 #endif

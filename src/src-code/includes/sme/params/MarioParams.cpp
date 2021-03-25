@@ -12,7 +12,7 @@
 using namespace SME::Class;
 
 PlayerParams::PlayerParams(TMario *player, bool isMario)
-    : mInitialized(true), mPlayer(player), mPlayerID(0), mIsEMario(!isMario),
+    : mPlayer(player), mIsEMario(!isMario), mPlayerID(0), mInitialized(true),
       mCurJump(0) {
   mFluddHistory.mHadFludd = false;
   mFluddHistory.mMainNozzle = TWaterGun::Spray;
@@ -26,87 +26,6 @@ PlayerParams::PlayerParams(TMario *player, bool isMario)
     wearGlass__6TMarioFv(player);
 
   scalePlayerAttrs(mParams->mSizeMultiplier.get());
-}
-
-void PlayerParams::ParamHistory::applyHistoryTo(TMario *player) {
-  SME_ASSERT(player != nullptr, "Can't apply param history to a nullptr");
-  player->mDeParams = mDeParams;
-  player->mBodyAngleFreeParams = mBodyAngleFreeParams;
-  player->mBodyAngleWaterGunParams = mBodyAngleWaterGunParams;
-  player->mPunchFenceParams = mPunchFenceParams;
-  player->mKickRoofParams = mKickRoofParams;
-  player->mJumpParams = mJumpParams;
-  player->mRunParams = mRunParams;
-  player->mSwimParams = mSwimParams;
-  player->mHangFenceParams = mHangFenceParams;
-  player->mHangRoofParams = mHangRoofParams;
-  player->mWireParams = mWireParams;
-  player->mPullBGBeakParams = mPullBGBeakParams;
-  player->mPullBGTentacleParams = mPullBGTentacleParams;
-  player->mPullBGFireWanWanBossTailParams = mPullBGFireWanWanBossTailParams;
-  player->mPullFireWanWanTailParams = mPullFireWanWanTailParams;
-  player->mHoverParams = mHoverParams;
-  player->mDivingParams = mDivingParams;
-  player->mYoshiParams = mYoshiParams;
-  player->mWaterEffectParams = mWaterEffectParams;
-  player->mControllerParams = mControllerParams;
-  player->mGraffitoParams = mGraffitoParams;
-  player->mDirtyParams = mDirtyParams;
-  player->mMotorParams = mMotorParams;
-  player->mParticleParams = mParticleParams;
-  player->mEffectParams = mEffectParams;
-  player->mSlipNormalParams = mSlipNormalParams;
-  player->mSlipOilParams = mSlipOilParams;
-  player->mSlipAllParams = mSlipAllParams;
-  player->mSlipAllSliderParams = mSlipAllSliderParams;
-  player->mSlip45Params = mSlip45Params;
-  player->mSlipWaterSlopeParams = mSlipWaterSlopeParams;
-  player->mSlipWaterGroundParams = mSlipWaterGroundParams;
-  player->mSlipYoshiParams = mSlipYoshiParams;
-  player->mUpperBodyParams = mUpperBodyParams;
-}
-
-void PlayerParams::ParamHistory::recordFrom(TMario *player) {
-  SME_ASSERT(player != nullptr, "Can't record param history from a nullptr");
-  mDeParams = player->mDeParams;
-  mBodyAngleFreeParams = player->mBodyAngleFreeParams;
-  mBodyAngleWaterGunParams = player->mBodyAngleWaterGunParams;
-  mPunchFenceParams = player->mPunchFenceParams;
-  mKickRoofParams = player->mKickRoofParams;
-  mJumpParams = player->mJumpParams;
-  mRunParams = player->mRunParams;
-  mSwimParams = player->mSwimParams;
-  mHangFenceParams = player->mHangFenceParams;
-  mHangRoofParams = player->mHangRoofParams;
-  mWireParams = player->mWireParams;
-  mPullBGBeakParams = player->mPullBGBeakParams;
-  mPullBGTentacleParams = player->mPullBGTentacleParams;
-  mPullBGFireWanWanBossTailParams = player->mPullBGFireWanWanBossTailParams;
-  mPullFireWanWanTailParams = player->mPullFireWanWanTailParams;
-  mHoverParams = player->mHoverParams;
-  mDivingParams = player->mDivingParams;
-  mYoshiParams = player->mYoshiParams;
-  mWaterEffectParams = player->mWaterEffectParams;
-  mControllerParams = player->mControllerParams;
-  mGraffitoParams = player->mGraffitoParams;
-  mDirtyParams = player->mDirtyParams;
-  mMotorParams = player->mMotorParams;
-  mParticleParams = player->mParticleParams;
-  mEffectParams = player->mEffectParams;
-  mSlipNormalParams = player->mSlipNormalParams;
-  mSlipOilParams = player->mSlipOilParams;
-  mSlipAllParams = player->mSlipAllParams;
-  mSlipAllSliderParams = player->mSlipAllSliderParams;
-  mSlip45Params = player->mSlip45Params;
-  mSlipWaterSlopeParams = player->mSlipWaterSlopeParams;
-  mSlipWaterGroundParams = player->mSlipWaterGroundParams;
-  mSlipYoshiParams = player->mSlipYoshiParams;
-  mUpperBodyParams = player->mUpperBodyParams;
-}
-
-void PlayerParams::ParamHistory::reset() {
-  mHasHistory = false;
-  memset(this, 0, sizeof(ParamHistory));
 }
 
 void PlayerParams::scalePlayerAttrs(f32 scale) {
@@ -273,3 +192,106 @@ bool PlayerParams::canUseNozzle(TWaterGun::NozzleType nozzle) const {
     return false;
   }
 }
+
+void PlayerParams::ParamHistory::applyHistoryTo(TMario *player) {
+  SME_ASSERT(player != nullptr, "Can't apply param history to a nullptr");
+  player->mDeParams = mDeParams;
+  player->mBodyAngleFreeParams = mBodyAngleFreeParams;
+  player->mBodyAngleWaterGunParams = mBodyAngleWaterGunParams;
+  player->mPunchFenceParams = mPunchFenceParams;
+  player->mKickRoofParams = mKickRoofParams;
+  player->mJumpParams = mJumpParams;
+  player->mRunParams = mRunParams;
+  player->mSwimParams = mSwimParams;
+  player->mHangFenceParams = mHangFenceParams;
+  player->mHangRoofParams = mHangRoofParams;
+  player->mWireParams = mWireParams;
+  player->mPullBGBeakParams = mPullBGBeakParams;
+  player->mPullBGTentacleParams = mPullBGTentacleParams;
+  player->mPullBGFireWanWanBossTailParams = mPullBGFireWanWanBossTailParams;
+  player->mPullFireWanWanTailParams = mPullFireWanWanTailParams;
+  player->mHoverParams = mHoverParams;
+  player->mDivingParams = mDivingParams;
+  player->mYoshiParams = mYoshiParams;
+  player->mWaterEffectParams = mWaterEffectParams;
+  player->mControllerParams = mControllerParams;
+  player->mGraffitoParams = mGraffitoParams;
+  player->mDirtyParams = mDirtyParams;
+  player->mMotorParams = mMotorParams;
+  player->mParticleParams = mParticleParams;
+  player->mEffectParams = mEffectParams;
+  player->mSlipNormalParams = mSlipNormalParams;
+  player->mSlipOilParams = mSlipOilParams;
+  player->mSlipAllParams = mSlipAllParams;
+  player->mSlipAllSliderParams = mSlipAllSliderParams;
+  player->mSlip45Params = mSlip45Params;
+  player->mSlipWaterSlopeParams = mSlipWaterSlopeParams;
+  player->mSlipWaterGroundParams = mSlipWaterGroundParams;
+  player->mSlipYoshiParams = mSlipYoshiParams;
+  player->mUpperBodyParams = mUpperBodyParams;
+}
+
+PlayerParams::ParamHistory::ParamHistory(TMario *player = nullptr)
+    : mDeParams(), mBodyAngleFreeParams("/Mario/BodyAngleFree.prm"),
+      mBodyAngleWaterGunParams("/Mario/BodyAngleWaterGun.prm"),
+      mPunchFenceParams("/Mario/AttackFencePunch.prm"),
+      mKickRoofParams("/Mario/AttackKickRoof.prm"), mJumpParams(), mRunParams(),
+      mSwimParams(), mHangFenceParams(), mHangRoofParams(), mWireParams(),
+      mPullBGBeakParams("/Mario/PullParamBGBeak.prm"),
+      mPullBGTentacleParams("/Mario/PullParamBGTentacle.prm"),
+      mPullBGFireWanWanBossTailParams(
+          "/Mario/PullParamBGFireWanWanBossTail.prm"),
+      mPullFireWanWanTailParams("/Mario/PullParamFireWanWanTail.prm"),
+      mHoverParams(), mDivingParams(), mYoshiParams(), mWaterEffectParams(),
+      mControllerParams(), mGraffitoParams(), mDirtyParams(), mMotorParams(),
+      mParticleParams(), mEffectParams(),
+      mSlipNormalParams("/Mario/SlipParamNormal.prm"),
+      mSlipOilParams("/Mario/SlipParamOil.prm"),
+      mSlipAllParams("/Mario/SlipParamAll.prm"),
+      mSlipAllSliderParams("/Mario/SlipParamAll_Slider.prm"),
+      mSlip45Params("/Mario/SlipParam45.prm"),
+      mSlipWaterSlopeParams("/Mario/SlipParamWaterSlope.prm"),
+      mSlipWaterGroundParams("/Mario/SlipParamWaterGround.prm"),
+      mSlipYoshiParams("/Mario/SlipParamYoshi.prm"), mUpperBodyParams() {
+  recordFrom(player);
+}
+
+void PlayerParams::ParamHistory::recordFrom(TMario *player) {
+  SME_ASSERT(player != nullptr, "Can't record param history from a nullptr");
+  mDeParams = player->mDeParams;
+  mBodyAngleFreeParams = player->mBodyAngleFreeParams;
+  mBodyAngleWaterGunParams = player->mBodyAngleWaterGunParams;
+  mPunchFenceParams = player->mPunchFenceParams;
+  mKickRoofParams = player->mKickRoofParams;
+  mJumpParams = player->mJumpParams;
+  mRunParams = player->mRunParams;
+  mSwimParams = player->mSwimParams;
+  mHangFenceParams = player->mHangFenceParams;
+  mHangRoofParams = player->mHangRoofParams;
+  mWireParams = player->mWireParams;
+  mPullBGBeakParams = player->mPullBGBeakParams;
+  mPullBGTentacleParams = player->mPullBGTentacleParams;
+  mPullBGFireWanWanBossTailParams = player->mPullBGFireWanWanBossTailParams;
+  mPullFireWanWanTailParams = player->mPullFireWanWanTailParams;
+  mHoverParams = player->mHoverParams;
+  mDivingParams = player->mDivingParams;
+  mYoshiParams = player->mYoshiParams;
+  mWaterEffectParams = player->mWaterEffectParams;
+  mControllerParams = player->mControllerParams;
+  mGraffitoParams = player->mGraffitoParams;
+  mDirtyParams = player->mDirtyParams;
+  mMotorParams = player->mMotorParams;
+  mParticleParams = player->mParticleParams;
+  mEffectParams = player->mEffectParams;
+  mSlipNormalParams = player->mSlipNormalParams;
+  mSlipOilParams = player->mSlipOilParams;
+  mSlipAllParams = player->mSlipAllParams;
+  mSlipAllSliderParams = player->mSlipAllSliderParams;
+  mSlip45Params = player->mSlip45Params;
+  mSlipWaterSlopeParams = player->mSlipWaterSlopeParams;
+  mSlipWaterGroundParams = player->mSlipWaterGroundParams;
+  mSlipYoshiParams = player->mSlipYoshiParams;
+  mUpperBodyParams = player->mUpperBodyParams;
+}
+
+void PlayerParams::ParamHistory::reset() { *this = ParamHistory(); }

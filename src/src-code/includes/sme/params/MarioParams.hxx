@@ -84,6 +84,8 @@ class PlayerParams {
 
 public:
   struct ParamHistory {
+    ParamHistory(TMario *);
+
     bool hasHistory() const { return mHasHistory; }
 
     void applyHistoryTo(TMario *player);

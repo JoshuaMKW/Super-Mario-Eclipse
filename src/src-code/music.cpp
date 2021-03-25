@@ -3,6 +3,38 @@
 
 #include "SME.hxx"
 
+static bool startStreamedBGM(MSStageInfo musicID, bool loopMusic) {
+  char buffer[0x20];
+  DVDFileInfo *handle = (DVDFileInfo *)0x803FDB7C;
+
+  sprintf(buffer, "/AudioRes/Streams/Music/%lu.adp", (u32)(musicID & 0x3FF));
+
+  if (!DVDOpen(buffer, handle))
+    return false;
+
+  MSBgm::stopBGM(gStageBGM, 32);
+  DVDPrepareStreamAsync(handle, 0, 0, (DVDCallback)0x803184E4);
+
+  if (!loopMusic)
+    DVDStopStreamAtEndAsync(&handle->mCmdBlock, 0);
+  return true;
+}
+
+static bool startStreamedSFX(u32 sfxID) {
+  char buffer[0x20];
+  DVDFileInfo *handle = (DVDFileInfo *)0x803FDB7C;
+
+  sprintf(buffer, "/AudioRes/Streams/SFX/%lu.adp", (sfxID & 0x3FF));
+
+  if (!DVDOpen(buffer, handle))
+    return false;
+
+  DVDPrepareStreamAsync(handle, 0, 0, (DVDCallback)0x803184E4);
+  DVDStopStreamAtEndAsync(&handle->mCmdBlock, 0);
+
+  return true;
+}
+
 // 0x80016998
 u32 SME::Patch::Music::setIsValid(MSStageInfo musicID) {
   gInfo.Context.mIsAudioStreamAllowed = SME::Util::Music::isValidBGM(musicID);

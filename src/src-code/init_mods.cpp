@@ -17,13 +17,9 @@ extern void setUserCodes(OSAlarm *alarm, OSContext *context);
 GlobalSMEDataStruct gInfo;
 Memory::Protection::MemoryMap gCodeProtector;
 
-namespace Init
-{
-
-}
 // 0x80005328
 // extern -> SME.cpp
-void initCodeProtection()
+void SME::Patch::Init::initCodeProtection()
 {
     OSInit();
     gCodeProtector.setIndex(2);
@@ -35,7 +31,7 @@ void initCodeProtection()
 
 // 0x802A750C
 // extern -> SME.cpp
-JKRExpHeap *createGlobalHeaps(void *newHeap, size_t size, JKRHeap *rootHeap, bool unk_1)
+JKRExpHeap *SME::Patch::Init::createGlobalHeaps(void *newHeap, size_t size, JKRHeap *rootHeap, bool unk_1)
 {
     gInfo.mCharacterHeap = JKRExpHeap::create(0x200000, JKRHeap::sRootHeap, false);
     gInfo.mGlobalsHeap = JKRExpHeap::create(0x10000, JKRHeap::sRootHeap, false);
@@ -45,7 +41,7 @@ JKRExpHeap *createGlobalHeaps(void *newHeap, size_t size, JKRHeap *rootHeap, boo
 
 // 0x802A7140
 // extern -> SME.cpp
-u32 setupMarioDatas(char *filepath)
+u32 SME::Patch::Init::setupMarioDatas(char *filepath)
 {
     TMarioGamePad *gpGamePad = gpApplication.mGamePad1;
     u32 id;
@@ -74,14 +70,14 @@ u32 setupMarioDatas(char *filepath)
 
 // 0x802A716C
 // extern -> SME.cpp
-u32 *initFirstModel(char *path, u32 unk_1, u32 unk_2, u32 unk_3, JKRHeap *heap, u32 unk_4, u32 unk_5, u32 unk_6)
+u32 *SME::Patch::Init::initFirstModel(char *path, u32 unk_1, u32 unk_2, u32 unk_3, JKRHeap *heap, u32 unk_4, u32 unk_5, u32 unk_6)
 {
     if (gInfo.mCharacterHeap)
     {
         heap = gInfo.mCharacterHeap;
         freeAll__10JKRExpHeapFv(gInfo.mCharacterHeap);
     }
-    u32 *file = reinterpret_cast<u32 *>(SME::loadArchive(path, heap));
+    u32 *file = reinterpret_cast<u32 *>(SME::Util::loadArchive(path, heap));
 
     if (file)
         Memory::hmalloc(gInfo.mCharacterHeap, (0x1F0000 - file[1]) & -32, 32);
@@ -91,7 +87,7 @@ u32 *initFirstModel(char *path, u32 unk_1, u32 unk_2, u32 unk_3, JKRHeap *heap, 
     return file;
 }
 
-void resetGlobalValues()
+static void resetGlobalValues()
 {
     gModelWaterManagerWaterColor.set(0x3C, 0x46, 0x78, 0x14); //Water rgba
     gYoshiJuiceColor[0].set(0xFE, 0xA8, 0x02, 0x6E); //Yoshi Juice rgba
@@ -108,7 +104,7 @@ void resetGlobalValues()
 }
 
 //0x802998B4
-u32 *initFileMods()
+u32 *SME::Patch::Init::initFileMods()
 {
     u32 *objList;
     SME_FROM_GPR(r26, objList);
@@ -151,7 +147,7 @@ u32 *initFileMods()
     resetGlobalValues();
     SMEFile::mStageConfig.reset();
 
-    if (SMEFile::mStageConfig.load(SME::getStageName(&gpApplication)))
+    if (SMEFile::mStageConfig.load(SME::Util::getStageName(&gpApplication)))
     {
         SME_DEBUG_LOG("Success: SME config loaded at %X\n", SMEFile::mStageConfig);
         if (characterID < 0)
@@ -165,7 +161,7 @@ u32 *initFileMods()
         
         gInfo.mCharacterHeap->freeAll();
 
-        u32 *marioData = reinterpret_cast<u32 *>(SME::loadArchive(buffer, gInfo.mCharacterHeap));
+        u32 *marioData = reinterpret_cast<u32 *>(SME::Util::loadArchive(buffer, gInfo.mCharacterHeap));
         *(u32 *)gpArcBufferMario = (u32)marioData;
 
         gInfo.mCharacterHeap->alloc((0x1F0000 - marioData[1]) & -32, 32);
@@ -211,7 +207,7 @@ u32 *initFileMods()
 }
 
 //0x80280180
-void initShineShadow()
+void SME::Patch::Init::initShineShadow()
 {
     if (SMEFile::mStageConfig.FileHeader.mMAGIC != SMEFile::MAGIC || !SMEFile::mStageConfig.GlobalFlags.mIsShineShadow)
         return;
@@ -230,7 +226,7 @@ void initShineShadow()
         gpModelWaterManager->LightType.mMaskObjects = true;
         gpModelWaterManager->LightType.mShowShadow = true;
 
-        if (SMEFile::mStageConfig.GlobalFlags.mShineShadowFlag == LightContext::FOLLOWPLAYER)
+        if (SMEFile::mStageConfig.GlobalFlags.mShineShadowFlag == SME::Enum::LightContext::FOLLOWPLAYER)
         {
             gInfo.Light.mNextSize = SMEFile::mStageConfig.Light.mSize;
             for (u32 i = 0; i < TFlagManager::smInstance->Type4Flag.mShineCount; ++i)
@@ -244,26 +240,22 @@ void initShineShadow()
     }
     else
     {
-        gInfo.Light.mLightType = LightContext::DISABLED;
+        gInfo.Light.mLightType = SME::Enum::LightContext::DISABLED;
     }
 }
 
 //0x802B7A4C
-void initSoundBank(u8 areaID, u8 episodeID)
+void SME::Patch::Init::initSoundBank(u8 areaID, u8 episodeID)
 {
     if (SMEFile::mStageConfig.FileHeader.mMAGIC != SMEFile::MAGIC || !SMEFile::mStageConfig.GlobalFlags.mIsMusic)
-    {
         setMSoundEnterStage__10MSMainProcFUcUc(areaID, episodeID);
-    }
     else
-    {
         setMSoundEnterStage__10MSMainProcFUcUc(SMEFile::mStageConfig.Music.mAreaID, SMEFile::mStageConfig.Music.mEpisodeID);
-    }
 }
 
 //0x802983F0
 //0x80298420
-void initMusicTrack()
+void SME::Patch::Init::initMusicTrack()
 {
     if (SMEFile::mStageConfig.Music.mPlayMusic)
     {
@@ -275,9 +267,9 @@ void initMusicTrack()
     startStageBGM__10MSMainProcFUcUc();
 }
 
-void initFludd(TMario *player)
+static void initFludd(TMario *player)
 {
-    MarioParamsFile *params = player->mCustomInfo->mParams;
+    SME::Class::TCustomParams *params = player->mCustomInfo->mParams;
 
     if (params)
     {
@@ -330,7 +322,7 @@ void initFludd(TMario *player)
     }
 }
 
-void initMario(TMario *player, bool isMario)
+static void initMario(TMario *player, bool isMario)
 {
     player->mCustomInfo = (MarioParams *)Memory::malloc(sizeof(MarioParams), 32);
     player->mCustomInfo->mParams = nullptr;
@@ -369,7 +361,7 @@ void initMario(TMario *player, bool isMario)
 
 
 //0x80276C94
-TMario *fromMarioInit(TMario *player)
+TMario *SME::Patch::Init::fromMarioInit(TMario *player)
 {
     TMario *(*virtualFunc)(TMario *);
     SME_FROM_GPR(r12, virtualFunc);
@@ -380,7 +372,7 @@ TMario *fromMarioInit(TMario *player)
 }
 
 //0x800397DC
-bool fromShadowMarioInit()
+bool SME::Patch::Init::fromShadowMarioInit()
 {
     TMario *player;
     asm volatile ( "lwz %0, 0x150 (r31)" : "=r"(player));
@@ -390,7 +382,7 @@ bool fromShadowMarioInit()
 
 
 //0x80271580
-void initYoshi(void *anmSound, void *r4, u32 r5, f32 f1)
+void SME::Patch::Init::initYoshi(void *anmSound, void *r4, u32 r5, f32 f1)
 {
     initAnmSound__9MAnmSoundFPvUlf(anmSound, r4, r5, f1);
 
@@ -416,7 +408,7 @@ void initYoshi(void *anmSound, void *r4, u32 r5, f32 f1)
 }
 
 //0x8029CCB0
-void initCardColors()
+void SME::Patch::Init::initCardColors()
 {
     if (SMEFile::mStageConfig.FileHeader.mMAGIC == SMEFile::MAGIC && SMEFile::mStageConfig.GlobalFlags.mIsYoshi)
     {
@@ -428,10 +420,10 @@ void initCardColors()
     if (SMEFile::mStageConfig.FileHeader.mMAGIC == SMEFile::MAGIC && SMEFile::mStageConfig.GlobalFlags.mIsFludd && SMEFile::mStageConfig.Fludd.mIsColorWater)
     {
         gpMarDirector->mGCConsole->mWaterLeftPanel = SMEFile::mStageConfig.Fludd.mWaterColor;
-        gpMarDirector->mGCConsole->mWaterRightPanel.R = lerp<u8>(0, SMEFile::mStageConfig.Fludd.mWaterColor.R, 0.8125);
-        gpMarDirector->mGCConsole->mWaterRightPanel.G = lerp<u8>(0, SMEFile::mStageConfig.Fludd.mWaterColor.G, 0.8125);
-        gpMarDirector->mGCConsole->mWaterRightPanel.B = lerp<u8>(0, SMEFile::mStageConfig.Fludd.mWaterColor.B, 0.8125);
-        gpMarDirector->mGCConsole->mWaterRightPanel.A = lerp<u8>(0, SMEFile::mStageConfig.Fludd.mWaterColor.A, 0.8125);
+        gpMarDirector->mGCConsole->mWaterRightPanel.r = SME::Util::Math::lerp<u8>(0, SMEFile::mStageConfig.Fludd.mWaterColor.r, 0.8125);
+        gpMarDirector->mGCConsole->mWaterRightPanel.g = SME::Util::Math::lerp<u8>(0, SMEFile::mStageConfig.Fludd.mWaterColor.g, 0.8125);
+        gpMarDirector->mGCConsole->mWaterRightPanel.b = SME::Util::Math::lerp<u8>(0, SMEFile::mStageConfig.Fludd.mWaterColor.b, 0.8125);
+        gpMarDirector->mGCConsole->mWaterRightPanel.a = SME::Util::Math::lerp<u8>(0, SMEFile::mStageConfig.Fludd.mWaterColor.a, 0.8125);
     }
 }
 
@@ -463,7 +455,7 @@ static void parseWarpLinks(TMapCollisionData *col, WarpCollisionList *links, u32
 }
 
 //0x802B8B20
-u32 initCollisionWarpLinks(const char *name)
+u32 SME::Patch::Init::initCollisionWarpLinks(const char *name)
 {
     WarpCollisionList *warpDataArray = (WarpCollisionList *)Memory::malloc(sizeof(WarpCollisionList), 32);
     WarpCollisionList *warpDataPreserveArray = (WarpCollisionList *)Memory::malloc(sizeof(WarpCollisionList), 32);
@@ -480,14 +472,14 @@ u32 initCollisionWarpLinks(const char *name)
 }
 
 //0x802B57E4
-void createUIHeap(u32 size, s32 alignment)
+void SME::Patch::Init::createUIHeap(u32 size, s32 alignment)
 {
     gInfo.mGame6Heap = JKRExpHeap::create(size, JKRHeap::sSystemHeap, false);
     gpMarDirector->mGame6Data = (u32 *)Memory::malloc(size, alignment);
 }
 
 //0x802A72A4
-u32 initHUDElements(char *filepath)
+u32 SME::Patch::Init::initHUDElements(char *filepath)
 {
     char buffer[32];
     s32 entrynum;
@@ -513,7 +505,7 @@ static JKRMemArchive *switchArchive(char *curArchive, void *newArchive)
 }
 
 //0x80172440
-JKRMemArchive *switchHUDOnStageLoad(char *curArchive, u32 *gameUI)
+JKRMemArchive *SME::Patch::Init::switchHUDOnStageLoad(char *curArchive, u32 *gameUI)
 {
     char buffer[32];
 
@@ -536,7 +528,7 @@ JKRMemArchive *switchHUDOnStageLoad(char *curArchive, u32 *gameUI)
 //kmCall(0x80172440, &switchHUDOnStageLoad);
 
 //0x802B57E4
-JKRHeap *useCustomHUDHeap(u32 size, s32 alignment)
+JKRHeap *SME::Patch::Init::useCustomHUDHeap(u32 size, s32 alignment)
 {
     return gInfo.mGame6Heap;
 }

@@ -4,7 +4,9 @@
 #include "sms/game/Application.hxx"
 #include "SME.hxx"
 
-s8 SME::getCharacterID(JUTGamePad *controller = nullptr)
+using namespace SME;
+
+s8 Util::getCharacterID(JUTGamePad *controller = nullptr)
 {
     if (!controller)
         return gInfo.mCurrentStageConfig->GlobalFlags.mPlayerID;
@@ -25,7 +27,7 @@ s8 SME::getCharacterID(JUTGamePad *controller = nullptr)
         return -1;
     }
 }
-const char *SME::getStageName(TApplication *gpApplication)
+const char *Util::getStageName(TApplication *gpApplication)
 {
     AreaEpisodeArray *AreaPathArray = gpApplication->mStringPaths;
 
@@ -46,7 +48,7 @@ const char *SME::getStageName(TApplication *gpApplication)
     return (char *)(StageArrayStart[(gpApplication->mCurrentScene.mEpisodeID << 2) + (0xC / 4)]);
 }
 
-void *SME::loadArchive(char *path, JKRHeap *heap)
+void *Util::loadArchive(char *path, JKRHeap *heap)
 {
     SME_DEBUG_LOG("Loading \"%s\" into memory...\n", path);
     if (DVDConvertPathToEntrynum(path) >= 0)

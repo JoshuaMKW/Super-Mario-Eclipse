@@ -1,5 +1,7 @@
 #pragma once
 
+#ifdef ZHINE_BOSS
+
 #include "sms/JSystem/JGeometry.hxx"
 #include "sms/enemy/BossGesso.hxx"
 
@@ -156,3 +158,5 @@ public:
     bool isTargetInRangeToHome(JGeometry::TVec3<f32> home, f32 r);
     void perform_(TMario *player);
 };
+
+#endif

@@ -5,7 +5,9 @@
 
 #include "SME.hxx"
 
-TCheatHandler gDebugModeHandler;
+using namespace SME;
+
+Class::TCheatHandler gDebugModeHandler;
 
 static u16 gDebugModeCheatCode[] = {TMarioGamePad::Buttons::DPAD_UP,
                                     TMarioGamePad::Buttons::DPAD_UP,
@@ -21,8 +23,22 @@ static u16 gDebugModeCheatCode[] = {TMarioGamePad::Buttons::DPAD_UP,
 
 J2DTextBox *gDebugTextBox;
 
+static void debugModeNotify(Class::TCheatHandler *)
+{
+    if (gpMSound->gateCheck(MSound::SE_SHINE_TOUCH))
+        startSoundActor__Q214MSoundSESystem8MSoundSEFUlPC3VecUlPP8JAISoundUlUc(gpMSound,
+                                                                               MSound::SE_SHINE_TOUCH,
+                                                                               0, 0, 0, 4);
+
+    Memory::PPC::write<u32>((void *)0x802A6788, 0x3BC00009);
+
+    #ifndef SME_DEBUG
+        gDebugTextBox->isVisible = true;
+    #endif
+}
+
 // extern runtime_mods.cpp
-void drawCheatText()
+void Patch::Cheat::drawCheatText()
 {
     if (gDebugTextBox && gDebugTextBox->getStringPtr())
     {
@@ -37,23 +53,10 @@ void drawCheatText()
     }
 }
 
-static void debugModeNotify(TCheatHandler *)
-{
-    if (gpMSound->gateCheck(MSound::SE_SHINE_TOUCH))
-        startSoundActor__Q214MSoundSESystem8MSoundSEFUlPC3VecUlPP8JAISoundUlUc(gpMSound,
-                                                                               MSound::SE_SHINE_TOUCH,
-                                                                               0, 0, 0, 4);
-
-    Memory::PPC::write((void *)0x802A6788, 0x3BC00009);
-
-    #ifndef SME_DEBUG
-        gDebugTextBox->isVisible = true;
-    #endif
-}
 
 // 0x80295B6C
 // extern -> SME.cpp
-void *handleDebugCheat(void *GCLogoDir)
+void *Patch::Cheat::handleDebugCheat(void *GCLogoDir)
 {
     if (!gDebugModeHandler.isInitialized())
     {

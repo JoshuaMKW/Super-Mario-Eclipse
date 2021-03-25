@@ -1,5 +1,5 @@
 
-#include "GlobalSMEDataStruct.hxx"
+#include "Globals.hxx"
 #include "CheatHandler.hxx"
 #include "stage/FileUtils.hxx"
 #include "funcs.hxx"
@@ -8,6 +8,7 @@
 #include "libs/sLogging.hxx"
 #include "libs/sMath.hxx"
 #include "libs/sMemory.hxx"
+#include "libs/sMusic.hxx"
 #include "libs/sString.hxx"
 
 #include "params/MarioParams.hxx"
@@ -33,6 +34,8 @@
 #define SME_MAX_SHINES 999
 #endif
 #endif
+
+#define SME_MAX_PLAYERS 1
 
 #ifndef KURIBO_NO_TYPES
 #define KURIBO_NO_TYPES
@@ -65,14 +68,10 @@
 #define SME_EXTERN_C extern
 #endif
 
-// init_mods.cpp
-extern GlobalSMEDataStruct gInfo;
-extern TCheatHandler gDebugModeHandler;
-
-SME_EXTERN_C OSBootInfo BootInfo;
 
 namespace SME
 {
+    
 
 inline bool isGameEmulated() { return BootInfo.mConsoleType == OS_CONSOLE_DEV_KIT3; }
 
@@ -83,9 +82,31 @@ namespace Util
 namespace Patch
 {
 
+namespace Cheat
+{
+void drawCheatText();
+void *handleDebugCheat(void *GCLogoDir);
+}
+
 namespace Init
 {
-    //fill out
+    void initCodeProtection();
+    JKRExpHeap *createGlobalHeaps(void *newHeap, size_t size, JKRHeap *rootHeap, bool unk_1);
+    u32 setupMarioDatas(char *filepath);
+    u32 *initFirstModel(char *path, u32 unk_1, u32 unk_2, u32 unk_3, JKRHeap *heap, u32 unk_4, u32 unk_5, u32 unk_6);
+    u32 *initFileMods();
+    void initShineShadow();
+    void initSoundBank(u8 areaID, u8 episodeID);
+    void initMusicTrack();
+    TMario *fromMarioInit(TMario *player);
+    bool fromShadowMarioInit();
+    void initYoshi(void *anmSound, void *r4, u32 r5, f32 f1);
+    void initCardColors();
+    u32 initCollisionWarpLinks(const char *name);
+    void createUIHeap(u32 size, s32 alignment);
+    u32 initHUDElements(char *filepath);
+    JKRMemArchive *switchHUDOnStageLoad(char *curArchive, u32 *gameUI);
+    JKRHeap *useCustomHUDHeap(u32 size, s32 alignment);
 }
 
 namespace Music
@@ -143,3 +164,9 @@ void restoreNozzles(TMario *player);
 }
 }
 }
+
+// init_mods.cpp
+extern SME::TGlobals gInfo;
+extern SME::Class::TCheatHandler gDebugModeHandler;
+
+SME_EXTERN_C OSBootInfo BootInfo;

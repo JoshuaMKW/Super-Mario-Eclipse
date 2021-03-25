@@ -2,6 +2,9 @@
 
 #include "sms/actor/Mario.hxx"
 
+namespace SME::Class
+{
+
 class TCheatHandler
 {
     void (*mSuccessCallback)(TCheatHandler *);
@@ -27,3 +30,5 @@ public:
     void advanceInput();
     void reset();
 };
+
+}

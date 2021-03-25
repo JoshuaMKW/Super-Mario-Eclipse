@@ -151,7 +151,6 @@ KURIBO_MODULE_BEGIN("Eclipse", "JoshuaMK", __VERSION__ "[" SME_STRINGIZE(SME_MAX
         OSCancelAlarm(&gctAlarm);
     }
 
-
     /* -- HOOKS -- */
 
     // c_kit.cpp

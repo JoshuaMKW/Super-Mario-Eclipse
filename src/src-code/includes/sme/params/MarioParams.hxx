@@ -80,7 +80,7 @@ struct TCustomParams : public TParams {
   TParamRT<char[32]> mName;
 };
 
-class PlayerParams {
+class TPlayerParams {
 
 public:
   struct ParamHistory {
@@ -138,8 +138,8 @@ public:
     bool mHadFludd;
   };
 
-  PlayerParams() = delete;
-  PlayerParams(TMario *player, bool isMario);
+  TPlayerParams() = delete;
+  TPlayerParams(TMario *player, bool isMario);
 
   u8 getMaxJumps() const { return mParams->mMaxJumps.get(); }
   const TCustomParams *getParams() const { return mParams; }

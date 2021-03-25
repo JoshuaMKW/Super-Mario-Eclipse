@@ -1,3 +1,5 @@
+#ifdef ZHINE_BOSS
+
 #include "DarkZhine.hxx"
 
 #include "SME.hxx"
@@ -447,3 +449,5 @@ void control_(TDarkZhine *thisZhine)
 //0x800FFFAC = remove tentacles BLR, 0x800764CC perform tentacles?
 
 //0x802A9D54 = TBossGesso Class Size
+
+#endif

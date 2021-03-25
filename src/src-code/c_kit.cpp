@@ -155,11 +155,11 @@ bool manageLightSize()
     s32 &PrevShineCount = gInfo.Light.mPrevShineCount;
     switch (gInfo.Light.mLightType)
     {
-    case LightContext::STATIC: {
+    case SME::Enum::LightContext::STATIC: {
         if (SMEFile::mStageConfig.Light.mDarkLevel != 255)
             gpModelWaterManager->mDarkLevel = SMEFile::mStageConfig.Light.mDarkLevel;
         else if (CurrentShineCount < SME_MAX_SHINES)
-            gpModelWaterManager->mDarkLevel = lerp<u8>(30, 190,
+            gpModelWaterManager->mDarkLevel = SME::Util::Math::lerp<u8>(30, 190,
                                                        static_cast<f32>(CurrentShineCount) /
                                                            static_cast<f32>(SME_MAX_SHINES));
         else
@@ -167,7 +167,7 @@ bool manageLightSize()
             if (gpModelWaterManager->mDarkLevel < 255)
                 gpModelWaterManager->mDarkLevel += 1;
             else
-                gInfo.Light.mLightType = LightContext::DISABLED;
+                gInfo.Light.mLightType = SME::Enum::LightContext::DISABLED;
         }
 
         gShineShadowPos = gInfo.Light.mShineShadowCoordinates;
@@ -202,7 +202,7 @@ bool manageLightSize()
             gInfo.Light.mStepContext = 0.0f;
         }
 
-        f32 cur = sigmoidCurve(gInfo.Light.mStepContext, gInfo.Light.mPrevSize,
+        f32 cur = SME::Util::Math::sigmoidCurve(gInfo.Light.mStepContext, gInfo.Light.mPrevSize,
                                gInfo.Light.mNextSize, sigOfs, sigStrength);
 
         if (gpModelWaterManager->mSize > 70000.0f)
@@ -230,8 +230,8 @@ bool manageLightSize()
         }
         break;
     }
-    case LightContext::FOLLOWPLAYER: {
-        gpModelWaterManager->mDarkLevel = SMEFile::mStageConfig.Light.mDarkLevel;
+    case SME::Enum::LightContext::FOLLOWPLAYER: {
+        gpModelWaterManager->mDarkLevel = SME::Class::SMEFile::mStageConfig.Light.mDarkLevel;
         gShineShadowPos.x = gpMarioPos->x + gInfo.Light.mShineShadowCoordinates.x;
         gShineShadowPos.y = gpMarioPos->y + gInfo.Light.mShineShadowCoordinates.y;
         gShineShadowPos.z = gpMarioPos->z + gInfo.Light.mShineShadowCoordinates.z;
@@ -240,7 +240,7 @@ bool manageLightSize()
     default:
         break;
     }
-    return gInfo.Light.mLightType != LightContext::DISABLED && gpMarDirector->mAreaID != TGameSequence::OPTION;
+    return gInfo.Light.mLightType != SME::Enum::LightContext::DISABLED && gpMarDirector->mAreaID != TGameSequence::OPTION;
 }
 
 //0x802571F0

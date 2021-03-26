@@ -17,7 +17,7 @@ TVectorTriangle &TVectorTriangle::operator=(TVectorTriangle &other)
 
 f32 TVectorTriangle::bearingAngleY(JGeometry::TVec3<f32> a, JGeometry::TVec3<f32> b)
 {
-    return RadiansToAngle(atan2f(b.x - a.x, b.z - a.z));
+    return radiansToAngle(atan2f(b.x - a.x, b.z - a.z));
 }
 
 JGeometry::TVec3<f32> TVectorTriangle::cross(JGeometry::TVec3<f32> a, JGeometry::TVec3<f32> b)

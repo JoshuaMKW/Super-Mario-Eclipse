@@ -28,7 +28,6 @@ public:
     TBGCheckData *resolveCollisionWarp(TBGCheckData *colTriangle);
     TBGCheckData *getNearestTarget(TBGCheckData *colTriangle);
 
-private:
     u8 mArrayLength;              //0x0000
     TCollisionLink mColList[0xFF]; //0x0004
 };

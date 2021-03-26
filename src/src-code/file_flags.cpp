@@ -18,7 +18,7 @@ TCardBookmarkInfo *setFileCompleteBool(TCardManager *cardManager)
 {
     TCardBookmarkInfo *bookmarkData = cardManager->getBookmarkInfos_();
     if (bookmarkData)
-        gInfo.Context.mIsCompletionRewards = isAnyFileComplete(bookmarkData);
+        SME::TGlobals::sGlobals.Context.mIsCompletionRewards = isAnyFileComplete(bookmarkData);
     return bookmarkData;
 }
 

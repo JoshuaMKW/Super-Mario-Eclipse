@@ -16,7 +16,7 @@ bool inXYZMode;
 static void xyzModifierMario()
 {   
     #ifndef SME_DEBUG
-        if (!gDebugModeHandler.isActive())
+        if (!SME::Class::TCheatHandler::sDebugHandler.isActive())
             return;
     #endif
 
@@ -59,7 +59,7 @@ static void xyzModifierMario()
 // extern -> SME.cpp
 void onSetup(TMarDirector* director)
 {
-    gDebugTextBox = new (gInfo.mGlobalsHeap, 4) J2DTextBox(gpSystemFont->mFont, "Debug Mode");
+    gDebugTextBox = new (SME::TGlobals::sGlobals.mGlobalsHeap, 4) J2DTextBox(gpSystemFont->mFont, "Debug Mode");
 
 	// run replaced call
 	director->setupObjects();
@@ -152,8 +152,8 @@ bool manageLightSize()
         return (gpMarDirector->mAreaID == 1);
 
     s32 &CurrentShineCount = TFlagManager::smInstance->Type4Flag.mShineCount;
-    s32 &PrevShineCount = gInfo.Light.mPrevShineCount;
-    switch (gInfo.Light.mLightType)
+    s32 &PrevShineCount = SME::TGlobals::sGlobals.Light.mPrevShineCount;
+    switch (SME::TGlobals::sGlobals.Light.mLightType)
     {
     case SME::Enum::LightContext::STATIC: {
         if (SMEFile::mStageConfig.Light.mDarkLevel != 255)
@@ -167,80 +167,80 @@ bool manageLightSize()
             if (gpModelWaterManager->mDarkLevel < 255)
                 gpModelWaterManager->mDarkLevel += 1;
             else
-                gInfo.Light.mLightType = SME::Enum::LightContext::DISABLED;
+                SME::TGlobals::sGlobals.Light.mLightType = SME::Enum::LightContext::DISABLED;
         }
 
-        gShineShadowPos = gInfo.Light.mShineShadowCoordinates;
+        gShineShadowPos = SME::TGlobals::sGlobals.Light.mShineShadowCoordinates;
 
         f32 sigOfs = 300.0f;
         f32 sigStrength = CurrentShineCount >= PrevShineCount ? 0.04f : -0.04f;
 
-        if (!gInfo.Light.mSizeMorphing &&
+        if (!SME::TGlobals::sGlobals.Light.mSizeMorphing &&
             CurrentShineCount == PrevShineCount)
             break;
 
         if (CurrentShineCount > PrevShineCount)
         {
-            gInfo.Light.mPrevSize = gpModelWaterManager->mSize;
-            gInfo.Light.mNextSize = gpModelWaterManager->mSize;
+            SME::TGlobals::sGlobals.Light.mPrevSize = gpModelWaterManager->mSize;
+            SME::TGlobals::sGlobals.Light.mNextSize = gpModelWaterManager->mSize;
 
             for (u32 i = 0; i < (CurrentShineCount - PrevShineCount); ++i)
-                gInfo.Light.mNextSize += (10000.0f / SME_MAX_SHINES) + (PrevShineCount + i) * 2.0f;
+                SME::TGlobals::sGlobals.Light.mNextSize += (10000.0f / SME_MAX_SHINES) + (PrevShineCount + i) * 2.0f;
 
-            gInfo.Light.mSizeMorphing = true;
-            gInfo.Light.mStepContext = 0.0f;
+            SME::TGlobals::sGlobals.Light.mSizeMorphing = true;
+            SME::TGlobals::sGlobals.Light.mStepContext = 0.0f;
         }
         else if (CurrentShineCount < PrevShineCount)
         {
-            gInfo.Light.mPrevSize = gpModelWaterManager->mSize;
-            gInfo.Light.mNextSize = gpModelWaterManager->mSize;
+            SME::TGlobals::sGlobals.Light.mPrevSize = gpModelWaterManager->mSize;
+            SME::TGlobals::sGlobals.Light.mNextSize = gpModelWaterManager->mSize;
 
             for (u32 i = 0; i < (PrevShineCount - CurrentShineCount); ++i)
-                gInfo.Light.mNextSize -= (10000.0f / SME_MAX_SHINES) + (PrevShineCount - i) * 2.0f;
+                SME::TGlobals::sGlobals.Light.mNextSize -= (10000.0f / SME_MAX_SHINES) + (PrevShineCount - i) * 2.0f;
 
-            gInfo.Light.mSizeMorphing = true;
-            gInfo.Light.mStepContext = 0.0f;
+            SME::TGlobals::sGlobals.Light.mSizeMorphing = true;
+            SME::TGlobals::sGlobals.Light.mStepContext = 0.0f;
         }
 
-        f32 cur = SME::Util::Math::sigmoidCurve(gInfo.Light.mStepContext, gInfo.Light.mPrevSize,
-                               gInfo.Light.mNextSize, sigOfs, sigStrength);
+        f32 cur = SME::Util::Math::sigmoidCurve(SME::TGlobals::sGlobals.Light.mStepContext, SME::TGlobals::sGlobals.Light.mPrevSize,
+                               SME::TGlobals::sGlobals.Light.mNextSize, sigOfs, sigStrength);
 
         if (gpModelWaterManager->mSize > 70000.0f)
         {
             gpModelWaterManager->mSize = 70000.0f;
-            gInfo.Light.mSizeMorphing = false;
+            SME::TGlobals::sGlobals.Light.mSizeMorphing = false;
         }
         else if (gpModelWaterManager->mSize < 0.0f)
         {
             gpModelWaterManager->mSize = 0.0f;
-            gInfo.Light.mSizeMorphing = false;
+            SME::TGlobals::sGlobals.Light.mSizeMorphing = false;
         }
-        else if (cur != gInfo.Light.mNextSize && cur != gInfo.Light.mPrevSize)
+        else if (cur != SME::TGlobals::sGlobals.Light.mNextSize && cur != SME::TGlobals::sGlobals.Light.mPrevSize)
         {
             gpModelWaterManager->mSize = cur;
             gpModelWaterManager->mSphereStep = cur / 2.0f;
-            gInfo.Light.mStepContext += 1.0f;
+            SME::TGlobals::sGlobals.Light.mStepContext += 1.0f;
         }
         else
         {
             gpModelWaterManager->mSize = cur;
             gpModelWaterManager->mSphereStep = cur / 2.0f;
             PrevShineCount = CurrentShineCount;
-            gInfo.Light.mSizeMorphing = false;
+            SME::TGlobals::sGlobals.Light.mSizeMorphing = false;
         }
         break;
     }
     case SME::Enum::LightContext::FOLLOWPLAYER: {
         gpModelWaterManager->mDarkLevel = SME::Class::SMEFile::mStageConfig.Light.mDarkLevel;
-        gShineShadowPos.x = gpMarioPos->x + gInfo.Light.mShineShadowCoordinates.x;
-        gShineShadowPos.y = gpMarioPos->y + gInfo.Light.mShineShadowCoordinates.y;
-        gShineShadowPos.z = gpMarioPos->z + gInfo.Light.mShineShadowCoordinates.z;
+        gShineShadowPos.x = gpMarioPos->x + SME::TGlobals::sGlobals.Light.mShineShadowCoordinates.x;
+        gShineShadowPos.y = gpMarioPos->y + SME::TGlobals::sGlobals.Light.mShineShadowCoordinates.y;
+        gShineShadowPos.z = gpMarioPos->z + SME::TGlobals::sGlobals.Light.mShineShadowCoordinates.z;
         break;
     }
     default:
         break;
     }
-    return gInfo.Light.mLightType != SME::Enum::LightContext::DISABLED && gpMarDirector->mAreaID != TGameSequence::OPTION;
+    return SME::TGlobals::sGlobals.Light.mLightType != SME::Enum::LightContext::DISABLED && gpMarDirector->mAreaID != TGameSequence::OPTION;
 }
 
 //0x802571F0

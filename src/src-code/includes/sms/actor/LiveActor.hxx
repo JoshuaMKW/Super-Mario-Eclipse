@@ -96,5 +96,5 @@ public:
 		bool mClipFromScene : 1;
 		u32 _05 : 2;
         bool mIsObjDead : 1;
-	} Flags;
+	} mStateFlags;
 };

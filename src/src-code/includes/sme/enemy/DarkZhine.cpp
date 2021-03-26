@@ -114,10 +114,10 @@ void TDarkZhine::advanceRollMovement(TPollutionManager *gpPollution)
     else if (this->mGroundSpeed < 0.0f)
         this->mGroundSpeed = 0.0f;
 
-    this->mPosition.x += (this->mGroundSpeed * sinf(AngleToRadians(this->mRotation.y)));
-    this->mPosition.z += (this->mGroundSpeed * cosf(AngleToRadians(this->mRotation.y)));
-    this->mSpeed.x = (this->mGroundSpeed * sinf(AngleToRadians(this->mRotation.y)));
-    this->mSpeed.z = (this->mGroundSpeed * cosf(AngleToRadians(this->mRotation.y)));
+    this->mPosition.x += (this->mGroundSpeed * sinf(angleToRadians(this->mRotation.y)));
+    this->mPosition.z += (this->mGroundSpeed * cosf(angleToRadians(this->mRotation.y)));
+    this->mSpeed.x = (this->mGroundSpeed * sinf(angleToRadians(this->mRotation.y)));
+    this->mSpeed.z = (this->mGroundSpeed * cosf(angleToRadians(this->mRotation.y)));
 
     stamp__17TPollutionManagerFUsffff(gpPollution, 1,
                                         this->mPosition.x,
@@ -318,8 +318,8 @@ void TDarkZhine::perform_(TMario *player)
         if (this->mGroundSpeed > this->mMaxSpeed)
             this->mGroundSpeed = this->mMaxSpeed;
 
-        this->mSpeed.x = this->mGroundSpeed * sinf(AngleToRadians(this->mRotation.y));
-        this->mSpeed.z = this->mGroundSpeed * cosf(AngleToRadians(this->mRotation.y));
+        this->mSpeed.x = this->mGroundSpeed * sinf(angleToRadians(this->mRotation.y));
+        this->mSpeed.z = this->mGroundSpeed * cosf(angleToRadians(this->mRotation.y));
     }
     else if (isTargetInRangeToHome(this->mPosition, this->shockRadius()) &&
                 this->poundingStatus() != TDarkZhine::GROUNDROLL)
@@ -328,8 +328,8 @@ void TDarkZhine::perform_(TMario *player)
         if (this->mGroundSpeed < 0.0f)
             this->mGroundSpeed = 0.0f;
 
-        this->mSpeed.x = this->mGroundSpeed * sinf(AngleToRadians(this->mRotation.y));
-        this->mSpeed.z = this->mGroundSpeed * cosf(AngleToRadians(this->mRotation.y));
+        this->mSpeed.x = this->mGroundSpeed * sinf(angleToRadians(this->mRotation.y));
+        this->mSpeed.z = this->mGroundSpeed * cosf(angleToRadians(this->mRotation.y));
     }
 
     if (isTargetInRangeToHome(this->mPosition, this->shockRadius()))

@@ -76,9 +76,9 @@ namespace SME::Util::Memory
         }
 
         template <typename T>
-        inline void write(void *ptr, T value)
+        inline void write(T *ptr, T value)
         {
-            *static_cast<T *>(ptr) = value;
+            *ptr = value;
             Cache::flush(ptr, sizeof(T));
         }
     } // namespace PPC

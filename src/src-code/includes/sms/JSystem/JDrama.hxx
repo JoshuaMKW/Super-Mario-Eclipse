@@ -228,11 +228,11 @@ public:
   virtual void JSGSetProjectionFovy(const f32 projectionFovy);
   virtual f32 JSGGetProjectionAspect() const;
   virtual void JSGSetProjectionAspect(const f32 projectionAspect);
-  virtual Vec *JSGGetViewPosition() const;
+  virtual void JSGGetViewPosition(Vec *) const;
   virtual void JSGSetViewPosition(const Vec *viewPos);
-  virtual Vec *JSGGetViewUpVector() const;
+  virtual void JSGGetViewUpVector(Vec *) const;
   virtual void JSGSetViewUpVector(const Vec *upVector);
-  virtual Vec *JSGGetViewTargetPosition() const;
+  virtual void JSGGetViewTargetPosition(Vec *) const;
   virtual void JSGSetViewTargetPosition(const Vec *targetPos);
 
 private:

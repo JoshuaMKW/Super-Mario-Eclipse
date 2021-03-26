@@ -1,11 +1,14 @@
 #include "CARD.h"
 #include "SME.hxx"
 
+using namespace SME;
+
 extern String *formatBMG(String *msg);
 
 /*** Memory File Buffer ***/
 #define MAXFILEBUFFER (1024 * 2048)	/*** 2MB Buffer ***/
 
+/*
 class CardHandler
 {
     void *mSysArea;
@@ -16,12 +19,13 @@ public:
     void *getSysArea() const { return this->mSysArea; }
 
 };
+*/
 //static u8 sSysArea[CARD_WORKAREA] __attribute__((aligned(32)));
 //static CARDInfo sCardInfo;
 //static int cardcount = 0;
 
 // extern -> SME.cpp
-s32 mountCard(TCardManager *cardManager, bool r4)
+s32 Patch::Card::mountCard(TCardManager *cardManager, bool r4)
 {
     bool tryMount = true;
     s32 ret = 0;
@@ -51,7 +55,7 @@ s32 mountCard(TCardManager *cardManager, bool r4)
 }
 
 // extern -> SME.cpp
-s32 probeCard(TCardManager *cardManager)
+s32 Patch::Card::probeCard(TCardManager *cardManager)
 {
     s32 ret = cardManager->probe();
     if (ret == CARD_ERROR_NOCARD)
@@ -63,7 +67,7 @@ s32 probeCard(TCardManager *cardManager)
 }
 
 // extern -> SME.cpp
-char *formatCardMessage(char *dst, const char *src, s32 len)
+char *Patch::Card::formatCardMessage(char *dst, const char *src, s32 len)
 {
     String *fmtMessage = new String(src, len);
     formatBMG(fmtMessage);

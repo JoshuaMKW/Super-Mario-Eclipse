@@ -12,22 +12,22 @@ constexpr const char String::numbers[10] = {'0', '1', '2', '3', '4',
 
 String::String(size_t bufferSize)
     : mBufferSize(Min(bufferSize, 1024)), mStringSize(0) {
-  mString = reinterpret_cast<char *>(Memory::calloc(mBufferSize, 4));
+  mString = static_cast<char *>(SME::Util::Memory::calloc(mBufferSize, 4));
 }
 
 String::String(const char *str, size_t bufferSize)
     : mBufferSize(Min(bufferSize, 1024)), mStringSize(0) {
-  mString = reinterpret_cast<char *>(Memory::calloc(mBufferSize, 4));
+  mString = static_cast<char *>(SME::Util::Memory::calloc(mBufferSize, 4));
   assign(str);
 }
 
 String::String(const String &str, size_t bufferSize)
     : mBufferSize(Min(bufferSize, 1024)), mStringSize(0) {
-  mString = reinterpret_cast<char *>(Memory::calloc(mBufferSize, 4));
+  mString = static_cast<char *>(SME::Util::Memory::calloc(mBufferSize, 4));
   assign(str.data());
 }
 
-String::~String() { Memory::free(mString); }
+String::~String() { SME::Util::Memory::free(mString); }
 
 String &String::operator=(const String &str) {
   mStringSize = str.size();
@@ -71,7 +71,7 @@ String &String::operator+=(char chr) {
 
 String &String::operator+(const String &str) {
   String *newStr = new String(mString, 256);
-  newStr->mString = reinterpret_cast<char *>(Memory::malloc(256, 4));
+  newStr->mString = static_cast<char *>(SME::Util::Memory::malloc(256, 4));
 
   strcat(newStr->mString, str.data());
   newStr->mStringSize += str.size();
@@ -81,7 +81,7 @@ String &String::operator+(const String &str) {
 
 String &String::operator+(const char *str) {
   String *newStr = new String(mString, 256);
-  newStr->mString = reinterpret_cast<char *>(Memory::malloc(256, 4));
+  newStr->mString = static_cast<char *>(SME::Util::Memory::malloc(256, 4));
 
   strcat(newStr->mString, str);
   newStr->mStringSize += strlen(str);
@@ -91,7 +91,7 @@ String &String::operator+(const char *str) {
 
 String &String::operator+(char chr) {
   String *newStr = new String(mString, 256);
-  newStr->mString = reinterpret_cast<char *>(Memory::malloc(256, 4));
+  newStr->mString = static_cast<char *>(SME::Util::Memory::malloc(256, 4));
 
   strncpy(newStr->mString, mString, mStringSize);
 
@@ -115,7 +115,7 @@ String &String::operator*=(size_t mul) {
 
 String &String::operator*(size_t mul) {
   String *newStr = new String(mString, 256);
-  newStr->mString = reinterpret_cast<char *>(Memory::malloc(256, 4));
+  newStr->mString = static_cast<char *>(SME::Util::Memory::malloc(256, 4));
 
   for (u32 i = 1; i < mul; i++)
     strcat(newStr->mString, mString);

@@ -141,6 +141,7 @@ public:
   TPlayerParams() = delete;
   TPlayerParams(TMario *player, bool isMario);
 
+  bool getCanUseFludd() const { return mCanUseFludd; }
   u8 getMaxJumps() const { return mParams->mMaxJumps.get(); }
   const TCustomParams *getParams() const { return mParams; }
   const TMario *getPlayer() const { return mPlayer; }
@@ -151,9 +152,13 @@ public:
   const char *getPlayerName() const { return mParams->mName.get(); }
   bool isMario() const { return !mIsEMario; }
   bool isInitialized() const { return mInitialized; }
+
+  void setCanUseFludd(bool enable) { mCanUseFludd = enable; }
   void setPlayer(TMario *player) { mPlayer = player; }
+  void setPlayerID(u8 id) { mPlayerID = id; }
 
   bool canUseNozzle(TWaterGun::NozzleType nozzle) const;
+  u8 getNozzleBoneID(TWaterGun::NozzleType nozzle) const;
   bool loadPrm(const char *prm);
   bool loadPrm(TCustomParams &params);
   void resetPlayer() { mDefaultAttrs.applyHistoryTo(mPlayer); };
@@ -164,7 +169,8 @@ private:
   TCustomParams *mParams;
   bool mIsEMario;
   bool mInitialized;
-  s8 mPlayerID;
+  bool mCanUseFludd;
+  u8 mPlayerID;
 
 public:
   u8 mCurJump;

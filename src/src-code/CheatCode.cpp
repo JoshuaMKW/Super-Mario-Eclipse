@@ -7,7 +7,7 @@
 
 using namespace SME;
 
-Class::TCheatHandler gDebugModeHandler;
+Class::TCheatHandler SME::Class::TCheatHandler::sDebugHandler;
 
 static u16 gDebugModeCheatCode[] = {TMarioGamePad::Buttons::DPAD_UP,
                                     TMarioGamePad::Buttons::DPAD_UP,
@@ -30,7 +30,7 @@ static void debugModeNotify(Class::TCheatHandler *)
                                                                                MSound::SE_SHINE_TOUCH,
                                                                                0, 0, 0, 4);
 
-    Memory::PPC::write<u32>((void *)0x802A6788, 0x3BC00009);
+    SME::Util::Memory::PPC::write<u32>((u32 *)0x802A6788, 0x3BC00009);
 
     #ifndef SME_DEBUG
         gDebugTextBox->isVisible = true;
@@ -43,7 +43,7 @@ void Patch::Cheat::drawCheatText()
     if (gDebugTextBox && gDebugTextBox->getStringPtr())
     {
         #ifndef SME_DEBUG
-            if (*gDebugTextBox->getStringPtr() != '\0' && gDebugModeHandler.isActive())
+            if (*gDebugTextBox->getStringPtr() != '\0' && SME::Class::TCheatHandler::sDebugHandler.isActive())
         #else
             if (*gDebugTextBox->getStringPtr() != '\0')
         #endif
@@ -58,12 +58,12 @@ void Patch::Cheat::drawCheatText()
 // extern -> SME.cpp
 void *Patch::Cheat::handleDebugCheat(void *GCLogoDir)
 {
-    if (!gDebugModeHandler.isInitialized())
+    if (!SME::Class::TCheatHandler::sDebugHandler.isInitialized())
     {
-        gDebugModeHandler.setGamePad(gpApplication.mGamePad1);
-        gDebugModeHandler.setInputList(gDebugModeCheatCode);
-        gDebugModeHandler.setSuccessCallBack(&debugModeNotify);
+        SME::Class::TCheatHandler::sDebugHandler.setGamePad(gpApplication.mGamePad1);
+        SME::Class::TCheatHandler::sDebugHandler.setInputList(gDebugModeCheatCode);
+        SME::Class::TCheatHandler::sDebugHandler.setSuccessCallBack(&debugModeNotify);
     }
-    gDebugModeHandler.advanceInput();
+    SME::Class::TCheatHandler::sDebugHandler.advanceInput();
     return GCLogoDir;
 }

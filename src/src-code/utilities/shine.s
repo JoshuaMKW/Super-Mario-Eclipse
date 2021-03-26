@@ -1,9 +1,9 @@
     .text
     .file "shine.s"
-    .globl animationFreezeCheck         # -- Begin function animationFreezeCheck
+    .globl shine_animationFreezeCheck         # -- Begin function shine_animationFreezeCheck
     .p2align	2
-	.type	animationFreezeCheck,@function
-animationFreezeCheck:                   # @shadowCrashPatch
+	.type	shine_animationFreezeCheck,@function
+shine_animationFreezeCheck:                   # @shadowCrashPatch
 .Lfunc_begin0:
     .cfi_startproc
 # %bb.0:                                # %entry
@@ -30,14 +30,14 @@ animationFreezeCheck:                   # @shadowCrashPatch
     .loc_0x3C:
     blr
 .Lfunc_end0:
-	.size	thinkCloseCamera, .Lfunc_end0-.Lfunc_begin0
+	.size	shine_thinkCloseCamera, .Lfunc_end0-.Lfunc_begin0
 	.cfi_endproc
                                         # -- End function
     .text
-    .globl thinkCloseCamera         # -- Begin function thinkCloseCamera
+    .globl shine_thinkCloseCamera         # -- Begin function shine_thinkCloseCamera
     .p2align	2
-	.type	thinkCloseCamera,@function
-thinkCloseCamera:                   # @thinkCloseCamera
+	.type	shine_thinkCloseCamera,@function
+shine_thinkCloseCamera:                   # @shine_thinkCloseCamera
 .Lfunc_begin1:
     .cfi_startproc
 # %bb.0:                                # %entry
@@ -49,7 +49,7 @@ thinkCloseCamera:                   # @thinkCloseCamera
     .Ltmp0:
     blr
 .Lfunc_end1:
-	.size	thinkCloseCamera, .Lfunc_end1-.Lfunc_begin1
+	.size	shine_thinkCloseCamera, .Lfunc_end1-.Lfunc_begin1
 	.cfi_endproc
                                         # -- End function
     .ident	"clang version 13.0.0 (https://github.com/DotKuribo/llvm-project.git)"

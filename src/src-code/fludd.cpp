@@ -3,6 +3,8 @@
 
 #include "SME.hxx"
 
+using namespace SME;
+
 /* 0x8026A164
 mr r11, r5
 lwz r5, 0x8 (r3)
@@ -39,23 +41,24 @@ static bool sIsTriggerNozzleDead;
 
 // 0x80248F14
 // extern -> SME.cpp
-bool isPumpOK(TMarioAnimeData *animeData)
+bool Patch::Fludd::isPumpOK(TMarioAnimeData *animeData)
 {
     return (animeData->mFluddEnabled != TMarioAnimeData::FLUDD::FLUDD_DISABLED &&
-            gpMarioAddress->mCustomInfo->mCurJump <= 1);
+            SME::TGlobals::sGlobals.getPlayerParams(gpMarioAddress)->mCurJump <= 1);
 }
 
 // 0x8014206C
 // extern -> SME.cpp
-bool hasWaterCardOpen()
+bool Patch::Fludd::hasWaterCardOpen()
 {
     TGCConsole2 *gcConsole;
     SME_FROM_GPR(r31, gcConsole);
 
-    if (gpMarioAddress->mYoshi->mState != TYoshi::State::MOUNTED &&
-        gpMarioAddress->mCustomInfo->mParams)
+    const SME::Class::TPlayerParams *playerParams = SME::TGlobals::sGlobals.getPlayerParams(gpMarioAddress);
+
+    if (gpMarioAddress->mYoshi->mState != TYoshi::State::MOUNTED)
         gpMarioAddress->mAttributes.mHasFludd =
-            gpMarioAddress->mCustomInfo->mParams->Attributes.mCanUseFludd;
+            playerParams->getParams()->mCanUseFludd.get();
     else
         gpMarioAddress->mAttributes.mHasFludd = true;
 
@@ -70,34 +73,33 @@ bool hasWaterCardOpen()
 
 // 0x80283058
 // extern -> SME.cpp
-bool canCollectFluddItem(TMario *player)
+bool Patch::Fludd::canCollectFluddItem(TMario *player)
 {
-    if (player->mCustomInfo->mParams)
-        return onYoshi__6TMarioCFv(player) ||
-               !player->mCustomInfo->mParams->Attributes.mCanUseFludd;
-    else
-        return onYoshi__6TMarioCFv(player);
+    return onYoshi__6TMarioCFv(player) ||
+            !SME::TGlobals::sGlobals.getPlayerParams(player)->getParams()->mCanUseFludd.get();
 }
 
 static void sprayGoopMap(TPollutionManager *gpPollutionManager, TMario *player,
                          f32 x, f32 y, f32 z, f32 r)
 {
-    if (!player->mCustomInfo->isMario() || !player->mCustomInfo->isInitialized())
+    const SME::Class::TPlayerParams *playerParams = SME::TGlobals::sGlobals.getPlayerParams(player);
+    const SME::Class::TCustomParams *prm = playerParams->getParams();
+
+    if (!playerParams->isMario() || !playerParams->isInitialized())
         clean__17TPollutionManagerFffff(gpPollutionManager, x, y, z, r);
 
-    MarioParamsFile *localfile = player->mCustomInfo->mParams;
-    if (localfile && localfile->Attributes.FluddAttrs.mCleaningType != localfile->NONE)
+    if (prm->mCleaningType.get() != SME::Class::TCustomParams::FluddCleanType::NONE)
     {
-        if (localfile->Attributes.FluddAttrs.mCleaningType == localfile->CLEAN)
+        if (prm->mCleaningType.get() == SME::Class::TCustomParams::FluddCleanType::CLEAN)
             clean__17TPollutionManagerFffff(gpPollutionManager, x, y, z, r);
-        else if (localfile->Attributes.FluddAttrs.mCleaningType == localfile->GOOP)
+        else if (prm->mCleaningType.get() == SME::Class::TCustomParams::FluddCleanType::GOOP)
             stamp__17TPollutionManagerFUsffff(gpPollutionManager, 1, x, y, z, r);
     }
 }
 
 // 0x800678C4, 0x801A3ED0, 0x801B42D8, 0x8027F7DC, 0x8027F94C,
 // extern -> SME.cpp
-void sprayGoopMapWrapGlobalMar(TPollutionManager *gpPollutionManager,
+void Patch::Fludd::sprayGoopMapWrapGlobalMar(TPollutionManager *gpPollutionManager,
                                f32 x, f32 y, f32 z, f32 r)
 {
     sprayGoopMap(gpPollutionManager, gpMarioAddress, x, y, z, r);
@@ -105,7 +107,7 @@ void sprayGoopMapWrapGlobalMar(TPollutionManager *gpPollutionManager,
 
 // 0x8024E710
 // extern -> SME.cpp
-void sprayGoopMapWrapMar30(TPollutionManager *gpPollutionManager,
+void Patch::Fludd::sprayGoopMapWrapMar30(TPollutionManager *gpPollutionManager,
                            f32 x, f32 y, f32 z, f32 r)
 {
     TMario *player;
@@ -116,32 +118,28 @@ void sprayGoopMapWrapMar30(TPollutionManager *gpPollutionManager,
 
 // 0x800FED3C
 // extern -> SME.cpp
-bool canCleanSeals(TWaterManager *gpWaterManager)
+bool Patch::Fludd::canCleanSeals(TWaterManager *gpWaterManager)
 {
-    MarioParamsFile *localfile = gpMarioAddress->mCustomInfo->mParams;
     return gpWaterManager->mWaterCardType != 0 ||
-           (localfile && localfile->Attributes.FluddAttrs.mCanCleanSeals);
+           SME::TGlobals::sGlobals.getPlayerParams(gpMarioAddress)->getParams()->mCanCleanSeals.get();
 }
 
 // 0x8024D53C
 // extern -> SME.cpp
-TWaterGun *bindFluddtojoint()
+TWaterGun *Patch::Fludd::bindFluddtojoint()
 {
     TMario *player;
     SME_FROM_GPR(r31, player);
 
-    MarioParamsFile *localfile = player->mCustomInfo->mParams;
-
-    if (localfile)
-        player->mBindBoneIDArray[1] =
-            localfile->Attributes.FluddAttrs.mBindToJointID[(u8)player->mFludd->mCurrentNozzle];
+    player->mBindBoneIDArray[0] =
+        SME::TGlobals::sGlobals.getPlayerParams(gpMarioAddress)->getNozzleBoneID(static_cast<TWaterGun::NozzleType>(player->mFludd->mCurrentNozzle));
 
     return player->mFludd;
 }
 
 // 0x80262580
 // extern -> SME.cpp
-void checkExecWaterGun(TWaterGun *fludd)
+void Patch::Fludd::checkExecWaterGun(TWaterGun *fludd)
 {
     if (fludd->mCurrentNozzle == TWaterGun::NozzleType::Spray ||
         fludd->mCurrentNozzle == TWaterGun::NozzleType::Yoshi ||
@@ -157,7 +155,7 @@ void checkExecWaterGun(TWaterGun *fludd)
 
 // 0x80262580
 // extern -> SME.cpp
-void killTriggerNozzle()
+void Patch::Fludd::killTriggerNozzle()
 {
     TNozzleTrigger *nozzle;
     SME_FROM_GPR(r29, nozzle);
@@ -173,6 +171,8 @@ void killTriggerNozzle()
 static void checkSpamHover(TNozzleTrigger *nozzle, u32 r4, TWaterEmitInfo *emitInfo)
 {
     TMario *player = nozzle->mFludd->mMario;
+    Vec size;
+    player->JSGGetScaling(&size);
 
     if (nozzle->mFludd->mCurrentNozzle != TWaterGun::Hover)
         return;
@@ -196,7 +196,7 @@ static void checkSpamHover(TNozzleTrigger *nozzle, u32 r4, TWaterEmitInfo *emitI
     nozzle->mSprayState = TNozzleTrigger::DEAD;
 
     nozzle->mFludd->mCurrentWater -= 255;
-    player->mSpeed.y += ((70.0f * player->mSize.y) - player->mSpeed.y);
+    player->mSpeed.y += (70.0f * size.y) - player->mSpeed.y;
     player->mJumpingState &= 0xFFFFFEFF;
 
     sIsTriggerNozzleDead = true;
@@ -205,7 +205,7 @@ static void checkSpamHover(TNozzleTrigger *nozzle, u32 r4, TWaterEmitInfo *emitI
 
 // 0x80262580
 // extern -> SME.cpp
-void spamHoverWrapper(TNozzleTrigger *nozzle, u32 r4, TWaterEmitInfo *emitInfo)
+void Patch::Fludd::spamHoverWrapper(TNozzleTrigger *nozzle, u32 r4, TWaterEmitInfo *emitInfo)
 {
     void (*virtualFunc)(TNozzleTrigger *, u32, TWaterEmitInfo *);
     SME_FROM_GPR(r12, virtualFunc);
@@ -216,7 +216,7 @@ void spamHoverWrapper(TNozzleTrigger *nozzle, u32 r4, TWaterEmitInfo *emitInfo)
 
 // 0x80262580
 // extern -> SME.cpp
-bool checkAirNozzle()
+bool Patch::Fludd::checkAirNozzle()
 {
     TMario *player;
     SME_FROM_GPR(r31, player);

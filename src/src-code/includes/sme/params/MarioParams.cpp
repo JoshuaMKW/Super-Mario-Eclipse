@@ -1,26 +1,26 @@
 #include <assert.h>
 
 #include "OS.h"
-#include "sms/actor/Mario.hxx"
-#include "string.h"
-
 #include "libs/sAssert.hxx"
 #include "libs/sMath.hxx"
 #include "libs/sMemory.hxx"
 #include "params/MarioParams.hxx"
+#include "sms/JSystem/JSU/JSUMemoryStream.hxx"
+#include "sms/actor/Mario.hxx"
+#include "string.h"
+
 
 using namespace SME::Class;
 
 TPlayerParams::TPlayerParams(TMario *player, bool isMario)
     : mPlayer(player), mIsEMario(!isMario), mPlayerID(0), mInitialized(true),
-      mCurJump(0) {
+      mCanUseFludd(true), mCurJump(0), mDefaultAttrs(player) {
   mFluddHistory.mHadFludd = false;
   mFluddHistory.mMainNozzle = TWaterGun::Spray;
   mFluddHistory.mSecondNozzle = TWaterGun::Hover;
   mFluddHistory.mWaterLevel = 0;
 
-  loadPrm(reinterpret_cast<TCustomParams &>(
-      *JKRFileLoader::getVolume("mario")->getResource("/params.bin")));
+  loadPrm("/sme.prm");
 
   if (mParams->mPlayerHasGlasses.get())
     wearGlass__6TMarioFv(player);
@@ -162,9 +162,17 @@ void TPlayerParams::setPlayer(TMario *player) {
   mDefaultAttrs.recordFrom(player);
 }
 
-bool TPlayerParams::loadPrm(const char *prm = "/Mario/SME.prm") {
-  mParams->load(prm);
-  return true;
+bool TPlayerParams::loadPrm(const char *prm = "/sme.prm") {
+  JKRArchive *archive = JKRFileLoader::getVolume("mario");
+  SME_DEBUG_ASSERT(archive != nullptr, "Mario archive could not be located!");
+
+  void *resource = archive->getResource(prm);
+  if (resource) {
+    JSUMemoryInputStream stream(resource, archive->getResSize(resource));
+    mParams->load(stream);
+    return true;
+  }
+  return false;
 }
 
 bool TPlayerParams::loadPrm(TCustomParams &data) {
@@ -188,6 +196,27 @@ bool TPlayerParams::canUseNozzle(TWaterGun::NozzleType nozzle) const {
     return mParams->mTurboNozzleUsable.get();
   case TWaterGun::NozzleType::Sniper:
     return mParams->mSniperNozzleUsable.get();
+  default:
+    return false;
+  }
+}
+
+u8 TPlayerParams::getNozzleBoneID(TWaterGun::NozzleType nozzle) const {
+  switch (nozzle) {
+  case TWaterGun::NozzleType::Spray:
+    return mParams->mSprayNozzleBoneID.get();
+  case TWaterGun::NozzleType::Rocket:
+    return mParams->mRocketNozzleBoneID.get();
+  case TWaterGun::NozzleType::Underwater:
+    return mParams->mUnderwaterNozzleBoneID.get();
+  case TWaterGun::NozzleType::Yoshi:
+    return mParams->mYoshiNozzleBoneID.get();
+  case TWaterGun::NozzleType::Hover:
+    return mParams->mHoverNozzleBoneID.get();
+  case TWaterGun::NozzleType::Turbo:
+    return mParams->mTurboNozzleBoneID.get();
+  case TWaterGun::NozzleType::Sniper:
+    return mParams->mSniperNozzleBoneID.get();
   default:
     return false;
   }

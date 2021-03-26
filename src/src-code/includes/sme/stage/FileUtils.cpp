@@ -9,7 +9,7 @@ using namespace SME;
 s8 Util::getCharacterID(JUTGamePad *controller = nullptr)
 {
     if (!controller)
-        return gInfo.mCurrentStageConfig->GlobalFlags.mPlayerID;
+        return SME::TGlobals::sGlobals.mCurrentStageConfig->GlobalFlags.mPlayerID;
 
     switch (controller->mButtons.mInput)
     {

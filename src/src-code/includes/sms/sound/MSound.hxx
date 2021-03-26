@@ -23,7 +23,7 @@ public:
         SE_MAP_CLOSE = 0x4803,
         SE_TALK_OPEN = 0x4804,
         SE_TALK_CLOSE = 0x4805,
-        SE_ROCKETNOZZLE_u8GE = 0x4806,
+        SE_ROCKETNOZZLE_CHARGE = 0x4806,
 
         SE_FRUIT_IN_BASKET = 0x480A,
 

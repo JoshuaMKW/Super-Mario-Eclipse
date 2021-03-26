@@ -5,11 +5,13 @@
 #include "funcs.hxx"
 
 #include "libs/sAssert.hxx"
+#include "libs/sBmg.hxx"
 #include "libs/sLogging.hxx"
 #include "libs/sMath.hxx"
 #include "libs/sMemory.hxx"
 #include "libs/sMusic.hxx"
 #include "libs/sString.hxx"
+#include "libs/sTime.hxx"
 
 #include "params/MarioParams.hxx"
 #include "params/StageParams.hxx"
@@ -82,31 +84,79 @@ namespace Util
 namespace Patch
 {
 
+namespace Card
+{
+s32 mountCard(TCardManager *cardManager, bool r4);
+s32 probeCard(TCardManager *cardManager);
+char *formatCardMessage(char *dst, const char *src, s32 len);
+}
+
 namespace Cheat
 {
 void drawCheatText();
 void *handleDebugCheat(void *GCLogoDir);
 }
 
+namespace Collision
+{
+void checkIsGlideBounce(TMario *player);
+u16 checkIsRestoreTypeNoFallDamage(TBGCheckData *floor);
+u32 updateCollisionContext(TMario *player);
+u16 masterGroundCollisionHandler(TBGCheckData *colTriangle);
+u32 masterAllCollisionHandler(TMario *player);
+}
+
+namespace Fludd
+{
+bool isPumpOK(TMarioAnimeData *animeData);
+bool hasWaterCardOpen();
+bool canCollectFluddItem(TMario *player);
+void sprayGoopMapWrapGlobalMar(TPollutionManager *gpPollutionManager,
+                               f32 x, f32 y, f32 z, f32 r);
+void sprayGoopMapWrapMar30(TPollutionManager *gpPollutionManager,
+                           f32 x, f32 y, f32 z, f32 r);
+bool canCleanSeals(TWaterManager *gpWaterManager);
+TWaterGun *bindFluddtojoint();
+void checkExecWaterGun(TWaterGun *fludd);
+void killTriggerNozzle();
+void spamHoverWrapper(TNozzleTrigger *nozzle, u32 r4, TWaterEmitInfo *emitInfo);
+bool checkAirNozzle();
+}
+
+namespace Fruit
+{
+bool canFruitDieWater(TResetFruit *fruit);
+f32 chooseGrabDistancing(M3UModelMario *model);
+bool isGrabWaitOver(TMario *player);
+}
+
 namespace Init
 {
-    void initCodeProtection();
-    JKRExpHeap *createGlobalHeaps(void *newHeap, size_t size, JKRHeap *rootHeap, bool unk_1);
-    u32 setupMarioDatas(char *filepath);
-    u32 *initFirstModel(char *path, u32 unk_1, u32 unk_2, u32 unk_3, JKRHeap *heap, u32 unk_4, u32 unk_5, u32 unk_6);
-    u32 *initFileMods();
-    void initShineShadow();
-    void initSoundBank(u8 areaID, u8 episodeID);
-    void initMusicTrack();
-    TMario *fromMarioInit(TMario *player);
-    bool fromShadowMarioInit();
-    void initYoshi(void *anmSound, void *r4, u32 r5, f32 f1);
-    void initCardColors();
-    u32 initCollisionWarpLinks(const char *name);
-    void createUIHeap(u32 size, s32 alignment);
-    u32 initHUDElements(char *filepath);
-    JKRMemArchive *switchHUDOnStageLoad(char *curArchive, u32 *gameUI);
-    JKRHeap *useCustomHUDHeap(u32 size, s32 alignment);
+void initCodeProtection();
+JKRExpHeap *createGlobalHeaps(void *newHeap, size_t size, JKRHeap *rootHeap, bool unk_1);
+u32 setupMarioDatas(char *filepath);
+u32 *initFirstModel(char *path, u32 unk_1, u32 unk_2, u32 unk_3, JKRHeap *heap, u32 unk_4, u32 unk_5, u32 unk_6);
+u32 *initFileMods();
+void initShineShadow();
+void initSoundBank(u8 areaID, u8 episodeID);
+void initMusicTrack();
+TMario *fromMarioInit(TMario *player);
+bool fromShadowMarioInit();
+void initYoshi(MAnmSound *anmSound, void *r4, u32 r5, f32 f1);
+void initCardColors();
+u32 initCollisionWarpLinks(const char *name);
+void createUIHeap(u32 size, s32 alignment);
+u32 initHUDElements(char *filepath);
+JKRMemArchive *switchHUDOnStageLoad(char *curArchive, u32 *gameUI);
+JKRHeap *useCustomHUDHeap(u32 size, s32 alignment);
+}
+
+namespace Mario
+{
+u32 updateContexts(TMario *player);
+u32 carryOrTalkNPC(TBaseNPC *npc);
+bool canGrabAtNPC();
+bool canCarryNPC();
 }
 
 namespace Music
@@ -166,7 +216,4 @@ void restoreNozzles(TMario *player);
 }
 
 // init_mods.cpp
-extern SME::TGlobals gInfo;
-extern SME::Class::TCheatHandler gDebugModeHandler;
-
 SME_EXTERN_C OSBootInfo BootInfo;

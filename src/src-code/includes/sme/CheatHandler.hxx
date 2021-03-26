@@ -29,6 +29,8 @@ public:
 
     void advanceInput();
     void reset();
+
+    static TCheatHandler sDebugHandler;
 };
 
 }

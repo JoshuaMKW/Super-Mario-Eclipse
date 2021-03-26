@@ -51,72 +51,13 @@ extern void killTriggerNozzle();
 extern void spamHoverWrapper(TNozzleTrigger *nozzle, u32 r4, TWaterEmitInfo *emitInfo);
 extern bool checkAirNozzle();
 
-// init_mods.cpp
-extern void initCodeProtection();
-extern u32 *createGlobalHeaps(u32 *newHeap, u32 size, u32 *rootHeap, u32 unk_1);
-extern u32 setupMarioDatas(char *filepath);
-extern u32 *initFirstModel(char *path, u32 unk_1, u32 unk_2, u32 unk_3, JKRHeap *heap, u32 unk_4, u32 unk_5, u32 unk_6);
-extern u32 *initFileMods();
-extern void initShineShadow();
-extern void initSoundBank(u8 areaID, u8 episodeID);
-extern void initMusicTrack();
-extern TMario *fromMarioInit(TMario *player);
-extern bool fromShadowMarioInit();
-extern void initYoshi(void *anmSound, void *r4, u32 r5, f32 f1);
-extern void initCardColors();
-extern u32 initCollisionWarpLinks(char *name, u32 *dest);
-extern void createUIHeap(u32 size, s32 alignment);
-
 // mario.cpp
 #include "sms/npc/BaseNPC.hxx"
-extern "C" s16 shadowCrashPatch();
-extern u32 updateContexts(TMario *player);
-extern u32 carryOrTalkNPC(TBaseNPC *npc);
-extern bool canGrabAtNPC();
-extern bool canCarryNPC();
+extern "C" s16 mario_shadowCrashPatch();
 
-// shine.cpp
-#include "sms/game/Conductor.hxx"
-extern void manageShineVanish(JGeometry::TVec3<f32> *marioPos);
-extern void isKillEnemiesShine(TConductor *gpConductor, JGeometry::TVec3<f32> *playerCoordinates, f32 range);
-extern void restoreMario(TMarDirector *gpMarDirector, u32 curState);
-extern void checkBootOut(TMarDirector *gpMarDirector, u32 curState);
-extern u32 extendShineIDLogic(TFlagManager *flagManager, u32 flagID);
-extern void shineObjectStringMod(JSUInputStream *stream, u8 *dst, u32 size);
-extern void shineFlagSetter(TFlagManager *flagManager, u32 flag, s32 val);
-extern u32 shineFlagGetter(TFlagManager *flagManager, u32 flag);
-extern u32 shineSetClamper(TFlagManager *flagManager, u32 flag);
-extern u32 shineGetClamper(TFlagManager *flagManager, u32 flag);
-extern void extendFlagManagerLoad(JSUInputStream &stream);
-extern void extendFlagManagerSave(JSUOutputStream &stream);
-extern void thinkSetBootFlag(void *shineFader, u32 unk_1, u32 unk_2);
-extern u32 loadAfterMaskState();
-extern void setKillState();
-extern "C" void thinkCloseCamera();
-extern "C" void animationFreezeCheck();
-
-// stage.cpp
-extern void setStageOnExit(TGameSequence *gpSequence, s8 stage, s8 episode);
-extern void startEpisodeSelect(void *selectMenu);
-
-// yoshi.cpp
-extern bool isYoshiDie(TMario *player);
-extern bool isYoshiEggNeedFruit(THitActor *gpFruit);
-extern u8 isYoshiEggFree(TEggYoshi *gpEgg, THitActor *gpFruit);
-extern bool isYoshiMaintainFluddModel();
-extern void maybeYoshiDrown(TYoshi *yoshi);
-extern bool canMountYoshi(u32 state);
-extern f32 getYoshiYPos_(TYoshi *yoshi);
-extern void fixYoshiJuiceDecrement();
-extern void canYoshiSpray(TWaterGun *gpWaterGun);
-extern u32 calcYoshiSwimVelocity(TMario *player, u32 arg1);
-extern u32 isYoshiWaterFlutter();
-extern bool isYoshiValidDrip(TYoshi *yoshi);
-extern void initFreeEggCard(MActorAnmBck *bckData);
-extern u32 checkFreeEggCard(MActorAnmBck *bckData);
-extern void saveNozzles(TYoshi *yoshi);
-extern void restoreNozzles(TMario *player);
-
+//shine.cpp
+extern "C" void shine_animationFreezeCheck();
+extern "C" void shine_thinkCloseCamera();
 
 // utilities/card.cpp
 extern s32 mountCard(TCardManager *cardManager, bool r4);
@@ -129,6 +70,8 @@ extern void setUserCodes(OSAlarm *alarm, OSContext *context);
 #ifdef SME_DEBUG
     extern OSStopwatch gctStopwatch;
 #endif
+
+using namespace SME;
 
 KURIBO_MODULE_BEGIN("Eclipse", "JoshuaMK", __VERSION__ "[" SME_STRINGIZE(SME_MAX_SHINES) " Shines]")
 {
@@ -208,46 +151,53 @@ KURIBO_MODULE_BEGIN("Eclipse", "JoshuaMK", __VERSION__ "[" SME_STRINGIZE(SME_MAX
     KURIBO_PATCH_BL(0x80262580, checkAirNozzle);
     kWrite32(0x80262584, 0x2C030000);
 
+    // fruit.cpp
+    KURIBO_PATCH_BL(0x801E542C, Patch::Fruit::canFruitDieWater);
+    kWrite32(0x801E5430, 0x2C030000);
+    kWrite32(0x801E5434, 0x41820140);
+    KURIBO_PATCH_BL(0x8023F964, Patch::Fruit::chooseGrabDistancing);
+    KURIBO_PATCH_BL(0x8023F9DC, Patch::Fruit::isGrabWaitOver);
+
     // init_mods.cpp
-    KURIBO_PATCH_BL(0x80005328, &initCodeProtection);
-    KURIBO_PATCH_BL(0x802A750C, &createGlobalHeaps);
-    KURIBO_PATCH_BL(0x802A7140, &setupMarioDatas);
-    KURIBO_PATCH_BL(0x802A716C, &initFirstModel);
-    KURIBO_PATCH_BL(0x802998B4, &initFileMods);
-    KURIBO_PATCH_BL(0x80280180, &initShineShadow);
-    KURIBO_PATCH_BL(0x802B7A4C, &initSoundBank);
-    KURIBO_PATCH_BL(0x802983F0, &initMusicTrack);
-    KURIBO_PATCH_BL(0x80298420, &initMusicTrack);
+    KURIBO_PATCH_BL(0x80005328, Patch::Init::initCodeProtection);
+    KURIBO_PATCH_BL(0x802A750C, Patch::Init::createGlobalHeaps);
+    KURIBO_PATCH_BL(0x802A7140, Patch::Init::setupMarioDatas);
+    KURIBO_PATCH_BL(0x802A716C, Patch::Init::initFirstModel);
+    KURIBO_PATCH_BL(0x802998B4, Patch::Init::initFileMods);
+    KURIBO_PATCH_BL(0x80280180, Patch::Init::initShineShadow);
+    KURIBO_PATCH_BL(0x802B7A4C, Patch::Init::initSoundBank);
+    KURIBO_PATCH_BL(0x802983F0, Patch::Init::initMusicTrack);
+    KURIBO_PATCH_BL(0x80298420, Patch::Init::initMusicTrack);
     kWrite32(0x80276C90, 0x60000000);
-    KURIBO_PATCH_BL(0x80276C94, &fromMarioInit);
-    KURIBO_PATCH_BL(0x800397DC, &fromShadowMarioInit);
-    KURIBO_PATCH_BL(0x80271580, &initYoshi);
-    KURIBO_PATCH_BL(0x8029CCB0, &initCardColors);
-    KURIBO_PATCH_BL(0x802B8B20, &initCollisionWarpLinks);
-    KURIBO_PATCH_BL(0x802B57E4, &createUIHeap);
+    KURIBO_PATCH_BL(0x80276C94, Patch::Init::fromMarioInit);
+    KURIBO_PATCH_BL(0x800397DC, Patch::Init::fromShadowMarioInit);
+    KURIBO_PATCH_BL(0x80271580, Patch::Init::initYoshi);
+    KURIBO_PATCH_BL(0x8029CCB0, Patch::Init::initCardColors);
+    KURIBO_PATCH_BL(0x802B8B20, Patch::Init::initCollisionWarpLinks);
+    KURIBO_PATCH_BL(0x802B57E4, Patch::Init::createUIHeap);
 
     // mario.cpp
-    KURIBO_PATCH_BL(0x802320E0, shadowCrashPatch);
-    KURIBO_PATCH_BL(0x802500B8, updateContexts);
-    KURIBO_PATCH_BL(0x8029A87C, carryOrTalkNPC);
-    KURIBO_PATCH_BL(0x802815F0, canGrabAtNPC);
+    KURIBO_PATCH_BL(0x802320E0, mario_shadowCrashPatch);
+    KURIBO_PATCH_BL(0x802500B8, Patch::Mario::updateContexts);
+    KURIBO_PATCH_BL(0x8029A87C, Patch::Mario::carryOrTalkNPC);
+    KURIBO_PATCH_BL(0x802815F0, Patch::Mario::canGrabAtNPC);
     kWrite32(0x802815F4, 0x2C030000);
-    KURIBO_PATCH_BL(0x80207430, canCarryNPC);
+    KURIBO_PATCH_BL(0x80207430, Patch::Mario::canCarryNPC);
     kWrite32(0x80207434, 0x2C030000);
 
     // shine.cpp
-    KURIBO_PATCH_BL(0x801BD664, manageShineVanish);
+    KURIBO_PATCH_BL(0x801BD664, Patch::Shine::manageShineVanish);
     kWrite32(0x801BD668, 0x48000568);
-    KURIBO_PATCH_BL(0x802413E0, isKillEnemiesShine);
-    KURIBO_PATCH_BL(0x802995BC, checkBootOut);
+    KURIBO_PATCH_BL(0x802413E0, Patch::Shine::isKillEnemiesShine);
+    KURIBO_PATCH_BL(0x802995BC, Patch::Shine::checkBootOut);
     kWrite32(0x80297BE8, 0x60848200);
-    KURIBO_PATCH_BL(0x80293B10, extendShineIDLogic);
-    KURIBO_PATCH_BL(0x801BCC98, shineObjectStringMod);
-    kWrite32(0x803DEE50, shineFlagSetter);
-    kWrite32(0x803DEE7C, shineFlagGetter);
-    KURIBO_PATCH_BL(0x802946D4, shineSetClamper);
+    KURIBO_PATCH_BL(0x80293B10, Patch::Shine::extendShineIDLogic);
+    KURIBO_PATCH_BL(0x801BCC98, Patch::Shine::shineObjectStringMod);
+    kWrite32(0x803DEE50, Patch::Shine::shineFlagSetter);
+    kWrite32(0x803DEE7C, Patch::Shine::shineFlagGetter);
+    KURIBO_PATCH_BL(0x802946D4, Patch::Shine::shineSetClamper);
     kWrite32(0x80294744, 0x60000000);
-    KURIBO_PATCH_BL(0x8029474C, shineGetClamper);
+    KURIBO_PATCH_BL(0x8029474C, Patch::Shine::shineGetClamper);
     /*Shine casts, fix light*/
     kWrite32(0x80412548, (f32)SME_MAX_SHINES);
     kWrite32(0x80293AF8, 0x3BFF03E7);
@@ -261,42 +211,42 @@ KURIBO_MODULE_BEGIN("Eclipse", "JoshuaMK", __VERSION__ "[" SME_STRINGIZE(SME_MAX
     kWrite32(0x80294730, 0x5480043E);
     kWrite32(0x80294734, 0x280003E7);
     kWrite32(0x80297BA0, 0x5404037E);
-    KURIBO_PATCH_BL(0x80294334, extendFlagManagerLoad);
+    KURIBO_PATCH_BL(0x80294334, Patch::Shine::extendFlagManagerLoad);
     kWrite32(0x80294338, 0x48000010);
-    KURIBO_PATCH_BL(0x802939B8, extendFlagManagerSave);
+    KURIBO_PATCH_BL(0x802939B8, Patch::Shine::extendFlagManagerSave);
     kWrite32(0x802939BC, 0x48000014);
-    KURIBO_PATCH_BL(0x80297BD8, thinkSetBootFlag);
-    KURIBO_PATCH_BL(0x801BCD20, loadAfterMaskState);
+    KURIBO_PATCH_BL(0x80297BD8, Patch::Shine::thinkSetBootFlag);
+    KURIBO_PATCH_BL(0x801BCD20, Patch::Shine::loadAfterMaskState);
     kWrite32(0x801BCD24, 0x28030002);
-    KURIBO_PATCH_BL(0x801BCEEC, setKillState);
-    KURIBO_PATCH_BL(0x8029A590, thinkCloseCamera);
+    KURIBO_PATCH_BL(0x801BCEEC, Patch::Shine::setKillState);
+    KURIBO_PATCH_BL(0x8029A590, shine_thinkCloseCamera);
     kWrite32(0x8029A594, 0x28000000);
-    KURIBO_PATCH_BL(0x802999D8, animationFreezeCheck);
+    KURIBO_PATCH_BL(0x802999D8, shine_animationFreezeCheck);
     kWrite32(0x802999DC, 0x48000034);
     //Make Shines glow more
     kWrite32(0x803C9190, 0x3F19999A);
 
     // stage.cpp
-    KURIBO_PATCH_BL(0x80299230, setStageOnExit);
-    KURIBO_PATCH_BL(0x80175F58, startEpisodeSelect);
+    KURIBO_PATCH_BL(0x80299230, Patch::Stage::setStageOnExit);
+    KURIBO_PATCH_BL(0x80175F58, Patch::Stage::startEpisodeSelect);
 
     // yoshi.cpp
     kWrite32(0x8026E068, 0x2C000001); //Turn green when out of juice
     kWrite32(0x8026E0A0, 0x60000000); //No flickering
     kWrite32(0x8026EE14, 0x4800020C); //Yoshi can't starve
-    KURIBO_PATCH_BL(0x8026EB00, isYoshiDie);
+    KURIBO_PATCH_BL(0x8026EB00, Patch::Yoshi::isYoshiDie);
     kWrite32(0x8026EB04, 0x2C030000);
     kWrite32(0x8026EB08, 0x41820518);
 
-    KURIBO_PATCH_BL(0x8026EBFC, isYoshiDie);
+    KURIBO_PATCH_BL(0x8026EBFC, Patch::Yoshi::isYoshiDie);
     kWrite32(0x8026EC00, 0x2C030000);
     kWrite32(0x8026EC04, 0x4182041C);
 
-    KURIBO_PATCH_BL(0x8026F218, isYoshiDie);
+    KURIBO_PATCH_BL(0x8026F218, Patch::Yoshi::isYoshiDie);
     kWrite32(0x8026F21C, 0x2C030000);
     kWrite32(0x8026F220, 0x41820164);
-    KURIBO_PATCH_BL(0x801BC868, isYoshiEggNeedFruit);
-    KURIBO_PATCH_BL(0x801BC8B4, isYoshiEggFree);
+    KURIBO_PATCH_BL(0x801BC868, Patch::Yoshi::isYoshiEggNeedFruit);
+    KURIBO_PATCH_BL(0x801BC8B4, Patch::Yoshi::isYoshiEggFree);
     kWrite32(0x801BC8B8, 0xA01E00FC);
     kWrite32(0x801BC8BC, 0x2C00000B);
     kWrite32(0x801BC8C0, 0x418200E4);
@@ -304,24 +254,24 @@ KURIBO_MODULE_BEGIN("Eclipse", "JoshuaMK", __VERSION__ "[" SME_STRINGIZE(SME_MAX
     kWrite32(0x801BC8C8, 0x4182003C);
     kWrite32(0x801BC8CC, 0x418100D8);
     kWrite32(0x801BC8D0, 0x48000134);
-    KURIBO_PATCH_BL(0x8024D68C, isYoshiMaintainFluddModel);
+    KURIBO_PATCH_BL(0x8024D68C, Patch::Yoshi::isYoshiMaintainFluddModel);
     kWrite32(0x8024D690, 0x2C030000);
-    KURIBO_PATCH_BL(0x8024F240, maybeYoshiDrown);
-    KURIBO_PATCH_BL(0x802810F8, canMountYoshi);
-    KURIBO_PATCH_BL(0x80281148, getYoshiYPos_);
+    KURIBO_PATCH_BL(0x8024F240, Patch::Yoshi::maybeYoshiDrown);
+    KURIBO_PATCH_BL(0x802810F8, Patch::Yoshi::canMountYoshi);
+    KURIBO_PATCH_BL(0x80281148, Patch::Yoshi::getYoshiYPos_);
     kWrite32(0x802810FC, 0x2C030000);
-    KURIBO_PATCH_BL(0x8026E810, fixYoshiJuiceDecrement);
-    KURIBO_PATCH_BL(0x8024E58C, canYoshiSpray);
-    KURIBO_PATCH_BL(0x80273198, calcYoshiSwimVelocity);
-    KURIBO_PATCH_BL(0x80270078, isYoshiWaterFlutter);
+    KURIBO_PATCH_BL(0x8026E810, Patch::Yoshi::fixYoshiJuiceDecrement);
+    KURIBO_PATCH_BL(0x8024E58C, Patch::Yoshi::canYoshiSpray);
+    KURIBO_PATCH_BL(0x80273198, Patch::Yoshi::calcYoshiSwimVelocity);
+    KURIBO_PATCH_BL(0x80270078, Patch::Yoshi::isYoshiWaterFlutter);
     kWrite32(0x8027007C, 0x7C7E1B78);
     kWrite32(0x80270080, 0x60000000);
     kWrite32(0x80270084, 0x60000000);
-    KURIBO_PATCH_BL(0x8024E788, isYoshiValidDrip);
-    KURIBO_PATCH_B(0x801BC128, initFreeEggCard);
-    KURIBO_PATCH_BL(0x801BC380, checkFreeEggCard);
-    KURIBO_PATCH_BL(0x8028121C, saveNozzles);
-    KURIBO_PATCH_BL(0x8024EC18, restoreNozzles);
+    KURIBO_PATCH_BL(0x8024E788, Patch::Yoshi::isYoshiValidDrip);
+    KURIBO_PATCH_B(0x801BC128, Patch::Yoshi::initFreeEggCard);
+    KURIBO_PATCH_BL(0x801BC380, Patch::Yoshi::checkFreeEggCard);
+    KURIBO_PATCH_BL(0x8028121C, Patch::Yoshi::saveNozzles);
+    KURIBO_PATCH_BL(0x8024EC18, Patch::Yoshi::restoreNozzles);
     kWrite32(0x8024EC2C, 0x60000000);
 
     // utilities/card.cpp

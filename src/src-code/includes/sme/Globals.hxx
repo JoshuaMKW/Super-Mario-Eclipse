@@ -14,7 +14,7 @@
 namespace SME
 {
 
-class TGlobals
+struct TGlobals
 {
     SME::Class::TSMEFile *mStageConfig;
     SME::Class::TPlayerParams *mPlayerCfgArray[4];
@@ -25,23 +25,15 @@ class TGlobals
     
     struct
     {
-        SME::Enum::LightContext mLightType;
-        s32 mPrevShineCount;
-        bool mSizeMorphing;
         JGeometry::TVec3<f32> mShineShadowCoordinates;
+        s32 mPrevShineCount;
         f32 mPrevSize;
         f32 mNextSize;
         f32 mShineShadowBase;
         f32 mStepContext;
-    } Light;
-
-    struct
-    {
-        TMario *mPlayerArray[4];
-        u8 mCurPlayerCount;
-        u8 mMaxPlayerCount;
-        bool mIsActive[4];
-    } PlayerData;
+        SME::Enum::LightContext mLightType;
+        bool mSizeMorphing;
+    } mLightData;
 
     void *mPRMFile;
     SME::Class::TWarpCollisionList *mWarpColArray;
@@ -55,11 +47,15 @@ class TGlobals
     SME::Class::TSMEFile *getStageConfig() const { return mStageConfig; };
     SME::Class::TPlayerParams *getPlayerParams(u8 id) const;
     SME::Class::TPlayerParams *getPlayerParams(TMario *player) const;
+    void registerPlayerParams(SME::Class::TPlayerParams *params);
+    void deregisterPlayerParams(SME::Class::TPlayerParams *params);
 
     constexpr bool isCompletionRewarded() const { return mIsCompletionRewards; }
     constexpr bool isFreePlayMode() const { return mIsFreePlay; }
     constexpr bool isMusicBeingStreamed() const { return mIsAudioStreaming; }
     constexpr bool isMusicStreamingAllowed() const { return mIsAudioStreamAllowed; }
+
+    static SME::TGlobals sGlobals;
 };
 
 }

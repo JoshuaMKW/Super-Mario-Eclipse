@@ -229,11 +229,11 @@ public:
   virtual f32 JSGGetProjectionAspect() const;
   virtual void JSGSetProjectionAspect(const f32 projectionAspect);
   virtual void JSGGetViewPosition(Vec *) const;
-  virtual void JSGSetViewPosition(const Vec *viewPos);
+  virtual void JSGSetViewPosition(const Vec &viewPos);
   virtual void JSGGetViewUpVector(Vec *) const;
-  virtual void JSGSetViewUpVector(const Vec *upVector);
+  virtual void JSGSetViewUpVector(const Vec &upVector);
   virtual void JSGGetViewTargetPosition(Vec *) const;
-  virtual void JSGSetViewTargetPosition(const Vec *targetPos);
+  virtual void JSGSetViewTargetPosition(const Vec &targetPos);
 
 private:
   JGeometry::TVec3<f32> mUpVector;  // 30

@@ -24,6 +24,8 @@
 #include "sms/JSystem/JGeometry.hxx"
 #include "sms/game/Conductor.hxx"
 #include "sms/sound/MSBGM.hxx"
+#include "sms/JSystem/J2D/J2DOrthoGraph.hxx"
+#include "sms/talk/Talk2D2.hxx"
 
 #ifndef SME_MAX_SHINES
 #define SME_MAX_SHINES 120
@@ -73,41 +75,85 @@
 
 namespace SME
 {
-    
 
 inline bool isGameEmulated() { return BootInfo.mConsoleType == OS_CONSOLE_DEV_KIT3; }
 
 namespace Util
 {
+
+namespace SMS
+{
+
+bool isExMap();
+bool isMultiplayerMap();
+bool isDivingMap();
+bool isOptionMap();
+
+}
+
 }
 
 namespace Patch
 {
 
+namespace Camera
+{
+
+void modifyCameraRangeToSize(f32 *params, f32 *saveParams);
+
+}
+
 namespace Card
 {
+
 s32 mountCard(TCardManager *cardManager, bool r4);
 s32 probeCard(TCardManager *cardManager);
 char *formatCardMessage(char *dst, const char *src, s32 len);
+
 }
 
 namespace Cheat
 {
+
 void drawCheatText();
 void *handleDebugCheat(void *GCLogoDir);
+
+}
+
+namespace CKit
+{
+
+void onSetup(TMarDirector* director);
+s32 onUpdate(TMarDirector* director);
+void onDraw2D(J2DOrthoGraph *graph);
+bool manageLightSize();
+void formatTalkMessage(Talk2D2 *talker, char *msgfield, u32 *entrydata);
+void realTimeCustomAttrsHandler(TMario *player);
+
 }
 
 namespace Collision
 {
+
 void checkIsGlideBounce(TMario *player);
 u16 checkIsRestoreTypeNoFallDamage(TBGCheckData *floor);
 u32 updateCollisionContext(TMario *player);
 u16 masterGroundCollisionHandler(TBGCheckData *colTriangle);
 u32 masterAllCollisionHandler(TMario *player);
+
+}
+
+namespace Flag
+{
+
+TCardBookmarkInfo *setFileCompleteBool(TCardManager *cardManager);
+void resetStage(TFlagManager *flagManager);
+
 }
 
 namespace Fludd
 {
+
 bool isPumpOK(TMarioAnimeData *animeData);
 bool hasWaterCardOpen();
 bool canCollectFluddItem(TMario *player);
@@ -121,17 +167,21 @@ void checkExecWaterGun(TWaterGun *fludd);
 void killTriggerNozzle();
 void spamHoverWrapper(TNozzleTrigger *nozzle, u32 r4, TWaterEmitInfo *emitInfo);
 bool checkAirNozzle();
+
 }
 
 namespace Fruit
 {
+
 bool canFruitDieWater(TResetFruit *fruit);
 f32 chooseGrabDistancing(M3UModelMario *model);
 bool isGrabWaitOver(TMario *player);
+
 }
 
 namespace Init
 {
+
 void initCodeProtection();
 JKRExpHeap *createGlobalHeaps(void *newHeap, size_t size, JKRHeap *rootHeap, bool unk_1);
 u32 setupMarioDatas(char *filepath);
@@ -149,26 +199,32 @@ void createUIHeap(u32 size, s32 alignment);
 u32 initHUDElements(char *filepath);
 JKRMemArchive *switchHUDOnStageLoad(char *curArchive, u32 *gameUI);
 JKRHeap *useCustomHUDHeap(u32 size, s32 alignment);
+
 }
 
 namespace Mario
 {
+
 u32 updateContexts(TMario *player);
 u32 carryOrTalkNPC(TBaseNPC *npc);
 bool canGrabAtNPC();
 bool canCarryNPC();
+
 }
 
 namespace Music
 {
+
 u32 setIsValid(MSStageInfo musicID);
 void initMusic();
 void stopMusicOnStop();
 void stopMusicOnStageExit(TMarioGamePad *gamepad);
+
 }
 
 namespace Shine
 {
+
 void manageShineVanish(JGeometry::TVec3<f32> *marioPos);
 void isKillEnemiesShine(TConductor *gpConductor, JGeometry::TVec3<f32> *playerCoordinates, f32 range);
 static void restoreMario(TMarDirector *gpMarDirector, u32 curState);
@@ -184,16 +240,20 @@ void extendFlagManagerSave(JSUMemoryOutputStream &stream);
 void thinkSetBootFlag(void *shineFader, u32 unk_1, u32 unk_2);
 u32 loadAfterMaskState();
 void setKillState();
+
 }
 
 namespace Stage
 {
+
 void setStageOnExit(TGameSequence *gpSequence, s8 stage, s8 episode);
 void startEpisodeSelect(void *selectMenu);
+
 }
 
 namespace Yoshi
 {
+
 bool isYoshiDie(TMario *player) { return !player->mYoshi->isGreenYoshi(); }
 bool isYoshiEggNeedFruit(THitActor *gpFruit);
 u8 isYoshiEggFree(TEggYoshi *gpEgg, THitActor *gpFruit);
@@ -211,8 +271,11 @@ void initFreeEggCard(MActorAnmBck *bckData);
 u32 checkFreeEggCard(MActorAnmBck *bckData);
 void saveNozzles(TYoshi *yoshi);
 void restoreNozzles(TMario *player);
+
 }
+
 }
+
 }
 
 // init_mods.cpp

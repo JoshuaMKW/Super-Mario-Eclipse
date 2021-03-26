@@ -1,10 +1,12 @@
 #include "SME.hxx"
 
+using namespace SME;
+
 void TFlagManager::resetGame() { memset(this + 0xE4, 0, 0xD); }
 
 // 0x80294EF4
 // extern -> SMS.cpp
-void resetStage(TFlagManager *flagManager) {
+void Patch::Flag::resetStage(TFlagManager *flagManager) {
   constexpr size_t mainResetSize =
       (SME_MAX_SHINES - 120) < 0
           ? 0x180

@@ -41,6 +41,7 @@ struct TGlobals
     JKRExpHeap *mCharacterHeap;
     JKRExpHeap *mGame6Heap;
     JKRExpHeap *mGlobalsHeap;
+    bool mPlayerHasGeckoCodes;
 
     TMario *getPlayerByID(u8 id) const;
 

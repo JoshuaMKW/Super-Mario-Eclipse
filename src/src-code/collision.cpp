@@ -142,7 +142,7 @@ static void warpToLinkedCol(TMario *player)
     SME::Class::TPlayerParams *playerData = SME::TGlobals::sGlobals.getPlayerParams(player);
 
     TBGCheckData *linkedCol = SME::TGlobals::sGlobals.mWarpColArray->resolveCollisionWarp(player->mFloorTriangle);
-    TVectorTriangle colTriangle(&linkedCol->mVertexA, &linkedCol->mVertexB, &linkedCol->mVertexC);
+    SME::Class::TVectorTriangle colTriangle(linkedCol->mVertexA, linkedCol->mVertexB, linkedCol->mVertexC);
 
     if (!linkedCol)
     {
@@ -150,7 +150,7 @@ static void warpToLinkedCol(TMario *player)
         return;
     }
 
-    f32 speed = player->mSpeed.resultant();
+    const f32 speed = SME::Class::TVectorTriangle::resultant(player->mSpeed);
 
     if (speed > 1.0f)
     {
@@ -168,10 +168,10 @@ static void warpToLinkedCol(TMario *player)
             gpCamera->JSGGetViewPosition(reinterpret_cast<Vec *>(&cameraPos));
 
             playerPos.set(colTriangle.center());
-            
+
             player->mFloorTriangle = linkedCol;
             player->mFloorTriangleCopy = linkedCol;
-            player->mFloorBelow = player->mPosition.y;
+            player->mFloorBelow = playerPos.y;
             playerData->mCollisionFlags.mIsFaceUsed = true;
             playerData->mCollisionTimer = 0;
             startSoundActor__6TMarioFUl(player, TMario::Voice::JUMP);
@@ -183,7 +183,7 @@ static void warpToLinkedCol(TMario *player)
                 cameraPos.set(x, y, z);
             }
             gpCamera->mHorizontalAngle =
-                static_cast<u16>(TVectorTriangle::bearingAngleY(playerPos, cameraPos)) * 182;
+                static_cast<u16>(SME::Class::TVectorTriangle::bearingAngleY(playerPos, cameraPos)) * 182;
         }
         else if (playerData->mCollisionTimer > 80)
         {
@@ -208,7 +208,7 @@ static void warpToLinkedColPreserve(TMario *player, bool fluid)
     SME::Class::TPlayerParams *playerData = SME::TGlobals::sGlobals.getPlayerParams(player);
 
     TBGCheckData *linkedCol = SME::TGlobals::sGlobals.mWarpColArray->resolveCollisionWarp(player->mFloorTriangle);
-    TVectorTriangle colTriangle(&linkedCol->mVertexA, &linkedCol->mVertexB, &linkedCol->mVertexC);
+    SME::Class::TVectorTriangle colTriangle(linkedCol->mVertexA, linkedCol->mVertexB, linkedCol->mVertexC);
 
     if (!linkedCol) return;
 
@@ -232,16 +232,16 @@ static void warpToLinkedColPreserve(TMario *player, bool fluid)
             cameraPos.set(x, y, z);
         }
         gpCamera->mHorizontalAngle =
-            static_cast<u16>(TVectorTriangle::bearingAngleY(playerPos, cameraPos)) * 182;
+            static_cast<u16>(SME::Class::TVectorTriangle::bearingAngleY(playerPos, cameraPos)) * 182;
 
         JGeometry::TVec3<f32> colNormal = colTriangle.normal();
-        JGeometry::TVec3<f32> colUnit = colNormal.unitVector();
+        JGeometry::TVec3<f32> colUnit = SME::Class::TVectorTriangle::unitVector(colNormal);
 
         const f32 magnitude = fabsf(player->mSpeed.x) +
                         fabsf(player->mSpeed.y) +
                         fabsf(player->mSpeed.z);
 
-        player->mAngle.y = (u16)colNormal.getNormalAngle() * 182;
+        player->mAngle.y = static_cast<u16>(SME::Class::TVectorTriangle::getNormalAngle(colNormal)) * 182;
         setPlayerVelocity__6TMarioFf(player, magnitude * colUnit.x + magnitude * colUnit.z);
         player->mSpeed.y = magnitude * colUnit.y;
 

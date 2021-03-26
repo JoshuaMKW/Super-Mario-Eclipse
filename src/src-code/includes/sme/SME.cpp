@@ -6,50 +6,12 @@
 // c_kit.cpp
 #include "sms/talk/Talk2D2.hxx"
 #include "sms/actor/Mario.hxx"
-extern void onSetup();
-extern s32 onUpdate();
-extern void onDraw2D();
-extern bool SMS_IsExMap();
-extern bool SMS_IsMultiplayerMap();
-extern bool SMS_IsDivingMap();
-extern bool SMS_IsOptionMap();
-extern bool manageLightSize();
-extern void formatTalkMessage(Talk2D2 *, char *, u32 *);
-extern void realTimeCustomAttrsHandler(TMario *);
-
-// camera.cpp
-extern void modifyCameraRangeToSize(f32 *params, f32 *saveParams);
-
-// CheatCode.cpp
-extern void *handleDebugCheat(void *GCLogoDir);
-
-// collision.cpp
-extern void checkIsGlideBounce(TMario *player);
-extern u16 checkIsRestoreTypeNoFallDamage(TBGCheckData *floor);
-extern u32 updateCollisionContext(TMario *player);
-extern u16 masterGroundCollisionHandler(TBGCheckData *colTriangle);
-extern u32 masterAllCollisionHandler(TMario *player);
 
 // file_flags.cpp
 extern s32 setFileCompleteBool(TCardManager *gpCardManager);
 
 // flagmanager.cpp
 extern void resetStage(TFlagManager *flagManager);
-
-// fludd.cpp
-extern bool isPumpOK(TMarioAnimeData *animeData);
-extern bool hasWaterCardOpen();
-extern bool canCollectFluddItem(TMario *player);
-extern void sprayGoopMapWrapGlobalMar(TPollutionManager *gpPollutionManager,
-                                      f32 x, f32 y, f32 z, f32 r);
-extern void sprayGoopMapWrapMar30(TPollutionManager *gpPollutionManager,
-                                  f32 x, f32 y, f32 z, f32 r);
-extern bool canCleanSeals(TWaterManager *gpWaterManager);
-extern TWaterGun *bindFluddtojoint();
-extern void checkExecWaterGun(TWaterGun *fludd);
-extern void killTriggerNozzle();
-extern void spamHoverWrapper(TNozzleTrigger *nozzle, u32 r4, TWaterEmitInfo *emitInfo);
-extern bool checkAirNozzle();
 
 // mario.cpp
 #include "sms/npc/BaseNPC.hxx"
@@ -97,58 +59,58 @@ KURIBO_MODULE_BEGIN("Eclipse", "JoshuaMK", __VERSION__ "[" SME_STRINGIZE(SME_MAX
     /* -- HOOKS -- */
 
     // c_kit.cpp
-    KURIBO_PATCH_BL(0x802998B8, onSetup);
-    KURIBO_PATCH_BL(0x802A616C, onUpdate);
-    KURIBO_PATCH_BL(0x80143F14, onDraw2D);
-    KURIBO_PATCH_B(0x802A8B58, SMS_IsExMap);
-    KURIBO_PATCH_B(0x802A8B30, SMS_IsMultiplayerMap);
-    KURIBO_PATCH_B(0x802A8AFC, SMS_IsDivingMap);
-    KURIBO_PATCH_B(0x802A8AE0, SMS_IsOptionMap);
-    KURIBO_PATCH_BL(0x8027C6A4, manageLightSize);
+    KURIBO_PATCH_BL(0x802998B8, Patch::CKit::onSetup);
+    KURIBO_PATCH_BL(0x802A616C, Patch::CKit::onUpdate);
+    KURIBO_PATCH_BL(0x80143F14, Patch::CKit::onDraw2D);
+    KURIBO_PATCH_B(0x802A8B58, Util::SMS::isExMap);
+    KURIBO_PATCH_B(0x802A8B30, Util::SMS::isMultiplayerMap);
+    KURIBO_PATCH_B(0x802A8AFC, Util::SMS::isDivingMap);
+    KURIBO_PATCH_B(0x802A8AE0, Util::SMS::isOptionMap);
+    KURIBO_PATCH_BL(0x8027C6A4, Patch::CKit::manageLightSize);
     kWrite32(0x8027C6A8, 0x28030001);
-    KURIBO_PATCH_BL(0x80153DE8, formatTalkMessage);
-    KURIBO_PATCH_BL(0x80153E1C, formatTalkMessage);
-    KURIBO_PATCH_BL(0x8024D3A8, realTimeCustomAttrsHandler);
+    KURIBO_PATCH_BL(0x80153DE8, Patch::CKit::formatTalkMessage);
+    KURIBO_PATCH_BL(0x80153E1C, Patch::CKit::formatTalkMessage);
+    KURIBO_PATCH_BL(0x8024D3A8, Patch::CKit::realTimeCustomAttrsHandler);
 
     // camera.cpp
-    KURIBO_PATCH_B(0x80027548, modifyCameraRangeToSize);
+    KURIBO_PATCH_B(0x80027548, Patch::Camera::modifyCameraRangeToSize);
 
     // CheatCode.cpp
-    KURIBO_PATCH_B(0x80295B6C, handleDebugCheat);
+    KURIBO_PATCH_B(0x80295B6C, Patch::Cheat::handleDebugCheat);
 
     // collision.cpp
-    KURIBO_PATCH_BL(0x80258334, checkIsGlideBounce);
-    KURIBO_PATCH_BL(0x80264CFC, checkIsGlideBounce);
-    KURIBO_PATCH_BL(0x8024C558, checkIsRestoreTypeNoFallDamage);
-    KURIBO_PATCH_BL(0x802500B8, updateCollisionContext);
-    KURIBO_PATCH_BL(0x80250CA0, masterGroundCollisionHandler);
-    KURIBO_PATCH_BL(0x8025059C, masterAllCollisionHandler);
+    KURIBO_PATCH_BL(0x80258334, Patch::Collision::checkIsGlideBounce);
+    KURIBO_PATCH_BL(0x80264CFC, Patch::Collision::checkIsGlideBounce);
+    KURIBO_PATCH_BL(0x8024C558, Patch::Collision::checkIsRestoreTypeNoFallDamage);
+    KURIBO_PATCH_BL(0x802500B8, Patch::Collision::updateCollisionContext);
+    KURIBO_PATCH_BL(0x80250CA0, Patch::Collision::masterGroundCollisionHandler);
+    KURIBO_PATCH_BL(0x8025059C, Patch::Collision::masterAllCollisionHandler);
 
     // file_flags.cpp
-    KURIBO_PATCH_BL(0x802B1794, setFileCompleteBool);
+    KURIBO_PATCH_BL(0x802B1794, Patch::Flag::setFileCompleteBool);
 
     // flagmanager.cpp
-    KURIBO_PATCH_B(0x80294EF4, resetStage);
+    KURIBO_PATCH_B(0x80294EF4, Patch::Flag::resetStage);
 
     // fludd.cpp
-    KURIBO_PATCH_B(0x80248F14, isPumpOK);
+    KURIBO_PATCH_B(0x80248F14, Patch::Fludd::isPumpOK);
     kWrite32(0x803DCA02, 0x00300000 | TMarioAnimeData::FLUDD::FLUDD_ENABLED);
-    KURIBO_PATCH_BL(0x8014206C, hasWaterCardOpen);
+    KURIBO_PATCH_BL(0x8014206C, Patch::Fludd::hasWaterCardOpen);
     kWrite32(0x80142070, 0x28030000);
-    KURIBO_PATCH_BL(0x80283058, canCollectFluddItem);
-    KURIBO_PATCH_BL(0x800678C4, sprayGoopMapWrapGlobalMar);
-    KURIBO_PATCH_BL(0x801A3ED0, sprayGoopMapWrapGlobalMar);
-    KURIBO_PATCH_BL(0x801B42D8, sprayGoopMapWrapGlobalMar);
-    KURIBO_PATCH_BL(0x8024E710, sprayGoopMapWrapMar30);
-    KURIBO_PATCH_BL(0x8027F7DC, sprayGoopMapWrapGlobalMar);
-    KURIBO_PATCH_BL(0x8027F94C, sprayGoopMapWrapGlobalMar);
-    KURIBO_PATCH_BL(0x800FED3C, canCleanSeals);
+    KURIBO_PATCH_BL(0x80283058, Patch::Fludd::canCollectFluddItem);
+    KURIBO_PATCH_BL(0x800678C4, Patch::Fludd::sprayGoopMapWrapGlobalMar);
+    KURIBO_PATCH_BL(0x801A3ED0, Patch::Fludd::sprayGoopMapWrapGlobalMar);
+    KURIBO_PATCH_BL(0x801B42D8, Patch::Fludd::sprayGoopMapWrapGlobalMar);
+    KURIBO_PATCH_BL(0x8024E710, Patch::Fludd::sprayGoopMapWrapMar30);
+    KURIBO_PATCH_BL(0x8027F7DC, Patch::Fludd::sprayGoopMapWrapGlobalMar);
+    KURIBO_PATCH_BL(0x8027F94C, Patch::Fludd::sprayGoopMapWrapGlobalMar);
+    KURIBO_PATCH_BL(0x800FED3C, Patch::Fludd::canCleanSeals);
     kWrite32(0x800FED40, 0x2C030000);
-    KURIBO_PATCH_BL(0x8024D53C, bindFluddtojoint);
-    KURIBO_PATCH_BL(0x8024E548, checkExecWaterGun);
-    KURIBO_PATCH_BL(0x8026C370, killTriggerNozzle);
-    KURIBO_PATCH_BL(0x8026C018, spamHoverWrapper);
-    KURIBO_PATCH_BL(0x80262580, checkAirNozzle);
+    KURIBO_PATCH_BL(0x8024D53C, Patch::Fludd::bindFluddtojoint);
+    KURIBO_PATCH_BL(0x8024E548, Patch::Fludd::checkExecWaterGun);
+    KURIBO_PATCH_BL(0x8026C370, Patch::Fludd::killTriggerNozzle);
+    KURIBO_PATCH_BL(0x8026C018, Patch::Fludd::spamHoverWrapper);
+    KURIBO_PATCH_BL(0x80262580, Patch::Fludd::checkAirNozzle);
     kWrite32(0x80262584, 0x2C030000);
 
     // fruit.cpp
@@ -275,51 +237,51 @@ KURIBO_MODULE_BEGIN("Eclipse", "JoshuaMK", __VERSION__ "[" SME_STRINGIZE(SME_MAX
     kWrite32(0x8024EC2C, 0x60000000);
 
     // utilities/card.cpp
-    KURIBO_PATCH_BL(0x802B20F8, mountCard);
-    KURIBO_PATCH_BL(0x80163C40, probeCard);
-    KURIBO_PATCH_BL(0x8015B2C0, formatCardMessage);
-    KURIBO_PATCH_BL(0x8015B2F8, formatCardMessage);
-    KURIBO_PATCH_BL(0x8015B5BC, formatCardMessage);
-    KURIBO_PATCH_BL(0x8015B5E4, formatCardMessage);
-    KURIBO_PATCH_BL(0x8015B638, formatCardMessage);
-    KURIBO_PATCH_BL(0x8015B660, formatCardMessage);
-    KURIBO_PATCH_BL(0x8015BCB8, formatCardMessage);
-    KURIBO_PATCH_BL(0x8015BCE0, formatCardMessage);
-    KURIBO_PATCH_BL(0x8015BE24, formatCardMessage);
-    KURIBO_PATCH_BL(0x8015BE4C, formatCardMessage);
-    KURIBO_PATCH_BL(0x8015BE9C, formatCardMessage);
-    KURIBO_PATCH_BL(0x8015BEC4, formatCardMessage);
-    KURIBO_PATCH_BL(0x8015C508, formatCardMessage);
-    KURIBO_PATCH_BL(0x8015D194, formatCardMessage);
-    KURIBO_PATCH_BL(0x8015D1CC, formatCardMessage);
-    KURIBO_PATCH_BL(0x8015DEFC, formatCardMessage);
-    KURIBO_PATCH_BL(0x8015DF34, formatCardMessage);
-    KURIBO_PATCH_BL(0x8015E34C, formatCardMessage);
-    KURIBO_PATCH_BL(0x8015E374, formatCardMessage);
-    KURIBO_PATCH_BL(0x8015E3C8, formatCardMessage);
-    KURIBO_PATCH_BL(0x8015E3F0, formatCardMessage);
-    KURIBO_PATCH_BL(0x8015F970, formatCardMessage);
-    KURIBO_PATCH_BL(0x8015F9A8, formatCardMessage);
-    KURIBO_PATCH_BL(0x80161320, formatCardMessage);
-    KURIBO_PATCH_BL(0x80161358, formatCardMessage);
-    KURIBO_PATCH_BL(0x8016889C, formatCardMessage);
-    KURIBO_PATCH_BL(0x801688D4, formatCardMessage);
-    KURIBO_PATCH_BL(0x80169224, formatCardMessage);
-    KURIBO_PATCH_BL(0x8016925C, formatCardMessage);
-    KURIBO_PATCH_BL(0x8016950C, formatCardMessage);
-    KURIBO_PATCH_BL(0x80169534, formatCardMessage);
-    KURIBO_PATCH_BL(0x8016958C, formatCardMessage);
-    KURIBO_PATCH_BL(0x801695B4, formatCardMessage);
-    KURIBO_PATCH_BL(0x80169ACC, formatCardMessage);
-    KURIBO_PATCH_BL(0x80169B04, formatCardMessage);
-    KURIBO_PATCH_BL(0x8016A02C, formatCardMessage);
-    KURIBO_PATCH_BL(0x8016A064, formatCardMessage);
-    KURIBO_PATCH_BL(0x8016A3D0, formatCardMessage);
-    KURIBO_PATCH_BL(0x8016A3F8, formatCardMessage);
-    KURIBO_PATCH_BL(0x8016A44C, formatCardMessage);
-    KURIBO_PATCH_BL(0x8016A474, formatCardMessage);
-    KURIBO_PATCH_BL(0x8016B19C, formatCardMessage);
-    KURIBO_PATCH_BL(0x8016B1D4, formatCardMessage);
+    KURIBO_PATCH_BL(0x802B20F8, Patch::Card::mountCard);
+    KURIBO_PATCH_BL(0x80163C40, Patch::Card::probeCard);
+    KURIBO_PATCH_BL(0x8015B2C0, Patch::Card::formatCardMessage);
+    KURIBO_PATCH_BL(0x8015B2F8, Patch::Card::formatCardMessage);
+    KURIBO_PATCH_BL(0x8015B5BC, Patch::Card::formatCardMessage);
+    KURIBO_PATCH_BL(0x8015B5E4, Patch::Card::formatCardMessage);
+    KURIBO_PATCH_BL(0x8015B638, Patch::Card::formatCardMessage);
+    KURIBO_PATCH_BL(0x8015B660, Patch::Card::formatCardMessage);
+    KURIBO_PATCH_BL(0x8015BCB8, Patch::Card::formatCardMessage);
+    KURIBO_PATCH_BL(0x8015BCE0, Patch::Card::formatCardMessage);
+    KURIBO_PATCH_BL(0x8015BE24, Patch::Card::formatCardMessage);
+    KURIBO_PATCH_BL(0x8015BE4C, Patch::Card::formatCardMessage);
+    KURIBO_PATCH_BL(0x8015BE9C, Patch::Card::formatCardMessage);
+    KURIBO_PATCH_BL(0x8015BEC4, Patch::Card::formatCardMessage);
+    KURIBO_PATCH_BL(0x8015C508, Patch::Card::formatCardMessage);
+    KURIBO_PATCH_BL(0x8015D194, Patch::Card::formatCardMessage);
+    KURIBO_PATCH_BL(0x8015D1CC, Patch::Card::formatCardMessage);
+    KURIBO_PATCH_BL(0x8015DEFC, Patch::Card::formatCardMessage);
+    KURIBO_PATCH_BL(0x8015DF34, Patch::Card::formatCardMessage);
+    KURIBO_PATCH_BL(0x8015E34C, Patch::Card::formatCardMessage);
+    KURIBO_PATCH_BL(0x8015E374, Patch::Card::formatCardMessage);
+    KURIBO_PATCH_BL(0x8015E3C8, Patch::Card::formatCardMessage);
+    KURIBO_PATCH_BL(0x8015E3F0, Patch::Card::formatCardMessage);
+    KURIBO_PATCH_BL(0x8015F970, Patch::Card::formatCardMessage);
+    KURIBO_PATCH_BL(0x8015F9A8, Patch::Card::formatCardMessage);
+    KURIBO_PATCH_BL(0x80161320, Patch::Card::formatCardMessage);
+    KURIBO_PATCH_BL(0x80161358, Patch::Card::formatCardMessage);
+    KURIBO_PATCH_BL(0x8016889C, Patch::Card::formatCardMessage);
+    KURIBO_PATCH_BL(0x801688D4, Patch::Card::formatCardMessage);
+    KURIBO_PATCH_BL(0x80169224, Patch::Card::formatCardMessage);
+    KURIBO_PATCH_BL(0x8016925C, Patch::Card::formatCardMessage);
+    KURIBO_PATCH_BL(0x8016950C, Patch::Card::formatCardMessage);
+    KURIBO_PATCH_BL(0x80169534, Patch::Card::formatCardMessage);
+    KURIBO_PATCH_BL(0x8016958C, Patch::Card::formatCardMessage);
+    KURIBO_PATCH_BL(0x801695B4, Patch::Card::formatCardMessage);
+    KURIBO_PATCH_BL(0x80169ACC, Patch::Card::formatCardMessage);
+    KURIBO_PATCH_BL(0x80169B04, Patch::Card::formatCardMessage);
+    KURIBO_PATCH_BL(0x8016A02C, Patch::Card::formatCardMessage);
+    KURIBO_PATCH_BL(0x8016A064, Patch::Card::formatCardMessage);
+    KURIBO_PATCH_BL(0x8016A3D0, Patch::Card::formatCardMessage);
+    KURIBO_PATCH_BL(0x8016A3F8, Patch::Card::formatCardMessage);
+    KURIBO_PATCH_BL(0x8016A44C, Patch::Card::formatCardMessage);
+    KURIBO_PATCH_BL(0x8016A474, Patch::Card::formatCardMessage);
+    KURIBO_PATCH_BL(0x8016B19C, Patch::Card::formatCardMessage);
+    KURIBO_PATCH_BL(0x8016B1D4, Patch::Card::formatCardMessage);
 
     /* -- PATCHES -- */
 

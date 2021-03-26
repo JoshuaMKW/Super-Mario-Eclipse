@@ -3,9 +3,11 @@
 
 #include "SME.hxx"
 
+using namespace SME;
+
 // 0x80027548
 // extern -> SME.cpp
-void modifyCameraRangeToSize(f32 *params, f32 *saveParams)
+void Patch::Camera::modifyCameraRangeToSize(f32 *params, f32 *saveParams)
 {
     params[0xA8 / 4] = saveParams[0x3B0 / 4];
 

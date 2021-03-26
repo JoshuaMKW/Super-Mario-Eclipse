@@ -1,7 +1,9 @@
 #include "CARD.h"
+#include "Globals.hxx"
 #include "printf.h"
-
-#include "SME.hxx"
+#include "sString.hxx"
+#include "sTime.hxx"
+#include "sms/SMS.hxx"
 
 namespace SME::Util {
 
@@ -11,13 +13,18 @@ String &formatBMG(String &msg) {
     OSCalendarTime calendarTime;
     OSTicksToCalendarTime(OSGetTime(), &calendarTime);
 
-    SME::Class::TPlayerParams *playerData = SME::TGlobals::sGlobals.getPlayerParams(gpMarioAddress);
+    SME::Class::TPlayerParams *playerData =
+        SME::TGlobals::sGlobals.getPlayerParams(gpMarioAddress);
 
     msg.replaceAll("%name%", playerData->getPlayerName());
-    msg.replaceAll("%shine%", String::intToString(TFlagManager::smInstance->Type4Flag.mShineCount, buffer));
-    msg.replaceAll("%bcoin%", String::intToString(TFlagManager::smInstance->Type4Flag.mBlueCoinCount, buffer));
-    msg.replaceAll("%rcoin%", String::intToString(TFlagManager::smInstance->Type6Flag.mRedCoinCount, buffer));
-    msg.replaceAll("%coin%", String::intToString(TFlagManager::smInstance->Type4Flag.mGoldCoinCount, buffer));
+    msg.replaceAll("%shine%",
+        String::intToString(TFlagManager::smInstance->Type4Flag.mShineCount, buffer));
+    msg.replaceAll("%bcoin%",
+        String::intToString(TFlagManager::smInstance->Type4Flag.mBlueCoinCount, buffer));
+    msg.replaceAll("%rcoin%",
+        String::intToString(TFlagManager::smInstance->Type6Flag.mRedCoinCount, buffer));
+    msg.replaceAll("%coin%",
+        String::intToString(TFlagManager::smInstance->Type4Flag.mGoldCoinCount, buffer));
     msg.replaceAll("%time%", SME::Util::Time::calendarToDate(calendarTime));
     msg.replaceAll("%date%", SME::Util::Time::calendarToTime(calendarTime));
     msg.replaceAll("%bdate%", SME::Util::Time::buildDate());

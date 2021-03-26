@@ -2,6 +2,8 @@
 
 #include "SME.hxx"
 
+using namespace SME;
+
 static bool isAnyFileComplete(TCardBookmarkInfo *bookmark)
 {
     for (u32 i = 0; i < 3; ++i)
@@ -14,11 +16,11 @@ static bool isAnyFileComplete(TCardBookmarkInfo *bookmark)
 
 // 0x802B1794
 // extern -> SME.cpp
-TCardBookmarkInfo *setFileCompleteBool(TCardManager *cardManager)
+TCardBookmarkInfo *Patch::Flag::setFileCompleteBool(TCardManager *cardManager)
 {
     TCardBookmarkInfo *bookmarkData = cardManager->getBookmarkInfos_();
     if (bookmarkData)
-        SME::TGlobals::sGlobals.Context.mIsCompletionRewards = isAnyFileComplete(bookmarkData);
+        SME::TGlobals::sGlobals.mIsCompletionRewards = isAnyFileComplete(bookmarkData);
     return bookmarkData;
 }
 
@@ -149,5 +151,5 @@ void isGPlusNozzleBox(TNozzleBox *gpNozzleBox)
         return;
 
     if (gpNozzleBox->mNozzleToRegen == TWaterGun::Hover)
-        makeObjDead__11TMapObjBaseFv(gpNozzleBox);
+        gpNozzleBox->makeObjDead();
 }

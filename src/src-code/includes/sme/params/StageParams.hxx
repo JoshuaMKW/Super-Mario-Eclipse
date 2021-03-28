@@ -114,10 +114,10 @@ public:
   } Fludd;
 
   static constexpr u32 MAGIC = 0x434F4445;
-  static TSMEFile mStageConfig;
+  static TSMEFile sStageConfig;
 
   static bool load(const char *stageName);
-  static void reset() { memset(&TSMEFile::mStageConfig, 0, sizeof(TSMEFile)); };
+  static void reset() { memset(&TSMEFile::sStageConfig, 0, sizeof(TSMEFile)); };
   static char *withSMEExtension(char *dst, const char *stage,
                                 bool generalize = false);
 };

@@ -165,13 +165,13 @@ TDarkZhine::PoundingState TDarkZhine::advanceDropAttack(TPollutionManager *gpPol
     }
     else if (this->poundingStatus() == TDarkZhine::SHOCKING)
     {
-        if (!(player->mState & TMario::State::AIRBORN) &&
+        if (!(player->mState & static_cast<u32>(TMario::State::AIRBORN)) &&
             this->isTargetInRangeToHome(this->mPosition, this->shockRadius()) &&
-            (player->mState != TMario::State::KNCK_LND &&
+            (player->mState != static_cast<u32>(TMario::State::KNCK_LND) &&
                 player->mState != 0x4045C))
         {
             decHP__6TMarioFi(player, 1);
-            changePlayerStatus__6TMarioFUlUlb(player, TMario::State::KNCK_LND, 0, 0);
+            changePlayerStatus__6TMarioFUlUlb(player, static_cast<u32>(TMario::State::KNCK_LND), 0, 0);
         }
 
         if (this->statusTimer() <= 0)
@@ -357,7 +357,7 @@ void TDarkZhine::init()
     if (gessoZhineFile)
     {
 
-        u32 *newVTable = (u32 *)Memory::malloc(0x120, 32);
+        u32 *newVTable = (u32 *)SME::Util::Memory::malloc(0x120, 32);
         memcpy(newVTable, this->vTable, 0x114);
         newVTable[0xD0 / 4] = (u32)gessoZhineFile + (u32)gessoZhineFile->mCodeBlock[0]; //Replace move vtable entry
         *(u32 *)0x803B2A94 = (u32)gessoZhineFile + (u32)gessoZhineFile->mCodeBlock[1];  //Replace eye damage vtable entry

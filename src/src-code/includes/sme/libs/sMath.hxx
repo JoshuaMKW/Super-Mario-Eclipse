@@ -3,6 +3,7 @@
 #pragma once
 
 #include "types.h"
+#include "sms/JSystem/JGeometry.hxx"
 
 namespace SME::Util::Math {
 
@@ -35,5 +36,17 @@ constexpr f64 sigmoidCurve(f64 x, f64 f, f64 r, f64 c, f64 b) {
 template <typename T> constexpr inline T lerp(T a, T b, f32 f) {
   return a + f * (b - a);
 }
+
+namespace Vector {
+
+template <typename T> T magnitude(const JGeometry::TVec3<T> &);
+template <typename T> T resultant(const JGeometry::TVec3<T> &);
+template <typename T> T getNormalAngle(const JGeometry::TVec3<T> &);
+template <typename T>
+JGeometry::TVec3<T> unitVector(const JGeometry::TVec3<T> &);
+template <typename T>
+JGeometry::TVec3<T> normalized(const JGeometry::TVec3<T> &);
+
+} // namespace Vector
 
 } // namespace SME::Util::Math

@@ -26,9 +26,7 @@ class TParamT : public TBaseParam
 {
     T mValue;
 public:
-    TParamT(T param, const char *name)
-        : TBaseParam(param, JDrama::TNameRef::calcKeyCode(name), name),
-          mValue(param) {};
+    TParamT(TParams *parent, T param, u16 keycode, const char *name);
 
     T get() const { return mValue; }
     void set(T param) { mValue = param; }
@@ -37,10 +35,10 @@ public:
 };
 
 template <typename T>
-class TParamRT : public TParamT
+class TParamRT : public TParamT<T>
 {
 public:
-    TParamRT(T param, const char *name) {}
+    TParamRT(TParams *parent, T param, u16 keycode, const char *name) : TParamT<T>(parent, param, keycode, name) {}
 
     void set(T param) {};
 };

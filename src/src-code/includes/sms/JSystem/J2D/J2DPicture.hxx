@@ -1,7 +1,7 @@
 #pragma once
 
 #include "types.h"
-#include "Mtx.h"
+#include "MTX.h"
 #include "J2DPane.hxx"
 #include "../JSU/JSUInputStream.hxx"
 

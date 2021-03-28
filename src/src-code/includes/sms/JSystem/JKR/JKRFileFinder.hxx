@@ -1,7 +1,8 @@
 #pragma once
 
 #include "types.h"
-#include "JKRArchivePri.hxx"
+
+class JKRArchive;
 
 class JKRFileFinder
 {

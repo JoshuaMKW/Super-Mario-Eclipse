@@ -1,20 +1,17 @@
-#include <assert.h>
-
+#include "params/MarioParams.hxx"
 #include "OS.h"
 #include "libs/sAssert.hxx"
 #include "libs/sMath.hxx"
 #include "libs/sMemory.hxx"
-#include "params/MarioParams.hxx"
 #include "sms/JSystem/JSU/JSUMemoryStream.hxx"
 #include "sms/actor/Mario.hxx"
 #include "string.h"
 
-
 using namespace SME::Class;
 
 TPlayerParams::TPlayerParams(TMario *player, bool isMario)
-    : mPlayer(player), mIsEMario(!isMario), mPlayerID(0), mInitialized(true),
-      mCanUseFludd(true), mCurJump(0), mDefaultAttrs(player) {
+    : mPlayer(player), mIsEMario(!isMario), mInitialized(true),
+      mCanUseFludd(true), mPlayerID(0), mCurJump(0), mDefaultAttrs(player) {
   mFluddHistory.mHadFludd = false;
   mFluddHistory.mMainNozzle = TWaterGun::Spray;
   mFluddHistory.mSecondNozzle = TWaterGun::Hover;
@@ -175,8 +172,8 @@ bool TPlayerParams::loadPrm(const char *prm = "/sme.prm") {
   return false;
 }
 
-bool TPlayerParams::loadPrm(TCustomParams &data) {
-  *mParams = data;
+bool TPlayerParams::loadPrm(JSUMemoryInputStream &stream) {
+  mParams->load(stream);
   return true;
 }
 
@@ -222,6 +219,22 @@ u8 TPlayerParams::getNozzleBoneID(TWaterGun::NozzleType nozzle) const {
   }
 }
 
+const char *TPlayerParams::getPlayerName() const {
+  switch (getPlayerID()) {
+  case 1:
+    return "Luigi";
+  case 2:
+    return "Il Piantissimo";
+  case 3:
+    return "Shadow Mario";
+  case 4:
+    return "Dry Bones";
+  case 0:
+  default:
+    return "Mario";
+  }
+}
+
 void TPlayerParams::ParamHistory::applyHistoryTo(TMario *player) {
   SME_ASSERT(player != nullptr, "Can't apply param history to a nullptr");
   player->mDeParams = mDeParams;
@@ -260,7 +273,30 @@ void TPlayerParams::ParamHistory::applyHistoryTo(TMario *player) {
   player->mUpperBodyParams = mUpperBodyParams;
 }
 
-TPlayerParams::ParamHistory::ParamHistory(TMario *player = nullptr)
+TPlayerParams::ParamHistory::ParamHistory()
+    : mDeParams(), mBodyAngleFreeParams("/Mario/BodyAngleFree.prm"),
+      mBodyAngleWaterGunParams("/Mario/BodyAngleWaterGun.prm"),
+      mPunchFenceParams("/Mario/AttackFencePunch.prm"),
+      mKickRoofParams("/Mario/AttackKickRoof.prm"), mJumpParams(), mRunParams(),
+      mSwimParams(), mHangFenceParams(), mHangRoofParams(), mWireParams(),
+      mPullBGBeakParams("/Mario/PullParamBGBeak.prm"),
+      mPullBGTentacleParams("/Mario/PullParamBGTentacle.prm"),
+      mPullBGFireWanWanBossTailParams(
+          "/Mario/PullParamBGFireWanWanBossTail.prm"),
+      mPullFireWanWanTailParams("/Mario/PullParamFireWanWanTail.prm"),
+      mHoverParams(), mDivingParams(), mYoshiParams(), mWaterEffectParams(),
+      mControllerParams(), mGraffitoParams(), mDirtyParams(), mMotorParams(),
+      mParticleParams(), mEffectParams(),
+      mSlipNormalParams("/Mario/SlipParamNormal.prm"),
+      mSlipOilParams("/Mario/SlipParamOil.prm"),
+      mSlipAllParams("/Mario/SlipParamAll.prm"),
+      mSlipAllSliderParams("/Mario/SlipParamAll_Slider.prm"),
+      mSlip45Params("/Mario/SlipParam45.prm"),
+      mSlipWaterSlopeParams("/Mario/SlipParamWaterSlope.prm"),
+      mSlipWaterGroundParams("/Mario/SlipParamWaterGround.prm"),
+      mSlipYoshiParams("/Mario/SlipParamYoshi.prm"), mUpperBodyParams() {}
+
+TPlayerParams::ParamHistory::ParamHistory(TMario *player)
     : mDeParams(), mBodyAngleFreeParams("/Mario/BodyAngleFree.prm"),
       mBodyAngleWaterGunParams("/Mario/BodyAngleWaterGun.prm"),
       mPunchFenceParams("/Mario/AttackFencePunch.prm"),

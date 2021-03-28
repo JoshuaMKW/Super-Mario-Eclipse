@@ -9,8 +9,6 @@
 #include "params/MarioParams.hxx"
 #include "params/StageParams.hxx"
 
-#include "SME.hxx"
-
 namespace SME
 {
 

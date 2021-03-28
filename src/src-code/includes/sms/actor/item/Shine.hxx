@@ -17,14 +17,14 @@ public:
     virtual void kill() override;
     virtual void initMapObj() override;
     virtual void loadBeforeInit(JSUMemoryInputStream &) override;
-    virtual void makeMActors(); // override;
+    virtual void makeMActors() override;
+    virtual void calc() override;
     virtual void touchPlayer(THitActor *) override;
 
     void appearSimple(int);
     void appearWithDemo(const char *);
     void appearWithTime(int, int, int, int);
     void appearWithTimeCallback(u32, u32);
-    void calc();
     void movingCircle();
 
     u32 mType;                         //0x0154

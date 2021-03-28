@@ -4,6 +4,38 @@
 #include "J3DTransform.hxx"
 #include "../JUT/JUTNameTab.hxx"
 
+class J3DTexNoAnm
+{
+public:
+	u32 *vTable; // _0
+	u16 _4;
+	u16 _6; // padding?
+};
+
+class J3DAnmColor
+{
+};
+
+class J3DAnmTevRegKey
+{
+};
+
+class J3DAnmTextureSRTKey
+{
+};
+
+class J3DMatColorAnm
+{
+};
+
+class J3DTevKColorAnm
+{
+};
+
+class J3DTexNtxAnm
+{
+};
+
 class J3DAnmKeyTableBase
 {
 };
@@ -105,36 +137,4 @@ public:
 	u16 _1A;
 	u32 _1C;
 	JUTNameTab *mNameTab; // _20
-};
-
-class J3DTexNoAnm
-{
-public:
-	u32 *vTable; // _0
-	u16 _4;
-	u16 _6; // padding?
-};
-
-class J3DAnmColor
-{
-};
-
-class J3DAnmTevRegKey
-{
-};
-
-class J3DAnmTextureSRTKey
-{
-};
-
-class J3DMatColorAnm
-{
-};
-
-class J3DTevKColorAnm
-{
-};
-
-class J3DTexNtxAnm
-{
 };

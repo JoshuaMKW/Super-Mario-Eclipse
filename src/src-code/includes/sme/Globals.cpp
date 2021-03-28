@@ -1,4 +1,5 @@
 #include "Globals.hxx"
+#include "SME.hxx"
 
 SME::Class::TPlayerParams *SME::TGlobals::getPlayerParams(u8 id) const {
   SME_DEBUG_ASSERT(id < SME_MAX_PLAYERS, "Invalid player index provided");

@@ -1,6 +1,8 @@
 #pragma once
 
 #include "types.h"
+#include "mem.h"
+#include "string.h"
 
 class String {
   char *mString;

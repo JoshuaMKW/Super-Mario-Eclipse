@@ -12,8 +12,8 @@ public:
 	virtual void removeResourceAll();
 	virtual bool removeResource(void *);
 
-	virtual void *fetchResource(JKRArchive::SDIFileEntry *, u32 *);
-	virtual void *fetchResource(void *src, u32 len, JKRArchive::SDIFileEntry *, u32 *);
+	virtual void *fetchResource(SDIFileEntry *, u32 *);
+	virtual void *fetchResource(void *src, u32 len, SDIFileEntry *, u32 *);
 
 	void open(s32);
 };

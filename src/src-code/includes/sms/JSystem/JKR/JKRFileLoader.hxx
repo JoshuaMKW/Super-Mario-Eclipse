@@ -1,8 +1,10 @@
 #pragma once
 
 #include "types.h"
-#include "JKRArchivePri.hxx"
 #include "JKRDisposer.hxx"
+#include "../JSU/JSUList.hxx"
+
+class JKRArchive;
 
 class JKRFileLoader : public JKRDisposer
 {

@@ -5,6 +5,7 @@
 #include "JKRAramHeap.hxx"
 #include "JKRDvdRipper.hxx"
 #include "JKRThread.hxx"
+#include "OS.h"
 #include "types.h"
 
 

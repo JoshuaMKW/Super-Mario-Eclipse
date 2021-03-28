@@ -1,6 +1,6 @@
 #include "OS.h"
 #include "SME.hxx"
-#include "sms/JSystem/J2D/J2DTextbox.hxx"
+#include "sms/JSystem/J2D/J2DTextBox.hxx"
 #include "sms/JSystem/JDrama.hxx"
 #include "types.h"
 

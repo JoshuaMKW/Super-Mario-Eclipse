@@ -1,10 +1,59 @@
 #pragma once
 
 #include "types.h"
-#include "Mtx.h"
+#include "MTX.h"
 #include "J3DPacket.hxx"
 #include "J3DShape.hxx"
 #include "J3DTexture.hxx"
+
+class J3DColorBlock
+{
+public:
+	virtual void reset(J3DColorBlock *);
+
+	virtual ~J3DColorBlock();
+};
+
+class J3DPEBlock
+{
+public:
+	virtual void reset(J3DPEBlock *);
+	//virtual void setFog(J3DFog *);
+
+	virtual ~J3DPEBlock();
+};
+
+class J3DTevBlock
+{
+public:
+	virtual void reset(J3DTevBlock *);
+
+	virtual ~J3DTevBlock();
+};
+
+class J3DIndBlock
+{
+public:
+	virtual void reset(J3DIndBlock *);
+
+	virtual ~J3DIndBlock();
+};
+
+class J3DTexBlock
+{
+public:
+	virtual void reset(J3DTexBlock *);
+
+	virtual ~J3DTexBlock();
+};
+
+class J3DTexGenBlock
+{
+public:
+	virtual void reset(J3DTexGenBlock *);
+
+	virtual ~J3DTexGenBlock();
+};
 
 class J3DMaterial
 {
@@ -86,54 +135,5 @@ public:
 
 class J3DGXColor
 {
-};
-
-class J3DColorBlock
-{
-public:
-	virtual void reset(J3DColorBlock *);
-
-	virtual ~J3DColorBlock();
-};
-
-class J3DPEBlock
-{
-public:
-	virtual void reset(J3DPEBlock *);
-	//virtual void setFog(J3DFog *);
-
-	virtual ~J3DPEBlock();
-};
-
-class J3DTevBlock
-{
-public:
-	virtual void reset(J3DTevBlock *);
-
-	virtual ~J3DTevBlock();
-};
-
-class J3DIndBlock
-{
-public:
-	virtual void reset(J3DIndBlock *);
-
-	virtual ~J3DIndBlock();
-};
-
-class J3DTexBlock
-{
-public:
-	virtual void reset(J3DTexBlock *);
-
-	virtual ~J3DTexBlock();
-};
-
-class J3DTexGenBlock
-{
-public:
-	virtual void reset(J3DTexGenBlock *);
-
-	virtual ~J3DTexGenBlock();
 };
 

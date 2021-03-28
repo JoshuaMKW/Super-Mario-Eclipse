@@ -208,7 +208,7 @@ extern "C"
     void OSTicksToCalendarTime(OSTime time, OSCalendarTime *result);
 
     void OSReport(const char *msg, ...);
-    void OSPanic(char *, u32, char *, ...);
+    void OSPanic(const char *, u32, const char *, ...);
     void OSFatal(u32 *, u32 *, const char *);
     void OSResetSystem(u32, u32, bool);
     u32 OSGetResetCode();

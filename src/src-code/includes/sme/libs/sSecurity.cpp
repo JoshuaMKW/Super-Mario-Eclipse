@@ -8,12 +8,11 @@ OSAlarm gctAlarm;
 #endif
 
 static constexpr u32 sEnabledmagic = 0x00D0C0DE;
-static constexpr u32 sDisabledmagic = 0x00D0DEAD;
 static u32 *sCachedAddr = nullptr;
 
 using namespace SME;
 
-bool Util::Security::areGeckoCodesPresent(void *handlerBuffer, size_t maxlen, u32 **addrStorage = nullptr)
+bool Util::Security::areGeckoCodesPresent(void *handlerBuffer, size_t maxlen, u32 **addrStorage)
 {
     u32 *checkArea = static_cast<u32 *>(handlerBuffer);
 
@@ -35,10 +34,9 @@ void *Util::Security::setUserCodes(OSAlarm *alarm, OSContext *context)
         OSStartStopwatch(&gctStopwatch);
     #endif
     
-    constexpr u32 *searchcontext = reinterpret_cast<u32 *>(0x80001C00);
-    constexpr size_t searchlength = 0x80003000 - 0x80001C00;
+    u32 *searchcontext = (u32 *)(0x80001C00);
+    const size_t searchlength = 0x80003000 - 0x80001C00;
 
-    bool magicFound;
     if (sCachedAddr) {
         if (areGeckoCodesPresent(sCachedAddr, 8)) {
             #ifdef SME_DEBUG
@@ -52,7 +50,7 @@ void *Util::Security::setUserCodes(OSAlarm *alarm, OSContext *context)
         }
     }
     SME::TGlobals::sGlobals.mPlayerHasGeckoCodes =
-        areGeckoCodesPresent(searchcontext, searchlength, &sCachedAddr);
+        areGeckoCodesPresent(static_cast<void *>(searchcontext), searchlength, &sCachedAddr);
 
     #ifdef SME_DEBUG
         OSStopStopwatch(&gctStopwatch);

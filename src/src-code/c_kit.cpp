@@ -10,7 +10,7 @@
 using namespace SME;
 
 extern void drawCheatText();
-extern J2DTextBox *gDebugTextBox;
+extern J2DTextBox gDebugTextBox;
 
 bool inXYZMode;
 
@@ -62,7 +62,7 @@ static void xyzModifierMario()
 // extern -> SME.cpp
 void Patch::CKit::onSetup(TMarDirector* director)
 {
-    gDebugTextBox = new (SME::TGlobals::sGlobals.mGlobalsHeap, 4) J2DTextBox(gpSystemFont->mFont, "Debug Mode");
+    gDebugTextBox = J2DTextBox(gpSystemFont->mFont, "Debug Mode");
 
 	// run replaced call
 	director->setupObjects();
@@ -91,8 +91,8 @@ void Patch::CKit::onDraw2D(J2DOrthoGraph *graph)
 // extern -> SME.cpp
 bool Util::SMS::isExMap()
 {
-    if (SME::Class::TSMEFile::mStageConfig.FileHeader.mMAGIC == SME::Class::TSMEFile::MAGIC)
-        return SME::Class::TSMEFile::mStageConfig.GlobalFlags.StageType.mIsExMap;
+    if (SME::Class::TSMEFile::sStageConfig.FileHeader.mMAGIC == SME::Class::TSMEFile::MAGIC)
+        return SME::Class::TSMEFile::sStageConfig.GlobalFlags.StageType.mIsExMap;
     else
         return (gpApplication.mCurrentScene.mAreaID >= TGameSequence::DOLPICEX0 &&
                 gpApplication.mCurrentScene.mAreaID <= TGameSequence::COROEX6);
@@ -102,8 +102,8 @@ bool Util::SMS::isExMap()
 // extern -> SME.cpp
 bool Util::SMS::isMultiplayerMap()
 {
-    if (SME::Class::TSMEFile::mStageConfig.FileHeader.mMAGIC == SME::Class::TSMEFile::MAGIC)
-        return SME::Class::TSMEFile::mStageConfig.GlobalFlags.StageType.mIsMultiPlayerMap;
+    if (SME::Class::TSMEFile::sStageConfig.FileHeader.mMAGIC == SME::Class::TSMEFile::MAGIC)
+        return SME::Class::TSMEFile::sStageConfig.GlobalFlags.StageType.mIsMultiPlayerMap;
     else
         return (gpMarDirector->mAreaID == TGameSequence::TEST10 && gpMarDirector->mEpisodeID == 0);
 }
@@ -112,8 +112,8 @@ bool Util::SMS::isMultiplayerMap()
 // extern -> SME.cpp
 bool Util::SMS::isDivingMap()
 {
-    if (SME::Class::TSMEFile::mStageConfig.FileHeader.mMAGIC == SME::Class::TSMEFile::MAGIC)
-        return SME::Class::TSMEFile::mStageConfig.GlobalFlags.StageType.mIsDivingMap;
+    if (SME::Class::TSMEFile::sStageConfig.FileHeader.mMAGIC == SME::Class::TSMEFile::MAGIC)
+        return SME::Class::TSMEFile::sStageConfig.GlobalFlags.StageType.mIsDivingMap;
     else
         return (gpMarDirector->mAreaID == TGameSequence::MAREBOSS ||
                 gpMarDirector->mAreaID == TGameSequence::MAREEX0 ||
@@ -124,8 +124,8 @@ bool Util::SMS::isDivingMap()
 // extern -> SME.cpp
 bool Util::SMS::isOptionMap()
 {
-    if (SME::Class::TSMEFile::mStageConfig.FileHeader.mMAGIC == SME::Class::TSMEFile::MAGIC)
-        return SME::Class::TSMEFile::mStageConfig.GlobalFlags.StageType.mIsOptionMap;
+    if (SME::Class::TSMEFile::sStageConfig.FileHeader.mMAGIC == SME::Class::TSMEFile::MAGIC)
+        return SME::Class::TSMEFile::sStageConfig.GlobalFlags.StageType.mIsOptionMap;
     else
         return (gpMarDirector->mAreaID == 15);
 }
@@ -134,8 +134,8 @@ bool Util::SMS::isOptionMap()
 // extern -> SME.cpp
 bool Patch::CKit::manageLightSize()
 {
-    if (SME::Class::TSMEFile::mStageConfig.FileHeader.mMAGIC != SME::Class::TSMEFile::MAGIC ||
-        !SME::Class::TSMEFile::mStageConfig.GlobalFlags.mIsShineShadow)
+    if (SME::Class::TSMEFile::sStageConfig.FileHeader.mMAGIC != SME::Class::TSMEFile::MAGIC ||
+        !SME::Class::TSMEFile::sStageConfig.GlobalFlags.mIsShineShadow)
         return (gpMarDirector->mAreaID == 1);
 
     s32 &CurrentShineCount = TFlagManager::smInstance->Type4Flag.mShineCount;
@@ -143,8 +143,8 @@ bool Patch::CKit::manageLightSize()
     switch (SME::TGlobals::sGlobals.mLightData.mLightType)
     {
     case SME::Enum::LightContext::STATIC: {
-        if (SME::Class::TSMEFile::mStageConfig.Light.mDarkLevel != 255)
-            gpModelWaterManager->mDarkLevel = SME::Class::TSMEFile::mStageConfig.Light.mDarkLevel;
+        if (SME::Class::TSMEFile::sStageConfig.Light.mDarkLevel != 255)
+            gpModelWaterManager->mDarkLevel = SME::Class::TSMEFile::sStageConfig.Light.mDarkLevel;
         else if (CurrentShineCount < SME_MAX_SHINES)
             gpModelWaterManager->mDarkLevel = SME::Util::Math::lerp<u8>(30, 190,
                                                        static_cast<f32>(CurrentShineCount) /
@@ -218,7 +218,7 @@ bool Patch::CKit::manageLightSize()
         break;
     }
     case SME::Enum::LightContext::FOLLOWPLAYER: {
-        gpModelWaterManager->mDarkLevel = SME::Class::TSMEFile::mStageConfig.Light.mDarkLevel;
+        gpModelWaterManager->mDarkLevel = SME::Class::TSMEFile::sStageConfig.Light.mDarkLevel;
         gShineShadowPos.x = gpMarioPos->x + SME::TGlobals::sGlobals.mLightData.mShineShadowCoordinates.x;
         gShineShadowPos.y = gpMarioPos->y + SME::TGlobals::sGlobals.mLightData.mShineShadowCoordinates.y;
         gShineShadowPos.z = gpMarioPos->z + SME::TGlobals::sGlobals.mLightData.mShineShadowCoordinates.z;

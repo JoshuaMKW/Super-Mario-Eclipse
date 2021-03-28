@@ -1,8 +1,4 @@
-
-#include "Globals.hxx"
-#include "CheatHandler.hxx"
-#include "stage/FileUtils.hxx"
-#include "funcs.hxx"
+#pragma once
 
 #include "libs/sAssert.hxx"
 #include "libs/sBmg.hxx"
@@ -13,19 +9,25 @@
 #include "libs/sString.hxx"
 #include "libs/sTime.hxx"
 
+#include "CheatHandler.hxx"
+#include "Globals.hxx"
+#include "funcs.hxx"
+#include "stage/FileUtils.hxx"
+
 #include "params/MarioParams.hxx"
 #include "params/StageParams.hxx"
 
-#pragma once
-
-#include "types.h"
 #include "OS.h"
-#include "sms/SMS.hxx"
-#include "sms/JSystem/JGeometry.hxx"
-#include "sms/game/Conductor.hxx"
-#include "sms/sound/MSBGM.hxx"
 #include "sms/JSystem/J2D/J2DOrthoGraph.hxx"
+#include "sms/JSystem/JGeometry.hxx"
+#include "sms/SMS.hxx"
+#include "sms/game/Conductor.hxx"
+#include "sms/npc/BaseNPC.hxx"
+#include "sms/object/ResetFruit.hxx"
+#include "sms/sound/MSBGM.hxx"
 #include "sms/talk/Talk2D2.hxx"
+#include "types.h"
+
 
 #ifndef SME_MAX_SHINES
 #define SME_MAX_SHINES 120
@@ -45,10 +47,10 @@
 #define KURIBO_NO_TYPES
 #endif
 
-#define SME_FROM_GPR(reg, var) asm volatile ("mr %0, " #reg : "=r"(var))
-#define SME_TO_GPR(reg, var)   asm volatile ("mr " #reg ", %0" : : "r"(var))
-#define SME_FROM_FPR(reg, var) asm volatile ("fmr %0, " #reg : "=r"(var))
-#define SME_TO_FPR(reg, var)   asm volatile ("fmr " #reg ", %0" : : "r"(var))
+#define SME_FROM_GPR(reg, var) asm volatile("mr %0, " #reg : "=r"(var))
+#define SME_TO_GPR(reg, var) asm volatile("mr " #reg ", %0" : : "r"(var))
+#define SME_FROM_FPR(reg, var) asm volatile("fmr %0, " #reg : "=r"(var))
+#define SME_TO_FPR(reg, var) asm volatile("fmr " #reg ", %0" : : "r"(var))
 
 /* Misc compiler info */
 #define SME_VERSION "v0.4a"
@@ -63,77 +65,73 @@
 
 #ifdef __cplusplus
 #if __cplusplus >= 201103L
-#define offsetof(t, d) __builtin_offsetof(t, d)
+#define offsetof(t, d) ((size_t) & (((t *)0)->d))
+//#define offsetof(t, d) __builtin_offsetof(t, d)
 #else
-#define offsetof(t, d) ((size_t)&(((t *)0)->d))
+#define offsetof(t, d) ((size_t) & (((t *)0)->d))
 #endif
 #define SME_EXTERN_C extern "C"
 #else
 #define SME_EXTERN_C extern
 #endif
 
+// init_mods.cpp
+SME_EXTERN_C OSBootInfo BootInfo;
 
-namespace SME
-{
+namespace SME {
 
-inline bool isGameEmulated() { return BootInfo.mConsoleType == OS_CONSOLE_DEV_KIT3; }
+inline bool isGameEmulated() {
+  return BootInfo.mConsoleType == OS_CONSOLE_DEV_KIT3;
+}
 
-namespace Util
-{
+namespace Util {
 
-namespace SMS
-{
+namespace SMS {
 
 bool isExMap();
 bool isMultiplayerMap();
 bool isDivingMap();
 bool isOptionMap();
 
-}
+} // namespace SMS
 
-}
+} // namespace Util
 
-namespace Patch
-{
+namespace Patch {
 
-namespace Camera
-{
+namespace Camera {
 
 void modifyCameraRangeToSize(f32 *params, f32 *saveParams);
 
 }
 
-namespace Card
-{
+namespace Card {
 
 s32 mountCard(TCardManager *cardManager, bool r4);
 s32 probeCard(TCardManager *cardManager);
 char *formatCardMessage(char *dst, const char *src, s32 len);
 
-}
+} // namespace Card
 
-namespace Cheat
-{
+namespace Cheat {
 
 void drawCheatText();
 void *handleDebugCheat(void *GCLogoDir);
 
-}
+} // namespace Cheat
 
-namespace CKit
-{
+namespace CKit {
 
-void onSetup(TMarDirector* director);
-s32 onUpdate(TMarDirector* director);
+void onSetup(TMarDirector *director);
+s32 onUpdate(TMarDirector *director);
 void onDraw2D(J2DOrthoGraph *graph);
 bool manageLightSize();
 void formatTalkMessage(Talk2D2 *talker, char *msgfield, u32 *entrydata);
 void realTimeCustomAttrsHandler(TMario *player);
 
-}
+} // namespace CKit
 
-namespace Collision
-{
+namespace Collision {
 
 void checkIsGlideBounce(TMario *player);
 u16 checkIsRestoreTypeNoFallDamage(TBGCheckData *floor);
@@ -141,26 +139,24 @@ u32 updateCollisionContext(TMario *player);
 u16 masterGroundCollisionHandler(TBGCheckData *colTriangle);
 u32 masterAllCollisionHandler(TMario *player);
 
-}
+} // namespace Collision
 
-namespace Flag
-{
+namespace Flag {
 
 TCardBookmarkInfo *setFileCompleteBool(TCardManager *cardManager);
 void resetStage(TFlagManager *flagManager);
 
-}
+} // namespace Flag
 
-namespace Fludd
-{
+namespace Fludd {
 
 bool isPumpOK(TMarioAnimeData *animeData);
 bool hasWaterCardOpen();
 bool canCollectFluddItem(TMario *player);
-void sprayGoopMapWrapGlobalMar(TPollutionManager *gpPollutionManager,
-                               f32 x, f32 y, f32 z, f32 r);
-void sprayGoopMapWrapMar30(TPollutionManager *gpPollutionManager,
-                           f32 x, f32 y, f32 z, f32 r);
+void sprayGoopMapWrapGlobalMar(TPollutionManager *gpPollutionManager, f32 x,
+                               f32 y, f32 z, f32 r);
+void sprayGoopMapWrapMar30(TPollutionManager *gpPollutionManager, f32 x, f32 y,
+                           f32 z, f32 r);
 bool canCleanSeals(TWaterManager *gpWaterManager);
 TWaterGun *bindFluddtojoint();
 void checkExecWaterGun(TWaterGun *fludd);
@@ -168,24 +164,24 @@ void killTriggerNozzle();
 void spamHoverWrapper(TNozzleTrigger *nozzle, u32 r4, TWaterEmitInfo *emitInfo);
 bool checkAirNozzle();
 
-}
+} // namespace Fludd
 
-namespace Fruit
-{
+namespace Fruit {
 
 bool canFruitDieWater(TResetFruit *fruit);
 f32 chooseGrabDistancing(M3UModelMario *model);
 bool isGrabWaitOver(TMario *player);
 
-}
+} // namespace Fruit
 
-namespace Init
-{
+namespace Init {
 
 void initCodeProtection();
-JKRExpHeap *createGlobalHeaps(void *newHeap, size_t size, JKRHeap *rootHeap, bool unk_1);
+JKRExpHeap *createGlobalHeaps(void *newHeap, size_t size, JKRHeap *rootHeap,
+                              bool unk_1);
 u32 setupMarioDatas(char *filepath);
-u32 *initFirstModel(char *path, u32 unk_1, u32 unk_2, u32 unk_3, JKRHeap *heap, u32 unk_4, u32 unk_5, u32 unk_6);
+u32 *initFirstModel(char *path, u32 unk_1, u32 unk_2, u32 unk_3, JKRHeap *heap,
+                    u32 unk_4, u32 unk_5, u32 unk_6);
 u32 *initFileMods();
 void initShineShadow();
 void initSoundBank(u8 areaID, u8 episodeID);
@@ -200,34 +196,31 @@ u32 initHUDElements(char *filepath);
 JKRMemArchive *switchHUDOnStageLoad(char *curArchive, u32 *gameUI);
 JKRHeap *useCustomHUDHeap(u32 size, s32 alignment);
 
-}
+} // namespace Init
 
-namespace Mario
-{
+namespace Mario {
 
 u32 updateContexts(TMario *player);
 u32 carryOrTalkNPC(TBaseNPC *npc);
 bool canGrabAtNPC();
 bool canCarryNPC();
 
-}
+} // namespace Mario
 
-namespace Music
-{
+namespace Music {
 
 u32 setIsValid(MSStageInfo musicID);
 void initMusic();
 void stopMusicOnStop();
 void stopMusicOnStageExit(TMarioGamePad *gamepad);
 
-}
+} // namespace Music
 
-namespace Shine
-{
+namespace Shine {
 
 void manageShineVanish(JGeometry::TVec3<f32> *marioPos);
-void isKillEnemiesShine(TConductor *gpConductor, JGeometry::TVec3<f32> *playerCoordinates, f32 range);
-static void restoreMario(TMarDirector *gpMarDirector, u32 curState);
+void isKillEnemiesShine(TConductor *gpConductor,
+                        JGeometry::TVec3<f32> *playerCoordinates, f32 range);
 void checkBootOut(TMarDirector *gpMarDirector, u32 curState);
 u32 extendShineIDLogic(TFlagManager *flagManager, u32 flagID);
 void shineObjectStringMod(JSUInputStream *stream, u8 *dst, u32 size);
@@ -241,20 +234,18 @@ void thinkSetBootFlag(void *shineFader, u32 unk_1, u32 unk_2);
 u32 loadAfterMaskState();
 void setKillState();
 
-}
+} // namespace Shine
 
-namespace Stage
-{
+namespace Stage {
 
 void setStageOnExit(TGameSequence *gpSequence, s8 stage, s8 episode);
 void startEpisodeSelect(void *selectMenu);
 
-}
+} // namespace Stage
 
-namespace Yoshi
-{
+namespace Yoshi {
 
-bool isYoshiDie(TMario *player) { return !player->mYoshi->isGreenYoshi(); }
+bool isYoshiDie(TMario *player);
 bool isYoshiEggNeedFruit(THitActor *gpFruit);
 u8 isYoshiEggFree(TEggYoshi *gpEgg, THitActor *gpFruit);
 bool isYoshiMaintainFluddModel();
@@ -272,11 +263,8 @@ u32 checkFreeEggCard(MActorAnmBck *bckData);
 void saveNozzles(TYoshi *yoshi);
 void restoreNozzles(TMario *player);
 
-}
+} // namespace Yoshi
 
-}
+} // namespace Patch
 
-}
-
-// init_mods.cpp
-SME_EXTERN_C OSBootInfo BootInfo;
+} // namespace SME

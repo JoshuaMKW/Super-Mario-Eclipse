@@ -1,7 +1,7 @@
 #pragma once
 
 #include "types.h"
-#include "Mtx.h"
+#include "MTX.h"
 #include "../JSU/JSUInputStream.hxx"
 #include "../JSU/JSUList.hxx"
 #include "../JUT/JUTColor.hxx"

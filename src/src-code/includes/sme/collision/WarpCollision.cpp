@@ -1,9 +1,11 @@
 #include "WarpCollision.hxx"
 #include "libs/sGeometry.hxx"
 #include "sms/JSystem/JGeometry.hxx"
+#include "libs/sMath.hxx"
 
 
 using namespace SME;
+using namespace SME::Util::Math;
 
 Class::TWarpCollisionList::TWarpCollisionList(Class::TCollisionLink colList[]) {
   u8 size = 0;
@@ -59,8 +61,8 @@ Class::TWarpCollisionList::getNearestTarget(TBGCheckData *colTriangle) {
 
     JGeometry::TVec3<f32> _set(b.x - a.x, b.y - a.y, b.z - a.z);
 
-    if (_set.magnitude() < nearestDist) {
-      nearestDist = _set.magnitude();
+    if (Vector::magnitude(_set) < nearestDist) {
+      nearestDist = Vector::magnitude(_set);
       index = i;
     }
   }

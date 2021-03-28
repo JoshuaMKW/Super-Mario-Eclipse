@@ -1,7 +1,9 @@
 #pragma once
 
 #include "types.h"
-#include "J3DModel.hxx"
+
+class J3DModel;
+class J3DModelData;
 
 enum J3DDeformAttachFlag
 {

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "types.h"
-#include "Mtx.h"
+#include "MTX.h"
 
 class J3DShape
 {

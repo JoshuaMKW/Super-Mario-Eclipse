@@ -40,7 +40,7 @@ f32 Patch::Fruit::chooseGrabDistancing(M3UModelMario *model)
     TMario *player;
     SME_FROM_GPR(r31, player);
 
-    if (player->mPrevState & TMario::State::WATERBORN)
+    if (player->mPrevState & static_cast<u32>(TMario::State::WATERBORN))
     {
         SME_TO_GPR(r3, model);
         return 0.0f;
@@ -56,5 +56,5 @@ f32 Patch::Fruit::chooseGrabDistancing(M3UModelMario *model)
 // extern -> SME.cpp
 bool Patch::Fruit::isGrabWaitOver(TMario *player)
 {
-    return isLast1AnimeFrame__6TMarioFv(player) | (player->mPrevState & TMario::State::WATERBORN);
+    return isLast1AnimeFrame__6TMarioFv(player) | (player->mPrevState & static_cast<u32>(TMario::State::WATERBORN));
 }

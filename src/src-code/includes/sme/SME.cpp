@@ -2,6 +2,7 @@
 #include "OS.h"
 
 #include "kuribo_sdk.h"
+#include "sms/actor/Mario.hxx"
 
 // mario.cpp
 extern "C" s16 mario_shadowCrashPatch();
@@ -31,11 +32,8 @@ KURIBO_MODULE_BEGIN("Eclipse", "JoshuaMK",
     OSCreateAlarm(&gctAlarm);
     OSSetPeriodicAlarm(&gctAlarm, OSGetTime(), OSMillisecondsToTicks(1),
                        &setUserCodes);
-    SME_DEBUG_LOG("Actor flags offset = %X\n",
-                  offsetof(JDrama::TNameRef, mKeyCode));
-    SME_DEBUG_LOG("Actor position offset = %X\n",
-                  offsetof(JDrama::TPlacement, mPosition));
-    SME_DEBUG_LOG("Actor size offset = %X\n", offsetof(JDrama::TActor, mSize));
+    SME_DEBUG_LOG("Mario health offset = %X\n",
+                  offsetof(TMario, mHealth));
   }
   KURIBO_EXECUTE_ON_UNLOAD {
     SME_DEBUG_LOG("-- Destroying Module --\n");

@@ -22,7 +22,7 @@ void Patch::Stage::startEpisodeSelect(void *selectMenu)
 {
     TMarioGamePad *gpGamePad = gpApplication.mGamePad1;
 
-    if (!gpGamePad->mButtons.mInput & TMarioGamePad::Buttons::Z)
+    if (!(gpGamePad->mButtons.mInput & TMarioGamePad::Buttons::Z))
     {
         startOpenWindow__11TSelectMenuFv(selectMenu);
     }

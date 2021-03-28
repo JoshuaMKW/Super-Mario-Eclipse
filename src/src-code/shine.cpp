@@ -34,7 +34,7 @@ void Patch::Shine::manageShineVanish(JGeometry::TVec3<f32> *marioPos)
         shine->mActorData->mBckInfo->setAnmFromIndex(-1, nullptr);
         shine->kill();
     }
-    else if (gpMarioAddress->mState != TMario::State::SHINE_C)
+    else if (gpMarioAddress->mState != static_cast<u32>(TMario::State::SHINE_C))
     {
         rotation.y += 3.0f;
         position.y += 4.0f;
@@ -59,7 +59,7 @@ void Patch::Shine::isKillEnemiesShine(TConductor *gpConductor, JGeometry::TVec3<
         killEnemiesWithin__10TConductorFRCQ29JGeometry8TVec3_f(gpConductor, playerCoordinates, range);
 }
 
-static void Patch::Shine::restoreMario(TMarDirector *gpMarDirector, u32 curState)
+static void restoreMario(TMarDirector *gpMarDirector, u32 curState)
 {
     TShine *shine = (TShine *)gpMarDirector->mCollectedShine;
 
@@ -70,7 +70,7 @@ static void Patch::Shine::restoreMario(TMarDirector *gpMarDirector, u32 curState
 
     if (curState != TMarDirector::Status::NORMAL ||
         gpMarDirector->mLastState != TMarDirector::Status::SAVE_CARD ||
-        gpMarioAddress->mState != TMario::State::SHINE_C)
+        gpMarioAddress->mState != static_cast<u32>(TMario::State::SHINE_C))
         return;
 
     if (curSaveCard[0x2E9] != 1)
@@ -78,7 +78,7 @@ static void Patch::Shine::restoreMario(TMarDirector *gpMarDirector, u32 curState
         if (SMS_isDivingMap__Fv() || (gpMarioAddress->mPrevState & 0x20D0) == 0x20D0)
             gpMarioAddress->mState = gpMarioAddress->mPrevState;
         else
-            gpMarioAddress->mState = TMario::State::IDLE;
+            gpMarioAddress->mState = static_cast<u32>(TMario::State::IDLE);
 
         MSBgm::stopBGM(BGM_GET_SHINE, 20);
         MSBgm::startBGM(gStageBGM);

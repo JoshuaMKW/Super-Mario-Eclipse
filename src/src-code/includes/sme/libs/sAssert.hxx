@@ -17,11 +17,17 @@
 #define SME_ASSERT(expr, msg, ...)                                             \
   if (!(expr)) {                                                               \
     char errmsg[256];                                                          \
-    sprintf(errmsg, "[SME] %s: %s", (_SmeFunc), (msg));                       \
-    OSPanic(__FILE__, __LINE__, errmsg, ##__VA_ARGS__);                       \
+    sprintf(errmsg, "[SME] %s: %s", (_SmeFunc), (msg));                        \
+    OSPanic(__FILE__, __LINE__, errmsg, ##__VA_ARGS__);                        \
   }
 
-#define SME_DEBUG_ASSERT(expr, msg, ...)
 #ifdef SME_DEBUG
-SME_ASSERT(expr, msg, ##__VA_ARGS__)
+#define SME_DEBUG_ASSERT(expr, msg, ...) SME_ASSERT(expr, msg, ##__VA_ARGS__)
+#else
+#define SME_DEBUG_ASSERT(expr, msg, ...)
 #endif
+
+#define SME_ERROR(msg, ...)                                                    \
+  char errmsg[256];                                                            \
+  sprintf(errmsg, "[SME] %s: %s", (_SmeFunc), (msg));                          \
+  OSPanic(__FILE__, __LINE__, errmsg, ##__VA_ARGS__);

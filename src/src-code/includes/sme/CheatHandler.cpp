@@ -25,7 +25,7 @@ Class::TCheatHandler::TCheatHandler(u16 *inputList, TMarioGamePad *gamepad,
 void Class::TCheatHandler::advanceInput() {
   if (!this->mGamePad || !this->mInputList)
     return;
-  else if (this->mGamePad->mButtons.mFrameInput == NULL ||
+  else if (this->mGamePad->mButtons.mFrameInput == 0 ||
            this->mInputIndex < 0)
     return;
 
@@ -40,7 +40,7 @@ void Class::TCheatHandler::advanceInput() {
     return;
   }
 
-  if (this->mInputList[static_cast<u8>(this->mInputIndex) + 1] == NULL) {
+  if (this->mInputList[static_cast<u8>(this->mInputIndex) + 1] == 0) {
     this->mInputIndex = -1;
     this->mActive = true;
 

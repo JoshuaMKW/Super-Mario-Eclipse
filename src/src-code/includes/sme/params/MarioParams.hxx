@@ -2,48 +2,55 @@
 
 #include "mem.h"
 #include "types.h"
+#include "macros.h"
 
 #include "funcs.hxx"
 #include "sms/JSystem/JGeometry.hxx"
+#include "sms/JSystem/JSU/JSUMemoryStream.hxx"
 #include "sms/JSystem/JUT/JUTColor.hxx"
 #include "sms/actor/Mario.hxx"
 
 namespace SME::Class {
 
 struct TCustomParams : public TParams {
+  #define CONSTRUCT_PARAM(name, val)                                             \
+  name(this, val, JDrama::TNameRef::calcKeyCode(SME_STRINGIZE(name)),          \
+       SME_STRINGIZE(name))
+
   TCustomParams()
-      : mMaxJumps(1, "mMaxJumps"), mCanRideYoshi(true, "mCanRideYoshi"),
-        mCanUseFludd(true, "mCanUseFludd"),
-        mPlayerHasHelmet(false, "mPlayerHasHelmet"),
-        mPlayerHasGlasses(false, "mPlayerHasGlasses"),
-        mPlayerHasShirt(false, "mPlayerHasShirt"),
-        mCanCleanSeals(false, "mCanCleanSeals"),
-        mGoopAffected(true, "mGoopAffected"),
-        mCanHoldNPCs(false, "mCanHoldNPCs"),
-        mCanClimbWalls(false, "mCanClimbWalls"),
-        mSizeMultiplier(1.0f, "mSizeMultiplier"),
-        mMultiJumpMultiplier(0.875f, "mMultiJumpMultiplier"),
-        mMultiJumpFSpeedMulti(0.9f, "mMultiJumpFSpeedMulti"),
-        mThrowPowerMultiplier(1.0f, "mThrowPowerMultiplier"),
-        mSprayNozzleUsable(true, "mSprayNozzleUsable"),
-        mRocketNozzleUsable(true, "mRocketNozzleUsable"),
-        mUnderwaterNozzleUsable(true, "mUnderwaterNozzleUsable"),
-        mYoshiNozzleUsable(true, "mYoshiNozzleUsable"),
-        mHoverNozzleUsable(true, "mHoverNozzleUsable"),
-        mTurboNozzleUsable(true, "mTurboNozzleUsable"),
-        mSniperNozzleUsable(true, "mSniperNozzleUsable"),
-        mSprayNozzleBoneID(14, "mSprayNozzleBoneID"),
-        mRocketNozzleBoneID(14, "mRocketNozzleBoneID"),
-        mUnderwaterNozzleBoneID(14, "mUnderwaterNozzleBoneID"),
-        mYoshiNozzleBoneID(14, "mYoshiNozzleBoneID"),
-        mHoverNozzleBoneID(14, "mHoverNozzleBoneID"),
-        mTurboNozzleBoneID(14, "mTurboNozzleBoneID"),
-        mSniperNozzleBoneID(14, "mSniperNozzleBoneID"),
-        mWaterColor(JUtility::TColor{60, 70, 120, 20}, "mSniperNozzleBoneID"),
-        mCleaningType(FluddCleanType::CLEAN, "mFluddCleanType"),
-        mName("Mario", "mName") {
+      : CONSTRUCT_PARAM(mMaxJumps, 1), CONSTRUCT_PARAM(mCanRideYoshi, true),
+        CONSTRUCT_PARAM(mCanUseFludd, true),
+        CONSTRUCT_PARAM(mPlayerHasHelmet, false),
+        CONSTRUCT_PARAM(mPlayerHasGlasses, false),
+        CONSTRUCT_PARAM(mPlayerHasShirt, false),
+        CONSTRUCT_PARAM(mCanCleanSeals, false),
+        CONSTRUCT_PARAM(mGoopAffected, true),
+        CONSTRUCT_PARAM(mCanHoldNPCs, false),
+        CONSTRUCT_PARAM(mCanClimbWalls, false),
+        CONSTRUCT_PARAM(mSizeMultiplier, 1.0f),
+        CONSTRUCT_PARAM(mMultiJumpMultiplier, 0.875f),
+        CONSTRUCT_PARAM(mMultiJumpFSpeedMulti, 0.9f),
+        CONSTRUCT_PARAM(mThrowPowerMultiplier, 1.0f),
+        CONSTRUCT_PARAM(mSprayNozzleUsable, true),
+        CONSTRUCT_PARAM(mRocketNozzleUsable, true),
+        CONSTRUCT_PARAM(mUnderwaterNozzleUsable, true),
+        CONSTRUCT_PARAM(mYoshiNozzleUsable, true),
+        CONSTRUCT_PARAM(mHoverNozzleUsable, true),
+        CONSTRUCT_PARAM(mTurboNozzleUsable, true),
+        CONSTRUCT_PARAM(mSniperNozzleUsable, true),
+        CONSTRUCT_PARAM(mSprayNozzleBoneID, 14),
+        CONSTRUCT_PARAM(mRocketNozzleBoneID, 14),
+        CONSTRUCT_PARAM(mUnderwaterNozzleBoneID, 14),
+        CONSTRUCT_PARAM(mYoshiNozzleBoneID, 14),
+        CONSTRUCT_PARAM(mHoverNozzleBoneID, 14),
+        CONSTRUCT_PARAM(mTurboNozzleBoneID, 14),
+        CONSTRUCT_PARAM(mSniperNozzleBoneID, 14),
+        CONSTRUCT_PARAM(mWaterColor, JUtility::TColor(60, 70, 120, 20)),
+        CONSTRUCT_PARAM(mCleaningType, FluddCleanType::CLEAN) {
     load("/Mario/SME.prm");
   }
+
+  #undef CONSTRUCT_PARAM
 
   enum class FluddCleanType : u8 { NONE, CLEAN, GOOP };
 
@@ -77,13 +84,13 @@ struct TCustomParams : public TParams {
   TParamRT<u8> mSniperNozzleBoneID;
   TParamRT<JUtility::TColor> mWaterColor;
   TParamRT<FluddCleanType> mCleaningType;
-  TParamRT<char[32]> mName;
 };
 
 class TPlayerParams {
 
 public:
   struct ParamHistory {
+    ParamHistory();
     ParamHistory(TMario *);
 
     bool hasHistory() const { return mHasHistory; }
@@ -149,20 +156,20 @@ public:
   const u16 getPlayerKey() const {
     return JDrama::TNameRef::calcKeyCode(getPlayerName());
   }
-  const char *getPlayerName() const { return mParams->mName.get(); }
   bool isMario() const { return !mIsEMario; }
   bool isInitialized() const { return mInitialized; }
 
   void setCanUseFludd(bool enable) { mCanUseFludd = enable; }
-  void setPlayer(TMario *player) { mPlayer = player; }
   void setPlayerID(u8 id) { mPlayerID = id; }
 
   bool canUseNozzle(TWaterGun::NozzleType nozzle) const;
   u8 getNozzleBoneID(TWaterGun::NozzleType nozzle) const;
+  const char *getPlayerName() const;
   bool loadPrm(const char *prm);
-  bool loadPrm(TCustomParams &params);
+  bool loadPrm(JSUMemoryInputStream &stream);
   void resetPlayer() { mDefaultAttrs.applyHistoryTo(mPlayer); };
   void scalePlayerAttrs(f32 scale);
+  void setPlayer(TMario *player);
 
 private:
   TMario *mPlayer;

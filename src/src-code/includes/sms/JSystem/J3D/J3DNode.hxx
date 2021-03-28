@@ -1,7 +1,8 @@
 #pragma once
 
 #include "types.h"
-#include "J3DModel.hxx"
+
+class J3DModelData;
 
 class J3DNode
 {

@@ -1,6 +1,5 @@
-#include "DVD.h"
-
 #include "StageParams.hxx"
+#include "DVD.h"
 #include "libs/sLogging.hxx"
 #include "libs/sString.hxx"
 
@@ -32,7 +31,7 @@ bool Class::TSMEFile::openFile(const char *path) {
   }
   DVDClose(&handle);
 
-  memcpy(&mStageConfig, &tmp, sizeof(TSMEFile));
+  memcpy(&sStageConfig, &tmp, sizeof(TSMEFile));
   return true;
 }
 
@@ -52,7 +51,7 @@ bool Class::TSMEFile::load(const char *stage) {
                 configPath);
 
   if (TSMEFile::openFile(configPath)) {
-    SME_DEBUG_LOG("Success: SME config loaded at %p\n", &mStageConfig);
+    SME_DEBUG_LOG("Success: SME config loaded at %p\n", &sStageConfig);
     return true;
   } else {
     SME_DEBUG_LOG("Failure: No SME configuration could be loaded\n");
@@ -62,22 +61,19 @@ bool Class::TSMEFile::load(const char *stage) {
 
 char *Class::TSMEFile::withSMEExtension(char *dst, const char *stage,
                                         bool generalize) {
-  String *path = new String("/data/scene/sme/", 128);
-  String *file = new String(stage, 32);
+  String path("/data/scene/sme/", 128);
+  String file(stage, 32);
 
-  size_t numIDPos = file->findAny(String::numbers);
+  size_t numIDPos = file.findAny(String::numbers);
   if (generalize && numIDPos != String::npos) {
-    file->erase(numIDPos);
-    file->append("+.sme");
+    file.erase(numIDPos);
+    file.append("+.sme");
   } else {
-    file->erase(file->find('.'));
-    file->append(".sme");
+    file.erase(file.find('.'));
+    file.append(".sme");
   }
-  path->append(*file);
-  strncpy(dst, path->data(), path->size() + 1);
-
-  delete path;
-  delete file;
+  path.append(file);
+  strncpy(dst, path.data(), path.size() + 1);
 
   return dst;
 }

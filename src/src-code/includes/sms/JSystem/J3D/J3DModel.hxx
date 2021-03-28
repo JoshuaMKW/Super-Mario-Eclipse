@@ -1,10 +1,11 @@
 #pragma once
 
 #include "types.h"
-#include "Mtx.h"
+#include "MTX.h"
 #include "J3DAnimation.hxx"
 #include "J3DCluster.hxx"
 #include "J3DJoint.hxx"
+#include "J3DNode.hxx"
 #include "J3DVertex.hxx"
 #include "../JGeometry.hxx"
 

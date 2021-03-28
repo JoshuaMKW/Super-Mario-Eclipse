@@ -1,17 +1,12 @@
 #pragma once
 
 #include "OS.h"
+#include "macros.h"
 
-#define SME_STRINGIZE_(x) #x
-#define SME_STRINGIZE(x) SME_STRINGIZE_(x)
+#define SME_LOG(msg, ...) OSReport("[SME] %s", msg, ##__VA_ARGS__)
 
-#define SME_WIDE_(s) L##s
-#define SME_WIDE(s) SME_WIDE_(s)
-
-#define SME_CONCATENATE_(a, b) a##b
-#define SME_CONCATENATE(a, b) SME_CONCATENATE_(a, b)
-
-#define SME_DEBUG_LOG(msg, ...) 
 #ifdef SME_DEBUG
-OSReport("[SME] %s", msg, ##__VA_ARGS__)
+#define SME_DEBUG_LOG(msg, ...) SME_LOG(msg, ##__VA_ARGS__)
+#else
+#define SME_DEBUG_LOG(msg, ...)
 #endif

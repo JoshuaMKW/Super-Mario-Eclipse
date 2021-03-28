@@ -139,7 +139,7 @@ namespace SME::Util::Memory
         size_t mAlignment;
         bool mGarbageCollect;
 
-        constexpr size_t tailRealSize() const;
+        size_t tailRealSize() const;
 
     public:
         bool isVolatile() const { return this->mGarbageCollect; };
@@ -147,7 +147,7 @@ namespace SME::Util::Memory
         void *end() const { return (void *)((u8 *)this + sizeof(ArenaBlock) + this->size()); };
         ArenaBlock *next() const { return this->mNext; };
         ArenaBlock *prev() const { return this->mPrev; };
-        constexpr size_t size() const { return this->mSize; };
+        size_t size() const { return this->mSize; };
         void *start() const { return (void *)((u8 *)this + sizeof(ArenaBlock)); };
 
         void setVolatile(bool v) { this->mGarbageCollect = v; };

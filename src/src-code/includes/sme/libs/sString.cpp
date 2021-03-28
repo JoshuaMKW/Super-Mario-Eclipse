@@ -3,6 +3,7 @@
 #include "string.h"
 #include "types.h"
 
+#include "libs/sLogging.hxx"
 #include "libs/sMath.hxx"
 #include "libs/sMemory.hxx"
 #include "libs/sString.hxx"
@@ -289,18 +290,16 @@ String *String::substr(size_t pos, size_t len) {
 
 char *String::intToString(s32 num, char *buffer, size_t base) {
   switch (base) {
-  case 2:
-    snprintf(buffer, 35, "0b%b", num);
-    break;
   case 7:
-    snprintf(buffer, 14, "0o%o", num);
+    snprintf(buffer, 14, "0o%lo", num);
     break;
   case 16:
-    snprintf(buffer, 11, "0x%X", num);
+    snprintf(buffer, 11, "0x%lX", num);
     break;
   case 10:
+    snprintf(buffer, 11, "%ld", num);
   default:
-    snprintf(buffer, 11, "%d", num);
+    SME_DEBUG_LOG("Invalid base specified (%ld) for string format", base);
   }
   return buffer;
 }

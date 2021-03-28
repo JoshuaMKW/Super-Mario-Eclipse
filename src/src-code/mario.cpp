@@ -42,42 +42,40 @@ u32 SME::Patch::Mario::updateContexts(TMario *player)
 
     bool checkClimbContext = false;
 
-    if ((player->mState & TMario::State::AIRBORN) == 0 && (player->mState & 0x1C0) != 320)
-        playerParams->mClimbQuarterFramesLeft =
-            player->mDeParams.mNoFreezeTime.get() / 5;
+    if ((player->mState & static_cast<u32>(TMario::State::AIRBORN)) == 0 && (player->mState & 0x1C0) != 320)
+        player->mSubStateTimer = 0;
     else if ((player->mState & 0x1C0) == 320)
     {
         if ((player->mState & 0x200000) != 0 && player->mRoofTriangle &&
             player->mRoofTriangle->mCollisionType != 266)
-            checkClimbContext = player->mState != TMario::State::HANG;
+            checkClimbContext = player->mState != static_cast<u32>(TMario::State::HANG);
         else if ((player->mState & 0x200000) == 0 && 
                  player->mWallTriangle &&
                  player->mWallTriangle->mCollisionType != 266)
-            checkClimbContext = player->mState != TMario::State::HANG;
+            checkClimbContext = player->mState != static_cast<u32>(TMario::State::HANG);
 
         if (checkClimbContext)
         {
-            if (playerParams->mClimbQuarterFramesLeft == 0)
+            if (player->mSubStateTimer == player->mDeParams.mNoFreezeTime.get() / 5)
             {
                 player->mActionState |= 0x8000;
-                playerParams->mClimbQuarterFramesLeft =
-                    player->mDeParams.mNoFreezeTime.get() / 5;
+                player->mSubStateTimer = 0;
                 playerParams->mIsClimbTired = false;
             }
             else
             {
-                if (SME::Util::Math::lerp<f32>(0.0f, 1.0f, static_cast<f32>(playerParams->mClimbQuarterFramesLeft) / // TODO: FIGURE OUT NATURAL WALL HANG TIMER..
-                                              player->mDeParams.mNoFreezeTime.get()) < 0.1f)
+                if (SME::Util::Math::lerp<f32>(0.0f, 1.0f, static_cast<f32>(player->mSubStateTimer) /
+                                              player->mDeParams.mNoFreezeTime.get()) > 0.9f)
                 {
                     if (!playerParams->mIsClimbTired)
-                        startVoice__6TMarioFUl(player, TMario::Voice::FALL_LEDGE_GRAB);
+                        startVoice__6TMarioFUl(player, static_cast<u32>(TMario::Voice::FALL_LEDGE_GRAB));
                     
                     playerParams->mIsClimbTired = true;
                 }
                 else
                     playerParams->mIsClimbTired = false;
 
-                playerParams->mClimbQuarterFramesLeft -= 1;
+                player->mSubStateTimer += 1;
             }
         }
 
@@ -96,7 +94,7 @@ u32 SME::Patch::Mario::carryOrTalkNPC(TBaseNPC *npc)
     if ((*(u32 *)(&npc->mStateFlags) & 0x840007) != 0)
         return 0;
     
-    if (gpMarioAddress->mState == TMario::State::IDLE)
+    if (gpMarioAddress->mState == static_cast<u32>(TMario::State::IDLE))
         return 0;
 
     if (!playerParams->isMario() ||
@@ -122,7 +120,7 @@ bool SME::Patch::Mario::canGrabAtNPC()
     if (npc->mStateFlags.mCanBeTaken)
         return true;
     
-    if (gpMarioAddress->mState == TMario::State::IDLE)
+    if (gpMarioAddress->mState == static_cast<u32>(TMario::State::IDLE))
         return false;
 
     if (!playerParams->isMario() || !playerParams->isInitialized())
@@ -141,7 +139,7 @@ bool SME::Patch::Mario::canCarryNPC()
     if (npc->mStateFlags.mCanBeTaken)
         return true;
     
-    if (gpMarioAddress->mState == TMario::State::IDLE)
+    if (gpMarioAddress->mState == static_cast<u32>(TMario::State::IDLE))
         return false;
 
     if (!playerParams->isMario() || !playerParams->isInitialized())
@@ -162,7 +160,7 @@ static TMario *scaleNPCThrowLength(TMario *player, float *params)
         _f11 *= playerParams->mParams->Attributes.mThrowPowerMultiplier * ((playerParams->mParams->Attributes.mSizeMultiplier * 0.5f) + (1.0f - 0.5f));
     }
     
-    if (player->mState == TMario::State::NPC_THROW || player->mState == TMario::State::NPC_JUMPTHROW)
+    if (player->mState == static_cast<u32>(TMario::State::NPC_THROW) || player->mState == static_cast<u32>(TMario::State::NPC_JUMPTHROW))
     {
         _f11 *= 4.0f;
     }
@@ -186,8 +184,8 @@ static u32 scaleNPCThrowHeight(u32 _r3, f32 z, f32 y)
         y *= playerParams->mParams->Attributes.mThrowPowerMultiplier *
              ((playerParams->mParams->Attributes.mSizeMultiplier * 0.5f) + (1.0f - 0.5f));
     
-    if (player->mState == TMario::State::NPC_THROW ||
-        player->mState == TMario::State::NPC_JUMPTHROW)
+    if (player->mState == static_cast<u32>(TMario::State::NPC_THROW) ||
+        player->mState == static_cast<u32>(TMario::State::NPC_JUMPTHROW))
         y *= 4.0f;
     
     npc->mSpeed.y = y;
@@ -582,7 +580,7 @@ static u32 patchYStorage()
     TMario *player;
     __asm { mr player, r31 };
 
-    if (player->mState != TMario::State::IDLE)
+    if (player->mState != static_cast<u32>(TMario::State::IDLE))
         player->mSpeed.y = 0.0f;
 
     return 0;
@@ -598,7 +596,7 @@ static void manageExtraJumps(TMario *player)
         return;
     }
 
-    if ((player->mState & TMario::State::AIRBORN) == false ||
+    if ((player->mState & static_cast<u32>(TMario::State::AIRBORN)) == false ||
         (player->mState & 0x800000) ||
         player->mYoshi->mState == TYoshi::MOUNTED)
         playerParams->mCurJump = 1;
@@ -606,17 +604,17 @@ static void manageExtraJumps(TMario *player)
     {
         if (player->mController->mButtons.mFrameInput & TMarioGamePad::Buttons::A &&
             playerParams->mCurJump < playerParams->mMaxJumps &&
-            player->mState != TMario::State::WALLSLIDE)
+            player->mState != static_cast<u32>(TMario::State::WALLSLIDE))
         {
             if ((playerParams->mMaxJumps - playerParams->mCurJump) == 1)
             {
-                if (player->mState != TMario::State::TRIPLE_J)
-                    changePlayerJumping__6TMarioFUlUl(player, TMario::State::TRIPLE_J, 0);
+                if (player->mState != static_cast<u32>(TMario::State::TRIPLE_J))
+                    changePlayerJumping__6TMarioFUlUl(player, static_cast<u32>(TMario::State::TRIPLE_J), 0);
                 else
-                    setStatusToJumping__6TMarioFUlUl(player, TMario::State::TRIPLE_J, 0);
+                    setStatusToJumping__6TMarioFUlUl(player, static_cast<u32>(TMario::State::TRIPLE_J), 0);
             }
-            else if ((player->mState - TMario::State::JUMP) > 1)
-                changePlayerJumping__6TMarioFUlUl(player, TMario::State::JUMP, 0);
+            else if ((player->mState - static_cast<u32>(TMario::State::JUMP)) > 1)
+                changePlayerJumping__6TMarioFUlUl(player, static_cast<u32>(TMario::State::JUMP), 0);
             else
                 changePlayerJumping__6TMarioFUlUl(player, player->mState ^ 1, 0);
             playerParams->mCurJump += 1;
@@ -631,7 +629,7 @@ static f32 calcJumpPower(TMario *player, f32 factor, f32 curYVelocity, f32 jumpP
     if (playerParams->mParams)
     {
         jumpPower *= playerParams->mParams->Attributes.mBaseJumpHeightMulti;
-        if (player->mState & TMario::State::AIRBORN)
+        if (player->mState & static_cast<u32>(TMario::State::AIRBORN))
         {
             jumpPower *= powf(playerParams->mParams->Attributes.mMultiJumpMultiplier, (f32)playerParams->mCurJump);
             player->mForwardSpeed *= playerParams->mParams->Attributes.mMultiJumpFSpeedMulti;

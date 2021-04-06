@@ -37,18 +37,6 @@ using namespace SME;
 #endif
 
 #if defined(NTSCU)
-#define SME_KCALL(ntscu, pal, ntscj, ntsck, addr) KURIBO_PATCH_BL(ntscu, addr)
-#elif defined(PAL)
-#define SME_KCALL(ntscu, pal, ntscj, ntsck, addr) KURIBO_PATCH_BL(pal, addr)
-#elif defined(NTSCJ)
-#define SME_KCALL(ntscu, pal, ntscj, ntsck, addr) KURIBO_PATCH_BL(ntscj, addr)
-#elif defined(NTSCK)
-#define SME_KCALL(ntscu, pal, ntscj, ntsck, addr) KURIBO_PATCH_BL(ntsck, addr)
-#else
-#error "Region not provided!"
-#endif
-
-#if defined(NTSCU)
 #define SME_KBRANCH(ntscu, pal, ntscj, ntsck, addr) KURIBO_PATCH_B(ntscu, addr)
 #elif defined(PAL)
 #define SME_KBRANCH(ntscu, pal, ntscj, ntsck, addr) KURIBO_PATCH_B(pal, addr)

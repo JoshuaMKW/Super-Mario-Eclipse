@@ -34,7 +34,7 @@ public:
     TGameSequence mCurrentScene;    //0x000E
     TGameSequence mNextScene;       //0x0012
     u16 _02;                        //0x0016
-    u32 _03;                        //0x0018
+    u32 mCutSceneID;                //0x0018
     JDrama::TDisplay *mDisplay;     //0x001C
     TMarioGamePad *mGamePad1;       //0x0020
     TMarioGamePad *mGamePad2;       //0x0024

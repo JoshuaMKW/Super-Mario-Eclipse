@@ -106,7 +106,7 @@ static void resetGlobalValues() {
 // 0x802998B4
 u32 *SME::Patch::Init::initFileMods() {
   u32 *objList;
-  SME_FROM_GPR(r26, objList);
+  SME_FROM_GPR(26, objList);
 
   TMarioGamePad *gpGamePad = gpApplication.mGamePad1;
 
@@ -380,7 +380,7 @@ static void initMario(TMario *player, bool isMario) {
 // 0x80276C94
 TMario *SME::Patch::Init::fromMarioInit(TMario *player) {
   TMario *(*virtualFunc)(TMario *);
-  SME_FROM_GPR(r12, virtualFunc);
+  SME_FROM_GPR(12, virtualFunc);
 
   virtualFunc(player); // call vtable func
   initMario(player, true);
@@ -390,7 +390,7 @@ TMario *SME::Patch::Init::fromMarioInit(TMario *player) {
 // 0x800397DC
 bool SME::Patch::Init::fromShadowMarioInit() {
   TMario *player;
-  asm volatile("lwz %0, 0x150 (r31)" : "=r"(player));
+  asm volatile("lwz %0, 0x150 (31)" : "=r"(player));
   initMario(player, false);
   return SMS_isMultiPlayerMap__Fv();
 }
@@ -401,7 +401,7 @@ void SME::Patch::Init::initYoshi(MAnmSound *anmSound, void *r4, u32 r5,
   initAnmSound__9MAnmSoundFPvUlf(anmSound, r4, r5, f1);
 
   TYoshi *yoshi;
-  SME_FROM_GPR(r31, yoshi);
+  SME_FROM_GPR(31, yoshi);
 
   if (SME::Class::TSMEFile::sStageConfig.FileHeader.mMAGIC !=
           SME::Class::TSMEFile::MAGIC ||

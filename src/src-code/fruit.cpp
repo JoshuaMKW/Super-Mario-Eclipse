@@ -9,7 +9,7 @@ using namespace SME;
 bool Patch::Fruit::canFruitDieWater(TResetFruit *fruit)
 {
     u32 *vTable;
-    SME_FROM_GPR(r12, vTable);
+    SME_FROM_GPR(12, vTable);
 
     void (*virtualFunc)(TResetFruit *) = reinterpret_cast<void (*)(TResetFruit *)>(vTable[0x1E0 / 4]);
 
@@ -38,16 +38,16 @@ bool Patch::Fruit::canFruitDieWater(TResetFruit *fruit)
 f32 Patch::Fruit::chooseGrabDistancing(M3UModelMario *model)
 {
     TMario *player;
-    SME_FROM_GPR(r31, player);
+    SME_FROM_GPR(31, player);
 
     if (player->mPrevState & static_cast<u32>(TMario::State::WATERBORN))
     {
-        SME_TO_GPR(r3, model);
+        SME_TO_GPR(3, model);
         return 0.0f;
     }
     else
     {
-        SME_TO_GPR(r3, model);
+        SME_TO_GPR(3, model);
         return 11.0f;
     }
 }

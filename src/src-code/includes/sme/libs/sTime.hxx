@@ -1,13 +1,13 @@
 #pragma once
 
 #include "OS.h"
-#include "libs/sString.hxx"
+#include "sString.hxx"
 
 namespace SME::Util::Time {
-constexpr const char *buildDate() { return __DATE__; }
-constexpr const char *buildTime() { return __TIME__; }
-OSTime ostime() { return OSGetTime(); }
-void calendarTime(OSCalendarTime &result) {
+inline constexpr const char *buildDate() { return __DATE__; }
+inline constexpr const char *buildTime() { return __TIME__; }
+inline OSTime ostime() { return OSGetTime(); }
+inline void calendarTime(OSCalendarTime &result) {
   return OSTicksToCalendarTime(ostime(), &result);
 }
 char *date();

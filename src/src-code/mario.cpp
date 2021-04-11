@@ -113,7 +113,7 @@ u32 SME::Patch::Mario::carryOrTalkNPC(TBaseNPC *npc)
 bool SME::Patch::Mario::canGrabAtNPC()
 {
     TBaseNPC *npc;
-    SME_FROM_GPR(r30, npc);
+    SME_FROM_GPR(30, npc);
 
     const SME::Class::TPlayerParams *playerParams = SME::TGlobals::sGlobals.getPlayerParams(gpMarioAddress);
     
@@ -132,7 +132,7 @@ bool SME::Patch::Mario::canGrabAtNPC()
 bool SME::Patch::Mario::canCarryNPC()
 {
     TBaseNPC *npc;
-    SME_FROM_GPR(r30, npc);
+    SME_FROM_GPR(30, npc);
 
     const SME::Class::TPlayerParams *playerParams = SME::TGlobals::sGlobals.getPlayerParams(gpMarioAddress);
     
@@ -177,7 +177,7 @@ kmWrite32(0x80214634, 0xEC2B0072);
 static u32 scaleNPCThrowHeight(u32 _r3, f32 z, f32 y)
 {
     TBaseNPC *npc;
-    SME_FROM_GPR(r31, npc);
+    SME_FROM_GPR(31, npc);
 
     TMario *player = (TMario *)npc->mPrevHolder;
     if (playerParams->isInitialized() && playerParams->isMario())
@@ -201,7 +201,7 @@ kmCall(0x8021463C, &scaleNPCThrowHeight);
 static f32 getTreeClimbMinFall()
 {
     TMario *player;
-    SME_FROM_GPR(r31, player);
+    SME_FROM_GPR(31, player);
 
     return 100.0f * player->mSize.y;
 }
@@ -213,13 +213,13 @@ static void getTreeClimbMaxFall(TMapObjBase *tree, f32 speed)
 {
     TMario *player;
     f32 ret;
-    SME_FROM_GPR(r31, player);
-    SME_FROM_FPR(f3, ret);
+    SME_FROM_GPR(31, player);
+    SME_FROM_FPR(3, ret);
     
     ret = tree->mReceiveHeight / ((player->mSize.y*0.2f) + (1.0f - 0.2f));
 
-    SME_TO_FPR(f1, speed);
-    SME_TO_FPR(f3, ret);
+    SME_TO_FPR(1, speed);
+    SME_TO_FPR(3, ret);
 }
 kmCall(0x802619CC, &getTreeClimbMaxFall);
 kmWrite32(0x802619D0, 0xC05F0014);
@@ -228,7 +228,7 @@ kmWrite32(0x802619D0, 0xC05F0014);
 bool scaleTreeSlideSpeed(register f32 _f1, f32 _f2)
 {
     TMario *player;
-    SME_FROM_GPR(r31, player);
+    SME_FROM_GPR(31, player);
 
     _f1 = 0.00195313f * player->mGravity;
 
@@ -880,7 +880,7 @@ kmWrite32(0x8025B150, 0xFC020840);
 static void checkYSpdForTerminalVelocity()
 {
     TMario *player;
-    SME_FROM_GPR(r31, player);
+    SME_FROM_GPR(31, player);
 
     float terminalVelocity; = -75.0f * player->mJumpParams.mGravity.get();
     if (SME::TGlobals::sGlobals.getPlayerParams(player)->mCollisionFlags.mIsGlideBounce)

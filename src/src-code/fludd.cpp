@@ -52,7 +52,7 @@ bool Patch::Fludd::isPumpOK(TMarioAnimeData *animeData)
 bool Patch::Fludd::hasWaterCardOpen()
 {
     TGCConsole2 *gcConsole;
-    SME_FROM_GPR(r31, gcConsole);
+    SME_FROM_GPR(31, gcConsole);
 
     const SME::Class::TPlayerParams *playerParams = SME::TGlobals::sGlobals.getPlayerParams(gpMarioAddress);
 
@@ -111,7 +111,7 @@ void Patch::Fludd::sprayGoopMapWrapMar30(TPollutionManager *gpPollutionManager,
                            f32 x, f32 y, f32 z, f32 r)
 {
     TMario *player;
-    SME_FROM_GPR(r30, player);
+    SME_FROM_GPR(30, player);
 
     sprayGoopMap(gpPollutionManager, player, x, y, z, r);
 }
@@ -129,7 +129,7 @@ bool Patch::Fludd::canCleanSeals(TWaterManager *gpWaterManager)
 TWaterGun *Patch::Fludd::bindFluddtojoint()
 {
     TMario *player;
-    SME_FROM_GPR(r31, player);
+    SME_FROM_GPR(31, player);
 
     player->mBindBoneIDArray[0] =
         SME::TGlobals::sGlobals.getPlayerParams(gpMarioAddress)->getNozzleBoneID(static_cast<TWaterGun::NozzleType>(player->mFludd->mCurrentNozzle));
@@ -158,7 +158,7 @@ void Patch::Fludd::checkExecWaterGun(TWaterGun *fludd)
 void Patch::Fludd::killTriggerNozzle()
 {
     TNozzleTrigger *nozzle;
-    SME_FROM_GPR(r29, nozzle);
+    SME_FROM_GPR(29, nozzle);
 
     nozzle->mSprayState = TNozzleTrigger::DEAD;
     if (nozzle->mFludd->mCurrentNozzle == TWaterGun::NozzleType::Hover ||
@@ -208,7 +208,7 @@ static void checkSpamHover(TNozzleTrigger *nozzle, u32 r4, TWaterEmitInfo *emitI
 void Patch::Fludd::spamHoverWrapper(TNozzleTrigger *nozzle, u32 r4, TWaterEmitInfo *emitInfo)
 {
     void (*virtualFunc)(TNozzleTrigger *, u32, TWaterEmitInfo *);
-    SME_FROM_GPR(r12, virtualFunc);
+    SME_FROM_GPR(12, virtualFunc);
 
     checkSpamHover(nozzle, r4, emitInfo);
     virtualFunc(nozzle, r4, emitInfo);
@@ -219,7 +219,7 @@ void Patch::Fludd::spamHoverWrapper(TNozzleTrigger *nozzle, u32 r4, TWaterEmitIn
 bool Patch::Fludd::checkAirNozzle()
 {
     TMario *player;
-    SME_FROM_GPR(r31, player);
+    SME_FROM_GPR(31, player);
     
     sIsTriggerNozzleDead &= (player->mState & static_cast<u32>(TMario::State::AIRBORN)) != 0;
 

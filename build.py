@@ -3,15 +3,15 @@ from __future__ import annotations
 import argparse
 import atexit
 import json
-from typing import Union
-import psutil
 import subprocess
 import time
 from fnmatch import fnmatch
 from io import BytesIO
 from pathlib import Path
+from typing import Union
 
 import oead
+import psutil
 from dolreader.dolfile import DolFile
 from pyisotools.bnrparser import BNR
 from pyisotools.iso import GamecubeISO
@@ -20,10 +20,11 @@ from compiler import Compiler, Define
 
 TMPDIR = Path("tmp-compiler")
 
+
 @atexit.register
 def clean_resources():
     if TMPDIR.is_dir():
-        pass#shutil.rmtree(TMPDIR)
+        pass  # shutil.rmtree(TMPDIR)
 
 
 class FilePatcher(Compiler):
@@ -50,15 +51,18 @@ class FilePatcher(Compiler):
         self._init_tables()
 
         super().__init__(Path("src/compiler"),
-                         self._get_matching_filepath(self.solutionDir / "main.dol"),
+                         self._get_matching_filepath(
+                             self.solutionDir / "main.dol"),
                          Path("src/linker/address.map"),
                          False,
                          startAddr)
 
         if self.is_release():
-            self.defines = [Define("SME_MAX_SHINES", f"{self.maxShines}"), Define("SME_RELEASE")]
+            self.defines = [
+                Define("SME_MAX_SHINES", f"{self.maxShines}"), Define("SME_RELEASE")]
         elif self.is_debug():
-            self.defines = [Define("SME_MAX_SHINES", f"{self.maxShines}"), Define("SME_DEBUG")]
+            self.defines = [
+                Define("SME_MAX_SHINES", f"{self.maxShines}"), Define("SME_DEBUG")]
         else:
             raise ValueError(f"Unknown patcher state {self.state}")
 
@@ -71,7 +75,7 @@ class FilePatcher(Compiler):
 
     def is_release(self) -> bool:
         return self.state == FilePatcher.STATE.RELEASE
-    
+
     def is_debug(self) -> bool:
         return self.state == FilePatcher.STATE.DEBUG
 
@@ -125,15 +129,15 @@ class FilePatcher(Compiler):
 
             dolphin = Path(config["dolphinpath"])
 
-
             if self.is_dol_boot():
                 print(f"\nAttempting to boot Dolphin by DOL at {dolphin}...\n")
-                subprocess.Popen(f"\"{dolphin}\" -e \"{self.dest}\" " + " ".join(options), shell=True)
+                subprocess.Popen(
+                    f"\"{dolphin}\" -e \"{self.dest}\" " + " ".join(options), shell=True)
             elif self.is_iso_boot():
-                print(f"\nAttempting to boot Dolphin by DOL at {dolphin}...\n")
+                print(f"\nAttempting to boot Dolphin by ISO at {dolphin}...\n")
                 isoPath = self._build_iso(config)
-                subprocess.Popen(f"\"{dolphin}\" -e \"{isoPath}\" " + " ".join(options), shell=True)
-
+                subprocess.Popen(
+                    f"\"{dolphin}\" -e \"{isoPath}\" " + " ".join(options), shell=True)
 
     def _build_iso(self, config: dict) -> Path:
         print("")
@@ -167,7 +171,7 @@ class FilePatcher(Compiler):
                 print("====== DOL PATCHING ======".center(128))
                 print("-"*128)
                 print(f"Generating {self.maxShines} shines DEBUG build")
-                
+
             modules = self.run(Path("src/src-code"), dolPath)
             _doldata = DolFile(BytesIO(self.dest.read_bytes()))
 
@@ -176,46 +180,55 @@ class FilePatcher(Compiler):
                 for m in modules:
                     m.rename(self._get_translated_filepath(m.name))
                     size += m.stat().st_size
-                self._alloc_from_heap(_doldata, (kernelPath.stat().st_size() + size + 31) & -32)
-                
+                self._alloc_from_heap(
+                    _doldata, (kernelPath.stat().st_size() + size + 31) & -32)
+
                 tmpbin = TMPDIR / "pyasm.bin"
                 pyiiasmh_cli._ppc_exec([str(self.solutionDir / "kuribo/pre_patch.s"),
                                         "a",
                                         "--codetype", "C2D2",
                                         "--dest", tmpbin])
-                                    
+
                 data = BytesIO(tmpbin.read_bytes())
-                injectaddr = (int.from_bytes(data.getvalue()[:4], "big", signed=False) & 0x1FFFFFC) | 0x80000000
-                codelen = int.from_bytes(data.getvalue()[4:8], "big", signed=False) * 8
-                blockstart = _doldata.seek_nearest_unmapped(_doldata.bssAddress, codelen)
+                injectaddr = (int.from_bytes(data.getvalue()[
+                              :4], "big", signed=False) & 0x1FFFFFC) | 0x80000000
+                codelen = int.from_bytes(
+                    data.getvalue()[4:8], "big", signed=False) * 8
+                blockstart = _doldata.seek_nearest_unmapped(
+                    _doldata.bssAddress, codelen)
 
                 _doldata.insert_branch(blockstart, injectaddr)
                 _doldata.insert_branch(injectaddr + 4, blockstart + codelen)
 
                 with self.dest.open("wb") as dest:
                     _doldata.save(dest)
-                
+
             elif isinstance(modules, Path):
-                modules.rename(self._get_translated_filepath(modules.name))
-                self._alloc_from_heap(_doldata, (kernelPath.stat().st_size() + modules.stat().st_size + 31) & -32)
-            
+                modules.rename(self._get_translated_filepath(
+                    modules.name).with_name("SME"))
+                self._alloc_from_heap(
+                    _doldata, (kernelPath.stat().st_size() + modules.stat().st_size + 31) & -32)
+
                 tmpbin = TMPDIR / "pyasm.bin"
                 pyiiasmh_cli._ppc_exec([str(self.solutionDir / "kuribo/pre_patch.s"),
                                         "a",
                                         "--codetype", "C2D2",
                                         "--dest", tmpbin])
-                                    
+
                 data = BytesIO(tmpbin.read_bytes())
-                injectaddr = (int.from_bytes(data.getvalue()[:4], "big", signed=False) & 0x1FFFFFC) | 0x80000000
-                codelen = int.from_bytes(data.getvalue()[4:8], "big", signed=False) * 8
-                blockstart = _doldata.seek_nearest_unmapped(_doldata.bssAddress, codelen)
+                injectaddr = (int.from_bytes(data.getvalue()[
+                              :4], "big", signed=False) & 0x1FFFFFC) | 0x80000000
+                codelen = int.from_bytes(
+                    data.getvalue()[4:8], "big", signed=False) * 8
+                blockstart = _doldata.seek_nearest_unmapped(
+                    _doldata.bssAddress, codelen)
 
                 _doldata.insert_branch(blockstart, injectaddr)
                 _doldata.insert_branch(injectaddr + 4, blockstart + codelen)
 
                 with self.dest.open("wb") as dest:
                     _doldata.save(dest)
-            
+
             print("-"*128)
             return True
         return False
@@ -250,7 +263,7 @@ class FilePatcher(Compiler):
                 destPath = destPath.with_suffix(".szs")
                 with f.open("rb") as archive:
                     data = BytesIO(archive.read())
-                    
+
                 data.seek(0)
                 if data.read(4) != b"Yaz0":
                     data = oead.yaz0.compress(data.getvalue())
@@ -259,7 +272,7 @@ class FilePatcher(Compiler):
                     destPath.write_bytes(f.read_bytes())
             else:
                 destPath.write_bytes(f.read_bytes())
-            
+
             print(f"{relativePath} -> {destPath}")
 
         print("-"*128)
@@ -301,7 +314,7 @@ class FilePatcher(Compiler):
                         return self.gameDir / _set[glob]["destination"].strip() / _set[glob]["rename"].strip()
 
         return None
-        
+
     def _rename_files_from_config(self):
         print("")
         print("====== RENAMING ======".center(128))
@@ -338,23 +351,30 @@ class FilePatcher(Compiler):
 
 
 def main():
-    parser = argparse.ArgumentParser("SMS-Patcher", description="C++ Patcher for SMS NTSC-U, using Kamek by Treeki")
+    parser = argparse.ArgumentParser(
+        "SMS-Patcher", description="C++ Patcher for SMS NTSC-U, using Kamek by Treeki")
 
     parser.add_argument("gamefolder", help="root folder of GCR extracted ISO")
-    parser.add_argument("-p", "--projectfolder", help="project folder used to patch game", metavar="PATH")
-    parser.add_argument("-s", "--startaddr", help="Starting address for the linker and code", default="0x80000000", metavar="ADDR")
-    parser.add_argument("-b", "--build", help="Build type", choices=["R", "D"], default="D")
-    parser.add_argument("--boot", help="What to boot from", choices=["DOL", "ISO", "NONE"], default="NONE")
-    parser.add_argument("--shines", help="Max shines allowed", type=int, default=120)
+    parser.add_argument("-p", "--projectfolder",
+                        help="project folder used to patch game", metavar="PATH")
+    parser.add_argument("-s", "--startaddr", help="Starting address for the linker and code",
+                        default="0x80000000", metavar="ADDR")
+    parser.add_argument("-b", "--build", help="Build type",
+                        choices=["R", "D"], default="D")
+    parser.add_argument("--boot", help="What to boot from",
+                        choices=["DOL", "ISO", "NONE"], default="NONE")
+    parser.add_argument(
+        "--shines", help="Max shines allowed", type=int, default=120)
 
     args = parser.parse_args()
 
     if args.shines < 0 or args.shines > 999:
-        parser.error(f"Shine count is beyond the inclusive range (0 - 999): {args.shines}")
+        parser.error(
+            f"Shine count is beyond the inclusive range (0 - 999): {args.shines}")
 
     if not args.projectfolder:
         args.projectfolder = Path.cwd()
-    
+
     if not args.startaddr:
         args.startaddr = 0x80000000
 
@@ -363,10 +383,12 @@ def main():
     else:
         build = FilePatcher.STATE.RELEASE
 
-    patcher = FilePatcher(build, args.gamefolder, args.projectfolder, args.boot, args.startaddr, args.shines)
+    patcher = FilePatcher(build, args.gamefolder, args.projectfolder,
+                          args.boot, args.startaddr, args.shines)
 
     if patcher.is_codewarrior():
-        patcher.cxxOptions = ["-Cpp_exceptions off", "-gccinc", "-gccext on", "-enum int", "-fp hard", "-use_lmw_stmw on", "-O4,p", "-c", "-rostr", "-sdata 0", "-sdata2 0"]
+        patcher.cxxOptions = ["-Cpp_exceptions off", "-gccinc", "-gccext on", "-enum int",
+                              "-fp hard", "-use_lmw_stmw on", "-O4,p", "-c", "-rostr", "-sdata 0", "-sdata2 0"]
     elif patcher.is_clang():
         patcher.cxxOptions = ["--target=powerpc-gekko-ibm-kuribo-eabi", "-std=gnu++17", "-fno-exceptions", "-fno-rtti", "-fno-unwind-tables", "-ffast-math",
                               "-flto", "-nodefaultlibs", "-nostdlib", "-fno-use-init-array", "-fuse-ld=lld", "-fpermissive", "-Wall", "-O3", "-r", "-v"]
@@ -377,12 +399,17 @@ def main():
         patcher.linkOptions = ["--target=powerpc-gekko-ibm-kuribo-eabi", "-std=gnu++17", "-fno-exceptions", "-fno-rtti", "-fno-unwind-tables", "-ffast-math",
                                "-flto", "-nodefaultlibs", "-nostdlib", "-fno-use-init-array", "-fuse-ld=lld", "-fpermissive", "-Wall", "-O3", "-r", "-v"]
     elif patcher.is_gcc():
-        patcher.cxxOptions = ["-nodefaultlibs", "-nostdlib", "-std=gnu++20", "-fno-exceptions", "-fno-rtti", "-ffast-math", "-fpermissive", "-Wall", "-O3", "-r"]
-        patcher.cOptions = ["-nodefaultlibs", "-nostdlib", "-fno-exceptions", "-fno-rtti", "-ffast-math", "-fpermissive", "-Wall", "-O3", "-r"]
-        patcher.sOptions = ["-nodefaultlibs", "-nostdlib", "-fno-exceptions", "-fno-rtti", "-Wall", "-O3", "-r"]
-        patcher.linkOptions = ["-nodefaultlibs", "-nostdlib", "-std=gnu++20", "-fno-exceptions", "-fno-rtti", "-ffast-math", "-fpermissive", "-Wall", "-O3", "-r"]
+        patcher.cxxOptions = ["-nodefaultlibs", "-nostdlib", "-std=gnu++20",
+                              "-fno-exceptions", "-fno-rtti", "-ffast-math", "-fpermissive", "-Wall", "-O3", "-r"]
+        patcher.cOptions = ["-nodefaultlibs", "-nostdlib", "-fno-exceptions",
+                            "-fno-rtti", "-ffast-math", "-fpermissive", "-Wall", "-O3", "-r"]
+        patcher.sOptions = ["-nodefaultlibs", "-nostdlib",
+                            "-fno-exceptions", "-fno-rtti", "-Wall", "-O3", "-r"]
+        patcher.linkOptions = ["-nodefaultlibs", "-nostdlib", "-std=gnu++20",
+                               "-fno-exceptions", "-fno-rtti", "-ffast-math", "-fpermissive", "-Wall", "-O3", "-r"]
 
     patcher.patch_game()
+
 
 if __name__ == "__main__":
     main()

@@ -73,7 +73,7 @@ u8 Patch::Yoshi::isYoshiEggFree(TEggYoshi *gpEgg, THitActor *gpFruit) {
 // extern -> SME.cpp
 bool Patch::Yoshi::isYoshiMaintainFluddModel() {
   TMario *player;
-  SME_FROM_GPR(r31, player);
+  SME_FROM_GPR(31, player);
 
   const SME::Class::TPlayerParams *playerParams =
       SME::TGlobals::sGlobals.getPlayerParams(player);
@@ -96,7 +96,7 @@ void Patch::Yoshi::maybeYoshiDrown(TYoshi *yoshi) {
 // extern -> SME.cpp
 bool Patch::Yoshi::canMountYoshi(u32 state) {
   TMario *player;
-  SME_FROM_GPR(r31, player);
+  SME_FROM_GPR(31, player);
 
   const SME::Class::TPlayerParams *playerParams =
       SME::TGlobals::sGlobals.getPlayerParams(player);
@@ -112,7 +112,7 @@ bool Patch::Yoshi::canMountYoshi(u32 state) {
 // extern -> SME.cpp
 f32 Patch::Yoshi::getYoshiYPos_(TYoshi *yoshi) {
   TMario *player;
-  SME_FROM_GPR(r31, player);
+  SME_FROM_GPR(31, player);
 
   return player->mYoshi->mCoordinates.y;
 }
@@ -121,7 +121,7 @@ f32 Patch::Yoshi::getYoshiYPos_(TYoshi *yoshi) {
 // extern -> SME.cpp
 void Patch::Yoshi::fixYoshiJuiceDecrement() {
   TYoshi *yoshi;
-  SME_FROM_GPR(r30, yoshi);
+  SME_FROM_GPR(30, yoshi);
 
   TMario *player = yoshi->mMario;
   if (player->mFludd->mIsEmitWater && yoshi->isMounted())
@@ -178,8 +178,8 @@ u32 Patch::Yoshi::calcYoshiSwimVelocity(TMario *player, u32 arg1) {
 u32 Patch::Yoshi::isYoshiWaterFlutter() {
   TYoshi *yoshi;
   u32 animID;
-  SME_FROM_GPR(r29, yoshi);
-  SME_FROM_GPR(r30, animID);
+  SME_FROM_GPR(29, yoshi);
+  SME_FROM_GPR(30, animID);
 
   if (SME::Class::TSMEFile::sStageConfig.FileHeader.mMAGIC ==
           SME::Class::TSMEFile::MAGIC &&

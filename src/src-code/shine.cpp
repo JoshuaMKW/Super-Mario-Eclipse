@@ -12,7 +12,7 @@ using namespace SME;
 void Patch::Shine::manageShineVanish(JGeometry::TVec3<f32> *marioPos)
 {
     TShine *shine;
-    SME_FROM_GPR(r30, shine);
+    SME_FROM_GPR(30, shine);
 
     const JGeometry::TVec3<f32> step(1.0f, 1.0f, 1.0f);
     
@@ -52,7 +52,7 @@ void Patch::Shine::manageShineVanish(JGeometry::TVec3<f32> *marioPos)
 void Patch::Shine::isKillEnemiesShine(TConductor *gpConductor, JGeometry::TVec3<f32> *playerCoordinates, f32 range)
 {
     TMario *player;
-    SME_FROM_GPR(r31, player);
+    SME_FROM_GPR(31, player);
 
     TShine *shine = (TShine *)player->mGrabTarget;
     if (!(shine->mType & 0x10))
@@ -109,7 +109,7 @@ u32 Patch::Shine::extendShineIDLogic(TFlagManager *flagManager, u32 flagID)
 void Patch::Shine::shineObjectStringMod(JSUInputStream *stream, u8 *dst, u32 size)
 {
     TShine *shine;
-    SME_FROM_GPR(r30, shine);
+    SME_FROM_GPR(30, shine);
 
     if (shine->mType == 1)
     {
@@ -200,7 +200,7 @@ void Patch::Shine::extendFlagManagerSave(JSUMemoryOutputStream &stream)
 void Patch::Shine::thinkSetBootFlag(void *shineFader, u32 unk_1, u32 unk_2)
 {
     TMarDirector *gpMarDirector;
-    SME_FROM_GPR(r31, gpMarDirector);
+    SME_FROM_GPR(31, gpMarDirector);
     
     if ((gpMarDirector->mCollectedShine->mType & 0x10) == false)
     {
@@ -212,7 +212,7 @@ void Patch::Shine::thinkSetBootFlag(void *shineFader, u32 unk_1, u32 unk_2)
 u32 Patch::Shine::loadAfterMaskState()
 {
     TShine *shine;
-    SME_FROM_GPR(r31, shine);
+    SME_FROM_GPR(31, shine);
 
     return shine->mType & 0xF;
 }
@@ -221,7 +221,7 @@ u32 Patch::Shine::loadAfterMaskState()
 void Patch::Shine::setKillState()
 {
     TShine *shine;
-    SME_FROM_GPR(r31, shine);
+    SME_FROM_GPR(31, shine);
 
     shine->mType = (shine->mType & 0x10) | 1;
 }

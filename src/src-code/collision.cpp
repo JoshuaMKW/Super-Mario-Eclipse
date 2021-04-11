@@ -327,7 +327,7 @@ u32 Patch::Collision::updateCollisionContext(TMario *player) {
 // extern -> SME.cpp
 u16 Patch::Collision::masterGroundCollisionHandler(TBGCheckData *colTriangle) {
   TMario *player;
-  SME_FROM_GPR(r29, player);
+  SME_FROM_GPR(29, player);
 
   u16 type = colTriangle->mCollisionType & 0x7FFF;
   switch (type) {

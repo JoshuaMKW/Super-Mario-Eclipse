@@ -1,178 +1,201 @@
 #pragma once
 
-#include "types.h"
 #include "mem.h"
+#include "types.h"
+#include "macros.h"
 
+#include "funcs.hxx"
 #include "sms/JSystem/JGeometry.hxx"
+#include "sms/JSystem/JSU/JSUMemoryStream.hxx"
 #include "sms/JSystem/JUT/JUTColor.hxx"
 #include "sms/actor/Mario.hxx"
-#include "funcs.hxx"
 
-class MarioParamsFile
-{
+namespace SME::Class {
 
-public:
-    enum FluddCleanType
-    {
-        NONE,
-        CLEAN,
-        GOOP
-    };
+struct TCustomParams : public TParams {
+  #define CONSTRUCT_PARAM(name, val)                                             \
+  name(this, val, JDrama::TNameRef::calcKeyCode(SME_STRINGIZE(name)),          \
+       SME_STRINGIZE(name))
 
-    struct Attributes
-    {
-        u8 mJumpCount;             //0x0000
-        bool mCanRideYoshi;        //0x0001
-        bool mCanUseFludd;         //0x0002
-        bool mMarioHasHelmet;      //0x0003
-        bool mMarioHasGlasses;     //0x0004
-        bool mMarioHasShirt;       //0x0005
-        u16 _01;                   //0x0006
-        u16 mHealth;               //0x0008
-        u16 mMaxHealth;            //0x000A
-        u16 mOBStep;               //0x000C
-        u16 mOBMax;                //0x000E
-        f32 mSizeMultiplier;       //0x0010
-        f32 _02[0x8 / 4];          //0x0014
-        f32 mGravityMulti;         //0x001C
-        f32 mBaseBounce1Multi;     //0x0020
-        f32 mBaseBounce2Multi;     //0x0024
-        f32 mBaseBounce3Multi;     //0x0028
-        f32 mMaxFallNoDamageMulti; //0x002C
-        f32 mBaseJumpHeightMulti;  //0x0030
-        f32 mMultiJumpMultiplier;  //0x0034
-        f32 mMultiJumpFSpeedMulti; //0x0038
-        f32 mSpeedMultiplier;      //0x003C
+  TCustomParams()
+      : CONSTRUCT_PARAM(mMaxJumps, 1), CONSTRUCT_PARAM(mCanRideYoshi, true),
+        CONSTRUCT_PARAM(mCanUseFludd, true),
+        CONSTRUCT_PARAM(mPlayerHasHelmet, false),
+        CONSTRUCT_PARAM(mPlayerHasGlasses, false),
+        CONSTRUCT_PARAM(mPlayerHasShirt, false),
+        CONSTRUCT_PARAM(mCanCleanSeals, false),
+        CONSTRUCT_PARAM(mGoopAffected, true),
+        CONSTRUCT_PARAM(mCanHoldNPCs, false),
+        CONSTRUCT_PARAM(mCanClimbWalls, false),
+        CONSTRUCT_PARAM(mSizeMultiplier, 1.0f),
+        CONSTRUCT_PARAM(mMultiJumpMultiplier, 0.875f),
+        CONSTRUCT_PARAM(mMultiJumpFSpeedMulti, 0.9f),
+        CONSTRUCT_PARAM(mThrowPowerMultiplier, 1.0f),
+        CONSTRUCT_PARAM(mSprayNozzleUsable, true),
+        CONSTRUCT_PARAM(mRocketNozzleUsable, true),
+        CONSTRUCT_PARAM(mUnderwaterNozzleUsable, true),
+        CONSTRUCT_PARAM(mYoshiNozzleUsable, true),
+        CONSTRUCT_PARAM(mHoverNozzleUsable, true),
+        CONSTRUCT_PARAM(mTurboNozzleUsable, true),
+        CONSTRUCT_PARAM(mSniperNozzleUsable, true),
+        CONSTRUCT_PARAM(mSprayNozzleBoneID, 14),
+        CONSTRUCT_PARAM(mRocketNozzleBoneID, 14),
+        CONSTRUCT_PARAM(mUnderwaterNozzleBoneID, 14),
+        CONSTRUCT_PARAM(mYoshiNozzleBoneID, 14),
+        CONSTRUCT_PARAM(mHoverNozzleBoneID, 14),
+        CONSTRUCT_PARAM(mTurboNozzleBoneID, 14),
+        CONSTRUCT_PARAM(mSniperNozzleBoneID, 14),
+        CONSTRUCT_PARAM(mWaterColor, JUtility::TColor(60, 70, 120, 20)),
+        CONSTRUCT_PARAM(mCleaningType, FluddCleanType::CLEAN) {
+    load("/Mario/SME.prm");
+  }
 
-        struct FluddAttrs
-        {
-            bool mCanUseNozzle[8];        //0x0040
-            JUtility::TColor mWaterColor; //0x0048
-            u8 mCleaningType;             //0x004C
-            u8 _00;                       //0x004D
-            u16 _01;                      //0x004E
-            bool mBindToJointID[8];       //0x0050
-            bool mCanCleanSeals;          //0x0058
-            u8 _02;                       //0x0059
-            u16 _03;                      //0x005A
-        } FluddAttrs;
+  #undef CONSTRUCT_PARAM
 
-        f32 mWaterHealthMultiplier;   //0x005C
-        s32 mNameOffset;              //0x0060
-        f32 mThrowPowerMultiplier;    //0x0064
-        f32 mSlideStrengthMultiplier; //0x0068
-        s16 mWallHangMax;             //0x006C
-        bool mGoopAffected;           //0x006E
-        bool mCanHoldNPCs;            //0x006F
-        bool mCanClimbWalls;          //0x0070
-        s16 mMaxClimbQuarterFrames;   //0x0072
-    } Attributes;
+  enum class FluddCleanType : u8 { NONE, CLEAN, GOOP };
+
+  TParamRT<u8> mMaxJumps;
+  TParamRT<bool> mCanRideYoshi;
+  TParamRT<bool> mCanUseFludd;
+  TParamRT<bool> mPlayerHasHelmet;
+  TParamRT<bool> mPlayerHasGlasses;
+  TParamRT<bool> mPlayerHasShirt;
+  TParamRT<bool> mCanCleanSeals;
+  TParamRT<bool> mGoopAffected;
+  TParamRT<bool> mCanHoldNPCs;
+  TParamRT<bool> mCanClimbWalls;
+  TParamRT<f32> mSizeMultiplier;
+  TParamRT<f32> mMultiJumpMultiplier;
+  TParamRT<f32> mMultiJumpFSpeedMulti;
+  TParamRT<f32> mThrowPowerMultiplier;
+  TParamRT<bool> mSprayNozzleUsable;
+  TParamRT<bool> mRocketNozzleUsable;
+  TParamRT<bool> mUnderwaterNozzleUsable;
+  TParamRT<bool> mYoshiNozzleUsable;
+  TParamRT<bool> mHoverNozzleUsable;
+  TParamRT<bool> mTurboNozzleUsable;
+  TParamRT<bool> mSniperNozzleUsable;
+  TParamRT<u8> mSprayNozzleBoneID;
+  TParamRT<u8> mRocketNozzleBoneID;
+  TParamRT<u8> mUnderwaterNozzleBoneID;
+  TParamRT<u8> mYoshiNozzleBoneID;
+  TParamRT<u8> mHoverNozzleBoneID;
+  TParamRT<u8> mTurboNozzleBoneID;
+  TParamRT<u8> mSniperNozzleBoneID;
+  TParamRT<JUtility::TColor> mWaterColor;
+  TParamRT<FluddCleanType> mCleaningType;
 };
 
-class MarioParams
-{
-    TMario *mPlayer; //0x0000
+class TPlayerParams {
 
 public:
-    MarioParams() {}
-    MarioParams(TMario *player, bool isMario)
-    {
-        this->init(player, isMario);
-    }
+  struct ParamHistory {
+    ParamHistory();
+    ParamHistory(TMario *);
 
-    MarioParamsFile *mParams;      //0x0004
-    MarioParamsFile *_mBaseParams; //0x0008
-    f32 mTerminalVelocity;         //0x000C
+    bool hasHistory() const { return mHasHistory; }
 
-    struct
-    {
-        bool mIsAirborn : 1;
-        bool mIsFaceUsed : 1;
-        bool mIsSpinBounce : 1;
-        bool mIsDisableInput : 1;
-        u16 _00 : 16;
-        u8 _01 : 4;
-    } CollisionFlags; //0x0010
+    void applyHistoryTo(TMario *player);
+    void recordFrom(TMario *player);
+    void reset();
 
-    u16 mPrevCollision;          //0x0014
-    s32 mCollisionTimer;         //0x0016
-    bool mCollisionUsed;         //0x001A
-    u8 mMaxJumps;                //0x001B
-    u8 mCurJump;                 //0x001C
-    s8 mPlayerID;                //0x001D
-    s16 mClimbQuarterFramesLeft; //0x001E
-    bool mIsClimbTired;          //0x0020
+    TMario::TDeParams mDeParams;
+    TMario::TBodyAngleParams mBodyAngleFreeParams;
+    TMario::TBodyAngleParams mBodyAngleWaterGunParams;
+    TMario::TAttackParams mPunchFenceParams;
+    TMario::TAttackParams mKickRoofParams;
+    TMario::TJumpParams mJumpParams;
+    TMario::TRunParams mRunParams;
+    TMario::TSwimParams mSwimParams;
+    TMario::THangFenceParams mHangFenceParams;
+    TMario::THangRoofParams mHangRoofParams;
+    TMario::TWireParams mWireParams;
+    TMario::TPullParams mPullBGBeakParams;
+    TMario::TPullParams mPullBGTentacleParams;
+    TMario::TPullParams mPullBGFireWanWanBossTailParams;
+    TMario::TPullParams mPullFireWanWanTailParams;
+    TMario::THoverParams mHoverParams;
+    TMario::TDivingParams mDivingParams;
+    TMario::TYoshiParams mYoshiParams;
+    TMario::TWaterEffectParams mWaterEffectParams;
+    TMario::TControllerParams mControllerParams;
+    TMario::TGraffitoParams mGraffitoParams;
+    TMario::TDirtyParams mDirtyParams;
+    TMario::TMotorParams mMotorParams;
+    TMario::TParticleParams mParticleParams;
+    TMario::TEffectParams mEffectParams;
+    TMario::TSlipParams mSlipNormalParams;
+    TMario::TSlipParams mSlipOilParams;
+    TMario::TSlipParams mSlipAllParams;
+    TMario::TSlipParams mSlipAllSliderParams;
+    TMario::TSlipParams mSlip45Params;
+    TMario::TSlipParams mSlipWaterSlopeParams;
+    TMario::TSlipParams mSlipWaterGroundParams;
+    TMario::TSlipParams mSlipYoshiParams;
+    TMario::TUpperBodyParams mUpperBodyParams;
 
-    struct
-    {
-        u8 mMainNozzle;   //0x0024
-        u8 mSecondNozzle; //0x0025
-        s32 mWaterLevel;  //0x0026
-        bool mHadFludd;   //0x002A
-    } FluddHistory;
+  private:
+    bool mHasHistory;
+  };
 
-    f32 mSizeContext; //0x002C
+  struct FluddHistory {
+    s32 mWaterLevel;
+    u8 mMainNozzle;
+    u8 mSecondNozzle;
+    bool mHadFludd;
+  };
 
-    struct
-    {
-        f32 mGravity;
-        f32 mTwirlGravity;
-        f32 mDiveStartSpeed;
-        f32 mBaseBounce1;
-        f32 mBaseBounce2;
-        f32 mBaseBounce3;
-        f32 mMaxFallNoDamage;
-        f32 mThrowPower;
-        f32 mAttackHeight;
-        f32 mAttackRadius;
-        f32 mReceiveHeight;
-        f32 mReceiveRadius;
-        f32 mOceanOfs;
-        f32 mWaterJumpHeightDiffMax;
-        f32 mWaterMaxDiffToInteract;
-        f32 mWaterEntryMaxHeight;
-        f32 mWaterHealthDrainSpd;
-        f32 mWaterHealthScubaDrainSpd;
-        f32 mWaterYSpdMultiplier;
-        f32 mWaterHighBuoyant;
-        f32 mWaterLowBuoyant;
-        f32 mCollisionHeight;
-        f32 mCollisionWidth;
-        f32 mRunSpeedMulti;
-        f32 mMaxGroundSpeed;
-        f32 mHipDropSpeedSlow;
-        f32 mHipDropSpeedFast;
-        f32 mPoleGrabDistPadding;
-        f32 mPoleClimbSpeedMul;
-        f32 mHoverYSpdMultiplier;
-        f32 mHoverMaxHeight;
-        f32 mTurboNozzleSpeed;
-        f32 mTurboJumpFSpeed;
-        f32 mTurboJumpYSpeed;
-    } DefaultAttrs; //0x002C
+  TPlayerParams() = delete;
+  TPlayerParams(TMario *player, bool isMario);
 
-    JGeometry::TVec3<f32> mYoshiWaterSpeed;
+  bool getCanUseFludd() const { return mCanUseFludd; }
+  u8 getMaxJumps() const { return mParams->mMaxJumps.get(); }
+  const TCustomParams *getParams() const { return mParams; }
+  const TMario *getPlayer() const { return mPlayer; }
+  s8 getPlayerID() const { return mPlayerID; }
+  const u16 getPlayerKey() const {
+    return JDrama::TNameRef::calcKeyCode(getPlayerName());
+  }
+  bool isMario() const { return !mIsEMario; }
+  bool isInitialized() const { return mInitialized; }
+
+  void setCanUseFludd(bool enable) { mCanUseFludd = enable; }
+  void setPlayerID(u8 id) { mPlayerID = id; }
+
+  bool canUseNozzle(TWaterGun::NozzleType nozzle) const;
+  u8 getNozzleBoneID(TWaterGun::NozzleType nozzle) const;
+  const char *getPlayerName() const;
+  bool loadPrm(const char *prm);
+  bool loadPrm(JSUMemoryInputStream &stream);
+  void resetPlayer() { mDefaultAttrs.applyHistoryTo(mPlayer); };
+  void scalePlayerAttrs(f32 scale);
+  void setPlayer(TMario *player);
 
 private:
-    bool mIsEMario;
-    bool mInitialized;
-
-    //FUNCS
-
-    void _setDefaults();
+  TMario *mPlayer;
+  TCustomParams *mParams;
+  bool mIsEMario;
+  bool mInitialized;
+  bool mCanUseFludd;
+  u8 mPlayerID;
 
 public:
-    const MarioParamsFile *getFile() const { return this->_mBaseParams; };
-    const TMario *getPlayer() const { return this->mPlayer; };
-    const u16 getPlayerKey() { return calcKeyCode__Q26JDrama8TNameRefFPCc(this->getPlayerName()); };
-    bool isMario() const { return !this->mIsEMario; };
-    bool isInitialized() const { return this->mInitialized; };
-    void reset() { memcpy(this->mParams, this, (sizeof(MarioParamsFile))); };
+  u8 mCurJump;
+  bool mIsClimbTired;
+  u16 mPrevCollisionType;
+  s32 mCollisionTimer;
 
-    bool canUseNozzle(TWaterGun::NozzleType nozzle) const;
-    const char *getPlayerName() const;
-    void init(TMario *player, bool isMario);
-    void update();
-    bool setFile(MarioParamsFile *data);
-    void setPlayer(TMario *player);
+  struct {
+    bool mIsAirborn : 1;
+    bool mIsFaceUsed : 1;
+    bool mIsSpinBounce : 1;
+    bool mIsDisableInput : 1;
+    bool mIsCollisionUsed : 1;
+  } mCollisionFlags;
+
+  JGeometry::TVec3<f32> mYoshiWaterSpeed;
+  FluddHistory mFluddHistory;
+  ParamHistory mDefaultAttrs;
 };
+
+} // namespace SME::Class

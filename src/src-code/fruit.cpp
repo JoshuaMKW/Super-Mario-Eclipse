@@ -2,10 +2,14 @@
 
 #include "SME.hxx"
 
-bool canFruitDieWater(TResetFruit *fruit)
+using namespace SME;
+
+// 0x801E542C
+// extern -> SME.cpp
+bool Patch::Fruit::canFruitDieWater(TResetFruit *fruit)
 {
     u32 *vTable;
-    asm volatile ( "mr %0, r12" : "=r"(vTable));
+    SME_FROM_GPR(r12, vTable);
 
     void (*virtualFunc)(TResetFruit *) = reinterpret_cast<void (*)(TResetFruit *)>(vTable[0x1E0 / 4]);
 
@@ -16,40 +20,41 @@ bool canFruitDieWater(TResetFruit *fruit)
     }
     else
     {
-        fruit->mFlags.mHasPhysics = true;
-        if (gateCheck__6MSoundFUl(*gpMSound, 14453))
+        fruit->mStateFlags.mHasPhysics = true;
+        if (gpMSound->gateCheck(14453))
         {
+            Vec fruitPos;
+            fruit->JSGGetTranslation(&fruitPos);
             emitColumnWater__11TMapObjBaseFv(fruit);
-            startSoundActor__Q214MSoundSESystem8MSoundSEFUlPC3VecUlPP8JAISoundUlUc(14453, &fruit->mPosition, 0, 0, 0, 4);
+            startSoundActor__Q214MSoundSESystem8MSoundSEFUlPC3VecUlPP8JAISoundUlUc(14453, &fruitPos, 0, 0, 0, 4);
         }
     }
 
     return false;
 }
-kmCall(0x801E542C, &canFruitDieWater);
-kmWrite32(0x801E5430, 0x2C030000);
-kmWrite32(0x801E5434, 0x41820140);
 
-f32 chooseGrabDistancing(M3UModelMario *mModel)
+// 0x8023F964
+// extern -> SME.cpp
+f32 Patch::Fruit::chooseGrabDistancing(M3UModelMario *model)
 {
     TMario *player;
-    asm volatile ( "mr %0, r31" : "=r"(player));
+    SME_FROM_GPR(r31, player);
 
-    if (player->mPrevState & TMario::State::WATERBORN)
+    if (player->mPrevState & static_cast<u32>(TMario::State::WATERBORN))
     {
-        asm volatile ( "mr 3, %0" : : "r"(mModel));
+        SME_TO_GPR(r3, model);
         return 0.0f;
     }
     else
     {
-        asm volatile ( "mr 3, %0" : : "r"(mModel));
+        SME_TO_GPR(r3, model);
         return 11.0f;
     }
 }
-kmCall(0x8023F964, &chooseGrabDistancing);
 
-bool isGrabWaitOver(TMario *player)
+// 0x8023F9DC
+// extern -> SME.cpp
+bool Patch::Fruit::isGrabWaitOver(TMario *player)
 {
-    return isLast1AnimeFrame__6TMarioFv(player) | (player->mPrevState & TMario::State::WATERBORN);
+    return isLast1AnimeFrame__6TMarioFv(player) | (player->mPrevState & static_cast<u32>(TMario::State::WATERBORN));
 }
-kmCall(0x8023F9DC, &isGrabWaitOver);

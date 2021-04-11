@@ -3,20 +3,22 @@
 
 #include "SME.hxx"
 
+using namespace SME;
+
 // 0x80027548
 // extern -> SME.cpp
-void modifyCameraRangeToSize(f32 *params, f32 *saveParams)
+void Patch::Camera::modifyCameraRangeToSize(f32 *params, f32 *saveParams)
 {
     params[0xA8 / 4] = saveParams[0x3B0 / 4];
 
     //Custom code here
-    if (gpMarioAddress->mCustomInfo->mParams)
+    const SME::Class::TPlayerParams *playerParams = SME::TGlobals::sGlobals.getPlayerParams(gpMarioAddress);
+    const f32 scale = playerParams->getParams()->mSizeMultiplier.get();
+
+    if (!gpMarioAddress->mYoshi || gpMarioAddress->mYoshi->mState != TYoshi::MOUNTED || scale > 1.0f)
     {
-        if (!gpMarioAddress->mYoshi || gpMarioAddress->mYoshi->mState != TYoshi::MOUNTED || gpMarioAddress->mCustomInfo->mParams->Attributes.mSizeMultiplier > 1.0f)
-        {
-            params[0x8 / 4] *= (f32)((gpMarioAddress->mCustomInfo->mParams->Attributes.mSizeMultiplier * 0.5f) + (1.0f - 0.5f));
-            params[0xC / 4] *= (f32)((gpMarioAddress->mCustomInfo->mParams->Attributes.mSizeMultiplier * 0.5f) + (1.0f - 0.5f));
-            params[0x24 / 4] *= (f32)((gpMarioAddress->mCustomInfo->mParams->Attributes.mSizeMultiplier * 0.9375f) + (1.0f - 0.9375f));
-        }
+        params[0x8 / 4] *= (scale * 0.5f) + (1.0f - 0.5f);
+        params[0xC / 4] *= (scale * 0.5f) + (1.0f - 0.5f);
+        params[0x24 / 4] *= (scale * 0.9375f) + (1.0f - 0.9375f);
     }
 }

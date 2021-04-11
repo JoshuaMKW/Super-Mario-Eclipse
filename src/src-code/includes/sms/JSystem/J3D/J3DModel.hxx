@@ -1,10 +1,11 @@
 #pragma once
 
 #include "types.h"
-#include "Mtx.h"
+#include "MTX.h"
 #include "J3DAnimation.hxx"
 #include "J3DCluster.hxx"
 #include "J3DJoint.hxx"
+#include "J3DNode.hxx"
 #include "J3DVertex.hxx"
 #include "../JGeometry.hxx"
 
@@ -93,7 +94,7 @@ public:
 	u32 _8;
 	u32 _C;
 	u32 _10;
-	JGeometry::TVec3<f32> mSizeMultiplier;
+	JGeometry::TVec3<f32> mScale;
 	Mtx _20;
 	u32 _50;
 	u32 _54;

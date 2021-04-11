@@ -7,7 +7,7 @@
 
 #include "funcs.hxx"
 
-namespace SME
+namespace SME::Util
 {
     s8 getCharacterID(JUTGamePad *controller = nullptr);
     const char *getStageName(TApplication *gpApplication);

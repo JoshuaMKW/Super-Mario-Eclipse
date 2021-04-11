@@ -1,5 +1,7 @@
 #include "sMemory.hxx"
 
+using namespace SME;
+
 struct MemCtrl
 {
     u8 _reserved;
@@ -60,27 +62,27 @@ struct MemEnbl
     }
 };
 
-static MemCtrl *gpMapCtrl = (MemCtrl *)Memory::Protection::MemoryMap::MARRCTRL;
-static MemEnbl *gpMapEnbl = (MemEnbl *)Memory::Protection::MemoryMap::MARRENBL;
+static MemCtrl *gpMapCtrl = (MemCtrl *)SME::Util::Memory::Protection::MemoryMap::MARRCTRL;
+static MemEnbl *gpMapEnbl = (MemEnbl *)SME::Util::Memory::Protection::MemoryMap::MARRENBL;
 
-Memory::Protection::MemoryMap::MemoryMap(u8 index)
+Util::Memory::Protection::MemoryMap::MemoryMap(u8 index)
 {
     this->mIndex = index;
 }
 
-Memory::Protection::MemoryMap::~MemoryMap()
+Util::Memory::Protection::MemoryMap::~MemoryMap()
 {
     this->deactivate();
 }
 
-void Memory::Protection::MemoryMap::activate()
+void Util::Memory::Protection::MemoryMap::activate()
 {
     OSProtectRange(this->mIndex, this->start(), this->size(), this->permission());
 }
 
-void Memory::Protection::MemoryMap::deactivate()
+void Util::Memory::Protection::MemoryMap::deactivate()
 {
-    u32 *mapAddrTable = (u32 *)MemoryMap::MARR0;
+    u32 *mapAddrTable = (u32 *)SME::Util::Memory::Protection::MemoryMap::MARR0;
 
     mapAddrTable[this->mIndex] = 0;
     gpMapCtrl->setAccess(this->mIndex, READWRITE);
@@ -89,7 +91,7 @@ void Memory::Protection::MemoryMap::deactivate()
 
 // -- ArenaBlock -- //
 
-size_t Memory::ArenaBlock::tailRealSize() const
+size_t Util::Memory::ArenaBlock::tailRealSize() const
 {
     size_t size = this->size() + sizeof(ArenaBlock);
 
@@ -100,7 +102,7 @@ size_t Memory::ArenaBlock::tailRealSize() const
     return size;
 }
 
-void Memory::ArenaBlock::free()
+void Util::Memory::ArenaBlock::free()
 {
     ArenaBlock *prevBlock = this->prev();
     ArenaBlock *nextBlock = this->next();
@@ -113,7 +115,7 @@ void Memory::ArenaBlock::free()
 
 // -- ArenaHeap -- //
 
-Memory::ArenaHeap::ArenaHeap(size_t size)
+Util::Memory::ArenaHeap::ArenaHeap(size_t size)
 {
     size = (size + 3) & -4;
     if (JKRHeap::mUserRamEnd)
@@ -124,7 +126,7 @@ Memory::ArenaHeap::ArenaHeap(size_t size)
         *(u32 *)0x80000034 -= size;
 }
 
-Memory::ArenaHeap::ArenaHeap(size_t size, void *cb)
+Util::Memory::ArenaHeap::ArenaHeap(size_t size, void *cb)
 {
     size = (size + 3) & -4;
     if (JKRHeap::mUserRamEnd)
@@ -137,7 +139,7 @@ Memory::ArenaHeap::ArenaHeap(size_t size, void *cb)
     this->mCallback = cb;
 }
 
-Memory::ArenaHeap::~ArenaHeap()
+Util::Memory::ArenaHeap::~ArenaHeap()
 {
     if (JKRHeap::mUserRamEnd)
         JKRHeap::mUserRamEnd += this->maxSize();
@@ -149,12 +151,12 @@ Memory::ArenaHeap::~ArenaHeap()
     this->freeAll();
 }
 
-constexpr bool Memory::ArenaHeap::canAlloc(const size_t size, const size_t alignment) const
+bool Util::Memory::ArenaHeap::canAlloc(const size_t size, const size_t alignment) const
 {
-    return this->size() > (sizeof(ArenaBlock) + size + (alignment-1)) & -alignment;
+    return this->size() > ((sizeof(ArenaBlock) + size + (alignment-1)) & -alignment);
 }
 
-void *Memory::ArenaHeap::alloc(const size_t size, const size_t alignment, bool isVolatile)
+void *Util::Memory::ArenaHeap::alloc(const size_t size, const size_t alignment, bool isVolatile)
 {
     if (!this->canAlloc(size, alignment))
     {
@@ -164,8 +166,8 @@ void *Memory::ArenaHeap::alloc(const size_t size, const size_t alignment, bool i
         return nullptr;
     }
 
-    ArenaBlock *block;
-    ArenaBlock *lastBlock = this->mTailBlock;
+    SME::Util::Memory::ArenaBlock *block;
+    SME::Util::Memory::ArenaBlock *lastBlock = this->mTailBlock;
     if (lastBlock)
     {
         block = (ArenaBlock *)((u32)((u8 *)lastBlock + sizeof(ArenaBlock) + lastBlock->size() + (alignment-1)) & -alignment);
@@ -189,7 +191,7 @@ void *Memory::ArenaHeap::alloc(const size_t size, const size_t alignment, bool i
     return (void *)((u8 *)block + sizeof(ArenaBlock));
 }
 
-void Memory::ArenaHeap::free(const void *p)
+void Util::Memory::ArenaHeap::free(const void *p)
 {
     ArenaBlock *block = (ArenaBlock *)((u8 *)p - sizeof(ArenaBlock));
     ArenaBlock *prevBlock = block->prev();
@@ -212,13 +214,13 @@ void Memory::ArenaHeap::free(const void *p)
     }
 }
 
-void Memory::ArenaHeap::freeAll()
+void Util::Memory::ArenaHeap::freeAll()
 {
     this->mHeadBlock = nullptr;
     this->mTailBlock = nullptr;
 }
 
-void Memory::ArenaHeap::defragment()
+void Util::Memory::ArenaHeap::defragment()
 {
     ArenaBlock *block = this->mHeadBlock;
     while (block)
@@ -229,7 +231,7 @@ void Memory::ArenaHeap::defragment()
     }
 }
 
-constexpr size_t Memory::ArenaHeap::size() const
+size_t Util::Memory::ArenaHeap::size() const
 {
     size_t size = this->maxSize();
 

@@ -4,6 +4,9 @@
 #include "sms/JSystem/J3D/J3DAnimation.hxx"
 #include "sms/JSystem/J3D/J3DModel.hxx"
 #include "sms/JSystem/J3D/J3DModelLoader.hxx"
+#include "sms/JSystem/JGeometry.hxx"
+#include "sms/JSystem/JDrama.hxx"
+#include "sms/collision/BGCheck.hxx"
 
 class MActorAnmBase
 {
@@ -115,7 +118,6 @@ public:
 	f32 getOldMotionBlendFrame() const;
 	void initNormalMotionBlend();
 	void initSimpleMotionBlend(int);
-	void setAnmFromIndex(int, u16 *);
 	void setMotionBlendRatio(f32);
 	void setOldMotionBlendAnmPtr(J3DAnmTransform *);
 };

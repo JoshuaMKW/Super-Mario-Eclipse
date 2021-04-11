@@ -7,14 +7,14 @@
 #include "../JUT/JUTFont.hxx"
 #include "../JUT/JUTResFont.hxx"
 
-enum J2DTextBoxHBinding
+enum class J2DTextBoxHBinding
 {
     Center,
     Right,
     Left
 };
 
-enum J2DTextBoxVBinding
+enum class J2DTextBoxVBinding
 {
     Center,
     Bottom,
@@ -24,6 +24,7 @@ enum J2DTextBoxVBinding
 class J2DTextBox : public J2DPane
 {
 public:
+    J2DTextBox();
     J2DTextBox(const ResFONT *, const char *);
 	J2DTextBox(J2DPane *, JSURandomInputStream *, bool);
 	J2DTextBox(u32, const JUTRect &, const ResFONT *, const char *, J2DTextBoxHBinding, J2DTextBoxVBinding);

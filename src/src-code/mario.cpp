@@ -10,11 +10,11 @@
 //0x8024D2C4
 /*
 TMario* updateMario(TMario* player) {
-    if (gInfo.PlayerData.mCurPlayerID[i] != prevPlayerID) {
+    if (SME::TGlobals::sGlobals.PlayerData.mCurPlayerID[i] != prevPlayerID) {
         u32* marioVolumeData = (u32*)getVolume__13JKRFileLoaderFPCc("mario");
         u32* marioDataArray = (u32*)*(u32*)ARCBufferMario;
 
-        if (marioDataArray[gInfo.PlayerData.mCurPlayerID[i]]) {
+        if (marioDataArray[SME::TGlobals::sGlobals.PlayerData.mCurPlayerID[i]]) {
             __dt__13JKRMemArchiveFv(marioVolumeData);
             __ct__13JKRMemArchiveFPvUl15JKRMemBreakFlag(marioVolumeData, marioDataArray[i], 0, 0);
 
@@ -30,52 +30,52 @@ TMario* updateMario(TMario* player) {
 
 /* MASTER MARIO.CPP UPDATER */
 
-u32 updateContexts(TMario *player)
+u32 SME::Patch::Mario::updateContexts(TMario *player)
 {
-    if (!player->mCustomInfo->isMario() || !player->mCustomInfo->isInitialized())
+    SME::Class::TPlayerParams *playerParams = SME::TGlobals::sGlobals.getPlayerParams(player);
+
+    if (!playerParams->isMario() || !playerParams->isInitialized())
     {
-        player->mCustomInfo->mIsClimbTired = false;
+        playerParams->mIsClimbTired = false;
         return 1;
     }
 
     bool checkClimbContext = false;
 
-    if ((player->mState & TMario::State::AIRBORN) == 0 && (player->mState & 0x1C0) != 320)
-        player->mCustomInfo->mClimbQuarterFramesLeft =
-            player->mCustomInfo->mParams->Attributes.mMaxClimbQuarterFrames;
+    if ((player->mState & static_cast<u32>(TMario::State::AIRBORN)) == 0 && (player->mState & 0x1C0) != 320)
+        player->mSubStateTimer = 0;
     else if ((player->mState & 0x1C0) == 320)
     {
         if ((player->mState & 0x200000) != 0 && player->mRoofTriangle &&
             player->mRoofTriangle->mCollisionType != 266)
-            checkClimbContext = player->mState != TMario::State::HANG;
+            checkClimbContext = player->mState != static_cast<u32>(TMario::State::HANG);
         else if ((player->mState & 0x200000) == 0 && 
                  player->mWallTriangle &&
                  player->mWallTriangle->mCollisionType != 266)
-            checkClimbContext = player->mState != TMario::State::HANG;
+            checkClimbContext = player->mState != static_cast<u32>(TMario::State::HANG);
 
         if (checkClimbContext)
         {
-            if (player->mCustomInfo->mClimbQuarterFramesLeft == 0)
+            if (player->mSubStateTimer == player->mDeParams.mNoFreezeTime.get() / 5)
             {
                 player->mActionState |= 0x8000;
-                player->mCustomInfo->mClimbQuarterFramesLeft =
-                    player->mCustomInfo->mParams->Attributes.mMaxClimbQuarterFrames;
-                player->mCustomInfo->mIsClimbTired = false;
+                player->mSubStateTimer = 0;
+                playerParams->mIsClimbTired = false;
             }
             else
             {
-                if (lerp<f32>(0.0f, 1.0f, (float)player->mCustomInfo->mClimbQuarterFramesLeft /
-                                              (float)player->mCustomInfo->mParams->Attributes.mMaxClimbQuarterFrames) < 0.1f)
+                if (SME::Util::Math::lerp<f32>(0.0f, 1.0f, static_cast<f32>(player->mSubStateTimer) /
+                                              player->mDeParams.mNoFreezeTime.get()) > 0.9f)
                 {
-                    if (!player->mCustomInfo->mIsClimbTired)
-                        startVoice__6TMarioFUl(player, TMario::Voice::FALL_LEDGE_GRAB);
+                    if (!playerParams->mIsClimbTired)
+                        startVoice__6TMarioFUl(player, static_cast<u32>(TMario::Voice::FALL_LEDGE_GRAB));
                     
-                    player->mCustomInfo->mIsClimbTired = true;
+                    playerParams->mIsClimbTired = true;
                 }
                 else
-                    player->mCustomInfo->mIsClimbTired = false;
+                    playerParams->mIsClimbTired = false;
 
-                player->mCustomInfo->mClimbQuarterFramesLeft -= 1;
+                player->mSubStateTimer += 1;
             }
         }
 
@@ -87,59 +87,65 @@ u32 updateContexts(TMario *player)
 
 /* NPC CARRY CODE */
 
-u32 carryOrTalkNPC(TBaseNPC *npc)
+u32 SME::Patch::Mario::carryOrTalkNPC(TBaseNPC *npc)
 {
-    if ((*(u32 *)(&npc->mFlags) & 0x840007) != 0)
+    const SME::Class::TPlayerParams *playerParams = SME::TGlobals::sGlobals.getPlayerParams(gpMarioAddress);
+
+    if ((*(u32 *)(&npc->mStateFlags) & 0x840007) != 0)
         return 0;
     
-    if (gpMarioAddress->mState == TMario::State::IDLE)
+    if (gpMarioAddress->mState == static_cast<u32>(TMario::State::IDLE))
         return 0;
 
-    if (!gpMarioAddress->mCustomInfo->isMario() ||
-        !gpMarioAddress->mCustomInfo->isInitialized())
+    if (!playerParams->isMario() ||
+        !playerParams->isInitialized())
         return 0;
 
-    bool oldTake = npc->mFlags.mCanBeTaken;
-    npc->mFlags.mCanBeTaken = gpMarioAddress->mCustomInfo->mParams->Attributes.mCanHoldNPCs;
+    bool oldTake = npc->mStateFlags.mCanBeTaken;
+    npc->mStateFlags.mCanBeTaken = playerParams->getParams()->mCanHoldNPCs.get();
 
     u32 ret = isNowCanTaken__8TBaseNPCCFv(npc);
 
-    npc->mFlags.mCanBeTaken = oldTake;
+    npc->mStateFlags.mCanBeTaken = oldTake;
     return ret;
 }
 
-bool canGrabAtNPC()
+bool SME::Patch::Mario::canGrabAtNPC()
 {
     TBaseNPC *npc;
     SME_FROM_GPR(r30, npc);
+
+    const SME::Class::TPlayerParams *playerParams = SME::TGlobals::sGlobals.getPlayerParams(gpMarioAddress);
     
-    if (npc->mFlags.mCanBeTaken)
+    if (npc->mStateFlags.mCanBeTaken)
         return true;
     
-    if (gpMarioAddress->mState == TMario::State::IDLE)
+    if (gpMarioAddress->mState == static_cast<u32>(TMario::State::IDLE))
         return false;
 
-    if (!gpMarioAddress->mCustomInfo->isMario() || !gpMarioAddress->mCustomInfo->isInitialized())
+    if (!playerParams->isMario() || !playerParams->isInitialized())
         return false;
 
-    return gpMarioAddress->mCustomInfo->mParams->Attributes.mCanHoldNPCs;
+    return playerParams->getParams()->mCanHoldNPCs.get();
 }
 
-bool canCarryNPC()
+bool SME::Patch::Mario::canCarryNPC()
 {
     TBaseNPC *npc;
     SME_FROM_GPR(r30, npc);
+
+    const SME::Class::TPlayerParams *playerParams = SME::TGlobals::sGlobals.getPlayerParams(gpMarioAddress);
     
-    if (npc->mFlags.mCanBeTaken)
+    if (npc->mStateFlags.mCanBeTaken)
         return true;
     
-    if (gpMarioAddress->mState == TMario::State::IDLE)
+    if (gpMarioAddress->mState == static_cast<u32>(TMario::State::IDLE))
         return false;
 
-    if (!gpMarioAddress->mCustomInfo->isMario() || !gpMarioAddress->mCustomInfo->isInitialized())
+    if (!playerParams->isMario() || !playerParams->isInitialized())
         return false;
 
-    return gpMarioAddress->mCustomInfo->mParams->Attributes.mCanHoldNPCs;
+    return playerParams->getParams()->mCanHoldNPCs.get();
 }
 
 #ifdef MARIO_MODS
@@ -149,12 +155,12 @@ static TMario *scaleNPCThrowLength(TMario *player, float *params)
     __asm { fmr _f11, f11 };
 
     _f11 = params[0x1D0 / 4];
-    if (player->mCustomInfo->isInitialized() && player->mCustomInfo->isMario())
+    if (playerParams->isInitialized() && playerParams->isMario())
     {
-        _f11 *= player->mCustomInfo->mParams->Attributes.mThrowPowerMultiplier * ((player->mCustomInfo->mParams->Attributes.mSizeMultiplier * 0.5f) + (1.0f - 0.5f));
+        _f11 *= playerParams->mParams->Attributes.mThrowPowerMultiplier * ((playerParams->mParams->Attributes.mSizeMultiplier * 0.5f) + (1.0f - 0.5f));
     }
     
-    if (player->mState == TMario::State::NPC_THROW || player->mState == TMario::State::NPC_JUMPTHROW)
+    if (player->mState == static_cast<u32>(TMario::State::NPC_THROW) || player->mState == static_cast<u32>(TMario::State::NPC_JUMPTHROW))
     {
         _f11 *= 4.0f;
     }
@@ -174,12 +180,12 @@ static u32 scaleNPCThrowHeight(u32 _r3, f32 z, f32 y)
     SME_FROM_GPR(r31, npc);
 
     TMario *player = (TMario *)npc->mPrevHolder;
-    if (player->mCustomInfo->isInitialized() && player->mCustomInfo->isMario())
-        y *= player->mCustomInfo->mParams->Attributes.mThrowPowerMultiplier *
-             ((player->mCustomInfo->mParams->Attributes.mSizeMultiplier * 0.5f) + (1.0f - 0.5f));
+    if (playerParams->isInitialized() && playerParams->isMario())
+        y *= playerParams->mParams->Attributes.mThrowPowerMultiplier *
+             ((playerParams->mParams->Attributes.mSizeMultiplier * 0.5f) + (1.0f - 0.5f));
     
-    if (player->mState == TMario::State::NPC_THROW ||
-        player->mState == TMario::State::NPC_JUMPTHROW)
+    if (player->mState == static_cast<u32>(TMario::State::NPC_THROW) ||
+        player->mState == static_cast<u32>(TMario::State::NPC_JUMPTHROW))
         y *= 4.0f;
     
     npc->mSpeed.y = y;
@@ -248,7 +254,7 @@ kmWrite32(0x80261CFC, 0x41820070);
 
 static void getClimbingAnimSpd(TMario *player, TMario::Animation anim, f32 speed)
 {
-    if (player->mCustomInfo->mIsClimbTired)
+    if (playerParams->mIsClimbTired)
         speed = 6.0f;
     
     setAnimation__6TMarioFif(player, anim, speed);
@@ -303,8 +309,8 @@ void scaleHangSpeed(TMario *player)
 {
     player->mForwardSpeed += 1.0f;
 
-    if (player->mCustomInfo->isInitialized() && player->mCustomInfo->isMario())
-        player->mForwardSpeed = Min(player->mForwardSpeed, 4.0f * player->mCustomInfo->mParams->Attributes.mSpeedMultiplier);
+    if (playerParams->isInitialized() && playerParams->isMario())
+        player->mForwardSpeed = Min(player->mForwardSpeed, 4.0f * playerParams->mParams->Attributes.mSpeedMultiplier);
     else
         player->mForwardSpeed = Min(player->mForwardSpeed, 4.0f);
 }
@@ -319,8 +325,8 @@ static TBGCheckData *canHangOnRoof(TBGCheckData *roof)
     TMario *player;
     __asm { mr player, r30 };
 
-    if (player->mCustomInfo->isMario() && player->mCustomInfo->isInitialized())
-        canCling = (roof->mCollisionType == 266 || player->mCustomInfo->mParams->Attributes.mCanClimbWalls);
+    if (playerParams->isMario() && playerParams->isInitialized())
+        canCling = (roof->mCollisionType == 266 || playerParams->mParams->Attributes.mCanClimbWalls);
     else
         canCling = roof->mCollisionType == 266;
 
@@ -358,8 +364,8 @@ static f32 scaleClimbSpeed(f32 speed)
 
     f32 scale = 0.015625f;
 
-    if (player->mCustomInfo->isInitialized() && player->mCustomInfo->isMario())
-        scale *= player->mCustomInfo->mParams->Attributes.mSpeedMultiplier;
+    if (playerParams->isInitialized() && playerParams->isMario())
+        scale *= playerParams->mParams->Attributes.mSpeedMultiplier;
 
     __asm volatile { fmr f0, _f0
                      fmr f3, _f3
@@ -392,10 +398,10 @@ static TBGCheckData *canJumpClingWall(TBGCheckData *wall)
     TMario *player;
     __asm { mr player, r28 };
 
-    if (player->mCustomInfo->isMario() && player->mCustomInfo->isInitialized())
+    if (playerParams->isMario() && playerParams->isInitialized())
         canCling =
             wall->mCollisionType == 266 ||
-                (player->mCustomInfo->mParams->Attributes.mCanClimbWalls &&
+                (playerParams->mParams->Attributes.mCanClimbWalls &&
                  player->mController->mButtons.mInput & TMarioGamePad::Buttons::Z);
     else
         canCling = wall->mCollisionType == 266;
@@ -416,10 +422,10 @@ static TBGCheckData *canUnkActionWall(TBGCheckData *wall)
     TMario *player;
     __asm { mr player, r22 };
 
-    if (player->mCustomInfo->isMario() && player->mCustomInfo->isInitialized())
+    if (playerParams->isMario() && playerParams->isInitialized())
         canCling =
             wall->mCollisionType == 266 ||
-                (player->mCustomInfo->mParams->Attributes.mCanClimbWalls &&
+                (playerParams->mParams->Attributes.mCanClimbWalls &&
                  player->mController->mButtons.mInput & TMarioGamePad::Buttons::Z && 
                  wall->mCollisionType != 5);
     else
@@ -441,10 +447,10 @@ static TBGCheckData *canRunClingWall(TBGCheckData *wall)
     TMario *player;
     __asm { mr player, r31 };
 
-    if (player->mCustomInfo->isMario() && player->mCustomInfo->isInitialized())
+    if (playerParams->isMario() && playerParams->isInitialized())
         canCling =
             wall->mCollisionType == 266 ||
-                (player->mCustomInfo->mParams->Attributes.mCanClimbWalls &&
+                (playerParams->mParams->Attributes.mCanClimbWalls &&
                  player->mController->mButtons.mInput & TMarioGamePad::Buttons::Z &&
                  wall->mCollisionType != 5);
     else
@@ -469,8 +475,8 @@ static TBGCheckData *canMoveOnWall1()
     TBGCheckData *wall;
     __asm { mr wall, r29 };
 
-    if (player->mCustomInfo->isMario() && player->mCustomInfo->isInitialized())
-        canCling = (wall->mCollisionType == 266 || player->mCustomInfo->mParams->Attributes.mCanClimbWalls);
+    if (playerParams->isMario() && playerParams->isInitialized())
+        canCling = (wall->mCollisionType == 266 || playerParams->mParams->Attributes.mCanClimbWalls);
     else
         canCling = wall->mCollisionType == 266;
 
@@ -490,8 +496,8 @@ static TBGCheckData *canMoveOnWall2(TBGCheckData *wall)
     TMario *player;
     __asm { mr player, r30 };
 
-    if (player->mCustomInfo->isMario() && player->mCustomInfo->isInitialized())
-        canCling = (wall->mCollisionType == 266 || player->mCustomInfo->mParams->Attributes.mCanClimbWalls);
+    if (playerParams->isMario() && playerParams->isInitialized())
+        canCling = (wall->mCollisionType == 266 || playerParams->mParams->Attributes.mCanClimbWalls);
     else
         canCling = wall->mCollisionType == 266;
 
@@ -511,10 +517,10 @@ static TBGCheckData *canClimbUnderwater(TBGCheckData *wall)
     TMario *player;
     __asm { mr player, r31 };
 
-    if (player->mCustomInfo->isMario() && player->mCustomInfo->isInitialized())
+    if (playerParams->isMario() && playerParams->isInitialized())
         canCling =
             wall->mCollisionType == 266 ||
-                (player->mCustomInfo->mParams->Attributes.mCanClimbWalls &&
+                (playerParams->mParams->Attributes.mCanClimbWalls &&
                  player->mController->mButtons.mInput & TMarioGamePad::Buttons::Z &&
                  wall->mCollisionType != 5);
     else
@@ -533,11 +539,11 @@ kmWrite32(0x80272668, 0x4182000C);
 
 static void checkGraffitiAffected(TMario *player)
 {
-    if (!player->mCustomInfo->isMario() || !player->mCustomInfo->isInitialized())
+    if (!playerParams->isMario() || !playerParams->isInitialized())
     {
         checkGraffito__6TMarioFv(player);
     }
-    else if (player->mCustomInfo->mParams->Attributes.mGoopAffected)
+    else if (playerParams->mParams->Attributes.mGoopAffected)
     {
         checkGraffito__6TMarioFv(player);
     }
@@ -574,7 +580,7 @@ static u32 patchYStorage()
     TMario *player;
     __asm { mr player, r31 };
 
-    if (player->mState != TMario::State::IDLE)
+    if (player->mState != static_cast<u32>(TMario::State::IDLE))
         player->mSpeed.y = 0.0f;
 
     return 0;
@@ -584,34 +590,34 @@ kmCall(0x802571F0, &patchYStorage);
 //0x8024E02C
 static void manageExtraJumps(TMario *player)
 {
-    if (!player->mCustomInfo->isMario() || !player->mCustomInfo->isInitialized())
+    if (!playerParams->isMario() || !playerParams->isInitialized())
     {
         stateMachine__6TMarioFv(player);
         return;
     }
 
-    if ((player->mState & TMario::State::AIRBORN) == false ||
+    if ((player->mState & static_cast<u32>(TMario::State::AIRBORN)) == false ||
         (player->mState & 0x800000) ||
         player->mYoshi->mState == TYoshi::MOUNTED)
-        player->mCustomInfo->mCurJump = 1;
+        playerParams->mCurJump = 1;
     else
     {
         if (player->mController->mButtons.mFrameInput & TMarioGamePad::Buttons::A &&
-            player->mCustomInfo->mCurJump < player->mCustomInfo->mMaxJumps &&
-            player->mState != TMario::State::WALLSLIDE)
+            playerParams->mCurJump < playerParams->mMaxJumps &&
+            player->mState != static_cast<u32>(TMario::State::WALLSLIDE))
         {
-            if ((player->mCustomInfo->mMaxJumps - player->mCustomInfo->mCurJump) == 1)
+            if ((playerParams->mMaxJumps - playerParams->mCurJump) == 1)
             {
-                if (player->mState != TMario::State::TRIPLE_J)
-                    changePlayerJumping__6TMarioFUlUl(player, TMario::State::TRIPLE_J, 0);
+                if (player->mState != static_cast<u32>(TMario::State::TRIPLE_J))
+                    changePlayerJumping__6TMarioFUlUl(player, static_cast<u32>(TMario::State::TRIPLE_J), 0);
                 else
-                    setStatusToJumping__6TMarioFUlUl(player, TMario::State::TRIPLE_J, 0);
+                    setStatusToJumping__6TMarioFUlUl(player, static_cast<u32>(TMario::State::TRIPLE_J), 0);
             }
-            else if ((player->mState - TMario::State::JUMP) > 1)
-                changePlayerJumping__6TMarioFUlUl(player, TMario::State::JUMP, 0);
+            else if ((player->mState - static_cast<u32>(TMario::State::JUMP)) > 1)
+                changePlayerJumping__6TMarioFUlUl(player, static_cast<u32>(TMario::State::JUMP), 0);
             else
                 changePlayerJumping__6TMarioFUlUl(player, player->mState ^ 1, 0);
-            player->mCustomInfo->mCurJump += 1;
+            playerParams->mCurJump += 1;
         }
     }
     stateMachine__6TMarioFv(player);
@@ -620,13 +626,13 @@ kmCall(0x8024E02C, &manageExtraJumps);
 
 static f32 calcJumpPower(TMario *player, f32 factor, f32 curYVelocity, f32 jumpPower)
 {
-    if (player->mCustomInfo->mParams)
+    if (playerParams->mParams)
     {
-        jumpPower *= player->mCustomInfo->mParams->Attributes.mBaseJumpHeightMulti;
-        if (player->mState & TMario::State::AIRBORN)
+        jumpPower *= playerParams->mParams->Attributes.mBaseJumpHeightMulti;
+        if (player->mState & static_cast<u32>(TMario::State::AIRBORN))
         {
-            jumpPower *= powf(player->mCustomInfo->mParams->Attributes.mMultiJumpMultiplier, (f32)player->mCustomInfo->mCurJump);
-            player->mForwardSpeed *= player->mCustomInfo->mParams->Attributes.mMultiJumpFSpeedMulti;
+            jumpPower *= powf(playerParams->mParams->Attributes.mMultiJumpMultiplier, (f32)playerParams->mCurJump);
+            player->mForwardSpeed *= playerParams->mParams->Attributes.mMultiJumpFSpeedMulti;
         }
     }
     return (curYVelocity * factor) + jumpPower;
@@ -672,9 +678,9 @@ static f32 checkGroundSpeedLimit()
     {
         multiplier *= player->mFSpeedYoshiMul;
     }
-    else if (player->mCustomInfo->isInitialized() && player->mCustomInfo->isMario() && !onYoshi__6TMarioCFv(player))
+    else if (playerParams->isInitialized() && playerParams->isMario() && !onYoshi__6TMarioCFv(player))
     {
-        multiplier *= player->mCustomInfo->mParams->Attributes.mSpeedMultiplier;
+        multiplier *= playerParams->mParams->Attributes.mSpeedMultiplier;
     }
     return multiplier;
 }
@@ -687,8 +693,8 @@ static f32 checkGroundSpeedMulti()
     TMario *player;
     __asm { mr player, r31 };
 
-    if (player->mCustomInfo->isInitialized() && player->mCustomInfo->isMario() && !onYoshi__6TMarioCFv(player))
-        return player->mRunSlowdownFactor2 / player->mCustomInfo->mParams->Attributes.mSpeedMultiplier;
+    if (playerParams->isInitialized() && playerParams->isMario() && !onYoshi__6TMarioCFv(player))
+        return player->mRunSlowdownFactor2 / playerParams->mParams->Attributes.mSpeedMultiplier;
     else
         return player->mRunSlowdownFactor2;
 }
@@ -702,10 +708,10 @@ static void checkJumpSpeedLimit(f32 speed)
     f32 speedCap = 32;
     f32 speedReducer = 0.2;
 
-    if (player->mCustomInfo->isInitialized() && player->mCustomInfo->isMario() && !onYoshi__6TMarioCFv(player))
+    if (playerParams->isInitialized() && playerParams->isMario() && !onYoshi__6TMarioCFv(player))
     {
-        speedCap *= player->mCustomInfo->mParams->Attributes.mSpeedMultiplier;
-        speedReducer *= player->mCustomInfo->mParams->Attributes.mSpeedMultiplier;
+        speedCap *= playerParams->mParams->Attributes.mSpeedMultiplier;
+        speedReducer *= playerParams->mParams->Attributes.mSpeedMultiplier;
     }
     
     if (speed > speedCap)
@@ -720,9 +726,9 @@ kmCall(0x8024CC6C, &checkJumpSpeedLimit);
 
 static TMario *checkJumpSpeedMulti(TMario *player, f32 factor, f32 max)
 {
-    if (player->mCustomInfo->isInitialized() && player->mCustomInfo->isMario() && !onYoshi__6TMarioCFv(player))
+    if (playerParams->isInitialized() && playerParams->isMario() && !onYoshi__6TMarioCFv(player))
     {
-        player->mForwardSpeed = ((factor * player->mCustomInfo->mParams->Attributes.mSpeedMultiplier) * max) + player->mForwardSpeed;
+        player->mForwardSpeed = ((factor * playerParams->mParams->Attributes.mSpeedMultiplier) * max) + player->mForwardSpeed;
         return player;
     }
     else
@@ -740,9 +746,9 @@ static void checkSwimSpeedMulti(f32 max, f32 factor)
     TMario *player;
     __asm { mr player, r31 };
 
-    if (player->mCustomInfo->isInitialized() && player->mCustomInfo->isMario() && !onYoshi__6TMarioCFv(player))
+    if (playerParams->isInitialized() && playerParams->isMario() && !onYoshi__6TMarioCFv(player))
     {
-        player->mForwardSpeed = ((factor * player->mCustomInfo->mParams->Attributes.mSpeedMultiplier) * max) + player->mForwardSpeed;
+        player->mForwardSpeed = ((factor * playerParams->mParams->Attributes.mSpeedMultiplier) * max) + player->mForwardSpeed;
     }
     else
     {
@@ -759,9 +765,9 @@ static f64 checkSlideSpeedMulti(f32 max, f32 factor)
 
     f64 slowFactor = 0.5;
 
-    if (player->mCustomInfo->isInitialized() && player->mCustomInfo->isMario() && !onYoshi__6TMarioCFv(player))
+    if (playerParams->isInitialized() && playerParams->isMario() && !onYoshi__6TMarioCFv(player))
     {
-        slowFactor /= player->mCustomInfo->mParams->Attributes.mSpeedMultiplier;
+        slowFactor /= playerParams->mParams->Attributes.mSpeedMultiplier;
     }
     
     if (player->mFludd && isEmitting__9TWaterGunFv(player->mFludd))
@@ -785,8 +791,8 @@ static f32 checkGroundSpeedCap()
     TMario *player;
     __asm { mr player, r31 };
 
-    if (player->mCustomInfo->isInitialized() && player->mCustomInfo->isMario() && !onYoshi__6TMarioCFv(player))
-        return player->mMaxGroundSpeed * player->mCustomInfo->mParams->Attributes.mSpeedMultiplier;
+    if (playerParams->isInitialized() && playerParams->isMario() && !onYoshi__6TMarioCFv(player))
+        return player->mMaxGroundSpeed * playerParams->mParams->Attributes.mSpeedMultiplier;
     else
         return player->mMaxGroundSpeed;
 }
@@ -797,9 +803,9 @@ static void checkHoverSpeedMulti(f32 factor, f32 max)
     TMario *player;
     __asm { mr player, r30 };
 
-    if (player->mCustomInfo->isInitialized() && player->mCustomInfo->isMario() && !onYoshi__6TMarioCFv(player))
+    if (playerParams->isInitialized() && playerParams->isMario() && !onYoshi__6TMarioCFv(player))
     {
-        player->mForwardSpeed = ((factor * player->mCustomInfo->mParams->Attributes.mSpeedMultiplier) * max) + player->mForwardSpeed;
+        player->mForwardSpeed = ((factor * playerParams->mParams->Attributes.mSpeedMultiplier) * max) + player->mForwardSpeed;
     }
     else
     {
@@ -812,10 +818,10 @@ kmWrite32(0x8024AE84, 0x60000000);
 static void mario_addVelocity(TMario *player, f32 add)
 {
     player->mForwardSpeed += add;
-    if (player->mCustomInfo->isInitialized() && player->mCustomInfo->isMario() && !onYoshi__6TMarioCFv(player))
+    if (playerParams->isInitialized() && playerParams->isMario() && !onYoshi__6TMarioCFv(player))
     {
-        if (player->mForwardSpeed > (99.0f * player->mCustomInfo->mParams->Attributes.mSpeedMultiplier))
-            player->mForwardSpeed = (99.0f * player->mCustomInfo->mParams->Attributes.mSpeedMultiplier);
+        if (player->mForwardSpeed > (99.0f * playerParams->mParams->Attributes.mSpeedMultiplier))
+            player->mForwardSpeed = (99.0f * playerParams->mParams->Attributes.mSpeedMultiplier);
     }
     else
     {
@@ -830,9 +836,9 @@ static TMario *checkOilSlipSpeedMulti(f32 factor, f32 max)
     TMario *player;
     __asm { mr player, r31 };
 
-    if (player->mCustomInfo->isInitialized() && player->mCustomInfo->isMario() && !onYoshi__6TMarioCFv(player))
+    if (playerParams->isInitialized() && playerParams->isMario() && !onYoshi__6TMarioCFv(player))
     {
-        player->mForwardSpeed = ((factor * player->mCustomInfo->mParams->Attributes.mSpeedMultiplier) * max) + player->mForwardSpeed;
+        player->mForwardSpeed = ((factor * playerParams->mParams->Attributes.mSpeedMultiplier) * max) + player->mForwardSpeed;
     }
     else
     {
@@ -848,8 +854,8 @@ static f32 checkJumpingWallBonk(f32 f1, f32 speed)
     TMario *player;
     __asm { mr player, r28 };
 
-    if (player->mCustomInfo->isInitialized() && player->mCustomInfo->isMario() && !onYoshi__6TMarioCFv(player))
-        return player->mWallBonkThreshold * player->mCustomInfo->mParams->Attributes.mSpeedMultiplier;
+    if (playerParams->isInitialized() && playerParams->isMario() && !onYoshi__6TMarioCFv(player))
+        return player->mWallBonkThreshold * playerParams->mParams->Attributes.mSpeedMultiplier;
     else
         return player->mWallBonkThreshold;
 }
@@ -862,8 +868,8 @@ static f32 checkRunningWallBonk(f32 f1, f32 speed)
     TMario *player;
     __asm { mr player, r31 };
 
-    if (player->mCustomInfo->isInitialized() && player->mCustomInfo->isMario() && !onYoshi__6TMarioCFv(player))
-        return player->mWallBonkThreshold * player->mCustomInfo->mParams->Attributes.mSpeedMultiplier;
+    if (playerParams->isInitialized() && playerParams->isMario() && !onYoshi__6TMarioCFv(player))
+        return player->mWallBonkThreshold * playerParams->mParams->Attributes.mSpeedMultiplier;
     else
         return player->mWallBonkThreshold;
 }
@@ -874,18 +880,14 @@ kmWrite32(0x8025B150, 0xFC020840);
 static void checkYSpdForTerminalVelocity()
 {
     TMario *player;
-    __asm { mr player, r31 };
+    SME_FROM_GPR(r31, player);
 
-    if (player->mCustomInfo->isInitialized() && player->mCustomInfo->isMario())
-    {
-        if (player->mSpeed.y < player->mCustomInfo->mTerminalVelocity)
-            player->mSpeed.y = player->mCustomInfo->mTerminalVelocity;
-    }
+    float terminalVelocity; = -75.0f * player->mJumpParams.mGravity.get();
+    if (SME::TGlobals::sGlobals.getPlayerParams(player)->mCollisionFlags.mIsGlideBounce)
+        terminalVelocity = -20.0f * player->mJumpParams.mGravity.get();
     else
-    {
-        if (player->mSpeed.y < -75)
-            player->mSpeed.y = -75;
-    }
+        terminalVelocity = -75.0f * player->mJumpParams.mGravity.get();
+    player->mSpeed.y = Max(player->mSpeed.y, terminalVelocity);
 }
 kmCall(0x80256678, &checkYSpdForTerminalVelocity);
 kmWrite32(0x8025667C, 0x60000000);
@@ -898,8 +900,8 @@ static void scaleDiveSpeed()
     f32 _f0;
     __asm { fmr _f0, f0 };
 
-    if (player->mCustomInfo->isMario() && player->mCustomInfo->isInitialized())
-        _f0 = 48.0f * player->mCustomInfo->mParams->Attributes.mSpeedMultiplier;
+    if (playerParams->isMario() && playerParams->isInitialized())
+        _f0 = 48.0f * playerParams->mParams->Attributes.mSpeedMultiplier;
     else
         _f0 = 48.0f;
 
@@ -985,9 +987,9 @@ static void setCollisionWidth()
     f32 width;
     __asm { fmr width, f0 };
 
-    if (player->mCustomInfo->isMario())
+    if (playerParams->isMario())
     {
-        player->mCollisionXZSize = player->mCustomInfo->DefaultAttrs.mCollisionWidth * player->mSize.x;
+        player->mCollisionXZSize = playerParams->DefaultAttrs.mCollisionWidth * player->mSize.x;
     }
     else
     {

@@ -4,6 +4,6 @@
 
 enum JKRExpandSwitch
 {
-	NON_COMPRESSED = 0,
-	COMPRESSED = 1
+	NOP = 0,
+	EXPAND = 1
 };

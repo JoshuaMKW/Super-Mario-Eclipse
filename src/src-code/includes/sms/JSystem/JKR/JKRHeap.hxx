@@ -2,6 +2,8 @@
 
 #include "types.h"
 #include "OS.h"
+#include "JKRDisposer.hxx"
+#include "../JSU/JSUList.hxx"
 
 class JKRHeap : public JKRDisposer
 {

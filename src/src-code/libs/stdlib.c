@@ -22,13 +22,13 @@ static char *reverse(char *buffer, size_t len)
 char* itoa(int num, char *buffer, int base) 
 {
     int i = 0; 
-    BOOL isNegative = FALSE; 
+    bool isNegative = false; 
   
     /* Handle 0 explicitely, otherwise empty buffering is printed for 0 */
     if (num == 0) 
     { 
         buffer[i++] = '0'; 
-        buffer[i] = '\0'; 
+        buffer[i] = '\0';
         return buffer; 
     } 
   
@@ -36,7 +36,7 @@ char* itoa(int num, char *buffer, int base)
     // base 10. Otherwise numbers are considered unsigned. 
     if (num < 0 && base == 10) 
     { 
-        isNegative = TRUE; 
+        isNegative = true; 
         num = -num; 
     } 
   

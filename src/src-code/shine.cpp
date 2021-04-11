@@ -5,36 +5,51 @@
 
 #include "SME.hxx"
 
+using namespace SME;
+
 // 0x801BD664
 // extern -> SME.cpp
-void manageShineVanish(JGeometry::TVec3<f32> *marioPos)
+void Patch::Shine::manageShineVanish(JGeometry::TVec3<f32> *marioPos)
 {
     TShine *shine;
     SME_FROM_GPR(r30, shine);
 
     const JGeometry::TVec3<f32> step(1.0f, 1.0f, 1.0f);
+    
+    JGeometry::TVec3<f32> size;
+    JGeometry::TVec3<f32> rotation;
+    JGeometry::TVec3<f32> position;
 
-    if (shine->mSize.x - 0.011f <= 0)
+    shine->JSGGetScaling(reinterpret_cast<Vec *>(&size));
+    shine->JSGGetRotation(reinterpret_cast<Vec *>(&rotation));
+    shine->JSGGetTranslation(reinterpret_cast<Vec *>(&position));
+
+    if (size.x - 0.011f <= 0)
     {
-        shine->mSize = JGeometry::TVec3<f32>(1.0f, 1.0f, 1.0f);
-        shine->mGlowSize = JGeometry::TVec3<f32>(1.0f, 1.0f, 1.0f);
-        shine->mRotation.y = 0.0f;
+        rotation.y = 1.0f;
+        size.set(1.0f, 1.0f, 1.0f);
+        shine->JSGSetScaling(reinterpret_cast<Vec &>(size));
+        shine->JSGSetRotation(reinterpret_cast<Vec &>(size));
+        shine->mGlowSize.set(1.0f, 1.0f, 1.0f);
         shine->mActorData->mBckInfo->setAnmFromIndex(-1, nullptr);
         shine->kill();
     }
-    else if (gpMarioAddress->mState != TMario::State::SHINE_C)
+    else if (gpMarioAddress->mState != static_cast<u32>(TMario::State::SHINE_C))
     {
-        shine->mPosition.y += 4.0f;
-        shine->mRotation.y += 3.0f;
-        shine->mSize.sub(step);
+        rotation.y += 3.0f;
+        position.y += 4.0f;
+        size.sub(step);
+        shine->JSGSetScaling(reinterpret_cast<Vec &>(size));
+        shine->JSGSetRotation(reinterpret_cast<Vec &>(rotation));
+        shine->JSGSetTranslation(reinterpret_cast<Vec &>(position));
         shine->mGlowSize.sub(step);
     }
     else
-        shine->mPosition = *marioPos;
+        shine->JSGSetTranslation(reinterpret_cast<Vec &>(*marioPos));
 }
 
 //0x802413E0
-void isKillEnemiesShine(TConductor *gpConductor, JGeometry::TVec3<f32> *playerCoordinates, f32 range)
+void Patch::Shine::isKillEnemiesShine(TConductor *gpConductor, JGeometry::TVec3<f32> *playerCoordinates, f32 range)
 {
     TMario *player;
     SME_FROM_GPR(r31, player);
@@ -55,7 +70,7 @@ static void restoreMario(TMarDirector *gpMarDirector, u32 curState)
 
     if (curState != TMarDirector::Status::NORMAL ||
         gpMarDirector->mLastState != TMarDirector::Status::SAVE_CARD ||
-        gpMarioAddress->mState != TMario::State::SHINE_C)
+        gpMarioAddress->mState != static_cast<u32>(TMario::State::SHINE_C))
         return;
 
     if (curSaveCard[0x2E9] != 1)
@@ -63,7 +78,7 @@ static void restoreMario(TMarDirector *gpMarDirector, u32 curState)
         if (SMS_isDivingMap__Fv() || (gpMarioAddress->mPrevState & 0x20D0) == 0x20D0)
             gpMarioAddress->mState = gpMarioAddress->mPrevState;
         else
-            gpMarioAddress->mState = TMario::State::IDLE;
+            gpMarioAddress->mState = static_cast<u32>(TMario::State::IDLE);
 
         MSBgm::stopBGM(BGM_GET_SHINE, 20);
         MSBgm::startBGM(gStageBGM);
@@ -74,14 +89,14 @@ static void restoreMario(TMarDirector *gpMarDirector, u32 curState)
 }
 
 //0x802995BC
-void checkBootOut(TMarDirector *gpMarDirector, u32 curState)
+void Patch::Shine::checkBootOut(TMarDirector *gpMarDirector, u32 curState)
 {
     restoreMario(gpMarDirector, curState);
     currentStateFinalize__12TMarDirectorFUc(gpMarDirector, curState);
 }
 
 //0x80293B10
-u32 extendShineIDLogic(TFlagManager *flagManager, u32 flagID)
+u32 Patch::Shine::extendShineIDLogic(TFlagManager *flagManager, u32 flagID)
 {
     if ((flagID & 0xFFFF) > 0x77)
         flagID += (0x60040 - 0x78);
@@ -91,7 +106,7 @@ u32 extendShineIDLogic(TFlagManager *flagManager, u32 flagID)
 }
 
 //0x801BCC98
-void shineObjectStringMod(JSUInputStream *stream, u8 *dst, u32 size)
+void Patch::Shine::shineObjectStringMod(JSUInputStream *stream, u8 *dst, u32 size)
 {
     TShine *shine;
     SME_FROM_GPR(r30, shine);
@@ -108,7 +123,7 @@ void shineObjectStringMod(JSUInputStream *stream, u8 *dst, u32 size)
     read__14JSUInputStreamFPvl(stream, dst, size);
 }
 
-void shineFlagSetter(TFlagManager *flagManager, u32 flag, s32 val)
+void Patch::Shine::shineFlagSetter(TFlagManager *flagManager, u32 flag, s32 val)
 {
     if (flag < 0x60400)
     {
@@ -127,7 +142,7 @@ void shineFlagSetter(TFlagManager *flagManager, u32 flag, s32 val)
     }
 }
 
-u32 shineFlagGetter(TFlagManager *flagManager, u32 flag)
+u32 Patch::Shine::shineFlagGetter(TFlagManager *flagManager, u32 flag)
 {
     if (flag < 0x60400)
     {
@@ -147,7 +162,7 @@ u32 shineFlagGetter(TFlagManager *flagManager, u32 flag)
 }
 
 //0x802946D4
-u32 shineSetClamper(TFlagManager *flagManager, u32 flag)
+u32 Patch::Shine::shineSetClamper(TFlagManager *flagManager, u32 flag)
 {
     flag &= 0x7FFFF;
     if (flag >= 0x10078)
@@ -157,7 +172,7 @@ u32 shineSetClamper(TFlagManager *flagManager, u32 flag)
 }
 
 //0x8029474C
-u32 shineGetClamper(TFlagManager *flagManager, u32 flag)
+u32 Patch::Shine::shineGetClamper(TFlagManager *flagManager, u32 flag)
 {
     flag &= 0x7FFFF;
     if (flag >= 0x10078)
@@ -167,7 +182,7 @@ u32 shineGetClamper(TFlagManager *flagManager, u32 flag)
 }
 
 //0x80294334
-void extendFlagManagerLoad(JSUMemoryInputStream &stream)
+void Patch::Shine::extendFlagManagerLoad(JSUMemoryInputStream &stream)
 {
     stream.read(((u8 *)TFlagManager::smInstance + 0x1F4), 0x8C);
     stream.skip(0x120);
@@ -175,14 +190,14 @@ void extendFlagManagerLoad(JSUMemoryInputStream &stream)
 
 
 //0x802939B8
-void extendFlagManagerSave(JSUMemoryOutputStream &stream)
+void Patch::Shine::extendFlagManagerSave(JSUMemoryOutputStream &stream)
 {
     stream.write(((u8 *)TFlagManager::smInstance + 0x1F4), 0x8C);
     stream.skip(0x120, 0);
 }
 
 //0x80297BD8
-void thinkSetBootFlag(void *shineFader, u32 unk_1, u32 unk_2)
+void Patch::Shine::thinkSetBootFlag(void *shineFader, u32 unk_1, u32 unk_2)
 {
     TMarDirector *gpMarDirector;
     SME_FROM_GPR(r31, gpMarDirector);
@@ -194,7 +209,7 @@ void thinkSetBootFlag(void *shineFader, u32 unk_1, u32 unk_2)
     }
 }
 
-u32 loadAfterMaskState()
+u32 Patch::Shine::loadAfterMaskState()
 {
     TShine *shine;
     SME_FROM_GPR(r31, shine);
@@ -203,7 +218,7 @@ u32 loadAfterMaskState()
 }
 
 //0x801BCEEC
-void setKillState()
+void Patch::Shine::setKillState()
 {
     TShine *shine;
     SME_FROM_GPR(r31, shine);

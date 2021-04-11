@@ -8,13 +8,13 @@
 
 enum TEProgress
 {
-    UNK_0,
-    UNK_1,
-    UNK_2,
-    UNK_3,
-    UNK_4,
-    UNK_5,
-    UNK_6
+    PROGRESS_UNK_0,
+    PROGRESS_UNK_1,
+    PROGRESS_UNK_2,
+    PROGRESS_UNK_3,
+    PROGRESS_UNK_4,
+    PROGRESS_UNK_5,
+    PROGRESS_UNK_6
 };
 
 class TCardLoad : public JDrama::TNameRef

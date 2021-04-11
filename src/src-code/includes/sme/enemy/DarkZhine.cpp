@@ -1,3 +1,5 @@
+#ifdef ZHINE_BOSS
+
 #include "DarkZhine.hxx"
 
 #include "SME.hxx"
@@ -69,7 +71,7 @@ TDarkZhine::TDarkZhine(const char *name, bool hardMode) : TBossGesso(name)
         *(f32 *)0x80410150 *= 1.0f;
     }
     this->mGoopLevel = 0xFF;
-    OSReport("Created Zhine boss at %p; Hard mode = %s", this, this->mHardMode ? "True" : "False");
+    SME_DEBUG_LOG("Created Zhine boss at %p; Hard mode = %s", this, this->mHardMode ? "True" : "False");
 }
 
 TDarkZhine::~TDarkZhine()
@@ -112,10 +114,10 @@ void TDarkZhine::advanceRollMovement(TPollutionManager *gpPollution)
     else if (this->mGroundSpeed < 0.0f)
         this->mGroundSpeed = 0.0f;
 
-    this->mPosition.x += (this->mGroundSpeed * sinf(AngleToRadians(this->mRotation.y)));
-    this->mPosition.z += (this->mGroundSpeed * cosf(AngleToRadians(this->mRotation.y)));
-    this->mSpeed.x = (this->mGroundSpeed * sinf(AngleToRadians(this->mRotation.y)));
-    this->mSpeed.z = (this->mGroundSpeed * cosf(AngleToRadians(this->mRotation.y)));
+    this->mPosition.x += (this->mGroundSpeed * sinf(angleToRadians(this->mRotation.y)));
+    this->mPosition.z += (this->mGroundSpeed * cosf(angleToRadians(this->mRotation.y)));
+    this->mSpeed.x = (this->mGroundSpeed * sinf(angleToRadians(this->mRotation.y)));
+    this->mSpeed.z = (this->mGroundSpeed * cosf(angleToRadians(this->mRotation.y)));
 
     stamp__17TPollutionManagerFUsffff(gpPollution, 1,
                                         this->mPosition.x,
@@ -163,13 +165,13 @@ TDarkZhine::PoundingState TDarkZhine::advanceDropAttack(TPollutionManager *gpPol
     }
     else if (this->poundingStatus() == TDarkZhine::SHOCKING)
     {
-        if (!(player->mState & TMario::State::AIRBORN) &&
+        if (!(player->mState & static_cast<u32>(TMario::State::AIRBORN)) &&
             this->isTargetInRangeToHome(this->mPosition, this->shockRadius()) &&
-            (player->mState != TMario::State::KNCK_LND &&
+            (player->mState != static_cast<u32>(TMario::State::KNCK_LND) &&
                 player->mState != 0x4045C))
         {
             decHP__6TMarioFi(player, 1);
-            changePlayerStatus__6TMarioFUlUlb(player, TMario::State::KNCK_LND, 0, 0);
+            changePlayerStatus__6TMarioFUlUlb(player, static_cast<u32>(TMario::State::KNCK_LND), 0, 0);
         }
 
         if (this->statusTimer() <= 0)
@@ -316,8 +318,8 @@ void TDarkZhine::perform_(TMario *player)
         if (this->mGroundSpeed > this->mMaxSpeed)
             this->mGroundSpeed = this->mMaxSpeed;
 
-        this->mSpeed.x = this->mGroundSpeed * sinf(AngleToRadians(this->mRotation.y));
-        this->mSpeed.z = this->mGroundSpeed * cosf(AngleToRadians(this->mRotation.y));
+        this->mSpeed.x = this->mGroundSpeed * sinf(angleToRadians(this->mRotation.y));
+        this->mSpeed.z = this->mGroundSpeed * cosf(angleToRadians(this->mRotation.y));
     }
     else if (isTargetInRangeToHome(this->mPosition, this->shockRadius()) &&
                 this->poundingStatus() != TDarkZhine::GROUNDROLL)
@@ -326,8 +328,8 @@ void TDarkZhine::perform_(TMario *player)
         if (this->mGroundSpeed < 0.0f)
             this->mGroundSpeed = 0.0f;
 
-        this->mSpeed.x = this->mGroundSpeed * sinf(AngleToRadians(this->mRotation.y));
-        this->mSpeed.z = this->mGroundSpeed * cosf(AngleToRadians(this->mRotation.y));
+        this->mSpeed.x = this->mGroundSpeed * sinf(angleToRadians(this->mRotation.y));
+        this->mSpeed.z = this->mGroundSpeed * cosf(angleToRadians(this->mRotation.y));
     }
 
     if (isTargetInRangeToHome(this->mPosition, this->shockRadius()))
@@ -355,7 +357,7 @@ void TDarkZhine::init()
     if (gessoZhineFile)
     {
 
-        u32 *newVTable = (u32 *)Memory::malloc(0x120, 32);
+        u32 *newVTable = (u32 *)SME::Util::Memory::malloc(0x120, 32);
         memcpy(newVTable, this->vTable, 0x114);
         newVTable[0xD0 / 4] = (u32)gessoZhineFile + (u32)gessoZhineFile->mCodeBlock[0]; //Replace move vtable entry
         *(u32 *)0x803B2A94 = (u32)gessoZhineFile + (u32)gessoZhineFile->mCodeBlock[1];  //Replace eye damage vtable entry
@@ -447,3 +449,5 @@ void control_(TDarkZhine *thisZhine)
 //0x800FFFAC = remove tentacles BLR, 0x800764CC perform tentacles?
 
 //0x802A9D54 = TBossGesso Class Size
+
+#endif

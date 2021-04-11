@@ -19,7 +19,7 @@ public:
     virtual bool receiveMessage(THitActor *, u32) override;
     virtual Mtx *getTakingMtx() override;
     virtual void ensureTakeSituation() override;
-    virtual f32 getRadiusAtY() const;
+    virtual f32 getRadiusAtY(f32) const override;
     virtual Mtx *getRootJointMtx() const override;
     virtual void calcRootMatrix() override;
     virtual void setGroundCollision() override;
@@ -60,7 +60,6 @@ public:
     void calcMap();
     void calcReflectingVelocity(const TBGCheckData *, f32,
                                 JGeometry::TVec3<f32> *) const;
-    void calcRootMatrix();
     void checkOnManhole();
     void concatOnlyRotFromLeft(Mtx *, Mtx *, Mtx *);
     void concatOnlyRotFromRight(Mtx *, Mtx *, Mtx *);
@@ -81,8 +80,6 @@ public:
     Vec *getNormalVecFromTarget(f32, f32, f32, JGeometry::TVec3<f32> *) const;
     Vec *getNormalVecFromTargetXZ(f32, f32, JGeometry::TVec3<f32> *) const;
     f32 getObjCollisionHeightOffset() const;
-    f32 getRadiusAtY(f32) const;
-    Mtx *getRootJointMtx() const;
     f32 getRotYFromAxisX(const JGeometry::TVec3<f32> &) const;
     f32 getRotYFromAxisZ(const JGeometry::TVec3<f32> &) const;
     JGeometry::TVec3<f32> *getVerticalVecToTargetXZ(f32, f32,
@@ -96,7 +93,6 @@ public:
     void initModelData();
     void initObjCollisionData();
     void initUnique();
-    void makeMActors();
     void makeObjMtxRotByAxis(const JGeometry::TVec3<f32> &, f32, Mtx *) const;
     void makeRootMtxRotX(Mtx *);
     void makeRootMtxRotY(Mtx *);

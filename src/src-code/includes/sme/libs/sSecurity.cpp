@@ -1,4 +1,5 @@
 #include "sSecurity.hxx"
+#include "Globals.hxx"
 
 OSAlarm gctAlarm;
 
@@ -7,53 +8,49 @@ OSAlarm gctAlarm;
 #endif
 
 static constexpr u32 sEnabledmagic = 0x00D0C0DE;
-static constexpr u32 sDisabledmagic = 0x00D0DEAD;
 static u32 *sCachedAddr = nullptr;
-bool gEnableGCT;
 
-void *setUserCodes(OSAlarm *alarm, OSContext *context)
+using namespace SME;
+
+bool Util::Security::areGeckoCodesPresent(void *handlerBuffer, size_t maxlen, u32 **addrStorage)
+{
+    u32 *checkArea = static_cast<u32 *>(handlerBuffer);
+
+    for (u32 i = 0; i < (maxlen >> 2)-1; ++i)
+    {
+        if (checkArea[i] == sEnabledmagic && checkArea[i + 1] == sEnabledmagic)
+        {
+            if (addrStorage)
+                *addrStorage = &checkArea[i];
+            return true;
+        }
+    }
+    return false;
+}
+
+void *Util::Security::setUserCodes(OSAlarm *alarm, OSContext *context)
 {
     #ifdef SME_DEBUG
         OSStartStopwatch(&gctStopwatch);
     #endif
     
-    u32 *searchcontext = (u32 *)0x80001C00;
-    u32 searchlength = (0x80003000 - 0x80001C00) >> 2;
+    u32 *searchcontext = (u32 *)(0x80001C00);
+    const size_t searchlength = 0x80003000 - 0x80001C00;
 
-    bool matched = false;
+    if (sCachedAddr) {
+        if (areGeckoCodesPresent(sCachedAddr, 8)) {
+            #ifdef SME_DEBUG
+                OSStopStopwatch(&gctStopwatch);
+                if (gctStopwatch.mHits % 60000 == 0)
+                    OSDumpStopwatch(&gctStopwatch);
+            #endif
 
-    if (!sCachedAddr)
-    {
-        for (u32 i = 0; i < searchlength; ++i)
-        {
-            if (searchcontext[i] == sEnabledmagic && searchcontext[i + 1] == sEnabledmagic)
-            {
-                matched = true;
-                searchcontext = &searchcontext[i];
-                sCachedAddr = searchcontext;
-                break;
-            }
+            SME::TGlobals::sGlobals.mPlayerHasGeckoCodes = true;
+            return nullptr;
         }
     }
-    else
-    {
-        matched = true;
-        searchcontext = sCachedAddr;
-    }
-
-    if (matched)
-    {
-        if (gEnableGCT)
-        {
-            searchcontext[0] = sEnabledmagic;
-            searchcontext[1] = sEnabledmagic;
-        }
-        else
-        {
-            searchcontext[0] = sDisabledmagic;
-            searchcontext[1] = sDisabledmagic;
-        }
-    }
+    SME::TGlobals::sGlobals.mPlayerHasGeckoCodes =
+        areGeckoCodesPresent(static_cast<void *>(searchcontext), searchlength, &sCachedAddr);
 
     #ifdef SME_DEBUG
         OSStopStopwatch(&gctStopwatch);

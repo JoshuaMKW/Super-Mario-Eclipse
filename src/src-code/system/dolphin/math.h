@@ -3,7 +3,7 @@
 
 #include "types.h"
 
-#define PI 3.14159265f
+#define M_PI 3.14159265358979323846
 #define Max(a, b) (((a) > (b)) ? (a) : (b))
 #define Min(a, b) (((a) < (b)) ? (a) : (b))
 

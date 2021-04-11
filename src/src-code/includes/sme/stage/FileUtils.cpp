@@ -4,10 +4,12 @@
 #include "sms/game/Application.hxx"
 #include "SME.hxx"
 
-s8 SME::getCharacterID(JUTGamePad *controller = nullptr)
+using namespace SME;
+
+s8 Util::getCharacterID(JUTGamePad *controller)
 {
     if (!controller)
-        return gInfo.mCurrentStageConfig->GlobalFlags.mPlayerID;
+        return SME::TGlobals::sGlobals.getStageConfig()->GlobalFlags.mPlayerID;
 
     switch (controller->mButtons.mInput)
     {
@@ -25,7 +27,7 @@ s8 SME::getCharacterID(JUTGamePad *controller = nullptr)
         return -1;
     }
 }
-const char *SME::getStageName(TApplication *gpApplication)
+const char *Util::getStageName(TApplication *gpApplication)
 {
     AreaEpisodeArray *AreaPathArray = gpApplication->mStringPaths;
 
@@ -46,22 +48,22 @@ const char *SME::getStageName(TApplication *gpApplication)
     return (char *)(StageArrayStart[(gpApplication->mCurrentScene.mEpisodeID << 2) + (0xC / 4)]);
 }
 
-void *SME::loadArchive(char *path, JKRHeap *heap)
+void *Util::loadArchive(char *path, JKRHeap *heap)
 {
-    OSReport("Loading \"%s\" into memory...\n", path);
+    SME_DEBUG_LOG("Loading \"%s\" into memory...\n", path);
     if (DVDConvertPathToEntrynum(path) >= 0)
     {
         u32 *file = (u32 *)loadToMainRAM__12JKRDvdRipperFPCcPUc15JKRExpandSwitchUlP7JKRHeapQ212JKRDvdRipper15EAllocDirectionUlPi(path, 0, 1, 0, heap, 1, 0, 0);
 
         if (file)
-            OSReport("Success! Location = %X, Size = %X\n", file, file[1]);
+            SME_DEBUG_LOG("Success! Location = %X, Size = %X\n", file, file[1]);
         else
-            OSReport("Failed! Could not allocate memory\n");
+            SME_DEBUG_LOG("Failed! Could not allocate memory\n");
         return file;
     }
     else
     {
-        OSReport("Failed! \"%s\" was not found\n");
+        SME_DEBUG_LOG("Failed! \"%s\" was not found\n");
         return nullptr;
     }
 }

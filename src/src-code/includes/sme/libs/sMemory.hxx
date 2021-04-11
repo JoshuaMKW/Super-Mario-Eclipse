@@ -6,18 +6,7 @@
 #include "OS.h"
 #include "sms/JSystem/JKR/JKRHeap.hxx"
 
-void *operator new(size_t size, JKRHeap *heap) noexcept
-{
-    if (heap)
-        return heap->alloc(size, 4);
-    
-    if (JKRHeap::sCurrentHeap)
-        return JKRHeap::sCurrentHeap->alloc(size, 4);
-    
-    return nullptr;
-}
-
-namespace Cache
+namespace SME::Util::Cache
 {
     inline void flush(void *addr, size_t size)
     {
@@ -54,10 +43,10 @@ namespace Cache
     }
 } // namespace Cache
 
-namespace Memory
+namespace SME::Util::Memory
 {
-    inline void *malloc(const size_t size, const size_t alignment) { return new (alignment) u8[size]; }
-    inline void *hmalloc(JKRHeap *heap, const size_t size, const size_t alignment) { return new (heap, alignment) u8[size]; }
+    inline void *malloc(const size_t size, const size_t alignment) { return JKRHeap::sCurrentHeap->alloc(size, alignment); }
+    inline void *hmalloc(JKRHeap *heap, const size_t size, const size_t alignment) { return JKRHeap::alloc(size, alignment, heap); }
     inline void *calloc(const size_t size, const size_t alignment)
     {
         void *obj = malloc(size, alignment);
@@ -77,17 +66,20 @@ namespace Memory
         inline u32 *getBranchDest(u32 *bAddr)
         {
             s32 offset;
-            if (*bAddr & 0x2000000)
-                offset = (*bAddr & 0x3FFFFFD) - 0x4000000;
+            u32 instr = *bAddr;
+
+            if (instr & 0x2000000)
+                offset = (instr & 0x3FFFFFD) - 0x4000000;
             else
-                offset = *bAddr & 0x3FFFFFD;
-            return (u32 *)((u32)bAddr + offset);
+                offset = instr & 0x3FFFFFD;
+            return static_cast<u32 *>(bAddr + (offset / 4));
         }
 
-        inline void write(void *ptr, u32 value)
+        template <typename T>
+        inline void write(T *ptr, T value)
         {
-            *(u32 *)ptr = value;
-            Cache::flush(ptr, 4);
+            *ptr = value;
+            Cache::flush(ptr, sizeof(T));
         }
     } // namespace PPC
 
@@ -147,7 +139,7 @@ namespace Memory
         size_t mAlignment;
         bool mGarbageCollect;
 
-        constexpr size_t tailRealSize() const;
+        size_t tailRealSize() const;
 
     public:
         bool isVolatile() const { return this->mGarbageCollect; };
@@ -155,7 +147,7 @@ namespace Memory
         void *end() const { return (void *)((u8 *)this + sizeof(ArenaBlock) + this->size()); };
         ArenaBlock *next() const { return this->mNext; };
         ArenaBlock *prev() const { return this->mPrev; };
-        constexpr size_t size() const { return this->mSize; };
+        size_t size() const { return this->mSize; };
         void *start() const { return (void *)((u8 *)this + sizeof(ArenaBlock)); };
 
         void setVolatile(bool v) { this->mGarbageCollect = v; };
@@ -178,7 +170,7 @@ namespace Memory
     public:
         ArenaHeap(const size_t size);
         ArenaHeap(const size_t size, void *cb);
-        ~ArenaHeap();
+        virtual ~ArenaHeap();
 
         bool defragmentEnabled() const { return this->mAutoDefragment; };
         void setDefragment(bool autoDefrag) { this->mAutoDefragment = autoDefrag; };

@@ -1,35 +1,30 @@
 #include "sGeometry.hxx"
 
-TVectorTriangle::TVectorTriangle(JGeometry::TVec3<f32> *a, JGeometry::TVec3<f32> *b, JGeometry::TVec3<f32> *c)
+using namespace SME::Class;
+using namespace SME::Util::Math;
+
+TVectorTriangle::TVectorTriangle(const JGeometry::TVec3<f32> &a, const JGeometry::TVec3<f32> &b, const JGeometry::TVec3<f32> &c)
 {
-    this->a = *a;
-    this->b = *b;
-    this->c = *c;
+    this->a = a;
+    this->b = b;
+    this->c = c;
 };
 
-TVectorTriangle &TVectorTriangle::operator=(TVectorTriangle &other)
+f32 TVectorTriangle::bearingAngleY(const JGeometry::TVec3<f32> &a, const JGeometry::TVec3<f32> &b)
 {
-    this->a = other.a;
-    this->b = other.b;
-    this->c = other.c;
-    return *this;
+    return SME::Util::Math::radiansToAngle(atan2f(b.x - a.x, b.z - a.z));
 }
 
-f32 TVectorTriangle::bearingAngleY(JGeometry::TVec3<f32> a, JGeometry::TVec3<f32> b)
-{
-    return RadiansToAngle(atan2f(b.x - a.x, b.z - a.z));
-}
-
-JGeometry::TVec3<f32> TVectorTriangle::cross(JGeometry::TVec3<f32> a, JGeometry::TVec3<f32> b)
+JGeometry::TVec3<f32> TVectorTriangle::cross(const JGeometry::TVec3<f32> &a, const JGeometry::TVec3<f32> &b)
 {
     JGeometry::TVec3<f32> x;
-    PSVECCrossProduct(reinterpret_cast<Vec *>(&a), reinterpret_cast<Vec *>(&b), reinterpret_cast<Vec *>(&x));
+    PSVECCrossProduct(reinterpret_cast<const Vec *>(&a), reinterpret_cast<const Vec *>(&b), reinterpret_cast<Vec *>(&x));
     return x;
 }
 
-f32 TVectorTriangle::dot(JGeometry::TVec3<f32> a, JGeometry::TVec3<f32> b)
+f32 TVectorTriangle::dot(const JGeometry::TVec3<f32> &a, const JGeometry::TVec3<f32> &b)
 {
-    return PSVECDotProduct(reinterpret_cast<Vec *>(&a), reinterpret_cast<Vec *>(&b));
+    return PSVECDotProduct(reinterpret_cast<const Vec *>(&a), reinterpret_cast<const Vec *>(&b));
 }
 
 JGeometry::TVec3<f32> TVectorTriangle::normal(bool normalize)
@@ -44,7 +39,7 @@ JGeometry::TVec3<f32> TVectorTriangle::normal(bool normalize)
 
     JGeometry::TVec3<f32> normal = cross(vectorA, vectorB);
     if (normalize)
-        normal = normal.normalized();
+        normal = Vector::normalized(normal);
 
     return normal;
 }

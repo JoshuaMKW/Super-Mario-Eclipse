@@ -11,8 +11,8 @@ namespace JGeometry
     {
         TVec2();
 
-        f32 dot(const TVec2<T> &) const;
-        void sub(const TVec3<T> &);
+        f32 dot(const TVec2 &) const;
+        void sub(const TVec2 &);
 
         T x;
         T y;
@@ -22,22 +22,22 @@ namespace JGeometry
     struct TVec3
     {
         TVec3();
-        TVec3(const TVec3<T> &);
+        TVec3(const TVec3 &);
 
         template <typename TY>
         TVec3(TY, TY, TY);
         
-        TVec3<T> &operator =(const TVec3<T> &);
-        TVec3<T> &operator *=(const TVec3<T> &);
-        TVec3<T> &operator -=(const TVec3<T> &);
+        TVec3 &operator =(const TVec3 &);
+        TVec3 &operator *=(const TVec3 &);
+        TVec3 &operator -=(const TVec3 &);
         
-        void add(const TVec3<T> &);
+        void add(const TVec3 &);
         void div(f32);
-        f32 dot(const TVec3<T> &) const;
+        f32 dot(const TVec3 &) const;
         void negate();
         void scale(f32);
-        void scale(f32, const TVec3<T> &);
-        void scaleAdd(f32, const TVec3<T> &, const TVec3<T> &);
+        void scale(f32, const TVec3 &);
+        void scaleAdd(f32, const TVec3 &, const TVec3 &);
         void set(const Vec &);
         
         template <typename TY>
@@ -46,11 +46,11 @@ namespace JGeometry
         template <typename TY>
         void set(const TVec3<TY> &);
 
-        void setLength(const TVec3<T> &, f32);
-        void setMax(const TVec3<T> &);
-        void setMin(const TVec3<T> &);
-        void sub(const TVec3<T> &);
-        void sub(const TVec3<T> &, const TVec3<T> &);
+        void setLength(const TVec3 &, f32);
+        void setMax(const TVec3 &);
+        void setMin(const TVec3 &);
+        void sub(const TVec3 &);
+        void sub(const TVec3 &, const TVec3 &);
         
         T x;
         T y;
@@ -61,12 +61,12 @@ namespace JGeometry
     struct TVec4
     {
         TVec4();
-        TVec4(const TVec4<T> &);
+        TVec4(const TVec4 &);
         
-        TVec4<T> &operator =(const TVec4<T> &);
+        TVec4 &operator =(const TVec4 &);
         
-        f32 dot(const TVec4<T> &) const;
-        void scale(f32, const TVec4<T> &);
+        f32 dot(const TVec4 &) const;
+        void scale(f32, const TVec4 &);
         
         template <typename TY>
         void set(TY, TY, TY, TY);
@@ -84,7 +84,7 @@ namespace JGeometry
     {
         void rotate(const TVec3<T> &, const TVec3<T> &dst) const;
         void setRotate(const TVec3<T> &, const TVec3<T> &, f32);
-        void slerp(const TQuat4<T> &);
+        void slerp(const TQuat4 &);
 
         T x;
         T y;

@@ -55,7 +55,7 @@ clang-guide.txt
 log.txt
 
 #compiler
-src/compiler/
+compiler/
 
 #Kuribo
 !tools/KuriboConverter/*

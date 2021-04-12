@@ -28,16 +28,25 @@ def clean_resources():
 
 
 class FilePatcher(Compiler):
-    class STATE:
+    class State:
         DEBUG = "DEBUG"
         RELEASE = "RELEASE"
 
-    class BOOTTYPE:
+    class BootType:
         DOL = "DOL"
         ISO = "ISO"
         NONE = "NONE"
 
-    def __init__(self, build: STATE, gameDir: str, projectDir: str = Path.cwd(), bootfrom: BOOTTYPE = BOOTTYPE.DOL, startAddr: int = 0x80000000, shines: int = 120):
+    class Region:
+        US = "US"
+        EU = "EU"
+        JP = "JP"
+        KR = "KR"
+
+    def __init__(self, build: State, gameDir: str, projectDir: str = Path.cwd(),
+                 region: Region = Region.US, bootfrom: BootType = BootType.DOL,
+                 startAddr: int = 0x80000000, shines: int = 120):
+
         if isinstance(startAddr, str):
             startAddr = int(startAddr, 16)
 
@@ -45,15 +54,16 @@ class FilePatcher(Compiler):
         self.gameDir = Path(gameDir)
         self.state = build
         self.maxShines = shines
-        self.boottype = bootfrom
+        self.bootType = bootfrom
+        self.region = region
         self._fileTables = {}
 
         self._init_tables()
 
-        super().__init__(Path("src/compiler"),
+        super().__init__(Path("compiler"),
                          self._get_matching_filepath(
                              self.solutionDir / "main.dol"),
-                         Path("src/linker/address.map"),
+                         Path(f"linker/{self.region}.map"),
                          False,
                          startAddr)
 
@@ -74,19 +84,19 @@ class FilePatcher(Compiler):
             return self.projectDir / "bin" / "debug"
 
     def is_release(self) -> bool:
-        return self.state == FilePatcher.STATE.RELEASE
+        return self.state == FilePatcher.State.RELEASE
 
     def is_debug(self) -> bool:
-        return self.state == FilePatcher.STATE.DEBUG
+        return self.state == FilePatcher.State.DEBUG
 
     def is_booting(self) -> bool:
-        self.boottype != FilePatcher.BOOTTYPE.NONE
+        self.bootType != FilePatcher.BootType.NONE
 
     def is_iso_boot(self) -> bool:
-        self.boottype == FilePatcher.BOOTTYPE.ISO
+        self.bootType == FilePatcher.BootType.ISO
 
     def is_dol_boot(self) -> bool:
-        self.boottype == FilePatcher.BOOTTYPE.DOL
+        self.bootType == FilePatcher.BootType.DOL
 
     def patch_game(self):
         with (self.solutionDir / ".config.json").open("r") as f:
@@ -155,7 +165,6 @@ class FilePatcher(Compiler):
         return isoPath
 
     def _patch_dol(self) -> bool:
-        from pyiiasmh import pyiiasmh_cli
         dolPath = self.solutionDir / "system/main.dol"
         kernelPath = self.solutionDir / "kuribo/KuriboKernel.bin"
 
@@ -181,13 +190,9 @@ class FilePatcher(Compiler):
                     m.rename(self._get_translated_filepath(m.name))
                     size += m.stat().st_size
                 self._alloc_from_heap(
-                    _doldata, (kernelPath.stat().st_size() + size + 31) & -32)
+                    _doldata, (kernelPath.stat().st_size + size + 31) & -32)
 
-                tmpbin = TMPDIR / "pyasm.bin"
-                pyiiasmh_cli._ppc_exec([str(self.solutionDir / "kuribo/pre_patch.s"),
-                                        "a",
-                                        "--codetype", "C2D2",
-                                        "--dest", tmpbin])
+                tmpbin = Path("bin", f"kuriboloader-{self.region}.bin")
 
                 data = BytesIO(tmpbin.read_bytes())
                 injectaddr = (int.from_bytes(data.getvalue()[
@@ -204,16 +209,15 @@ class FilePatcher(Compiler):
                     _doldata.save(dest)
 
             elif isinstance(modules, Path):
-                modules.rename(self._get_translated_filepath(
-                    modules.name).with_name("SME"))
+                renamed = self._get_translated_filepath(
+                    modules.name).with_name("SME")
+                if renamed.exists:
+                    renamed.unlink()
+                modules.rename(renamed)
                 self._alloc_from_heap(
-                    _doldata, (kernelPath.stat().st_size() + modules.stat().st_size + 31) & -32)
+                    _doldata, (kernelPath.stat().st_size + renamed.stat().st_size + 31) & -32)
 
-                tmpbin = TMPDIR / "pyasm.bin"
-                pyiiasmh_cli._ppc_exec([str(self.solutionDir / "kuribo/pre_patch.s"),
-                                        "a",
-                                        "--codetype", "C2D2",
-                                        "--dest", tmpbin])
+                tmpbin = Path("bin", f"kuriboloader-{self.region}.bin")
 
                 data = BytesIO(tmpbin.read_bytes())
                 injectaddr = (int.from_bytes(data.getvalue()[
@@ -301,7 +305,7 @@ class FilePatcher(Compiler):
         elif self.is_debug():
             parentGlob = "*/debug/"
         else:
-            raise ValueError("Invalid state!")
+            raise ValueError("Invalid State!")
 
         with Path(self.solutionDir / ".config.json").open("r") as f:
             config = json.load(f)
@@ -361,6 +365,8 @@ def main():
                         default="0x80000000", metavar="ADDR")
     parser.add_argument("-b", "--build", help="Build type",
                         choices=["R", "D"], default="D")
+    parser.add_argument("-r", "--region", help="Game region",
+                        choices=["US", "EU", "JP", "KR"], default="US")
     parser.add_argument("--boot", help="What to boot from",
                         choices=["DOL", "ISO", "NONE"], default="NONE")
     parser.add_argument(
@@ -379,11 +385,11 @@ def main():
         args.startaddr = 0x80000000
 
     if args.build == "D":
-        build = FilePatcher.STATE.DEBUG
+        build = FilePatcher.State.DEBUG
     else:
-        build = FilePatcher.STATE.RELEASE
+        build = FilePatcher.State.RELEASE
 
-    patcher = FilePatcher(build, args.gamefolder, args.projectfolder,
+    patcher = FilePatcher(build, args.gamefolder, args.projectfolder, args.region,
                           args.boot, args.startaddr, args.shines)
 
     if patcher.is_codewarrior():

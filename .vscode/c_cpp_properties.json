@@ -3,10 +3,10 @@
         {
             "name": "Win32",
             "includePath": [
-                "${workspaceFolder}/src/src-code/system/dolphin",
-                "${workspaceFolder}/src/src-code/system/Kuribo/sdk",
-                "${workspaceFolder}/src/src-code/includes/sme",
-                "${workspaceFolder}/src/src-code/includes"
+                "${workspaceFolder}/src/system/dolphin",
+                "${workspaceFolder}/src/system/Kuribo/sdk",
+                "${workspaceFolder}/src/includes/sme",
+                "${workspaceFolder}/src/includes"
             ],
             "defines": [
                 "_DEBUG",

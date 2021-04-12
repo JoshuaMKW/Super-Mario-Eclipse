@@ -50,6 +50,10 @@ class Compiler(object):
         
         self.dest = Path(dest) if isinstance(dest, str) else dest
         self.linker = Path(linker) if isinstance(linker, str) else linker
+
+        if self.linker and not self.linker.exists():
+            raise FileNotFoundError(f"Linker map could not be found :: {self.linker}")
+            
         self.dump = dump
         self.startaddr = startaddr
 
@@ -181,9 +185,7 @@ class Compiler(object):
             dumpCode = buildDir / "source.code"
             tmpDumpCode = TMPDIR / "source.tmp"
             tmpDumpDol = TMPDIR / self.dest.name
-
-            preCompilesDir = Path("src/objects")
-            linkableObjects = [str((preCompilesDir / f).resolve()) for f in preCompilesDir.iterdir() if f.is_file() and f.suffix == ".o"]
+            linkableObjects = []
 
             if dol is not None:
                 if not self.dest.parent.exists():
@@ -446,7 +448,7 @@ def main():
     else:
         defines = ""
 
-    worker = Compiler(Path("src/compiler"),
+    worker = Compiler(Path("compiler"),
                       dest=args.dest,
                       linker=args.map,
                       dump=args.dump,

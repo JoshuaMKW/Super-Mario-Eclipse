@@ -9,7 +9,6 @@ from pathlib import Path
 from typing import List, Optional, Union
 
 import pykamek
-from dolreader.dol import DolFile, write_uint32
 
 TMPDIR = Path("tmp-compiler")
 
@@ -50,6 +49,10 @@ class Compiler(object):
         
         self.dest = Path(dest) if isinstance(dest, str) else dest
         self.linker = Path(linker) if isinstance(linker, str) else linker
+
+        if self.linker and not self.linker.exists():
+            raise FileNotFoundError(f"Linker map could not be found :: {self.linker}")
+            
         self.dump = dump
         self.startaddr = startaddr
 
@@ -181,9 +184,7 @@ class Compiler(object):
             dumpCode = buildDir / "source.code"
             tmpDumpCode = TMPDIR / "source.tmp"
             tmpDumpDol = TMPDIR / self.dest.name
-
-            preCompilesDir = Path("src/objects")
-            linkableObjects = [str((preCompilesDir / f).resolve()) for f in preCompilesDir.iterdir() if f.is_file() and f.suffix == ".o"]
+            linkableObjects = []
 
             if dol is not None:
                 if not self.dest.parent.exists():
@@ -259,14 +260,7 @@ class Compiler(object):
             args = [*objects.split(" "), "--static", f"0x{self.startaddr:08X}", *cmdtype]
             pykamek.main(args)
 
-            if dol is not None:
-                _doldata = DolFile(BytesIO(self.dest.read_bytes()))
-                
-                self.alloc_from_heap(_doldata, tmpDumpCode.stat().st_size + 0x8000)
-                with self.dest.open("wb") as dest:
-                    _doldata.save(dest)
-
-            return None
+            return tmpDumpCode
         elif self.is_clang():
             _clangCpp: Path = self._compilers["clang"]
 
@@ -401,16 +395,6 @@ class Compiler(object):
 
             return kxefile
 
-    def _alloc_from_heap(self, dol: DolFile, size: int):
-        size = (size + 31) & -32
-        dol.seek(0x80341E74)
-        write_uint32(dol, 0x3C600000 | (((self.startaddr + size) >> 16) & 0xFFFF))
-        write_uint32(dol, 0x60630000 | ((self.startaddr + size) & 0xFFFF))
-
-        dol.seek(0x80341EAC)
-        write_uint32(dol, 0x3C600000 | (((self.startaddr + size) >> 16) & 0xFFFF))
-        write_uint32(dol, 0x60630000 | ((self.startaddr + size) & 0xFFFF))
-
     def _init_compilers(self, path: Path):
         for f in path.iterdir():
             if f.is_file() and f.suffix == ".exe":
@@ -446,7 +430,7 @@ def main():
     else:
         defines = ""
 
-    worker = Compiler(Path("src/compiler"),
+    worker = Compiler(Path("compiler"),
                       dest=args.dest,
                       linker=args.map,
                       dump=args.dump,

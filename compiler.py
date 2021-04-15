@@ -9,7 +9,6 @@ from pathlib import Path
 from typing import List, Optional, Union
 
 import pykamek
-from dolreader.dol import DolFile, write_uint32
 
 TMPDIR = Path("tmp-compiler")
 
@@ -261,14 +260,7 @@ class Compiler(object):
             args = [*objects.split(" "), "--static", f"0x{self.startaddr:08X}", *cmdtype]
             pykamek.main(args)
 
-            if dol is not None:
-                _doldata = DolFile(BytesIO(self.dest.read_bytes()))
-                
-                self.alloc_from_heap(_doldata, tmpDumpCode.stat().st_size + 0x8000)
-                with self.dest.open("wb") as dest:
-                    _doldata.save(dest)
-
-            return None
+            return tmpDumpCode
         elif self.is_clang():
             _clangCpp: Path = self._compilers["clang"]
 
@@ -402,16 +394,6 @@ class Compiler(object):
                            text=True)
 
             return kxefile
-
-    def _alloc_from_heap(self, dol: DolFile, size: int):
-        size = (size + 31) & -32
-        dol.seek(0x80341E74)
-        write_uint32(dol, 0x3C600000 | (((self.startaddr + size) >> 16) & 0xFFFF))
-        write_uint32(dol, 0x60630000 | ((self.startaddr + size) & 0xFFFF))
-
-        dol.seek(0x80341EAC)
-        write_uint32(dol, 0x3C600000 | (((self.startaddr + size) >> 16) & 0xFFFF))
-        write_uint32(dol, 0x60630000 | ((self.startaddr + size) & 0xFFFF))
 
     def _init_compilers(self, path: Path):
         for f in path.iterdir():

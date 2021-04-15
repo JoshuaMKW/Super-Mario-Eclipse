@@ -8,11 +8,11 @@ import time
 from fnmatch import fnmatch
 from io import BytesIO
 from pathlib import Path
-from typing import Union
+from typing import Any, Dict, List, Optional, Union
 
 import oead
 import psutil
-from dolreader.dolfile import DolFile
+from dolreader.dolfile import DolFile, TextSection, write_uint32
 from pyisotools.bnrparser import BNR
 from pyisotools.iso import GamecubeISO
 
@@ -27,6 +27,89 @@ def clean_resources():
         pass  # shutil.rmtree(TMPDIR)
 
 
+class Region:
+    US = "US"
+    EU = "EU"
+    JP = "JP"
+    KR = "KR"
+
+
+class AllocationMap(object):
+    class RelocationType:
+        HI = 0
+        LO = 1
+        NONE = -1
+
+    class InstructionInfo(object):
+        def __init__(self, value: int, relocationType: AllocationMap.RelocationType, relmask: int = 0xFFFF):
+            self.value = value
+            self.reltype = relocationType
+            self._relmask = relmask
+
+        def is_rel_hi(self) -> bool:
+            return self.reltype == AllocationMap.RelocationType.HI
+
+        def is_rel_lo(self) -> bool:
+            return self.reltype == AllocationMap.RelocationType.LO
+
+        def is_rel_none(self) -> bool:
+            return self.reltype == AllocationMap.RelocationType.NONE
+
+        def as_translated(self, offset) -> int:
+            offset <<= _get_bit_alignment(self._relmask)
+            if self.is_rel_hi():
+                offset = (offset >> 16) & 0xFFFF
+            elif self.is_rel_lo():
+                offset &= 0xFFFF
+            return self.value + (offset & self._relmask)
+
+        @staticmethod
+        def translate(value: int, offset: int, relocationType: AllocationMap.RelocationType, relmask: int = 0xFFFF):
+            instr = AllocationMap.InstructionInfo(
+                value, relocationType, relmask)
+            return instr.as_translated(offset)
+
+    class AllocationPacket(object):
+        def __init__(self, address: int, baseInstrs: List[AllocationMap.InstructionInfo]):
+            self._address = address
+            self._baseInstrs = baseInstrs
+
+        @property
+        def instructions(self) -> AllocationMap.InstructionInfo:
+            for instr in self._baseInstrs:
+                yield instr
+
+        @property
+        def address(self) -> int:
+            return self._address
+
+    def __init__(self, template: Optional[Dict[Region, List[AllocationMap.AllocationPacket]]] = None):
+        if template:
+            self._template = template
+        else:
+            self._template = {
+                Region.US: [],
+                Region.EU: [],
+                Region.JP: [],
+                Region.KR: []
+            }
+
+    def group(self, region: Region.US) -> List[AllocationMap.AllocationPacket]:
+        return self._template[region]
+
+
+_ALLOC_INFO = AllocationMap({
+    Region.US: (AllocationMap.AllocationPacket(0x80341E74, [AllocationMap.InstructionInfo(0x3C600000, AllocationMap.RelocationType.HI), AllocationMap.InstructionInfo(0x60630000, AllocationMap.RelocationType.LO)]),
+                (AllocationMap.AllocationPacket(0x80341EAC, [AllocationMap.InstructionInfo(0x3C600000, AllocationMap.RelocationType.HI), AllocationMap.InstructionInfo(0x60630000, AllocationMap.RelocationType.LO)]))),
+    Region.EU: (AllocationMap.AllocationPacket(0x80341E74, [AllocationMap.InstructionInfo(0x3C600000, AllocationMap.RelocationType.HI), AllocationMap.InstructionInfo(0x60630000, AllocationMap.RelocationType.LO)]),
+                (AllocationMap.AllocationPacket(0x80341EAC, [AllocationMap.InstructionInfo(0x3C600000, AllocationMap.RelocationType.HI), AllocationMap.InstructionInfo(0x60630000, AllocationMap.RelocationType.LO)]))),
+    Region.JP: (AllocationMap.AllocationPacket(0x80341E74, [AllocationMap.InstructionInfo(0x3C600000, AllocationMap.RelocationType.HI), AllocationMap.InstructionInfo(0x60630000, AllocationMap.RelocationType.LO)]),
+                (AllocationMap.AllocationPacket(0x80341EAC, [AllocationMap.InstructionInfo(0x3C600000, AllocationMap.RelocationType.HI), AllocationMap.InstructionInfo(0x60630000, AllocationMap.RelocationType.LO)]))),
+    Region.KR: (AllocationMap.AllocationPacket(0x80341E74, [AllocationMap.InstructionInfo(0x3C600000, AllocationMap.RelocationType.HI), AllocationMap.InstructionInfo(0x60630000, AllocationMap.RelocationType.LO)]),
+                (AllocationMap.AllocationPacket(0x80341EAC, [AllocationMap.InstructionInfo(0x3C600000, AllocationMap.RelocationType.HI), AllocationMap.InstructionInfo(0x60630000, AllocationMap.RelocationType.LO)]))),
+})
+
+
 class FilePatcher(Compiler):
     class State:
         DEBUG = "DEBUG"
@@ -37,11 +120,7 @@ class FilePatcher(Compiler):
         ISO = "ISO"
         NONE = "NONE"
 
-    class Region:
-        US = "US"
-        EU = "EU"
-        JP = "JP"
-        KR = "KR"
+    MainAllocationMap = AllocationMap()
 
     def __init__(self, build: State, gameDir: str, projectDir: str = Path.cwd(),
                  region: Region = Region.US, bootfrom: BootType = BootType.DOL,
@@ -90,13 +169,13 @@ class FilePatcher(Compiler):
         return self.state == FilePatcher.State.DEBUG
 
     def is_booting(self) -> bool:
-        self.bootType != FilePatcher.BootType.NONE
+        return self.bootType != FilePatcher.BootType.NONE
 
     def is_iso_boot(self) -> bool:
-        self.bootType == FilePatcher.BootType.ISO
+        return self.bootType == FilePatcher.BootType.ISO
 
     def is_dol_boot(self) -> bool:
-        self.bootType == FilePatcher.BootType.DOL
+        return self.bootType == FilePatcher.BootType.DOL
 
     def patch_game(self):
         with (self.solutionDir / ".config.json").open("r") as f:
@@ -105,7 +184,10 @@ class FilePatcher(Compiler):
         self._rename_files_from_config()
         self._replace_files(config)
 
+        PATCHED = self._patch_dol()
+        print(PATCHED, self.is_booting())
         if self._patch_dol() and self.is_booting():
+            
             for proc in psutil.process_iter():
                 if proc.name() == "Dolphin.exe":
                     proc.kill()
@@ -167,6 +249,7 @@ class FilePatcher(Compiler):
     def _patch_dol(self) -> bool:
         dolPath = self.solutionDir / "system/main.dol"
         kernelPath = self.solutionDir / "kuribo/KuriboKernel.bin"
+        modulesDest = self.gameDir / "files/Kuribo!/Mods/"
 
         if dolPath.exists():
             if self.is_release():
@@ -187,51 +270,35 @@ class FilePatcher(Compiler):
             if isinstance(modules, list):
                 size = 0
                 for m in modules:
-                    m.rename(self._get_translated_filepath(m.name))
+                    m.rename(modulesDest / m.name)
                     size += m.stat().st_size
                 self._alloc_from_heap(
                     _doldata, (kernelPath.stat().st_size + size + 31) & -32)
-
-                tmpbin = Path("bin", f"kuriboloader-{self.region}.bin")
-
-                data = BytesIO(tmpbin.read_bytes())
-                injectaddr = (int.from_bytes(data.getvalue()[
-                              :4], "big", signed=False) & 0x1FFFFFC) | 0x80000000
-                codelen = int.from_bytes(
-                    data.getvalue()[4:8], "big", signed=False) * 8
-                blockstart = _doldata.seek_nearest_unmapped(
-                    _doldata.bssAddress, codelen)
-
-                _doldata.insert_branch(blockstart, injectaddr)
-                _doldata.insert_branch(injectaddr + 4, blockstart + codelen)
-
-                with self.dest.open("wb") as dest:
-                    _doldata.save(dest)
-
             elif isinstance(modules, Path):
-                renamed = self._get_translated_filepath(
-                    modules.name).with_name("SME")
-                if renamed.exists:
-                    renamed.unlink()
+                renamed = (modulesDest / modules.name).with_name("SME").with_suffix(".kxe")
+                renamed.parent.mkdir(parents=True, exist_ok=True)
+                renamed.unlink(missing_ok=True)
                 modules.rename(renamed)
                 self._alloc_from_heap(
                     _doldata, (kernelPath.stat().st_size + renamed.stat().st_size + 31) & -32)
 
-                tmpbin = Path("bin", f"kuriboloader-{self.region}.bin")
+            tmpbin = Path("bin", f"kuriboloader-{self.region}.bin")
 
-                data = BytesIO(tmpbin.read_bytes())
-                injectaddr = (int.from_bytes(data.getvalue()[
-                              :4], "big", signed=False) & 0x1FFFFFC) | 0x80000000
-                codelen = int.from_bytes(
-                    data.getvalue()[4:8], "big", signed=False) * 8
-                blockstart = _doldata.seek_nearest_unmapped(
-                    _doldata.bssAddress, codelen)
+            data = BytesIO(tmpbin.read_bytes())
+            rawData = data.getvalue()
+            injectaddr = (int.from_bytes(rawData[
+                :4], "big", signed=False) & 0x1FFFFFC) | 0x80000000
+            codelen = int.from_bytes(
+                rawData[4:8], "big", signed=False) * 8
 
-                _doldata.insert_branch(blockstart, injectaddr)
-                _doldata.insert_branch(injectaddr + 4, blockstart + codelen)
+            blockstart = 0x80003C00
+            _doldata.seek(blockstart)
+            _doldata.write(rawData[8:])
+            _doldata.insert_branch(blockstart, injectaddr)
+            _doldata.insert_branch(injectaddr + 4, blockstart + (codelen - 4))
 
-                with self.dest.open("wb") as dest:
-                    _doldata.save(dest)
+            with self.dest.open("wb") as dest:
+                _doldata.save(dest)
 
             print("-"*128)
             return True
@@ -353,6 +420,22 @@ class FilePatcher(Compiler):
         bnr = BNR(path, BNR.Regions.AMERICA)
         bnr.save_bnr(self.gameDir / "opening.bnr")
 
+    def _alloc_from_heap(self, dol: DolFile, size: int):
+        group = _ALLOC_INFO.group(self.region)
+        size = (size + 31) & -32
+
+        for packet in group:
+            dol.seek(packet.address)
+            for instr in packet.instructions:
+                write_uint32(dol, instr.as_translated(self.startaddr + size))
+
+
+def _get_bit_alignment(num: int) -> int:
+    for i in range(1000):
+        if (num >> i) & 1 == 1:
+            return i
+    return -1
+
 
 def main():
     parser = argparse.ArgumentParser(
@@ -363,7 +446,7 @@ def main():
                         help="project folder used to patch game", metavar="PATH")
     parser.add_argument("-s", "--startaddr", help="Starting address for the linker and code",
                         default="0x80000000", metavar="ADDR")
-    parser.add_argument("-b", "--build", help="Build type",
+    parser.add_argument("-b", "--build", help="Build type; R=Release, D=Debug",
                         choices=["R", "D"], default="D")
     parser.add_argument("-r", "--region", help="Game region",
                         choices=["US", "EU", "JP", "KR"], default="US")

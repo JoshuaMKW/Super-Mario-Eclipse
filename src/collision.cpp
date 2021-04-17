@@ -147,7 +147,7 @@ static void warpToLinkedCol(TMario *player) {
     return;
   }
 
-  const f32 speed = Vector::resultant(player->mSpeed);
+  const f32 speed = Vector::magnitude(player->mSpeed);
 
   if (speed > 1.0f) {
     playerData->mCollisionTimer = 0;
@@ -231,7 +231,6 @@ static void warpToLinkedColPreserve(TMario *player, bool fluid) {
         182;
 
     JGeometry::TVec3<f32> colNormal = colTriangle.normal();
-    JGeometry::TVec3<f32> colUnit = Vector::unitVector(colNormal);
 
     const f32 magnitude = fabsf(player->mSpeed.x) + fabsf(player->mSpeed.y) +
                           fabsf(player->mSpeed.z);
@@ -239,11 +238,11 @@ static void warpToLinkedColPreserve(TMario *player, bool fluid) {
     player->mAngle.y =
         static_cast<u16>(Vector::getNormalAngle(colNormal)) * 182;
     setPlayerVelocity__6TMarioFf(player,
-                                 magnitude * colUnit.x + magnitude * colUnit.z);
-    player->mSpeed.y = magnitude * colUnit.y;
+                                 magnitude * colNormal.x + magnitude * colNormal.z);
+    player->mSpeed.y = magnitude * colNormal.y;
 
-    playerPos.add(JGeometry::TVec3<f32>{40.0f * colUnit.x, 40.0f * colUnit.y,
-                                        40.0f * colUnit.z});
+    playerPos.add(JGeometry::TVec3<f32>{40.0f * colNormal.x, 40.0f * colNormal.y,
+                                        40.0f * colNormal.z});
 
     player->JSGSetTranslation(reinterpret_cast<Vec &>(playerPos));
     gpCamera->JSGSetViewPosition(reinterpret_cast<Vec &>(cameraPos));

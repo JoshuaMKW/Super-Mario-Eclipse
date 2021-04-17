@@ -13,7 +13,6 @@ extern "C" void shine_animationFreezeCheck();
 extern "C" void shine_thinkCloseCamera();
 
 extern OSAlarm gctAlarm;
-extern void setUserCodes(OSAlarm *alarm, OSContext *context);
 
 #ifdef SME_DEBUG
 extern OSStopwatch gctStopwatch;
@@ -26,13 +25,13 @@ KURIBO_MODULE_BEGIN("Eclipse", "JoshuaMK",
   KURIBO_EXECUTE_ON_LOAD {
     SME_DEBUG_LOG(
         "Codeblocker - Creating OSAlarm at %p; Calls %p every %0.4f seconds\n",
-        &gctAlarm, &setUserCodes, 0.001f);
+        &gctAlarm, &SME::Util::Security::checkUserCodes, 0.001f);
 #ifdef SME_DEBUG
     OSInitStopwatch(&gctStopwatch, "Codeblocker");
 #endif
     OSCreateAlarm(&gctAlarm);
     OSSetPeriodicAlarm(&gctAlarm, OSGetTime(), OSMillisecondsToTicks(1),
-                       &setUserCodes);
+                       &SME::Util::Security::checkUserCodes);
     SME_DEBUG_LOG("Mario health offset = %X\n",
                   offsetof(TMario, mHealth));
   }

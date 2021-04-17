@@ -5,15 +5,7 @@
 #include "sms/JSystem/JKR/JKRMemArchive.hxx"
 #include "stdlib.h"
 
-
 #include "SME.hxx"
-
-extern OSAlarm gctAlarm;
-extern void setUserCodes(OSAlarm *alarm, OSContext *context);
-
-#ifdef SME_DEBUG
-extern OSStopwatch gctStopwatch;
-#endif
 
 SME::Util::Memory::Protection::MemoryMap gCodeProtector;
 

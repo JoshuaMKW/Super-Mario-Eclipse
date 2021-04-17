@@ -8,6 +8,7 @@
 #include "libs/sMusic.hxx"
 #include "libs/sString.hxx"
 #include "libs/sTime.hxx"
+#include "libs/sSecurity.hxx"
 
 #include "CheatHandler.hxx"
 #include "Globals.hxx"

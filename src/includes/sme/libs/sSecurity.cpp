@@ -28,7 +28,7 @@ bool Util::Security::areGeckoCodesPresent(void *handlerBuffer, size_t maxlen, u3
     return false;
 }
 
-void *Util::Security::setUserCodes(OSAlarm *alarm, OSContext *context)
+void *Util::Security::checkUserCodes(OSAlarm *alarm, OSContext *context)
 {
     #ifdef SME_DEBUG
         OSStartStopwatch(&gctStopwatch);

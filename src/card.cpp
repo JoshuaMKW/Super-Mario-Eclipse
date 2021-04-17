@@ -3,8 +3,6 @@
 
 using namespace SME;
 
-extern String *formatBMG(String *msg);
-
 /*** Memory File Buffer ***/
 #define MAXFILEBUFFER (1024 * 2048)	/*** 2MB Buffer ***/
 
@@ -69,11 +67,7 @@ s32 Patch::Card::probeCard(TCardManager *cardManager)
 // extern -> SME.cpp
 char *Patch::Card::formatCardMessage(char *dst, const char *src, s32 len)
 {
-    String *fmtMessage = new String(src, len);
-    formatBMG(fmtMessage);
-
-    char *ret = strncpy(dst, fmtMessage->data(), len);
-    delete fmtMessage;
-
-    return ret;
+    String fmtMessage(src, len);
+    Util::formatBMG(fmtMessage);
+    return strncpy(dst, fmtMessage.data(), len);;
 }

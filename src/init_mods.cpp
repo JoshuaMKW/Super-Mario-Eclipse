@@ -7,7 +7,9 @@
 
 #include "SME.hxx"
 
-SME::Util::Memory::Protection::MemoryMap gCodeProtector;
+using namespace SME::Util;
+
+Memory::Protection::MemoryMap gCodeProtector;
 
 // 0x80005328
 // extern -> SME.cpp
@@ -16,7 +18,7 @@ void SME::Patch::Init::initCodeProtection() {
   gCodeProtector.setIndex(2);
   gCodeProtector.setStart(0x80003800);
   gCodeProtector.setEnd(0x80373000);
-  gCodeProtector.setPermission(SME::Util::Memory::Protection::READ);
+  gCodeProtector.setPermission(Memory::Protection::READ);
   gCodeProtector.activate();
 }
 
@@ -437,13 +439,13 @@ void SME::Patch::Init::initCardColors() {
       SME::Class::TSMEFile::sStageConfig.Fludd.mIsColorWater) {
     gpMarDirector->mGCConsole->mWaterLeftPanel =
         SME::Class::TSMEFile::sStageConfig.Fludd.mWaterColor;
-    gpMarDirector->mGCConsole->mWaterRightPanel.r = SME::Util::Math::lerp<u8>(
+    gpMarDirector->mGCConsole->mWaterRightPanel.r = Math::lerp<u8>(
         0, SME::Class::TSMEFile::sStageConfig.Fludd.mWaterColor.r, 0.8125);
-    gpMarDirector->mGCConsole->mWaterRightPanel.g = SME::Util::Math::lerp<u8>(
+    gpMarDirector->mGCConsole->mWaterRightPanel.g = Math::lerp<u8>(
         0, SME::Class::TSMEFile::sStageConfig.Fludd.mWaterColor.g, 0.8125);
-    gpMarDirector->mGCConsole->mWaterRightPanel.b = SME::Util::Math::lerp<u8>(
+    gpMarDirector->mGCConsole->mWaterRightPanel.b = Math::lerp<u8>(
         0, SME::Class::TSMEFile::sStageConfig.Fludd.mWaterColor.b, 0.8125);
-    gpMarDirector->mGCConsole->mWaterRightPanel.a = SME::Util::Math::lerp<u8>(
+    gpMarDirector->mGCConsole->mWaterRightPanel.a = Math::lerp<u8>(
         0, SME::Class::TSMEFile::sStageConfig.Fludd.mWaterColor.a, 0.8125);
   }
 }
@@ -498,7 +500,7 @@ u32 SME::Patch::Init::initCollisionWarpLinks(const char *name) {
 void SME::Patch::Init::createUIHeap(u32 size, s32 alignment) {
   SME::TGlobals::sGlobals.mGame6Heap =
       JKRExpHeap::create(size, JKRHeap::sSystemHeap, false);
-  gpMarDirector->mGame6Data = (u32 *)SME::Util::Memory::malloc(size, alignment);
+  gpMarDirector->mGame6Data = (u32 *)Memory::malloc(size, alignment);
 }
 
 // 0x802A72A4
@@ -545,7 +547,7 @@ JKRMemArchive *SME::Patch::Init::switchHUDOnStageLoad(char *curArchive,
   strcpy(strstr(buffer, ".arc"), ".szs"); //".arc", ".szs"
 
   if (DVDConvertPathToEntrynum(buffer) >= 0) {
-    SME::Util::Memory::free(gpMarDirector->mGame6Data);
+    Memory::free(gpMarDirector->mGame6Data);
     *gameUI =
         loadToMainRAM__12JKRDvdRipperFPCcPUc15JKRExpandSwitchUlP7JKRHeapQ212JKRDvdRipper15EAllocDirectionUlPi(
             buffer, 0, 1, 0, gpMarDirector->mGame6Data, 1, 0, 0);

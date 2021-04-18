@@ -26,7 +26,7 @@ class TParamT : public TBaseParam
 {
     T mValue;
 public:
-    TParamT(TParams *parent, T param, u16 keycode, const char *name);
+    TParamT(TParams *parent, T param, u16 keycode, const char *name) : mValue(param) {}
 
     T get() const { return mValue; }
     void set(T param) { mValue = param; }

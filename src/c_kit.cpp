@@ -9,7 +9,6 @@
 
 using namespace SME;
 
-extern void drawCheatText();
 extern J2DTextBox gDebugTextBox;
 
 bool inXYZMode;
@@ -73,7 +72,7 @@ void Patch::CKit::onSetup(TMarDirector* director)
 s32 Patch::CKit::onUpdate(TMarDirector* director)
 {
     //xyzModifierMario();
-    //drawCheatText(); //currently bugged
+    //Patch::Cheat::drawCheatText(); //currently bugged
 
     // run replaced call
 	return director->direct();

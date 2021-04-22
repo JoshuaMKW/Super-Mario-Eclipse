@@ -25,7 +25,7 @@ public:
 
 	virtual s32 getAvailable() const override;
 	virtual void skip(s32) override;
-	virtual s32 getLength() const = 0;
+	virtual size_t getLength() const = 0;
 	virtual s32 getPosition() const = 0;
 	virtual s32 seekPos(s32, JSUStreamSeekFrom) = 0;
 

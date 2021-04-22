@@ -24,3 +24,28 @@
 #else
 #error "No region provided!"
 #endif
+
+#define SME_FROM_GPR(reg, var) asm volatile("mr %0, " #reg : "=r"(var))
+#define SME_TO_GPR(reg, var) asm volatile("mr " #reg ", %0" : : "r"(var))
+#define SME_FROM_FPR(reg, var) asm volatile("fmr %0, " #reg : "=r"(var))
+#define SME_TO_FPR(reg, var) asm volatile("fmr " #reg ", %0" : : "r"(var))
+
+#ifdef __cplusplus
+#if __cplusplus >= 201103L
+#define offsetof(t, d) ((size_t) & (((t *)0)->d))
+//#define offsetof(t, d) __builtin_offsetof(t, d)
+#else
+#define offsetof(t, d) ((size_t) & (((t *)0)->d))
+#endif
+#define SME_EXTERN_C extern "C"
+#else
+#define SME_EXTERN_C extern
+#endif
+
+#ifndef _MSC_VER
+#define SME_NO_INLINE __attribute__((noinline))
+#else
+#define SME_NO_INLINE __declspec(noinline)
+#endif
+
+#define SME_CALL_NAIVE(addr, ...) ((void(*)(...))addr)(__VA_ARGS__)

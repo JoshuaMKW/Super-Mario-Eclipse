@@ -31,7 +31,7 @@ KURIBO_MODULE_BEGIN("Eclipse", "JoshuaMK",
 #endif
     OSCreateAlarm(&gctAlarm);
     OSSetPeriodicAlarm(&gctAlarm, OSGetTime(), OSMillisecondsToTicks(1),
-                       &SME::Util::Security::checkUserCodes);
+                       reinterpret_cast<OSAlarmHandler>(&SME::Util::Security::checkUserCodes));
     SME_DEBUG_LOG("Mario health offset = %X\n",
                   offsetof(TMario, mHealth));
   }
@@ -133,6 +133,15 @@ KURIBO_MODULE_BEGIN("Eclipse", "JoshuaMK",
   kWrite32(SME_PORT_REGION(0x802815F4, 0, 0, 0), 0x2C030000);
   KURIBO_PATCH_BL(SME_PORT_REGION(0x80207430, 0, 0, 0), Patch::Mario::canCarryNPC);
   kWrite32(SME_PORT_REGION(0x80207434, 0, 0, 0), 0x2C030000);
+
+  // multiplayer.cpp
+  KURIBO_PATCH_B(SME_PORT_REGION(0x802EFAB4, 0, 0, 0), Patch::Multiplayer::draw3DOverhaul);
+  KURIBO_PATCH_BL(SME_PORT_REGION(0x8029D7E8, 0, 0, 0), Patch::Multiplayer::makeMarios);
+  KURIBO_PATCH_B(SME_PORT_REGION(0x80276BD0, 0, 0, 0), Patch::Multiplayer::loadMarioTrickyOverhaul);
+  KURIBO_PATCH_B(SME_PORT_REGION(0x8024D2A8, 0, 0, 0), Patch::Multiplayer::performMarioTrickyOverhaul);
+  KURIBO_PATCH_BL(SME_PORT_REGION(0x802983F8, 0, 0, 0), Patch::Multiplayer::setMarioOverhaul);
+  KURIBO_PATCH_BL(SME_PORT_REGION(0x80298428, 0, 0, 0), Patch::Multiplayer::setMarioOverhaul);
+  KURIBO_PATCH_BL(SME_PORT_REGION(0x802984D8, 0, 0, 0), Patch::Multiplayer::setMarioOverhaul);
 
   // shine.cpp
   KURIBO_PATCH_BL(SME_PORT_REGION(0x801BD664, 0, 0, 0), Patch::Shine::manageShineVanish);

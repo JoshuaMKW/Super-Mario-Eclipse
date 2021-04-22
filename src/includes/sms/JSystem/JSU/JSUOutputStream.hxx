@@ -19,7 +19,7 @@ class JSURandomOutputStream : public JSUOutputStream
 public:
 	virtual ~JSURandomOutputStream();
 
-	virtual s32 getLength() const = 0;
+	virtual size_t getLength() const = 0;
 	virtual s32 getPosition() const = 0;
 	virtual s32 seek(s32, JSUStreamSeekFrom);
 	virtual s32 getAvailable() const;

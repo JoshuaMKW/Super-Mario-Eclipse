@@ -98,6 +98,8 @@ extern "C"
 	void GXSetNumIndStages(u32);
 	void GXSetTevDirect(u32);
 	void GXSetTexCoordGen2(u32, u32, u32, u32, u32, u32);
+    void GXSetViewport(f32 xPos, f32 yPos, f32 width, f32 height, f32 nearZ, f32 farZ);
+    void GXSetViewportJitter(f32 xPos, f32 yPos, f32 width, f32 height, f32 nearZ, f32 farZ, u32 field);
 
 #ifdef __cplusplus
 }

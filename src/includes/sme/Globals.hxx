@@ -1,5 +1,6 @@
 #pragma once
 
+#include "defines.h"
 #include "types.h"
 #include "sms/JSystem/JGeometry.hxx"
 #include "sms/JSystem/JKR/JKRHeap.hxx"
@@ -15,11 +16,14 @@ namespace SME
 struct TGlobals
 {
     SME::Class::TSMEFile *mStageConfig;
-    SME::Class::TPlayerParams *mPlayerCfgArray[4];
+    SME::Class::TPlayerParams *mPlayerCfgArray[SME_MAX_PLAYERS];
+    TMario *mPlayers[SME_MAX_PLAYERS];
     bool mIsCompletionRewards;
     bool mIsAudioStreaming;
     bool mIsAudioStreamAllowed;
     bool mIsFreePlay;
+    u8 mActivePlayers;
+    u8 mMaxPlayers;
     
     struct
     {
@@ -41,16 +45,21 @@ struct TGlobals
     JKRExpHeap *mGlobalsHeap;
     bool mPlayerHasGeckoCodes;
 
-    TMario *getPlayerByID(u8 id) const;
-
-    SME::Class::TSMEFile *getStageConfig() const { return mStageConfig; };
+    u8 getActivePlayers() const { return mActivePlayers; }
+    u8 getMaxPlayers() const { return mMaxPlayers; }
+    TMario *getPlayerByIndex(u8 index) const;
+    SME::Class::TSMEFile *getStageConfig() const { return mStageConfig; }
     SME::Class::TPlayerParams *getPlayerParams(u8 id) const;
     SME::Class::TPlayerParams *getPlayerParams(TMario *player) const;
+
+    void setPlayerByIndex(u8 index, TMario *player);
+
     void registerPlayerParams(SME::Class::TPlayerParams *params);
     void deregisterPlayerParams(SME::Class::TPlayerParams *params);
 
     constexpr bool isCompletionRewarded() const { return mIsCompletionRewards; }
     constexpr bool isFreePlayMode() const { return mIsFreePlay; }
+    constexpr bool isMultiplayerActive() const { return mActivePlayers > 1; }
     constexpr bool isMusicBeingStreamed() const { return mIsAudioStreaming; }
     constexpr bool isMusicStreamingAllowed() const { return mIsAudioStreamAllowed; }
 

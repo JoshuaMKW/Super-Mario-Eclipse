@@ -1,13 +1,20 @@
 #include "Globals.hxx"
 #include "SME.hxx"
 
-SME::Class::TPlayerParams *SME::TGlobals::getPlayerParams(u8 id) const {
+using namespace SME;
+
+TMario *TGlobals::getPlayerByIndex(u8 index) const {
+  SME_DEBUG_ASSERT(index < SME_MAX_PLAYERS, "Invalid player index provided");
+  return mPlayers[index];
+}
+
+Class::TPlayerParams *TGlobals::getPlayerParams(u8 id) const {
   SME_DEBUG_ASSERT(id < SME_MAX_PLAYERS, "Invalid player index provided");
   return mPlayerCfgArray[id];
 }
 
-SME::Class::TPlayerParams *
-SME::TGlobals::getPlayerParams(TMario *player) const {
+Class::TPlayerParams *
+TGlobals::getPlayerParams(TMario *player) const {
   for (u32 i = 0; i < SME_MAX_PLAYERS; ++i) {
     if (mPlayerCfgArray[i]->getPlayer() == player)
       return mPlayerCfgArray[i];
@@ -15,7 +22,12 @@ SME::TGlobals::getPlayerParams(TMario *player) const {
   return nullptr;
 }
 
-void SME::TGlobals::registerPlayerParams(SME::Class::TPlayerParams *params) {
+void TGlobals::setPlayerByIndex(u8 index, TMario *player) {
+  SME_DEBUG_ASSERT(index < SME_MAX_PLAYERS, "Invalid player index provided");
+  mPlayers[index] = player;
+}
+
+void TGlobals::registerPlayerParams(Class::TPlayerParams *params) {
   for (u32 i = 0; i < SME_MAX_PLAYERS; ++i) {
     if (mPlayerCfgArray[i] == params)
       return;
@@ -26,7 +38,7 @@ void SME::TGlobals::registerPlayerParams(SME::Class::TPlayerParams *params) {
   }
 }
 
-void SME::TGlobals::deregisterPlayerParams(SME::Class::TPlayerParams *params) {
+void TGlobals::deregisterPlayerParams(Class::TPlayerParams *params) {
   for (u32 i = 0; i < SME_MAX_PLAYERS; ++i) {
     if (mPlayerCfgArray[i] == params) {
       mPlayerCfgArray[i] = nullptr;

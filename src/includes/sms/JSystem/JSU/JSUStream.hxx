@@ -4,10 +4,9 @@
 
 enum JSUStreamSeekFrom
 {
-	Unknown1,
-	Unknown2,
-	Unknown3,
-	Unknown4
+	BEGIN,
+	CURRENT,
+	END
 };
 
 class JSUIosBase

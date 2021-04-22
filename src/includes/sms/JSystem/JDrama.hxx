@@ -67,12 +67,9 @@ public:
   void setViewport(const TRect &, f32, f32);
 
   u8 _0[0x20];
-  u8 _20;
+  bool _20;
   u8 _21[0x54 - 0x21];
-  u32 _54;
-  u32 _58;
-  u32 _5C;
-  u32 _60;
+  TRect mViewPortSpace;
 };
 
 class TViewObj : public TNameRef {

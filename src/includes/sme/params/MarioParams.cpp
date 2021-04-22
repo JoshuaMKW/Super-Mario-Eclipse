@@ -1,17 +1,21 @@
-#include "params/MarioParams.hxx"
 #include "OS.h"
+#include "string.h"
+#include "sms/JSystem/JSU/JSUMemoryStream.hxx"
+#include "sms/actor/Mario.hxx"
+#include "sms/camera/PolarSubCamera.hxx"
 #include "libs/sAssert.hxx"
 #include "libs/sMath.hxx"
 #include "libs/sMemory.hxx"
-#include "sms/JSystem/JSU/JSUMemoryStream.hxx"
-#include "sms/actor/Mario.hxx"
-#include "string.h"
+#include "params/MarioParams.hxx"
 
 using namespace SME::Class;
 
-TPlayerParams::TPlayerParams(TMario *player, bool isMario)
+TPlayerParams::TPlayerParams(TMario *player, CPolarSubCamera *camera, bool isMario)
     : mPlayer(player), mIsEMario(!isMario), mInitialized(true),
       mCanUseFludd(true), mPlayerID(0), mCurJump(0), mDefaultAttrs(player) {
+  if (!camera) {
+    camera = new CPolarSubCamera();
+  }
   mFluddHistory.mHadFludd = false;
   mFluddHistory.mMainNozzle = TWaterGun::Spray;
   mFluddHistory.mSecondNozzle = TWaterGun::Hover;

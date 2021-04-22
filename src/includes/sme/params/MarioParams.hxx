@@ -1,8 +1,9 @@
 #pragma once
 
+#include "macros.h"
 #include "mem.h"
 #include "types.h"
-#include "macros.h"
+
 
 #include "funcs.hxx"
 #include "sms/JSystem/JGeometry.hxx"
@@ -13,7 +14,7 @@
 namespace SME::Class {
 
 struct TCustomParams : public TParams {
-  #define CONSTRUCT_PARAM(name, val)                                             \
+#define CONSTRUCT_PARAM(name, val)                                             \
   name(this, val, JDrama::TNameRef::calcKeyCode(SME_STRINGIZE(name)),          \
        SME_STRINGIZE(name))
 
@@ -50,7 +51,7 @@ struct TCustomParams : public TParams {
     load("/Mario/SME.prm");
   }
 
-  #undef CONSTRUCT_PARAM
+#undef CONSTRUCT_PARAM
 
   enum class FluddCleanType : u8 { NONE, CLEAN, GOOP };
 
@@ -146,10 +147,12 @@ public:
   };
 
   TPlayerParams() = delete;
-  TPlayerParams(TMario *player, bool isMario);
+  TPlayerParams(TMario *player, CPolarSubCamera *camera, bool isMario);
 
+  CPolarSubCamera *getCamera() const { return mCamera; }
   bool getCanUseFludd() const { return mCanUseFludd; }
   u8 getMaxJumps() const { return mParams->mMaxJumps.get(); }
+  u8 getNozzleBoneID(TWaterGun::NozzleType nozzle) const;
   const TCustomParams *getParams() const { return mParams; }
   const TMario *getPlayer() const { return mPlayer; }
   s8 getPlayerID() const { return mPlayerID; }
@@ -159,20 +162,21 @@ public:
   bool isMario() const { return !mIsEMario; }
   bool isInitialized() const { return mInitialized; }
 
+  void setCamera(CPolarSubCamera *camera);
   void setCanUseFludd(bool enable) { mCanUseFludd = enable; }
+  void setPlayer(TMario *player);
   void setPlayerID(u8 id) { mPlayerID = id; }
 
   bool canUseNozzle(TWaterGun::NozzleType nozzle) const;
-  u8 getNozzleBoneID(TWaterGun::NozzleType nozzle) const;
   const char *getPlayerName() const;
   bool loadPrm(const char *prm);
   bool loadPrm(JSUMemoryInputStream &stream);
   void resetPlayer() { mDefaultAttrs.applyHistoryTo(mPlayer); };
   void scalePlayerAttrs(f32 scale);
-  void setPlayer(TMario *player);
 
 private:
   TMario *mPlayer;
+  CPolarSubCamera *mCamera;
   TCustomParams *mParams;
   bool mIsEMario;
   bool mInitialized;

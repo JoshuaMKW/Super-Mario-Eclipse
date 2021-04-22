@@ -6,9 +6,10 @@
 #include "libs/sMath.hxx"
 #include "libs/sMemory.hxx"
 #include "libs/sMusic.hxx"
+#include "libs/sSecurity.hxx"
 #include "libs/sString.hxx"
 #include "libs/sTime.hxx"
-#include "libs/sSecurity.hxx"
+
 
 #include "CheatHandler.hxx"
 #include "Globals.hxx"
@@ -19,6 +20,8 @@
 #include "params/StageParams.hxx"
 
 #include "OS.h"
+#include "defines.h"
+#include "macros.h"
 #include "sms/JSystem/J2D/J2DOrthoGraph.hxx"
 #include "sms/JSystem/JGeometry.hxx"
 #include "sms/SMS.hxx"
@@ -29,52 +32,6 @@
 #include "sms/talk/Talk2D2.hxx"
 #include "types.h"
 
-
-#ifndef SME_MAX_SHINES
-#define SME_MAX_SHINES 120
-#else
-#if SME_MAX_SHINES < 0
-#undef SME_MAX_SHINES
-#define SME_MAX_SHINES 0
-#elif SME_MAX_SHINES > 999
-#undef SME_MAX_SHINES
-#define SME_MAX_SHINES 999
-#endif
-#endif
-
-#define SME_MAX_PLAYERS 1
-
-#ifndef KURIBO_NO_TYPES
-#define KURIBO_NO_TYPES
-#endif
-
-#define SME_FROM_GPR(reg, var) asm volatile("mr %0, " #reg : "=r"(var))
-#define SME_TO_GPR(reg, var) asm volatile("mr " #reg ", %0" : : "r"(var))
-#define SME_FROM_FPR(reg, var) asm volatile("fmr %0, " #reg : "=r"(var))
-#define SME_TO_FPR(reg, var) asm volatile("fmr " #reg ", %0" : : "r"(var))
-
-/* Misc compiler info */
-#define SME_VERSION "v0.4a"
-
-#ifdef __VERSION__
-#define SME_CC_VERSION __VERSION__
-#elif defined(__CWCC__)
-#define SME_CC_VERSION "CWCC " STRINGIZE(__CWCC__)
-#else
-#define SME_CC_VERSION "Unknown"
-#endif
-
-#ifdef __cplusplus
-#if __cplusplus >= 201103L
-#define offsetof(t, d) ((size_t) & (((t *)0)->d))
-//#define offsetof(t, d) __builtin_offsetof(t, d)
-#else
-#define offsetof(t, d) ((size_t) & (((t *)0)->d))
-#endif
-#define SME_EXTERN_C extern "C"
-#else
-#define SME_EXTERN_C extern
-#endif
 
 // init_mods.cpp
 SME_EXTERN_C OSBootInfo BootInfo;
@@ -207,6 +164,16 @@ bool canGrabAtNPC();
 bool canCarryNPC();
 
 } // namespace Mario
+
+namespace Multiplayer {
+
+void draw3DOverhaul(J3DDrawBuffer *drawBuffer);
+TMario *makeMarios();
+void loadMarioTrickyOverhaul(TMario *player, JSUMemoryInputStream &stream);
+void performMarioTrickyOverhaul(TMario *player, JSUMemoryInputStream &stream);
+void setMarioOverhaul(TMarDirector *director);
+
+} // namespace Multiplayer
 
 namespace Music {
 

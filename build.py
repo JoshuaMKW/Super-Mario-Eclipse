@@ -184,10 +184,7 @@ class FilePatcher(Compiler):
         self._rename_files_from_config()
         self._replace_files(config)
 
-        PATCHED = self._patch_dol()
-        print(PATCHED, self.is_booting())
         if self._patch_dol() and self.is_booting():
-            
             for proc in psutil.process_iter():
                 if proc.name() == "Dolphin.exe":
                     proc.kill()

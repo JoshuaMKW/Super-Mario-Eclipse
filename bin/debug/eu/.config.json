@@ -1,0 +1,77 @@
+{
+    "buildpath": "C:/Users/Kyler-Josh/3D Objects/Dolphin/Dolphin-Games/Super Mario Kamek [GMSE04].iso",
+    "dolphinpath": "C:/Users/Kyler-Josh/3D Objects/Dolphin/Dolphin-x64/Dolphin.exe",
+    "userfiles": [
+        {
+            "system/*.*": {
+                "destination": "sys/",
+                "rename": ""
+            }
+        },
+        {
+            "smeconfigs/*.sme": {
+                "destination": "files/data/scene/sme/",
+                "rename": ""
+            }
+        },
+        {
+            "characters/chr*.[as][rz][cs]": {
+                "destination": "files/data/",
+                "rename": ""
+            }
+        },
+        {
+            "stages/*.[as][rz][cs]": {
+                "destination": "files/data/scene/",
+                "rename": ""
+            }
+        },
+        {
+            "thps/*.thp": {
+                "destination": "files/data/",
+                "rename": ""
+            }
+        },
+        {
+            "globals/*.?*": {
+                "destination": "files/data/",
+                "rename": ""
+            }
+        },
+        {
+            "kuribo/KuriboKernel.bin": {
+                "destination": "files/Kuribo!/System/",
+                "rename": ""
+            }
+        },
+        {
+            "kuribo/modules/*.kxe": {
+                "destination": "files/Kuribo!/Mods/",
+                "rename": ""
+            }
+        },
+        {
+            "opening.bnr": {
+                "destination": "files/",
+                "rename": ""
+            }
+        },
+        {
+            "mario[EJU][PSU].map": {
+                "destination": "files/",
+                "rename": ""
+            }
+        }
+    ],
+    "rename": {
+        "data/mario.szs": "chr0.szs",
+        "data/game_6.szs": "game_6.szs"
+    },
+    "delete": {},
+    "ignore": [
+        ".config.json",
+        "opening.png",
+        "opening.json"
+    ],
+    "gamebanner": "opening.png"
+}

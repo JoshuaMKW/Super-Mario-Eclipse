@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import atexit
+import functools
 import json
 import subprocess
 import time
@@ -25,6 +26,21 @@ TMPDIR = Path("tmp-compiler")
 def clean_resources():
     if TMPDIR.is_dir():
         pass  # shutil.rmtree(TMPDIR)
+
+def wrap_printer(msg: str = ""):
+    """ Wrapped function must return a (Controller, bool, str) tuple to indicate a status, and show message """
+    def decorater_inner(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            print("")
+            if len(msg.strip()) > 0:
+                print(f"====== {msg} ======".center(128))
+            print("-"*128)
+            value = func(*args, **kwargs)
+            print("-"*128)
+            return value
+        return wrapper
+    return decorater_inner
 
 
 class Region:
@@ -141,7 +157,7 @@ class FilePatcher(Compiler):
 
         super().__init__(Path("compiler"),
                          self._get_matching_filepath(
-                             self.solutionDir / "main.dol"),
+                             self.solutionRegionDir / "main.dol"),
                          Path(f"linker/{self.region}.map"),
                          False,
                          startAddr)
@@ -156,11 +172,18 @@ class FilePatcher(Compiler):
             raise ValueError(f"Unknown patcher state {self.state}")
 
     @property
-    def solutionDir(self) -> Path:
+    def solutionRegionDir(self) -> Path:
         if self.is_release():
             return self.projectDir / "bin" / "release" / self.region.lower()
         elif self.is_debug():
             return self.projectDir / "bin" / "debug" / self.region.lower()
+
+    @property
+    def solutionAnyDir(self) -> Path:
+        if self.is_release():
+            return self.projectDir / "bin" / "release" / "any"
+        elif self.is_debug():
+            return self.projectDir / "bin" / "debug" / "any"
 
     def is_release(self) -> bool:
         return self.state == FilePatcher.State.RELEASE
@@ -178,11 +201,15 @@ class FilePatcher(Compiler):
         return self.bootType == FilePatcher.BootType.DOL
 
     def patch_game(self):
-        with (self.solutionDir / ".config.json").open("r") as f:
+        with (self.solutionRegionDir / ".config.json").open("r") as f:
             config = json.load(f)
 
-        self._rename_files_from_config()
-        self._replace_files(config)
+        self._rename_files_from_config(self.solutionAnyDir)
+        self._rename_files_from_config(self.solutionRegionDir)
+        self._delete_files_from_config(self.solutionAnyDir)
+        self._delete_files_from_config(self.solutionRegionDir)
+        self._replace_files_from_config(self.solutionAnyDir)
+        self._replace_files_from_config(self.solutionRegionDir)
 
         if self._patch_dol() and self.is_booting():
             for proc in psutil.process_iter():
@@ -243,22 +270,16 @@ class FilePatcher(Compiler):
         print("-"*128)
         return isoPath
 
+    @wrap_printer("DOL PATCHING")
     def _patch_dol(self) -> bool:
-        dolPath = self.solutionDir / "system/main.dol"
-        kernelPath = self.solutionDir / "kuribo/KuriboKernel.bin"
+        dolPath = self.solutionRegionDir / "system/main.dol"
+        kernelPath = self.solutionRegionDir / "kuribo/KuriboKernel.bin"
         modulesDest = self.gameDir / "files/Kuribo!/Mods/"
 
         if dolPath.exists():
             if self.is_release():
-                print("")
-                print("====== DOL PATCHING ======".center(128))
-                print("-"*128)
                 print(f"Generating {self.maxShines} shines RELEASE build")
-
             elif self.is_debug():
-                print("")
-                print("====== DOL PATCHING ======".center(128))
-                print("-"*128)
                 print(f"Generating {self.maxShines} shines DEBUG build")
 
             modules = self.run(Path("src/src-code"), dolPath)
@@ -297,21 +318,20 @@ class FilePatcher(Compiler):
             with self.dest.open("wb") as dest:
                 _doldata.save(dest)
 
-            print("-"*128)
             return True
         return False
 
-    def _replace_files(self, config: dict):
-        print("")
-        print("====== REPLACING | COPYING ======".center(128))
-        print("-"*128)
+    @wrap_printer("REPLACING | COPYING")
+    def _replace_files_from_config(self, solutionPath: Path):
+        with Path(solutionPath / ".config.json").open("r") as f:
+            config = json.load(f)
 
-        bnrPath = (self.solutionDir / config["gamebanner"]).resolve()
+        bnrPath = (solutionPath / config["gamebanner"]).resolve()
 
         self._compile_bnr_to_game(bnrPath)
         destPath = self.gameDir / "opening.bnr"
 
-        for f in self.solutionDir.rglob("*"):
+        for f in solutionPath.rglob("*"):
             relativePath = f.relative_to(Path.cwd())
 
             if f.name.lower() == ".config.json":
@@ -343,14 +363,40 @@ class FilePatcher(Compiler):
 
             print(f"{relativePath} -> {destPath}")
 
-        print("-"*128)
+    @wrap_printer("RENAMING")
+    def _rename_files_from_config(self, solutionPath: Path):
+        _renamed = []
+
+        with Path(solutionPath / ".config.json").open("r") as f:
+            config = json.load(f)
+
+        for path in config["rename"]:
+            rename = config["rename"][path]
+
+            absPath = self.gameDir / path
+
+            if absPath.exists() and absPath not in _renamed:
+                print(f"{absPath} -> {self.gameDir / absPath.parent / rename}")
+                absPath.rename(self.gameDir / absPath.parent / rename)
+                _renamed.append(absPath)
+
+    @wrap_printer("DELETING")
+    def _delete_files_from_config(self, solutionPath: Path):
+        with Path(solutionPath / ".config.json").open("r") as f:
+            config = json.load(f)
+
+        for path in config["delete"]:
+            absPath = self.gameDir / path
+            if absPath.exists():
+                print(f"{absPath} -> DELETED")
+                absPath.unlink()
 
     def _get_translated_filepath(self, relativePath: Union[str, Path]) -> Path:
         return self.gameDir / relativePath
 
     def _init_tables(self):
         for f in self.gameDir.rglob("*"):
-            if f.is_file:
+            if f.is_file():
                 self._fileTables.setdefault(f.suffix, []).append(f)
 
     def _get_matching_filepath(self, path: Path) -> Path:
@@ -359,11 +405,17 @@ class FilePatcher(Compiler):
                 if f.name == path.name:
                     return self.gameDir / f
         except KeyError:
-            return self._get_path_from_config(path)
+            retpath = self._get_path_from_config(self.solutionRegionDir, path)
+            if retpath:
+                return retpath
+            return self._get_path_from_config(self.solutionAnyDir, path)
         else:
-            return self._get_path_from_config(path)
+            retpath = self._get_path_from_config(self.solutionRegionDir, path)
+            if retpath:
+                return retpath
+            return self._get_path_from_config(self.solutionAnyDir, path)
 
-    def _get_path_from_config(self, path: Path) -> Path:
+    def _get_path_from_config(self, solutionPath: Path, path: Path) -> Path:
         if self.is_release():
             parentGlob = "*/release/"
         elif self.is_debug():
@@ -371,49 +423,23 @@ class FilePatcher(Compiler):
         else:
             raise ValueError("Invalid State!")
 
-        with Path(self.solutionDir / ".config.json").open("r") as f:
+        with Path(solutionPath / ".config.json").open("r") as f:
             config = json.load(f)
-            for _set in config["userfiles"]:
-                glob = list(_set.keys())[0]
-                if fnmatch(str(path).lower(), parentGlob + glob.strip().lower()):
-                    if _set[glob]["rename"].strip() == "":
-                        return self.gameDir / _set[glob]["destination"].strip() / path.name
-                    else:
-                        return self.gameDir / _set[glob]["destination"].strip() / _set[glob]["rename"].strip()
+
+        for _set in config["userfiles"]:
+            glob = list(_set.keys())[0]
+            if fnmatch(str(path).lower(), parentGlob + glob.strip().lower()):
+                if _set[glob]["rename"].strip() == "":
+                    return self.gameDir / _set[glob]["destination"].strip() / path.name
+                else:
+                    return self.gameDir / _set[glob]["destination"].strip() / _set[glob]["rename"].strip()
 
         return None
 
-    def _rename_files_from_config(self):
-        print("")
-        print("====== RENAMING ======".center(128))
-        print("-"*128)
+    def _compile_bnr_to_game(self, path: Path):
+        if not path.exists():
+            return
 
-        _renamed = []
-
-        with Path(self.solutionDir / ".config.json").open("r") as f:
-            config = json.load(f)
-            for path in config["rename"]:
-                rename = config["rename"][path]
-
-                absPath = self.gameDir / path
-
-                if absPath.exists() and absPath not in _renamed:
-                    print(f"{absPath} -> {self.gameDir / absPath.parent / rename}")
-                    absPath.rename(self.gameDir / absPath.parent / rename)
-                    _renamed.append(absPath)
-
-        print("-"*128)
-
-    def _delete_files_from_config(self):
-        with Path(self.solutionDir / ".config.json").open("r") as f:
-            config = json.load(f)
-            for path in config["delete"]:
-                absPath = self.gameDir / path
-                if absPath.exists():
-                    print(f"{absPath} -> DELETED")
-                    absPath.unlink()
-
-    def _compile_bnr_to_game(self, path):
         bnr = BNR(path, BNR.Regions.AMERICA)
         bnr.save_bnr(self.gameDir / "opening.bnr")
 

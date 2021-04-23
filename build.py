@@ -8,7 +8,7 @@ import time
 from fnmatch import fnmatch
 from io import BytesIO
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, Generator, List, Optional, Union
 
 import oead
 import psutil
@@ -75,7 +75,7 @@ class AllocationMap(object):
             self._baseInstrs = baseInstrs
 
         @property
-        def instructions(self) -> AllocationMap.InstructionInfo:
+        def instructions(self) -> Generator[AllocationMap.InstructionInfo]:
             for instr in self._baseInstrs:
                 yield instr
 
@@ -158,9 +158,9 @@ class FilePatcher(Compiler):
     @property
     def solutionDir(self) -> Path:
         if self.is_release():
-            return self.projectDir / "bin" / "release"
+            return self.projectDir / "bin" / "release" / self.region.lower()
         elif self.is_debug():
-            return self.projectDir / "bin" / "debug"
+            return self.projectDir / "bin" / "debug" / self.region.lower()
 
     def is_release(self) -> bool:
         return self.state == FilePatcher.State.RELEASE
@@ -282,7 +282,7 @@ class FilePatcher(Compiler):
                 self._alloc_from_heap(
                     _doldata, (kernelPath.stat().st_size + renamed.stat().st_size + 31) & -32)
 
-            tmpbin = Path("bin", f"kuriboloader-{self.region}.bin")
+            tmpbin = Path("bin", f"kuriboloader-{self.region.lower()}.bin")
 
             data = BytesIO(tmpbin.read_bytes())
             rawData = data.getvalue()

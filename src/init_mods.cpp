@@ -327,8 +327,9 @@ static void initFludd(TMario *player, SME::Class::TPlayerParams *params) {
 }
 
 static void initMario(TMario *player, bool isMario) {
+  CPolarSubCamera *camera = new CPolarSubCamera("<CPolarSubCamera>");
   SME::Class::TPlayerParams *params =
-      new SME::Class::TPlayerParams(player, isMario);
+      new SME::Class::TPlayerParams(player, camera, isMario);
   SME::TGlobals::sGlobals.registerPlayerParams(params);
 
   if (SME::Class::TSMEFile::sStageConfig.FileHeader.mMAGIC ==

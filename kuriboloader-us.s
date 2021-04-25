@@ -1,4 +1,4 @@
-#inject(0x80005328)
+#inject(0x802A744C)
 
 # SMS NTSC-U Kuribo Loader #
 #   Credits: Riidefi SMS   #
@@ -7,7 +7,7 @@
 .set DVDReadPrio, 0x8034BD74
 .set DVDClose, 0x8034B9DC
 #
-.set OSInit, 0x80341D94
+.set createRoot__10JKRExpHeapFib, 0x802C0F8C
 .set OSReport, 0x80344644
 
 # As this may be a cheat code, we use absolute branching with __call
@@ -23,13 +23,13 @@ loadCMD:
     stwu      r1, back_chain(r1)
     mflr      r0
     stw       r0, 0x50+sender_lr(r1)
-    addi      r4, r1, 0x50+dvd_handle
     stw       r31, 0x50+r31_save(r1)
     stw       r30, 0x50+r30_save(r1)
     
-    mr r31, r4
-    __call r12, OSInit
-    mr r4, r31
+    # Init the heaps
+    __call r12, createRoot__10JKRExpHeapFib
+
+    addi      r4, r1, 0x50+dvd_handle
     # Disable interrupts, saving state
     mfmsr     r3
     rlwinm    r12, r3, 0,17,15

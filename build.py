@@ -200,6 +200,23 @@ class FilePatcher(Compiler):
     def is_dol_boot(self) -> bool:
         return self.bootType == FilePatcher.BootType.DOL
 
+    def is_ignored(self, path: Path) -> bool:
+        with Path(self.solutionRegionDir / ".config.json").open("r") as f:
+            config = json.load(f)
+
+        for glob in config["ignore"]:
+            if fnmatch(str(path).lower(), glob.strip().lower()):
+                return True
+        
+        with Path(self.solutionAnyDir / ".config.json").open("r") as f:
+            config = json.load(f)
+
+        for glob in config["ignore"]:
+            if fnmatch(str(path).lower(), glob.strip().lower()):
+                return True
+
+        return False
+
     def patch_game(self):
         with (self.solutionRegionDir / ".config.json").open("r") as f:
             config = json.load(f)
@@ -340,7 +357,7 @@ class FilePatcher(Compiler):
             destPath = self._get_matching_filepath(f)
 
             if destPath is None:
-                if f.is_file() and str(f.relative_to(Path.cwd(), "bin", "debug")) not in config["ignore"]:
+                if f.is_file() and self.is_ignored(f.relative_to(solutionPath)):
                     print(f"{relativePath} -> No destination found")
                 continue
 

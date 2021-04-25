@@ -14,7 +14,7 @@ TPlayerParams::TPlayerParams(TMario *player, CPolarSubCamera *camera, bool isMar
     : mPlayer(player), mIsEMario(!isMario), mInitialized(true),
       mCanUseFludd(true), mPlayerID(0), mCurJump(0), mDefaultAttrs(player) {
   if (!camera) {
-    camera = new CPolarSubCamera();
+    camera = new CPolarSubCamera("<CPolarSubCamera>");
   }
   mFluddHistory.mHadFludd = false;
   mFluddHistory.mMainNozzle = TWaterGun::Spray;

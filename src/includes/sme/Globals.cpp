@@ -3,6 +3,8 @@
 
 using namespace SME;
 
+TGlobals TGlobals::sGlobals = TGlobals();
+
 TMario *TGlobals::getPlayerByIndex(u8 index) const {
   SME_DEBUG_ASSERT(index < SME_MAX_PLAYERS, "Invalid player index provided");
   return mPlayers[index];

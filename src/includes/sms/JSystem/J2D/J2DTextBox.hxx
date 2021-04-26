@@ -24,7 +24,7 @@ enum class J2DTextBoxVBinding
 class J2DTextBox : public J2DPane
 {
 public:
-    J2DTextBox();
+    J2DTextBox() {}
     J2DTextBox(const ResFONT *, const char *);
 	J2DTextBox(J2DPane *, JSURandomInputStream *, bool);
 	J2DTextBox(u32, const JUTRect &, const ResFONT *, const char *, J2DTextBoxHBinding, J2DTextBoxVBinding);

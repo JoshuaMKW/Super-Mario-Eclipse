@@ -11,7 +11,7 @@ template <typename T> T Vector::magnitude(const JGeometry::TVec3<T> &vec)
 
 template <typename T> T Vector::getNormalAngle(const JGeometry::TVec3<T> &vec)
 {
-    return (T)((180.0f / M_PI) * atan2f(this->x, this->z));
+    return (T)((180.0f / M_PI) * atan2f(vec->x, vec->z));
 }
 
 template <typename T>

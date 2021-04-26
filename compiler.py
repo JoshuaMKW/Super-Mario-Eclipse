@@ -302,17 +302,14 @@ class Compiler(object):
                         sObjects.append(str(f.resolve()))
 
                 if len(cppObjects) > 0:
-                    print([str(_clangCpp.resolve()), *cppObjects, *self._includes, *self._defines, *self.cxxOptions, "-o", str(TMPDIR / f"cpp_obj.o")])
                     subprocess.run([str(_clangCpp.resolve()), *cppObjects, *self._includes, *self._defines, *self.cxxOptions, "-o", str(TMPDIR / f"cpp_obj.o")],
                                     text=True)
                     linkObjects.append(str(TMPDIR / f"cpp_obj.o"))
                 if len(cObjects) > 0:
-                    print([str(_clangCpp.resolve()), *cppObjects, *self._includes, *self._defines, *self.cOptions, "-o", str(TMPDIR / f"c_obj.o")])
                     subprocess.run([str(_clangCpp.resolve()), *cObjects, *self._includes, *self._defines, *self.cOptions, "-o", str(TMPDIR / f"c_obj.o")],
                                     text=True)
                     linkObjects.append(str(TMPDIR / f"c_obj.o"))
                 if len(sObjects) > 0:
-                    print([str(_clangCpp.resolve()), *cppObjects, *self._includes, *self._defines, *self.sOptions, "-o", str(TMPDIR / f"s_obj.o")])
                     subprocess.run([str(_clangCpp.resolve()), *sObjects, *self._includes, *self._defines, *self.sOptions, "-o", str(TMPDIR / f"s_obj.o")],
                                     text=True)
                     linkObjects.append(str(TMPDIR / f"s_obj.o"))
@@ -412,7 +409,7 @@ class Compiler(object):
 
 
 def main():
-    parser = argparse.ArgumentParser("SMS-Patcher", description="C++ Patcher for SMS NTSC-U, using Kamek by Treeki")
+    parser = argparse.ArgumentParser("SMS-worker", description="C++ worker for SMS NTSC-U, using Kamek by Treeki")
 
     parser.add_argument("src", help="Source(s) to compile", nargs="+")
     parser.add_argument("--dolfile", help="SMS NTSC-U DOL")
@@ -438,22 +435,22 @@ def main():
 
     worker.defines = [Define(*d.strip().split("=")) for d in args.defines.split(",")]
 
-    if patcher.is_codewarrior():
-        patcher.cxxOptions = ["-Cpp_exceptions off", "-gccinc", "-gccext on", "-enum int", "-fp hard", "-use_lmw_stmw on", "-O4,p", "-c", "-rostr", "-sdata 0", "-sdata2 0"]
-    elif patcher.is_clang():
-        patcher.cxxOptions = ["--target=powerpc-gekko-ibm-kuribo-eabi", "-std=gnu++17", "-fno-exceptions", "-fno-rtti", "-fno-unwind-tables", "-ffast-math",
+    if worker.is_codewarrior():
+        worker.cxxOptions = ["-Cpp_exceptions off", "-gccinc", "-gccext on", "-enum int", "-fp hard", "-use_lmw_stmw on", "-O4,p", "-c", "-rostr", "-sdata 0", "-sdata2 0"]
+    elif worker.is_clang():
+        worker.cxxOptions = ["--target=powerpc-gekko-ibm-kuribo-eabi", "-std=gnu++17", "-fno-exceptions", "-fno-rtti", "-fno-unwind-tables", "-ffast-math",
                               "-flto", "-nodefaultlibs", "-nostdlib", "-fno-use-init-array", "-fuse-ld=lld", "-fpermissive", "-Wall", "-O3", "-r", "-v"]
-        patcher.cOptions = ["--target=powerpc-gekko-ibm-kuribo-eabi", "-fno-exceptions", "-fno-rtti", "-fno-unwind-tables", "-ffast-math",
+        worker.cOptions = ["--target=powerpc-gekko-ibm-kuribo-eabi", "-fno-exceptions", "-fno-rtti", "-fno-unwind-tables", "-ffast-math",
                             "-flto", "-nodefaultlibs", "-nostdlib", "-fno-use-init-array", "-fuse-ld=lld", "-fpermissive", "-Wall", "-O3", "-r", "-v"]
-        patcher.sOptions = ["--target=powerpc-gekko-ibm-kuribo-eabi", "-fno-exceptions", "-fno-rtti", "-fno-unwind-tables",
+        worker.sOptions = ["--target=powerpc-gekko-ibm-kuribo-eabi", "-fno-exceptions", "-fno-rtti", "-fno-unwind-tables",
                             "-flto", "-nodefaultlibs", "-nostdlib", "-fno-use-init-array", "-fuse-ld=lld", "-Wall", "-r", "-v"]
-        patcher.linkOptions = ["--target=powerpc-gekko-ibm-kuribo-eabi", "-std=gnu++17", "-fno-exceptions", "-fno-rtti", "-fno-unwind-tables", "-ffast-math",
+        worker.linkOptions = ["--target=powerpc-gekko-ibm-kuribo-eabi", "-std=gnu++17", "-fno-exceptions", "-fno-rtti", "-fno-unwind-tables", "-ffast-math",
                                "-flto", "-nodefaultlibs", "-nostdlib", "-fno-use-init-array", "-fuse-ld=lld", "-fpermissive", "-Wall", "-O3", "-r", "-v"]
-    elif patcher.is_gcc():
-        patcher.cxxOptions = ["-nodefaultlibs", "-nostdlib", "-std=gnu++20", "-fno-exceptions", "-fno-rtti", "-ffast-math", "-fpermissive", "-Wall", "-O3", "-r"]
-        patcher.cOptions = ["-nodefaultlibs", "-nostdlib", "-fno-exceptions", "-fno-rtti", "-ffast-math", "-fpermissive", "-Wall", "-O3", "-r"]
-        patcher.sOptions = ["-nodefaultlibs", "-nostdlib", "-fno-exceptions", "-fno-rtti", "-Wall", "-O3", "-r"]
-        patcher.linkOptions = ["-nodefaultlibs", "-nostdlib", "-std=gnu++20", "-fno-exceptions", "-fno-rtti", "-ffast-math", "-fpermissive", "-Wall", "-O3", "-r"]
+    elif worker.is_gcc():
+        worker.cxxOptions = ["-nodefaultlibs", "-nostdlib", "-std=gnu++20", "-fno-exceptions", "-fno-rtti", "-ffast-math", "-fpermissive", "-Wall", "-O3", "-r"]
+        worker.cOptions = ["-nodefaultlibs", "-nostdlib", "-fno-exceptions", "-fno-rtti", "-ffast-math", "-fpermissive", "-Wall", "-O3", "-r"]
+        worker.sOptions = ["-nodefaultlibs", "-nostdlib", "-fno-exceptions", "-fno-rtti", "-Wall", "-O3", "-r"]
+        worker.linkOptions = ["-nodefaultlibs", "-nostdlib", "-std=gnu++20", "-fno-exceptions", "-fno-rtti", "-ffast-math", "-fpermissive", "-Wall", "-O3", "-r"]
 
     worker.run(args.src, args.dolfile)
 

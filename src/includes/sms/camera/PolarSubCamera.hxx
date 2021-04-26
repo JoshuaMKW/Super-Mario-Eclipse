@@ -3,6 +3,7 @@
 #include "sms/JSystem/JDrama.hxx"
 #include "sms/camera/CameraInbetween.hxx"
 #include "sms/camera/CameraMapTool.hxx"
+#include "sms/npc/BaseNPC.hxx"
 #include "types.h"
 
 

@@ -169,8 +169,8 @@ namespace Multiplayer {
 
 void draw3DOverhaul(J3DDrawBuffer *drawBuffer);
 TMario *makeMarios();
-void loadMarioTrickyOverhaul(TMario *player, JSUMemoryInputStream &stream);
-void performMarioTrickyOverhaul(TMario *player, JSUMemoryInputStream &stream);
+void loadMarioTrickyOverhaul(TMario *player, JSUMemoryInputStream *stream);
+void performMarioTrickyOverhaul(TMario *player, JSUMemoryInputStream *stream);
 void setMarioOverhaul(TMarDirector *director);
 
 } // namespace Multiplayer

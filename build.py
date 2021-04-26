@@ -4,6 +4,7 @@ import argparse
 import atexit
 import functools
 import json
+import shutil
 import subprocess
 import time
 from fnmatch import fnmatch
@@ -25,10 +26,9 @@ TMPDIR = Path("tmp-compiler")
 @atexit.register
 def clean_resources():
     if TMPDIR.is_dir():
-        pass  # shutil.rmtree(TMPDIR)
+        shutil.rmtree(TMPDIR)
 
-def wrap_printer(msg: str = ""):
-    """ Wrapped function must return a (Controller, bool, str) tuple to indicate a status, and show message """
+def wrap_printer(msg: str = "") -> function:
     def decorater_inner(func):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
@@ -299,7 +299,7 @@ class FilePatcher(Compiler):
             elif self.is_debug():
                 print(f"Generating {self.maxShines} shines DEBUG build")
 
-            modules = self.run(Path("src/src-code"), dolPath)
+            modules = self.run(Path("src"), dolPath)
             _doldata = DolFile(BytesIO(self.dest.read_bytes()))
 
             if isinstance(modules, list):
@@ -520,13 +520,13 @@ def main():
                               "-fp hard", "-use_lmw_stmw on", "-O4,p", "-c", "-rostr", "-sdata 0", "-sdata2 0"]
     elif patcher.is_clang():
         patcher.cxxOptions = ["--target=powerpc-gekko-ibm-kuribo-eabi", "-std=gnu++17", "-fno-exceptions", "-fno-rtti", "-fno-unwind-tables", "-ffast-math",
-                              "-flto", "-nodefaultlibs", "-nostdlib", "-fno-use-init-array", "-fuse-ld=lld", "-fpermissive", "-Wall", "-O3", "-r", "-v"]
+                              "-flto", "-nodefaultlibs", "-nostdlib", "-fno-use-init-array", "-fno-use-cxa-atexit", "-fuse-ld=lld", "-fpermissive", "-Werror", "-O3", "-r", "-v"]
         patcher.cOptions = ["--target=powerpc-gekko-ibm-kuribo-eabi", "-fno-exceptions", "-fno-rtti", "-fno-unwind-tables", "-ffast-math", "-fdeclspec",
-                            "-flto", "-nodefaultlibs", "-nostdlib", "-fno-use-init-array", "-fuse-ld=lld", "-fpermissive", "-Wall", "-O3", "-r", "-v"]
+                            "-flto", "-nodefaultlibs", "-nostdlib", "-fno-use-init-array", "-fno-use-cxa-atexit", "-fuse-ld=lld", "-fpermissive", "-Werror", "-O3", "-r", "-v"]
         patcher.sOptions = ["--target=powerpc-gekko-ibm-kuribo-eabi", "-fno-exceptions", "-fno-rtti", "-fno-unwind-tables",
-                            "-flto", "-nodefaultlibs", "-nostdlib", "-fno-use-init-array", "-fuse-ld=lld", "-Wall", "-r", "-v"]
+                            "-flto", "-nodefaultlibs", "-nostdlib", "-fno-use-init-array", "-fno-use-cxa-atexit", "-fuse-ld=lld", "-Werror", "-r", "-v"]
         patcher.linkOptions = ["--target=powerpc-gekko-ibm-kuribo-eabi", "-std=gnu++17", "-fno-exceptions", "-fno-rtti", "-fno-unwind-tables", "-ffast-math",
-                               "-flto", "-nodefaultlibs", "-nostdlib", "-fno-use-init-array", "-fuse-ld=lld", "-fpermissive", "-Wall", "-O3", "-r", "-v"]
+                               "-flto", "-nodefaultlibs", "-nostdlib", "-fno-use-init-array", "-fno-use-cxa-atexit", "-fuse-ld=lld", "-fpermissive", "-Werror", "-O3", "-r", "-v"]
     elif patcher.is_gcc():
         patcher.cxxOptions = ["-nodefaultlibs", "-nostdlib", "-std=gnu++20",
                               "-fno-exceptions", "-fno-rtti", "-ffast-math", "-fpermissive", "-Wall", "-O3", "-r"]

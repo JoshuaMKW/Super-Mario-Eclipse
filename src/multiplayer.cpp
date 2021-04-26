@@ -84,20 +84,20 @@ TMario *Multiplayer::makeMarios() {
 	return nullptr; //Skip default initialization
 }
 
-void Multiplayer::loadMarioTrickyOverhaul(TMario *player, JSUMemoryInputStream &stream) {
+void Multiplayer::loadMarioTrickyOverhaul(TMario *player, JSUMemoryInputStream *stream) {
     // We preserve the stream's position for each iteration
-    const s32 pos = stream.getPosition();
+    const s32 pos = stream->getPosition();
 	for (u32 i = 0; i < SME_MAX_PLAYERS; i++) {
 		gpMarioAddress = SME::TGlobals::sGlobals.getPlayerByIndex(i);
 		SMS_SetMarioAccessParams__Fv();
-		stream.seek(pos, JSUStreamSeekFrom::BEGIN);
+		stream->seek(pos, JSUStreamSeekFrom::BEGIN);
 		avoidRecurseCall(SME_PORT_REGION(0x8024D2AC, 0, 0, 0), gpMarioAddress, stream);
 	}
 	gpMarioAddress = player;
 }
 
 //I manually update each mario here
-void Multiplayer::performMarioTrickyOverhaul(TMario *player, JSUMemoryInputStream &stream) {
+void Multiplayer::performMarioTrickyOverhaul(TMario *player, JSUMemoryInputStream *stream) {
 	for (u32 i = 0; i < SME::TGlobals::sGlobals.getActivePlayers(); i++) {
         gpMarioAddress = SME::TGlobals::sGlobals.getPlayerByIndex(i);
 		SMS_SetMarioAccessParams__Fv();

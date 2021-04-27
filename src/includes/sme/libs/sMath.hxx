@@ -39,10 +39,22 @@ template <typename T> constexpr inline T lerp(T a, T b, f32 f) {
 
 namespace Vector {
 
-template <typename T> T magnitude(const JGeometry::TVec3<T> &);
-template <typename T> T getNormalAngle(const JGeometry::TVec3<T> &);
+template <typename T> inline T magnitude(const JGeometry::TVec3<T> &vec)
+{
+    return sqrtf(vec.x * vec.x + vec.y * vec.y + vec.z * vec.z);
+}
+
+template <typename T> inline T getNormalAngle(const JGeometry::TVec3<T> &vec)
+{
+    return (T)((180.0f / M_PI) * atan2f(vec.x, vec.z));
+}
+
 template <typename T>
-JGeometry::TVec3<T> normalized(const JGeometry::TVec3<T> &);
+JGeometry::TVec3<T> inline normalized(const JGeometry::TVec3<T> &vec)
+{
+    const f32 mag = magnitude(vec);
+    return JGeometry::TVec3<T>(vec.x / mag, vec.y / mag, vec.z / mag);
+}
 
 } // namespace Vector
 

@@ -12,10 +12,6 @@
 
 #define SME_MAX_PLAYERS 1
 
-#ifndef KURIBO_NO_TYPES
-#define KURIBO_NO_TYPES
-#endif
-
 /* Misc compiler info */
 #define SME_VERSION "v0.4a"
 

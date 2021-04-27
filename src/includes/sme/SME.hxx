@@ -32,6 +32,13 @@
 #include "sms/talk/Talk2D2.hxx"
 #include "types.h"
 
+#ifndef KURIBO_NO_TYPES
+#define KURIBO_NO_TYPES
+#endif
+
+#ifndef __ppc__
+#define __ppc__
+#endif
 
 // init_mods.cpp
 SME_EXTERN_C OSBootInfo BootInfo;

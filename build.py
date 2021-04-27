@@ -520,13 +520,13 @@ def main():
                               "-fp hard", "-use_lmw_stmw on", "-O4,p", "-c", "-rostr", "-sdata 0", "-sdata2 0"]
     elif patcher.is_clang():
         patcher.cxxOptions = ["--target=powerpc-gekko-ibm-kuribo-eabi", "-std=gnu++17", "-fno-exceptions", "-fno-rtti", "-fno-unwind-tables", "-ffast-math",
-                              "-flto", "-nodefaultlibs", "-nostdlib", "-fno-use-init-array", "-fno-use-cxa-atexit", "-fuse-ld=lld", "-fpermissive", "-Werror", "-O3", "-r", "-v"]
+                              "-flto", "-nodefaultlibs", "-nostdlib", "-fno-use-init-array", "-fno-use-cxa-atexit", "-fno-c++-static-destructors", "-fuse-ld=lld", "-fpermissive", "-Werror", "-O3", "-r", "-v"]
         patcher.cOptions = ["--target=powerpc-gekko-ibm-kuribo-eabi", "-fno-exceptions", "-fno-rtti", "-fno-unwind-tables", "-ffast-math", "-fdeclspec",
-                            "-flto", "-nodefaultlibs", "-nostdlib", "-fno-use-init-array", "-fno-use-cxa-atexit", "-fuse-ld=lld", "-fpermissive", "-Werror", "-O3", "-r", "-v"]
+                            "-flto", "-nodefaultlibs", "-nostdlib", "-fno-use-init-array", "-fno-use-cxa-atexit", "-fno-c++-static-destructors", "-fuse-ld=lld", "-fpermissive", "-Werror", "-O3", "-r", "-v"]
         patcher.sOptions = ["--target=powerpc-gekko-ibm-kuribo-eabi", "-fno-exceptions", "-fno-rtti", "-fno-unwind-tables",
-                            "-flto", "-nodefaultlibs", "-nostdlib", "-fno-use-init-array", "-fno-use-cxa-atexit", "-fuse-ld=lld", "-Werror", "-r", "-v"]
+                            "-flto", "-nodefaultlibs", "-nostdlib", "-fno-use-init-array", "-fno-use-cxa-atexit", "-fno-c++-static-destructors", "-fuse-ld=lld", "-Werror", "-r", "-v"]
         patcher.linkOptions = ["--target=powerpc-gekko-ibm-kuribo-eabi", "-std=gnu++17", "-fno-exceptions", "-fno-rtti", "-fno-unwind-tables", "-ffast-math",
-                               "-flto", "-nodefaultlibs", "-nostdlib", "-fno-use-init-array", "-fno-use-cxa-atexit", "-fuse-ld=lld", "-fpermissive", "-Werror", "-O3", "-r", "-v"]
+                               "-flto", "-nodefaultlibs", "-nostdlib", "-fno-use-init-array", "-fno-use-cxa-atexit", "-fno-c++-static-destructors", "-fuse-ld=lld", "-fpermissive", "-Werror", "-O3", "-r", "-v"]
     elif patcher.is_gcc():
         patcher.cxxOptions = ["-nodefaultlibs", "-nostdlib", "-std=gnu++20",
                               "-fno-exceptions", "-fno-rtti", "-ffast-math", "-fpermissive", "-Wall", "-O3", "-r"]

@@ -1,8 +1,10 @@
 #include "CheatHandler.hxx"
 
-using namespace SME;
+using namespace SME::Class;
 
-Class::TCheatHandler::TCheatHandler() {
+TCheatHandler TCheatHandler::sDebugHandler = TCheatHandler();
+
+TCheatHandler::TCheatHandler() {
   this->mInputList = nullptr;
   this->mSuccessCallback = nullptr;
   this->mFailureCallback = nullptr;
@@ -11,9 +13,9 @@ Class::TCheatHandler::TCheatHandler() {
   this->mInputIndex = 0;
 }
 
-Class::TCheatHandler::TCheatHandler(u16 *inputList, TMarioGamePad *gamepad,
-                                    void (*successCallback)(TCheatHandler *),
-                                    void (*failureCallback)(TCheatHandler *)) {
+TCheatHandler::TCheatHandler(u16 *inputList, TMarioGamePad *gamepad,
+                             void (*successCallback)(TCheatHandler *),
+                             void (*failureCallback)(TCheatHandler *)) {
   this->mInputList = inputList;
   this->mSuccessCallback = successCallback;
   this->mFailureCallback = failureCallback;
@@ -22,11 +24,10 @@ Class::TCheatHandler::TCheatHandler(u16 *inputList, TMarioGamePad *gamepad,
   this->mInputIndex = 0;
 }
 
-void Class::TCheatHandler::advanceInput() {
+void TCheatHandler::advanceInput() {
   if (!this->mGamePad || !this->mInputList)
     return;
-  else if (this->mGamePad->mButtons.mFrameInput == 0 ||
-           this->mInputIndex < 0)
+  else if (this->mGamePad->mButtons.mFrameInput == 0 || this->mInputIndex < 0)
     return;
 
   if (this->mGamePad->mButtons.mFrameInput !=
@@ -53,7 +54,7 @@ void Class::TCheatHandler::advanceInput() {
   this->mInputIndex += 1;
 }
 
-void Class::TCheatHandler::reset() {
+void TCheatHandler::reset() {
   this->mInputIndex = 0;
   this->mActive = false;
 }

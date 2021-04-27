@@ -3,6 +3,10 @@
 
 #include "types.h"
 
+#ifndef __ppc__
+#define __ppc__
+#endif
+
 #ifdef __cplusplus
 extern "C"
 {

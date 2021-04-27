@@ -3,9 +3,11 @@
 #include "libs/sLogging.hxx"
 #include "libs/sString.hxx"
 
-using namespace SME;
+using namespace SME::Class;
 
-bool Class::TSMEFile::openFile(const char *path) {
+TSMEFile TSMEFile::sStageConfig = TSMEFile();
+
+bool TSMEFile::openFile(const char *path) {
   DVDFileInfo handle;
   TSMEFile tmp __attribute__((aligned(32)));
 
@@ -35,7 +37,7 @@ bool Class::TSMEFile::openFile(const char *path) {
   return true;
 }
 
-bool Class::TSMEFile::load(const char *stage) {
+bool TSMEFile::load(const char *stage) {
   char configPath[32];
 
   TSMEFile::withSMEExtension(configPath, stage);
@@ -59,8 +61,8 @@ bool Class::TSMEFile::load(const char *stage) {
   }
 }
 
-char *Class::TSMEFile::withSMEExtension(char *dst, const char *stage,
-                                        bool generalize) {
+char *TSMEFile::withSMEExtension(char *dst, const char *stage,
+                                 bool generalize) {
   String path("/data/scene/sme/", 128);
   String file(stage, 32);
 

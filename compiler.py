@@ -8,7 +8,7 @@ from io import BytesIO
 from pathlib import Path
 from typing import List, Optional, Union
 
-import pykamek
+#import pykamek
 
 TMPDIR = Path("tmp-compiler")
 
@@ -258,7 +258,7 @@ class Compiler(object):
             print("")
 
             args = [*objects.split(" "), "--static", f"0x{self.startaddr:08X}", *cmdtype]
-            pykamek.main(args)
+            # pykamek.main(args)
 
             return tmpDumpCode
         elif self.is_clang():

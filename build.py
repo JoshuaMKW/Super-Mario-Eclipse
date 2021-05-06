@@ -26,7 +26,7 @@ TMPDIR = Path("tmp-compiler")
 @atexit.register
 def clean_resources():
     if TMPDIR.is_dir():
-        shutil.rmtree(TMPDIR)
+        pass#shutil.rmtree(TMPDIR)
 
 def wrap_printer(msg: str = "") -> function:
     def decorater_inner(func):

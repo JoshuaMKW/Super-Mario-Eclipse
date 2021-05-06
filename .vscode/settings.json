@@ -27,7 +27,14 @@
         "initializer_list": "cpp",
         "limits": "cpp",
         "new": "cpp",
-        "xstddef": "cpp"
+        "xstddef": "cpp",
+        "math.h": "c",
+        "ppcarch.h": "c",
+        "ppc_intrinsics.h": "c",
+        "int_lib.h": "c",
+        "*.inc": "c",
+        "types.h": "c",
+        "*.tcc": "c"
     },
     "cmake.configureOnOpen": false
 }

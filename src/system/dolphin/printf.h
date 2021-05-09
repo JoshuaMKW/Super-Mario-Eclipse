@@ -12,7 +12,7 @@ extern "C"
     int snprintf(char *, size_t, const char *, ...);
     int sprintf(char *, const char *, ...);
     int vsnprintf(char *, size_t, const char *, va_list);
-    int vsprintf(char *, const char *, va_list);
+    int vprintf(char *, const char *, va_list);
 
 #ifdef __cplusplus
 }

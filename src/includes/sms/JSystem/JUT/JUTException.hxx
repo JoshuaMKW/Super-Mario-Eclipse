@@ -28,4 +28,6 @@ public:
 
     u32 _60;
     JUTDirectPrint *mPrinter; // _64
+
+    static char **sCpuExpName;
 };

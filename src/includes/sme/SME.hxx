@@ -88,7 +88,7 @@ void *handleDebugCheat(void *GCLogoDir);
 namespace CKit {
 
 void onSetup(TMarDirector *director);
-s32 onUpdate(TMarDirector *director);
+s32 onUpdate(void *director);
 void onDraw2D(J2DOrthoGraph *graph);
 bool manageLightSize();
 void formatTalkMessage(Talk2D2 *talker, char *msgfield, u32 *entrydata);
@@ -147,7 +147,7 @@ JKRExpHeap *createGlobalHeaps(void *newHeap, size_t size, JKRHeap *rootHeap,
 u32 setupMarioDatas(char *filepath);
 u32 *initFirstModel(char *path, u32 unk_1, u32 unk_2, u32 unk_3, JKRHeap *heap,
                     u32 unk_4, u32 unk_5, u32 unk_6);
-u32 *initFileMods();
+TMarDirector *initFileMods();
 void initShineShadow();
 void initSoundBank(u8 areaID, u8 episodeID);
 void initMusicTrack();

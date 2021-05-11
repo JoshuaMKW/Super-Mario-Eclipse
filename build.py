@@ -26,7 +26,7 @@ TMPDIR = Path("tmp-compiler")
 @atexit.register
 def clean_resources():
     if TMPDIR.is_dir():
-        pass#shutil.rmtree(TMPDIR)
+        shutil.rmtree(TMPDIR)
 
 def wrap_printer(msg: str = "") -> function:
     def decorater_inner(func):
@@ -394,7 +394,7 @@ class FilePatcher(Compiler):
 
             if absPath.exists() and absPath not in _renamed:
                 print(f"{absPath} -> {self.gameDir / absPath.parent / rename}")
-                absPath.rename(self.gameDir / absPath.parent / rename)
+                absPath.rename(absPath.parent / rename)
                 _renamed.append(absPath)
 
     @wrap_printer("DELETING")

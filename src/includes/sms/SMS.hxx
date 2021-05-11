@@ -43,6 +43,7 @@ extern RumbleMgr *gpPad1RumbleMgr;
 extern RumbleMgr *gpPad2RumbleMgr;
 extern RumbleMgr *gpPad3RumbleMgr;
 extern RumbleMgr *gpPad4RumbleMgr;
+extern TMario *gpMarioOriginal;
 extern TMario *gpMarioAddress;
 extern JGeometry::TVec3<f32> *gpMarioPos;
 extern TWaterManager *gpModelWaterManager;

@@ -10,7 +10,7 @@
 #endif
 #endif
 
-#define SME_MAX_PLAYERS 1
+#define SME_MAX_PLAYERS 4
 
 /* Misc compiler info */
 #define SME_VERSION "v0.4a"

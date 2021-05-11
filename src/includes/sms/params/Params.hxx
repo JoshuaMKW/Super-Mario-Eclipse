@@ -31,7 +31,12 @@ public:
   T get() const { return mValue; }
   void set(T param) { mValue = param; }
 
-  void load(JSUMemoryInputStream &) override;
+  void load(JSUMemoryInputStream &stream)
+  {
+    T buffer;
+    stream.read(&buffer, 4);
+    stream.read(&mValue, 4);
+  }
 };
 
 template <typename T> class TParamRT : public TParamT<T> {

@@ -95,6 +95,6 @@ namespace JStage
     public:
         virtual ~TAmbientLight();
 
-        virtual unsigned long JSGFGetType() const;
+        virtual u32 JSGFGetType() const;
     };
 };

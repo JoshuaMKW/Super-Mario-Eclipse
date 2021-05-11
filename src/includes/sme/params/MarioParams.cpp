@@ -167,6 +167,9 @@ bool TPlayerParams::loadPrm(const char *prm = "/sme.prm") {
   JKRArchive *archive = JKRFileLoader::getVolume("mario");
   SME_DEBUG_ASSERT(archive != nullptr, "Mario archive could not be located!");
 
+  if (!mParams)
+    mParams = new TCustomParams();
+
   void *resource = archive->getResource(prm);
   if (resource) {
     JSUMemoryInputStream stream(resource, archive->getResSize(resource));

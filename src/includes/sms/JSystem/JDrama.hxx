@@ -31,6 +31,7 @@ public:
 
   char *mTypeName;
   u16 mKeyCode;
+  u16 _0A;
 };
 
 class TNameRefGen {
@@ -81,7 +82,7 @@ public:
 
   void testPerform(u32, TGraphics *);
 
-  TFlagT<u16> mFlags; // 0x000C
+  TFlagT<u16> mViewFlags; // 0x000C
 };
 
 class TPlacement : public TViewObj {
@@ -94,7 +95,7 @@ private:
   JGeometry::TVec3<f32> mPosition;
 
 public:
-  TFlagT<u16> mFlags;
+  TFlagT<u16> mPlacementFlags;
 };
 
 class TLightMap : public TViewObj {

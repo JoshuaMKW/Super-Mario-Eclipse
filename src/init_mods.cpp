@@ -98,36 +98,16 @@ static void resetGlobalValues() {
 }
 
 // 0x802998B4
-u32 *SME::Patch::Init::initFileMods() {
-  u32 *objList;
-  SME_FROM_GPR(26, objList);
+TMarDirector *SME::Patch::Init::initFileMods() {
+  TMarDirector *director;
+  SME_FROM_GPR(26, director);
 
   TMarioGamePad *gpGamePad = gpApplication.mGamePad1;
 
 #ifdef SME_DEBUG
-  s8 characterID;
-
-  switch (gpGamePad->mButtons.mInput) {
-  case TMarioGamePad::Buttons::Z:
-    characterID = 0;
-    break;
-  case TMarioGamePad::Buttons::DPAD_UP:
-    characterID = 1;
-    break;
-  case TMarioGamePad::Buttons::DPAD_DOWN:
-    characterID = 2;
-    break;
-  case TMarioGamePad::Buttons::DPAD_LEFT:
-    characterID = 3;
-    break;
-  case TMarioGamePad::Buttons::DPAD_RIGHT:
-    characterID = 4;
-    break;
-  default:
-    characterID = -1;
-  }
+  s32 characterID = SME::Util::getCharacterID(gpGamePad);
 #else
-  s8 characterID = -1;
+  s32 characterID = -1;
 #endif
 
   JKRMemArchive *marioVolumeData =
@@ -141,15 +121,16 @@ u32 *SME::Patch::Init::initFileMods() {
 
   if (SME::Class::TSMEFile::sStageConfig.load(
           SME::Util::getStageName(&gpApplication))) {
-    SME_DEBUG_LOG("Success: SME config loaded at %X\n",
-                  &SME::Class::TSMEFile::sStageConfig);
-    if (characterID < 0)
+    if (characterID == -1)
       characterID = SME::Class::TSMEFile::sStageConfig.GlobalFlags.mPlayerID;
+  } else {
+    if (characterID == -1)
+      characterID = 0;
   }
 
-  if (characterID >= 0) {
+  if (characterID != -1) {
     // Attempt to swap character data
-    sprintf(buffer, "/data/chr%d.szs", characterID);
+    sprintf(buffer, "/data/chr%ld.szs", characterID);
 
     SME::TGlobals::sGlobals.mCharacterHeap->freeAll();
 
@@ -198,7 +179,7 @@ u32 *SME::Patch::Init::initFileMods() {
                           JKRMemBreakFlag::UNK_0);
   }
 
-  return objList;
+  return director;
 }
 
 // 0x80280180
@@ -328,6 +309,7 @@ static void initFludd(TMario *player, SME::Class::TPlayerParams *params) {
 
 static void initMario(TMario *player, bool isMario) {
   CPolarSubCamera *camera = new CPolarSubCamera("<CPolarSubCamera>");
+  camera->mInterpolateDistance = 420.69f;
   SME::Class::TPlayerParams *params =
       new SME::Class::TPlayerParams(player, camera, isMario);
   SME::TGlobals::sGlobals.registerPlayerParams(params);

@@ -66,7 +66,7 @@ char *TSMEFile::withSMEExtension(char *dst, const char *stage,
   String path("/data/scene/sme/", 128);
   String file(stage, 32);
 
-  size_t numIDPos = file.findAny(String::numbers);
+  const size_t numIDPos = file.findAny(String::numbers);
   if (generalize && numIDPos != String::npos) {
     file.erase(numIDPos);
     file.append("+.sme");

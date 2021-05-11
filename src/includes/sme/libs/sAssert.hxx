@@ -1,6 +1,7 @@
 #pragma once
 
 #include "OS.h"
+#include "PPCArch.h"
 #include "printf.h"
 
 #if defined(__GNUC__) || (defined(__MWERKS__) && (__MWERKS__ >= 0x3000)) ||    \
@@ -19,6 +20,7 @@
     char errmsg[256];                                                          \
     sprintf(errmsg, "[SME] %s: %s", (_SmeFunc), (msg));                        \
     OSPanic(__FILE__, __LINE__, errmsg, ##__VA_ARGS__);                        \
+    __OSUnhandledException(6, 0, 0);                                           \
   }
 
 #ifdef SME_DEBUG

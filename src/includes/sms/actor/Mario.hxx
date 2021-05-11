@@ -77,6 +77,7 @@ public:
   u16 _22;
   u8 _24;
   u16 _26;
+  u16 _28;
   u8 _2A;
   u8 _2B;
   u8 _2C;
@@ -841,8 +842,7 @@ public:
     DEATH = 0x00020467,
     DOOR_F_O = 0x00001321, // Door open fail
     WALL_S_L = 0x04000471,
-    F_KNCK_H =
-        0x000208B0, // hard knockback from front (bumping into a wall from dive)
+    F_KNCK_H = 0x000208B0, // hard knockback from front (bumping wall from dive)
     KNCK_LND = 0x00020462, // Landing from front knockback
     KNCK_GND = 0x00020466, // Front knockback while grounded
     FIRE_HIT = 0x000208B7,
@@ -1164,6 +1164,12 @@ public:
   f32 _450;
   f32 _454;
   f32 _458;
+  u32 _45C;
+  u32 _460;
+  u32 _464;
+  u32 _468;
+  u32 _46C;
+  u32 _470;
   THitActor _474;
   u32 _4DC;
   u32 _4E0;
@@ -1214,6 +1220,7 @@ public:
   TPullParams mPullBGTentacleParams;              // 0x14D4
   TPullParams mPullBGFireWanWanBossTailParams;    // 0x152C
   TPullParams mPullFireWanWanTailParams;          // 0x1584
+  TClimbParams mClimbParams;                      // 0x15DC
   TSurfingParams mSurfingWaterRedParams;          // 0x1648
   TSurfingParams mSurfingGroundRedParams;         // 0x181C
   TSurfingParams mSurfingWaterYellowParams;       // 0x19F0

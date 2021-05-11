@@ -6,7 +6,7 @@
 
 using namespace SME;
 
-s8 Util::getCharacterID(JUTGamePad *controller)
+s32 Util::getCharacterID(JUTGamePad *controller)
 {
     if (!controller)
         return SME::TGlobals::sGlobals.getStageConfig()->GlobalFlags.mPlayerID;
@@ -27,6 +27,7 @@ s8 Util::getCharacterID(JUTGamePad *controller)
         return -1;
     }
 }
+
 const char *Util::getStageName(TApplication *gpApplication)
 {
     AreaEpisodeArray *AreaPathArray = gpApplication->mStringPaths;
@@ -55,10 +56,12 @@ void *Util::loadArchive(char *path, JKRHeap *heap)
     {
         u32 *file = (u32 *)loadToMainRAM__12JKRDvdRipperFPCcPUc15JKRExpandSwitchUlP7JKRHeapQ212JKRDvdRipper15EAllocDirectionUlPi(path, 0, 1, 0, heap, 1, 0, 0);
 
-        if (file)
+        if (file) {
             SME_DEBUG_LOG("Success! Location = %X, Size = %X\n", file, file[1]);
-        else
+        }
+        else {
             SME_DEBUG_LOG("Failed! Could not allocate memory\n");
+        }
         return file;
     }
     else

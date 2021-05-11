@@ -108,12 +108,11 @@ KURIBO_MODULE_BEGIN("Eclipse", "JoshuaMK",
   KURIBO_PATCH_BL(SME_PORT_REGION(0x8023F9DC, 0, 0, 0), Patch::Fruit::isGrabWaitOver);
 
   // init_mods.cpp
-  KURIBO_PATCH_BL(SME_PORT_REGION(0x80005328, 0, 0, 0), Patch::Init::initCodeProtection);
   KURIBO_PATCH_BL(SME_PORT_REGION(0x802A750C, 0, 0, 0), Patch::Init::createGlobalHeaps);
   KURIBO_PATCH_BL(SME_PORT_REGION(0x802A7140, 0, 0, 0), Patch::Init::setupMarioDatas);
   KURIBO_PATCH_BL(SME_PORT_REGION(0x802A716C, 0, 0, 0), Patch::Init::initFirstModel);
   KURIBO_PATCH_BL(SME_PORT_REGION(0x802998B4, 0, 0, 0), Patch::Init::initFileMods);
-  KURIBO_PATCH_BL(SME_PORT_REGION(0x80280180, 0, 0, 0), Patch::Init::initShineShadow);
+  KURIBO_PATCH_B(SME_PORT_REGION(0x80280180, 0, 0, 0), Patch::Init::initShineShadow);
   KURIBO_PATCH_BL(SME_PORT_REGION(0x802B7A4C, 0, 0, 0), Patch::Init::initSoundBank);
   KURIBO_PATCH_BL(SME_PORT_REGION(0x802983F0, 0, 0, 0), Patch::Init::initMusicTrack);
   KURIBO_PATCH_BL(SME_PORT_REGION(0x80298420, 0, 0, 0), Patch::Init::initMusicTrack);
@@ -121,7 +120,7 @@ KURIBO_MODULE_BEGIN("Eclipse", "JoshuaMK",
   KURIBO_PATCH_BL(SME_PORT_REGION(0x80276C94, 0, 0, 0), Patch::Init::fromMarioInit);
   KURIBO_PATCH_BL(SME_PORT_REGION(0x800397DC, 0, 0, 0), Patch::Init::fromShadowMarioInit);
   KURIBO_PATCH_BL(SME_PORT_REGION(0x80271580, 0, 0, 0), Patch::Init::initYoshi);
-  KURIBO_PATCH_BL(SME_PORT_REGION(0x8029CCB0, 0, 0, 0), Patch::Init::initCardColors);
+  KURIBO_PATCH_B(SME_PORT_REGION(0x8029CCB0, 0, 0, 0), Patch::Init::initCardColors);
   KURIBO_PATCH_BL(SME_PORT_REGION(0x802B8B20, 0, 0, 0), Patch::Init::initCollisionWarpLinks);
   KURIBO_PATCH_BL(SME_PORT_REGION(0x802B57E4, 0, 0, 0), Patch::Init::createUIHeap);
 
@@ -287,6 +286,10 @@ KURIBO_MODULE_BEGIN("Eclipse", "JoshuaMK",
   // Show Exception Handler
   kWrite32(SME_PORT_REGION(0x8029D0BC, 0, 0, 0), 0x60000000);
 
+  // Extend Exception Handler
+  kWrite32(SME_PORT_REGION(0x802C7638, 0, 0, 0), 0x60000000);
+  kWrite32(SME_PORT_REGION(0x802C7690, 0, 0, 0), 0x60000000);
+
 #ifdef SME_DEBUG
   // Skip FMVs
   kWrite32(SME_PORT_REGION(0x802B5E8C, 0, 0, 0), 0x38600001);
@@ -325,5 +328,7 @@ KURIBO_MODULE_BEGIN("Eclipse", "JoshuaMK",
   kWrite32(SME_PORT_REGION(0x801B7514, 0, 0, 0), 0x4810BA9D);
   kWrite32(SME_PORT_REGION(0x801B7518, 0, 0, 0), 0x28030000);
   kWrite32(SME_PORT_REGION(0x801B751C, 0, 0, 0), 0x418200A4);
+
+  Patch::Init::initCodeProtection();
 }
 KURIBO_MODULE_END();

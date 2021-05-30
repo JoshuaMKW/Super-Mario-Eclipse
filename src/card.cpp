@@ -63,11 +63,3 @@ s32 Patch::Card::probeCard(TCardManager *cardManager)
     }
     return ret;
 }
-
-// extern -> SME.cpp
-char *Patch::Card::formatCardMessage(char *dst, const char *src, s32 len)
-{
-    String fmtMessage(src, len);
-    Util::formatBMG(fmtMessage);
-    return strncpy(dst, fmtMessage.data(), len);;
-}

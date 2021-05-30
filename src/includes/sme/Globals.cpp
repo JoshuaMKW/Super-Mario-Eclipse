@@ -5,6 +5,28 @@ using namespace SME;
 
 TGlobals TGlobals::sGlobals = TGlobals();
 
+TGlobals::TGlobals()
+    : mStageConfig(nullptr), mIsCompletionRewards(false),
+      mIsAudioStreaming(false), mIsAudioStreamAllowed(false),
+      mIsFreePlay(false), mActivePlayers(0), mMaxPlayers(SME_MAX_PLAYERS),
+      mPRMFile(nullptr), mWarpColArray(nullptr), mWarpColPreserveArray(nullptr),
+      mCharacterHeap(nullptr), mGame6Heap(nullptr), mGlobalsHeap(nullptr),
+      mPlayerHasGeckoCodes(false) {
+  for (u32 i = 0; i < SME_MAX_PLAYERS; ++i) {
+    mPlayers[i] = nullptr;
+    mPlayerCfgArray[i] = nullptr;
+  }
+
+  mLightData.mShineShadowCoordinates.set(0.0f, 0.0f, 0.0f);
+  mLightData.mPrevShineCount = 0;
+  mLightData.mPrevSize = 0.0f;
+  mLightData.mNextSize = 0.0f;
+  mLightData.mShineShadowBase = 0.0f;
+  mLightData.mStepContext = 0.0f;
+  mLightData.mLightType = SME::Enum::LightContext::DISABLED;
+  mLightData.mSizeMorphing = false;
+}
+
 TMario *TGlobals::getPlayerByIndex(u8 index) const {
   SME_DEBUG_ASSERT(index < SME_MAX_PLAYERS, "Invalid player index provided");
   return mPlayers[index];
@@ -15,8 +37,7 @@ Class::TPlayerParams *TGlobals::getPlayerParams(u8 id) const {
   return mPlayerCfgArray[id];
 }
 
-Class::TPlayerParams *
-TGlobals::getPlayerParams(TMario *player) const {
+Class::TPlayerParams *TGlobals::getPlayerParams(TMario *player) const {
   for (u32 i = 0; i < SME_MAX_PLAYERS; ++i) {
     if (mPlayerCfgArray[i]->getPlayer() == player)
       return mPlayerCfgArray[i];
@@ -47,5 +68,11 @@ void TGlobals::deregisterPlayerParams(Class::TPlayerParams *params) {
       return;
     } else if (mPlayerCfgArray[i] == nullptr)
       return;
+  }
+}
+
+void TGlobals::clearAllPlayerParams() {
+  for (u32 i = 0; i < SME_MAX_PLAYERS; ++i) {
+    mPlayerCfgArray[i] = nullptr;
   }
 }

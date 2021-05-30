@@ -4,13 +4,11 @@
 #include "sms/spc/SpcBinary.hxx"
 #include "sms/spc/SpcTypedInterp.hxx"
 
-template<typename T>
-class TSpcTypedBinary : public TSpcBinary
-{
-    public:
-    virtual ~TSpcTypedBinary();
+template <typename T> class TSpcTypedBinary : public TSpcBinary {
+public:
+  virtual ~TSpcTypedBinary();
 
-    virtual void initUserBuiltin();
+  virtual void initUserBuiltin() override;
 };
 
 void linPushNerve(TSpcTypedInterp<TLiveActor> *, u32);

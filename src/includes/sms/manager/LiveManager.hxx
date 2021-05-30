@@ -5,7 +5,7 @@
 
 class TLiveManager : public TObjManager
 {
-	public:
+public:
 	TLiveManager(char const *);
 	virtual ~TLiveManager();
 

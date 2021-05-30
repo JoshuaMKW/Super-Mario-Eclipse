@@ -220,6 +220,7 @@ extern "C"
     void OSExceptionInit();
     void OSExceptionVector(u32 unk);
     void OSDefaultExceptionHandler();
+    void __OSUnhandledException(u32, u32, u32);
 
     void OSInitAlarm();
     void OSCreateAlarm(void *alarm);

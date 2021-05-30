@@ -10,7 +10,6 @@
 #include "libs/sString.hxx"
 #include "libs/sTime.hxx"
 
-
 #include "CheatHandler.hxx"
 #include "Globals.hxx"
 #include "funcs.hxx"
@@ -74,7 +73,6 @@ namespace Card {
 
 s32 mountCard(TCardManager *cardManager, bool r4);
 s32 probeCard(TCardManager *cardManager);
-char *formatCardMessage(char *dst, const char *src, s32 len);
 
 } // namespace Card
 
@@ -118,10 +116,8 @@ namespace Fludd {
 bool isPumpOK(TMarioAnimeData *animeData);
 bool hasWaterCardOpen();
 bool canCollectFluddItem(TMario *player);
-void sprayGoopMapWrapGlobalMar(TPollutionManager *gpPollutionManager, f32 x,
-                               f32 y, f32 z, f32 r);
-void sprayGoopMapWrapMar30(TPollutionManager *gpPollutionManager, f32 x, f32 y,
-                           f32 z, f32 r);
+void sprayGoopMap(TPollutionManager *gpPollutionManager, f32 x, f32 y, f32 z,
+                  f32 r);
 bool canCleanSeals(TWaterManager *gpWaterManager);
 TWaterGun *bindFluddtojoint();
 void checkExecWaterGun(TWaterGun *fludd);

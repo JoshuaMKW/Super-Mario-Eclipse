@@ -10367,7 +10367,6 @@
 #define __OSLoadFPUContext ((int(*)(...))0x80343CB0)
 #define __OSSaveFPUContext ((int(*)(...))0x80343DD4)
 #define __OSContextInit ((int(*)(...))0x803444D0)
-#define __OSUnhandledException ((int(*)(...))0x8034480C)
 #define GetFontCode ((int(*)(...))0x80344A0C)
 #define Decode ((int(*)(...))0x80344BA8)
 #define ReadROM ((int(*)(...))0x80344D74)

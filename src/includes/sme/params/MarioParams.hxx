@@ -189,6 +189,7 @@ public:
   bool mIsClimbTired;
   u16 mPrevCollisionType;
   s32 mCollisionTimer;
+  s32 mClimbTiredTimer;
 
   struct {
     bool mIsAirborn : 1;

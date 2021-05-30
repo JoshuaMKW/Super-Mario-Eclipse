@@ -15,6 +15,8 @@ namespace SME
 
 struct TGlobals
 {
+    TGlobals();
+
     SME::Class::TSMEFile *mStageConfig;
     SME::Class::TPlayerParams *mPlayerCfgArray[SME_MAX_PLAYERS];
     TMario *mPlayers[SME_MAX_PLAYERS];
@@ -56,6 +58,7 @@ struct TGlobals
 
     void registerPlayerParams(SME::Class::TPlayerParams *params);
     void deregisterPlayerParams(SME::Class::TPlayerParams *params);
+    void clearAllPlayerParams();
 
     constexpr bool isCompletionRewarded() const { return mIsCompletionRewards; }
     constexpr bool isFreePlayMode() const { return mIsFreePlay; }

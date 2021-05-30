@@ -14,6 +14,9 @@ extern "C" void shine_thinkCloseCamera();
 
 extern OSAlarm gctAlarm;
 
+#define _SME_PATCH_RAM
+#define _SME_EXECUTE_LOADS
+
 #ifdef SME_DEBUG
 extern OSStopwatch gctStopwatch;
 #endif
@@ -22,6 +25,7 @@ using namespace SME;
 
 KURIBO_MODULE_BEGIN("Eclipse", "JoshuaMK",
                     __VERSION__ "[" SME_STRINGIZE(SME_MAX_SHINES) " Shines]") {
+#ifdef _SME_EXECUTE_LOADS
   KURIBO_EXECUTE_ON_LOAD {
     SME_DEBUG_LOG(
         "Codeblocker - Creating OSAlarm at %p; Calls %p every %0.4f seconds\n",
@@ -42,6 +46,9 @@ KURIBO_MODULE_BEGIN("Eclipse", "JoshuaMK",
 #endif
     OSCancelAlarm(&gctAlarm);
   }
+#endif
+
+#ifdef _SME_PATCH_RAM
 
   /* -- HOOKS -- */
 
@@ -85,12 +92,12 @@ KURIBO_MODULE_BEGIN("Eclipse", "JoshuaMK",
   KURIBO_PATCH_BL(SME_PORT_REGION(0x8014206C, 0, 0, 0), Patch::Fludd::hasWaterCardOpen);
   kWrite32(SME_PORT_REGION(0x80142070, 0, 0, 0), 0x28030000);
   KURIBO_PATCH_BL(SME_PORT_REGION(0x80283058, 0, 0, 0), Patch::Fludd::canCollectFluddItem);
-  KURIBO_PATCH_BL(SME_PORT_REGION(0x800678C4, 0, 0, 0), Patch::Fludd::sprayGoopMapWrapGlobalMar);
-  KURIBO_PATCH_BL(SME_PORT_REGION(0x801A3ED0, 0, 0, 0), Patch::Fludd::sprayGoopMapWrapGlobalMar);
-  KURIBO_PATCH_BL(SME_PORT_REGION(0x801B42D8, 0, 0, 0), Patch::Fludd::sprayGoopMapWrapGlobalMar);
-  KURIBO_PATCH_BL(SME_PORT_REGION(0x8024E710, 0, 0, 0), Patch::Fludd::sprayGoopMapWrapMar30);
-  KURIBO_PATCH_BL(SME_PORT_REGION(0x8027F7DC, 0, 0, 0), Patch::Fludd::sprayGoopMapWrapGlobalMar);
-  KURIBO_PATCH_BL(SME_PORT_REGION(0x8027F94C, 0, 0, 0), Patch::Fludd::sprayGoopMapWrapGlobalMar);
+  KURIBO_PATCH_BL(SME_PORT_REGION(0x800678C4, 0, 0, 0), Patch::Fludd::sprayGoopMap);
+  KURIBO_PATCH_BL(SME_PORT_REGION(0x801A3ED0, 0, 0, 0), Patch::Fludd::sprayGoopMap);
+  KURIBO_PATCH_BL(SME_PORT_REGION(0x801B42D8, 0, 0, 0), Patch::Fludd::sprayGoopMap);
+  KURIBO_PATCH_BL(SME_PORT_REGION(0x8024E710, 0, 0, 0), Patch::Fludd::sprayGoopMap);
+  KURIBO_PATCH_BL(SME_PORT_REGION(0x8027F7DC, 0, 0, 0), Patch::Fludd::sprayGoopMap);
+  KURIBO_PATCH_BL(SME_PORT_REGION(0x8027F94C, 0, 0, 0), Patch::Fludd::sprayGoopMap);
   KURIBO_PATCH_BL(SME_PORT_REGION(0x800FED3C, 0, 0, 0), Patch::Fludd::canCleanSeals);
   kWrite32(SME_PORT_REGION(0x800FED40, 0, 0, 0), 0x2C030000);
   KURIBO_PATCH_BL(SME_PORT_REGION(0x8024D53C, 0, 0, 0), Patch::Fludd::bindFluddtojoint);
@@ -134,13 +141,19 @@ KURIBO_MODULE_BEGIN("Eclipse", "JoshuaMK",
   kWrite32(SME_PORT_REGION(0x80207434, 0, 0, 0), 0x2C030000);
 
   // multiplayer.cpp
-  KURIBO_PATCH_B(SME_PORT_REGION(0x802EFAB4, 0, 0, 0), Patch::Multiplayer::draw3DOverhaul);
+  // KURIBO_PATCH_B(SME_PORT_REGION(0x802EFAB4, 0, 0, 0), Patch::Multiplayer::draw3DOverhaul);
   KURIBO_PATCH_BL(SME_PORT_REGION(0x8029D7E8, 0, 0, 0), Patch::Multiplayer::makeMarios);
-  KURIBO_PATCH_B(SME_PORT_REGION(0x80276BD0, 0, 0, 0), Patch::Multiplayer::loadMarioTrickyOverhaul);
-  KURIBO_PATCH_B(SME_PORT_REGION(0x8024D2A8, 0, 0, 0), Patch::Multiplayer::performMarioTrickyOverhaul);
-  KURIBO_PATCH_BL(SME_PORT_REGION(0x802983F8, 0, 0, 0), Patch::Multiplayer::setMarioOverhaul);
-  KURIBO_PATCH_BL(SME_PORT_REGION(0x80298428, 0, 0, 0), Patch::Multiplayer::setMarioOverhaul);
-  KURIBO_PATCH_BL(SME_PORT_REGION(0x802984D8, 0, 0, 0), Patch::Multiplayer::setMarioOverhaul);
+  // KURIBO_PATCH_B(SME_PORT_REGION(0x80276BD0, 0, 0, 0), Patch::Multiplayer::loadMarioTrickyOverhaul);
+  // KURIBO_PATCH_B(SME_PORT_REGION(0x8024D2A8, 0, 0, 0), Patch::Multiplayer::performMarioTrickyOverhaul);
+  // KURIBO_PATCH_BL(SME_PORT_REGION(0x802983F8, 0, 0, 0), Patch::Multiplayer::setMarioOverhaul);
+  // KURIBO_PATCH_BL(SME_PORT_REGION(0x80298428, 0, 0, 0), Patch::Multiplayer::setMarioOverhaul);
+  // KURIBO_PATCH_BL(SME_PORT_REGION(0x802984D8, 0, 0, 0), Patch::Multiplayer::setMarioOverhaul);
+
+  // music.cpp
+  KURIBO_PATCH_BL(SME_PORT_REGION(0x80016998, 0, 0, 0), Patch::Music::setIsValid);
+  KURIBO_PATCH_B(SME_PORT_REGION(0x80016ABC, 0, 0, 0), Patch::Music::initMusic);
+  KURIBO_PATCH_B(SME_PORT_REGION(0x80016948, 0, 0, 0), Patch::Music::stopMusicOnStop);
+  KURIBO_PATCH_BL(SME_PORT_REGION(0x802A670C, 0, 0, 0), Patch::Music::stopMusicOnStageExit);
 
   // shine.cpp
   KURIBO_PATCH_BL(SME_PORT_REGION(0x801BD664, 0, 0, 0), Patch::Shine::manageShineVanish);
@@ -156,7 +169,7 @@ KURIBO_MODULE_BEGIN("Eclipse", "JoshuaMK",
   kWrite32(SME_PORT_REGION(0x80294744, 0, 0, 0), 0x60000000);
   KURIBO_PATCH_BL(SME_PORT_REGION(0x8029474C, 0, 0, 0), Patch::Shine::shineGetClamper);
   /*Shine casts, fix light*/
-  kWrite32(SME_PORT_REGION(0x80412548, 0, 0, 0), (f32)SME_MAX_SHINES);
+  kWrite32(SME_PORT_REGION(0x80412548, 0, 0, 0), f32(SME_MAX_SHINES));
   kWrite32(SME_PORT_REGION(0x80293AF8, 0, 0, 0), 0x3BFF03E7);
   kWrite32(SME_PORT_REGION(0x802946B8, 0, 0, 0), 0x280003E7);
   kWrite32(SME_PORT_REGION(0x8017BE78, 0, 0, 0), 0x5464037E);
@@ -234,49 +247,49 @@ KURIBO_MODULE_BEGIN("Eclipse", "JoshuaMK",
   // utilities/card.cpp
   KURIBO_PATCH_BL(SME_PORT_REGION(0x802B20F8, 0, 0, 0), Patch::Card::mountCard);
   KURIBO_PATCH_BL(SME_PORT_REGION(0x80163C40, 0, 0, 0), Patch::Card::probeCard);
-  KURIBO_PATCH_BL(SME_PORT_REGION(0x8015B2C0, 0, 0, 0), Patch::Card::formatCardMessage);
-  KURIBO_PATCH_BL(SME_PORT_REGION(0x8015B2F8, 0, 0, 0), Patch::Card::formatCardMessage);
-  KURIBO_PATCH_BL(SME_PORT_REGION(0x8015B5BC, 0, 0, 0), Patch::Card::formatCardMessage);
-  KURIBO_PATCH_BL(SME_PORT_REGION(0x8015B5E4, 0, 0, 0), Patch::Card::formatCardMessage);
-  KURIBO_PATCH_BL(SME_PORT_REGION(0x8015B638, 0, 0, 0), Patch::Card::formatCardMessage);
-  KURIBO_PATCH_BL(SME_PORT_REGION(0x8015B660, 0, 0, 0), Patch::Card::formatCardMessage);
-  KURIBO_PATCH_BL(SME_PORT_REGION(0x8015BCB8, 0, 0, 0), Patch::Card::formatCardMessage);
-  KURIBO_PATCH_BL(SME_PORT_REGION(0x8015BCE0, 0, 0, 0), Patch::Card::formatCardMessage);
-  KURIBO_PATCH_BL(SME_PORT_REGION(0x8015BE24, 0, 0, 0), Patch::Card::formatCardMessage);
-  KURIBO_PATCH_BL(SME_PORT_REGION(0x8015BE4C, 0, 0, 0), Patch::Card::formatCardMessage);
-  KURIBO_PATCH_BL(SME_PORT_REGION(0x8015BE9C, 0, 0, 0), Patch::Card::formatCardMessage);
-  KURIBO_PATCH_BL(SME_PORT_REGION(0x8015BEC4, 0, 0, 0), Patch::Card::formatCardMessage);
-  KURIBO_PATCH_BL(SME_PORT_REGION(0x8015C508, 0, 0, 0), Patch::Card::formatCardMessage);
-  KURIBO_PATCH_BL(SME_PORT_REGION(0x8015D194, 0, 0, 0), Patch::Card::formatCardMessage);
-  KURIBO_PATCH_BL(SME_PORT_REGION(0x8015D1CC, 0, 0, 0), Patch::Card::formatCardMessage);
-  KURIBO_PATCH_BL(SME_PORT_REGION(0x8015DEFC, 0, 0, 0), Patch::Card::formatCardMessage);
-  KURIBO_PATCH_BL(SME_PORT_REGION(0x8015DF34, 0, 0, 0), Patch::Card::formatCardMessage);
-  KURIBO_PATCH_BL(SME_PORT_REGION(0x8015E34C, 0, 0, 0), Patch::Card::formatCardMessage);
-  KURIBO_PATCH_BL(SME_PORT_REGION(0x8015E374, 0, 0, 0), Patch::Card::formatCardMessage);
-  KURIBO_PATCH_BL(SME_PORT_REGION(0x8015E3C8, 0, 0, 0), Patch::Card::formatCardMessage);
-  KURIBO_PATCH_BL(SME_PORT_REGION(0x8015E3F0, 0, 0, 0), Patch::Card::formatCardMessage);
-  KURIBO_PATCH_BL(SME_PORT_REGION(0x8015F970, 0, 0, 0), Patch::Card::formatCardMessage);
-  KURIBO_PATCH_BL(SME_PORT_REGION(0x8015F9A8, 0, 0, 0), Patch::Card::formatCardMessage);
-  KURIBO_PATCH_BL(SME_PORT_REGION(0x80161320, 0, 0, 0), Patch::Card::formatCardMessage);
-  KURIBO_PATCH_BL(SME_PORT_REGION(0x80161358, 0, 0, 0), Patch::Card::formatCardMessage);
-  KURIBO_PATCH_BL(SME_PORT_REGION(0x8016889C, 0, 0, 0), Patch::Card::formatCardMessage);
-  KURIBO_PATCH_BL(SME_PORT_REGION(0x801688D4, 0, 0, 0), Patch::Card::formatCardMessage);
-  KURIBO_PATCH_BL(SME_PORT_REGION(0x80169224, 0, 0, 0), Patch::Card::formatCardMessage);
-  KURIBO_PATCH_BL(SME_PORT_REGION(0x8016925C, 0, 0, 0), Patch::Card::formatCardMessage);
-  KURIBO_PATCH_BL(SME_PORT_REGION(0x8016950C, 0, 0, 0), Patch::Card::formatCardMessage);
-  KURIBO_PATCH_BL(SME_PORT_REGION(0x80169534, 0, 0, 0), Patch::Card::formatCardMessage);
-  KURIBO_PATCH_BL(SME_PORT_REGION(0x8016958C, 0, 0, 0), Patch::Card::formatCardMessage);
-  KURIBO_PATCH_BL(SME_PORT_REGION(0x801695B4, 0, 0, 0), Patch::Card::formatCardMessage);
-  KURIBO_PATCH_BL(SME_PORT_REGION(0x80169ACC, 0, 0, 0), Patch::Card::formatCardMessage);
-  KURIBO_PATCH_BL(SME_PORT_REGION(0x80169B04, 0, 0, 0), Patch::Card::formatCardMessage);
-  KURIBO_PATCH_BL(SME_PORT_REGION(0x8016A02C, 0, 0, 0), Patch::Card::formatCardMessage);
-  KURIBO_PATCH_BL(SME_PORT_REGION(0x8016A064, 0, 0, 0), Patch::Card::formatCardMessage);
-  KURIBO_PATCH_BL(SME_PORT_REGION(0x8016A3D0, 0, 0, 0), Patch::Card::formatCardMessage);
-  KURIBO_PATCH_BL(SME_PORT_REGION(0x8016A3F8, 0, 0, 0), Patch::Card::formatCardMessage);
-  KURIBO_PATCH_BL(SME_PORT_REGION(0x8016A44C, 0, 0, 0), Patch::Card::formatCardMessage);
-  KURIBO_PATCH_BL(SME_PORT_REGION(0x8016A474, 0, 0, 0), Patch::Card::formatCardMessage);
-  KURIBO_PATCH_BL(SME_PORT_REGION(0x8016B19C, 0, 0, 0), Patch::Card::formatCardMessage);
-  KURIBO_PATCH_BL(SME_PORT_REGION(0x8016B1D4, 0, 0, 0), Patch::Card::formatCardMessage);
+  KURIBO_PATCH_BL(SME_PORT_REGION(0x8015B2C0, 0, 0, 0), Util::formatBMGRaw);
+  KURIBO_PATCH_BL(SME_PORT_REGION(0x8015B2F8, 0, 0, 0), Util::formatBMGRaw);
+  KURIBO_PATCH_BL(SME_PORT_REGION(0x8015B5BC, 0, 0, 0), Util::formatBMGRaw);
+  KURIBO_PATCH_BL(SME_PORT_REGION(0x8015B5E4, 0, 0, 0), Util::formatBMGRaw);
+  KURIBO_PATCH_BL(SME_PORT_REGION(0x8015B638, 0, 0, 0), Util::formatBMGRaw);
+  KURIBO_PATCH_BL(SME_PORT_REGION(0x8015B660, 0, 0, 0), Util::formatBMGRaw);
+  KURIBO_PATCH_BL(SME_PORT_REGION(0x8015BCB8, 0, 0, 0), Util::formatBMGRaw);
+  KURIBO_PATCH_BL(SME_PORT_REGION(0x8015BCE0, 0, 0, 0), Util::formatBMGRaw);
+  KURIBO_PATCH_BL(SME_PORT_REGION(0x8015BE24, 0, 0, 0), Util::formatBMGRaw);
+  KURIBO_PATCH_BL(SME_PORT_REGION(0x8015BE4C, 0, 0, 0), Util::formatBMGRaw);
+  KURIBO_PATCH_BL(SME_PORT_REGION(0x8015BE9C, 0, 0, 0), Util::formatBMGRaw);
+  KURIBO_PATCH_BL(SME_PORT_REGION(0x8015BEC4, 0, 0, 0), Util::formatBMGRaw);
+  KURIBO_PATCH_BL(SME_PORT_REGION(0x8015C508, 0, 0, 0), Util::formatBMGRaw);
+  KURIBO_PATCH_BL(SME_PORT_REGION(0x8015D194, 0, 0, 0), Util::formatBMGRaw);
+  KURIBO_PATCH_BL(SME_PORT_REGION(0x8015D1CC, 0, 0, 0), Util::formatBMGRaw);
+  KURIBO_PATCH_BL(SME_PORT_REGION(0x8015DEFC, 0, 0, 0), Util::formatBMGRaw);
+  KURIBO_PATCH_BL(SME_PORT_REGION(0x8015DF34, 0, 0, 0), Util::formatBMGRaw);
+  KURIBO_PATCH_BL(SME_PORT_REGION(0x8015E34C, 0, 0, 0), Util::formatBMGRaw);
+  KURIBO_PATCH_BL(SME_PORT_REGION(0x8015E374, 0, 0, 0), Util::formatBMGRaw);
+  KURIBO_PATCH_BL(SME_PORT_REGION(0x8015E3C8, 0, 0, 0), Util::formatBMGRaw);
+  KURIBO_PATCH_BL(SME_PORT_REGION(0x8015E3F0, 0, 0, 0), Util::formatBMGRaw);
+  KURIBO_PATCH_BL(SME_PORT_REGION(0x8015F970, 0, 0, 0), Util::formatBMGRaw);
+  KURIBO_PATCH_BL(SME_PORT_REGION(0x8015F9A8, 0, 0, 0), Util::formatBMGRaw);
+  KURIBO_PATCH_BL(SME_PORT_REGION(0x80161320, 0, 0, 0), Util::formatBMGRaw);
+  KURIBO_PATCH_BL(SME_PORT_REGION(0x80161358, 0, 0, 0), Util::formatBMGRaw);
+  KURIBO_PATCH_BL(SME_PORT_REGION(0x8016889C, 0, 0, 0), Util::formatBMGRaw);
+  KURIBO_PATCH_BL(SME_PORT_REGION(0x801688D4, 0, 0, 0), Util::formatBMGRaw);
+  KURIBO_PATCH_BL(SME_PORT_REGION(0x80169224, 0, 0, 0), Util::formatBMGRaw);
+  KURIBO_PATCH_BL(SME_PORT_REGION(0x8016925C, 0, 0, 0), Util::formatBMGRaw);
+  KURIBO_PATCH_BL(SME_PORT_REGION(0x8016950C, 0, 0, 0), Util::formatBMGRaw);
+  KURIBO_PATCH_BL(SME_PORT_REGION(0x80169534, 0, 0, 0), Util::formatBMGRaw);
+  KURIBO_PATCH_BL(SME_PORT_REGION(0x8016958C, 0, 0, 0), Util::formatBMGRaw);
+  KURIBO_PATCH_BL(SME_PORT_REGION(0x801695B4, 0, 0, 0), Util::formatBMGRaw);
+  KURIBO_PATCH_BL(SME_PORT_REGION(0x80169ACC, 0, 0, 0), Util::formatBMGRaw);
+  KURIBO_PATCH_BL(SME_PORT_REGION(0x80169B04, 0, 0, 0), Util::formatBMGRaw);
+  KURIBO_PATCH_BL(SME_PORT_REGION(0x8016A02C, 0, 0, 0), Util::formatBMGRaw);
+  KURIBO_PATCH_BL(SME_PORT_REGION(0x8016A064, 0, 0, 0), Util::formatBMGRaw);
+  KURIBO_PATCH_BL(SME_PORT_REGION(0x8016A3D0, 0, 0, 0), Util::formatBMGRaw);
+  KURIBO_PATCH_BL(SME_PORT_REGION(0x8016A3F8, 0, 0, 0), Util::formatBMGRaw);
+  KURIBO_PATCH_BL(SME_PORT_REGION(0x8016A44C, 0, 0, 0), Util::formatBMGRaw);
+  KURIBO_PATCH_BL(SME_PORT_REGION(0x8016A474, 0, 0, 0), Util::formatBMGRaw);
+  KURIBO_PATCH_BL(SME_PORT_REGION(0x8016B19C, 0, 0, 0), Util::formatBMGRaw);
+  KURIBO_PATCH_BL(SME_PORT_REGION(0x8016B1D4, 0, 0, 0), Util::formatBMGRaw);
 
   /* -- PATCHES -- */
 
@@ -329,6 +342,10 @@ KURIBO_MODULE_BEGIN("Eclipse", "JoshuaMK",
   kWrite32(SME_PORT_REGION(0x801B7518, 0, 0, 0), 0x28030000);
   kWrite32(SME_PORT_REGION(0x801B751C, 0, 0, 0), 0x418200A4);
 
+  // Sunscript logging restoration
+  kWrite32(SME_PORT_REGION(0x8003DB3C, 0, 0, 0), 0x48306B08);
+
   Patch::Init::initCodeProtection();
+  #endif
 }
 KURIBO_MODULE_END();

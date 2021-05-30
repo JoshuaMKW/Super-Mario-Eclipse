@@ -75,8 +75,8 @@ public:
 		void update(const PADStatus *, u32);
 		void setRepeat(u32, u32, u32);
 
-        Buttons mInput; // _0
-        Buttons mFrameInput;
+        u32 mInput; // _0
+        u32 mFrameInput;
         u32 _8;
         u8 mAnalogA;  // _C
         u8 mAnalogB;  // _D

@@ -170,36 +170,36 @@ bool Patch::CKit::manageLightSize() {
     gShineShadowPos =
         SME::TGlobals::sGlobals.mLightData.mShineShadowCoordinates;
 
-    f32 sigOfs = 300.0f;
-    f32 sigStrength = CurrentShineCount >= PrevShineCount ? 0.04f : -0.04f;
+    const f32 sigOfs = 300.0f;
+    const f32 sigStrength = CurrentShineCount >= PrevShineCount ? 0.04f : -0.04f;
 
-    if (!SME::TGlobals::sGlobals.mLightData.mSizeMorphing &&
-        CurrentShineCount == PrevShineCount)
-      break;
+    if (!SME::TGlobals::sGlobals.mLightData.mSizeMorphing) {
+      if (CurrentShineCount > PrevShineCount) {
+        SME::TGlobals::sGlobals.mLightData.mPrevSize = gpModelWaterManager->mSize;
+        SME::TGlobals::sGlobals.mLightData.mNextSize = gpModelWaterManager->mSize;
 
-    if (CurrentShineCount > PrevShineCount) {
-      SME::TGlobals::sGlobals.mLightData.mPrevSize = gpModelWaterManager->mSize;
-      SME::TGlobals::sGlobals.mLightData.mNextSize = gpModelWaterManager->mSize;
+        for (u32 i = 0; i < (CurrentShineCount - PrevShineCount); ++i)
+          SME::TGlobals::sGlobals.mLightData.mNextSize +=
+              (10000.0f / SME_MAX_SHINES) + (PrevShineCount + i) * 2.0f;
 
-      for (u32 i = 0; i < (CurrentShineCount - PrevShineCount); ++i)
-        SME::TGlobals::sGlobals.mLightData.mNextSize +=
-            (10000.0f / SME_MAX_SHINES) + (PrevShineCount + i) * 2.0f;
+        SME::TGlobals::sGlobals.mLightData.mSizeMorphing = true;
+        SME::TGlobals::sGlobals.mLightData.mStepContext = 0.0f;
+      } else if (CurrentShineCount < PrevShineCount) {
+        SME::TGlobals::sGlobals.mLightData.mPrevSize = gpModelWaterManager->mSize;
+        SME::TGlobals::sGlobals.mLightData.mNextSize = gpModelWaterManager->mSize;
 
-      SME::TGlobals::sGlobals.mLightData.mSizeMorphing = true;
-      SME::TGlobals::sGlobals.mLightData.mStepContext = 0.0f;
-    } else if (CurrentShineCount < PrevShineCount) {
-      SME::TGlobals::sGlobals.mLightData.mPrevSize = gpModelWaterManager->mSize;
-      SME::TGlobals::sGlobals.mLightData.mNextSize = gpModelWaterManager->mSize;
+        for (u32 i = 0; i < (PrevShineCount - CurrentShineCount); ++i)
+          SME::TGlobals::sGlobals.mLightData.mNextSize -=
+              (10000.0f / SME_MAX_SHINES) + (PrevShineCount - i) * 2.0f;
 
-      for (u32 i = 0; i < (PrevShineCount - CurrentShineCount); ++i)
-        SME::TGlobals::sGlobals.mLightData.mNextSize -=
-            (10000.0f / SME_MAX_SHINES) + (PrevShineCount - i) * 2.0f;
-
-      SME::TGlobals::sGlobals.mLightData.mSizeMorphing = true;
-      SME::TGlobals::sGlobals.mLightData.mStepContext = 0.0f;
+        SME::TGlobals::sGlobals.mLightData.mSizeMorphing = true;
+        SME::TGlobals::sGlobals.mLightData.mStepContext = 0.0f;
+      } else {
+        break;
+      }
     }
 
-    f32 cur = SME::Util::Math::sigmoidCurve(
+    const f32 cur = SME::Util::Math::sigmoidCurve(
         SME::TGlobals::sGlobals.mLightData.mStepContext,
         SME::TGlobals::sGlobals.mLightData.mPrevSize,
         SME::TGlobals::sGlobals.mLightData.mNextSize, sigOfs, sigStrength);

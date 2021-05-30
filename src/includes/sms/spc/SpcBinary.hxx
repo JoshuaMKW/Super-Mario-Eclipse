@@ -2,19 +2,17 @@
 
 #include "types.h"
 
-class TSpcBinary
-{
-    public:
-    TSpcBinary(void *);
-    virtual ~TSpcBinary();
+class TSpcBinary {
+  void *mHeader; // _0
 
-    virtual void initUserBuiltin();
+public:
+  TSpcBinary(void *binary);
+  virtual ~TSpcBinary();
 
-    void* getHeader() const;
-    void bindSystemDataToSymbol(const char *, u32);
-    u32* searchSymbol(const char *);
-    void init();
-    
-    void* spcBinary; // _0
-    // vtable _4
+  virtual void initUserBuiltin();
+
+  void *getHeader() const;
+  void bindSystemDataToSymbol(const char *symbol, u32 address);
+  u32 searchSymbol(const char *symbol);
+  void init();
 };

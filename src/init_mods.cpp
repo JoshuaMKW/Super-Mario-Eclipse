@@ -117,6 +117,7 @@ TMarDirector *SME::Patch::Init::initFileMods() {
   char buffer[32];
 
   resetGlobalValues();
+  SME::TGlobals::sGlobals.clearAllPlayerParams();
   SME::Class::TSMEFile::sStageConfig.reset();
 
   if (SME::Class::TSMEFile::sStageConfig.load(
@@ -210,13 +211,13 @@ void SME::Patch::Init::initShineShadow() {
     gpModelWaterManager->LightType.mShowShadow = true;
 
     if (SME::Class::TSMEFile::sStageConfig.GlobalFlags.mShineShadowFlag ==
-        SME::Enum::LightContext::FOLLOWPLAYER) {
+        SME::Enum::LightContext::STATIC) {
       SME::TGlobals::sGlobals.mLightData.mNextSize =
           SME::Class::TSMEFile::sStageConfig.Light.mSize;
       for (u32 i = 0; i < TFlagManager::smInstance->Type4Flag.mShineCount;
            ++i) {
         SME::TGlobals::sGlobals.mLightData.mNextSize +=
-            (10000 / SME_MAX_SHINES) + i * 2.0f;
+            (10000.0f / (f32)SME_MAX_SHINES) + (f32)i * 2.0f;
       }
       gpModelWaterManager->mSize = SME::TGlobals::sGlobals.mLightData.mNextSize;
       gpModelWaterManager->mSphereStep = gpModelWaterManager->mSize / 2.0f;
@@ -309,7 +310,6 @@ static void initFludd(TMario *player, SME::Class::TPlayerParams *params) {
 
 static void initMario(TMario *player, bool isMario) {
   CPolarSubCamera *camera = new CPolarSubCamera("<CPolarSubCamera>");
-  camera->mInterpolateDistance = 420.69f;
   SME::Class::TPlayerParams *params =
       new SME::Class::TPlayerParams(player, camera, isMario);
   SME::TGlobals::sGlobals.registerPlayerParams(params);

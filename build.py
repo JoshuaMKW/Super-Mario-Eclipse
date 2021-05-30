@@ -14,7 +14,8 @@ from typing import Any, Dict, Generator, List, Optional, Union
 
 import oead
 import psutil
-from dolreader.dolfile import DolFile, TextSection, write_uint32
+from dolreader.dol import DolFile
+from dolreader.section import TextSection
 from pyisotools.bnrparser import BNR
 from pyisotools.iso import GamecubeISO
 
@@ -467,7 +468,7 @@ class FilePatcher(Compiler):
         for packet in group:
             dol.seek(packet.address)
             for instr in packet.instructions:
-                write_uint32(dol, instr.as_translated(self.startaddr + size))
+                dol.write_uint32(dol.tell(), instr.as_translated(self.startaddr + size))
 
 
 def _get_bit_alignment(num: int) -> int:

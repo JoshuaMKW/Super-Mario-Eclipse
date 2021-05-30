@@ -43,7 +43,7 @@ u32 SME::Patch::Mario::updateContexts(TMario *player)
     bool checkClimbContext = false;
 
     if ((player->mState & static_cast<u32>(TMario::State::AIRBORN)) == 0 && (player->mState & 0x1C0) != 320)
-        player->mSubStateTimer = 0;
+        playerParams->mClimbTiredTimer = 0;
     else if ((player->mState & 0x1C0) == 320)
     {
         if ((player->mState & 0x200000) != 0 && player->mRoofTriangle &&
@@ -56,15 +56,15 @@ u32 SME::Patch::Mario::updateContexts(TMario *player)
 
         if (checkClimbContext)
         {
-            if (player->mSubStateTimer == player->mDeParams.mNoFreezeTime.get() / 5)
+            if (playerParams->mClimbTiredTimer == player->mDeParams.mNoFreezeTime.get() / 5)
             {
                 player->mActionState |= 0x8000;
-                player->mSubStateTimer = 0;
+                playerParams->mClimbTiredTimer = 0;
                 playerParams->mIsClimbTired = false;
             }
             else
             {
-                if (SME::Util::Math::lerp<f32>(0.0f, 1.0f, static_cast<f32>(player->mSubStateTimer) /
+                if (SME::Util::Math::lerp<f32>(0.0f, 1.0f, static_cast<f32>(playerParams->mClimbTiredTimer) /
                                               player->mDeParams.mNoFreezeTime.get()) > 0.9f)
                 {
                     if (!playerParams->mIsClimbTired)
@@ -75,7 +75,7 @@ u32 SME::Patch::Mario::updateContexts(TMario *player)
                 else
                     playerParams->mIsClimbTired = false;
 
-                player->mSubStateTimer += 1;
+                playerParams->mClimbTiredTimer += 1;
             }
         }
 

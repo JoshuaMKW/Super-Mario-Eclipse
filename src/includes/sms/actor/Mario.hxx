@@ -915,6 +915,7 @@ public:
 
   TMario();
   virtual ~TMario();
+
   virtual void load(JSUMemoryInputStream &) override;
   virtual void loadAfter() override;
   virtual void perform(u32, JDrama::TGraphics *) override;
@@ -931,6 +932,8 @@ public:
   virtual void checkCollision();
   virtual void damageExec(THitActor *, int, int, int, f32, int, f32, s16);
   virtual u8 getVoiceStatus();
+
+  //add funcs
 
   u32 mActionState;   // 0x0074
   u32 mJumpingState;  // 0x0078

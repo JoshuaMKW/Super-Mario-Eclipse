@@ -3,14 +3,21 @@
 #include "types.h"
 
 // I've only seen this used as u32 and TSpcSlice
-template <typename T>
-class TSpcStack
-{
-    public:
-    virtual ~TSpcStack();
+template <typename T> class TSpcStack {
+public:
+  size_t mMaxSize;
+  size_t mCurSize;
+  T *mStack;
 
-    u32 _0;
-    u32 _4;
-    u32 *_8; // some array
-    u32 *vtable; // _C
+  TSpcStack(size_t size) : mMaxSize(size), mCurSize(0) {
+    mStack = new T[size];
+  }
+  
+  virtual ~TSpcStack();
+
+  void push(const T &slice);
+  T pop() {
+    mCurSize -= 1;
+    return mStack[mCurSize + 1];
+  };
 };

@@ -131,7 +131,7 @@ static void *t_swapCharacter(void *context) {
 
   // Refresh mounted handle
   marioVolumeData->unmountFixed();
-  marioVolumeData->mountFixed((void *)*(u32 *)gpArcBufferMario,
+  marioVolumeData->mountFixed(gpArcBufferMario,
                               JKRMemBreakFlag::UNK_0);
 
   // -- Update player data -- //
@@ -143,6 +143,8 @@ static void *t_swapCharacter(void *context) {
     gPlayerToSwap->JSGGetTranslation(&position);
     gPlayerToSwap->JSGGetRotation(&rotation);
 
+    delete gPlayerToSwap;
+
     // Fresh player data
     TMario *newPlayer = new TMario();
 
@@ -150,9 +152,12 @@ static void *t_swapCharacter(void *context) {
     const bool interruptStatus = OSDisableInterrupts();
 
     if (gpMarioAddress == gPlayerToSwap) {
-      gpMarioAddress = newPlayer;
+      gpMarioOriginal = newPlayer;
       SMS_SetMarioAccessParams__Fv();
     }
+
+    newPlayer->initValues();
+    newPlayer->loadAfter();
 
     newPlayer->mAttributes.mIsInactive = false;
     newPlayer->JSGSetTranslation(position);
@@ -190,7 +195,7 @@ void Util::Mario::switchCharacter(TMario *player, Enum::Player id,
   if (OSIsThreadTerminated(&gCharacterSwapThread)) {
     //fix stack bug, gets overwritten due to obnoxious pointer
     OSCreateThread(&gCharacterSwapThread, &t_swapCharacter, nullptr,
-                   &gCharacterSwapStack + sizeof(gCharacterSwapStack),
+                   (u8 *)(&gCharacterSwapStack) + sizeof(gCharacterSwapStack),
                    sizeof(gCharacterSwapStack), 18, 0);
     OSResumeThread(&gCharacterSwapThread);
   }

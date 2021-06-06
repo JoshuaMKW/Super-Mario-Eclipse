@@ -12,6 +12,7 @@
 
 #include "CheatHandler.hxx"
 #include "Globals.hxx"
+#include "Player.hxx"
 #include "funcs.hxx"
 #include "stage/FileUtils.hxx"
 
@@ -38,6 +39,10 @@
 #ifndef __ppc__
 #define __ppc__
 #endif
+
+#define SME_MODULE_NAME "Eclipse"
+#define SME_AUTHOR_NAME "JoshuaMK"
+#define SME_VERSION_TAG __VERSION__ "[" SME_STRINGIZE(SME_MAX_SHINES) " Shines]"
 
 // init_mods.cpp
 SME_EXTERN_C OSBootInfo BootInfo;
@@ -213,6 +218,12 @@ void setStageOnExit(TGameSequence *gpSequence, s8 stage, s8 episode);
 void startEpisodeSelect(void *selectMenu);
 
 } // namespace Stage
+
+namespace Spc {
+
+void initCustomFunctions(TSpcBinary *spcBinary, const char *symbol, u32 address);
+
+}
 
 namespace Yoshi {
 

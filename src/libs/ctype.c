@@ -1,120 +1,115 @@
 #include "types.h"
 
-
-#ifdef __CWCC__
-
 int isxdigit(int c)
 {
     if (c >= '0' && c <= '9')
-        return TRUE;
+        return true;
     else if (c >= 'a' && c <= 'f')
-        return TRUE;
+        return true;
     else if (c >= 'A' && c <= 'F')
-        return TRUE;
+        return true;
 
-    return FALSE;
+    return false;
 }
 
 int isupper(int c)
 {
     if (c >= 'A' && c <= 'Z')
-        return TRUE;
+        return true;
 
-    return FALSE;
+    return false;
 }
 
 int isspace(int c)
 {
     if (c >= '\t' && c <= '\r')
-        return TRUE;
+        return true;
     else if (c == ' ')
-        return TRUE;
+        return true;
     
-    return FALSE;
+    return false;
 }
 
 int ispunct(int c)
 {
     if (c >= '!' && c <= '/')
-        return TRUE;
+        return true;
     else if (c >= ':' && c <= '@')
-        return TRUE;
+        return true;
     else if (c >= '[' && c <= '`')
-        return TRUE;
+        return true;
     else if (c >= '{' && c <= '~')
-        return TRUE;
+        return true;
     else if (c > 0x7F)
-        return TRUE;
+        return true;
 
-    return FALSE;
+    return false;
 }
 
 int isprint(int c)
 {
     if (c >= ' ' && c <= '~')
-        return TRUE;
+        return true;
     else if (c > 0x7F)
-        return TRUE;
+        return true;
     
-    return FALSE;
+    return false;
 }
 
 int islower(int c)
 {
     if (c >= 'a' && c <= 'z')
-        return TRUE;
+        return true;
 
-    return FALSE;
+    return false;
 }
 
 int isgraph(int c)
 {
     if (c >= '!' && c <= '~')
-        return TRUE;
+        return true;
     else if (c > 0x7F)
-        return TRUE;
+        return true;
     
-    return FALSE;
+    return false;
 }
 
 int isdigit(int c)
 {
     if (c >= '0' && c <= '9')
-        return TRUE;
+        return true;
 
-    return FALSE;
+    return false;
 }
 
 int iscntrl(int c)
 {
     if (c >= 0 && c <= 0x1F)
-        return TRUE;
+        return true;
     else if (c == 0x7F)
-        return TRUE;
+        return true;
     
-    return FALSE;
+    return false;
 }
 
 int isalpha(int c)
 {
     if (c >= 'a' && c <= 'z')
-        return TRUE;
+        return true;
     else if (c >= 'A' && c <= 'Z')
-        return TRUE;
+        return true;
 
-    return FALSE;
+    return false;
 }
 
 int isalnum(int c)
 {
     if (c >= '0' && c <= '9')
-        return TRUE;
+        return true;
     else if (c >= 'a' && c <= 'z')
-        return TRUE;
+        return true;
     else if (c >= 'A' && c <= 'Z')
-        return TRUE;
+        return true;
 
-    return FALSE;
+    return false;
 }
-
-#endif

@@ -26,12 +26,30 @@ void SME::Patch::Init::initCodeProtection() {
 // extern -> SME.cpp
 JKRExpHeap *SME::Patch::Init::createGlobalHeaps(void *newHeap, size_t size,
                                                 JKRHeap *rootHeap, bool unk_1) {
-  SME::TGlobals::sGlobals.mCharacterHeap =
-      JKRExpHeap::create(0x200000, JKRHeap::sRootHeap, false);
-  SME::TGlobals::sGlobals.mGlobalsHeap =
-      JKRExpHeap::create(0x10000, JKRHeap::sRootHeap, false);
-  auto *gameHeap =
-      JKRExpHeap::create(newHeap, size - 0x200000, rootHeap, unk_1);
+  constexpr size_t mysize = 0x400000;
+
+  #ifndef SME_GLOBAL_HEAPS
+  JKRExpHeap *gameHeap =
+      JKRExpHeap::create(newHeap, size - mysize, rootHeap, unk_1);
+  {
+    JKRHeap *rootHeap = JKRHeap::sRootHeap;
+    JKRHeap *systemHeap = JKRHeap::sSystemHeap;
+    JKRHeap *currentHeap = JKRHeap::sCurrentHeap;
+
+    JKRHeap::sRootHeap = nullptr; // Hack to make this heap disconnected
+
+    void *heap = OSGetArenaHi();
+    SME::TGlobals::sCharacterHeap = new (JKRExpHeap::sSystemHeap, 4) JKRExpHeap(heap, mysize - sizeof(JKRExpHeap), nullptr, false);
+
+    // Restore heap pointers
+    JKRHeap::sRootHeap = rootHeap;
+    currentHeap->becomeCurrentHeap();
+    systemHeap->becomeSystemHeap();
+  }
+  #else
+  JKRExpHeap *gameHeap =
+      JKRExpHeap::create(newHeap, size, rootHeap, unk_1);
+  #endif
   return gameHeap;
 }
 
@@ -39,26 +57,10 @@ JKRExpHeap *SME::Patch::Init::createGlobalHeaps(void *newHeap, size_t size,
 // extern -> SME.cpp
 u32 SME::Patch::Init::setupMarioDatas(char *filepath) {
   TMarioGamePad *gpGamePad = gpApplication.mGamePad1;
-  u8 id;
+  SME::Enum::Player playerID =
+      SME::Util::Mario::getPlayerIDFromInput(gpGamePad->mButtons.mInput);
 
-  switch (gpGamePad->mButtons.mInput) {
-  case TMarioGamePad::Buttons::DPAD_UP:
-    id = 1;
-    break;
-  case TMarioGamePad::Buttons::DPAD_DOWN:
-    id = 2;
-    break;
-  case TMarioGamePad::Buttons::DPAD_LEFT:
-    id = 3;
-    break;
-  case TMarioGamePad::Buttons::DPAD_RIGHT:
-    id = 4;
-    break;
-  default:
-    id = 0;
-  }
-
-  sprintf(filepath, "/data/chr%d.szs", id);
+  sprintf(filepath, "/data/chr%d.szs", static_cast<u8>(playerID));
   return DVDConvertPathToEntrynum(filepath);
 }
 
@@ -67,17 +69,16 @@ u32 SME::Patch::Init::setupMarioDatas(char *filepath) {
 u32 *SME::Patch::Init::initFirstModel(char *path, u32 unk_1, u32 unk_2,
                                       u32 unk_3, JKRHeap *heap, u32 unk_4,
                                       u32 unk_5, u32 unk_6) {
-  if (SME::TGlobals::sGlobals.mCharacterHeap) {
-    heap = SME::TGlobals::sGlobals.mCharacterHeap;
-    SME::TGlobals::sGlobals.mCharacterHeap->freeAll();
-  }
+  heap = SME::TGlobals::sCharacterHeap;
+  heap->freeAll();
   u32 *file = static_cast<u32 *>(SME::Util::loadArchive(path, heap));
 
+  /*
   if (file)
-    SME::TGlobals::sGlobals.mCharacterHeap->alloc((0x1F0000 - file[1]) & -32,
-                                                  32);
+    SME::TGlobals::sCharacterHeap->alloc((0x1F0000 - file[1]) & -32, 32);
   else
-    SME::TGlobals::sGlobals.mCharacterHeap->alloc(0x1F0000 & -32, 32);
+    SME::TGlobals::sCharacterHeap->alloc(0x1F0000 & -32, 32);
+  */
 
   return file;
 }
@@ -105,80 +106,31 @@ TMarDirector *SME::Patch::Init::initFileMods() {
   TMarioGamePad *gpGamePad = gpApplication.mGamePad1;
 
 #ifdef SME_DEBUG
-  s32 characterID = SME::Util::getCharacterID(gpGamePad);
+  SME::Enum::Player characterID =
+      SME::Util::Mario::getPlayerIDFromInput(gpGamePad->mButtons.mInput);
 #else
-  s32 characterID = -1;
+  SME::Enum::Player characterID = SME::Enum::Player::UNKNOWN;
 #endif
 
   JKRMemArchive *marioVolumeData =
       static_cast<JKRMemArchive *>(JKRFileLoader::getVolume("mario"));
   u8 *params = marioVolumeData->getResource("/params.szs");
 
-  char buffer[32];
-
   resetGlobalValues();
-  SME::TGlobals::sGlobals.clearAllPlayerParams();
+  SME::TGlobals::clearAllPlayerParams();
   SME::Class::TSMEFile::sStageConfig.reset();
 
   if (SME::Class::TSMEFile::sStageConfig.load(
           SME::Util::getStageName(&gpApplication))) {
-    if (characterID == -1)
+    if (characterID == SME::Enum::Player::UNKNOWN)
       characterID = SME::Class::TSMEFile::sStageConfig.GlobalFlags.mPlayerID;
   } else {
-    if (characterID == -1)
-      characterID = 0;
+    if (characterID == SME::Enum::Player::UNKNOWN)
+      characterID = SME::Enum::Player::MARIO;
   }
 
-  if (characterID != -1) {
-    // Attempt to swap character data
-    sprintf(buffer, "/data/chr%ld.szs", characterID);
-
-    SME::TGlobals::sGlobals.mCharacterHeap->freeAll();
-
-    u32 *marioData = static_cast<u32 *>(
-        SME::Util::loadArchive(buffer, SME::TGlobals::sGlobals.mCharacterHeap));
-    *(u32 *)gpArcBufferMario = (u32)marioData;
-
-    SME::TGlobals::sGlobals.mCharacterHeap->alloc(
-        (0x1F0000 - marioData[1]) & -32, 32);
-
-    marioVolumeData->unmountFixed();
-    marioVolumeData->mountFixed((void *)*(u32 *)gpArcBufferMario,
-                                JKRMemBreakFlag::UNK_0);
-    //__dt__13JKRMemArchiveFv(marioVolumeData);
-    //__ct__13JKRMemArchiveFPvUl15JKRMemBreakFlag(marioVolumeData, *(u32
-    //*)gpArcBufferMario, 0, 0);
-  }
-
-  void *allocation;
-  if (params) {
-    u32 filesize = marioVolumeData->getResSize(params);
-    CompressionType compressionState = JKRDecomp::checkCompressed(params);
-
-    switch (compressionState) {
-    case CompressionType::SZS: {
-      *(u32 *)0x8040E260 = params[1];
-      allocation =
-          JKRHeap::sCurrentHeap->alloc(params[1], 32, JKRHeap::sCurrentHeap);
-      decompSZS_subroutine(params, static_cast<u8 *>(allocation));
-      SME::TGlobals::sGlobals.mPRMFile = allocation;
-    }
-    case CompressionType::SZP:
-      SME::TGlobals::sGlobals.mPRMFile = nullptr;
-    case CompressionType::NONE: {
-      allocation = JKRHeap::sCurrentHeap->alloc(filesize, 32);
-      memcpy(allocation, params, filesize);
-      SME::TGlobals::sGlobals.mPRMFile = allocation;
-    }
-    }
-
-    JKRMemArchive *oldParams =
-        static_cast<JKRMemArchive *>(JKRFileLoader::getVolume("params"));
-
-    oldParams->unmountFixed();
-    oldParams->mountFixed(SME::TGlobals::sGlobals.mPRMFile,
-                          JKRMemBreakFlag::UNK_0);
-  }
+  //SME::Util::Mario::swapBinary(characterID);
+  SME::Util::Mario::loadParams();
 
   return director;
 }
@@ -191,11 +143,11 @@ void SME::Patch::Init::initShineShadow() {
     return;
 
   if (TFlagManager::smInstance->Type4Flag.mShineCount < SME_MAX_SHINES) {
-    SME::TGlobals::sGlobals.mLightData.mLightType =
+    SME::TGlobals::sLightData.mLightType =
         SME::Class::TSMEFile::sStageConfig.GlobalFlags.mShineShadowFlag;
-    SME::TGlobals::sGlobals.mLightData.mShineShadowBase =
+    SME::TGlobals::sLightData.mShineShadowBase =
         SME::Class::TSMEFile::sStageConfig.Light.mSize;
-    SME::TGlobals::sGlobals.mLightData.mPrevShineCount =
+    SME::TGlobals::sLightData.mPrevShineCount =
         TFlagManager::smInstance->Type4Flag.mShineCount;
 
     gpModelWaterManager->mColor =
@@ -211,22 +163,21 @@ void SME::Patch::Init::initShineShadow() {
     gpModelWaterManager->LightType.mShowShadow = true;
 
     if (SME::Class::TSMEFile::sStageConfig.GlobalFlags.mShineShadowFlag ==
-        SME::Enum::LightContext::STATIC) {
-      SME::TGlobals::sGlobals.mLightData.mNextSize =
+        TLightContext::ActiveType::STATIC) {
+      SME::TGlobals::sLightData.mNextSize =
           SME::Class::TSMEFile::sStageConfig.Light.mSize;
       for (u32 i = 0; i < TFlagManager::smInstance->Type4Flag.mShineCount;
            ++i) {
-        SME::TGlobals::sGlobals.mLightData.mNextSize +=
+        SME::TGlobals::sLightData.mNextSize +=
             (10000.0f / (f32)SME_MAX_SHINES) + (f32)i * 2.0f;
       }
-      gpModelWaterManager->mSize = SME::TGlobals::sGlobals.mLightData.mNextSize;
+      gpModelWaterManager->mSize = SME::TGlobals::sLightData.mNextSize;
       gpModelWaterManager->mSphereStep = gpModelWaterManager->mSize / 2.0f;
     }
-    SME::TGlobals::sGlobals.mLightData.mShineShadowCoordinates =
+    SME::TGlobals::sLightData.mShineShadowCoordinates =
         SME::Class::TSMEFile::sStageConfig.Light.mCoordinates;
   } else {
-    SME::TGlobals::sGlobals.mLightData.mLightType =
-        SME::Enum::LightContext::DISABLED;
+    SME::TGlobals::sLightData.mLightType = TLightContext::ActiveType::DISABLED;
   }
 }
 
@@ -312,7 +263,7 @@ static void initMario(TMario *player, bool isMario) {
   CPolarSubCamera *camera = new CPolarSubCamera("<CPolarSubCamera>");
   SME::Class::TPlayerParams *params =
       new SME::Class::TPlayerParams(player, camera, isMario);
-  SME::TGlobals::sGlobals.registerPlayerParams(params);
+  SME::TGlobals::registerPlayerParams(params);
 
   if (SME::Class::TSMEFile::sStageConfig.FileHeader.mMAGIC ==
           SME::Class::TSMEFile::MAGIC &&
@@ -468,8 +419,8 @@ u32 SME::Patch::Init::initCollisionWarpLinks(const char *name) {
       new (32) SME::Class::TWarpCollisionList();
   SME::Class::TWarpCollisionList *warpDataPreserveArray =
       new (32) SME::Class::TWarpCollisionList();
-  SME::TGlobals::sGlobals.mWarpColArray = warpDataArray;
-  SME::TGlobals::sGlobals.mWarpColPreserveArray = warpDataPreserveArray;
+  SME::TGlobals::sWarpColArray = warpDataArray;
+  SME::TGlobals::sWarpColPreserveArray = warpDataPreserveArray;
 
   if (warpDataArray) {
     parseWarpLinks(gpMapCollisionData, warpDataArray, 16040);
@@ -481,8 +432,6 @@ u32 SME::Patch::Init::initCollisionWarpLinks(const char *name) {
 
 // 0x802B57E4
 void SME::Patch::Init::createUIHeap(u32 size, s32 alignment) {
-  SME::TGlobals::sGlobals.mGame6Heap =
-      JKRExpHeap::create(size, JKRHeap::sSystemHeap, false);
   gpMarDirector->mGame6Data = (u32 *)Memory::malloc(size, alignment);
 }
 
@@ -542,6 +491,6 @@ JKRMemArchive *SME::Patch::Init::switchHUDOnStageLoad(char *curArchive,
 
 // 0x802B57E4
 JKRHeap *SME::Patch::Init::useCustomHUDHeap(u32 size, s32 alignment) {
-  return SME::TGlobals::sGlobals.mGame6Heap;
+  return nullptr; //SME::TGlobals::sGame6Heap;
 }
 // kmCall(0x802B57E4, &useCustomHUDHeap);

@@ -1,3 +1,5 @@
+#pragma once
+
 #ifndef SME_MAX_SHINES
 #define SME_MAX_SHINES 120
 #else

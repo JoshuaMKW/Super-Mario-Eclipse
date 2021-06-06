@@ -52,7 +52,7 @@ bool Patch::Yoshi::isYoshiEggNeedFruit(THitActor *gpFruit) {
 // extern -> SME.cpp
 u8 Patch::Yoshi::isYoshiEggFree(TEggYoshi *gpEgg, THitActor *gpFruit) {
   const SME::Class::TPlayerParams *playerParams =
-      SME::TGlobals::sGlobals.getPlayerParams(gpMarioAddress);
+      SME::TGlobals::getPlayerParams(gpMarioAddress);
   if (gpEgg->mState == 14 || gpEgg->mState == 6)
     return 0;
   else if (!playerParams->getParams()->mCanRideYoshi.get())
@@ -76,7 +76,7 @@ bool Patch::Yoshi::isYoshiMaintainFluddModel() {
   SME_FROM_GPR(31, player);
 
   const SME::Class::TPlayerParams *playerParams =
-      SME::TGlobals::sGlobals.getPlayerParams(player);
+      SME::TGlobals::getPlayerParams(player);
 
   if (player->mYoshi->mState == TYoshi::MOUNTED)
     return (playerParams->mFluddHistory.mHadFludd &
@@ -99,7 +99,7 @@ bool Patch::Yoshi::canMountYoshi(u32 state) {
   SME_FROM_GPR(31, player);
 
   const SME::Class::TPlayerParams *playerParams =
-      SME::TGlobals::sGlobals.getPlayerParams(player);
+      SME::TGlobals::getPlayerParams(player);
 
   if (state & static_cast<u32>(TMario::State::WATERBORN))
     return playerParams->getParams()->mCanRideYoshi.get();
@@ -143,7 +143,7 @@ void Patch::Yoshi::canYoshiSpray(TWaterGun *gpWaterGun) {
 // extern -> SME.cpp
 u32 Patch::Yoshi::calcYoshiSwimVelocity(TMario *player, u32 arg1) {
   SME::Class::TPlayerParams *playerParams =
-      SME::TGlobals::sGlobals.getPlayerParams(player);
+      SME::TGlobals::getPlayerParams(player);
 
   if (SME::Class::TSMEFile::sStageConfig.FileHeader.mMAGIC !=
           SME::Class::TSMEFile::MAGIC ||
@@ -247,7 +247,7 @@ void Patch::Yoshi::saveNozzles(TYoshi *yoshi) {
   TMario *player = yoshi->mMario;
 
   SME::Class::TPlayerParams *playerParams =
-      SME::TGlobals::sGlobals.getPlayerParams(player);
+      SME::TGlobals::getPlayerParams(player);
 
   playerParams->mFluddHistory.mMainNozzle = player->mFludd->mCurrentNozzle;
   playerParams->mFluddHistory.mSecondNozzle = player->mFludd->mSecondNozzle;
@@ -260,7 +260,7 @@ void Patch::Yoshi::saveNozzles(TYoshi *yoshi) {
 // extern -> SME.cpp
 void Patch::Yoshi::restoreNozzles(TMario *player) {
   SME::Class::TPlayerParams *playerParams =
-      SME::TGlobals::sGlobals.getPlayerParams(player);
+      SME::TGlobals::getPlayerParams(player);
   f32 factor =
       static_cast<f32>(playerParams->mFluddHistory.mWaterLevel) /
       static_cast<f32>(

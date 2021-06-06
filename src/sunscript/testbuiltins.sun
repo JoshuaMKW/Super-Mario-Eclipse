@@ -1,0 +1,17 @@
+import "ssc/common.sun";
+import "ssc/sme.sun";
+
+builtin print();
+
+while (true){
+	if (isTalkModeNow())
+	{
+        var npcName = getTalkNPCName();
+		if (npcName == "TipBoard")
+		{
+			talkAndClose(0x00020000);
+		}
+	}
+	yield;
+}
+

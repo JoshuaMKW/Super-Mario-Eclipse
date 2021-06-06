@@ -4,13 +4,14 @@
 #include "mem.h"
 #include "types.h"
 
-
 #include "funcs.hxx"
 #include "sms/JSystem/JGeometry.hxx"
 #include "sms/JSystem/JSU/JSUMemoryStream.hxx"
 #include "sms/JSystem/JUT/JUTColor.hxx"
 #include "sms/actor/Mario.hxx"
 #include "sms/camera/PolarSubCamera.hxx"
+
+#include "Player.hxx"
 
 namespace SME::Class {
 
@@ -156,7 +157,7 @@ public:
   u8 getNozzleBoneID(TWaterGun::NozzleType nozzle) const;
   const TCustomParams *getParams() const { return mParams; }
   const TMario *getPlayer() const { return mPlayer; }
-  s8 getPlayerID() const { return mPlayerID; }
+  SME::Enum::Player getPlayerID() const { return mPlayerID; }
   const u16 getPlayerKey() const {
     return JDrama::TNameRef::calcKeyCode(getPlayerName());
   }
@@ -166,7 +167,7 @@ public:
   void setCamera(CPolarSubCamera *camera);
   void setCanUseFludd(bool enable) { mCanUseFludd = enable; }
   void setPlayer(TMario *player);
-  void setPlayerID(u8 id) { mPlayerID = id; }
+  void setPlayerID(SME::Enum::Player id) { mPlayerID = id; }
 
   bool canUseNozzle(TWaterGun::NozzleType nozzle) const;
   const char *getPlayerName() const;
@@ -182,7 +183,7 @@ private:
   bool mIsEMario;
   bool mInitialized;
   bool mCanUseFludd;
-  u8 mPlayerID;
+  SME::Enum::Player mPlayerID;
 
 public:
   u8 mCurJump;

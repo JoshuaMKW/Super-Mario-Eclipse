@@ -1,0 +1,99 @@
+/* ================================================= *\
+ * sme.sun
+ *
+ * ssc custom function implementations for SME
+ * 2021 JoshuaMK
+\* ================================================= */
+
+// ================================================= \\
+// ACTOR
+// ================================================= \\
+
+builtin setActorPosToOther(actor, other);
+builtin setActorRotToOther(actor, other);
+
+// return: JGeometry::TVec3<f32> *
+builtin getActorPos(actor);
+
+builtin setActorPos(actor, vec3f);
+
+// return: JGeometry::TVec3<f32> *
+builtin getActorRot(actor);
+
+builtin setActorRot(actor, vec3f);
+
+// ================================================= \\
+// ITEM
+// ================================================= \\
+
+// spawnObjByID(id)
+// spawnObjByID(id, pos3f, rot3f, spd3f)
+// return: TMapObjBase *
+builtin spawnObjByID(id, ...);
+
+// ================================================= \\
+// FLAGS
+// ================================================= \\
+
+// return: bool
+builtin isMultiplayerActive();
+
+// return: bool
+builtin isFreePlayActive();
+
+// return: bool
+builtin isCompletionRewardActive();
+
+// ================================================= \\
+// GLOBALS
+// ================================================= \\
+
+// return: int
+builtin getActivePlayers();
+
+// return: int
+builtin getMaxPlayers();
+
+// return: TMario *
+builtin getPlayerByIndex(index);
+
+// return: char *
+builtin getDateAsStr();
+
+// return: char *
+builtin getTimeAsStr();
+
+// ================================================= \\
+// INPUT
+// ================================================= \\
+
+// return: int
+builtin getPlayerInputByIndex(index);
+
+// ================================================= \\
+// MEMORY
+// ================================================= \\
+
+// return: int
+builtin read8(address);
+
+// return: int
+builtin read16(address);
+
+// return: int
+builtin read32(address);
+
+builtin write8(address, value);
+builtin write16(address, value);
+builtin write32(address, value);
+builtin memcpy(dst, src, len);
+builtin memmove(dst, src, len);
+builtin memcmp(dst, src, len);
+builtin memset(dst, fill, len);
+
+// ================================================= \\
+// MISCELLANEOUS
+// ================================================= \\
+
+// return: char *
+builtin formatStrBySpec(str);

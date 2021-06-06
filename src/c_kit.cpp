@@ -5,7 +5,6 @@
 #include "sms/talk/Talk2D2.hxx"
 #include "string.h"
 
-
 #include "SME.hxx"
 
 using namespace SME;
@@ -75,13 +74,21 @@ void Patch::CKit::onSetup(TMarDirector *director) {
 
 // this is ran every frame
 // extern -> SME.cpp
-s32 Patch::CKit::onUpdate(void *director) { //movie director
+s32 Patch::CKit::onUpdate(void *director) { // movie director
   // xyzModifierMario();
   // Patch::Cheat::drawCheatText(); //currently bugged
 
   // run replaced call
   u32 func;
   SME_FROM_GPR(12, func);
+
+  TMarioGamePad *controller = gpApplication.mGamePad1;
+  if ((controller->mButtons.mInput & 0x260) == 0x260) { // L + R + B + D-PAD UP
+    SME::Util::Mario::switchCharacter(
+        gpMarioAddress,
+        SME::Util::Mario::getPlayerIDFromInput(controller->mButtons.mInput & 0xF),
+        true);
+  }
   return ((s32(*)(void *))func)(director);
 }
 
@@ -148,9 +155,9 @@ bool Patch::CKit::manageLightSize() {
     return (gpMarDirector->mAreaID == 1);
 
   s32 &CurrentShineCount = TFlagManager::smInstance->Type4Flag.mShineCount;
-  s32 &PrevShineCount = SME::TGlobals::sGlobals.mLightData.mPrevShineCount;
-  switch (SME::TGlobals::sGlobals.mLightData.mLightType) {
-  case SME::Enum::LightContext::STATIC: {
+  s32 &PrevShineCount = SME::TGlobals::sLightData.mPrevShineCount;
+  switch (SME::TGlobals::sLightData.mLightType) {
+  case TLightContext::ActiveType::STATIC: {
     if (SME::Class::TSMEFile::sStageConfig.Light.mDarkLevel != 255)
       gpModelWaterManager->mDarkLevel =
           SME::Class::TSMEFile::sStageConfig.Light.mDarkLevel;
@@ -163,85 +170,90 @@ bool Patch::CKit::manageLightSize() {
       if (gpModelWaterManager->mDarkLevel < 255)
         gpModelWaterManager->mDarkLevel += 1;
       else
-        SME::TGlobals::sGlobals.mLightData.mLightType =
-            SME::Enum::LightContext::DISABLED;
+        SME::TGlobals::sLightData.mLightType =
+            TLightContext::ActiveType::DISABLED;
     }
 
     gShineShadowPos =
-        SME::TGlobals::sGlobals.mLightData.mShineShadowCoordinates;
+        SME::TGlobals::sLightData.mShineShadowCoordinates;
 
     const f32 sigOfs = 300.0f;
-    const f32 sigStrength = CurrentShineCount >= PrevShineCount ? 0.04f : -0.04f;
+    const f32 sigStrength =
+        CurrentShineCount >= PrevShineCount ? 0.04f : -0.04f;
 
-    if (!SME::TGlobals::sGlobals.mLightData.mSizeMorphing) {
+    if (!SME::TGlobals::sLightData.mSizeMorphing) {
       if (CurrentShineCount > PrevShineCount) {
-        SME::TGlobals::sGlobals.mLightData.mPrevSize = gpModelWaterManager->mSize;
-        SME::TGlobals::sGlobals.mLightData.mNextSize = gpModelWaterManager->mSize;
+        SME::TGlobals::sLightData.mPrevSize =
+            gpModelWaterManager->mSize;
+        SME::TGlobals::sLightData.mNextSize =
+            gpModelWaterManager->mSize;
 
         for (u32 i = 0; i < (CurrentShineCount - PrevShineCount); ++i)
-          SME::TGlobals::sGlobals.mLightData.mNextSize +=
+          SME::TGlobals::sLightData.mNextSize +=
               (10000.0f / SME_MAX_SHINES) + (PrevShineCount + i) * 2.0f;
 
-        SME::TGlobals::sGlobals.mLightData.mSizeMorphing = true;
-        SME::TGlobals::sGlobals.mLightData.mStepContext = 0.0f;
+        SME::TGlobals::sLightData.mSizeMorphing = true;
+        SME::TGlobals::sLightData.mStepContext = 0.0f;
       } else if (CurrentShineCount < PrevShineCount) {
-        SME::TGlobals::sGlobals.mLightData.mPrevSize = gpModelWaterManager->mSize;
-        SME::TGlobals::sGlobals.mLightData.mNextSize = gpModelWaterManager->mSize;
+        SME::TGlobals::sLightData.mPrevSize =
+            gpModelWaterManager->mSize;
+        SME::TGlobals::sLightData.mNextSize =
+            gpModelWaterManager->mSize;
 
         for (u32 i = 0; i < (PrevShineCount - CurrentShineCount); ++i)
-          SME::TGlobals::sGlobals.mLightData.mNextSize -=
+          SME::TGlobals::sLightData.mNextSize -=
               (10000.0f / SME_MAX_SHINES) + (PrevShineCount - i) * 2.0f;
 
-        SME::TGlobals::sGlobals.mLightData.mSizeMorphing = true;
-        SME::TGlobals::sGlobals.mLightData.mStepContext = 0.0f;
+        SME::TGlobals::sLightData.mSizeMorphing = true;
+        SME::TGlobals::sLightData.mStepContext = 0.0f;
       } else {
         break;
       }
     }
 
     const f32 cur = SME::Util::Math::sigmoidCurve(
-        SME::TGlobals::sGlobals.mLightData.mStepContext,
-        SME::TGlobals::sGlobals.mLightData.mPrevSize,
-        SME::TGlobals::sGlobals.mLightData.mNextSize, sigOfs, sigStrength);
+        SME::TGlobals::sLightData.mStepContext,
+        SME::TGlobals::sLightData.mPrevSize,
+        SME::TGlobals::sLightData.mNextSize, sigOfs, sigStrength);
 
     if (gpModelWaterManager->mSize > 70000.0f) {
       gpModelWaterManager->mSize = 70000.0f;
-      SME::TGlobals::sGlobals.mLightData.mSizeMorphing = false;
+      SME::TGlobals::sLightData.mSizeMorphing = false;
     } else if (gpModelWaterManager->mSize < 0.0f) {
       gpModelWaterManager->mSize = 0.0f;
-      SME::TGlobals::sGlobals.mLightData.mSizeMorphing = false;
-    } else if (cur != SME::TGlobals::sGlobals.mLightData.mNextSize &&
-               cur != SME::TGlobals::sGlobals.mLightData.mPrevSize) {
+      SME::TGlobals::sLightData.mSizeMorphing = false;
+    } else if (cur != SME::TGlobals::sLightData.mNextSize &&
+               cur != SME::TGlobals::sLightData.mPrevSize) {
       gpModelWaterManager->mSize = cur;
       gpModelWaterManager->mSphereStep = cur / 2.0f;
-      SME::TGlobals::sGlobals.mLightData.mStepContext += 1.0f;
+      SME::TGlobals::sLightData.mStepContext += 1.0f;
     } else {
       gpModelWaterManager->mSize = cur;
       gpModelWaterManager->mSphereStep = cur / 2.0f;
       PrevShineCount = CurrentShineCount;
-      SME::TGlobals::sGlobals.mLightData.mSizeMorphing = false;
+      SME::TGlobals::sLightData.mSizeMorphing = false;
     }
     break;
   }
-  case SME::Enum::LightContext::FOLLOWPLAYER: {
+  case TLightContext::ActiveType::FOLLOWPLAYER: {
     gpModelWaterManager->mDarkLevel =
         SME::Class::TSMEFile::sStageConfig.Light.mDarkLevel;
     gShineShadowPos.x =
         gpMarioPos->x +
-        SME::TGlobals::sGlobals.mLightData.mShineShadowCoordinates.x;
+        SME::TGlobals::sLightData.mShineShadowCoordinates.x;
     gShineShadowPos.y =
         gpMarioPos->y +
-        SME::TGlobals::sGlobals.mLightData.mShineShadowCoordinates.y;
+        SME::TGlobals::sLightData.mShineShadowCoordinates.y;
     gShineShadowPos.z =
         gpMarioPos->z +
-        SME::TGlobals::sGlobals.mLightData.mShineShadowCoordinates.z;
+        SME::TGlobals::sLightData.mShineShadowCoordinates.z;
     break;
   }
   default:
     break;
   }
-  return SME::TGlobals::sGlobals.mLightData.mLightType !=
-             SME::Enum::LightContext::DISABLED &&
+  return SME::TGlobals::sLightData.mLightType !=
+             TLightContext::ActiveType::DISABLED &&
          gpMarDirector->mAreaID != TGameSequence::OPTION;
 }
 

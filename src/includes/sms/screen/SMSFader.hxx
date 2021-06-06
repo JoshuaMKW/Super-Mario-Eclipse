@@ -1,22 +1,72 @@
 #pragma once
 
-#include "types.h"
+#include "sms/JSystem/JDrama.hxx"
 #include "sms/JSystem/JUT/JUTColor.hxx"
 
-class TSMSFader
-{
+class TSMSFader : public JDrama::TNameRef {
 public:
-    enum FadeStatus
-    {
-        OPAQUE,
-        TRANSPARENT
-    };
+  enum EFadeStatus {
+    FADE_ON,
+    FADE_OFF,
+    FADE_IN,
+    FADE_OUT
+  };
 
-    u32 _00[0x18 / 4];       //0x0000
-    JUtility::TColor mColor; //0x0018
-    bool _01;                //0x001C
-    u32 mFadeStatus;         //0x0020
-    u32 mStatusID;           //0x0024
-    f32 mFadeTime;         //0x0028
-    f32 _02;               //0x002C
+  class WipeRequest {
+    public:
+    enum ERequest {
+      FADE_NONE,
+      FADE_CIRCLE_IN,
+      FADE_CIRCLE_OUT,
+      FADE_DIAMOND_IN,
+      FADE_DIAMOND_OUT,
+      FADE_GRID_CIRCLE_IN,
+      FADE_GRID_CIRCLE_OUT,
+      FADE_SPIRAL_IN,
+      FADE_SPIRAL_OUT,
+      FADE_UP_DOWN_IN,
+      FADE_UP_DOWN_OUT,
+      FADE_DOOR_OUT,
+      FADE_INTRO_M,
+      FADE_GAMEOVER,
+      FADE_BASIC_IN,
+      FADE_BASIC_OUT,
+      FADE_SQUARE_IN,
+      FADE_SQUARE_OUT
+    };
+    
+    u32 mWipeRequest;
+    f32 mWipeSpeed;
+    f32 mDelayTime;
+  };
+
+  TSMSFader(JUtility::TColor color, f32, const char *name);
+  virtual ~TSMSFader();
+
+  virtual void load(JSUMemoryInputStream &);
+  virtual void perform(u32, JDrama::TGraphics *);
+  virtual void update();
+  virtual void draw(const JDrama::TRect &);
+
+  virtual void drawFadeinout(const JDrama::TRect &);
+
+  void requestWipe(WipeRequest *request);
+  void setColor(JUtility::TColor color);
+  void setDisplaySize(int width, int height);
+  void setFadeStatus(EFadeStatus status);
+  void startFadeinT(f32 fadeTime);
+  void startFadeoutT(f32 fadeTime);
+  void startWipe(u32 requestKind, f32 fadeTime, f32 delayTime);
+
+  u16 _0C;
+  u16 _0E; //padding?
+  u16 _10;
+  u16 _12;
+  f32 mWipeTime;
+  JUtility::TColor mColor;
+  bool _1C;
+  EFadeStatus mFadeStatus;
+  WipeRequest mQueuedWipeRequest;
+  u32 mRequestKind;
+  f32 mDelayTime;
 };

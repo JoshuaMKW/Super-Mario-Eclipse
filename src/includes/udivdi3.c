@@ -10,6 +10,8 @@
 //
 //===----------------------------------------------------------------------===//
 
+#ifndef __MWERKS__
+
 #include "types.h"
 
 typedef u64 fixuint_t;
@@ -21,3 +23,5 @@ typedef s64 fixint_t;
 u64 __udivdi3(u64 a, u64 b) {
   return __udivXi3(a, b);
 }
+
+#endif

@@ -1,72 +1,77 @@
 #pragma once
 
-#include "defines.h"
 #include "types.h"
+#include "defines.h"
 #include "sms/JSystem/JGeometry.hxx"
 #include "sms/JSystem/JKR/JKRHeap.hxx"
 #include "sms/actor/Mario.hxx"
+#include "sms/option/CardManager.hxx"
+#include "sms/SMS.hxx"
 
+#include "LightContext.hxx"
 #include "collision/WarpCollision.hxx"
 #include "params/MarioParams.hxx"
 #include "params/StageParams.hxx"
 
-namespace SME
-{
+namespace SME {
 
-struct TGlobals
-{
-    TGlobals();
+struct TGlobals {
+public:
+  static u8 getActivePlayers() { return sActivePlayers; }
+  static u8 getMaxPlayers() { return sMaxPlayers; }
+  static TMario *getPlayerByIndex(u8 index);
+  static SME::Class::TSMEFile *getStageConfig() { return sStageConfig; }
+  static SME::Class::TPlayerParams *getPlayerParams(u8 id);
+  static SME::Class::TPlayerParams *getPlayerParams(TMario *player);
 
-    SME::Class::TSMEFile *mStageConfig;
-    SME::Class::TPlayerParams *mPlayerCfgArray[SME_MAX_PLAYERS];
-    TMario *mPlayers[SME_MAX_PLAYERS];
-    bool mIsCompletionRewards;
-    bool mIsAudioStreaming;
-    bool mIsAudioStreamAllowed;
-    bool mIsFreePlay;
-    u8 mActivePlayers;
-    u8 mMaxPlayers;
-    
-    struct
-    {
-        JGeometry::TVec3<f32> mShineShadowCoordinates;
-        s32 mPrevShineCount;
-        f32 mPrevSize;
-        f32 mNextSize;
-        f32 mShineShadowBase;
-        f32 mStepContext;
-        SME::Enum::LightContext mLightType;
-        bool mSizeMorphing;
-    } mLightData;
+  static void setPlayerByIndex(u8 index, TMario *player);
 
-    void *mPRMFile;
-    SME::Class::TWarpCollisionList *mWarpColArray;
-    SME::Class::TWarpCollisionList *mWarpColPreserveArray;
-    JKRExpHeap *mCharacterHeap;
-    JKRExpHeap *mGame6Heap;
-    JKRExpHeap *mGlobalsHeap;
-    bool mPlayerHasGeckoCodes;
+  static void registerPlayerParams(SME::Class::TPlayerParams *params);
+  static void deregisterPlayerParams(SME::Class::TPlayerParams *params);
+  static void clearAllPlayerParams();
 
-    u8 getActivePlayers() const { return mActivePlayers; }
-    u8 getMaxPlayers() const { return mMaxPlayers; }
-    TMario *getPlayerByIndex(u8 index) const;
-    SME::Class::TSMEFile *getStageConfig() const { return mStageConfig; }
-    SME::Class::TPlayerParams *getPlayerParams(u8 id) const;
-    SME::Class::TPlayerParams *getPlayerParams(TMario *player) const;
+  static bool isCompletionRewarded() {
+    TCardBookmarkInfo *bookmarkInfo = gpCardManager->getBookmarkInfos_();
+    if (!bookmarkInfo)
+        return false;
 
-    void setPlayerByIndex(u8 index, TMario *player);
+    for (u32 i = 0; i < 3; ++i) {
+      if (bookmarkInfo->FileData[i].mShineCount >= SME_MAX_SHINES)
+        return true;
+    }
+    return false;
+  }
 
-    void registerPlayerParams(SME::Class::TPlayerParams *params);
-    void deregisterPlayerParams(SME::Class::TPlayerParams *params);
-    void clearAllPlayerParams();
+  static bool isFreePlayMode() { return sIsFreePlay; }
+  static bool isMultiplayerActive() { return sActivePlayers > 1; }
+  static bool isMusicBeingStreamed() { return sIsAudioStreaming; }
+  static bool isMusicStreamingAllowed() { return sIsAudioStreamAllowed; }
+  static bool areCodesPresent() { return sPlayerHasGeckoCodes; }
 
-    constexpr bool isCompletionRewarded() const { return mIsCompletionRewards; }
-    constexpr bool isFreePlayMode() const { return mIsFreePlay; }
-    constexpr bool isMultiplayerActive() const { return mActivePlayers > 1; }
-    constexpr bool isMusicBeingStreamed() const { return mIsAudioStreaming; }
-    constexpr bool isMusicStreamingAllowed() const { return mIsAudioStreamAllowed; }
+  static TLightContext sLightData;
 
-    static SME::TGlobals sGlobals;
+  static void *sPRMFile;
+  static SME::Class::TWarpCollisionList *sWarpColArray;
+  static SME::Class::TWarpCollisionList *sWarpColPreserveArray;
+
+  #ifdef SME_GLOBAL_HEAPS
+  static JKRExpHeap sCharacterHeap;
+  static JKRExpHeap sGlobalHeap;
+  #else
+  static JKRExpHeap *sCharacterHeap;
+  static JKRExpHeap *sGlobalHeap;
+  #endif
+
+//private:
+  static SME::Class::TSMEFile *sStageConfig;
+  static SME::Class::TPlayerParams *sPlayerCfgArray[SME_MAX_PLAYERS];
+  static TMario *sPlayers[SME_MAX_PLAYERS];
+  static bool sPlayerHasGeckoCodes;
+  static bool sIsAudioStreaming;
+  static bool sIsAudioStreamAllowed;
+  static bool sIsFreePlay;
+  static u8 sActivePlayers;
+  static u8 sMaxPlayers;
 };
 
-}
+} // namespace SME

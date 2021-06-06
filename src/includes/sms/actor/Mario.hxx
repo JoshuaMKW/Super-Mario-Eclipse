@@ -982,7 +982,7 @@ public:
 
   struct {
     u32 _04 : 10;
-    bool mIsGone : 1;
+    bool mIsInactive : 1;
     bool mIsShineShirt : 1;
     u32 _03 : 2;
     bool mIsWater : 1;
@@ -1003,7 +1003,7 @@ public:
 
   struct {
     u32 _04 : 10;
-    bool mIsGone : 1;
+    bool mIsPerforming : 1;
     bool mIsShineShirt : 1;
     u32 _03 : 2;
     bool mIsWater : 1;
@@ -1121,13 +1121,12 @@ public:
   u32 _3A4;                  // unknown
   M3UModelMario *mModelData; // 0x03A8
   u32 _3AC;                  // unknown
-  u32 _3B0;
-  u32 _3B4;
-  u32 _3B8;
-  u32 _3BC;
-  u32 _3C0;                // unknown
-  u8 _3C4;                 // padding?
-  u8 mBindBoneIDArray[12]; // 0x03C5
+  J3DModel *mHandModel2R;
+  J3DModel *mHandModel2L;
+  J3DModel *mHandModel3R;
+  J3DModel *mHandModel3L;
+  J3DModel *mHandModel4R;               // unknown
+  u8 mBindBoneIDArray[13];
   u8 _3D1;                 // padding?
   u8 _3D2;                 // padding?
   u8 _3D3;                 // padding?
@@ -1172,7 +1171,7 @@ public:
   u32 _464;
   u32 _468;
   u32 _46C;
-  u32 _470;
+  void *mGoopTexture; //bti
   THitActor _474;
   u32 _4DC;
   u32 _4E0;

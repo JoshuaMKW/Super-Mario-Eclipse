@@ -3,59 +3,65 @@
 
 using namespace SME;
 
-TGlobals TGlobals::sGlobals = TGlobals();
+#ifdef SME_GLOBAL_HEAPS
+static u8 gCharacterHeapBuffer[0x10000];
+static u8 gGlobalBuffer[0x8000];
 
-TGlobals::TGlobals()
-    : mStageConfig(nullptr), mIsCompletionRewards(false),
-      mIsAudioStreaming(false), mIsAudioStreamAllowed(false),
-      mIsFreePlay(false), mActivePlayers(0), mMaxPlayers(SME_MAX_PLAYERS),
-      mPRMFile(nullptr), mWarpColArray(nullptr), mWarpColPreserveArray(nullptr),
-      mCharacterHeap(nullptr), mGame6Heap(nullptr), mGlobalsHeap(nullptr),
-      mPlayerHasGeckoCodes(false) {
-  for (u32 i = 0; i < SME_MAX_PLAYERS; ++i) {
-    mPlayers[i] = nullptr;
-    mPlayerCfgArray[i] = nullptr;
-  }
+JKRExpHeap TGlobals::sCharacterHeap(gCharacterHeapBuffer, sizeof(gCharacterHeapBuffer),
+                                    nullptr, false);
+JKRExpHeap TGlobals::sGlobalHeap(gGlobalBuffer, sizeof(gGlobalBuffer), nullptr,
+                                 false);
+#else
+JKRExpHeap *TGlobals::sCharacterHeap = nullptr;
+JKRExpHeap *TGlobals::sGlobalHeap = nullptr;
+#endif
 
-  mLightData.mShineShadowCoordinates.set(0.0f, 0.0f, 0.0f);
-  mLightData.mPrevShineCount = 0;
-  mLightData.mPrevSize = 0.0f;
-  mLightData.mNextSize = 0.0f;
-  mLightData.mShineShadowBase = 0.0f;
-  mLightData.mStepContext = 0.0f;
-  mLightData.mLightType = SME::Enum::LightContext::DISABLED;
-  mLightData.mSizeMorphing = false;
-}
+TLightContext TGlobals::sLightData = TLightContext();
 
-TMario *TGlobals::getPlayerByIndex(u8 index) const {
+void *TGlobals::sPRMFile = nullptr;
+SME::Class::TWarpCollisionList *TGlobals::sWarpColArray = nullptr;
+SME::Class::TWarpCollisionList *TGlobals::sWarpColPreserveArray = nullptr;
+
+SME::Class::TSMEFile *TGlobals::sStageConfig = nullptr;
+SME::Class::TPlayerParams *TGlobals::sPlayerCfgArray[] = {nullptr, nullptr,
+                                                          nullptr, nullptr};
+TMario *TGlobals::sPlayers[] = {nullptr, nullptr, nullptr, nullptr};
+bool TGlobals::sPlayerHasGeckoCodes = false;
+bool TGlobals::sIsAudioStreaming = false;
+bool TGlobals::sIsAudioStreamAllowed = false;
+bool TGlobals::sIsFreePlay = false;
+u8 TGlobals::sActivePlayers = 0;
+u8 TGlobals::sMaxPlayers = SME_MAX_PLAYERS;
+
+TMario *TGlobals::getPlayerByIndex(u8 index) {
   SME_DEBUG_ASSERT(index < SME_MAX_PLAYERS, "Invalid player index provided");
-  return mPlayers[index];
+  return sPlayers[index];
 }
 
-Class::TPlayerParams *TGlobals::getPlayerParams(u8 id) const {
+Class::TPlayerParams *TGlobals::getPlayerParams(u8 id) {
   SME_DEBUG_ASSERT(id < SME_MAX_PLAYERS, "Invalid player index provided");
-  return mPlayerCfgArray[id];
+  return sPlayerCfgArray[id];
 }
 
-Class::TPlayerParams *TGlobals::getPlayerParams(TMario *player) const {
+Class::TPlayerParams *TGlobals::getPlayerParams(TMario *player) {
   for (u32 i = 0; i < SME_MAX_PLAYERS; ++i) {
-    if (mPlayerCfgArray[i]->getPlayer() == player)
-      return mPlayerCfgArray[i];
+    if (sPlayerCfgArray[i]->getPlayer() == player)
+      return sPlayerCfgArray[i];
   }
   return nullptr;
 }
 
 void TGlobals::setPlayerByIndex(u8 index, TMario *player) {
   SME_DEBUG_ASSERT(index < SME_MAX_PLAYERS, "Invalid player index provided");
-  mPlayers[index] = player;
+  sPlayers[index] = player;
 }
 
 void TGlobals::registerPlayerParams(Class::TPlayerParams *params) {
   for (u32 i = 0; i < SME_MAX_PLAYERS; ++i) {
-    if (mPlayerCfgArray[i] == params)
+    if (sPlayerCfgArray[i] == params)
       return;
-    else if (mPlayerCfgArray[i] == nullptr) {
-      mPlayerCfgArray[i] = params;
+    else if (sPlayerCfgArray[i] == nullptr) {
+      sPlayerCfgArray[i] = params;
       return;
     }
   }
@@ -63,16 +69,16 @@ void TGlobals::registerPlayerParams(Class::TPlayerParams *params) {
 
 void TGlobals::deregisterPlayerParams(Class::TPlayerParams *params) {
   for (u32 i = 0; i < SME_MAX_PLAYERS; ++i) {
-    if (mPlayerCfgArray[i] == params) {
-      mPlayerCfgArray[i] = nullptr;
+    if (sPlayerCfgArray[i] == params) {
+      sPlayerCfgArray[i] = nullptr;
       return;
-    } else if (mPlayerCfgArray[i] == nullptr)
+    } else if (sPlayerCfgArray[i] == nullptr)
       return;
   }
 }
 
 void TGlobals::clearAllPlayerParams() {
   for (u32 i = 0; i < SME_MAX_PLAYERS; ++i) {
-    mPlayerCfgArray[i] = nullptr;
+    sPlayerCfgArray[i] = nullptr;
   }
 }

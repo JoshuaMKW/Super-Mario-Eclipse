@@ -200,16 +200,12 @@ size_t String::find(const char chr, size_t startPos) {
   return addr - mString;
 }
 
-size_t String::findAny(const char list[], size_t startPos) {
-  if (startPos >= length())
-    return String::npos;
-
-  for (u32 i = 0; list[i] != '\0'; i++) {
-    char *addr = strchr(mString + startPos, list[i]);
-    if (addr)
-      return addr - mString;
+size_t String::findAny(const char list[], size_t listSize, size_t startPos) {
+  for (u32 i = 0; i < listSize; i++) {
+    size_t pos = find(list[i], startPos);
+    if (pos != String::npos)
+      return pos;
   }
-
   return String::npos;
 }
 
@@ -280,8 +276,6 @@ void String::resize(size_t size, const char fill) {
 
 String *String::substr(size_t pos, size_t len) {
   String *substr = new String(Max(len, mBufferSize));
-
-  len = Min(size() - pos, len);
   if (pos < size()) {
     strncpy(substr->mString, mString + pos, len);
   }

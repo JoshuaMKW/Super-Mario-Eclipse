@@ -10,11 +10,11 @@
 //0x8024D2C4
 /*
 TMario* updateMario(TMario* player) {
-    if (SME::TGlobals::sGlobals.PlayerData.mCurPlayerID[i] != prevPlayerID) {
+    if (SME::TGlobals::PlayerData.mCurPlayerID[i] != prevPlayerID) {
         u32* marioVolumeData = (u32*)getVolume__13JKRFileLoaderFPCc("mario");
         u32* marioDataArray = (u32*)*(u32*)ARCBufferMario;
 
-        if (marioDataArray[SME::TGlobals::sGlobals.PlayerData.mCurPlayerID[i]]) {
+        if (marioDataArray[SME::TGlobals::PlayerData.mCurPlayerID[i]]) {
             __dt__13JKRMemArchiveFv(marioVolumeData);
             __ct__13JKRMemArchiveFPvUl15JKRMemBreakFlag(marioVolumeData, marioDataArray[i], 0, 0);
 
@@ -32,7 +32,7 @@ TMario* updateMario(TMario* player) {
 
 u32 SME::Patch::Mario::updateContexts(TMario *player)
 {
-    SME::Class::TPlayerParams *playerParams = SME::TGlobals::sGlobals.getPlayerParams(player);
+    SME::Class::TPlayerParams *playerParams = SME::TGlobals::getPlayerParams(player);
 
     if (!playerParams->isMario() || !playerParams->isInitialized())
     {
@@ -89,7 +89,7 @@ u32 SME::Patch::Mario::updateContexts(TMario *player)
 
 u32 SME::Patch::Mario::carryOrTalkNPC(TBaseNPC *npc)
 {
-    const SME::Class::TPlayerParams *playerParams = SME::TGlobals::sGlobals.getPlayerParams(gpMarioAddress);
+    const SME::Class::TPlayerParams *playerParams = SME::TGlobals::getPlayerParams(gpMarioAddress);
 
     if ((*(u32 *)(&npc->mStateFlags) & 0x840007) != 0)
         return 0;
@@ -115,7 +115,7 @@ bool SME::Patch::Mario::canGrabAtNPC()
     TBaseNPC *npc;
     SME_FROM_GPR(30, npc);
 
-    const SME::Class::TPlayerParams *playerParams = SME::TGlobals::sGlobals.getPlayerParams(gpMarioAddress);
+    const SME::Class::TPlayerParams *playerParams = SME::TGlobals::getPlayerParams(gpMarioAddress);
     
     if (npc->mStateFlags.mCanBeTaken)
         return true;
@@ -134,7 +134,7 @@ bool SME::Patch::Mario::canCarryNPC()
     TBaseNPC *npc;
     SME_FROM_GPR(30, npc);
 
-    const SME::Class::TPlayerParams *playerParams = SME::TGlobals::sGlobals.getPlayerParams(gpMarioAddress);
+    const SME::Class::TPlayerParams *playerParams = SME::TGlobals::getPlayerParams(gpMarioAddress);
     
     if (npc->mStateFlags.mCanBeTaken)
         return true;
@@ -883,7 +883,7 @@ static void checkYSpdForTerminalVelocity()
     SME_FROM_GPR(31, player);
 
     float terminalVelocity; = -75.0f * player->mJumpParams.mGravity.get();
-    if (SME::TGlobals::sGlobals.getPlayerParams(player)->mCollisionFlags.mIsGlideBounce)
+    if (SME::TGlobals::getPlayerParams(player)->mCollisionFlags.mIsGlideBounce)
         terminalVelocity = -20.0f * player->mJumpParams.mGravity.get();
     else
         terminalVelocity = -75.0f * player->mJumpParams.mGravity.get();

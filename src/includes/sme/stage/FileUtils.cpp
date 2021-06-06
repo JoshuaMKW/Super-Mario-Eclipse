@@ -6,28 +6,6 @@
 
 using namespace SME;
 
-s32 Util::getCharacterID(JUTGamePad *controller)
-{
-    if (!controller)
-        return SME::TGlobals::sGlobals.getStageConfig()->GlobalFlags.mPlayerID;
-
-    switch (controller->mButtons.mInput)
-    {
-    case TMarioGamePad::Buttons::Z:
-        return 0;
-    case TMarioGamePad::Buttons::DPAD_UP:
-        return 1;
-    case TMarioGamePad::Buttons::DPAD_DOWN:
-        return 2;
-    case TMarioGamePad::Buttons::DPAD_LEFT:
-        return 3;
-    case TMarioGamePad::Buttons::DPAD_RIGHT:
-        return 4;
-    default:
-        return -1;
-    }
-}
-
 const char *Util::getStageName(TApplication *gpApplication)
 {
     AreaEpisodeArray *AreaPathArray = gpApplication->mStringPaths;

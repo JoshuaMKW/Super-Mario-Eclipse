@@ -9,7 +9,7 @@ using namespace SME::Util;
 
 void Spc::getPlayerByIndex(TSpcInterp *interp, u32 argc) {
   SME_ASSERT(argc == 1, "Incorrect number of arguments passed to spc::getPlayerByIndex (%lu args passed, 1 needed)", argc);
-  Spc::Stack::pushItem(interp, reinterpret_cast<u32>(SME::TGlobals::sGlobals.getPlayerByIndex(Spc::Stack::popItem(interp).mValue)), Spc::ValueType::INT); // Return a value
+  Spc::Stack::pushItem(interp, reinterpret_cast<u32>(SME::TGlobals::getPlayerByIndex(Spc::Stack::popItem(interp).mValue)), Spc::ValueType::INT); // Return a value
 }
 
 void Spc::getDateAsStr(TSpcInterp *interp, u32 argc) {

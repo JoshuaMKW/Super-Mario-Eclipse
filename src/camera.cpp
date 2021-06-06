@@ -12,7 +12,7 @@ void Patch::Camera::modifyCameraRangeToSize(f32 *params, f32 *saveParams)
     params[0xA8 / 4] = saveParams[0x3B0 / 4];
 
     //Custom code here
-    const SME::Class::TPlayerParams *playerParams = SME::TGlobals::sGlobals.getPlayerParams(gpMarioAddress);
+    const SME::Class::TPlayerParams *playerParams = SME::TGlobals::getPlayerParams(gpMarioAddress);
     const f32 scale = playerParams->getParams()->mSizeMultiplier.get();
 
     if (!gpMarioAddress->mYoshi || gpMarioAddress->mYoshi->mState != TYoshi::MOUNTED || scale > 1.0f)

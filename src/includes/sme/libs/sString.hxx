@@ -62,7 +62,7 @@ public:
   size_t erase(size_t pos, size_t len = String::npos);
   size_t find(const char *str, size_t startPos = 0);
   size_t find(const char chr, size_t startPos = 0);
-  size_t findAny(const char list[], size_t startPos = 0);
+  size_t findAny(const char list[], size_t listSize, size_t startPos = 0);
   void insert(size_t pos, const char *str);
   size_t replace(size_t pos, size_t len, const char *newstr);
   size_t replace(size_t pos, size_t len, const char newstr);

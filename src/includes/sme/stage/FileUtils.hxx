@@ -9,7 +9,6 @@
 
 namespace SME::Util
 {
-    s32 getCharacterID(JUTGamePad *controller = nullptr);
     const char *getStageName(TApplication *gpApplication);
     void *loadArchive(char *path, JKRHeap *heap);
 }

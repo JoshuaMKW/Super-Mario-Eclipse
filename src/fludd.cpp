@@ -44,7 +44,7 @@ static bool sIsTriggerNozzleDead;
 // extern -> SME.cpp
 bool Patch::Fludd::isPumpOK(TMarioAnimeData *animeData) {
   return (animeData->mFluddEnabled != TMarioAnimeData::FLUDD::FLUDD_DISABLED &&
-          SME::TGlobals::sGlobals.getPlayerParams(gpMarioAddress)->mCurJump <=
+          SME::TGlobals::getPlayerParams(gpMarioAddress)->mCurJump <=
               1);
 }
 
@@ -55,7 +55,7 @@ bool Patch::Fludd::hasWaterCardOpen() {
   SME_FROM_GPR(31, gcConsole);
 
   const SME::Class::TPlayerParams *playerParams =
-      SME::TGlobals::sGlobals.getPlayerParams(gpMarioAddress);
+      SME::TGlobals::getPlayerParams(gpMarioAddress);
 
   if (gpMarioAddress->mYoshi->mState != TYoshi::State::MOUNTED)
     gpMarioAddress->mAttributes.mHasFludd =
@@ -75,7 +75,7 @@ bool Patch::Fludd::hasWaterCardOpen() {
 // extern -> SME.cpp
 bool Patch::Fludd::canCollectFluddItem(TMario *player) {
   return onYoshi__6TMarioCFv(player) ||
-         !SME::TGlobals::sGlobals.getPlayerParams(player)
+         !SME::TGlobals::getPlayerParams(player)
               ->getParams()
               ->mCanUseFludd.get();
 }
@@ -85,7 +85,7 @@ bool Patch::Fludd::canCollectFluddItem(TMario *player) {
 void Patch::Fludd::sprayGoopMap(TPollutionManager *gpPollutionManager, f32 x,
                                 f32 y, f32 z, f32 r) {
   const SME::Class::TPlayerParams *playerParams =
-      SME::TGlobals::sGlobals.getPlayerParams(gpMarioAddress);
+      SME::TGlobals::getPlayerParams(gpMarioAddress);
   const SME::Class::TCustomParams *prm = playerParams->getParams();
 
   if (!playerParams->isMario() || !playerParams->isInitialized())
@@ -106,7 +106,7 @@ void Patch::Fludd::sprayGoopMap(TPollutionManager *gpPollutionManager, f32 x,
 // extern -> SME.cpp
 bool Patch::Fludd::canCleanSeals(TWaterManager *gpWaterManager) {
   return gpWaterManager->mWaterCardType != 0 ||
-         SME::TGlobals::sGlobals.getPlayerParams(gpMarioAddress)
+         SME::TGlobals::getPlayerParams(gpMarioAddress)
              ->getParams()
              ->mCanCleanSeals.get();
 }
@@ -118,7 +118,7 @@ TWaterGun *Patch::Fludd::bindFluddtojoint() {
   SME_FROM_GPR(31, player);
 
   player->mBindBoneIDArray[0] =
-      SME::TGlobals::sGlobals.getPlayerParams(gpMarioAddress)
+      SME::TGlobals::getPlayerParams(gpMarioAddress)
           ->getNozzleBoneID(static_cast<TWaterGun::NozzleType>(
               player->mFludd->mCurrentNozzle));
 

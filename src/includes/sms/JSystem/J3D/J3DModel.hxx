@@ -50,7 +50,7 @@ public:
 	u16 _34;
 	u16 _36; // padding?
 	u32 _38;
-	J3DVertexData vertexData; // _3C
+	J3DVertexData mVertexData; // _3C
 	u32 _80;
 	u16 _84;
 	u16 _86; // padding?
@@ -58,7 +58,7 @@ public:
 	u32 _8C;
 	u32 _90;
 	u32 _94;
-	J3DDrawMtxData drawMtxData; // _98
+	J3DDrawMtxData mDrawMtxData; // _98
 	u32 _A4;
 	u32 _A8;
 	u32 _AC;

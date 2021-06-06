@@ -239,7 +239,9 @@ extern "C"
     s32 OSSuspendThread(OSThread *thread);
     void OSSleepThread(OSThreadQueue *queue);
     void OSWakeupThread(OSThreadQueue *queue);
+    void OSInitThreadQueue(OSThreadQueue *queue);
     OSPriority OSGetThreadPriority(OSThread *thread);
+    bool OSIsThreadTerminated(OSThread *thread);
 
     void OSInitStopwatch(OSStopwatch *watch, const char *name);
     void OSStartStopwatch(OSStopwatch *watch);

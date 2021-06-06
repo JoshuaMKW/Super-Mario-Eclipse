@@ -1,0 +1,126 @@
+﻿/* ================================================= *\
+ * system.sun
+ *
+ * ssc standard include utility
+ * 2015-2016 arookas
+\* ================================================= */
+
+// ================================================= \\
+// FLAGS
+// ================================================= \\
+
+// known flags here
+var const SYSF_SHINEGET											= 0x10000; // add shine num to this
+
+var const SYSF_MARIOLIVES										= 0x20001;
+
+var const SYSF_SHINENUM											= 0x40000;
+var const SYSF_BLUECOINNUM										= 0x40001;
+var const SYSF_GOLDCOINNUM										= 0x40002;
+
+builtin getSystemFlag(flag);
+builtin setSystemFlag(flag, value);
+
+function setOnSystemFlag(flag) { setSystemFlag(flag, true); }
+function setOffSystemFlag(flag) { setSystemFlag(flag, false); }
+
+// [arookas] custom utility
+function incSystemFlag(flag) {
+	setSystemFlag(flag, getSystemFlag(flag) + 1);
+}
+function decSystemFlag(flag) {
+	setSystemFlag(flag, getSystemFlag(flag) - 1);
+}
+
+// [augs] custom utility
+function wait(frames)
+{
+    var __i;
+    for (__i = 0; __i < frames; ++__i) 
+    {
+        yield;//wait for next frame.
+    }
+}
+
+// ================================================= \\
+// POLLUTION
+// ================================================= \\
+
+builtin isGraffitoCoverage0();
+builtin getPollutionLevel();
+builtin setGraffitoMultiplied(a);
+builtin setPollutionIncreaseCount(count);
+
+// ================================================= \\
+// EVENT
+// ================================================= \\
+
+builtin setEventForWaterMelon(a);
+builtin setEventID(a, b);
+builtin isMapEventFinishedAll(a);
+
+// ================================================= \\
+// DEMO
+// ================================================= \\
+
+builtin isDemoMode();
+builtin fireStartDemoCamera(a);
+builtin launchEventClearDemo();
+
+// noki bay
+builtin startMareBottleDemo();
+builtin isFinishMareBottleDemo();
+
+function waitForFinishDemo() {
+	while (!isDemoMode()) {
+		yield;
+	}
+	while (isDemoMode()) {
+		yield;
+	}
+}
+
+// ================================================= \\
+// TIME
+// ================================================= \\
+
+builtin setTimeLimit(limit);
+builtin setAttentionTime(time);
+
+builtin getTime();
+builtin getRestTime();
+
+builtin insertTimer(a, b);
+builtin startTimer();
+builtin stopTimer();
+
+// ================================================= \\
+// MISCELLANEOUS
+// ================================================= \\
+
+builtin invalidatePad(num);
+
+builtin isGameModeNormal();
+builtin isBossDefeated();
+
+builtin registerMovie(movie);
+
+// appear
+builtin appearReadyGo();
+builtin startAppearJetBalloon(a, b);
+
+// nozzle
+builtin changeNozzle(nozzle);
+builtin changeSunglass(sunglass);
+builtin putNozzle(nozzle);
+
+// death
+builtin startMiss();
+builtin gameOver();
+
+// fruit
+builtin eggYoshiStartFruit(a);
+
+builtin getFruitNum(a, b);
+builtin setFruitType(a, b, c);
+builtin resetFruitNum(fruit);

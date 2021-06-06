@@ -54,7 +54,7 @@ static constexpr float sViewPortData[] = {
 extern "C" void avoidRecurseCall(u32 addr, ...);
 
 void Multiplayer::draw3DOverhaul(J3DDrawBuffer *drawBuffer) {
-  const u8 activePlayers = SME::TGlobals::sGlobals.getActivePlayers();
+  const u8 activePlayers = SME::TGlobals::getActivePlayers();
 
   for (u32 i = 0; i < activePlayers; i++) {
     const u32 viewPortIndex = ((activePlayers - 1) * 16) + (i * 4);
@@ -71,11 +71,11 @@ TMario *Multiplayer::makeMarios() {
   for (int i = 1; i < SME_MAX_PLAYERS; i++) {
     TMario *player = new TMario();
     player->mController = &gpApplication.mGamePad1[i];
-    SME::TGlobals::sGlobals.setPlayerByIndex(i, player);
+    SME::TGlobals::setPlayerByIndex(i, player);
   }
   TMario *p1 =
       reinterpret_cast<TMario *>(SME::Util::Memory::malloc(sizeof(TMario), 4));
-  SME::TGlobals::sGlobals.setPlayerByIndex(0, p1);
+  SME::TGlobals::setPlayerByIndex(0, p1);
   return p1;
 }
 
@@ -84,7 +84,7 @@ void Multiplayer::loadMarioTrickyOverhaul(TMario *player,
   // We preserve the stream's position for each iteration
   const s32 pos = stream->getPosition();
   for (u32 i = 0; i < SME_MAX_PLAYERS; i++) {
-    gpMarioAddress = SME::TGlobals::sGlobals.getPlayerByIndex(i);
+    gpMarioAddress = SME::TGlobals::getPlayerByIndex(i);
     SMS_SetMarioAccessParams__Fv();
     stream->seek(pos, JSUStreamSeekFrom::BEGIN);
     avoidRecurseCall(SME_PORT_REGION(0x80276BD4, 0, 0, 0), gpMarioAddress,
@@ -96,8 +96,8 @@ void Multiplayer::loadMarioTrickyOverhaul(TMario *player,
 // I manually update each mario here
 void Multiplayer::performMarioTrickyOverhaul(TMario *player,
                                              JSUMemoryInputStream *stream) {
-  for (u32 i = 0; i < SME::TGlobals::sGlobals.getActivePlayers(); i++) {
-    gpMarioAddress = SME::TGlobals::sGlobals.getPlayerByIndex(i);
+  for (u32 i = 0; i < SME::TGlobals::getActivePlayers(); i++) {
+    gpMarioAddress = SME::TGlobals::getPlayerByIndex(i);
     SMS_SetMarioAccessParams__Fv();
     avoidRecurseCall(SME_PORT_REGION(0x8024D2AC, 0, 0, 0), gpMarioAddress,
                      stream);
@@ -109,10 +109,10 @@ void Multiplayer::performMarioTrickyOverhaul(TMario *player,
 // When the game changes the player's state (in)active, is required to make
 // active players visible and alive
 void Multiplayer::setMarioOverhaul(TMarDirector *director) {
-  for (u32 i = 0; i < SME::TGlobals::sGlobals.getActivePlayers(); i++) {
-    gpMarioAddress = SME::TGlobals::sGlobals.getPlayerByIndex(i);
+  for (u32 i = 0; i < SME::TGlobals::getActivePlayers(); i++) {
+    gpMarioAddress = SME::TGlobals::getPlayerByIndex(i);
     SMS_SetMarioAccessParams__Fv();
     director->setMario();
   }
-  gpMarioAddress = SME::TGlobals::sGlobals.getPlayerByIndex(0);
+  gpMarioAddress = SME::TGlobals::getPlayerByIndex(0);
 }

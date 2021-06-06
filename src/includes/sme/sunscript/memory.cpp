@@ -4,19 +4,19 @@
 using namespace SME::Util;
 
 void Spc::read8(TSpcInterp *interp, u32 argc) {
-    SME_ASSERT(argc == 2, "Incorrect number of arguments passed to spc::read8 (%lu args passed, 2 needed)", argc);
+    SME_ASSERT(argc == 1, "Incorrect number of arguments passed to spc::read8 (%lu args passed, 1 needed)", argc);
     u8 *dst = reinterpret_cast<u8 *>(Spc::Stack::popItem(interp).mValue);
     Spc::Stack::pushItem(interp, *dst, Spc::ValueType::INT);
 }
 
 void Spc::read16(TSpcInterp *interp, u32 argc) {
-    SME_ASSERT(argc == 2, "Incorrect number of arguments passed to spc::read16 (%lu args passed, 2 needed)", argc);
+    SME_ASSERT(argc == 1, "Incorrect number of arguments passed to spc::read16 (%lu args passed, 1 needed)", argc);
     u16 *dst = reinterpret_cast<u16 *>(Spc::Stack::popItem(interp).mValue);
     Spc::Stack::pushItem(interp, *dst, Spc::ValueType::INT);
 }
 
 void Spc::read32(TSpcInterp *interp, u32 argc) {
-    SME_ASSERT(argc == 2, "Incorrect number of arguments passed to spc::read32 (%lu args passed, 2 needed)", argc);
+    SME_ASSERT(argc == 1, "Incorrect number of arguments passed to spc::read32 (%lu args passed, 1 needed)", argc);
     u32 *dst = reinterpret_cast<u32 *>(Spc::Stack::popItem(interp).mValue);
     Spc::Stack::pushItem(interp, *dst, Spc::ValueType::INT);
 }

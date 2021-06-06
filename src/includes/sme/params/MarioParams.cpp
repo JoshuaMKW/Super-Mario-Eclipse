@@ -12,7 +12,7 @@ using namespace SME::Class;
 
 TPlayerParams::TPlayerParams(TMario *player, CPolarSubCamera *camera, bool isMario)
     : mPlayer(player), mIsEMario(!isMario), mInitialized(true),
-      mCanUseFludd(true), mPlayerID(0), mCurJump(0), mDefaultAttrs(player) {
+      mCanUseFludd(true), mPlayerID(SME::Enum::Player::MARIO), mCurJump(0), mDefaultAttrs(player) {
   if (!camera) {
     camera = new CPolarSubCamera("<CPolarSubCamera>");
   }
@@ -228,15 +228,15 @@ u8 TPlayerParams::getNozzleBoneID(TWaterGun::NozzleType nozzle) const {
 
 const char *TPlayerParams::getPlayerName() const {
   switch (getPlayerID()) {
-  case 1:
+  case SME::Enum::Player::LUIGI:
     return "Luigi";
-  case 2:
+  case SME::Enum::Player::IL_PIANTISSIMO:
     return "Il Piantissimo";
-  case 3:
+  case SME::Enum::Player::SHADOW_MARIO:
     return "Shadow Mario";
-  case 4:
+  case SME::Enum::Player::DRY_BONES:
     return "Dry Bones";
-  case 0:
+  case SME::Enum::Player::MARIO:
   default:
     return "Mario";
   }

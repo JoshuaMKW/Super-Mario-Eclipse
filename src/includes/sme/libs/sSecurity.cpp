@@ -45,11 +45,11 @@ void *Util::Security::checkUserCodes(OSAlarm *alarm, OSContext *context)
                     OSDumpStopwatch(&gctStopwatch);
             #endif
 
-            SME::TGlobals::sGlobals.mPlayerHasGeckoCodes = true;
+            SME::TGlobals::sPlayerHasGeckoCodes = true;
             return nullptr;
         }
     }
-    SME::TGlobals::sGlobals.mPlayerHasGeckoCodes =
+    SME::TGlobals::sPlayerHasGeckoCodes =
         areGeckoCodesPresent(static_cast<void *>(searchcontext), searchlength, &sCachedAddr);
 
     #ifdef SME_DEBUG

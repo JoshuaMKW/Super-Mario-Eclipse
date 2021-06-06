@@ -37,7 +37,7 @@ static bool startStreamedSFX(u32 sfxID) {
 
 // 0x80016998
 u32 SME::Patch::Music::setIsValid(MSStageInfo musicID) {
-  SME::TGlobals::sGlobals.mIsAudioStreamAllowed = SME::Util::Music::isValidBGM(musicID);
+  SME::TGlobals::sIsAudioStreamAllowed = SME::Util::Music::isValidBGM(musicID);
   return musicID & 0x3FF;
 }
 
@@ -48,13 +48,13 @@ void SME::Patch::Music::initMusic() {
 
   DVDFileInfo *handle = (DVDFileInfo *)0x803FDB7C;
 
-  if (!SME::TGlobals::sGlobals.mIsAudioStreaming &&
+  if (!SME::TGlobals::sIsAudioStreaming &&
       (SME::Class::TSMEFile::sStageConfig.Music.mMusicID & 0x400))
     startStreamedBGM((MSStageInfo)SME::Class::TSMEFile::sStageConfig.Music.mMusicID, true);
 
-  if (SME::TGlobals::sGlobals.mIsAudioStreaming && !SME::TGlobals::sGlobals.mIsAudioStreamAllowed) {
+  if (SME::TGlobals::sIsAudioStreaming && !SME::TGlobals::sIsAudioStreamAllowed) {
     DVDCancelStreamAsync(&handle->mCmdBlock, 0);
-    SME::TGlobals::sGlobals.mIsAudioStreaming = false;
+    SME::TGlobals::sIsAudioStreaming = false;
   }
 }
 
@@ -62,9 +62,9 @@ void SME::Patch::Music::initMusic() {
 void SME::Patch::Music::stopMusicOnStop() {
   DVDFileInfo *handle = (DVDFileInfo *)0x803FDB7C;
 
-  if (SME::TGlobals::sGlobals.mIsAudioStreaming) {
+  if (SME::TGlobals::sIsAudioStreaming) {
     DVDCancelStreamAsync(&handle->mCmdBlock, 0);
-    SME::TGlobals::sGlobals.mIsAudioStreaming = false;
+    SME::TGlobals::sIsAudioStreaming = false;
   }
 }
 
@@ -72,9 +72,9 @@ void SME::Patch::Music::stopMusicOnStop() {
 void SME::Patch::Music::stopMusicOnStageExit(TMarioGamePad *gamepad) {
   DVDFileInfo *handle = (DVDFileInfo *)0x803FDB7C;
 
-  if (SME::TGlobals::sGlobals.mIsAudioStreaming) {
+  if (SME::TGlobals::sIsAudioStreaming) {
     DVDCancelStreamAsync(&handle->mCmdBlock, 0);
-    SME::TGlobals::sGlobals.mIsAudioStreaming = false;
+    SME::TGlobals::sIsAudioStreaming = false;
   }
   reset__9RumbleMgrFv(gamepad);
 }

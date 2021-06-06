@@ -8,12 +8,10 @@
 #include "string.h"
 #include "types.h"
 
+#include "Player.hxx"
 #include "libs/sMemory.hxx"
 #include "libs/sString.hxx"
-
-namespace SME::Enum {
-enum class LightContext : u8 { DISABLED, STATIC, FOLLOWPLAYER };
-}
+#include "LightContext.hxx"
 
 namespace SME::Class {
 
@@ -29,13 +27,13 @@ public:
   } FileHeader;
 
   struct {
-    bool mIsShineShadow;                      // 0x0010
-    bool mIsMario;                            // 0x0011
-    bool mIsYoshi;                            // 0x0012
-    bool mIsMusic;                            // 0x0013
-    bool mIsFludd;                            // 0x0014
-    SME::Enum::LightContext mShineShadowFlag; // 0x0015
-    s8 mPlayerID;                             // 0x0016
+    bool mIsShineShadow;                                       // 0x0010
+    bool mIsMario;                                             // 0x0011
+    bool mIsYoshi;                                             // 0x0012
+    bool mIsMusic;                                             // 0x0013
+    bool mIsFludd;                                             // 0x0014
+    TLightContext::ActiveType mShineShadowFlag; // 0x0015
+    SME::Enum::Player mPlayerID;                               // 0x0016
 
     struct {
       u8 _00 : 4;

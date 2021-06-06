@@ -4,7 +4,7 @@
             "name": "Win32",
             "includePath": [
                 "${workspaceFolder}/src/system/dolphin",
-                "${workspaceFolder}/src/system/Kuribo/sdk",
+                "${workspaceFolder}/src/system",
                 "${workspaceFolder}/src/includes/sme",
                 "${workspaceFolder}/src/includes"
             ],

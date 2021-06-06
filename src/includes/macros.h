@@ -48,4 +48,10 @@
 #define SME_NO_INLINE __declspec(noinline)
 #endif
 
+#ifdef __MWERKS__
+#define SME_REGISTER register
+#else
+#define SME_REGISTER
+#endif
+
 #define SME_CALL_NAIVE(addr, ...) ((void(*)(...))addr)(__VA_ARGS__)

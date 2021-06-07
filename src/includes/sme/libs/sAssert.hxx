@@ -20,7 +20,7 @@
     char errmsg[256];                                                          \
     sprintf(errmsg, "[SME] %s: %s", (_SmeFunc), (msg));                        \
     OSPanic(__FILE__, __LINE__, errmsg, ##__VA_ARGS__);                        \
-    __OSUnhandledException(6, 0, 0);                                           \
+    __OSUnhandledException(6, OSGetCurrentContext(), 0);                                           \
   }
 
 #ifdef SME_DEBUG

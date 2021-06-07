@@ -220,7 +220,7 @@ extern "C"
     void OSExceptionInit();
     void OSExceptionVector(u32 unk);
     void OSDefaultExceptionHandler();
-    void __OSUnhandledException(u32, u32, u32);
+    void __OSUnhandledException(u32, OSContext *, u32);
 
     void OSInitAlarm();
     void OSCreateAlarm(void *alarm);
@@ -228,6 +228,9 @@ extern "C"
     void OSSetPeriodicAlarm(OSAlarm *alarm, OSTime start, OSTime period, OSAlarmHandler handler);
     void InsertAlarm(OSAlarm *alarm, OSTime time, OSAlarmHandler handler);
     void OSCancelAlarm(OSAlarm *alarm);
+
+    OSContext *OSGetCurrentContext();
+    OSThread *OSGetCurrentThread();
 
     void OSYieldThread();
     bool OSCreateThread(OSThread *thread, void *(*funcToThread)(void *), void *parameter, void *stack, u32 stackSize, OSPriority priority, u16 attributes);

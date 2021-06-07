@@ -7,17 +7,18 @@
 
 #include "Globals.hxx"
 #include "Player.hxx"
-#include "stage/FileUtils.hxx"
 #include "libs/sAssert.hxx"
+#include "stage/FileUtils.hxx"
 
 using namespace SME;
 
 static OSThread gCharacterSwapThread;
 static TMario *gPlayerToSwap;
 static Enum::Player gTargetCharacterID;
-static u8 gCharacterSwapStack[0x1000];
+static u8 gCharacterSwapStack[0x4000];
 static bool gFadeInOut = true;
 static bool gSwapSuccessful = false;
+static u8 gHeapAllocState = 0;
 
 bool Util::Mario::loadParams() {
   JKRMemArchive *marioVolumeData =
@@ -89,7 +90,7 @@ bool Util::Mario::swapBinary(Enum::Player id) {
 
 static void *t_swapCharacter(void *context) {
   gSwapSuccessful = false;
-  
+
   char buffer[32];
   sprintf(buffer, "/data/chr%hhu.szs", gTargetCharacterID);
 
@@ -107,20 +108,26 @@ static void *t_swapCharacter(void *context) {
   if (gFadeInOut) {
     gpApplication.mFader->startWipe(TSMSFader::WipeRequest::FADE_CIRCLE_OUT,
                                     1.0f, 0.0f);
-    marioData =
-      reinterpret_cast<u32 *>(SME::Util::loadArchive(buffer, CharacterHeap));
+    marioData = reinterpret_cast<u32 *>(SME::Util::loadArchive(
+        buffer, CharacterHeap,
+        static_cast<JKRDvdRipper::EAllocDirection>(gHeapAllocState)));
 
     // Threaded loop to wait on fade to complete
     while (gpApplication.mFader->mFadeStatus != TSMSFader::FADE_ON) {
       asm volatile("");
     }
   } else {
-    marioData =
-      reinterpret_cast<u32 *>(SME::Util::loadArchive(buffer, CharacterHeap));
+    marioData = reinterpret_cast<u32 *>(SME::Util::loadArchive(
+        buffer, CharacterHeap,
+        static_cast<JKRDvdRipper::EAllocDirection>(gHeapAllocState)));
   }
 
   // Character failed to load / doesn't exist
-  SME_ASSERT(marioData, "Tried to swap the player with data that doesn't exist!");
+  SME_ASSERT(marioData,
+             "Tried to swap the player with data that doesn't exist!");
+
+  // Toggle heap direction to keep heap from fragmenting
+  gHeapAllocState ^= 1;
 
   // Make the player inactive
   gPlayerToSwap->mAttributes.mIsInactive = true;
@@ -131,8 +138,7 @@ static void *t_swapCharacter(void *context) {
 
   // Refresh mounted handle
   marioVolumeData->unmountFixed();
-  marioVolumeData->mountFixed(gpArcBufferMario,
-                              JKRMemBreakFlag::UNK_0);
+  marioVolumeData->mountFixed(gpArcBufferMario, JKRMemBreakFlag::UNK_0);
 
   // -- Update player data -- //
   {
@@ -143,34 +149,50 @@ static void *t_swapCharacter(void *context) {
     gPlayerToSwap->JSGGetTranslation(&position);
     gPlayerToSwap->JSGGetRotation(&rotation);
 
-    delete gPlayerToSwap;
+    // delete gPlayerToSwap;
 
     // Fresh player data
-    TMario *newPlayer = new TMario();
+    // TMario *newPlayer = new TMario();
 
     // Prevent other threads from interrupting
-    const bool interruptStatus = OSDisableInterrupts();
+    // const bool interruptStatus = OSDisableInterrupts();
 
-    if (gpMarioAddress == gPlayerToSwap) {
-      gpMarioOriginal = newPlayer;
-      SMS_SetMarioAccessParams__Fv();
-    }
+    // gPlayerToSwap->initValues();
+    // gPlayerToSwap->loadAfter();
 
-    newPlayer->initValues();
-    newPlayer->loadAfter();
+    // gPlayerToSwap->mAttributes.mIsInactive = false;
+    // gPlayerToSwap->JSGSetTranslation(position);
+    // gPlayerToSwap->JSGSetRotation(rotation);
 
-    newPlayer->mAttributes.mIsInactive = false;
-    newPlayer->JSGSetTranslation(position);
-    newPlayer->JSGSetRotation(rotation);
+    gPlayerToSwap->mAttributes.mIsInactive = false;
 
-    for (u32 i = 0; i < TGlobals::getMaxPlayers(); ++i) {
-      if (TGlobals::getPlayerByIndex(i) == gPlayerToSwap) {
-        TGlobals::setPlayerByIndex(i, newPlayer);
-      }
-    }
+    initValues__6TMarioFv(gPlayerToSwap);
+    loadAfter__6TMarioFv(gPlayerToSwap);
+
+    // OSRestoreInterrupts(interruptStatus);
+
+    JSGSetTranslation__Q26JDrama6TActorFRC3Vec(gPlayerToSwap, position);
+    JSGSetRotation__Q26JDrama6TActorFRC3Vec(gPlayerToSwap, rotation);
+
+    // if (gpMarioAddress == gPlayerToSwap) {
+    //   gpMarioOriginal = newPlayer;
+    //   SMS_SetMarioAccessParams__Fv();
+    // }
+
+    // newPlayer->initValues();
+    // newPlayer->loadAfter();
+
+    // newPlayer->mAttributes.mIsInactive = false;
+    // newPlayer->JSGSetTranslation(position);
+    // newPlayer->JSGSetRotation(rotation);
+
+    // for (u32 i = 0; i < TGlobals::getMaxPlayers(); ++i) {
+    //   if (TGlobals::getPlayerByIndex(i) == gPlayerToSwap) {
+    //     TGlobals::setPlayerByIndex(i, newPlayer);
+    //   }
+    // }
 
     // Restore multi-threaded nature
-    OSRestoreInterrupts(interruptStatus);
   }
 
   if (gFadeInOut) {
@@ -193,7 +215,7 @@ void Util::Mario::switchCharacter(TMario *player, Enum::Player id,
   gFadeInOut = fadeInOut;
 
   if (OSIsThreadTerminated(&gCharacterSwapThread)) {
-    //fix stack bug, gets overwritten due to obnoxious pointer
+    // fix stack bug, gets overwritten due to obnoxious pointer
     OSCreateThread(&gCharacterSwapThread, &t_swapCharacter, nullptr,
                    (u8 *)(&gCharacterSwapStack) + sizeof(gCharacterSwapStack),
                    sizeof(gCharacterSwapStack), 18, 0);

@@ -57,7 +57,8 @@ KURIBO_MODULE_BEGIN(SME_MODULE_NAME, SME_AUTHOR_NAME, SME_VERSION_TAG) {
     OSSetPeriodicAlarm(
         &gctAlarm, OSGetTime(), OSMillisecondsToTicks(1),
         reinterpret_cast<OSAlarmHandler>(&SME::Util::Security::checkUserCodes));
-    SME_DEBUG_LOG("Mario health offset = %X\n", offsetof(TMario, mHealth));
+    SME_DEBUG_LOG("Mario health offset = 0x%X\n", offsetof(TMario, mHealth));
+    SME_DEBUG_LOG("MapObjBase = 0x%X\n", offsetof(TMapObjBase, mMapObjID));
   }
   KURIBO_EXECUTE_ON_UNLOAD {
     SME_DEBUG_LOG("-- Destroying Module --\n");
@@ -171,6 +172,12 @@ SME_PATCH_BL(SME_PORT_REGION(0x802A744C, 0, 0, 0), moduleLoad);
   SME_PATCH_BL(SME_PORT_REGION(0x8025059C, 0, 0, 0),
                Patch::Collision::masterAllCollisionHandler);
 
+  // debug.cpp
+  SME_PATCH_BL(SME_PORT_REGION(0x8024D194, 0, 0, 0),
+               Patch::Debug::xyzModifierMario);
+  SME_WRITE_32(SME_PORT_REGION(0x8024D198, 0, 0, 0),
+               0x2C030000);    
+
   // file_flags.cpp
   SME_PATCH_BL(SME_PORT_REGION(0x802B1794, 0, 0, 0),
                Patch::Flag::setFileCompleteBool);
@@ -180,7 +187,7 @@ SME_PATCH_BL(SME_PORT_REGION(0x802A744C, 0, 0, 0), moduleLoad);
 
   // fludd.cpp
   SME_PATCH_B(SME_PORT_REGION(0x80248F14, 0, 0, 0), Patch::Fludd::isPumpOK);
-  SME_WRITE_32(SME_PORT_REGION(0x803DCA02, 0, 0, 0),
+  SME_WRITE_32(SME_PORT_REGION(0x803DCA00, 0, 0, 0),
                0x00300000 | TMarioAnimeData::FLUDD::FLUDD_ENABLED);
   SME_PATCH_BL(SME_PORT_REGION(0x8014206C, 0, 0, 0),
                Patch::Fludd::hasWaterCardOpen);
@@ -225,13 +232,13 @@ SME_PATCH_BL(SME_PORT_REGION(0x802A744C, 0, 0, 0), moduleLoad);
                Patch::Fruit::isGrabWaitOver);
 
   // init_mods.cpp
-  SME_PATCH_BL(SME_PORT_REGION(0x802A750C, 0, 0, 0),
-               Patch::Init::createGlobalHeaps);
+  //SME_PATCH_BL(SME_PORT_REGION(0x802A750C, 0, 0, 0),
+  //             Patch::Init::createGlobalHeaps);
   SME_PATCH_BL(SME_PORT_REGION(0x802A7140, 0, 0, 0),
                Patch::Init::setupMarioDatas);
-  SME_PATCH_BL(SME_PORT_REGION(0x802A716C, 0, 0, 0),
-               Patch::Init::initFirstModel);
-  SME_PATCH_BL(SME_PORT_REGION(0x802998B4, 0, 0, 0), Patch::Init::initFileMods);
+  //SME_PATCH_BL(SME_PORT_REGION(0x802A716C, 0, 0, 0),
+  //             Patch::Init::initFirstModel);
+  //SME_PATCH_BL(SME_PORT_REGION(0x802998B4, 0, 0, 0), Patch::Init::initFileMods);
   SME_PATCH_B(SME_PORT_REGION(0x80280180, 0, 0, 0),
               Patch::Init::initShineShadow);
   SME_PATCH_BL(SME_PORT_REGION(0x802B7A4C, 0, 0, 0),
@@ -392,9 +399,12 @@ SME_PATCH_BL(SME_PORT_REGION(0x802A744C, 0, 0, 0), moduleLoad);
                Patch::Yoshi::maybeYoshiDrown);
   SME_PATCH_BL(SME_PORT_REGION(0x802810F8, 0, 0, 0),
                Patch::Yoshi::canMountYoshi);
+  SME_WRITE_32(SME_PORT_REGION(0x802810FC, 0, 0, 0), 0x2C030000);
+  SME_WRITE_32(SME_PORT_REGION(0x80281100, 0, 0, 0), 0x807F03F0);
+  SME_WRITE_32(SME_PORT_REGION(0x80281104, 0, 0, 0), 0x38830020);
+  SME_WRITE_32(SME_PORT_REGION(0x80281110, 0, 0, 0), 0x60000000);
   SME_PATCH_BL(SME_PORT_REGION(0x80281148, 0, 0, 0),
                Patch::Yoshi::getYoshiYPos_);
-  SME_WRITE_32(SME_PORT_REGION(0x802810FC, 0, 0, 0), 0x2C030000);
   SME_PATCH_BL(SME_PORT_REGION(0x8026E810, 0, 0, 0),
                Patch::Yoshi::fixYoshiJuiceDecrement);
   SME_PATCH_BL(SME_PORT_REGION(0x8024E58C, 0, 0, 0),
@@ -474,7 +484,7 @@ SME_PATCH_BL(SME_PORT_REGION(0x802A744C, 0, 0, 0), moduleLoad);
 
   // Extend Exception Handler
   SME_WRITE_32(SME_PORT_REGION(0x802C7638, 0, 0, 0), 0x60000000);
-  SME_WRITE_32(SME_PORT_REGION(0x802C7690, 0, 0, 0), 0x60000000);
+  //SME_WRITE_32(SME_PORT_REGION(0x802C7690, 0, 0, 0), 0x60000000);
 
 #ifdef SME_DEBUG
   // Skip FMVs

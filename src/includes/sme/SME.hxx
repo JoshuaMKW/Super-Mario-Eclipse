@@ -109,6 +109,12 @@ u32 masterAllCollisionHandler(TMario *player);
 
 } // namespace Collision
 
+namespace Debug {
+
+bool xyzModifierMario(TMario *player);
+
+} // namespace Debug
+
 namespace Flag {
 
 TCardBookmarkInfo *setFileCompleteBool(TCardManager *cardManager);
@@ -145,9 +151,10 @@ namespace Init {
 void initCodeProtection();
 JKRExpHeap *createGlobalHeaps(void *newHeap, size_t size, JKRHeap *rootHeap,
                               bool unk_1);
-u32 setupMarioDatas(char *filepath);
+s32 setupMarioDatas(char *filepath);
 u32 *initFirstModel(char *path, u32 unk_1, u32 unk_2, u32 unk_3, JKRHeap *heap,
-                    u32 unk_4, u32 unk_5, u32 unk_6);
+                    JKRDvdRipper::EAllocDirection direction, u32 unk_5,
+                    u32 unk_6);
 TMarDirector *initFileMods();
 void initShineShadow();
 void initSoundBank(u8 areaID, u8 episodeID);
@@ -221,7 +228,8 @@ void startEpisodeSelect(void *selectMenu);
 
 namespace Spc {
 
-void initCustomFunctions(TSpcBinary *spcBinary, const char *symbol, u32 address);
+void initCustomFunctions(TSpcBinary *spcBinary, const char *symbol,
+                         u32 address);
 
 }
 
@@ -232,7 +240,7 @@ bool isYoshiEggNeedFruit(THitActor *gpFruit);
 u8 isYoshiEggFree(TEggYoshi *gpEgg, THitActor *gpFruit);
 bool isYoshiMaintainFluddModel();
 void maybeYoshiDrown(TYoshi *yoshi);
-bool canMountYoshi(u32 state);
+bool canMountYoshi();
 f32 getYoshiYPos_(TYoshi *yoshi);
 void fixYoshiJuiceDecrement();
 void canYoshiSpray(TWaterGun *gpWaterGun);

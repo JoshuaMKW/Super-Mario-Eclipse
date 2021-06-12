@@ -31,8 +31,8 @@ public:
 	virtual u32 state_compare(const JKRHeap::TState &, const JKRHeap::TState &);
 	virtual void state_dump(const JKRHeap::TState &);
 
-	void becomeSystemHeap();
-	void becomeCurrentHeap();
+	JKRHeap *becomeSystemHeap();
+	JKRHeap *becomeCurrentHeap();
 	bool initArena(u8 **, size_t, int);
 	void free(void *, JKRHeap *);
 	static JKRHeap* findFromRoot(void *);
@@ -144,7 +144,7 @@ public:
 	virtual u32 state_register(JKRHeap::TState *, size_t) override;
 	virtual u32 state_compare(const JKRHeap::TState &, const JKRHeap::TState &) override;
 
-	static JKRExpHeap *create(size_t, JKRHeap *, bool);
+	static JKRStdHeap *create(size_t, JKRHeap *, bool);
 
 	u32 mHeapID;
 };
@@ -170,7 +170,7 @@ public:
 	virtual u32 state_register(JKRHeap::TState *, size_t) override;
 	virtual u32 state_compare(const JKRHeap::TState &, const JKRHeap::TState &) override;
 
-	static JKRExpHeap *create(size_t, JKRHeap *, bool);
+	static JKRSolidHeap *create(size_t, JKRHeap *, bool);
 
 	u32 _68;
 	u32 _6C;

@@ -94,17 +94,17 @@ void Patch::Yoshi::maybeYoshiDrown(TYoshi *yoshi) {
 
 // 0x802810F8
 // extern -> SME.cpp
-bool Patch::Yoshi::canMountYoshi(u32 state) {
+bool Patch::Yoshi::canMountYoshi() {
   TMario *player;
   SME_FROM_GPR(31, player);
 
   const SME::Class::TPlayerParams *playerParams =
       SME::TGlobals::getPlayerParams(player);
 
-  if (state & static_cast<u32>(TMario::State::WATERBORN))
+  if (player->mState & static_cast<u32>(TMario::State::WATERBORN))
     return playerParams->getParams()->mCanRideYoshi.get();
   else
-    return ((state & static_cast<u32>(TMario::State::AIRBORN)) &&
+    return ((player->mState & static_cast<u32>(TMario::State::AIRBORN)) &&
             playerParams->getParams()->mCanRideYoshi.get());
 }
 

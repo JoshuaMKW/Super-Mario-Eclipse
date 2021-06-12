@@ -922,7 +922,6 @@ public:
   virtual bool receiveMessage(THitActor *receiver, u32 msg) override;
   virtual Mtx *getTakingMtx() override;
   virtual u32 moveRequest(const JGeometry::TVec3<f32> &destPosition) override;
-  virtual void drawSyncCallback(u16) override;
   virtual void initValues();
   virtual void checkReturn();
   virtual void checkController();
@@ -932,8 +931,9 @@ public:
   virtual void checkCollision();
   virtual void damageExec(THitActor *, int, int, int, f32, int, f32, s16);
   virtual u8 getVoiceStatus();
+  virtual void drawSyncCallback(u16) override;
 
-  //add funcs
+  // add funcs
 
   u32 mActionState;   // 0x0074
   u32 mJumpingState;  // 0x0078
@@ -945,7 +945,7 @@ public:
   f32 mBaseAcceleration;        // 0x008C
   u16 mAccelerationDirection;   // 0x0090
   u16 _92;                      // padding?
-  JGeometry::TVec3<u16> mAngle; // 0x0094
+  JGeometry::TVec3<s16> mAngle; // 0x0094
   JGeometry::TVec3<u16> _9A;
   u16 _A0;
   JGeometry::TVec3<f32> mSpeed; // 0x00A4
@@ -1125,11 +1125,12 @@ public:
   J3DModel *mHandModel2L;
   J3DModel *mHandModel3R;
   J3DModel *mHandModel3L;
-  J3DModel *mHandModel4R;               // unknown
-  u8 mBindBoneIDArray[13];
-  u8 _3D1;                 // padding?
-  u8 _3D2;                 // padding?
-  u8 _3D3;                 // padding?
+  J3DModel *mHandModel4R; // unknown
+  u8 _3C4;
+  u8 mBindBoneIDArray[12];
+  u8 _3D1; // padding?
+  u8 _3D2; // padding?
+  u8 _3D3; // padding?
   u16 _3D4;
   u16 _3D6;
   f32 _3D8;
@@ -1138,11 +1139,11 @@ public:
   TWaterGun *mFludd; // 0x03E4
   u32 _3E8;
   f32 _3EC;
-  TYoshi *mYoshi;   // 0x03F0
-  void *mSurfGesso; // 0x03F4
-  void *_3F8;
-  void *_3FC;
-  void *_400; // used before for custom pointer
+  TYoshi *mYoshi;     // 0x03F0
+  void *mSurfGesso;   // 0x03F4
+  MActor *mTorocco;   // 0x03F8
+  MActor *mPinnaRail; // 0x03FC
+  MActor *mKoopaRail; // 0x0400
   f32 _404;
   f32 _408;
   f32 _40C;
@@ -1171,9 +1172,9 @@ public:
   u32 _464;
   u32 _468;
   u32 _46C;
-  void *mGoopTexture; //bti
+  void *mGoopTexture; // bti
   THitActor _474;
-  u32 _4DC;
+  MAnmSound *mAnmSound; // 0x04DC
   u32 _4E0;
   u32 _4E4;
   u32 _4E8;

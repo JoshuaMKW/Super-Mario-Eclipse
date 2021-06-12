@@ -21,7 +21,8 @@ struct TCustomParams : public TParams {
        SME_STRINGIZE(name))
 
   TCustomParams()
-      : CONSTRUCT_PARAM(mMaxJumps, 1), CONSTRUCT_PARAM(mCanRideYoshi, true),
+      : TParams(), CONSTRUCT_PARAM(mMaxJumps, 1),
+        CONSTRUCT_PARAM(mCanRideYoshi, true),
         CONSTRUCT_PARAM(mCanUseFludd, true),
         CONSTRUCT_PARAM(mPlayerHasHelmet, false),
         CONSTRUCT_PARAM(mPlayerHasGlasses, false),

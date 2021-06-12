@@ -11,58 +11,6 @@ using namespace SME;
 
 extern J2DTextBox gDebugTextBox;
 
-bool inXYZMode;
-
-/*
-static void xyzModifierMario()
-{
-    #ifndef SME_DEBUG
-        if (!SME::Class::TCheatHandler::sDebugHandler.isActive())
-            return;
-    #endif
-
-    if (!gpMarioAddress)
-        return;
-
-    if ((void *)gpMarioAddress->mController < (void *)0x80000000 || (u32
-*)gpMarioAddress->mController >= (void *)0x81800000) return;
-
-    if (gpMarioAddress->mController->mButtons.mFrameInput &
-TMarioGamePad::Buttons::DPAD_RIGHT && !inXYZMode)
-    {
-        inXYZMode = true;
-    }
-    else if (gpMarioAddress->mController->mButtons.mFrameInput &
-TMarioGamePad::Buttons::DPAD_RIGHT && inXYZMode)
-    {
-        gpMarioAddress->mState = TMario::State::IDLE;
-        inXYZMode = false;
-    }
-
-    if (inXYZMode)
-    {
-        gpMarioAddress->mState = TMario::State::IDLE | TMario::State::CUTSCENE;
-        f32 speedMultiplier = lerp<f32>(1, 2,
-gpMarioAddress->mController->mButtons.mAnalogR); gpMarioAddress->mPosition.x +=
-((gpMarioAddress->mController->mControlStick.mStickX * 83) * speedMultiplier);
-        gpMarioAddress->mPosition.z -=
-((gpMarioAddress->mController->mControlStick.mStickY * 83) * speedMultiplier);
-
-        if (gpMarioAddress->mController->mButtons.mInput &
-TMarioGamePad::Buttons::DPAD_DOWN)
-        {
-            gpMarioAddress->mPosition.y -= (83 * speedMultiplier);
-        }
-        else if (gpMarioAddress->mController->mButtons.mInput &
-TMarioGamePad::Buttons::DPAD_UP)
-        {
-            gpMarioAddress->mPosition.y += (83 * speedMultiplier);
-        }
-    }
-    return;
-}
-*/
-
 // this is ran once
 // extern -> SME.cpp
 void Patch::CKit::onSetup(TMarDirector *director) {
@@ -84,10 +32,10 @@ s32 Patch::CKit::onUpdate(void *director) { // movie director
 
   TMarioGamePad *controller = gpApplication.mGamePad1;
   if ((controller->mButtons.mInput & 0x260) == 0x260) { // L + R + B + D-PAD UP
-    SME::Util::Mario::switchCharacter(
-        gpMarioAddress,
-        SME::Util::Mario::getPlayerIDFromInput(controller->mButtons.mInput & 0xF),
-        true);
+    SME::Util::Mario::switchCharacter(gpMarioAddress,
+                                      SME::Util::Mario::getPlayerIDFromInput(
+                                          controller->mButtons.mInput & 0xF),
+                                      true);
   }
   return ((s32(*)(void *))func)(director);
 }
@@ -174,8 +122,7 @@ bool Patch::CKit::manageLightSize() {
             TLightContext::ActiveType::DISABLED;
     }
 
-    gShineShadowPos =
-        SME::TGlobals::sLightData.mShineShadowCoordinates;
+    gShineShadowPos = SME::TGlobals::sLightData.mShineShadowCoordinates;
 
     const f32 sigOfs = 300.0f;
     const f32 sigStrength =
@@ -183,10 +130,8 @@ bool Patch::CKit::manageLightSize() {
 
     if (!SME::TGlobals::sLightData.mSizeMorphing) {
       if (CurrentShineCount > PrevShineCount) {
-        SME::TGlobals::sLightData.mPrevSize =
-            gpModelWaterManager->mSize;
-        SME::TGlobals::sLightData.mNextSize =
-            gpModelWaterManager->mSize;
+        SME::TGlobals::sLightData.mPrevSize = gpModelWaterManager->mSize;
+        SME::TGlobals::sLightData.mNextSize = gpModelWaterManager->mSize;
 
         for (u32 i = 0; i < (CurrentShineCount - PrevShineCount); ++i)
           SME::TGlobals::sLightData.mNextSize +=
@@ -195,10 +140,8 @@ bool Patch::CKit::manageLightSize() {
         SME::TGlobals::sLightData.mSizeMorphing = true;
         SME::TGlobals::sLightData.mStepContext = 0.0f;
       } else if (CurrentShineCount < PrevShineCount) {
-        SME::TGlobals::sLightData.mPrevSize =
-            gpModelWaterManager->mSize;
-        SME::TGlobals::sLightData.mNextSize =
-            gpModelWaterManager->mSize;
+        SME::TGlobals::sLightData.mPrevSize = gpModelWaterManager->mSize;
+        SME::TGlobals::sLightData.mNextSize = gpModelWaterManager->mSize;
 
         for (u32 i = 0; i < (PrevShineCount - CurrentShineCount); ++i)
           SME::TGlobals::sLightData.mNextSize -=
@@ -239,14 +182,11 @@ bool Patch::CKit::manageLightSize() {
     gpModelWaterManager->mDarkLevel =
         SME::Class::TSMEFile::sStageConfig.Light.mDarkLevel;
     gShineShadowPos.x =
-        gpMarioPos->x +
-        SME::TGlobals::sLightData.mShineShadowCoordinates.x;
+        gpMarioPos->x + SME::TGlobals::sLightData.mShineShadowCoordinates.x;
     gShineShadowPos.y =
-        gpMarioPos->y +
-        SME::TGlobals::sLightData.mShineShadowCoordinates.y;
+        gpMarioPos->y + SME::TGlobals::sLightData.mShineShadowCoordinates.y;
     gShineShadowPos.z =
-        gpMarioPos->z +
-        SME::TGlobals::sLightData.mShineShadowCoordinates.z;
+        gpMarioPos->z + SME::TGlobals::sLightData.mShineShadowCoordinates.z;
     break;
   }
   default:

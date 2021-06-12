@@ -54,7 +54,7 @@ public:
   static SME::Class::TWarpCollisionList *sWarpColArray;
   static SME::Class::TWarpCollisionList *sWarpColPreserveArray;
 
-  #ifdef SME_GLOBAL_HEAPS
+  #ifdef SME_DETACHED_HEAPS
   static JKRExpHeap sCharacterHeap;
   static JKRExpHeap sGlobalHeap;
   #else

@@ -24,7 +24,6 @@ from compiler import Compiler, Define
 TMPDIR = Path("tmp-compiler")
 
 
-
 @atexit.register
 def clean_resources():
     if TMPDIR.is_dir():
@@ -363,7 +362,7 @@ class FilePatcher(Compiler):
                     m.rename(modulesDest / m.name)
                     size += m.stat().st_size
                 self._alloc_from_heap(
-                    _doldata, (kernelPath.stat().st_size + 0x100000 + size + 31) & -32)
+                    _doldata, (kernelPath.stat().st_size + 31) & -32)
             elif isinstance(modules, Path):
                 renamed = (modulesDest /
                            modules.name).with_name("SME").with_suffix(".kxe" if self.is_kuribo() else ".kmk")
@@ -371,7 +370,7 @@ class FilePatcher(Compiler):
                 renamed.unlink(missing_ok=True)
                 modules.rename(renamed)
                 self._alloc_from_heap(
-                    _doldata, (kernelPath.stat().st_size + 0x100000 + renamed.stat().st_size + 31) & -32)
+                    _doldata, (kernelPath.stat().st_size + 31) & -32)
 
             if self.is_kuribo():
                 tmpbin = Path("bin", f"kuriboloader-{self.region.lower()}.bin")
@@ -527,16 +526,15 @@ class FilePatcher(Compiler):
         for packet in _ALLOC_LO_INFO.group(self.region):
             dol.seek(packet.address)
             for instr in packet.instructions:
-                print(instr, hex(size))
-                print(hex(instr.as_translated(self.startaddr + size)))
                 dol.write_uint32(
                     dol.tell(), instr.as_translated(self.startaddr + size))
 
         for packet in _ALLOC_HI_INFO.group(self.region):
+            return
             dol.seek(packet.address)
             for instr in packet.instructions:
                 dol.write_uint32(
-                    dol.tell(), instr.as_translated(0x410000))
+                    dol.tell(), instr.as_translated(0x211000))
 
 
 def _get_bit_alignment(num: int) -> int:

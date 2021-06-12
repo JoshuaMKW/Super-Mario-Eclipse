@@ -3,7 +3,7 @@
 
 using namespace SME;
 
-#ifdef SME_GLOBAL_HEAPS
+#ifdef SME_DETACHED_HEAPS
 static u8 gCharacterHeapBuffer[0x10000];
 static u8 gGlobalBuffer[0x8000];
 

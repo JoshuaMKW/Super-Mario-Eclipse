@@ -35,7 +35,7 @@ const char *Util::getStageName(TApplication *gpApplication) {
                               (0xC / 4)]);
 }
 
-void *Util::loadArchive(char *path, JKRHeap *heap,
+void *Util::loadArchive(const char *path, JKRHeap *heap,
                         JKRDvdRipper::EAllocDirection allocDirection) {
   SME_DEBUG_LOG("Loading \"%s\" into memory...\n", path);
   if (DVDConvertPathToEntrynum(path) >= 0) {

@@ -1,21 +1,24 @@
+#include "params/MarioParams.hxx"
 #include "OS.h"
-#include "string.h"
-#include "sms/JSystem/JSU/JSUMemoryStream.hxx"
-#include "sms/actor/Mario.hxx"
-#include "sms/camera/PolarSubCamera.hxx"
 #include "libs/sAssert.hxx"
 #include "libs/sMath.hxx"
 #include "libs/sMemory.hxx"
-#include "params/MarioParams.hxx"
+#include "sms/JSystem/JSU/JSUMemoryStream.hxx"
+#include "sms/actor/Mario.hxx"
+#include "sms/camera/PolarSubCamera.hxx"
+#include "string.h"
+
 
 using namespace SME::Class;
 
-TPlayerParams::TPlayerParams(TMario *player, CPolarSubCamera *camera, bool isMario)
-    : mPlayer(player), mIsEMario(!isMario), mInitialized(true),
-      mCanUseFludd(true), mPlayerID(SME::Enum::Player::MARIO), mCurJump(0), mDefaultAttrs(player) {
-  if (!camera) {
-    camera = new CPolarSubCamera("<CPolarSubCamera>");
-  }
+TPlayerParams::TPlayerParams(TMario *player, CPolarSubCamera *camera,
+                             bool isMario)
+    : mPlayer(player), mCamera(camera), mParams(nullptr), mIsEMario(!isMario),
+      mInitialized(true), mCanUseFludd(true),
+      mPlayerID(SME::Enum::Player::MARIO), mCurJump(0), mIsClimbTired(false),
+      mPrevCollisionType(0), mCollisionTimer(0), mClimbTiredTimer(0),
+      mYoshiWaterSpeed(0.0f, 0.0f, 0.0f), mDefaultAttrs(player) {
+
   mFluddHistory.mHadFludd = false;
   mFluddHistory.mMainNozzle = TWaterGun::Spray;
   mFluddHistory.mSecondNozzle = TWaterGun::Hover;
@@ -165,7 +168,7 @@ void TPlayerParams::setPlayer(TMario *player) {
 
 bool TPlayerParams::loadPrm(const char *prm = "/sme.prm") {
   JKRArchive *archive = JKRFileLoader::getVolume("mario");
-  SME_DEBUG_ASSERT(archive != nullptr, "Mario archive could not be located!");
+  SME_DEBUG_ASSERT(archive, "Mario archive could not be located!");
 
   if (!mParams)
     mParams = new TCustomParams();

@@ -44,8 +44,7 @@ static bool sIsTriggerNozzleDead;
 // extern -> SME.cpp
 bool Patch::Fludd::isPumpOK(TMarioAnimeData *animeData) {
   return (animeData->mFluddEnabled != TMarioAnimeData::FLUDD::FLUDD_DISABLED &&
-          SME::TGlobals::getPlayerParams(gpMarioAddress)->mCurJump <=
-              1);
+          SME::TGlobals::getPlayerParams(gpMarioAddress)->mCurJump <= 1);
 }
 
 // 0x8014206C
@@ -74,10 +73,9 @@ bool Patch::Fludd::hasWaterCardOpen() {
 // 0x80283058
 // extern -> SME.cpp
 bool Patch::Fludd::canCollectFluddItem(TMario *player) {
-  return onYoshi__6TMarioCFv(player) ||
-         !SME::TGlobals::getPlayerParams(player)
-              ->getParams()
-              ->mCanUseFludd.get();
+  return onYoshi__6TMarioCFv(player) || !SME::TGlobals::getPlayerParams(player)
+                                             ->getParams()
+                                             ->mCanUseFludd.get();
 }
 
 // 0x800678C4, 0x801A3ED0, 0x801B42D8, 0x8027F7DC, 0x8027F94C, 0x8024E710

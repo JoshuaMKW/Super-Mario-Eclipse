@@ -26,36 +26,57 @@ void SME::Patch::Init::initCodeProtection() {
 // extern -> SME.cpp
 JKRExpHeap *SME::Patch::Init::createGlobalHeaps(void *newHeap, size_t size,
                                                 JKRHeap *rootHeap, bool unk_1) {
-  constexpr size_t mysize = 0x400000;
+  constexpr size_t charactersize = 0x200000;
+  constexpr size_t globalsize = 0x8000;
 
-  #ifndef SME_GLOBAL_HEAPS
-  JKRExpHeap *gameHeap =
-      JKRExpHeap::create(newHeap, size - mysize, rootHeap, unk_1);
+#ifdef SME_DETACHED_HEAPS
   {
     JKRHeap *rootHeap = JKRHeap::sRootHeap;
     JKRHeap *systemHeap = JKRHeap::sSystemHeap;
     JKRHeap *currentHeap = JKRHeap::sCurrentHeap;
-
     JKRHeap::sRootHeap = nullptr; // Hack to make this heap disconnected
 
     void *heap = OSGetArenaHi();
-    SME::TGlobals::sCharacterHeap = new (JKRExpHeap::sSystemHeap, 4) JKRExpHeap(heap, mysize - sizeof(JKRExpHeap), nullptr, false);
+    if (charactersize > sizeof(JKRExpHeap))
+      SME::TGlobals::sCharacterHeap = new (JKRExpHeap::sSystemHeap, 4)
+          JKRExpHeap(heap, charactersize - sizeof(JKRExpHeap), nullptr, false);
+    if (globalsize > sizeof(JKRExpHeap))
+      SME::TGlobals::sGlobalHeap = new (JKRExpHeap::sSystemHeap, 4)
+          JKRExpHeap(heap, globalsize - sizeof(JKRExpHeap), nullptr, false);
+
+    currentHeap->becomeCurrentHeap();
+    systemHeap->becomeSystemHeap();
 
     // Restore heap pointers
     JKRHeap::sRootHeap = rootHeap;
+  }
+#else
+  {
+    JKRHeap *systemHeap = JKRHeap::sSystemHeap;
+    JKRHeap *currentHeap = JKRHeap::sCurrentHeap;
+
+    if (charactersize > sizeof(JKRExpHeap))
+      SME::TGlobals::sCharacterHeap = JKRExpHeap::create(
+          charactersize - sizeof(JKRExpHeap), rootHeap, false);
+    if (globalsize > sizeof(JKRExpHeap))
+      SME::TGlobals::sGlobalHeap =
+          JKRExpHeap::create(globalsize - sizeof(JKRExpHeap), rootHeap, false);
+
+    SME::TGlobals::sCharacterHeap->alloc(
+        SME::TGlobals::sCharacterHeap->getFreeSize(), 4);
+
     currentHeap->becomeCurrentHeap();
     systemHeap->becomeSystemHeap();
   }
-  #else
-  JKRExpHeap *gameHeap =
-      JKRExpHeap::create(newHeap, size, rootHeap, unk_1);
-  #endif
+  JKRExpHeap *gameHeap = JKRExpHeap::create(
+      newHeap, size - (globalsize + charactersize), rootHeap, unk_1);
+#endif
   return gameHeap;
 }
 
 // 0x802A7140
 // extern -> SME.cpp
-u32 SME::Patch::Init::setupMarioDatas(char *filepath) {
+s32 SME::Patch::Init::setupMarioDatas(char *filepath) {
   TMarioGamePad *gpGamePad = gpApplication.mGamePad1;
   SME::Enum::Player playerID =
       SME::Util::Mario::getPlayerIDFromInput(gpGamePad->mButtons.mInput);
@@ -67,20 +88,19 @@ u32 SME::Patch::Init::setupMarioDatas(char *filepath) {
 // 0x802A716C
 // extern -> SME.cpp
 u32 *SME::Patch::Init::initFirstModel(char *path, u32 unk_1, u32 unk_2,
-                                      u32 unk_3, JKRHeap *heap, u32 unk_4,
+                                      u32 unk_3, JKRHeap *heap,
+                                      JKRDvdRipper::EAllocDirection direction,
                                       u32 unk_5, u32 unk_6) {
-  heap = SME::TGlobals::sCharacterHeap;
-  heap->freeAll();
-  u32 *file = static_cast<u32 *>(SME::Util::loadArchive(path, heap));
-
-  /*
-  if (file)
-    SME::TGlobals::sCharacterHeap->alloc((0x1F0000 - file[1]) & -32, 32);
-  else
-    SME::TGlobals::sCharacterHeap->alloc(0x1F0000 & -32, 32);
-  */
-
-  return file;
+#ifndef SME_DETACHED_HEAPS
+  SME::TGlobals::sCharacterHeap->freeAll();
+#endif
+  u32 *archive = static_cast<u32 *>(
+      SME::Util::loadArchive(path, SME::TGlobals::sCharacterHeap, direction));
+#ifndef SME_DETACHED_HEAPS
+  SME::TGlobals::sCharacterHeap->alloc(
+      SME::TGlobals::sCharacterHeap->getFreeSize(), 4);
+#endif
+  return archive;
 }
 
 static void resetGlobalValues() {
@@ -112,10 +132,6 @@ TMarDirector *SME::Patch::Init::initFileMods() {
   SME::Enum::Player characterID = SME::Enum::Player::UNKNOWN;
 #endif
 
-  JKRMemArchive *marioVolumeData =
-      static_cast<JKRMemArchive *>(JKRFileLoader::getVolume("mario"));
-  u8 *params = marioVolumeData->getResource("/params.szs");
-
   resetGlobalValues();
   SME::TGlobals::clearAllPlayerParams();
   SME::Class::TSMEFile::sStageConfig.reset();
@@ -129,7 +145,7 @@ TMarDirector *SME::Patch::Init::initFileMods() {
       characterID = SME::Enum::Player::MARIO;
   }
 
-  //SME::Util::Mario::swapBinary(characterID);
+  SME::Util::Mario::swapBinary(characterID);
   SME::Util::Mario::loadParams();
 
   return director;
@@ -307,10 +323,7 @@ static void initMario(TMario *player, bool isMario) {
 
 // 0x80276C94
 TMario *SME::Patch::Init::fromMarioInit(TMario *player) {
-  TMario *(*virtualFunc)(TMario *);
-  SME_FROM_GPR(12, virtualFunc);
-
-  virtualFunc(player); // call vtable func
+  player->initValues();
   initMario(player, true);
   return player;
 }
@@ -491,6 +504,6 @@ JKRMemArchive *SME::Patch::Init::switchHUDOnStageLoad(char *curArchive,
 
 // 0x802B57E4
 JKRHeap *SME::Patch::Init::useCustomHUDHeap(u32 size, s32 alignment) {
-  return nullptr; //SME::TGlobals::sGame6Heap;
+  return nullptr; // SME::TGlobals::sGame6Heap;
 }
 // kmCall(0x802B57E4, &useCustomHUDHeap);

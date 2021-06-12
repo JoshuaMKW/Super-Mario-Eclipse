@@ -9,6 +9,7 @@
 
 class TParams {
 public:
+  TParams() : _00(0), mBaseParam(nullptr) {}
   void finalize();
   void init();
   void load(const char *);

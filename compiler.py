@@ -230,7 +230,7 @@ class Compiler(object):
 
         dumpCode = buildDir / "source.code"
         tmpDumpCode = TMPDIR / "source.tmp"
-        tmpDumpDol = TMPDIR / self.dest.name
+        tmpDumpDol = TMPDIR / self.dest.name if self.dest else "main.dol"
 
         if dol is not None:
             if not self.dest.parent.exists():
@@ -263,44 +263,6 @@ class Compiler(object):
             _codewarriorAsm = self._compilers["mwasmeppc"]
             _codewarriorLd = self._compilers["mwldeppc"]
 
-            if self.dest is None:
-                self.dest = buildDir / dol.name
-
-            if self.linker is not None:
-                self.linker = Path(self.linker)
-
-            if dol is not None:
-                if not self.dest.parent.exists():
-                    self.dest.mkdir(parents=True, exist_ok=True)
-
-                if self.dest.is_file():
-                    self.dest.unlink()
-
-                if self.linker:
-                    cmdtype = ["--extern", f"{self.linker.resolve()}", "--input-dol",
-                               f"{dol.resolve()}", "--output-dol", f"{self.dest}"]
-                else:
-                    cmdtype = [
-                        "--input-dol", f"{dol.resolve()}", "--output-dol", f"{tmpDumpDol}"]
-
-                if self.dump:
-                    cmdtype.extend(
-                        ["--output-code", f"{dumpCode}", "--output-code", f"{tmpDumpCode}"])
-                else:
-                    cmdtype.extend(["--output-code", f"{tmpDumpCode}"])
-            else:
-                if self.dest is None:
-                    self.dest = dumpCode
-
-                if self.dest.is_file():
-                    self.dest.unlink()
-
-                if self.linker:
-                    cmdtype = [
-                        "--extern", f"{self.linker.resolve()}", "--output-code", f"{tmpDumpCode}"]
-                else:
-                    cmdtype = ["--output-code", f"{tmpDumpCode}"]
-
             if self.is_kuribo():
                 obj, *_ = build_objects(_codewarriorCpp, _codewarriorCpp, _codewarriorAsm, _codewarriorLd)
                 kxefile = Path(obj).with_suffix(".kxe")
@@ -319,12 +281,6 @@ class Compiler(object):
 
         elif self.is_clang():
             _clangCpp: Path = self._compilers["clang"]
-
-            if not TMPDIR.exists():
-                TMPDIR.mkdir()
-
-            if isinstance(src, str):
-                src = Path(src)
 
             if self.linker is not None:
                 self.linker = Path(self.linker)
@@ -347,12 +303,6 @@ class Compiler(object):
 
         elif self.is_gcc():
             _gccCpp: Path = self._compilers["gcc"]
-
-            if not TMPDIR.exists():
-                TMPDIR.mkdir()
-
-            if isinstance(src, str):
-                src = Path(src)
 
             if self.linker is not None:
                 self.linker = Path(self.linker)

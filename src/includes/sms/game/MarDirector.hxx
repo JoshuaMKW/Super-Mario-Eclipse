@@ -34,7 +34,7 @@ public:
   void updateGameMode();
   void nextStateInitialize(s8);
   void setMario();
-  void currentStateFinalize(s8);
+  void currentStateFinalize(u8);
   void changeState();
   void fireStreamingMovie(s8);
   void fireEndDemoCamera();

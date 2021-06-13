@@ -110,7 +110,7 @@ public:
 		bool _00 : 6;
 		bool mIsAnmReversed : 1;
 		bool mIsAnmDead : 1;
-	} AnmFlags;
+	} mAnmFlags;
 	s16 _06;
 	s16 mNumFrames;
 	s16 _0A;

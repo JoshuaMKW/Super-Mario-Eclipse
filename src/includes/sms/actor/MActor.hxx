@@ -10,9 +10,9 @@
 
 class MActorAnmBase {
 public:
+  int mAnimationID;
   J3DFrameCtrl mFrameCtrl;
   J3DModel *mModel;
-  void *_1C;
 
   MActorAnmBase();
 

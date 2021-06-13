@@ -6837,6 +6837,7 @@
 #define __dt__12J3DTexMtxAnmFv ((int(*)(...))0x8023B32C)
 #define __ct__12J3DTexMtxAnmFv ((int(*)(...))0x8023B36C)
 #define setTexNoAnmFullPtr__12MActorAnmBtpFv ((int(*)(...))0x8023B6B0)
+#define setAnmFromIndex__12MActorAnmBckFiPUs ((int(*)(...))0x8023B7C4)
 #define setModel__12MActorAnmBckFP8J3DModel ((int(*)(...))0x8023B9D8)
 #define __ct__18J3DMtxCalcBasicAnmFP15J3DAnmTransform ((int(*)(...))0x8023BAA8)
 #define getOldMotionBlendFrame__12MActorAnmBckCFv ((int(*)(...))0x8023BB7C)

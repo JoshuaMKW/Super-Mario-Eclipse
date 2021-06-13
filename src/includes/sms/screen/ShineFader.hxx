@@ -9,7 +9,7 @@ public:
   virtual void perform(u32, JDrama::TGraphics *) override;
   virtual void update() override;
 
-  void registFadeOut(u16, u16);
+  void registFadeout(u16, u16);
 
   u16 _38;
 };

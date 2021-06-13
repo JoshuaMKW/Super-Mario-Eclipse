@@ -341,6 +341,7 @@ SME_PATCH_BL(SME_PORT_REGION(0x802A744C, 0, 0, 0), moduleLoad);
   SME_PATCH_BL(SME_PORT_REGION(0x801BCD20, 0, 0, 0),
                Patch::Shine::loadAfterMaskState);
   SME_WRITE_32(SME_PORT_REGION(0x801BCD24, 0, 0, 0), 0x28030002);
+  SME_WRITE_32(SME_PORT_REGION(0x801BCD40, 0, 0, 0), 0x28030001);
   SME_PATCH_BL(SME_PORT_REGION(0x801BCEEC, 0, 0, 0),
                Patch::Shine::setKillState);
   SME_PATCH_BL(SME_PORT_REGION(0x8029A590, 0, 0, 0), shine_thinkCloseCamera);

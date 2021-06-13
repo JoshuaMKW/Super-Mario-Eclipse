@@ -477,20 +477,19 @@ class FilePatcher(Compiler):
                 self._fileTables.setdefault(f.suffix, []).append(f)
 
     def _get_matching_filepath(self, path: Path) -> Path:
+        retpath = self._get_path_from_config(self.solutionRegionDir, path)
+        if retpath:
+            return retpath
+        retpath = self._get_path_from_config(self.solutionAnyDir, path)
+        if retpath:
+            return retpath
+
         try:
             for f in self._fileTables[path.suffix]:
                 if f.name == path.name:
                     return self.gameDir / f
         except KeyError:
-            retpath = self._get_path_from_config(self.solutionRegionDir, path)
-            if retpath:
-                return retpath
-            return self._get_path_from_config(self.solutionAnyDir, path)
-        else:
-            retpath = self._get_path_from_config(self.solutionRegionDir, path)
-            if retpath:
-                return retpath
-            return self._get_path_from_config(self.solutionAnyDir, path)
+            return None
 
     def _get_path_from_config(self, solutionPath: Path, path: Path) -> Path:
         if self.is_release():

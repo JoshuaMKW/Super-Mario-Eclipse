@@ -28,9 +28,11 @@
 #include "sms/game/Conductor.hxx"
 #include "sms/npc/BaseNPC.hxx"
 #include "sms/object/ResetFruit.hxx"
+#include "sms/screen/ShineFader.hxx"
 #include "sms/sound/MSBGM.hxx"
 #include "sms/talk/Talk2D2.hxx"
 #include "types.h"
+
 
 #ifndef KURIBO_NO_TYPES
 #define KURIBO_NO_TYPES
@@ -204,7 +206,7 @@ namespace Shine {
 void manageShineVanish(JGeometry::TVec3<f32> *marioPos);
 void isKillEnemiesShine(TConductor *gpConductor,
                         JGeometry::TVec3<f32> *playerCoordinates, f32 range);
-void checkBootOut(TMarDirector *gpMarDirector, u32 curState);
+void checkBootOut(TMarDirector *gpMarDirector, u8 curState);
 u32 extendShineIDLogic(TFlagManager *flagManager, u32 flagID);
 void shineObjectStringMod(JSUInputStream *stream, u8 *dst, u32 size);
 void shineFlagSetter(TFlagManager *flagManager, u32 flag, s32 val);
@@ -213,7 +215,7 @@ u32 shineSetClamper(TFlagManager *flagManager, u32 flag);
 u32 shineGetClamper(TFlagManager *flagManager, u32 flag);
 void extendFlagManagerLoad(JSUMemoryInputStream &stream);
 void extendFlagManagerSave(JSUMemoryOutputStream &stream);
-void thinkSetBootFlag(void *shineFader, u32 unk_1, u32 unk_2);
+void thinkSetBootFlag(TShineFader *shineFader, u32 unk_1, u32 unk_2);
 u32 loadAfterMaskState();
 void setKillState();
 

@@ -15,12 +15,12 @@
 
 namespace SME::Class {
 
-struct TCustomParams : public TParams {
+struct TPlayerParams : public TParams {
 #define CONSTRUCT_PARAM(name, val)                                             \
   name(this, val, JDrama::TNameRef::calcKeyCode(SME_STRINGIZE(name)),          \
        SME_STRINGIZE(name))
 
-  TCustomParams()
+  TPlayerParams()
       : TParams(), CONSTRUCT_PARAM(mMaxJumps, 1),
         CONSTRUCT_PARAM(mCanRideYoshi, true),
         CONSTRUCT_PARAM(mCanUseFludd, true),
@@ -90,7 +90,7 @@ struct TCustomParams : public TParams {
   TParamRT<FluddCleanType> mCleaningType;
 };
 
-class TPlayerParams {
+class TPlayerData {
 
 public:
   struct ParamHistory {
@@ -149,14 +149,14 @@ public:
     bool mHadFludd;
   };
 
-  TPlayerParams() = delete;
-  TPlayerParams(TMario *player, CPolarSubCamera *camera, bool isMario);
+  TPlayerData() = delete;
+  TPlayerData(TMario *player, CPolarSubCamera *camera, bool isMario);
 
   CPolarSubCamera *getCamera() const { return mCamera; }
   bool getCanUseFludd() const { return mCanUseFludd; }
   u8 getMaxJumps() const { return mParams->mMaxJumps.get(); }
   u8 getNozzleBoneID(TWaterGun::NozzleType nozzle) const;
-  const TCustomParams *getParams() const { return mParams; }
+  const TPlayerParams *getParams() const { return mParams; }
   const TMario *getPlayer() const { return mPlayer; }
   SME::Enum::Player getPlayerID() const { return mPlayerID; }
   const u16 getPlayerKey() const {
@@ -180,7 +180,7 @@ public:
 private:
   TMario *mPlayer;
   CPolarSubCamera *mCamera;
-  TCustomParams *mParams;
+  TPlayerParams *mParams;
   bool mIsEMario;
   bool mInitialized;
   bool mCanUseFludd;

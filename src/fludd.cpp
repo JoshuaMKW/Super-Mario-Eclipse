@@ -53,7 +53,7 @@ bool Patch::Fludd::hasWaterCardOpen() {
   TGCConsole2 *gcConsole;
   SME_FROM_GPR(31, gcConsole);
 
-  const SME::Class::TPlayerParams *playerParams =
+  const SME::Class::TPlayerData *playerParams =
       SME::TGlobals::getPlayerParams(gpMarioAddress);
 
   if (gpMarioAddress->mYoshi->mState != TYoshi::State::MOUNTED)
@@ -82,20 +82,20 @@ bool Patch::Fludd::canCollectFluddItem(TMario *player) {
 // extern -> SME.cpp
 void Patch::Fludd::sprayGoopMap(TPollutionManager *gpPollutionManager, f32 x,
                                 f32 y, f32 z, f32 r) {
-  const SME::Class::TPlayerParams *playerParams =
+  const SME::Class::TPlayerData *playerParams =
       SME::TGlobals::getPlayerParams(gpMarioAddress);
-  const SME::Class::TCustomParams *prm = playerParams->getParams();
+  const SME::Class::TPlayerParams *prm = playerParams->getParams();
 
   if (!playerParams->isMario() || !playerParams->isInitialized())
     clean__17TPollutionManagerFffff(gpPollutionManager, x, y, z, r);
 
   if (prm->mCleaningType.get() !=
-      SME::Class::TCustomParams::FluddCleanType::NONE) {
+      SME::Class::TPlayerParams::FluddCleanType::NONE) {
     if (prm->mCleaningType.get() ==
-        SME::Class::TCustomParams::FluddCleanType::CLEAN)
+        SME::Class::TPlayerParams::FluddCleanType::CLEAN)
       clean__17TPollutionManagerFffff(gpPollutionManager, x, y, z, r);
     else if (prm->mCleaningType.get() ==
-             SME::Class::TCustomParams::FluddCleanType::GOOP)
+             SME::Class::TPlayerParams::FluddCleanType::GOOP)
       stamp__17TPollutionManagerFUsffff(gpPollutionManager, 1, x, y, z, r);
   }
 }
@@ -116,7 +116,7 @@ TWaterGun *Patch::Fludd::bindFluddtojoint() {
   SME_FROM_GPR(31, player);
 
   player->mBindBoneIDArray[0] =
-      SME::TGlobals::getPlayerParams(gpMarioAddress)
+      SME::TGlobals::getPlayerParams(player)
           ->getNozzleBoneID(static_cast<TWaterGun::NozzleType>(
               player->mFludd->mCurrentNozzle));
 

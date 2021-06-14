@@ -165,8 +165,6 @@ SME_PATCH_BL(SME_PORT_REGION(0x802A744C, 0, 0, 0), moduleLoad);
                Patch::Collision::checkIsGlideBounce);
   SME_PATCH_BL(SME_PORT_REGION(0x8024C558, 0, 0, 0),
                Patch::Collision::checkIsRestoreTypeNoFallDamage);
-  SME_PATCH_BL(SME_PORT_REGION(0x802500B8, 0, 0, 0),
-               Patch::Collision::updateCollisionContext);
   SME_PATCH_BL(SME_PORT_REGION(0x80250CA0, 0, 0, 0),
                Patch::Collision::masterGroundCollisionHandler);
   SME_PATCH_BL(SME_PORT_REGION(0x8025059C, 0, 0, 0),
@@ -232,13 +230,14 @@ SME_PATCH_BL(SME_PORT_REGION(0x802A744C, 0, 0, 0), moduleLoad);
                Patch::Fruit::isGrabWaitOver);
 
   // init_mods.cpp
-  //SME_PATCH_BL(SME_PORT_REGION(0x802A750C, 0, 0, 0),
-  //             Patch::Init::createGlobalHeaps);
   SME_PATCH_BL(SME_PORT_REGION(0x802A7140, 0, 0, 0),
                Patch::Init::setupMarioDatas);
-  //SME_PATCH_BL(SME_PORT_REGION(0x802A716C, 0, 0, 0),
-  //             Patch::Init::initFirstModel);
-  //SME_PATCH_BL(SME_PORT_REGION(0x802998B4, 0, 0, 0), Patch::Init::initFileMods);
+               
+  SME_PATCH_BL(SME_PORT_REGION(0x802A750C, 0, 0, 0),
+               Patch::Init::createGlobalHeaps);
+  SME_PATCH_BL(SME_PORT_REGION(0x802A716C, 0, 0, 0),
+               Patch::Init::initFirstModel);
+  SME_PATCH_BL(SME_PORT_REGION(0x802998B4, 0, 0, 0), Patch::Init::initFileMods);
   SME_PATCH_B(SME_PORT_REGION(0x80280180, 0, 0, 0),
               Patch::Init::initShineShadow);
   SME_PATCH_BL(SME_PORT_REGION(0x802B7A4C, 0, 0, 0),
@@ -258,6 +257,7 @@ SME_PATCH_BL(SME_PORT_REGION(0x802A744C, 0, 0, 0), moduleLoad);
   SME_PATCH_BL(SME_PORT_REGION(0x802B8B20, 0, 0, 0),
                Patch::Init::initCollisionWarpLinks);
   SME_PATCH_BL(SME_PORT_REGION(0x802B57E4, 0, 0, 0), Patch::Init::createUIHeap);
+
 
   // mario.cpp
   SME_PATCH_BL(SME_PORT_REGION(0x802320E0, 0, 0, 0), mario_shadowCrashPatch);

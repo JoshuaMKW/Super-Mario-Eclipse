@@ -43,14 +43,14 @@ u32 SME::Patch::Music::setIsValid(MSStageInfo musicID) {
 
 // 0x80016ABC
 void SME::Patch::Music::initMusic() {
-  if (SME::Class::TSMEFile::sStageConfig.FileHeader.mMAGIC != SME::Class::TSMEFile::MAGIC)
+  if (SME::Class::TSMEFile::sStageConfig->mMagic != SME::Class::TSMEFile::MAGIC)
     return;
 
   DVDFileInfo *handle = (DVDFileInfo *)0x803FDB7C;
 
   if (!SME::TGlobals::sIsAudioStreaming &&
-      (SME::Class::TSMEFile::sStageConfig.Music.mMusicID & 0x400))
-    startStreamedBGM((MSStageInfo)SME::Class::TSMEFile::sStageConfig.Music.mMusicID, true);
+      (SME::Class::TSMEFile::sStageConfig->Music.mMusicID & 0x400))
+    startStreamedBGM((MSStageInfo)SME::Class::TSMEFile::sStageConfig->Music.mMusicID, true);
 
   if (SME::TGlobals::sIsAudioStreaming && !SME::TGlobals::sIsAudioStreamAllowed) {
     DVDCancelStreamAsync(&handle->mCmdBlock, 0);

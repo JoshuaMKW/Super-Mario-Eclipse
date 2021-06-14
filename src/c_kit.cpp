@@ -50,9 +50,9 @@ void Patch::CKit::onDraw2D(J2DOrthoGraph *graph) {
 // 0x802A8B58
 // extern -> SME.cpp
 bool Util::SMS::isExMap() {
-  if (SME::Class::TSMEFile::sStageConfig.FileHeader.mMAGIC ==
+  if (SME::Class::TSMEFile::sStageConfig->mMagic ==
       SME::Class::TSMEFile::MAGIC)
-    return SME::Class::TSMEFile::sStageConfig.GlobalFlags.StageType.mIsExMap;
+    return SME::Class::TSMEFile::sStageConfig->GlobalFlags.StageType.mIsExMap;
   else
     return (gpApplication.mCurrentScene.mAreaID >= TGameSequence::DOLPICEX0 &&
             gpApplication.mCurrentScene.mAreaID <= TGameSequence::COROEX6);
@@ -61,9 +61,9 @@ bool Util::SMS::isExMap() {
 // 0x802A8B30
 // extern -> SME.cpp
 bool Util::SMS::isMultiplayerMap() {
-  if (SME::Class::TSMEFile::sStageConfig.FileHeader.mMAGIC ==
+  if (SME::Class::TSMEFile::sStageConfig->mMagic ==
       SME::Class::TSMEFile::MAGIC)
-    return SME::Class::TSMEFile::sStageConfig.GlobalFlags.StageType
+    return SME::Class::TSMEFile::sStageConfig->GlobalFlags.StageType
         .mIsMultiPlayerMap;
   else
     return (gpMarDirector->mAreaID == TGameSequence::TEST10 &&
@@ -73,9 +73,9 @@ bool Util::SMS::isMultiplayerMap() {
 // 0x802A8AFC
 // extern -> SME.cpp
 bool Util::SMS::isDivingMap() {
-  if (SME::Class::TSMEFile::sStageConfig.FileHeader.mMAGIC ==
+  if (SME::Class::TSMEFile::sStageConfig->mMagic ==
       SME::Class::TSMEFile::MAGIC)
-    return SME::Class::TSMEFile::sStageConfig.GlobalFlags.StageType
+    return SME::Class::TSMEFile::sStageConfig->GlobalFlags.StageType
         .mIsDivingMap;
   else
     return (gpMarDirector->mAreaID == TGameSequence::MAREBOSS ||
@@ -86,9 +86,9 @@ bool Util::SMS::isDivingMap() {
 // 0x802A8AE0
 // extern -> SME.cpp
 bool Util::SMS::isOptionMap() {
-  if (SME::Class::TSMEFile::sStageConfig.FileHeader.mMAGIC ==
+  if (SME::Class::TSMEFile::sStageConfig->mMagic ==
       SME::Class::TSMEFile::MAGIC)
-    return SME::Class::TSMEFile::sStageConfig.GlobalFlags.StageType
+    return SME::Class::TSMEFile::sStageConfig->GlobalFlags.StageType
         .mIsOptionMap;
   else
     return (gpMarDirector->mAreaID == 15);
@@ -97,18 +97,18 @@ bool Util::SMS::isOptionMap() {
 // 0x8027C6A4
 // extern -> SME.cpp
 bool Patch::CKit::manageLightSize() {
-  if (SME::Class::TSMEFile::sStageConfig.FileHeader.mMAGIC !=
+  if (SME::Class::TSMEFile::sStageConfig->mMagic !=
           SME::Class::TSMEFile::MAGIC ||
-      !SME::Class::TSMEFile::sStageConfig.GlobalFlags.mIsShineShadow)
+      !SME::Class::TSMEFile::sStageConfig->GlobalFlags.mIsShineShadow)
     return (gpMarDirector->mAreaID == 1);
 
   s32 &CurrentShineCount = TFlagManager::smInstance->Type4Flag.mShineCount;
   s32 &PrevShineCount = SME::TGlobals::sLightData.mPrevShineCount;
   switch (SME::TGlobals::sLightData.mLightType) {
   case TLightContext::ActiveType::STATIC: {
-    if (SME::Class::TSMEFile::sStageConfig.Light.mDarkLevel != 255)
+    if (SME::Class::TSMEFile::sStageConfig->Light.mDarkLevel != 255)
       gpModelWaterManager->mDarkLevel =
-          SME::Class::TSMEFile::sStageConfig.Light.mDarkLevel;
+          SME::Class::TSMEFile::sStageConfig->Light.mDarkLevel;
     else if (CurrentShineCount < SME_MAX_SHINES)
       gpModelWaterManager->mDarkLevel =
           SME::Util::Math::lerp<u8>(30, 190,
@@ -180,7 +180,7 @@ bool Patch::CKit::manageLightSize() {
   }
   case TLightContext::ActiveType::FOLLOWPLAYER: {
     gpModelWaterManager->mDarkLevel =
-        SME::Class::TSMEFile::sStageConfig.Light.mDarkLevel;
+        SME::Class::TSMEFile::sStageConfig->Light.mDarkLevel;
     gShineShadowPos.x =
         gpMarioPos->x + SME::TGlobals::sLightData.mShineShadowCoordinates.x;
     gShineShadowPos.y =

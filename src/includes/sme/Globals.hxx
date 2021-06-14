@@ -21,13 +21,13 @@ public:
   static u8 getMaxPlayers() { return sMaxPlayers; }
   static TMario *getPlayerByIndex(u8 index);
   static SME::Class::TSMEFile *getStageConfig() { return sStageConfig; }
-  static SME::Class::TPlayerParams *getPlayerParams(u8 id);
-  static SME::Class::TPlayerParams *getPlayerParams(TMario *player);
+  static SME::Class::TPlayerData *getPlayerParams(u8 id);
+  static SME::Class::TPlayerData *getPlayerParams(TMario *player);
 
   static void setPlayerByIndex(u8 index, TMario *player);
 
-  static void registerPlayerParams(SME::Class::TPlayerParams *params);
-  static void deregisterPlayerParams(SME::Class::TPlayerParams *params);
+  static void registerPlayerParams(SME::Class::TPlayerData *params);
+  static void deregisterPlayerParams(SME::Class::TPlayerData *params);
   static void clearAllPlayerParams();
 
   static bool isCompletionRewarded() {
@@ -64,7 +64,7 @@ public:
 
 //private:
   static SME::Class::TSMEFile *sStageConfig;
-  static SME::Class::TPlayerParams *sPlayerCfgArray[SME_MAX_PLAYERS];
+  static SME::Class::TPlayerData *sPlayerCfgArray[SME_MAX_PLAYERS];
   static TMario *sPlayers[SME_MAX_PLAYERS];
   static bool sPlayerHasGeckoCodes;
   static bool sIsAudioStreaming;

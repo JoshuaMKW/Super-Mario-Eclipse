@@ -7,8 +7,9 @@ using namespace SME;
 static u8 gCharacterHeapBuffer[0x10000];
 static u8 gGlobalBuffer[0x8000];
 
-JKRExpHeap TGlobals::sCharacterHeap(gCharacterHeapBuffer, sizeof(gCharacterHeapBuffer),
-                                    nullptr, false);
+JKRExpHeap TGlobals::sCharacterHeap(gCharacterHeapBuffer,
+                                    sizeof(gCharacterHeapBuffer), nullptr,
+                                    false);
 JKRExpHeap TGlobals::sGlobalHeap(gGlobalBuffer, sizeof(gGlobalBuffer), nullptr,
                                  false);
 #else
@@ -23,7 +24,7 @@ SME::Class::TWarpCollisionList *TGlobals::sWarpColArray = nullptr;
 SME::Class::TWarpCollisionList *TGlobals::sWarpColPreserveArray = nullptr;
 
 SME::Class::TSMEFile *TGlobals::sStageConfig = nullptr;
-SME::Class::TPlayerParams *TGlobals::sPlayerCfgArray[] = {nullptr, nullptr,
+SME::Class::TPlayerData *TGlobals::sPlayerCfgArray[] = {nullptr, nullptr,
                                                           nullptr, nullptr};
 TMario *TGlobals::sPlayers[] = {nullptr, nullptr, nullptr, nullptr};
 bool TGlobals::sPlayerHasGeckoCodes = false;
@@ -38,15 +39,19 @@ TMario *TGlobals::getPlayerByIndex(u8 index) {
   return sPlayers[index];
 }
 
-Class::TPlayerParams *TGlobals::getPlayerParams(u8 id) {
+Class::TPlayerData *TGlobals::getPlayerParams(u8 id) {
   SME_DEBUG_ASSERT(id < SME_MAX_PLAYERS, "Invalid player index provided");
   return sPlayerCfgArray[id];
 }
 
-Class::TPlayerParams *TGlobals::getPlayerParams(TMario *player) {
+Class::TPlayerData *TGlobals::getPlayerParams(TMario *player) {
+  Class::TPlayerData *cfg;
   for (u32 i = 0; i < SME_MAX_PLAYERS; ++i) {
-    if (sPlayerCfgArray[i]->getPlayer() == player)
-      return sPlayerCfgArray[i];
+    cfg = sPlayerCfgArray[i];
+    if (!cfg)
+      continue;
+    else if (cfg->getPlayer() == player)
+      return cfg;
   }
   return nullptr;
 }
@@ -56,7 +61,7 @@ void TGlobals::setPlayerByIndex(u8 index, TMario *player) {
   sPlayers[index] = player;
 }
 
-void TGlobals::registerPlayerParams(Class::TPlayerParams *params) {
+void TGlobals::registerPlayerParams(Class::TPlayerData *params) {
   for (u32 i = 0; i < SME_MAX_PLAYERS; ++i) {
     if (sPlayerCfgArray[i] == params)
       return;
@@ -67,7 +72,7 @@ void TGlobals::registerPlayerParams(Class::TPlayerParams *params) {
   }
 }
 
-void TGlobals::deregisterPlayerParams(Class::TPlayerParams *params) {
+void TGlobals::deregisterPlayerParams(Class::TPlayerData *params) {
   for (u32 i = 0; i < SME_MAX_PLAYERS; ++i) {
     if (sPlayerCfgArray[i] == params) {
       sPlayerCfgArray[i] = nullptr;

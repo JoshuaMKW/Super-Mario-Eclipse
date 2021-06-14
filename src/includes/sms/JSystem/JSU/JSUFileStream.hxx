@@ -12,10 +12,10 @@ public:
     virtual ~JSUFileInputStream();
 
     virtual void readData(void *, s32) override;
-	virtual s32 getLength() const override;
+	virtual size_t getLength() const override;
 	virtual s32 getPosition() const override;
 	virtual s32 seekPos(s32, JSUStreamSeekFrom) override;
 
     JKRDvdFile *mJKRDvdFile;
-	u32 mPosition;
+	s32 mPosition;
 };

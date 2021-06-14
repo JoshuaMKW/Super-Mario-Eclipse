@@ -3,37 +3,45 @@
 #include "DVD.h"
 #include "ctype.h"
 #include "sms/JSystem/JGeometry.hxx"
+#include "sms/JSystem/JSU/JSUFileStream.hxx"
 #include "sms/JSystem/JUT/JUTColor.hxx"
 #include "sms/sound/MSound.hxx"
 #include "string.h"
 #include "types.h"
 
+#include "LightContext.hxx"
 #include "Player.hxx"
 #include "libs/sMemory.hxx"
 #include "libs/sString.hxx"
-#include "LightContext.hxx"
 
 namespace SME::Class {
 
+#ifdef SME_DEPRECATED_CFG
 class TSMEFile {
-  static bool openFile(const char *path);
-
 public:
-  struct {
-    u32 mMAGIC;         // 0x0000 ("CODE")
-    void *mLoadAddress; // 0x0004
-    u32 mFileSize;      // 0x0008
-    void *mCallBack;    // 0x000C
-  } FileHeader;
+  static constexpr u32 MAGIC = 'CODE';
+  static TSMEFile *sStageConfig;
+
+  static bool load(const char *stageName);
+  static char *withSMEExtension(char *dst, const char *stage,
+                                bool generalize = false);
+
+  TSMEFile();
+  TSMEFile(JSUFileInputStream &stream);
+
+  bool isMagicValid() const { return mMagic == TSMEFile::MAGIC; }
+  void reset();
+
+  u32 mMagic;
 
   struct {
-    bool mIsShineShadow;                                       // 0x0010
-    bool mIsMario;                                             // 0x0011
-    bool mIsYoshi;                                             // 0x0012
-    bool mIsMusic;                                             // 0x0013
-    bool mIsFludd;                                             // 0x0014
+    bool mIsShineShadow;                        // 0x0010
+    bool mIsMario;                              // 0x0011
+    bool mIsYoshi;                              // 0x0012
+    bool mIsMusic;                              // 0x0013
+    bool mIsFludd;                              // 0x0014
     TLightContext::ActiveType mShineShadowFlag; // 0x0015
-    SME::Enum::Player mPlayerID;                               // 0x0016
+    SME::Enum::Player mPlayerID;                // 0x0016
 
     struct {
       u8 _00 : 4;
@@ -50,10 +58,6 @@ public:
       bool mMarioHasGlasses : 1;
       bool mMarioHasShirt : 1;
     } MarioStates; // 0x0018
-
-    u8 _19;
-    u16 _1A;
-    u32 _1C;
   } GlobalFlags;
 
   struct {
@@ -63,7 +67,6 @@ public:
     JUtility::TColor mColor;            // 0x0034
     u8 mLayerCount;                     // 0x0038
     u8 mDarkLevel;                      // 0x0039
-    u16 _00;                            // 0x003A
   } Light;
 
   struct {
@@ -100,8 +103,6 @@ public:
     u16 mMusicID;    // 0x0089
     u8 mAreaID;      // 0x008B
     u8 mEpisodeID;   // 0x008C
-    u8 _8D;
-    u16 _8E;
   } Music;
 
   struct {
@@ -111,13 +112,130 @@ public:
     bool mIsColorWater;           // 0x0096
   } Fludd;
 
-  static constexpr u32 MAGIC = 0x434F4445;
-  static TSMEFile sStageConfig;
+private:
+  static TSMEFile *loadFromFile(const char *path);
+};
+#else
+
+struct TStageParams : public TParams {
+#define CONSTRUCT_PARAM(name, val)                                             \
+  name(this, val, JDrama::TNameRef::calcKeyCode(SME_STRINGIZE(name)),          \
+       SME_STRINGIZE(name))
+
+  TStageParams(const char *prm)
+      : TParams(),
+        CONSTRUCT_PARAM(mIsExStage, false),
+        CONSTRUCT_PARAM(mIsDivingStage, false),
+        CONSTRUCT_PARAM(mIsOptionStage, false),
+        CONSTRUCT_PARAM(mIsMultiplayerStage, false),
+        CONSTRUCT_PARAM(mIsYoshiHungry, false),
+        CONSTRUCT_PARAM(mIsEggFree, false),
+        CONSTRUCT_PARAM(mLightType, TLightContext::ActiveType::DISABLED),
+        CONSTRUCT_PARAM(mLightPosX, 0.0f),
+        CONSTRUCT_PARAM(mLightPosY, 3600.0f),
+        CONSTRUCT_PARAM(mLightPosZ, -7458.0f),
+        CONSTRUCT_PARAM(mLightSize, 8000.0f),
+        CONSTRUCT_PARAM(mLightStep, 100.0f),
+        CONSTRUCT_PARAM(mLightColor, JUtility::TColor(0, 20, 40, 0)),
+        CONSTRUCT_PARAM(mLightLayerCount, 5),
+        CONSTRUCT_PARAM(mLightDarkLevel, 120),
+        CONSTRUCT_PARAM(mPlayerCanRideYoshi, true),
+        CONSTRUCT_PARAM(mPlayerHasHelmet, false),
+        CONSTRUCT_PARAM(mPlayerHasGlasses, false),
+        CONSTRUCT_PARAM(mPlayerHasShirt, false),
+        CONSTRUCT_PARAM(mPlayerCanHoldNPCs, false),
+        CONSTRUCT_PARAM(mPlayerSizeMultiplier, 1.0f),
+        CONSTRUCT_PARAM(mFluddPrimary, 0),
+        CONSTRUCT_PARAM(mFluddSecondary, 4),
+        CONSTRUCT_PARAM(mFluddWaterColor,JUtility::TColor(60, 70, 120, 20)),
+        CONSTRUCT_PARAM(mYoshiMaxJuice, 21300),
+        CONSTRUCT_PARAM(mYoshiMaxVSpdStartFlutter, -2.0f),
+        CONSTRUCT_PARAM(mYoshiFlutterAcceleration, 1.2f),
+        CONSTRUCT_PARAM(mYoshiMaxFlutterTimer, 120),
+        CONSTRUCT_PARAM(mYoshiColorGreen, JUtility::TColor(64, 161, 36, 255)),
+        CONSTRUCT_PARAM(mYoshiColorOrange, JUtility::TColor(255, 140, 28, 255)),
+        CONSTRUCT_PARAM(mYoshiColorPurple, JUtility::TColor(170, 76, 255, 255)),
+        CONSTRUCT_PARAM(mYoshiColorPink, JUtility::TColor(255, 160, 190, 255)),
+        CONSTRUCT_PARAM(mMusicVolume, 0.75f),
+        CONSTRUCT_PARAM(mMusicSpeed, 1.0f),
+        CONSTRUCT_PARAM(mMusicPitch, 1.0f),
+        CONSTRUCT_PARAM(mMusicID, 1),
+        CONSTRUCT_PARAM(mMusicAreaID, 1),
+        CONSTRUCT_PARAM(mMusicEpisodeID, 0),
+        CONSTRUCT_PARAM(mMusicEnabled, true),
+        CONSTRUCT_PARAM(mGravityMultiplier, 1.0f),
+        CONSTRUCT_PARAM(mMaxFrameRate, 30.0f) {
+    delete sStageConfig;
+    sStageConfig = this;
+
+    load(prm);
+  }
+
+#undef CONSTRUCT_PARAM
+
+  static TStageParams *sStageConfig;
 
   static bool load(const char *stageName);
-  static void reset() { memset(&TSMEFile::sStageConfig, 0, sizeof(TSMEFile)); };
   static char *withSMEExtension(char *dst, const char *stage,
                                 bool generalize = false);
+  void reset();
+
+  // Stage Info
+  TParamRT<bool> mIsExStage;
+  TParamRT<bool> mIsDivingStage;
+  TParamRT<bool> mIsOptionStage;
+  TParamRT<bool> mIsMultiplayerStage;
+  TParamRT<bool> mIsYoshiHungry;
+  TParamRT<bool> mIsEggFree;
+
+  // Light Info
+  TParamRT<TLightContext::ActiveType> mLightType;
+  TParamRT<f32> mLightPosX;
+  TParamRT<f32> mLightPosY;
+  TParamRT<f32> mLightPosZ;
+  TParamRT<f32> mLightSize;
+  TParamRT<f32> mLightStep;
+  TParamRT<JUtility::TColor> mLightColor;
+  TParamRT<u8> mLightLayerCount;
+  TParamRT<u8> mLightDarkLevel;
+
+  // Player Info
+  TParamRT<bool> mPlayerHasHelmet;
+  TParamRT<bool> mPlayerHasGlasses;
+  TParamRT<bool> mPlayerHasShirt;
+  TParamRT<bool> mPlayerCanRideYoshi;
+  TParamRT<bool> mPlayerCanHoldNPCs;
+  TParamRT<f32> mPlayerSizeMultiplier;
+
+  // Fludd Info
+  TParamRT<u8> mFluddPrimary;
+  TParamRT<u8> mFluddSecondary;
+  TParamRT<JUtility::TColor> mFluddWaterColor;
+
+  // Yoshi Info
+  TParamRT<s32> mYoshiMaxJuice;
+  TParamRT<f32> mYoshiMaxVSpdStartFlutter;
+  TParamRT<f32> mYoshiFlutterAcceleration;
+  TParamRT<u16> mYoshiMaxFlutterTimer;
+  TParamRT<JUtility::TColor> mYoshiColorGreen;
+  TParamRT<JUtility::TColor> mYoshiColorOrange;
+  TParamRT<JUtility::TColor> mYoshiColorPurple;
+  TParamRT<JUtility::TColor> mYoshiColorPink;
+
+  // Music Info
+  TParamRT<f32> mMusicVolume;
+  TParamRT<f32> mMusicSpeed;
+  TParamRT<f32> mMusicPitch;
+  TParamRT<u16> mMusicID;
+  TParamRT<u8> mMusicAreaID;
+  TParamRT<u8> mMusicEpisodeID;
+  TParamRT<bool> mMusicEnabled;
+
+  // Global Info
+  TParamRT<f32> mGravityMultiplier;
+  TParamRT<f32> mMaxFrameRate;
 };
+
+#endif
 
 } // namespace SME::Class

@@ -11,7 +11,7 @@
 
 using namespace SME::Class;
 
-TPlayerParams::TPlayerParams(TMario *player, CPolarSubCamera *camera,
+TPlayerData::TPlayerData(TMario *player, CPolarSubCamera *camera,
                              bool isMario)
     : mPlayer(player), mCamera(camera), mParams(nullptr), mIsEMario(!isMario),
       mInitialized(true), mCanUseFludd(true),
@@ -32,7 +32,7 @@ TPlayerParams::TPlayerParams(TMario *player, CPolarSubCamera *camera,
   scalePlayerAttrs(mParams->mSizeMultiplier.get());
 }
 
-void TPlayerParams::scalePlayerAttrs(f32 scale) {
+void TPlayerData::scalePlayerAttrs(f32 scale) {
   const float factor = (scale * 0.5f) + (1.0f - 0.5f);
 
   JGeometry::TVec3<f32> size;
@@ -161,17 +161,17 @@ void TPlayerParams::scalePlayerAttrs(f32 scale) {
 #undef SCALE_PARAM
 }
 
-void TPlayerParams::setPlayer(TMario *player) {
+void TPlayerData::setPlayer(TMario *player) {
   mPlayer = player;
   mDefaultAttrs.recordFrom(player);
 }
 
-bool TPlayerParams::loadPrm(const char *prm = "/sme.prm") {
+bool TPlayerData::loadPrm(const char *prm = "/sme.prm") {
   JKRArchive *archive = JKRFileLoader::getVolume("mario");
   SME_DEBUG_ASSERT(archive, "Mario archive could not be located!");
 
   if (!mParams)
-    mParams = new TCustomParams();
+    mParams = new TPlayerParams();
 
   void *resource = archive->getResource(prm);
   if (resource) {
@@ -182,12 +182,12 @@ bool TPlayerParams::loadPrm(const char *prm = "/sme.prm") {
   return false;
 }
 
-bool TPlayerParams::loadPrm(JSUMemoryInputStream &stream) {
+bool TPlayerData::loadPrm(JSUMemoryInputStream &stream) {
   mParams->load(stream);
   return true;
 }
 
-bool TPlayerParams::canUseNozzle(TWaterGun::NozzleType nozzle) const {
+bool TPlayerData::canUseNozzle(TWaterGun::NozzleType nozzle) const {
   switch (nozzle) {
   case TWaterGun::NozzleType::Spray:
     return mParams->mSprayNozzleUsable.get();
@@ -208,7 +208,7 @@ bool TPlayerParams::canUseNozzle(TWaterGun::NozzleType nozzle) const {
   }
 }
 
-u8 TPlayerParams::getNozzleBoneID(TWaterGun::NozzleType nozzle) const {
+u8 TPlayerData::getNozzleBoneID(TWaterGun::NozzleType nozzle) const {
   switch (nozzle) {
   case TWaterGun::NozzleType::Spray:
     return mParams->mSprayNozzleBoneID.get();
@@ -229,7 +229,7 @@ u8 TPlayerParams::getNozzleBoneID(TWaterGun::NozzleType nozzle) const {
   }
 }
 
-const char *TPlayerParams::getPlayerName() const {
+const char *TPlayerData::getPlayerName() const {
   switch (getPlayerID()) {
   case SME::Enum::Player::LUIGI:
     return "Luigi";
@@ -245,7 +245,7 @@ const char *TPlayerParams::getPlayerName() const {
   }
 }
 
-void TPlayerParams::ParamHistory::applyHistoryTo(TMario *player) {
+void TPlayerData::ParamHistory::applyHistoryTo(TMario *player) {
   SME_ASSERT(player != nullptr, "Can't apply param history to a nullptr");
   player->mDeParams = mDeParams;
   player->mBodyAngleFreeParams = mBodyAngleFreeParams;
@@ -283,7 +283,7 @@ void TPlayerParams::ParamHistory::applyHistoryTo(TMario *player) {
   player->mUpperBodyParams = mUpperBodyParams;
 }
 
-TPlayerParams::ParamHistory::ParamHistory()
+TPlayerData::ParamHistory::ParamHistory()
     : mDeParams(), mBodyAngleFreeParams("/Mario/BodyAngleFree.prm"),
       mBodyAngleWaterGunParams("/Mario/BodyAngleWaterGun.prm"),
       mPunchFenceParams("/Mario/AttackFencePunch.prm"),
@@ -306,7 +306,7 @@ TPlayerParams::ParamHistory::ParamHistory()
       mSlipWaterGroundParams("/Mario/SlipParamWaterGround.prm"),
       mSlipYoshiParams("/Mario/SlipParamYoshi.prm"), mUpperBodyParams() {}
 
-TPlayerParams::ParamHistory::ParamHistory(TMario *player)
+TPlayerData::ParamHistory::ParamHistory(TMario *player)
     : mDeParams(), mBodyAngleFreeParams("/Mario/BodyAngleFree.prm"),
       mBodyAngleWaterGunParams("/Mario/BodyAngleWaterGun.prm"),
       mPunchFenceParams("/Mario/AttackFencePunch.prm"),
@@ -331,7 +331,7 @@ TPlayerParams::ParamHistory::ParamHistory(TMario *player)
   recordFrom(player);
 }
 
-void TPlayerParams::ParamHistory::recordFrom(TMario *player) {
+void TPlayerData::ParamHistory::recordFrom(TMario *player) {
   SME_ASSERT(player != nullptr, "Can't record param history from a nullptr");
   mDeParams = player->mDeParams;
   mBodyAngleFreeParams = player->mBodyAngleFreeParams;
@@ -369,4 +369,4 @@ void TPlayerParams::ParamHistory::recordFrom(TMario *player) {
   mUpperBodyParams = player->mUpperBodyParams;
 }
 
-void TPlayerParams::ParamHistory::reset() { *this = ParamHistory(); }
+void TPlayerData::ParamHistory::reset() { *this = ParamHistory(); }

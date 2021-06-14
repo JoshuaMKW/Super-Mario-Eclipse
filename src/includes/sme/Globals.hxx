@@ -20,7 +20,6 @@ public:
   static u8 getActivePlayers() { return sActivePlayers; }
   static u8 getMaxPlayers() { return sMaxPlayers; }
   static TMario *getPlayerByIndex(u8 index);
-  static SME::Class::TSMEFile *getStageConfig() { return sStageConfig; }
   static SME::Class::TPlayerData *getPlayerParams(u8 id);
   static SME::Class::TPlayerData *getPlayerParams(TMario *player);
 
@@ -62,8 +61,6 @@ public:
   static JKRExpHeap *sGlobalHeap;
   #endif
 
-//private:
-  static SME::Class::TSMEFile *sStageConfig;
   static SME::Class::TPlayerData *sPlayerCfgArray[SME_MAX_PLAYERS];
   static TMario *sPlayers[SME_MAX_PLAYERS];
   static bool sPlayerHasGeckoCodes;

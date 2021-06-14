@@ -139,6 +139,7 @@ struct TStageParams : public TParams {
         CONSTRUCT_PARAM(mLightColor, JUtility::TColor(0, 20, 40, 0)),
         CONSTRUCT_PARAM(mLightLayerCount, 5),
         CONSTRUCT_PARAM(mLightDarkLevel, 120),
+        CONSTRUCT_PARAM(mPlayerSelectWhiteList, 0xFFFFFFFF),
         CONSTRUCT_PARAM(mPlayerCanRideYoshi, true),
         CONSTRUCT_PARAM(mPlayerHasHelmet, false),
         CONSTRUCT_PARAM(mPlayerHasGlasses, false),
@@ -151,7 +152,7 @@ struct TStageParams : public TParams {
         CONSTRUCT_PARAM(mYoshiMaxJuice, 21300),
         CONSTRUCT_PARAM(mYoshiMaxVSpdStartFlutter, -2.0f),
         CONSTRUCT_PARAM(mYoshiFlutterAcceleration, 1.2f),
-        CONSTRUCT_PARAM(mYoshiMaxFlutterTimer, 120),
+        CONSTRUCT_PARAM(mYoshiMaxFlutterTimer, 120), 
         CONSTRUCT_PARAM(mYoshiColorGreen, JUtility::TColor(64, 161, 36, 255)),
         CONSTRUCT_PARAM(mYoshiColorOrange, JUtility::TColor(255, 140, 28, 255)),
         CONSTRUCT_PARAM(mYoshiColorPurple, JUtility::TColor(170, 76, 255, 255)),
@@ -175,9 +176,10 @@ struct TStageParams : public TParams {
 
   static TStageParams *sStageConfig;
 
-  static bool load(const char *stageName);
-  static char *withSMEExtension(char *dst, const char *stage,
-                                bool generalize = false);
+  static char *stageNameToParamPath(char *dst, const char *stage,
+                                    bool generalize = false);
+
+  bool load(const char *stageName);
   void reset();
 
   // Stage Info
@@ -200,6 +202,7 @@ struct TStageParams : public TParams {
   TParamRT<u8> mLightDarkLevel;
 
   // Player Info
+  TParamRT<u32> mPlayerSelectWhiteList;
   TParamRT<bool> mPlayerHasHelmet;
   TParamRT<bool> mPlayerHasGlasses;
   TParamRT<bool> mPlayerHasShirt;

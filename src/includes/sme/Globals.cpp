@@ -23,7 +23,6 @@ void *TGlobals::sPRMFile = nullptr;
 SME::Class::TWarpCollisionList *TGlobals::sWarpColArray = nullptr;
 SME::Class::TWarpCollisionList *TGlobals::sWarpColPreserveArray = nullptr;
 
-SME::Class::TSMEFile *TGlobals::sStageConfig = nullptr;
 SME::Class::TPlayerData *TGlobals::sPlayerCfgArray[] = {nullptr, nullptr,
                                                           nullptr, nullptr};
 TMario *TGlobals::sPlayers[] = {nullptr, nullptr, nullptr, nullptr};

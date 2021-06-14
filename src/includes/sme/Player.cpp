@@ -62,6 +62,10 @@ bool Util::Mario::loadParams() {
 }
 
 bool Util::Mario::swapBinary(Enum::Player id) {
+  if (id == Enum::Player::UNKNOWN) {
+    id = Enum::Player::MARIO;
+  }
+  
   char buffer[32];
   sprintf(buffer, "/data/chr%hhu.szs", id);
 

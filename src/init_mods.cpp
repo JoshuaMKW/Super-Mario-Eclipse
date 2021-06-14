@@ -59,8 +59,8 @@ JKRExpHeap *SME::Patch::Init::createGlobalHeaps(void *newHeap, size_t size,
       SME::TGlobals::sCharacterHeap = JKRExpHeap::create(
           charactersize - sizeof(JKRExpHeap), JKRHeap::sRootHeap, false);
     if (globalsize > sizeof(JKRExpHeap))
-      SME::TGlobals::sGlobalHeap =
-          JKRExpHeap::create(globalsize - sizeof(JKRExpHeap), JKRHeap::sRootHeap, false);
+      SME::TGlobals::sGlobalHeap = JKRExpHeap::create(
+          globalsize - sizeof(JKRExpHeap), JKRHeap::sRootHeap, false);
 
     SME::TGlobals::sCharacterHeap->alloc(
         SME::TGlobals::sCharacterHeap->getFreeSize(), 4);
@@ -134,16 +134,10 @@ TMarDirector *SME::Patch::Init::initFileMods() {
 
   resetGlobalValues();
   SME::TGlobals::clearAllPlayerParams();
-  SME::Class::TSMEFile::sStageConfig->reset();
+  SME::Class::TStageParams::sStageConfig->reset();
 
-  if (SME::Class::TSMEFile::sStageConfig->load(
-          SME::Util::getStageName(&gpApplication))) {
-    if (characterID == SME::Enum::Player::UNKNOWN)
-      characterID = SME::Class::TSMEFile::sStageConfig->GlobalFlags.mPlayerID;
-  } else {
-    if (characterID == SME::Enum::Player::UNKNOWN)
-      characterID = SME::Enum::Player::MARIO;
-  }
+  SME::Class::TStageParams::sStageConfig->load(
+      SME::Util::getStageName(&gpApplication));
 
   SME::Util::Mario::swapBinary(characterID);
   SME::Util::Mario::loadParams();
@@ -174,7 +168,8 @@ void SME::Patch::Init::initShineShadow() {
         SME::Class::TSMEFile::sStageConfig->Light.mLayerCount;
     gpModelWaterManager->mSphereStep =
         SME::Class::TSMEFile::sStageConfig->Light.mStep;
-    gpModelWaterManager->mSize = SME::Class::TSMEFile::sStageConfig->Light.mSize;
+    gpModelWaterManager->mSize =
+        SME::Class::TSMEFile::sStageConfig->Light.mSize;
     gpModelWaterManager->LightType.mMaskObjects = true;
     gpModelWaterManager->LightType.mShowShadow = true;
 
@@ -306,8 +301,9 @@ static void initMario(TMario *player, bool isMario) {
     player->mAttributes.mGainHelmet =
         SME::Class::TSMEFile::sStageConfig->GlobalFlags.MarioStates
             .mMarioHasHelmet;
-    player->mAttributes.mHasFludd = SME::Class::TSMEFile::sStageConfig
-                                        ->GlobalFlags.MarioStates.mMarioHasFludd;
+    player->mAttributes.mHasFludd =
+        SME::Class::TSMEFile::sStageConfig->GlobalFlags.MarioStates
+            .mMarioHasFludd;
     player->mAttributes.mIsShineShirt =
         SME::Class::TSMEFile::sStageConfig->GlobalFlags.MarioStates
             .mMarioHasShirt;

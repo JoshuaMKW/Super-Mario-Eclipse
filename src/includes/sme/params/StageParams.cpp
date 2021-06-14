@@ -181,22 +181,36 @@ char *TStageParams::stageNameToParamPath(char *dst, const char *stage,
   return dst;
 }
 
-bool TStageParams::load(const char *stageName) {
-  char buffer[64];
+void TStageParams::load(const char *stageName) {
+  DVDFileInfo fileInfo;
+  s32 entrynum;
 
-  stageNameToParamPath(buffer, stageName, false);
-  if (DVDConvertPathToEntrynum(buffer) >= 0) {
-    TParams::load(buffer);
-    return true;
+  char path[64];
+  stageNameToParamPath(path, stageName, false);
+
+  entrynum = DVDConvertPathToEntrynum(path);
+  if (entrynum >= 0) {
+    DVDFastOpen(entrynum, &fileInfo);
+    JSUMemoryInputStream stream(SME::Util::Memory::malloc(fileInfo.mLen, 32),
+                                fileInfo.mLen);
+    TParams::load(stream);
+    mIsCustomConfigLoaded = true;
+    return;
   }
 
-  stageNameToParamPath(buffer, stageName, true);
-  if (DVDConvertPathToEntrynum(buffer) >= 0) {
-    TParams::load(buffer);
-    return true;
+  stageNameToParamPath(path, stageName, true);
+
+  entrynum = DVDConvertPathToEntrynum(path);
+  if (entrynum >= 0) {
+    DVDFastOpen(entrynum, &fileInfo);
+    JSUMemoryInputStream stream(SME::Util::Memory::malloc(fileInfo.mLen, 32),
+                                fileInfo.mLen);
+    TParams::load(stream);
+    mIsCustomConfigLoaded = true;
+    return;
   }
 
-  return false;
+  mIsCustomConfigLoaded = false;
 }
 
 void TStageParams::reset() {
@@ -218,10 +232,11 @@ void TStageParams::reset() {
   static_cast<TParamT<u8>>(mLightLayerCount).set(5);
   static_cast<TParamT<u8>>(mLightDarkLevel).set(120);
   static_cast<TParamT<u32>>(mPlayerSelectWhiteList).set(0xFFFFFFFF);
-  static_cast<TParamT<bool>>(mPlayerCanRideYoshi).set(true);
+  static_cast<TParamT<bool>>(mPlayerHasFludd).set(true);
   static_cast<TParamT<bool>>(mPlayerHasHelmet).set(false);
   static_cast<TParamT<bool>>(mPlayerHasGlasses).set(false);
   static_cast<TParamT<bool>>(mPlayerHasShirt).set(false);
+  static_cast<TParamT<bool>>(mPlayerCanRideYoshi).set(true);
   static_cast<TParamT<bool>>(mPlayerCanHoldNPCs).set(false);
   static_cast<TParamT<f32>>(mPlayerSizeMultiplier).set(1.0f);
   static_cast<TParamT<u8>>(mFluddPrimary).set(0);
@@ -249,6 +264,8 @@ void TStageParams::reset() {
   static_cast<TParamT<bool>>(mMusicEnabled).set(true);
   static_cast<TParamT<f32>>(mGravityMultiplier).set(1.0f);
   static_cast<TParamT<f32>>(mMaxFrameRate).set(30.0f);
+  
+  mIsCustomConfigLoaded = false;
 }
 
 #endif

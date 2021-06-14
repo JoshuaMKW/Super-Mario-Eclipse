@@ -3,6 +3,8 @@
 #include "sms/JSystem/JGeometry.hxx"
 #include "types.h"
 
+namespace SME::Class {
+
 struct TLightContext {
   enum class ActiveType : u8 { DISABLED, STATIC, FOLLOWPLAYER };
 
@@ -22,3 +24,6 @@ struct TLightContext {
   ActiveType mLightType;
   bool mSizeMorphing;
 };
+
+
+}

@@ -3,6 +3,9 @@
 
 #include "SME.hxx"
 
+using namespace SME;
+using namespace SME::Class;
+
 static bool startStreamedBGM(MSStageInfo musicID, bool loopMusic) {
   char buffer[0x20];
   DVDFileInfo *handle = (DVDFileInfo *)0x803FDB7C;
@@ -37,24 +40,24 @@ static bool startStreamedSFX(u32 sfxID) {
 
 // 0x80016998
 u32 SME::Patch::Music::setIsValid(MSStageInfo musicID) {
-  SME::TGlobals::sIsAudioStreamAllowed = SME::Util::Music::isValidBGM(musicID);
+  TGlobals::sIsAudioStreamAllowed = SME::Util::Music::isValidBGM(musicID);
   return musicID & 0x3FF;
 }
 
 // 0x80016ABC
 void SME::Patch::Music::initMusic() {
-  if (SME::Class::TSMEFile::sStageConfig->mMagic != SME::Class::TSMEFile::MAGIC)
-    return;
-
   DVDFileInfo *handle = (DVDFileInfo *)0x803FDB7C;
 
-  if (!SME::TGlobals::sIsAudioStreaming &&
-      (SME::Class::TSMEFile::sStageConfig->Music.mMusicID & 0x400))
-    startStreamedBGM((MSStageInfo)SME::Class::TSMEFile::sStageConfig->Music.mMusicID, true);
+  if (!TGlobals::sIsAudioStreaming &&
+      (TStageParams::sStageConfig->mMusicID.get() & 0x400))
+    startStreamedBGM(
+        (MSStageInfo)TStageParams::sStageConfig->mMusicID.get(),
+        true);
 
-  if (SME::TGlobals::sIsAudioStreaming && !SME::TGlobals::sIsAudioStreamAllowed) {
+  if (TGlobals::sIsAudioStreaming &&
+      !TGlobals::sIsAudioStreamAllowed) {
     DVDCancelStreamAsync(&handle->mCmdBlock, 0);
-    SME::TGlobals::sIsAudioStreaming = false;
+    TGlobals::sIsAudioStreaming = false;
   }
 }
 
@@ -62,9 +65,9 @@ void SME::Patch::Music::initMusic() {
 void SME::Patch::Music::stopMusicOnStop() {
   DVDFileInfo *handle = (DVDFileInfo *)0x803FDB7C;
 
-  if (SME::TGlobals::sIsAudioStreaming) {
+  if (TGlobals::sIsAudioStreaming) {
     DVDCancelStreamAsync(&handle->mCmdBlock, 0);
-    SME::TGlobals::sIsAudioStreaming = false;
+    TGlobals::sIsAudioStreaming = false;
   }
 }
 
@@ -72,9 +75,9 @@ void SME::Patch::Music::stopMusicOnStop() {
 void SME::Patch::Music::stopMusicOnStageExit(TMarioGamePad *gamepad) {
   DVDFileInfo *handle = (DVDFileInfo *)0x803FDB7C;
 
-  if (SME::TGlobals::sIsAudioStreaming) {
+  if (TGlobals::sIsAudioStreaming) {
     DVDCancelStreamAsync(&handle->mCmdBlock, 0);
-    SME::TGlobals::sIsAudioStreaming = false;
+    TGlobals::sIsAudioStreaming = false;
   }
   reset__9RumbleMgrFv(gamepad);
 }

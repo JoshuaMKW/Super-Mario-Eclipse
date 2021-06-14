@@ -140,10 +140,13 @@ struct TStageParams : public TParams {
         CONSTRUCT_PARAM(mLightLayerCount, 5),
         CONSTRUCT_PARAM(mLightDarkLevel, 120),
         CONSTRUCT_PARAM(mPlayerSelectWhiteList, 0xFFFFFFFF),
-        CONSTRUCT_PARAM(mPlayerCanRideYoshi, true),
+        CONSTRUCT_PARAM(mPlayerHealth, 8),
+        CONSTRUCT_PARAM(mPlayerMaxHealth, 8),
+        CONSTRUCT_PARAM(mPlayerHasFludd, true),
         CONSTRUCT_PARAM(mPlayerHasHelmet, false),
         CONSTRUCT_PARAM(mPlayerHasGlasses, false),
         CONSTRUCT_PARAM(mPlayerHasShirt, false),
+        CONSTRUCT_PARAM(mPlayerCanRideYoshi, true),
         CONSTRUCT_PARAM(mPlayerCanHoldNPCs, false),
         CONSTRUCT_PARAM(mPlayerSizeMultiplier, 1.0f),
         CONSTRUCT_PARAM(mFluddPrimary, 0),
@@ -179,7 +182,8 @@ struct TStageParams : public TParams {
   static char *stageNameToParamPath(char *dst, const char *stage,
                                     bool generalize = false);
 
-  bool load(const char *stageName);
+  bool isCustomConfig() const { return mIsCustomConfigLoaded; }
+  void load(const char *stageName);
   void reset();
 
   // Stage Info
@@ -203,6 +207,9 @@ struct TStageParams : public TParams {
 
   // Player Info
   TParamRT<u32> mPlayerSelectWhiteList;
+  TParamRT<u16> mPlayerHealth;
+  TParamRT<u16> mPlayerMaxHealth;
+  TParamRT<bool> mPlayerHasFludd;
   TParamRT<bool> mPlayerHasHelmet;
   TParamRT<bool> mPlayerHasGlasses;
   TParamRT<bool> mPlayerHasShirt;
@@ -237,6 +244,9 @@ struct TStageParams : public TParams {
   // Global Info
   TParamRT<f32> mGravityMultiplier;
   TParamRT<f32> mMaxFrameRate;
+
+  private:
+  bool mIsCustomConfigLoaded;
 };
 
 #endif

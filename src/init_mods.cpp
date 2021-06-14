@@ -7,7 +7,9 @@
 
 #include "SME.hxx"
 
+using namespace SME;
 using namespace SME::Util;
+using namespace SME::Class;
 
 Memory::Protection::MemoryMap gCodeProtector;
 
@@ -118,6 +120,8 @@ static void resetGlobalValues() {
   gAudioSpeed = 1.0f;
 }
 
+static Enum::Player gCharacterID;
+
 // 0x802998B4
 TMarDirector *SME::Patch::Init::initFileMods() {
   TMarDirector *director;
@@ -134,10 +138,10 @@ TMarDirector *SME::Patch::Init::initFileMods() {
 
   resetGlobalValues();
   SME::TGlobals::clearAllPlayerParams();
-  SME::Class::TStageParams::sStageConfig->reset();
+  TStageParams::sStageConfig->reset();
+  TStageParams::sStageConfig->load(SME::Util::getStageName(&gpApplication));
 
-  SME::Class::TStageParams::sStageConfig->load(
-      SME::Util::getStageName(&gpApplication));
+  gCharacterID = characterID;
 
   SME::Util::Mario::swapBinary(characterID);
   SME::Util::Mario::loadParams();
@@ -147,36 +151,35 @@ TMarDirector *SME::Patch::Init::initFileMods() {
 
 // 0x80280180
 void SME::Patch::Init::initShineShadow() {
-  if (SME::Class::TSMEFile::sStageConfig->mMagic !=
-          SME::Class::TSMEFile::MAGIC ||
-      !SME::Class::TSMEFile::sStageConfig->GlobalFlags.mIsShineShadow)
+  TStageParams *config = TStageParams::sStageConfig;
+  if (!config->isCustomConfig() ||
+      config->mLightType.get() == TLightContext::ActiveType::DISABLED)
     return;
 
   if (TFlagManager::smInstance->Type4Flag.mShineCount < SME_MAX_SHINES) {
-    SME::TGlobals::sLightData.mLightType =
-        SME::Class::TSMEFile::sStageConfig->GlobalFlags.mShineShadowFlag;
-    SME::TGlobals::sLightData.mShineShadowBase =
-        SME::Class::TSMEFile::sStageConfig->Light.mSize;
+    SME::TGlobals::sLightData.mLightType = config->mLightType.get();
+    SME::TGlobals::sLightData.mShineShadowBase = config->mLightSize.get();
     SME::TGlobals::sLightData.mPrevShineCount =
         TFlagManager::smInstance->Type4Flag.mShineCount;
+    {
+      JGeometry::TVec3<f32> coordinates(config->mLightPosX.get(),
+                                        config->mLightPosY.get(),
+                                        config->mLightPosZ.get());
+      SME::TGlobals::sLightData.mShineShadowCoordinates = coordinates;
+    }
 
-    gpModelWaterManager->mColor =
-        SME::Class::TSMEFile::sStageConfig->Light.mColor;
-    gpModelWaterManager->mDarkLevel =
-        SME::Class::TSMEFile::sStageConfig->Light.mDarkLevel;
-    gpModelWaterManager->mLayerCount =
-        SME::Class::TSMEFile::sStageConfig->Light.mLayerCount;
-    gpModelWaterManager->mSphereStep =
-        SME::Class::TSMEFile::sStageConfig->Light.mStep;
-    gpModelWaterManager->mSize =
-        SME::Class::TSMEFile::sStageConfig->Light.mSize;
+    gpModelWaterManager->mColor = config->mLightColor.get();
+    gpModelWaterManager->mDarkLevel = config->mLightDarkLevel.get();
+    gpModelWaterManager->mLayerCount = config->mLightLayerCount.get();
+    gpModelWaterManager->mSphereStep = config->mLightStep.get();
+    gpModelWaterManager->mSize = config->mLightSize.get();
     gpModelWaterManager->LightType.mMaskObjects = true;
     gpModelWaterManager->LightType.mShowShadow = true;
 
-    if (SME::Class::TSMEFile::sStageConfig->GlobalFlags.mShineShadowFlag ==
+    if (SME::TGlobals::sLightData.mLightType ==
         TLightContext::ActiveType::STATIC) {
       SME::TGlobals::sLightData.mNextSize =
-          SME::Class::TSMEFile::sStageConfig->Light.mSize;
+          SME::TGlobals::sLightData.mShineShadowBase;
       for (u32 i = 0; i < TFlagManager::smInstance->Type4Flag.mShineCount;
            ++i) {
         SME::TGlobals::sLightData.mNextSize +=
@@ -185,8 +188,6 @@ void SME::Patch::Init::initShineShadow() {
       gpModelWaterManager->mSize = SME::TGlobals::sLightData.mNextSize;
       gpModelWaterManager->mSphereStep = gpModelWaterManager->mSize / 2.0f;
     }
-    SME::TGlobals::sLightData.mShineShadowCoordinates =
-        SME::Class::TSMEFile::sStageConfig->Light.mCoordinates;
   } else {
     SME::TGlobals::sLightData.mLightType = TLightContext::ActiveType::DISABLED;
   }
@@ -194,127 +195,90 @@ void SME::Patch::Init::initShineShadow() {
 
 // 0x802B7A4C
 void SME::Patch::Init::initSoundBank(u8 areaID, u8 episodeID) {
-  if (SME::Class::TSMEFile::sStageConfig->mMagic !=
-          SME::Class::TSMEFile::MAGIC ||
-      !SME::Class::TSMEFile::sStageConfig->GlobalFlags.mIsMusic)
-    setMSoundEnterStage__10MSMainProcFUcUc(areaID, episodeID);
-  else
-    setMSoundEnterStage__10MSMainProcFUcUc(
-        SME::Class::TSMEFile::sStageConfig->Music.mAreaID,
-        SME::Class::TSMEFile::sStageConfig->Music.mEpisodeID);
+  TStageParams *config = TStageParams::sStageConfig;
+  setMSoundEnterStage__10MSMainProcFUcUc(config->mMusicAreaID.get(),
+                                         config->mMusicEpisodeID.get());
 }
 
 // 0x802983F0
 // 0x80298420
 void SME::Patch::Init::initMusicTrack() {
-  if (SME::Class::TSMEFile::sStageConfig->Music.mPlayMusic) {
-    gStageBGM = 0x80010000 | SME::Class::TSMEFile::sStageConfig->Music.mMusicID;
-    gAudioSpeed = SME::Class::TSMEFile::sStageConfig->Music.mSpeed;
-    gAudioPitch = SME::Class::TSMEFile::sStageConfig->Music.mPitch;
-    gAudioVolume =
-        Max(Min(SME::Class::TSMEFile::sStageConfig->Music.mVolume, 1), 0);
+  TStageParams *config = TStageParams::sStageConfig;
+  if (config->mMusicEnabled.get()) {
+    gStageBGM = 0x80010000 | config->mMusicID.get();
+    gAudioSpeed = config->mMusicSpeed.get();
+    gAudioPitch = config->mMusicPitch.get();
+    gAudioVolume = Max(Min(config->mMusicVolume.get(), 1), 0);
   }
   startStageBGM__10MSMainProcFUcUc();
 }
 
-static void initFludd(TMario *player, SME::Class::TPlayerData *params) {
-  SME_ASSERT(params != nullptr, "Can't init fludd with non existant params!");
-  if (params) {
-    gModelWaterManagerWaterColor = params->getParams()->mWaterColor.get();
+static void initFludd(TMario *player, TPlayerData *params) {
+  SME_ASSERT(params, "Can't init fludd with non existant params!");
+  TStageParams *config = TStageParams::sStageConfig;
 
-    if (!params->canUseNozzle(static_cast<TWaterGun::NozzleType>(
-            player->mFludd->mCurrentNozzle))) {
-      for (u8 i = 0; i < 7; ++i) {
-        if (params->canUseNozzle(static_cast<TWaterGun::NozzleType>(i))) {
-          player->mFludd->mCurrentNozzle = i;
-          player->mAttributes.mHasFludd = params->getCanUseFludd();
-          player->mFludd->mCurrentWater =
-              player->mFludd->mNozzleList[(u8)player->mFludd->mCurrentNozzle]
-                  ->mMaxWater;
-          break;
-        } else if (i == 6) {
-          player->mAttributes.mHasFludd = false;
-          params->setCanUseFludd(false);
-        }
-      }
-    }
+  gModelWaterManagerWaterColor = params->getParams()->mWaterColor.get();
 
-    if (!params->canUseNozzle(static_cast<TWaterGun::NozzleType>(
-            player->mFludd->mSecondNozzle))) {
-      for (u8 i = 0; i < 7; ++i) {
-        if (params->canUseNozzle(static_cast<TWaterGun::NozzleType>(i))) {
-          player->mFludd->mSecondNozzle = i;
-          player->mAttributes.mHasFludd = params->getCanUseFludd();
-          break;
-        }
-        player->mFludd->mSecondNozzle = player->mFludd->mCurrentNozzle;
+  if (!params->canUseNozzle(
+          static_cast<TWaterGun::NozzleType>(player->mFludd->mCurrentNozzle))) {
+    for (u8 i = 0; i < 7; ++i) {
+      if (params->canUseNozzle(static_cast<TWaterGun::NozzleType>(i))) {
+        player->mFludd->mCurrentNozzle = i;
+        player->mAttributes.mHasFludd = params->getCanUseFludd();
+        player->mFludd->mCurrentWater =
+            player->mFludd->mNozzleList[(u8)player->mFludd->mCurrentNozzle]
+                ->mMaxWater;
+        break;
+      } else if (i == 6) {
+        player->mAttributes.mHasFludd = false;
+        params->setCanUseFludd(false);
       }
     }
   }
 
-  if (SME::Class::TSMEFile::sStageConfig->mMagic ==
-          SME::Class::TSMEFile::MAGIC &&
-      SME::Class::TSMEFile::sStageConfig->GlobalFlags.mIsFludd) {
-    if (SME::Class::TSMEFile::sStageConfig->Fludd.mIsColorWater) {
-      gModelWaterManagerWaterColor =
-          SME::Class::TSMEFile::sStageConfig->Fludd.mWaterColor;
+  if (!params->canUseNozzle(
+          static_cast<TWaterGun::NozzleType>(player->mFludd->mSecondNozzle))) {
+    for (u8 i = 0; i < 7; ++i) {
+      if (params->canUseNozzle(static_cast<TWaterGun::NozzleType>(i))) {
+        player->mFludd->mSecondNozzle = i;
+        player->mAttributes.mHasFludd = params->getCanUseFludd();
+        break;
+      }
+      player->mFludd->mSecondNozzle = player->mFludd->mCurrentNozzle;
     }
-    player->mFludd->mCurrentNozzle =
-        SME::Class::TSMEFile::sStageConfig->Fludd.mPrimaryNozzle;
-    player->mFludd->mSecondNozzle =
-        SME::Class::TSMEFile::sStageConfig->Fludd.mSecondaryNozzle;
-
-    player->mFludd->mCurrentWater =
-        player->mFludd->mNozzleList[(u8)player->mFludd->mCurrentNozzle]
-            ->mMaxWater;
   }
+
+  gModelWaterManagerWaterColor = config->mFluddWaterColor.get();
+  player->mFludd->mCurrentNozzle = config->mFluddPrimary.get();
+  player->mFludd->mSecondNozzle = config->mFluddSecondary.get();
+
+  player->mFludd->mCurrentWater =
+      player->mFludd->mNozzleList[(u8)player->mFludd->mCurrentNozzle]
+          ->mMaxWater;
 }
 
 static void initMario(TMario *player, bool isMario) {
   CPolarSubCamera *camera = new CPolarSubCamera("<CPolarSubCamera>");
-  SME::Class::TPlayerData *params =
-      new SME::Class::TPlayerData(player, camera, isMario);
+  TPlayerData *params = new TPlayerData(player, camera, isMario);
   SME::TGlobals::registerPlayerParams(params);
 
-  if (SME::Class::TSMEFile::sStageConfig->mMagic ==
-          SME::Class::TSMEFile::MAGIC &&
-      SME::Class::TSMEFile::sStageConfig->GlobalFlags.mIsMario) {
-    params->setPlayerID(
-        SME::Class::TSMEFile::sStageConfig->GlobalFlags.mPlayerID);
-    player->mHealth = SME::Class::TSMEFile::sStageConfig->Mario.mHealth;
-    player->mDeParams.mTramplePowStep1.set(
-        SME::Class::TSMEFile::sStageConfig->Mario.mBaseBounce1);
-    player->mDeParams.mTramplePowStep2.set(
-        SME::Class::TSMEFile::sStageConfig->Mario.mBaseBounce2);
-    player->mDeParams.mTramplePowStep3.set(
-        SME::Class::TSMEFile::sStageConfig->Mario.mBaseBounce3);
-    player->mDeParams.mDamageFallHeight.set(
-        SME::Class::TSMEFile::sStageConfig->Mario.mMaxFallNoDamage);
-    player->mDeParams.mHPMax.set(
-        SME::Class::TSMEFile::sStageConfig->Mario.mMaxHealth);
-    player->mDeParams.mIllegalPlaneCtInc.set(
-        SME::Class::TSMEFile::sStageConfig->Mario.mOBStep);
-    player->mDeParams.mIllegalPlaneTime.set(
-        SME::Class::TSMEFile::sStageConfig->Mario.mOBMax);
-    player->mJumpParams.mGravity.set(
-        SME::Class::TSMEFile::sStageConfig->Mario.mGravity);
-    player->mAttributes.mGainHelmet =
-        SME::Class::TSMEFile::sStageConfig->GlobalFlags.MarioStates
-            .mMarioHasHelmet;
-    player->mAttributes.mHasFludd =
-        SME::Class::TSMEFile::sStageConfig->GlobalFlags.MarioStates
-            .mMarioHasFludd;
-    player->mAttributes.mIsShineShirt =
-        SME::Class::TSMEFile::sStageConfig->GlobalFlags.MarioStates
-            .mMarioHasShirt;
+  TStageParams *config = TStageParams::sStageConfig;
+  if (config->isCustomConfig()) {
+    params->setPlayerID(gCharacterID);
+    player->mHealth = config->mPlayerHealth.get();
+    player->mDeParams.mHPMax.set(config->mPlayerMaxHealth.get());
+    player->mJumpParams.mGravity.set(config->mGravityMultiplier.get());
+    player->mAttributes.mGainHelmet = config->mPlayerHasHelmet.get();
+    player->mAttributes.mHasFludd = config->mPlayerHasFludd.get();
+    player->mAttributes.mIsShineShirt = config->mPlayerHasShirt.get();
 
-    if (SME::Class::TSMEFile::sStageConfig->GlobalFlags.MarioStates
-            .mMarioHasGlasses)
+    if (config->mPlayerHasGlasses.get())
       wearGlass__6TMarioFv(player);
   }
 
-  if (isMario)
+  if (isMario) {
     initFludd(player, params);
+  }
 }
 
 // 0x80276C94
@@ -340,57 +304,46 @@ void SME::Patch::Init::initYoshi(MAnmSound *anmSound, void *r4, u32 r5,
   TYoshi *yoshi;
   SME_FROM_GPR(31, yoshi);
 
-  if (SME::Class::TSMEFile::sStageConfig->mMagic !=
-          SME::Class::TSMEFile::MAGIC ||
-      !SME::Class::TSMEFile::sStageConfig->GlobalFlags.mIsYoshi)
+  TStageParams *config = TStageParams::sStageConfig;
+  if (!config->isCustomConfig())
     return;
 
-  gYoshiJuiceColor[0] = SME::Class::TSMEFile::sStageConfig->Yoshi.mOrangeYoshi;
-  gYoshiJuiceColor[1] = SME::Class::TSMEFile::sStageConfig->Yoshi.mPurpleYoshi;
-  gYoshiJuiceColor[2] = SME::Class::TSMEFile::sStageConfig->Yoshi.mPinkYoshi;
+  gYoshiJuiceColor[0] = config->mYoshiColorOrange.get();
+  gYoshiJuiceColor[1] = config->mYoshiColorPurple.get();
+  gYoshiJuiceColor[2] = config->mYoshiColorPink.get();
 
-  gYoshiBodyColor[0] = SME::Class::TSMEFile::sStageConfig->Yoshi.mGreenYoshi;
-  gYoshiBodyColor[1] = SME::Class::TSMEFile::sStageConfig->Yoshi.mOrangeYoshi;
-  gYoshiBodyColor[2] = SME::Class::TSMEFile::sStageConfig->Yoshi.mPurpleYoshi;
-  gYoshiBodyColor[3] = SME::Class::TSMEFile::sStageConfig->Yoshi.mPinkYoshi;
+  gYoshiBodyColor[0] = config->mYoshiColorGreen.get();
+  gYoshiBodyColor[1] = config->mYoshiColorOrange.get();
+  gYoshiBodyColor[2] = config->mYoshiColorPurple.get();
+  gYoshiBodyColor[3] = config->mYoshiColorPink.get();
 
-  yoshi->mMaxJuice = SME::Class::TSMEFile::sStageConfig->Yoshi.mMaxJuice;
-  yoshi->mMaxVSpdStartFlutter =
-      SME::Class::TSMEFile::sStageConfig->Yoshi.mMaxVSpdStartFlutter;
-  yoshi->mFlutterAcceleration =
-      SME::Class::TSMEFile::sStageConfig->Yoshi.mFlutterAcceleration;
-  yoshi->mMaxFlutterTimer =
-      SME::Class::TSMEFile::sStageConfig->Yoshi.mMaxFlutterTimer;
+  yoshi->mMaxJuice = config->mYoshiMaxJuice.get();
+  yoshi->mMaxVSpdStartFlutter = config->mYoshiMaxVSpdStartFlutter.get();
+  yoshi->mFlutterAcceleration = config->mYoshiFlutterAcceleration.get();
+  yoshi->mMaxFlutterTimer = config->mYoshiMaxFlutterTimer.get();
 }
 
 // 0x8029CCB0
 void SME::Patch::Init::initCardColors() {
-  if (SME::Class::TSMEFile::sStageConfig->mMagic ==
-          SME::Class::TSMEFile::MAGIC &&
-      SME::Class::TSMEFile::sStageConfig->GlobalFlags.mIsYoshi) {
-    gpMarDirector->mGCConsole->mJuiceCardOrange =
-        SME::Class::TSMEFile::sStageConfig->Yoshi.mOrangeYoshi;
-    gpMarDirector->mGCConsole->mJuiceCardPurple =
-        SME::Class::TSMEFile::sStageConfig->Yoshi.mPurpleYoshi;
-    gpMarDirector->mGCConsole->mJuiceCardPink =
-        SME::Class::TSMEFile::sStageConfig->Yoshi.mPinkYoshi;
-  }
+  TStageParams *config = TStageParams::sStageConfig;
 
-  if (SME::Class::TSMEFile::sStageConfig->mMagic ==
-          SME::Class::TSMEFile::MAGIC &&
-      SME::Class::TSMEFile::sStageConfig->GlobalFlags.mIsFludd &&
-      SME::Class::TSMEFile::sStageConfig->Fludd.mIsColorWater) {
-    gpMarDirector->mGCConsole->mWaterLeftPanel =
-        SME::Class::TSMEFile::sStageConfig->Fludd.mWaterColor;
-    gpMarDirector->mGCConsole->mWaterRightPanel.r = Math::lerp<u8>(
-        0, SME::Class::TSMEFile::sStageConfig->Fludd.mWaterColor.r, 0.8125);
-    gpMarDirector->mGCConsole->mWaterRightPanel.g = Math::lerp<u8>(
-        0, SME::Class::TSMEFile::sStageConfig->Fludd.mWaterColor.g, 0.8125);
-    gpMarDirector->mGCConsole->mWaterRightPanel.b = Math::lerp<u8>(
-        0, SME::Class::TSMEFile::sStageConfig->Fludd.mWaterColor.b, 0.8125);
-    gpMarDirector->mGCConsole->mWaterRightPanel.a = Math::lerp<u8>(
-        0, SME::Class::TSMEFile::sStageConfig->Fludd.mWaterColor.a, 0.8125);
-  }
+  if (config->isCustomConfig())
+    return;
+
+  JUtility::TColor waterColor = config->mFluddWaterColor.get();
+
+  gpMarDirector->mGCConsole->mJuiceCardOrange = config->mYoshiColorOrange.get();
+  gpMarDirector->mGCConsole->mJuiceCardPurple = config->mYoshiColorPurple.get();
+  gpMarDirector->mGCConsole->mJuiceCardPink = config->mYoshiColorPink.get();
+  gpMarDirector->mGCConsole->mWaterLeftPanel = waterColor;
+  gpMarDirector->mGCConsole->mWaterRightPanel.r =
+      Math::lerp<u8>(0, waterColor.r, 0.8125f);
+  gpMarDirector->mGCConsole->mWaterRightPanel.g =
+      Math::lerp<u8>(0, waterColor.g, 0.8125f);
+  gpMarDirector->mGCConsole->mWaterRightPanel.b =
+      Math::lerp<u8>(0, waterColor.b, 0.8125f);
+  gpMarDirector->mGCConsole->mWaterRightPanel.a =
+      Math::lerp<u8>(0, waterColor.a, 0.8125f);
 }
 
 /*This works by taking the target id and matching it to the
@@ -400,9 +353,8 @@ void SME::Patch::Init::initCardColors() {
 / triangles for functionalities like linked warping!
 */
 
-static void parseWarpLinks(TMapCollisionData *col,
-                           SME::Class::TWarpCollisionList *links, u32 validID,
-                           u32 idGroupSize = 0) {
+static void parseWarpLinks(TMapCollisionData *col, TWarpCollisionList *links,
+                           u32 validID, u32 idGroupSize = 0) {
   u32 curDataIndex = 0;
 
   for (u32 i = 0; i < col->mFloorArraySize; ++i) {
@@ -411,7 +363,7 @@ static void parseWarpLinks(TMapCollisionData *col,
         ((col->mColTable[i].mCollisionType & 0x7FFF) - validID) <=
             idGroupSize + 1000) {
 
-      links->mColList[curDataIndex] = SME::Class::TCollisionLink(
+      links->mColList[curDataIndex] = TCollisionLink(
           &col->mColTable[i], (u8)(col->mColTable[i].mValue4 >> 8),
           (u8)col->mColTable[i].mValue4);
       if (curDataIndex >= 0xFF)
@@ -424,10 +376,8 @@ static void parseWarpLinks(TMapCollisionData *col,
 
 // 0x802B8B20
 u32 SME::Patch::Init::initCollisionWarpLinks(const char *name) {
-  SME::Class::TWarpCollisionList *warpDataArray =
-      new (32) SME::Class::TWarpCollisionList();
-  SME::Class::TWarpCollisionList *warpDataPreserveArray =
-      new (32) SME::Class::TWarpCollisionList();
+  TWarpCollisionList *warpDataArray = new (32) TWarpCollisionList();
+  TWarpCollisionList *warpDataPreserveArray = new (32) TWarpCollisionList();
   SME::TGlobals::sWarpColArray = warpDataArray;
   SME::TGlobals::sWarpColPreserveArray = warpDataPreserveArray;
 

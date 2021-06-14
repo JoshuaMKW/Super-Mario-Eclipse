@@ -8,6 +8,7 @@
 #include "SME.hxx"
 
 using namespace SME;
+using namespace SME::Class;
 
 extern J2DTextBox gDebugTextBox;
 
@@ -50,37 +51,56 @@ void Patch::CKit::onDraw2D(J2DOrthoGraph *graph) {
 // 0x802A8B58
 // extern -> SME.cpp
 bool Util::SMS::isExMap() {
-  return SME::Class::TStageParams::sStageConfig->mIsExStage.get();
+  if (TStageParams::sStageConfig->isCustomConfig())
+    return TStageParams::sStageConfig->mIsExStage.get();
+  else
+    return (gpApplication.mCurrentScene.mAreaID >= TGameSequence::DOLPICEX0 &&
+            gpApplication.mCurrentScene.mAreaID <= TGameSequence::COROEX6);
 }
 
 // 0x802A8B30
 // extern -> SME.cpp
 bool Util::SMS::isMultiplayerMap() {
-  return SME::Class::TStageParams::sStageConfig->mIsMultiplayerStage.get();
+  if (TStageParams::sStageConfig->isCustomConfig())
+    return TStageParams::sStageConfig->mIsMultiplayerStage.get();
+  else
+    return (gpMarDirector->mAreaID == TGameSequence::TEST10 &&
+            gpMarDirector->mEpisodeID == 0);
 }
 
 // 0x802A8AFC
 // extern -> SME.cpp
 bool Util::SMS::isDivingMap() {
-  return SME::Class::TStageParams::sStageConfig->mIsDivingStage.get();
+  if (TStageParams::sStageConfig->isCustomConfig())
+    return TStageParams::sStageConfig->mIsDivingStage.get();
+  else
+    return (gpMarDirector->mAreaID == TGameSequence::MAREBOSS ||
+            gpMarDirector->mAreaID == TGameSequence::MAREEX0 ||
+            gpMarDirector->mAreaID == TGameSequence::MAREUNDERSEA);
 }
 
 // 0x802A8AE0
 // extern -> SME.cpp
 bool Util::SMS::isOptionMap() {
-  return SME::Class::TStageParams::sStageConfig->mIsOptionStage.get();
+  if (TStageParams::sStageConfig->isCustomConfig())
+    return TStageParams::sStageConfig->mIsOptionStage.get();
+  else
+    return (gpMarDirector->mAreaID == 15);
 }
 
 // 0x8027C6A4
 // extern -> SME.cpp
 bool Patch::CKit::manageLightSize() {
+  if (!TStageParams::sStageConfig->isCustomConfig())
+    return (gpMarDirector->mAreaID == 1);
+
   s32 &CurrentShineCount = TFlagManager::smInstance->Type4Flag.mShineCount;
   s32 &PrevShineCount = SME::TGlobals::sLightData.mPrevShineCount;
   switch (SME::TGlobals::sLightData.mLightType) {
   case TLightContext::ActiveType::STATIC: {
-    if (SME::Class::TStageParams::sStageConfig->mLightDarkLevel.get() != 255)
+    if (TStageParams::sStageConfig->mLightDarkLevel.get() != 255)
       gpModelWaterManager->mDarkLevel =
-          SME::Class::TStageParams::sStageConfig->mLightDarkLevel.get();
+          TStageParams::sStageConfig->mLightDarkLevel.get();
     else if (CurrentShineCount < SME_MAX_SHINES)
       gpModelWaterManager->mDarkLevel =
           SME::Util::Math::lerp<u8>(30, 190,
@@ -152,7 +172,7 @@ bool Patch::CKit::manageLightSize() {
   }
   case TLightContext::ActiveType::FOLLOWPLAYER: {
     gpModelWaterManager->mDarkLevel =
-        SME::Class::TStageParams::sStageConfig->mLightDarkLevel.get();
+        TStageParams::sStageConfig->mLightDarkLevel.get();
     gShineShadowPos.x =
         gpMarioPos->x + SME::TGlobals::sLightData.mShineShadowCoordinates.x;
     gShineShadowPos.y =

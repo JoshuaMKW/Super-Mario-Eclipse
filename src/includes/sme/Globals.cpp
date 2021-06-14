@@ -17,7 +17,7 @@ JKRExpHeap *TGlobals::sCharacterHeap = nullptr;
 JKRExpHeap *TGlobals::sGlobalHeap = nullptr;
 #endif
 
-TLightContext TGlobals::sLightData = TLightContext();
+Class::TLightContext TGlobals::sLightData = Class::TLightContext();
 
 void *TGlobals::sPRMFile = nullptr;
 SME::Class::TWarpCollisionList *TGlobals::sWarpColArray = nullptr;

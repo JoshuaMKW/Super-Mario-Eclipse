@@ -3,6 +3,7 @@
 #pragma once
 
 #include "sms/JSystem/JGeometry.hxx"
+#include "macros.h"
 #include "types.h"
 
 namespace SME::Util::Math {
@@ -25,11 +26,11 @@ constexpr f64 radiansToAngle(f64 r) { return (180.0 / M_PI) * r; }
 /
 / Graphing Calculator: https://www.desmos.com/calculator/kn9tpwdan5
 */
-constexpr f32 sigmoidCurve(f32 x, f32 f, f32 r, f32 c, f32 b) {
+inline f32 sigmoidCurve(f32 x, f32 f, f32 r, f32 c, f32 b) {
   return f + ((r - f) / (1.0f + expf((b * -1.0f) * (x - c))));
 }
 
-constexpr f64 sigmoidCurve(f64 x, f64 f, f64 r, f64 c, f64 b) {
+inline f64 sigmoidCurve(f64 x, f64 f, f64 r, f64 c, f64 b) {
   return f + ((r - f) / (1.0f + expf((b * -1.0f) * (x - c))));
 }
 

@@ -94,98 +94,96 @@ bool Patch::CKit::manageLightSize() {
   if (!TStageParams::sStageConfig->isCustomConfig())
     return (gpMarDirector->mAreaID == 1);
 
+  Class::TLightContext &LightContext = SME::TGlobals::sLightData;
+
   s32 &CurrentShineCount = TFlagManager::smInstance->Type4Flag.mShineCount;
-  s32 &PrevShineCount = SME::TGlobals::sLightData.mPrevShineCount;
-  switch (SME::TGlobals::sLightData.mLightType) {
+  s32 &PrevShineCount = LightContext.mPrevShineCount;
+  switch (LightContext.mLightType) {
   case TLightContext::ActiveType::STATIC: {
     if (TStageParams::sStageConfig->mLightDarkLevel.get() != 255)
       gpModelWaterManager->mDarkLevel =
           TStageParams::sStageConfig->mLightDarkLevel.get();
-    else if (CurrentShineCount < SME_MAX_SHINES)
-      gpModelWaterManager->mDarkLevel =
-          SME::Util::Math::lerp<u8>(30, 190,
-                                    static_cast<f32>(CurrentShineCount) /
-                                        static_cast<f32>(SME_MAX_SHINES));
-    else {
+    else if (CurrentShineCount >= SME_MAX_SHINES) {
       if (gpModelWaterManager->mDarkLevel < 255)
         gpModelWaterManager->mDarkLevel += 1;
       else
-        SME::TGlobals::sLightData.mLightType =
-            TLightContext::ActiveType::DISABLED;
+        LightContext.mLightType = TLightContext::ActiveType::DISABLED;
     }
 
-    gShineShadowPos = SME::TGlobals::sLightData.mShineShadowCoordinates;
+    gShineShadowPos = LightContext.mShineShadowCoordinates;
 
     const f32 sigOfs = 300.0f;
-    const f32 sigStrength =
-        CurrentShineCount >= PrevShineCount ? 0.04f : -0.04f;
+    const f32 sigStrength = 0.04f;
 
-    if (!SME::TGlobals::sLightData.mSizeMorphing) {
-      if (CurrentShineCount > PrevShineCount) {
-        SME::TGlobals::sLightData.mPrevSize = gpModelWaterManager->mSize;
-        SME::TGlobals::sLightData.mNextSize = gpModelWaterManager->mSize;
+    if (!LightContext.mSizeMorphing) {
+      if (CurrentShineCount != PrevShineCount) {
+        LightContext.mPrevSize = gpModelWaterManager->mSize;
+        LightContext.mNextSize =
+            LightContext.mShineShadowBase +
+            powf(((1300.0f / SME_MAX_SHINES) * CurrentShineCount), 1.5f);
+        LightContext.mPrevDarkness = gpModelWaterManager->mDarkLevel;
+        LightContext.mNextDarkness =
+            Util::Math::lerp<u8>(30, 190,
+                                 static_cast<f32>(CurrentShineCount) /
+                                     static_cast<f32>(SME_MAX_SHINES));
 
-        for (u32 i = 0; i < (CurrentShineCount - PrevShineCount); ++i)
-          SME::TGlobals::sLightData.mNextSize +=
-              (10000.0f / SME_MAX_SHINES) + (PrevShineCount + i) * 2.0f;
-
-        SME::TGlobals::sLightData.mSizeMorphing = true;
-        SME::TGlobals::sLightData.mStepContext = 0.0f;
-      } else if (CurrentShineCount < PrevShineCount) {
-        SME::TGlobals::sLightData.mPrevSize = gpModelWaterManager->mSize;
-        SME::TGlobals::sLightData.mNextSize = gpModelWaterManager->mSize;
-
-        for (u32 i = 0; i < (PrevShineCount - CurrentShineCount); ++i)
-          SME::TGlobals::sLightData.mNextSize -=
-              (10000.0f / SME_MAX_SHINES) + (PrevShineCount - i) * 2.0f;
-
-        SME::TGlobals::sLightData.mSizeMorphing = true;
-        SME::TGlobals::sLightData.mStepContext = 0.0f;
+        LightContext.mSizeMorphing = true;
+        LightContext.mStepContext = 0.0f;
       } else {
         break;
       }
     }
 
     const f32 cur = SME::Util::Math::sigmoidCurve(
-        SME::TGlobals::sLightData.mStepContext,
-        SME::TGlobals::sLightData.mPrevSize,
-        SME::TGlobals::sLightData.mNextSize, sigOfs, sigStrength);
+        LightContext.mStepContext, LightContext.mPrevSize,
+        LightContext.mNextSize, sigOfs, sigStrength);
 
-    if (gpModelWaterManager->mSize > 70000.0f) {
-      gpModelWaterManager->mSize = 70000.0f;
-      SME::TGlobals::sLightData.mSizeMorphing = false;
-    } else if (gpModelWaterManager->mSize < 0.0f) {
-      gpModelWaterManager->mSize = 0.0f;
-      SME::TGlobals::sLightData.mSizeMorphing = false;
-    } else if (cur != SME::TGlobals::sLightData.mNextSize &&
-               cur != SME::TGlobals::sLightData.mPrevSize) {
+    if (TStageParams::sStageConfig->mLightDarkLevel.get() == 255)
+      gpModelWaterManager->mDarkLevel =
+          static_cast<u8>(SME::Util::Math::sigmoidCurve(
+              LightContext.mStepContext,
+              static_cast<f32>(LightContext.mPrevDarkness),
+              static_cast<f32>(LightContext.mNextDarkness), sigOfs, sigStrength));
+
+    constexpr f32 deadZone = 1.0f;
+    constexpr f32 minSize = 0.0f;
+    constexpr f32 maxSize = 80000.0f;
+
+    f32 &NextSize = LightContext.mNextSize;
+    f32 &PrevSize = LightContext.mPrevSize;
+
+    const bool isFinished = NextSize >= PrevSize ? cur >= (NextSize - deadZone)
+                                                 : cur <= (NextSize + deadZone);
+    if (gpModelWaterManager->mSize > maxSize) {
+      gpModelWaterManager->mSize = maxSize;
+      LightContext.mSizeMorphing = false;
+    } else if (gpModelWaterManager->mSize < minSize) {
+      gpModelWaterManager->mSize = minSize;
+      LightContext.mSizeMorphing = false;
+    } else if (!isFinished) {
       gpModelWaterManager->mSize = cur;
       gpModelWaterManager->mSphereStep = cur / 2.0f;
-      SME::TGlobals::sLightData.mStepContext += 1.0f;
+      LightContext.mStepContext += 1.0f;
     } else {
       gpModelWaterManager->mSize = cur;
       gpModelWaterManager->mSphereStep = cur / 2.0f;
       PrevShineCount = CurrentShineCount;
-      SME::TGlobals::sLightData.mSizeMorphing = false;
+      LightContext.mSizeMorphing = false;
     }
     break;
   }
   case TLightContext::ActiveType::FOLLOWPLAYER: {
     gpModelWaterManager->mDarkLevel =
         TStageParams::sStageConfig->mLightDarkLevel.get();
-    gShineShadowPos.x =
-        gpMarioPos->x + SME::TGlobals::sLightData.mShineShadowCoordinates.x;
-    gShineShadowPos.y =
-        gpMarioPos->y + SME::TGlobals::sLightData.mShineShadowCoordinates.y;
-    gShineShadowPos.z =
-        gpMarioPos->z + SME::TGlobals::sLightData.mShineShadowCoordinates.z;
+    gShineShadowPos.x = gpMarioPos->x + LightContext.mShineShadowCoordinates.x;
+    gShineShadowPos.y = gpMarioPos->y + LightContext.mShineShadowCoordinates.y;
+    gShineShadowPos.z = gpMarioPos->z + LightContext.mShineShadowCoordinates.z;
     break;
   }
   default:
     break;
   }
-  return SME::TGlobals::sLightData.mLightType !=
-             TLightContext::ActiveType::DISABLED &&
+  return LightContext.mLightType != TLightContext::ActiveType::DISABLED &&
          gpMarDirector->mAreaID != TGameSequence::OPTION;
 }
 

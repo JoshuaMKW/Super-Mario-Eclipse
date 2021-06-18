@@ -56,16 +56,13 @@ bool Patch::Fludd::hasWaterCardOpen() {
   const SME::Class::TPlayerData *playerParams =
       SME::TGlobals::getPlayerParams(gpMarioAddress);
 
-  if (gpMarioAddress->mYoshi->mState != TYoshi::State::MOUNTED)
-    gpMarioAddress->mAttributes.mHasFludd =
-        playerParams->getParams()->mCanUseFludd.get();
-  else
-    gpMarioAddress->mAttributes.mHasFludd = true;
 
   if (gpMarioAddress->mYoshi->mState != TYoshi::State::MOUNTED &&
       !gpMarioAddress->mAttributes.mHasFludd && !gcConsole->mWaterCardFalling &&
       gcConsole->mIsWaterCard)
     startDisappearTank__11TGCConsole2Fv(gcConsole);
+  else if (gpMarioAddress->mYoshi->mState == TYoshi::State::MOUNTED)
+    gpMarioAddress->mAttributes.mHasFludd = true;
 
   return gcConsole->mIsWaterCard;
 }
@@ -86,7 +83,7 @@ void Patch::Fludd::sprayGoopMap(TPollutionManager *gpPollutionManager, f32 x,
       SME::TGlobals::getPlayerParams(gpMarioAddress);
   const SME::Class::TPlayerParams *prm = playerParams->getParams();
 
-  if (!playerParams->isMario() || !playerParams->isInitialized())
+  if (!playerParams->isMario())
     clean__17TPollutionManagerFffff(gpPollutionManager, x, y, z, r);
 
   if (prm->mCleaningType.get() !=
@@ -114,6 +111,9 @@ bool Patch::Fludd::canCleanSeals(TWaterManager *gpWaterManager) {
 TWaterGun *Patch::Fludd::bindFluddtojoint() {
   TMario *player;
   SME_FROM_GPR(31, player);
+
+  if (!SME::TGlobals::getPlayerParams(player))
+      return player->mFludd;
 
   player->mBindBoneIDArray[0] =
       SME::TGlobals::getPlayerParams(player)

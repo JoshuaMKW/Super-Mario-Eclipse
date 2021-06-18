@@ -1,6 +1,7 @@
 #include "SME.hxx"
 
 using namespace SME;
+using namespace SME::Class;
 
 bool TYoshi::isMounted() { return this->mState == TYoshi::MOUNTED; }
 
@@ -39,11 +40,8 @@ bool Patch::Yoshi::isYoshiDie(TMario *player) {
 // 0x801BC868
 // extern -> SME.cpp
 bool Patch::Yoshi::isYoshiEggNeedFruit(THitActor *gpFruit) {
-  if (SME::Class::TSMEFile::sStageConfig->mMagic !=
-          SME::Class::TSMEFile::MAGIC ||
-      !SME::Class::TSMEFile::sStageConfig->GlobalFlags.mIsYoshi ||
-      !SME::Class::TSMEFile::sStageConfig->Yoshi.mIsEggFree)
-    return isFruit__11TMapObjBaseFP9THitActor(gpFruit);
+  if (!TStageParams::sStageConfig->mIsEggFree.get())
+    return TMapObjBase::isFruit(gpFruit);
 
   return true;
 }
@@ -51,16 +49,19 @@ bool Patch::Yoshi::isYoshiEggNeedFruit(THitActor *gpFruit) {
 // 0x801BC8B4
 // extern -> SME.cpp
 u8 Patch::Yoshi::isYoshiEggFree(TEggYoshi *gpEgg, THitActor *gpFruit) {
-  const SME::Class::TPlayerData *playerParams =
+  const TPlayerData *playerParams =
       SME::TGlobals::getPlayerParams(gpMarioAddress);
+  if (!playerParams) {
+    if (gpEgg->mWantedFruit != gpFruit->mObjectID)
+      return 2;
+    else
+      return 1;
+  }
   if (gpEgg->mState == 14 || gpEgg->mState == 6)
     return 0;
   else if (!playerParams->getParams()->mCanRideYoshi.get())
     return 0;
-  else if (SME::Class::TSMEFile::sStageConfig->mMagic !=
-               SME::Class::TSMEFile::MAGIC ||
-           !SME::Class::TSMEFile::sStageConfig->GlobalFlags.mIsYoshi ||
-           !SME::Class::TSMEFile::sStageConfig->Yoshi.mIsEggFree) {
+  else if (!TStageParams::sStageConfig->mIsEggFree.get()) {
     if (gpEgg->mWantedFruit != gpFruit->mObjectID)
       return 2;
     else
@@ -75,8 +76,10 @@ bool Patch::Yoshi::isYoshiMaintainFluddModel() {
   TMario *player;
   SME_FROM_GPR(31, player);
 
-  const SME::Class::TPlayerData *playerParams =
-      SME::TGlobals::getPlayerParams(player);
+  const TPlayerData *playerParams = SME::TGlobals::getPlayerParams(player);
+
+  if (!playerParams)
+    return player->mAttributes.mHasFludd;
 
   if (player->mYoshi->mState == TYoshi::MOUNTED)
     return (playerParams->mFluddHistory.mHadFludd &
@@ -98,8 +101,10 @@ bool Patch::Yoshi::canMountYoshi() {
   TMario *player;
   SME_FROM_GPR(31, player);
 
-  const SME::Class::TPlayerData *playerParams =
-      SME::TGlobals::getPlayerParams(player);
+  const TPlayerData *playerParams = SME::TGlobals::getPlayerParams(player);
+
+  if (!playerParams)
+    return player->mState & static_cast<u32>(TMario::State::AIRBORN);
 
   if (player->mState & static_cast<u32>(TMario::State::WATERBORN))
     return playerParams->getParams()->mCanRideYoshi.get();
@@ -142,14 +147,12 @@ void Patch::Yoshi::canYoshiSpray(TWaterGun *gpWaterGun) {
 // 0x80273198
 // extern -> SME.cpp
 u32 Patch::Yoshi::calcYoshiSwimVelocity(TMario *player, u32 arg1) {
-  SME::Class::TPlayerData *playerParams =
-      SME::TGlobals::getPlayerParams(player);
-
-  if (SME::Class::TSMEFile::sStageConfig->mMagic !=
-          SME::Class::TSMEFile::MAGIC ||
-      !SME::Class::TSMEFile::sStageConfig->GlobalFlags.mIsYoshi)
+  TPlayerData *playerParams = SME::TGlobals::getPlayerParams(player);
+  if (!playerParams) {
     return jumpProcess__6TMarioFi(player, arg1);
-  else if (SME::Class::TSMEFile::sStageConfig->Yoshi.mYoshiHungry)
+  }
+
+  if (TStageParams::sStageConfig->mIsYoshiHungry.get())
     return jumpProcess__6TMarioFi(player, arg1);
 
   if (!player->mYoshi)
@@ -159,15 +162,15 @@ u32 Patch::Yoshi::calcYoshiSwimVelocity(TMario *player, u32 arg1) {
     return jumpProcess__6TMarioFi(player, arg1);
 
   if (player->mController->mButtons.mInput & TMarioGamePad::Buttons::A) {
-    if (playerParams->mYoshiWaterSpeed.y > 12)
-      playerParams->mYoshiWaterSpeed.y = 12;
+    if (playerParams->mYoshiWaterSpeed.y > 12.0f)
+      playerParams->mYoshiWaterSpeed.y = 12.0f;
     else
-      playerParams->mYoshiWaterSpeed.y += 0.34375;
+      playerParams->mYoshiWaterSpeed.y += 0.34375f;
   } else {
-    if (playerParams->mYoshiWaterSpeed.y < -12)
-      playerParams->mYoshiWaterSpeed.y = -12;
+    if (playerParams->mYoshiWaterSpeed.y < -12.0f)
+      playerParams->mYoshiWaterSpeed.y = -12.0f;
     else
-      playerParams->mYoshiWaterSpeed.y -= 0.34375;
+      playerParams->mYoshiWaterSpeed.y -= 0.34375f;
   }
   player->mSpeed.y = playerParams->mYoshiWaterSpeed.y;
   return jumpProcess__6TMarioFi(player, arg1);
@@ -181,10 +184,7 @@ u32 Patch::Yoshi::isYoshiWaterFlutter() {
   SME_FROM_GPR(29, yoshi);
   SME_FROM_GPR(30, animID);
 
-  if (SME::Class::TSMEFile::sStageConfig->mMagic ==
-          SME::Class::TSMEFile::MAGIC &&
-      SME::Class::TSMEFile::sStageConfig->GlobalFlags.mIsYoshi &&
-      SME::Class::TSMEFile::sStageConfig->Yoshi.mYoshiHungry &&
+  if (!TStageParams::sStageConfig->mIsYoshiHungry.get() &&
       TYoshi::isGreenYoshiAscendingWater(yoshi->mMario))
     animID = 9;
 
@@ -197,15 +197,12 @@ u32 Patch::Yoshi::isYoshiWaterFlutter() {
 // 0x8026FE84 NEEDS ADDI R4, R3, 0
 u32 Patch::Yoshi::isYoshiValidWaterFlutter(s32 anmIdx, u32 unk1,
                                            TMario *player) {
-  if (SME::Class::TSMEFile::sStageConfig->mMagic !=
-          SME::Class::TSMEFile::MAGIC ||
-      !SME::Class::TSMEFile::sStageConfig->GlobalFlags.mIsYoshi)
-    return player->mState;
-  else if (SME::Class::TSMEFile::sStageConfig->Yoshi.mYoshiHungry)
+  if (!TStageParams::sStageConfig->mIsYoshiHungry.get())
     return player->mState;
 
   if (TYoshi::isGreenYoshiAscendingWater(player))
-    return (player->mState & 0xFFFFFBFF) | static_cast<u32>(TMario::State::AIRBORN);
+    return (player->mState & 0xFFFFFBFF) |
+           static_cast<u32>(TMario::State::AIRBORN);
   else
     return player->mState;
 }
@@ -219,25 +216,19 @@ bool Patch::Yoshi::isYoshiValidDrip(TYoshi *yoshi) {
 // 0x801BC128
 // extern -> SME.cpp
 void Patch::Yoshi::initFreeEggCard(MActorAnmBck *bckData) {
-  if (SME::Class::TSMEFile::sStageConfig->mMagic !=
-          SME::Class::TSMEFile::MAGIC ||
-      !SME::Class::TSMEFile::sStageConfig->GlobalFlags.mIsYoshi ||
-      !SME::Class::TSMEFile::sStageConfig->Yoshi.mIsEggFree)
+  if (!TStageParams::sStageConfig->mIsEggFree.get())
     return;
 
-  bckData->mFrameCtrl.mFrameRate = 11;
+  // bckData->mFrameCtrl.mCurFrame = 11.0f;
 }
 
 // 0x801BC380
 // extern -> SME.cpp
 u32 Patch::Yoshi::checkFreeEggCard(MActorAnmBck *bckData) {
-  if (SME::Class::TSMEFile::sStageConfig->mMagic !=
-          SME::Class::TSMEFile::MAGIC ||
-      !SME::Class::TSMEFile::sStageConfig->GlobalFlags.mIsYoshi ||
-      !SME::Class::TSMEFile::sStageConfig->Yoshi.mIsEggFree)
+  if (!TStageParams::sStageConfig->mIsEggFree.get())
     return 0;
 
-  bckData->mFrameCtrl.mFrameRate = 11;
+  // bckData->mFrameCtrl.mCurFrame = 11.0f;
   return 0;
 }
 
@@ -246,8 +237,11 @@ u32 Patch::Yoshi::checkFreeEggCard(MActorAnmBck *bckData) {
 void Patch::Yoshi::saveNozzles(TYoshi *yoshi) {
   TMario *player = yoshi->mMario;
 
-  SME::Class::TPlayerData *playerParams =
-      SME::TGlobals::getPlayerParams(player);
+  TPlayerData *playerParams = SME::TGlobals::getPlayerParams(player);
+  if (!playerParams->isMario()) {
+    ride__6TYoshiFv(yoshi);
+    return;
+  }
 
   playerParams->mFluddHistory.mMainNozzle = player->mFludd->mCurrentNozzle;
   playerParams->mFluddHistory.mSecondNozzle = player->mFludd->mSecondNozzle;
@@ -259,8 +253,11 @@ void Patch::Yoshi::saveNozzles(TYoshi *yoshi) {
 // 0x8024EC18
 // extern -> SME.cpp
 void Patch::Yoshi::restoreNozzles(TMario *player) {
-  SME::Class::TPlayerData *playerParams =
-      SME::TGlobals::getPlayerParams(player);
+  TPlayerData *playerParams = SME::TGlobals::getPlayerParams(player);
+
+  if (!playerParams->isMario())
+    return;
+
   f32 factor =
       static_cast<f32>(playerParams->mFluddHistory.mWaterLevel) /
       static_cast<f32>(

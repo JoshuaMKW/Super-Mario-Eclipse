@@ -34,8 +34,6 @@ public:
 	JKRHeap *becomeSystemHeap();
 	JKRHeap *becomeCurrentHeap();
 	bool initArena(u8 **, size_t, int);
-	void free(void *, JKRHeap *);
-	static JKRHeap* findFromRoot(void *);
 	JKRHeap *find(void *) const;
 	void dispose_subroutine(size_t, size_t);
 	void dispose(void *, size_t);
@@ -44,6 +42,8 @@ public:
 
 	static void *alloc(size_t, int, JKRHeap *);
 	static void copyMemory(void *, void *, size_t);
+	static JKRHeap* findFromRoot(void *);
+	static void free(void *, JKRHeap *);
 
 	u32 _0C[3];
 	OSMutex mMutex;

@@ -5,11 +5,13 @@
 #include "sms/JSystem/JKR/JKRMemArchive.hxx"
 #include "sms/JSystem/JSU/JSUMemoryStream.hxx"
 #include "types.h"
-
+#include "macros.h"
 
 class TParams {
 public:
   TParams() : _00(0), mBaseParam(nullptr) {}
+  ~TParams() {}
+
   void finalize();
   void init();
   void load(const char *);
@@ -32,11 +34,13 @@ public:
   T get() const { return mValue; }
   void set(T param) { mValue = param; }
 
-  void load(JSUMemoryInputStream &stream)
-  {
-    T buffer;
+  void load(JSUMemoryInputStream &stream) {
+    u32 fakeit;
+    SME_FROM_GPR(29, fakeit); //Hack to keep r29 from being used..
+
+    u32 buffer;
     stream.read(&buffer, 4);
-    stream.read(&mValue, 4);
+    stream.read(&mValue, sizeof(T));
   }
 };
 

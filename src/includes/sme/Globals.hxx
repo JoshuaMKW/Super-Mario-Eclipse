@@ -19,15 +19,15 @@ struct TGlobals {
 public:
   static u8 getActivePlayers() { return sActivePlayers; }
   static u8 getMaxPlayers() { return sMaxPlayers; }
-  static TMario *getPlayerByIndex(u8 index);
-  static SME::Class::TPlayerData *getPlayerParams(u8 id);
-  static SME::Class::TPlayerData *getPlayerParams(TMario *player);
+  static SME_NO_INLINE TMario *getPlayerByIndex(u8 index);
+  static SME_NO_INLINE SME::Class::TPlayerData *getPlayerParams(u8 id);
+  static SME_NO_INLINE SME::Class::TPlayerData *getPlayerParams(TMario *player);
 
-  static void setPlayerByIndex(u8 index, TMario *player);
+  static SME_NO_INLINE void setPlayerByIndex(u8 index, TMario *player);
 
-  static void registerPlayerParams(SME::Class::TPlayerData *params);
-  static void deregisterPlayerParams(SME::Class::TPlayerData *params);
-  static void clearAllPlayerParams();
+  static SME_NO_INLINE void registerPlayerParams(SME::Class::TPlayerData *params);
+  static SME_NO_INLINE void deregisterPlayerParams(SME::Class::TPlayerData *params);
+  static SME_NO_INLINE void clearAllPlayerParams();
 
   static bool isCompletionRewarded() {
     TCardBookmarkInfo *bookmarkInfo = gpCardManager->getBookmarkInfos_();
@@ -47,7 +47,7 @@ public:
   static bool isMusicStreamingAllowed() { return sIsAudioStreamAllowed; }
   static bool areCodesPresent() { return sPlayerHasGeckoCodes; }
 
-  static TLightContext sLightData;
+  static Class::TLightContext sLightData;
 
   static void *sPRMFile;
   static SME::Class::TWarpCollisionList *sWarpColArray;

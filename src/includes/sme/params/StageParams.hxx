@@ -123,16 +123,14 @@ struct TStageParams : public TParams {
        SME_STRINGIZE(name))
 
   TStageParams(const char *prm)
-      : TParams(),
-        CONSTRUCT_PARAM(mIsExStage, false),
+      : TParams(), CONSTRUCT_PARAM(mIsExStage, false),
         CONSTRUCT_PARAM(mIsDivingStage, false),
         CONSTRUCT_PARAM(mIsOptionStage, false),
         CONSTRUCT_PARAM(mIsMultiplayerStage, false),
         CONSTRUCT_PARAM(mIsYoshiHungry, false),
-        CONSTRUCT_PARAM(mIsEggFree, false),
+        CONSTRUCT_PARAM(mIsEggFree, true),
         CONSTRUCT_PARAM(mLightType, TLightContext::ActiveType::DISABLED),
-        CONSTRUCT_PARAM(mLightPosX, 0.0f),
-        CONSTRUCT_PARAM(mLightPosY, 3600.0f),
+        CONSTRUCT_PARAM(mLightPosX, 0.0f), CONSTRUCT_PARAM(mLightPosY, 3600.0f),
         CONSTRUCT_PARAM(mLightPosZ, -7458.0f),
         CONSTRUCT_PARAM(mLightSize, 8000.0f),
         CONSTRUCT_PARAM(mLightStep, 100.0f),
@@ -140,31 +138,27 @@ struct TStageParams : public TParams {
         CONSTRUCT_PARAM(mLightLayerCount, 5),
         CONSTRUCT_PARAM(mLightDarkLevel, 120),
         CONSTRUCT_PARAM(mPlayerSelectWhiteList, 0xFFFFFFFF),
-        CONSTRUCT_PARAM(mPlayerHealth, 8),
-        CONSTRUCT_PARAM(mPlayerMaxHealth, 8),
+        CONSTRUCT_PARAM(mPlayerHealth, 8), CONSTRUCT_PARAM(mPlayerMaxHealth, 8),
         CONSTRUCT_PARAM(mPlayerHasFludd, true),
         CONSTRUCT_PARAM(mPlayerHasHelmet, false),
         CONSTRUCT_PARAM(mPlayerHasGlasses, false),
         CONSTRUCT_PARAM(mPlayerHasShirt, false),
         CONSTRUCT_PARAM(mPlayerCanRideYoshi, true),
-        CONSTRUCT_PARAM(mPlayerCanHoldNPCs, false),
         CONSTRUCT_PARAM(mPlayerSizeMultiplier, 1.0f),
-        CONSTRUCT_PARAM(mFluddPrimary, 0),
-        CONSTRUCT_PARAM(mFluddSecondary, 4),
-        CONSTRUCT_PARAM(mFluddWaterColor,JUtility::TColor(60, 70, 120, 20)),
+        CONSTRUCT_PARAM(mFluddPrimary, 0), CONSTRUCT_PARAM(mFluddSecondary, 4),
+        CONSTRUCT_PARAM(mFluddWaterColor, JUtility::TColor(60, 70, 120, 20)),
+        CONSTRUCT_PARAM(mFluddShouldColorWater, false),
         CONSTRUCT_PARAM(mYoshiMaxJuice, 21300),
         CONSTRUCT_PARAM(mYoshiMaxVSpdStartFlutter, -2.0f),
         CONSTRUCT_PARAM(mYoshiFlutterAcceleration, 1.2f),
-        CONSTRUCT_PARAM(mYoshiMaxFlutterTimer, 120), 
+        CONSTRUCT_PARAM(mYoshiMaxFlutterTimer, 120),
         CONSTRUCT_PARAM(mYoshiColorGreen, JUtility::TColor(64, 161, 36, 255)),
         CONSTRUCT_PARAM(mYoshiColorOrange, JUtility::TColor(255, 140, 28, 255)),
         CONSTRUCT_PARAM(mYoshiColorPurple, JUtility::TColor(170, 76, 255, 255)),
         CONSTRUCT_PARAM(mYoshiColorPink, JUtility::TColor(255, 160, 190, 255)),
         CONSTRUCT_PARAM(mMusicVolume, 0.75f),
-        CONSTRUCT_PARAM(mMusicSpeed, 1.0f),
-        CONSTRUCT_PARAM(mMusicPitch, 1.0f),
-        CONSTRUCT_PARAM(mMusicID, 1),
-        CONSTRUCT_PARAM(mMusicAreaID, 1),
+        CONSTRUCT_PARAM(mMusicSpeed, 1.0f), CONSTRUCT_PARAM(mMusicPitch, 1.0f),
+        CONSTRUCT_PARAM(mMusicID, 1), CONSTRUCT_PARAM(mMusicAreaID, 1),
         CONSTRUCT_PARAM(mMusicEpisodeID, 0),
         CONSTRUCT_PARAM(mMusicEnabled, true),
         CONSTRUCT_PARAM(mGravityMultiplier, 1.0f),
@@ -172,10 +166,16 @@ struct TStageParams : public TParams {
     delete sStageConfig;
     sStageConfig = this;
 
-    load(prm);
+    if (prm)
+      load(prm);
   }
 
 #undef CONSTRUCT_PARAM
+  ~TStageParams() {
+    if (this == sStageConfig) {
+      sStageConfig = nullptr;
+    }
+  }
 
   static TStageParams *sStageConfig;
 
@@ -187,65 +187,65 @@ struct TStageParams : public TParams {
   void reset();
 
   // Stage Info
-  TParamRT<bool> mIsExStage;
-  TParamRT<bool> mIsDivingStage;
-  TParamRT<bool> mIsOptionStage;
-  TParamRT<bool> mIsMultiplayerStage;
-  TParamRT<bool> mIsYoshiHungry;
-  TParamRT<bool> mIsEggFree;
+  TParamT<bool> mIsExStage;
+  TParamT<bool> mIsDivingStage;
+  TParamT<bool> mIsOptionStage;
+  TParamT<bool> mIsMultiplayerStage;
+  TParamT<bool> mIsYoshiHungry;
+  TParamT<bool> mIsEggFree;
 
   // Light Info
-  TParamRT<TLightContext::ActiveType> mLightType;
-  TParamRT<f32> mLightPosX;
-  TParamRT<f32> mLightPosY;
-  TParamRT<f32> mLightPosZ;
-  TParamRT<f32> mLightSize;
-  TParamRT<f32> mLightStep;
-  TParamRT<JUtility::TColor> mLightColor;
-  TParamRT<u8> mLightLayerCount;
-  TParamRT<u8> mLightDarkLevel;
+  TParamT<TLightContext::ActiveType> mLightType;
+  TParamT<f32> mLightPosX;
+  TParamT<f32> mLightPosY;
+  TParamT<f32> mLightPosZ;
+  TParamT<f32> mLightSize;
+  TParamT<f32> mLightStep;
+  TParamT<JUtility::TColor> mLightColor;
+  TParamT<u8> mLightLayerCount;
+  TParamT<u8> mLightDarkLevel;
 
   // Player Info
-  TParamRT<u32> mPlayerSelectWhiteList;
-  TParamRT<u16> mPlayerHealth;
-  TParamRT<u16> mPlayerMaxHealth;
-  TParamRT<bool> mPlayerHasFludd;
-  TParamRT<bool> mPlayerHasHelmet;
-  TParamRT<bool> mPlayerHasGlasses;
-  TParamRT<bool> mPlayerHasShirt;
-  TParamRT<bool> mPlayerCanRideYoshi;
-  TParamRT<bool> mPlayerCanHoldNPCs;
-  TParamRT<f32> mPlayerSizeMultiplier;
+  TParamT<u32> mPlayerSelectWhiteList;
+  TParamT<u16> mPlayerHealth;
+  TParamT<u16> mPlayerMaxHealth;
+  TParamT<bool> mPlayerHasFludd;
+  TParamT<bool> mPlayerHasHelmet;
+  TParamT<bool> mPlayerHasGlasses;
+  TParamT<bool> mPlayerHasShirt;
+  TParamT<bool> mPlayerCanRideYoshi;
+  TParamT<f32> mPlayerSizeMultiplier;
 
   // Fludd Info
-  TParamRT<u8> mFluddPrimary;
-  TParamRT<u8> mFluddSecondary;
-  TParamRT<JUtility::TColor> mFluddWaterColor;
+  TParamT<u8> mFluddPrimary;
+  TParamT<u8> mFluddSecondary;
+  TParamT<JUtility::TColor> mFluddWaterColor;
+  TParamT<bool> mFluddShouldColorWater;
 
   // Yoshi Info
-  TParamRT<s32> mYoshiMaxJuice;
-  TParamRT<f32> mYoshiMaxVSpdStartFlutter;
-  TParamRT<f32> mYoshiFlutterAcceleration;
-  TParamRT<u16> mYoshiMaxFlutterTimer;
-  TParamRT<JUtility::TColor> mYoshiColorGreen;
-  TParamRT<JUtility::TColor> mYoshiColorOrange;
-  TParamRT<JUtility::TColor> mYoshiColorPurple;
-  TParamRT<JUtility::TColor> mYoshiColorPink;
+  TParamT<s32> mYoshiMaxJuice;
+  TParamT<f32> mYoshiMaxVSpdStartFlutter;
+  TParamT<f32> mYoshiFlutterAcceleration;
+  TParamT<u16> mYoshiMaxFlutterTimer;
+  TParamT<JUtility::TColor> mYoshiColorGreen;
+  TParamT<JUtility::TColor> mYoshiColorOrange;
+  TParamT<JUtility::TColor> mYoshiColorPurple;
+  TParamT<JUtility::TColor> mYoshiColorPink;
 
   // Music Info
-  TParamRT<f32> mMusicVolume;
-  TParamRT<f32> mMusicSpeed;
-  TParamRT<f32> mMusicPitch;
-  TParamRT<u16> mMusicID;
-  TParamRT<u8> mMusicAreaID;
-  TParamRT<u8> mMusicEpisodeID;
-  TParamRT<bool> mMusicEnabled;
+  TParamT<f32> mMusicVolume;
+  TParamT<f32> mMusicSpeed;
+  TParamT<f32> mMusicPitch;
+  TParamT<u16> mMusicID;
+  TParamT<u8> mMusicAreaID;
+  TParamT<u8> mMusicEpisodeID;
+  TParamT<bool> mMusicEnabled;
 
   // Global Info
-  TParamRT<f32> mGravityMultiplier;
-  TParamRT<f32> mMaxFrameRate;
+  TParamT<f32> mGravityMultiplier;
+  TParamT<f32> mMaxFrameRate;
 
-  private:
+private:
   bool mIsCustomConfigLoaded;
 };
 

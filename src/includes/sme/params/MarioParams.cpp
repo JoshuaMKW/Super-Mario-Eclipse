@@ -8,16 +8,14 @@
 #include "sms/camera/PolarSubCamera.hxx"
 #include "string.h"
 
-
 using namespace SME::Class;
 
-TPlayerData::TPlayerData(TMario *player, CPolarSubCamera *camera,
-                             bool isMario)
+TPlayerData::TPlayerData(TMario *player, CPolarSubCamera *camera, bool isMario)
     : mPlayer(player), mCamera(camera), mParams(nullptr), mIsEMario(!isMario),
-      mInitialized(true), mCanUseFludd(true),
-      mPlayerID(SME::Enum::Player::MARIO), mCurJump(0), mIsClimbTired(false),
-      mPrevCollisionType(0), mCollisionTimer(0), mClimbTiredTimer(0),
-      mYoshiWaterSpeed(0.0f, 0.0f, 0.0f), mDefaultAttrs(player) {
+      mCanUseFludd(true), mPlayerID(SME::Enum::Player::MARIO), mCurJump(0),
+      mIsClimbTired(false), mPrevCollisionType(0), mCollisionTimer(0),
+      mClimbTiredTimer(0), mYoshiWaterSpeed(0.0f, 0.0f, 0.0f),
+      mDefaultAttrs(player) {
 
   mFluddHistory.mHadFludd = false;
   mFluddHistory.mMainNozzle = TWaterGun::Spray;

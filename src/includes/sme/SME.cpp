@@ -58,7 +58,7 @@ KURIBO_MODULE_BEGIN(SME_MODULE_NAME, SME_AUTHOR_NAME, SME_VERSION_TAG) {
         &gctAlarm, OSGetTime(), OSMillisecondsToTicks(1),
         reinterpret_cast<OSAlarmHandler>(&SME::Util::Security::checkUserCodes));
     SME_DEBUG_LOG("Mario health offset = 0x%X\n", offsetof(TMario, mHealth));
-    SME_DEBUG_LOG("MapObjBase = 0x%X\n", offsetof(TMapObjBase, mMapObjID));
+    SME_DEBUG_LOG("J3DFrameCtrl offset = 0x%X\n", offsetof(J3DFrameCtrl, _04));
   }
   KURIBO_EXECUTE_ON_UNLOAD {
     SME_DEBUG_LOG("-- Destroying Module --\n");
@@ -91,6 +91,7 @@ static void moduleLoad(int size, bool unk) {
       &gctAlarm, OSGetTime(), OSMillisecondsToTicks(1),
       reinterpret_cast<OSAlarmHandler>(&SME::Util::Security::checkUserCodes));
   SME_DEBUG_LOG("Mario health offset = %X\n", offsetof(TMario, mHealth));
+  SME_DEBUG_LOG("J3DFrameCtrl offset = 0x%X\n", offsetof(J3DFrameCtrl, mFrameRate));
   Patch::Init::initCodeProtection();
 }
 

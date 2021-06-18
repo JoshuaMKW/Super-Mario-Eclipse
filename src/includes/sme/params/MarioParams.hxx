@@ -163,7 +163,6 @@ public:
     return JDrama::TNameRef::calcKeyCode(getPlayerName());
   }
   bool isMario() const { return !mIsEMario; }
-  bool isInitialized() const { return mInitialized; }
 
   void setCamera(CPolarSubCamera *camera);
   void setCanUseFludd(bool enable) { mCanUseFludd = enable; }
@@ -182,7 +181,6 @@ private:
   CPolarSubCamera *mCamera;
   TPlayerParams *mParams;
   bool mIsEMario;
-  bool mInitialized;
   bool mCanUseFludd;
   SME::Enum::Player mPlayerID;
 

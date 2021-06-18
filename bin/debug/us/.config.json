@@ -9,7 +9,13 @@
             }
         },
         {
-            "smeconfigs/*.sme": {
+            "smeconfigs/*.[ts][xm][te]": {
+                "destination": "files/data/scene/sme/",
+                "rename": ""
+            }
+        },
+        {
+            "smeconfigs/*.txt": {
                 "destination": "files/data/scene/sme/",
                 "rename": ""
             }
@@ -71,7 +77,8 @@
     "ignore": [
         ".config.json",
         "opening.png",
-        "opening.json"
+        "opening.json",
+        "*README.md"
     ],
     "gamebanner": "opening.png"
 }

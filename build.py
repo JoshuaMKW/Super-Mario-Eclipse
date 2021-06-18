@@ -18,6 +18,7 @@ from dolreader.dol import DolFile
 from dolreader.section import TextSection
 from pyisotools.bnrparser import BNR
 from pyisotools.iso import GamecubeISO
+from prmparser import PrmFile
 
 from compiler import Compiler, Define
 
@@ -27,7 +28,7 @@ TMPDIR = Path("tmp-compiler")
 @atexit.register
 def clean_resources():
     if TMPDIR.is_dir():
-        pass#shutil.rmtree(TMPDIR)
+        shutil.rmtree(TMPDIR)
 
 
 def wrap_printer(msg: str = "") -> function:
@@ -435,6 +436,9 @@ class FilePatcher(Compiler):
                     destPath.write_bytes(data)
                 else:
                     destPath.write_bytes(f.read_bytes())
+            elif f.parent.name.lower() == "smeconfigs" and f.suffix == ".txt":
+                prm = PrmFile.from_text(f.read_text())
+                destPath.with_suffix(".sme").write_bytes(prm.to_bytes())
             else:
                 destPath.write_bytes(f.read_bytes())
 
@@ -493,9 +497,9 @@ class FilePatcher(Compiler):
 
     def _get_path_from_config(self, solutionPath: Path, path: Path) -> Path:
         if self.is_release():
-            parentGlob = "*/release/"
+            parentGlob = f"*/release/{self.region.lower()}/"
         elif self.is_debug():
-            parentGlob = "*/debug/"
+            parentGlob = f"*/debug/{self.region.lower()}/"
         else:
             raise ValueError("Invalid State!")
 
@@ -504,6 +508,8 @@ class FilePatcher(Compiler):
 
         for _set in config["userfiles"]:
             glob = list(_set.keys())[0]
+            if path.suffix == ".txt":
+                print(str(path).lower(), parentGlob + glob.strip().lower())
             if fnmatch(str(path).lower(), parentGlob + glob.strip().lower()):
                 if _set[glob]["rename"].strip() == "":
                     return self.gameDir / _set[glob]["destination"].strip() / path.name

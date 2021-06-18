@@ -161,6 +161,8 @@ void TSMEFile::reset() {
 
 #else
 
+TStageParams *TStageParams::sStageConfig = nullptr;
+
 char *TStageParams::stageNameToParamPath(char *dst, const char *stage,
                                          bool generalize) {
   String path("/data/scene/sme/", 128);
@@ -188,83 +190,92 @@ void TStageParams::load(const char *stageName) {
   char path[64];
   stageNameToParamPath(path, stageName, false);
 
+  SME_DEBUG_LOG("Attempting to load local config %s...\n", path);
+
   entrynum = DVDConvertPathToEntrynum(path);
   if (entrynum >= 0) {
     DVDFastOpen(entrynum, &fileInfo);
-    JSUMemoryInputStream stream(SME::Util::Memory::malloc(fileInfo.mLen, 32),
+    void *buffer = JKRHeap::alloc(fileInfo.mLen, 32, nullptr);
+    
+    DVDReadPrio(&fileInfo, buffer, fileInfo.mLen, 0, 2);
+    DVDClose(&fileInfo);
+    JSUMemoryInputStream stream(buffer,
                                 fileInfo.mLen);
     TParams::load(stream);
+    JKRHeap::free(buffer, nullptr);
     mIsCustomConfigLoaded = true;
     return;
   }
 
   stageNameToParamPath(path, stageName, true);
 
+  SME_DEBUG_LOG("Failure: Now attempting to load global config %s...\n", path);
+
   entrynum = DVDConvertPathToEntrynum(path);
   if (entrynum >= 0) {
     DVDFastOpen(entrynum, &fileInfo);
-    JSUMemoryInputStream stream(SME::Util::Memory::malloc(fileInfo.mLen, 32),
+    void *buffer = JKRHeap::alloc(fileInfo.mLen, 32, nullptr);
+
+    DVDReadPrio(&fileInfo, buffer, fileInfo.mLen, 0, 2);
+    DVDClose(&fileInfo);
+    JSUMemoryInputStream stream(buffer,
                                 fileInfo.mLen);
     TParams::load(stream);
+    JKRHeap::free(buffer, nullptr);
+    SME_DEBUG_LOG("Success: SME config loaded at %p\n", &sStageConfig);
     mIsCustomConfigLoaded = true;
     return;
   }
 
+  SME_DEBUG_LOG("Failure: No SME configuration could be loaded\n");
   mIsCustomConfigLoaded = false;
 }
 
 void TStageParams::reset() {
-  static_cast<TParamT<bool>>(mIsExStage).set(false);
-  static_cast<TParamT<bool>>(mIsDivingStage).set(false);
-  static_cast<TParamT<bool>>(mIsOptionStage).set(false);
-  static_cast<TParamT<bool>>(mIsMultiplayerStage).set(false);
-  static_cast<TParamT<bool>>(mIsYoshiHungry).set(false);
-  static_cast<TParamT<bool>>(mIsEggFree).set(false);
-  static_cast<TParamT<TLightContext::ActiveType>>(mLightType)
-      .set(TLightContext::ActiveType::DISABLED);
-  static_cast<TParamT<f32>>(mLightPosX).set(0.0f);
-  static_cast<TParamT<f32>>(mLightPosY).set(3600.0f);
-  static_cast<TParamT<f32>>(mLightPosZ).set(-7458.0f);
-  static_cast<TParamT<f32>>(mLightSize).set(8000.0f);
-  static_cast<TParamT<f32>>(mLightStep).set(100.0f);
-  static_cast<TParamT<JUtility::TColor>>(mLightColor)
-      .set(JUtility::TColor(0, 20, 40, 0));
-  static_cast<TParamT<u8>>(mLightLayerCount).set(5);
-  static_cast<TParamT<u8>>(mLightDarkLevel).set(120);
-  static_cast<TParamT<u32>>(mPlayerSelectWhiteList).set(0xFFFFFFFF);
-  static_cast<TParamT<bool>>(mPlayerHasFludd).set(true);
-  static_cast<TParamT<bool>>(mPlayerHasHelmet).set(false);
-  static_cast<TParamT<bool>>(mPlayerHasGlasses).set(false);
-  static_cast<TParamT<bool>>(mPlayerHasShirt).set(false);
-  static_cast<TParamT<bool>>(mPlayerCanRideYoshi).set(true);
-  static_cast<TParamT<bool>>(mPlayerCanHoldNPCs).set(false);
-  static_cast<TParamT<f32>>(mPlayerSizeMultiplier).set(1.0f);
-  static_cast<TParamT<u8>>(mFluddPrimary).set(0);
-  static_cast<TParamT<u8>>(mFluddSecondary).set(4);
-  static_cast<TParamT<JUtility::TColor>>(mFluddWaterColor)
-      .set(JUtility::TColor(60, 70, 120, 20));
-  static_cast<TParamT<s32>>(mYoshiMaxJuice).set(21300);
-  static_cast<TParamT<f32>>(mYoshiMaxVSpdStartFlutter).set(-2.0f);
-  static_cast<TParamT<f32>>(mYoshiFlutterAcceleration).set(1.2f);
-  static_cast<TParamT<u16>>(mYoshiMaxFlutterTimer).set(120);
-  static_cast<TParamT<JUtility::TColor>>(mYoshiColorGreen)
-      .set(JUtility::TColor(64, 161, 36, 255));
-  static_cast<TParamT<JUtility::TColor>>(mYoshiColorOrange)
-      .set(JUtility::TColor(255, 140, 28, 255));
-  static_cast<TParamT<JUtility::TColor>>(mYoshiColorPurple)
-      .set(JUtility::TColor(170, 76, 255, 255));
-  static_cast<TParamT<JUtility::TColor>>(mYoshiColorPink)
-      .set(JUtility::TColor(255, 160, 190, 255));
-  static_cast<TParamT<f32>>(mMusicVolume).set(0.75f);
-  static_cast<TParamT<f32>>(mMusicSpeed).set(1.0f);
-  static_cast<TParamT<f32>>(mMusicPitch).set(1.0f);
-  static_cast<TParamT<u16>>(mMusicID).set(1);
-  static_cast<TParamT<u8>>(mMusicAreaID).set(1);
-  static_cast<TParamT<u8>>(mMusicEpisodeID).set(0);
-  static_cast<TParamT<bool>>(mMusicEnabled).set(true);
-  static_cast<TParamT<f32>>(mGravityMultiplier).set(1.0f);
-  static_cast<TParamT<f32>>(mMaxFrameRate).set(30.0f);
-  
+  mIsExStage.set(false);
+  mIsDivingStage.set(false);
+  mIsOptionStage.set(false);
+  mIsMultiplayerStage.set(false);
+  mIsYoshiHungry.set(false);
+  mIsEggFree.set(true);
+  mLightType.set(TLightContext::ActiveType::DISABLED);
+  mLightPosX.set(0.0f);
+  mLightPosY.set(3600.0f);
+  mLightPosZ.set(-7458.0f);
+  mLightSize.set(8000.0f);
+  mLightStep.set(100.0f);
+  mLightColor.set(JUtility::TColor(0, 20, 40, 0));
+  mLightLayerCount.set(5);
+  mLightDarkLevel.set(120);
+  mPlayerSelectWhiteList.set(0xFFFFFFFF);
+  mPlayerHasFludd.set(true);
+  mPlayerHasHelmet.set(false);
+  mPlayerHasGlasses.set(false);
+  mPlayerHasShirt.set(false);
+  mPlayerCanRideYoshi.set(true);
+  mPlayerSizeMultiplier.set(1.0f);
+  mFluddPrimary.set(0);
+  mFluddSecondary.set(4);
+  mFluddWaterColor.set(JUtility::TColor(60, 70, 120, 20));
+  mFluddShouldColorWater.set(false);
+  mYoshiMaxJuice.set(21300);
+  mYoshiMaxVSpdStartFlutter.set(-2.0f);
+  mYoshiFlutterAcceleration.set(1.2f);
+  mYoshiMaxFlutterTimer.set(120);
+  mYoshiColorGreen.set(JUtility::TColor(64, 161, 36, 255));
+  mYoshiColorOrange.set(JUtility::TColor(255, 140, 28, 255));
+  mYoshiColorPurple.set(JUtility::TColor(170, 76, 255, 255));
+  mYoshiColorPink.set(JUtility::TColor(255, 160, 190, 255));
+  mMusicVolume.set(0.75f);
+  mMusicSpeed.set(1.0f);
+  mMusicPitch.set(1.0f);
+  mMusicID.set(1);
+  mMusicAreaID.set(1);
+  mMusicEpisodeID.set(0);
+  mMusicEnabled.set(true);
+  mGravityMultiplier.set(1.0f);
+  mMaxFrameRate.set(30.0f);
+
   mIsCustomConfigLoaded = false;
 }
 

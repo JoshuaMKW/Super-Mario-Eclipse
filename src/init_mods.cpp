@@ -67,6 +67,9 @@ JKRExpHeap *SME::Patch::Init::createGlobalHeaps(void *newHeap, size_t size,
     SME::TGlobals::sCharacterHeap->alloc(
         SME::TGlobals::sCharacterHeap->getFreeSize(), 4);
 
+    TStageParams::sStageConfig =
+        new (JKRHeap::sRootHeap, 4) TStageParams(nullptr);
+
     currentHeap->becomeCurrentHeap();
     systemHeap->becomeSystemHeap();
   }
@@ -152,20 +155,21 @@ TMarDirector *SME::Patch::Init::initFileMods() {
 // 0x80280180
 void SME::Patch::Init::initShineShadow() {
   TStageParams *config = TStageParams::sStageConfig;
-  if (!config->isCustomConfig() ||
-      config->mLightType.get() == TLightContext::ActiveType::DISABLED)
+  if (config->mLightType.get() == TLightContext::ActiveType::DISABLED)
     return;
 
-  if (TFlagManager::smInstance->Type4Flag.mShineCount < SME_MAX_SHINES) {
-    SME::TGlobals::sLightData.mLightType = config->mLightType.get();
-    SME::TGlobals::sLightData.mShineShadowBase = config->mLightSize.get();
-    SME::TGlobals::sLightData.mPrevShineCount =
-        TFlagManager::smInstance->Type4Flag.mShineCount;
+  Class::TLightContext &LightContext = SME::TGlobals::sLightData;
+
+  s32 &CurrentShineCount = TFlagManager::smInstance->Type4Flag.mShineCount;
+  if (CurrentShineCount < SME_MAX_SHINES) {
+    LightContext.mLightType = config->mLightType.get();
+    LightContext.mShineShadowBase = config->mLightSize.get();
+    LightContext.mPrevShineCount = CurrentShineCount;
     {
       JGeometry::TVec3<f32> coordinates(config->mLightPosX.get(),
                                         config->mLightPosY.get(),
                                         config->mLightPosZ.get());
-      SME::TGlobals::sLightData.mShineShadowCoordinates = coordinates;
+      LightContext.mShineShadowCoordinates = coordinates;
     }
 
     gpModelWaterManager->mColor = config->mLightColor.get();
@@ -176,20 +180,25 @@ void SME::Patch::Init::initShineShadow() {
     gpModelWaterManager->LightType.mMaskObjects = true;
     gpModelWaterManager->LightType.mShowShadow = true;
 
-    if (SME::TGlobals::sLightData.mLightType ==
+    if (LightContext.mLightType ==
         TLightContext::ActiveType::STATIC) {
-      SME::TGlobals::sLightData.mNextSize =
-          SME::TGlobals::sLightData.mShineShadowBase;
-      for (u32 i = 0; i < TFlagManager::smInstance->Type4Flag.mShineCount;
-           ++i) {
-        SME::TGlobals::sLightData.mNextSize +=
-            (10000.0f / (f32)SME_MAX_SHINES) + (f32)i * 2.0f;
-      }
-      gpModelWaterManager->mSize = SME::TGlobals::sLightData.mNextSize;
+      LightContext.mNextSize =
+          LightContext.mShineShadowBase +
+          powf(((1300.0f / SME_MAX_SHINES) * CurrentShineCount), 1.5f);
+
+      if (config->mLightDarkLevel.get() == 255)
+        gpModelWaterManager->mDarkLevel =
+            Util::Math::lerp<u8>(30, 190,
+                                 static_cast<f32>(CurrentShineCount) /
+                                     static_cast<f32>(SME_MAX_SHINES));
+      else
+        gpModelWaterManager->mDarkLevel = config->mLightDarkLevel.get();
+        
+      gpModelWaterManager->mSize = LightContext.mNextSize;
       gpModelWaterManager->mSphereStep = gpModelWaterManager->mSize / 2.0f;
     }
   } else {
-    SME::TGlobals::sLightData.mLightType = TLightContext::ActiveType::DISABLED;
+    LightContext.mLightType = TLightContext::ActiveType::DISABLED;
   }
 }
 
@@ -217,7 +226,8 @@ static void initFludd(TMario *player, TPlayerData *params) {
   SME_ASSERT(params, "Can't init fludd with non existant params!");
   TStageParams *config = TStageParams::sStageConfig;
 
-  gModelWaterManagerWaterColor = params->getParams()->mWaterColor.get();
+  if (!params->isMario())
+    return;
 
   if (!params->canUseNozzle(
           static_cast<TWaterGun::NozzleType>(player->mFludd->mCurrentNozzle))) {
@@ -248,7 +258,9 @@ static void initFludd(TMario *player, TPlayerData *params) {
     }
   }
 
-  gModelWaterManagerWaterColor = config->mFluddWaterColor.get();
+  if (config->mFluddShouldColorWater.get())
+    gModelWaterManagerWaterColor = config->mFluddWaterColor.get();
+
   player->mFludd->mCurrentNozzle = config->mFluddPrimary.get();
   player->mFludd->mSecondNozzle = config->mFluddSecondary.get();
 
@@ -258,8 +270,7 @@ static void initFludd(TMario *player, TPlayerData *params) {
 }
 
 static void initMario(TMario *player, bool isMario) {
-  CPolarSubCamera *camera = new CPolarSubCamera("<CPolarSubCamera>");
-  TPlayerData *params = new TPlayerData(player, camera, isMario);
+  TPlayerData *params = new TPlayerData(player, nullptr, isMario);
   SME::TGlobals::registerPlayerParams(params);
 
   TStageParams *config = TStageParams::sStageConfig;
@@ -268,9 +279,12 @@ static void initMario(TMario *player, bool isMario) {
     player->mHealth = config->mPlayerHealth.get();
     player->mDeParams.mHPMax.set(config->mPlayerMaxHealth.get());
     player->mJumpParams.mGravity.set(config->mGravityMultiplier.get());
-    player->mAttributes.mGainHelmet = config->mPlayerHasHelmet.get();
-    player->mAttributes.mHasFludd = config->mPlayerHasFludd.get();
-    player->mAttributes.mIsShineShirt = config->mPlayerHasShirt.get();
+
+    if (isMario) {
+      player->mAttributes.mGainHelmet = config->mPlayerHasHelmet.get();
+      player->mAttributes.mHasFludd = config->mPlayerHasFludd.get();
+      player->mAttributes.mIsShineShirt = config->mPlayerHasShirt.get();
+    }
 
     if (config->mPlayerHasGlasses.get())
       wearGlass__6TMarioFv(player);
@@ -327,7 +341,7 @@ void SME::Patch::Init::initYoshi(MAnmSound *anmSound, void *r4, u32 r5,
 void SME::Patch::Init::initCardColors() {
   TStageParams *config = TStageParams::sStageConfig;
 
-  if (config->isCustomConfig())
+  if (!config->isCustomConfig())
     return;
 
   JUtility::TColor waterColor = config->mFluddWaterColor.get();
@@ -335,15 +349,18 @@ void SME::Patch::Init::initCardColors() {
   gpMarDirector->mGCConsole->mJuiceCardOrange = config->mYoshiColorOrange.get();
   gpMarDirector->mGCConsole->mJuiceCardPurple = config->mYoshiColorPurple.get();
   gpMarDirector->mGCConsole->mJuiceCardPink = config->mYoshiColorPink.get();
-  gpMarDirector->mGCConsole->mWaterLeftPanel = waterColor;
-  gpMarDirector->mGCConsole->mWaterRightPanel.r =
-      Math::lerp<u8>(0, waterColor.r, 0.8125f);
-  gpMarDirector->mGCConsole->mWaterRightPanel.g =
-      Math::lerp<u8>(0, waterColor.g, 0.8125f);
-  gpMarDirector->mGCConsole->mWaterRightPanel.b =
-      Math::lerp<u8>(0, waterColor.b, 0.8125f);
-  gpMarDirector->mGCConsole->mWaterRightPanel.a =
-      Math::lerp<u8>(0, waterColor.a, 0.8125f);
+
+  if (config->mFluddShouldColorWater.get()) {
+    gpMarDirector->mGCConsole->mWaterLeftPanel = waterColor;
+    gpMarDirector->mGCConsole->mWaterRightPanel.r =
+        Math::lerp<u8>(0, waterColor.r, 0.8125f);
+    gpMarDirector->mGCConsole->mWaterRightPanel.g =
+        Math::lerp<u8>(0, waterColor.g, 0.8125f);
+    gpMarDirector->mGCConsole->mWaterRightPanel.b =
+        Math::lerp<u8>(0, waterColor.b, 0.8125f);
+    gpMarDirector->mGCConsole->mWaterRightPanel.a =
+        Math::lerp<u8>(0, waterColor.a, 0.8125f);
+  }
 }
 
 /*This works by taking the target id and matching it to the

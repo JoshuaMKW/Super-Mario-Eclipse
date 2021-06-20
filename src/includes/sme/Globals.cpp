@@ -1,5 +1,6 @@
 #include "Globals.hxx"
 #include "SME.hxx"
+#include "OS.h"
 
 using namespace SME;
 
@@ -49,9 +50,11 @@ Class::TPlayerData *TGlobals::getPlayerParams(TMario *player) {
     cfg = sPlayerCfgArray[i];
     if (!cfg)
       continue;
-    else if (cfg->getPlayer() == player)
+    else if (cfg->getPlayer() == player){
       return cfg;
+    }
   }
+  SME_DEBUG_LOG("Player data not found");
   return nullptr;
 }
 

@@ -5,6 +5,7 @@ import atexit
 import functools
 import json
 import shutil
+import struct
 import subprocess
 import time
 from fnmatch import fnmatch
@@ -28,7 +29,7 @@ TMPDIR = Path("tmp-compiler")
 @atexit.register
 def clean_resources():
     if TMPDIR.is_dir():
-        shutil.rmtree(TMPDIR)
+        pass#shutil.rmtree(TMPDIR)
 
 
 def wrap_printer(msg: str = "") -> function:
@@ -131,8 +132,8 @@ class AllocationMap(object):
 _ALLOC_LO_INFO = AllocationMap({
     Region.US: (AllocationMap.AllocationPacket(0x80341E74, [AllocationMap.InstructionInfo(0x3C600000, AllocationMap.RelocationType.HI), AllocationMap.InstructionInfo(0x60630000, AllocationMap.RelocationType.LO)]),
                 AllocationMap.AllocationPacket(0x80341EAC, [AllocationMap.InstructionInfo(0x3C600000, AllocationMap.RelocationType.HI), AllocationMap.InstructionInfo(0x60630000, AllocationMap.RelocationType.LO)])),
-    Region.EU: (AllocationMap.AllocationPacket(0x80341E74, [AllocationMap.InstructionInfo(0x3C600000, AllocationMap.RelocationType.HI), AllocationMap.InstructionInfo(0x60630000, AllocationMap.RelocationType.LO)]),
-                AllocationMap.AllocationPacket(0x80341EAC, [AllocationMap.InstructionInfo(0x3C600000, AllocationMap.RelocationType.HI), AllocationMap.InstructionInfo(0x60630000, AllocationMap.RelocationType.LO)])),
+    Region.EU: (AllocationMap.AllocationPacket(0x80339ff4, [AllocationMap.InstructionInfo(0x3C600000, AllocationMap.RelocationType.HI), AllocationMap.InstructionInfo(0x60630000, AllocationMap.RelocationType.LO)]),
+                (AllocationMap.AllocationPacket(0x8033a02c, [AllocationMap.InstructionInfo(0x3C600000, AllocationMap.RelocationType.HI), AllocationMap.InstructionInfo(0x60630000, AllocationMap.RelocationType.LO)]))),
     Region.JP: (AllocationMap.AllocationPacket(0x80341E74, [AllocationMap.InstructionInfo(0x3C600000, AllocationMap.RelocationType.HI), AllocationMap.InstructionInfo(0x60630000, AllocationMap.RelocationType.LO)]),
                 AllocationMap.AllocationPacket(0x80341EAC, [AllocationMap.InstructionInfo(0x3C600000, AllocationMap.RelocationType.HI), AllocationMap.InstructionInfo(0x60630000, AllocationMap.RelocationType.LO)])),
     Region.KR: (AllocationMap.AllocationPacket(0x80341E74, [AllocationMap.InstructionInfo(0x3C600000, AllocationMap.RelocationType.HI), AllocationMap.InstructionInfo(0x60630000, AllocationMap.RelocationType.LO)]),
@@ -190,8 +191,7 @@ class FilePatcher(Compiler):
 
         super().__init__(Path("compiler"),
                          compiler=compiler,
-                         dest=self._get_matching_filepath(
-                             self.solutionRegionDir / "main.dol"),
+                         dest="F:\ModProjects\SME\sys\main.dol",
                          linker=Path(f"linker/{self.region}.map"),
                          patcher=patcher,
                          dump=False,
@@ -390,8 +390,10 @@ class FilePatcher(Compiler):
                 _doldata.insert_branch(
                     injectaddr + 4, blockstart + (codelen - 4))
 
-            _doldata.write_uint32(self.by_region(0x802A73F0, 0, 0, 0), 0x60000000)
-            _doldata.write_uint32(self.by_region(0x802A7404, 0, 0, 0), 0x60000000)
+            _doldata.seek(self.by_region(0x802A73F0, 0x8029f46c, 0, 0))
+            _doldata.write(struct.pack(">I",0x60000000))
+            _doldata.seek(self.by_region(0x802A7404, 0x8029f480, 0, 0))
+            _doldata.write(struct.pack(">I",0x60000000))
 
             with self.dest.open("wb") as dest:
                 _doldata.save(dest)
@@ -531,15 +533,13 @@ class FilePatcher(Compiler):
         for packet in _ALLOC_LO_INFO.group(self.region):
             dol.seek(packet.address)
             for instr in packet.instructions:
-                dol.write_uint32(
-                    dol.tell(), instr.as_translated(self.startaddr + size))
+                dol.write(struct.pack(">I",(instr.as_translated(self.startaddr + size))))
 
         for packet in _ALLOC_HI_INFO.group(self.region):
             return
             dol.seek(packet.address)
             for instr in packet.instructions:
-                dol.write_uint32(
-                    dol.tell(), instr.as_translated(0x211000))
+                dol.write(struct.pack(">I",(instr.as_translated(0x211000))))
 
 
 def _get_bit_alignment(num: int) -> int:

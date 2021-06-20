@@ -17,6 +17,10 @@ constexpr f32 radiansToAngle(f32 r) {
 }
 constexpr f64 radiansToAngle(f64 r) { return (180.0 / M_PI) * r; }
 
+template <typename T> constexpr T scaleLinear(T value, T scale) {
+  return (value * scale) + (static_cast<T>(1) - scale);
+}
+
 /*
 / x = point on x axis
 / f = floor (min value)

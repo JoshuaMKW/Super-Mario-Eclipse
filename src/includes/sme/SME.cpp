@@ -259,7 +259,6 @@ SME_PATCH_BL(SME_PORT_REGION(0x802A744C, 0, 0, 0), moduleLoad);
                Patch::Init::initCollisionWarpLinks);
   SME_PATCH_BL(SME_PORT_REGION(0x802B57E4, 0, 0, 0), Patch::Init::createUIHeap);
 
-
   // mario.cpp
   SME_PATCH_BL(SME_PORT_REGION(0x802320E0, 0, 0, 0), mario_shadowCrashPatch);
   SME_PATCH_BL(SME_PORT_REGION(0x802500B8, 0, 0, 0),
@@ -271,6 +270,38 @@ SME_PATCH_BL(SME_PORT_REGION(0x802A744C, 0, 0, 0), moduleLoad);
   SME_WRITE_32(SME_PORT_REGION(0x802815F4, 0, 0, 0), 0x2C030000);
   SME_PATCH_BL(SME_PORT_REGION(0x80207430, 0, 0, 0), Patch::Mario::canCarryNPC);
   SME_WRITE_32(SME_PORT_REGION(0x80207434, 0, 0, 0), 0x2C030000);
+  SME_PATCH_BL(0x802145F0, Patch::Mario::scaleNPCThrowLength);
+  SME_WRITE_32(0x802145F4, 0xC002E5E0);
+  SME_WRITE_32(0x802145F8, 0xC0230034);
+  SME_WRITE_32(0x8021462C, 0xEC0B0032);
+  SME_WRITE_32(0x80214634, 0xEC2B0072);
+  SME_PATCH_BL(0x8021463C, Patch::Mario::scaleNPCThrowHeight);
+  #if 0
+  SME_PATCH_BL(0x80261C3C, Patch::Mario::getTreeClimbMinFall);
+  SME_WRITE_32(0x80261C40, 0xC05F038C);
+  SME_WRITE_32(0x80261C44, 0xFC020040);
+  SME_PATCH_BL(0x802619CC, Patch::Mario::getTreeClimbMaxFall);
+  SME_WRITE_32(0x802619D0, 0xC05F0014);
+  SME_PATCH_BL(0x80261CF4, Patch::Mario::scaleTreeSlideSpeed);
+  SME_WRITE_32(0x80261CF8, 0x2C030000);
+  SME_WRITE_32(0x80261CFC, 0x41820070);
+  SME_PATCH_BL(0x8025D588, Patch::Mario::getClimbingAnimSpd);
+  SME_PATCH_BL(0x8025D63C, Patch::Mario::getClimbingAnimSpd);
+  SME_PATCH_BL(0x8025D650, Patch::Mario::getClimbingAnimSpd);
+  SME_PATCH_BL(0x8025DBC4, Patch::Mario::getClimbingAnimSpd);
+  SME_PATCH_BL(0x8025E38C, Patch::Mario::getClimbingAnimSpd);
+  SME_PATCH_BL(0x802615AC, Patch::Mario::scaleHangSpeed);
+  SME_WRITE_32(0x802615B0, 0x60000000);
+  SME_PATCH_BL(0x8024E288, Patch::Mario::checkGraffitiAffected);
+  // SME_PATCH_BL(0x801E4118, Patch::Mario::rescaleHeldObj);
+  SME_PATCH_BL(0x802571F0, Patch::Mario::patchYStorage);
+  SME_PATCH_BL(0x8024E02C, Patch::Mario::manageExtraJumps);
+  SME_WRITE_32(0x8025B8BC, 0x60000000);
+  SME_PATCH_BL(0x8025B8C0, Patch::Mario::checkGroundSpeedLimit);
+  SME_WRITE_32(0x8025B8C4, 0xEFFF0072);
+  #endif
+  SME_PATCH_BL(0x8003FFEC, Patch::Mario::manageEMarioHealthWrapper);
+  SME_WRITE_32(0x8003FD94, 0x60000000);
 
   // multiplayer.cpp
   // SME_PATCH_B(SME_PORT_REGION(0x802EFAB4, 0, 0, 0),

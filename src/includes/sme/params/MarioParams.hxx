@@ -32,6 +32,8 @@ struct TPlayerParams : public TParams {
         CONSTRUCT_PARAM(mCanHoldNPCs, false),
         CONSTRUCT_PARAM(mCanClimbWalls, false),
         CONSTRUCT_PARAM(mSizeMultiplier, 1.0f),
+        CONSTRUCT_PARAM(mSpeedMultiplier, 1.0f),
+        CONSTRUCT_PARAM(mBaseJumpMultiplier, 1.0f),
         CONSTRUCT_PARAM(mMultiJumpMultiplier, 0.875f),
         CONSTRUCT_PARAM(mMultiJumpFSpeedMulti, 0.9f),
         CONSTRUCT_PARAM(mThrowPowerMultiplier, 1.0f),
@@ -69,6 +71,8 @@ struct TPlayerParams : public TParams {
   TParamRT<bool> mCanHoldNPCs;
   TParamRT<bool> mCanClimbWalls;
   TParamRT<f32> mSizeMultiplier;
+  TParamRT<f32> mSpeedMultiplier;
+  TParamRT<f32> mBaseJumpMultiplier;
   TParamRT<f32> mMultiJumpMultiplier;
   TParamRT<f32> mMultiJumpFSpeedMulti;
   TParamRT<f32> mThrowPowerMultiplier;

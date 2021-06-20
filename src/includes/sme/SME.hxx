@@ -33,7 +33,6 @@
 #include "sms/talk/Talk2D2.hxx"
 #include "types.h"
 
-
 #ifndef KURIBO_NO_TYPES
 #define KURIBO_NO_TYPES
 #endif
@@ -179,6 +178,20 @@ u32 updateContexts(TMario *player);
 u32 carryOrTalkNPC(TBaseNPC *npc);
 bool canGrabAtNPC();
 bool canCarryNPC();
+TMario *scaleNPCThrowLength(TMario *player, float *params);
+u32 scaleNPCThrowHeight(u32 _r3, f32 z, f32 y);
+f32 getTreeClimbMinFall();
+TMapObjBase *getTreeClimbMaxFall(TMapObjBase *tree, f32 speed);
+bool scaleTreeSlideSpeed(f32 _f1, f32 _f2);
+void getClimbingAnimSpd(TMario *player, TMario::Animation anim, f32 speed);
+void scaleHangSpeed(TMario *player);
+void checkGraffitiAffected(TMario *player);
+void rescaleHeldObj(Mtx holderMatrix, Mtx destMatrix);
+u32 patchYStorage();
+void manageExtraJumps(TMario *player);
+f32 calcJumpPower(TMario *player, f32 factor, f32 curYVelocity, f32 jumpPower);
+f32 checkGroundSpeedLimit();
+void manageEMarioHealthWrapper(s32 chan, JUtility::TColor *color);
 
 } // namespace Mario
 

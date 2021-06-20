@@ -92,6 +92,7 @@ extern "C"
 	void GXSetTevColorOp(u32, u32, u32, u32, u32, u32);
 	void GXSetTevAlphaOp(u32, u32, u32, u32, u32, u32);
 	void GXSetTevColor(u32, u32);
+    void GXSetChanMatColor(s32, u32);
     void GXBegin(u32 type, u32 idx, u32 count);
 	void GXInitTexObjLOD(u32, u32, u32, u32, u32, u32, f32, f32, f32);
 	void GXCallDisplayList(u32, u32);

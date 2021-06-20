@@ -305,27 +305,7 @@ TPlayerData::ParamHistory::ParamHistory()
       mSlipYoshiParams("/Mario/SlipParamYoshi.prm"), mUpperBodyParams() {}
 
 TPlayerData::ParamHistory::ParamHistory(TMario *player)
-    : mDeParams(), mBodyAngleFreeParams("/Mario/BodyAngleFree.prm"),
-      mBodyAngleWaterGunParams("/Mario/BodyAngleWaterGun.prm"),
-      mPunchFenceParams("/Mario/AttackFencePunch.prm"),
-      mKickRoofParams("/Mario/AttackKickRoof.prm"), mJumpParams(), mRunParams(),
-      mSwimParams(), mHangFenceParams(), mHangRoofParams(), mWireParams(),
-      mPullBGBeakParams("/Mario/PullParamBGBeak.prm"),
-      mPullBGTentacleParams("/Mario/PullParamBGTentacle.prm"),
-      mPullBGFireWanWanBossTailParams(
-          "/Mario/PullParamBGFireWanWanBossTail.prm"),
-      mPullFireWanWanTailParams("/Mario/PullParamFireWanWanTail.prm"),
-      mHoverParams(), mDivingParams(), mYoshiParams(), mWaterEffectParams(),
-      mControllerParams(), mGraffitoParams(), mDirtyParams(), mMotorParams(),
-      mParticleParams(), mEffectParams(),
-      mSlipNormalParams("/Mario/SlipParamNormal.prm"),
-      mSlipOilParams("/Mario/SlipParamOil.prm"),
-      mSlipAllParams("/Mario/SlipParamAll.prm"),
-      mSlipAllSliderParams("/Mario/SlipParamAll_Slider.prm"),
-      mSlip45Params("/Mario/SlipParam45.prm"),
-      mSlipWaterSlopeParams("/Mario/SlipParamWaterSlope.prm"),
-      mSlipWaterGroundParams("/Mario/SlipParamWaterGround.prm"),
-      mSlipYoshiParams("/Mario/SlipParamYoshi.prm"), mUpperBodyParams() {
+    : ParamHistory() {
   recordFrom(player);
 }
 

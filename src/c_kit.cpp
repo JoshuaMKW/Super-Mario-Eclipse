@@ -283,5 +283,16 @@ static void maintainYoshi(TYoshi *yoshi) {
 // extern -> SME.cpp
 void Patch::CKit::realTimeCustomAttrsHandler(TMario *player) {
   maintainYoshi(player->mYoshi);
+
+  Class::TPlayerData *playerParams = TGlobals::getPlayerParams(player);
+  const Class::TPlayerParams *params = playerParams->getParams();
+  const Class::TPlayerData::ParamHistory &defaults = playerParams->mDefaultAttrs;
+  const f32 sizeMultiplier = params->mSizeMultiplier.get();
+  const f32 speedMultiplier = params->mSpeedMultiplier.get();
+  const f32 diminishedSizeMultiplier = SME::Util::Math::scaleLinear(sizeMultiplier, 0.5f);
+
+  player->mHolderHeightDiff = 100.0f * params->mSizeMultiplier.get();
+  player->mJumpParams.mGravity.set(defaults.mJumpParams.mGravity.get() * sizeMultiplier);
+
   setPositions__6TMarioFv(player);
 }

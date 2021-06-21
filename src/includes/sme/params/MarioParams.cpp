@@ -31,21 +31,28 @@ TPlayerData::TPlayerData(TMario *player, CPolarSubCamera *camera, bool isMario)
 }
 
 void TPlayerData::scalePlayerAttrs(f32 scale) {
-  const float factor = (scale * 0.5f) + (1.0f - 0.5f);
+  if (scale <= 0.0f)
+    scale = 0.0f;
 
-  JGeometry::TVec3<f32> size;
-  mPlayer->JSGGetScaling(reinterpret_cast<Vec *>(&size));
+  const float factor = Util::Math::scaleLinearAtAnchor<f32>(scale, 0.5f, 1.0f);
+
+  JGeometry::TVec3<f32> size(1.0f, 1.0f, 1.0f);
   size.scale(scale);
+
   mPlayer->JSGSetScaling(reinterpret_cast<Vec &>(size));
-  mPlayer->mModelData->mModel->mScale.scale(scale);
+  mPlayer->mModelData->mModel->mScale.set(size);
 
   const f32 yoshiAgility =
-      SME::Util::Math::sigmoidCurve(size.y, 0.8f, 5.0f, 1.6f, 5.0f);
+      SME::Util::Math::sigmoidCurve(size.y, 0.0f, 1.2f, 1.321887582486f, -5.0f);
+
+  mDefaultAttrs.applyHistoryTo(const_cast<TMario *>(getPlayer()));
 
 #define SCALE_PARAM(param, scale) param.set(param.get() * scale)
 
-  SCALE_PARAM(mPlayer->mDeParams.mRunningMax, factor);
-  SCALE_PARAM(mPlayer->mDeParams.mDashMax, factor);
+  const f32 maxSpeedFactor = onYoshi__6TMarioCFv(mPlayer) ? 1.0f : factor;
+
+  SCALE_PARAM(mPlayer->mDeParams.mRunningMax, maxSpeedFactor);
+  SCALE_PARAM(mPlayer->mDeParams.mDashMax, maxSpeedFactor);
   SCALE_PARAM(mPlayer->mDeParams.mShadowSize, scale);
   SCALE_PARAM(mPlayer->mDeParams.mHoldRadius, scale);
   SCALE_PARAM(mPlayer->mDeParams.mDamageRadius, scale);
@@ -61,7 +68,7 @@ void TPlayerData::scalePlayerAttrs(f32 scale) {
   SCALE_PARAM(mPlayer->mDeParams.mThrowPower, factor);
   SCALE_PARAM(mPlayer->mDeParams.mFeelDeep, factor);
   SCALE_PARAM(mPlayer->mDeParams.mDamageFallHeight, factor);
-  SCALE_PARAM(mPlayer->mDeParams.mClashSpeed, factor);
+  SCALE_PARAM(mPlayer->mDeParams.mClashSpeed, maxSpeedFactor);
   SCALE_PARAM(mPlayer->mDeParams.mSleepingCheckDist, factor);
   SCALE_PARAM(mPlayer->mDeParams.mSleepingCheckHeight, factor);
   SCALE_PARAM(mPlayer->mPunchFenceParams.mRadius, factor);
@@ -70,6 +77,7 @@ void TPlayerData::scalePlayerAttrs(f32 scale) {
   SCALE_PARAM(mPlayer->mKickRoofParams.mHeight, factor);
   SCALE_PARAM(mPlayer->mJumpParams.mGravity, factor);
   SCALE_PARAM(mPlayer->mJumpParams.mSpinJumpGravity, factor);
+  SCALE_PARAM(mPlayer->mJumpParams.mPopUpSpeedY, factor);
   SCALE_PARAM(mPlayer->mJumpParams.mJumpingMax, factor);
   SCALE_PARAM(mPlayer->mJumpParams.mFenceSpeed, factor);
   SCALE_PARAM(mPlayer->mJumpParams.mFireBackVelocity, factor);
@@ -84,15 +92,18 @@ void TPlayerData::scalePlayerAttrs(f32 scale) {
   SCALE_PARAM(mPlayer->mJumpParams.mRotBroadJumpForce, factor);
   SCALE_PARAM(mPlayer->mJumpParams.mRotBroadJumpForceY, factor);
   SCALE_PARAM(mPlayer->mJumpParams.mSecJumpForce, factor);
+  SCALE_PARAM(mPlayer->mJumpParams.mUltraJumpForce, factor);
+  SCALE_PARAM(mPlayer->mJumpParams.mTurnJumpForce, factor);
+  SCALE_PARAM(mPlayer->mJumpParams.mTriJumpEnableSp, factor);
   SCALE_PARAM(mPlayer->mJumpParams.mValleyDepth, factor);
   SCALE_PARAM(mPlayer->mJumpParams.mTremblePower, 1 / factor);
   SCALE_PARAM(mPlayer->mJumpParams.mTrembleTime, static_cast<s16>(1 / factor));
   SCALE_PARAM(mPlayer->mJumpParams.mGetOffYoshiY, factor);
   SCALE_PARAM(mPlayer->mJumpParams.mSuperHipAttackCt,
               static_cast<s16>(1 / factor));
-  SCALE_PARAM(mPlayer->mRunParams.mMaxSpeed, factor);
-  SCALE_PARAM(mPlayer->mRunParams.mAddBase, factor);
-  SCALE_PARAM(mPlayer->mRunParams.mDecBrake, factor);
+  SCALE_PARAM(mPlayer->mRunParams.mMaxSpeed, maxSpeedFactor);
+  SCALE_PARAM(mPlayer->mRunParams.mAddBase, maxSpeedFactor);
+  SCALE_PARAM(mPlayer->mRunParams.mDecBrake, maxSpeedFactor);
   SCALE_PARAM(mPlayer->mRunParams.mSoft2Walk, factor);
   SCALE_PARAM(mPlayer->mRunParams.mWalk2Soft, factor);
   SCALE_PARAM(mPlayer->mRunParams.mSoftStepAnmMult, 1 / factor);
@@ -304,8 +315,7 @@ TPlayerData::ParamHistory::ParamHistory()
       mSlipWaterGroundParams("/Mario/SlipParamWaterGround.prm"),
       mSlipYoshiParams("/Mario/SlipParamYoshi.prm"), mUpperBodyParams() {}
 
-TPlayerData::ParamHistory::ParamHistory(TMario *player)
-    : ParamHistory() {
+TPlayerData::ParamHistory::ParamHistory(TMario *player) : ParamHistory() {
   recordFrom(player);
 }
 

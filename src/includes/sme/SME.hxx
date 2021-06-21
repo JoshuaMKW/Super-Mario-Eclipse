@@ -20,17 +20,19 @@
 #include "params/StageParams.hxx"
 
 #include "OS.h"
+#include "MTX.h"
 #include "defines.h"
 #include "macros.h"
 #include "sms/JSystem/J2D/J2DOrthoGraph.hxx"
 #include "sms/JSystem/JGeometry.hxx"
-#include "sms/SMS.hxx"
 #include "sms/game/Conductor.hxx"
 #include "sms/npc/BaseNPC.hxx"
 #include "sms/object/ResetFruit.hxx"
 #include "sms/screen/ShineFader.hxx"
 #include "sms/sound/MSBGM.hxx"
 #include "sms/talk/Talk2D2.hxx"
+#include "sms/enemy/EnemyMario.hxx"
+#include "sms/SMS.hxx"
 #include "types.h"
 
 #ifndef KURIBO_NO_TYPES
@@ -189,9 +191,9 @@ void checkGraffitiAffected(TMario *player);
 void rescaleHeldObj(Mtx holderMatrix, Mtx destMatrix);
 u32 patchYStorage();
 void manageExtraJumps(TMario *player);
-f32 calcJumpPower(TMario *player, f32 factor, f32 curYVelocity, f32 jumpPower);
+void normJumpMultiplier();
 f32 checkGroundSpeedLimit();
-void manageEMarioHealthWrapper(s32 chan, JUtility::TColor *color);
+void manageEMarioHealthWrapper(TEnemyMario *eMario, Mtx *posMtx);
 
 } // namespace Mario
 

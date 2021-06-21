@@ -50,12 +50,10 @@ void SME::Patch::Music::initMusic() {
 
   if (!TGlobals::sIsAudioStreaming &&
       (TStageParams::sStageConfig->mMusicID.get() & 0x400))
-    startStreamedBGM(
-        (MSStageInfo)TStageParams::sStageConfig->mMusicID.get(),
-        true);
+    TGlobals::sIsAudioStreaming = startStreamedBGM(
+        (MSStageInfo)TStageParams::sStageConfig->mMusicID.get(), true);
 
-  if (TGlobals::sIsAudioStreaming &&
-      !TGlobals::sIsAudioStreamAllowed) {
+  if (TGlobals::sIsAudioStreaming && !TGlobals::sIsAudioStreamAllowed) {
     DVDCancelStreamAsync(&handle->mCmdBlock, 0);
     TGlobals::sIsAudioStreaming = false;
   }

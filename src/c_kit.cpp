@@ -285,14 +285,15 @@ void Patch::CKit::realTimeCustomAttrsHandler(TMario *player) {
   maintainYoshi(player->mYoshi);
 
   Class::TPlayerData *playerParams = TGlobals::getPlayerParams(player);
-  const Class::TPlayerParams *params = playerParams->getParams();
-  const Class::TPlayerData::ParamHistory &defaults = playerParams->mDefaultAttrs;
-  const f32 sizeMultiplier = params->mSizeMultiplier.get();
-  const f32 speedMultiplier = params->mSpeedMultiplier.get();
-  const f32 diminishedSizeMultiplier = SME::Util::Math::scaleLinear(sizeMultiplier, 0.5f);
+  Class::TStageParams *stageParams = Class::TStageParams::sStageConfig;
 
-  player->mHolderHeightDiff = 100.0f * params->mSizeMultiplier.get();
-  player->mJumpParams.mGravity.set(defaults.mJumpParams.mGravity.get() * sizeMultiplier);
+  const Class::TPlayerParams *params = playerParams->getParams();
+  //const Class::TPlayerData::ParamHistory &defaults = playerParams->mDefaultAttrs;
+  const f32 sizeMultiplier = params->mSizeMultiplier.get() * stageParams->mPlayerSizeMultiplier.get();
+  const f32 speedMultiplier = params->mSpeedMultiplier.get();
+  //const f32 diminishedSizeMultiplier = SME::Util::Math::scaleLinearAtAnchor(sizeMultiplier, 0.5f, 1.0f);
+
+  playerParams->scalePlayerAttrs(sizeMultiplier);
 
   setPositions__6TMarioFv(player);
 }

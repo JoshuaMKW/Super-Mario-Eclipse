@@ -294,13 +294,16 @@ SME_PATCH_BL(SME_PORT_REGION(0x802A744C, 0, 0, 0), moduleLoad);
   SME_WRITE_32(0x802615B0, 0x60000000);
   SME_PATCH_BL(0x8024E288, Patch::Mario::checkGraffitiAffected);
   // SME_PATCH_BL(0x801E4118, Patch::Mario::rescaleHeldObj);
-  SME_PATCH_BL(0x802571F0, Patch::Mario::patchYStorage);
-  SME_PATCH_BL(0x8024E02C, Patch::Mario::manageExtraJumps);
-  SME_WRITE_32(0x8025B8BC, 0x60000000);
-  SME_PATCH_BL(0x8025B8C0, Patch::Mario::checkGroundSpeedLimit);
-  SME_WRITE_32(0x8025B8C4, 0xEFFF0072);
   #endif
-  SME_PATCH_BL(0x8003FFEC, Patch::Mario::manageEMarioHealthWrapper);
+  SME_PATCH_BL(0x8024E02C, Patch::Mario::manageExtraJumps);
+  SME_PATCH_BL(0x802571F0, Patch::Mario::patchYStorage);
+  SME_PATCH_BL(0x80254534, Patch::Mario::normJumpMultiplier);
+  SME_WRITE_32(0x80254538, 0x60000000);
+  SME_WRITE_32(0x8025453C, 0x60000000);
+  SME_WRITE_32(0x80254540, 0x60000000);
+  SME_WRITE_32(0x80254544, 0x60000000);
+
+  SME_PATCH_BL(0x8003FDAC, Patch::Mario::manageEMarioHealthWrapper);
   SME_WRITE_32(0x8003FD94, 0x60000000);
 
   // multiplayer.cpp

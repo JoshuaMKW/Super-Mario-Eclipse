@@ -17,8 +17,8 @@ constexpr f32 radiansToAngle(f32 r) {
 }
 constexpr f64 radiansToAngle(f64 r) { return (180.0 / M_PI) * r; }
 
-template <typename T> constexpr T scaleLinear(T value, T scale) {
-  return (value * scale) + (static_cast<T>(1) - scale);
+template <typename T> constexpr T scaleLinearAtAnchor(T value, T scale, T anchor) {
+  return (value * scale) + (anchor - scale);
 }
 
 /*

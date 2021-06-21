@@ -54,7 +54,7 @@ Class::TPlayerData *TGlobals::getPlayerParams(TMario *player) {
       return cfg;
     }
   }
-  SME_DEBUG_LOG("Player data not found");
+  SME_DEBUG_LOG("Player data not found\n");
   return nullptr;
 }
 

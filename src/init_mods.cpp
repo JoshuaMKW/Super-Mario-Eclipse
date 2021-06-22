@@ -184,7 +184,7 @@ void SME::Patch::Init::initShineShadow() {
         TLightContext::ActiveType::STATIC) {
       LightContext.mNextSize =
           LightContext.mShineShadowBase +
-          powf(((1300.0f / SME_MAX_SHINES) * CurrentShineCount), 1.5f);
+          powf(((1350.0f / SME_MAX_SHINES) * CurrentShineCount), 1.5f);
 
       if (config->mLightDarkLevel.get() == 255)
         gpModelWaterManager->mDarkLevel =

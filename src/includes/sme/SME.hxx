@@ -45,7 +45,12 @@
 
 #define SME_MODULE_NAME "Eclipse"
 #define SME_AUTHOR_NAME "JoshuaMK"
-#define SME_VERSION_TAG __VERSION__ "[" SME_STRINGIZE(SME_MAX_SHINES) " Shines]"
+
+#ifdef SME_DEBUG
+#define SME_VERSION_TAG "(DEBUG) " SME_VERSION "[" SME_STRINGIZE(SME_MAX_SHINES) " Shines]"
+#else
+#define SME_VERSION_TAG "(RELEASE) " SME_VERSION "[" SME_STRINGIZE(SME_MAX_SHINES) " Shines]"
+#endif
 
 // init_mods.cpp
 SME_EXTERN_C OSBootInfo BootInfo;
@@ -118,6 +123,13 @@ bool xyzModifierMario(TMario *player);
 
 } // namespace Debug
 
+namespace Fixes {
+
+void shadowCrashPatch();
+u32 patchYStorage();
+
+}
+
 namespace Flag {
 
 TCardBookmarkInfo *setFileCompleteBool(TCardManager *cardManager);
@@ -189,7 +201,6 @@ void getClimbingAnimSpd(TMario *player, TMario::Animation anim, f32 speed);
 void scaleHangSpeed(TMario *player);
 void checkGraffitiAffected(TMario *player);
 void rescaleHeldObj(Mtx holderMatrix, Mtx destMatrix);
-u32 patchYStorage();
 void manageExtraJumps(TMario *player);
 void normJumpMultiplier();
 f32 checkGroundSpeedLimit();
@@ -233,6 +244,8 @@ void extendFlagManagerSave(JSUMemoryOutputStream &stream);
 void thinkSetBootFlag(TShineFader *shineFader, u32 unk_1, u32 unk_2);
 u32 loadAfterMaskState();
 void setKillState();
+void thinkCloseCamera();
+void animationFreezeCheck();
 
 } // namespace Shine
 

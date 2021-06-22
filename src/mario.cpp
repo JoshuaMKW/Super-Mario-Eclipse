@@ -592,18 +592,6 @@ static asm void scaleNPCTalkRadius(){
 #endif
 
 // extern -> SME.cpp
-// 0x802571F0
-u32 SME::Patch::Mario::patchYStorage() {
-  TMario *player;
-  SME_FROM_GPR(31, player);
-
-  if (player->mState != static_cast<u32>(TMario::State::IDLE))
-    player->mSpeed.y = 0.0f;
-
-  return 0;
-}
-
-// extern -> SME.cpp
 // 0x8024E02C
 void SME::Patch::Mario::manageExtraJumps(TMario *player) {
   SME::Class::TPlayerData *playerParams =

@@ -120,7 +120,7 @@ bool Patch::CKit::manageLightSize() {
         LightContext.mPrevSize = gpModelWaterManager->mSize;
         LightContext.mNextSize =
             LightContext.mShineShadowBase +
-            powf(((1300.0f / SME_MAX_SHINES) * CurrentShineCount), 1.5f);
+            powf(((1350.0f / SME_MAX_SHINES) * CurrentShineCount), 1.5f);
         LightContext.mPrevDarkness = gpModelWaterManager->mDarkLevel;
         LightContext.mNextDarkness =
             Util::Math::lerp<u8>(30, 190,

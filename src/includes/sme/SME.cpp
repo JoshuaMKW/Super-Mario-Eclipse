@@ -47,6 +47,15 @@ using namespace SME;
     !defined(SME_BUILD_KAMEK_INLINE)
 KURIBO_MODULE_BEGIN(SME_MODULE_NAME, SME_AUTHOR_NAME, SME_VERSION_TAG) {
   KURIBO_EXECUTE_ON_LOAD {
+    OSReport("~~~~~~~~~~~~~~~~~~~~~~~\n"
+             "[KURIBO] Game patched with module:\n"
+             "         Name:     	" SME_MODULE_NAME "\n"
+             "         Author:   	" SME_AUTHOR_NAME "\n"
+             "         Version:  	" SME_VERSION_TAG "\n"
+             "\n"
+             "         Built:    	" __DATE__ " at " __TIME__ "\n"
+             "         Compiler: 	" __VERSION__ "\n"
+             "~~~~~~~~~~~~~~~~~~~~~~~\n");
     SME_DEBUG_LOG(
         "Codeblocker - Creating OSAlarm at %p; Calls %p every %0.4f seconds\n",
         &gctAlarm, &SME::Util::Security::checkUserCodes, 0.001f);
@@ -91,7 +100,8 @@ static void moduleLoad(int size, bool unk) {
       &gctAlarm, OSGetTime(), OSMillisecondsToTicks(1),
       reinterpret_cast<OSAlarmHandler>(&SME::Util::Security::checkUserCodes));
   SME_DEBUG_LOG("Mario health offset = %X\n", offsetof(TMario, mHealth));
-  SME_DEBUG_LOG("J3DFrameCtrl offset = 0x%X\n", offsetof(J3DFrameCtrl, mFrameRate));
+  SME_DEBUG_LOG("J3DFrameCtrl offset = 0x%X\n",
+                offsetof(J3DFrameCtrl, mFrameRate));
   Patch::Init::initCodeProtection();
 }
 
@@ -174,8 +184,7 @@ SME_PATCH_BL(SME_PORT_REGION(0x802A744C, 0, 0, 0), moduleLoad);
   // debug.cpp
   SME_PATCH_BL(SME_PORT_REGION(0x8024D194, 0, 0, 0),
                Patch::Debug::xyzModifierMario);
-  SME_WRITE_32(SME_PORT_REGION(0x8024D198, 0, 0, 0),
-               0x2C030000);    
+  SME_WRITE_32(SME_PORT_REGION(0x8024D198, 0, 0, 0), 0x2C030000);
 
   // file_flags.cpp
   SME_PATCH_BL(SME_PORT_REGION(0x802B1794, 0, 0, 0),
@@ -233,7 +242,7 @@ SME_PATCH_BL(SME_PORT_REGION(0x802A744C, 0, 0, 0), moduleLoad);
   // init_mods.cpp
   SME_PATCH_BL(SME_PORT_REGION(0x802A7140, 0, 0, 0),
                Patch::Init::setupMarioDatas);
-               
+
   SME_PATCH_BL(SME_PORT_REGION(0x802A750C, 0, 0, 0),
                Patch::Init::createGlobalHeaps);
   SME_PATCH_BL(SME_PORT_REGION(0x802A716C, 0, 0, 0),
@@ -260,7 +269,6 @@ SME_PATCH_BL(SME_PORT_REGION(0x802A744C, 0, 0, 0), moduleLoad);
   SME_PATCH_BL(SME_PORT_REGION(0x802B57E4, 0, 0, 0), Patch::Init::createUIHeap);
 
   // mario.cpp
-  SME_PATCH_BL(SME_PORT_REGION(0x802320E0, 0, 0, 0), mario_shadowCrashPatch);
   SME_PATCH_BL(SME_PORT_REGION(0x802500B8, 0, 0, 0),
                Patch::Mario::updateContexts);
   SME_PATCH_BL(SME_PORT_REGION(0x8029A87C, 0, 0, 0),
@@ -270,41 +278,45 @@ SME_PATCH_BL(SME_PORT_REGION(0x802A744C, 0, 0, 0), moduleLoad);
   SME_WRITE_32(SME_PORT_REGION(0x802815F4, 0, 0, 0), 0x2C030000);
   SME_PATCH_BL(SME_PORT_REGION(0x80207430, 0, 0, 0), Patch::Mario::canCarryNPC);
   SME_WRITE_32(SME_PORT_REGION(0x80207434, 0, 0, 0), 0x2C030000);
-  SME_PATCH_BL(0x802145F0, Patch::Mario::scaleNPCThrowLength);
-  SME_WRITE_32(0x802145F4, 0xC002E5E0);
-  SME_WRITE_32(0x802145F8, 0xC0230034);
-  SME_WRITE_32(0x8021462C, 0xEC0B0032);
-  SME_WRITE_32(0x80214634, 0xEC2B0072);
-  SME_PATCH_BL(0x8021463C, Patch::Mario::scaleNPCThrowHeight);
-  #if 0
-  SME_PATCH_BL(0x80261C3C, Patch::Mario::getTreeClimbMinFall);
-  SME_WRITE_32(0x80261C40, 0xC05F038C);
-  SME_WRITE_32(0x80261C44, 0xFC020040);
-  SME_PATCH_BL(0x802619CC, Patch::Mario::getTreeClimbMaxFall);
-  SME_WRITE_32(0x802619D0, 0xC05F0014);
-  SME_PATCH_BL(0x80261CF4, Patch::Mario::scaleTreeSlideSpeed);
-  SME_WRITE_32(0x80261CF8, 0x2C030000);
-  SME_WRITE_32(0x80261CFC, 0x41820070);
-  SME_PATCH_BL(0x8025D588, Patch::Mario::getClimbingAnimSpd);
-  SME_PATCH_BL(0x8025D63C, Patch::Mario::getClimbingAnimSpd);
-  SME_PATCH_BL(0x8025D650, Patch::Mario::getClimbingAnimSpd);
-  SME_PATCH_BL(0x8025DBC4, Patch::Mario::getClimbingAnimSpd);
-  SME_PATCH_BL(0x8025E38C, Patch::Mario::getClimbingAnimSpd);
-  SME_PATCH_BL(0x802615AC, Patch::Mario::scaleHangSpeed);
-  SME_WRITE_32(0x802615B0, 0x60000000);
-  SME_PATCH_BL(0x8024E288, Patch::Mario::checkGraffitiAffected);
+  SME_PATCH_BL(SME_PORT_REGION(0x802145F0, 0, 0, 0),
+               Patch::Mario::scaleNPCThrowLength);
+  SME_WRITE_32(SME_PORT_REGION(0x802145F4, 0, 0, 0), 0xC002E5E0);
+  SME_WRITE_32(SME_PORT_REGION(0x802145F8, 0, 0, 0), 0xC0230034);
+  SME_WRITE_32(SME_PORT_REGION(0x8021462C, 0, 0, 0), 0xEC0B0032);
+  SME_WRITE_32(SME_PORT_REGION(0x80214634, 0, 0, 0), 0xEC2B0072);
+  SME_PATCH_BL(SME_PORT_REGION(0x8021463C, 0, 0, 0),
+               Patch::Mario::scaleNPCThrowHeight);
+#if 0
+  SME_PATCH_BL(SME_PORT_REGION(0x80261C3C, 0, 0, 0), Patch::Mario::getTreeClimbMinFall);
+  SME_WRITE_32(SME_PORT_REGION(0x80261C40, 0, 0, 0), 0xC05F038C);
+  SME_WRITE_32(SME_PORT_REGION(0x80261C44, 0, 0, 0), 0xFC020040);
+  SME_PATCH_BL(SME_PORT_REGION(0x802619CC, 0, 0, 0), Patch::Mario::getTreeClimbMaxFall);
+  SME_WRITE_32(SME_PORT_REGION(0x802619D0, 0, 0, 0), 0xC05F0014);
+  SME_PATCH_BL(SME_PORT_REGION(0x80261CF4, 0, 0, 0), Patch::Mario::scaleTreeSlideSpeed);
+  SME_WRITE_32(SME_PORT_REGION(0x80261CF8, 0, 0, 0), 0x2C030000);
+  SME_WRITE_32(SME_PORT_REGION(0x80261CFC, 0, 0, 0), 0x41820070);
+  SME_PATCH_BL(SME_PORT_REGION(0x8025D588, 0, 0, 0), Patch::Mario::getClimbingAnimSpd);
+  SME_PATCH_BL(SME_PORT_REGION(0x8025D63C, 0, 0, 0), Patch::Mario::getClimbingAnimSpd);
+  SME_PATCH_BL(SME_PORT_REGION(0x8025D650, 0, 0, 0), Patch::Mario::getClimbingAnimSpd);
+  SME_PATCH_BL(SME_PORT_REGION(0x8025DBC4, 0, 0, 0), Patch::Mario::getClimbingAnimSpd);
+  SME_PATCH_BL(SME_PORT_REGION(0x8025E38C, 0, 0, 0), Patch::Mario::getClimbingAnimSpd);
+  SME_PATCH_BL(SME_PORT_REGION(0x802615AC, 0, 0, 0), Patch::Mario::scaleHangSpeed);
+  SME_WRITE_32(SME_PORT_REGION(0x802615B0, 0, 0, 0), 0x60000000);
+  SME_PATCH_BL(SME_PORT_REGION(0x8024E288, 0, 0, 0), Patch::Mario::checkGraffitiAffected);
   // SME_PATCH_BL(0x801E4118, Patch::Mario::rescaleHeldObj);
-  #endif
-  SME_PATCH_BL(0x8024E02C, Patch::Mario::manageExtraJumps);
-  SME_PATCH_BL(0x802571F0, Patch::Mario::patchYStorage);
-  SME_PATCH_BL(0x80254534, Patch::Mario::normJumpMultiplier);
-  SME_WRITE_32(0x80254538, 0x60000000);
-  SME_WRITE_32(0x8025453C, 0x60000000);
-  SME_WRITE_32(0x80254540, 0x60000000);
-  SME_WRITE_32(0x80254544, 0x60000000);
+#endif
+  SME_PATCH_BL(SME_PORT_REGION(0x8024E02C, 0, 0, 0),
+               Patch::Mario::manageExtraJumps);
+  SME_PATCH_BL(SME_PORT_REGION(0x80254534, 0, 0, 0),
+               Patch::Mario::normJumpMultiplier);
+  SME_WRITE_32(SME_PORT_REGION(0x80254538, 0, 0, 0), 0x60000000);
+  SME_WRITE_32(SME_PORT_REGION(0x8025453C, 0, 0, 0), 0x60000000);
+  SME_WRITE_32(SME_PORT_REGION(0x80254540, 0, 0, 0), 0x60000000);
+  SME_WRITE_32(SME_PORT_REGION(0x80254544, 0, 0, 0), 0x60000000);
 
-  SME_PATCH_BL(0x8003FDAC, Patch::Mario::manageEMarioHealthWrapper);
-  SME_WRITE_32(0x8003FD94, 0x60000000);
+  SME_PATCH_BL(SME_PORT_REGION(0x8003FDAC, 0, 0, 0),
+               Patch::Mario::manageEMarioHealthWrapper);
+  SME_WRITE_32(SME_PORT_REGION(0x8003FD94, 0, 0, 0), 0x60000000);
 
   // multiplayer.cpp
   // SME_PATCH_B(SME_PORT_REGION(0x802EFAB4, 0, 0, 0),
@@ -329,6 +341,11 @@ SME_PATCH_BL(SME_PORT_REGION(0x802A744C, 0, 0, 0), moduleLoad);
               Patch::Music::stopMusicOnStop);
   SME_PATCH_BL(SME_PORT_REGION(0x802A670C, 0, 0, 0),
                Patch::Music::stopMusicOnStageExit);
+
+  // patches.cpp
+  SME_PATCH_BL(SME_PORT_REGION(0x802320E0, 0, 0, 0),
+               Patch::Fixes::shadowCrashPatch);
+  SME_PATCH_BL(SME_PORT_REGION(0x802571F0, 0, 0, 0), Patch::Fixes::patchYStorage);
 
   // shine.cpp
   SME_PATCH_BL(SME_PORT_REGION(0x801BD664, 0, 0, 0),
@@ -379,10 +396,11 @@ SME_PATCH_BL(SME_PORT_REGION(0x802A744C, 0, 0, 0), moduleLoad);
   SME_WRITE_32(SME_PORT_REGION(0x801BCD40, 0, 0, 0), 0x28030001);
   SME_PATCH_BL(SME_PORT_REGION(0x801BCEEC, 0, 0, 0),
                Patch::Shine::setKillState);
-  SME_PATCH_BL(SME_PORT_REGION(0x8029A590, 0, 0, 0), shine_thinkCloseCamera);
+  SME_PATCH_BL(SME_PORT_REGION(0x8029A590, 0, 0, 0),
+               Patch::Shine::thinkCloseCamera);
   SME_WRITE_32(SME_PORT_REGION(0x8029A594, 0, 0, 0), 0x28000000);
   SME_PATCH_BL(SME_PORT_REGION(0x802999D8, 0, 0, 0),
-               shine_animationFreezeCheck);
+               Patch::Shine::animationFreezeCheck);
   SME_WRITE_32(SME_PORT_REGION(0x802999DC, 0, 0, 0), 0x48000034);
   // Make Shines glow more
   SME_WRITE_32(SME_PORT_REGION(0x803C9190, 0, 0, 0), 0x3F19999A);
@@ -520,7 +538,7 @@ SME_PATCH_BL(SME_PORT_REGION(0x802A744C, 0, 0, 0), moduleLoad);
 
   // Extend Exception Handler
   SME_WRITE_32(SME_PORT_REGION(0x802C7638, 0, 0, 0), 0x60000000);
-  //SME_WRITE_32(SME_PORT_REGION(0x802C7690, 0, 0, 0), 0x60000000);
+  // SME_WRITE_32(SME_PORT_REGION(0x802C7690, 0, 0, 0), 0x60000000);
 
 #ifdef SME_DEBUG
   // Skip FMVs

@@ -1,6 +1,8 @@
 #include "OS.h"
 #include "math.h"
 
+#include "macros.h"
+
 OSBootInfo BootInfo;
 u32 BI2DebugFlag;
 u32 BI2DebugFlagHolder;
@@ -17,7 +19,7 @@ void OSSetPeriodicAlarm(OSAlarm *alarm, OSTime start, OSTime period,
   InsertAlarm(alarm, start - OSGetTime(), handler);
 
   OSRestoreInterrupts(iStatus);
-};
+}
 
 void OSDumpStopwatch(OSStopwatch *watch) {
   OSReport("============================\n"
@@ -30,4 +32,20 @@ void OSDumpStopwatch(OSStopwatch *watch) {
            "============================\n",
            watch->mName, watch->mTotal, watch->mHits, watch->mMin, watch->mMax,
            watch->mTotal / watch->mHits);
-};
+}
+
+SME_PURE_ASM void DCDisable() {
+  __asm__ volatile("sync                           \n\t"
+                   "mfspr      3, 1008             \n\t"
+                   "rlwinm     3, 3, 0, 18, 16     \n\t"
+                   "mtspr      1008, 3             \n\t"
+                   "blr                            \n\t");
+}
+
+SME_PURE_ASM void ICDisable() {
+  __asm__ volatile("sync                           \n\t"
+                   "mfspr      3, 1008             \n\t"
+                   "rlwinm     3, 3, 0, 17, 15     \n\t"
+                   "mtspr      1008, 3             \n\t"
+                   "blr                            \n\t");
+}

@@ -101,16 +101,19 @@ bool Patch::Yoshi::canMountYoshi() {
   TMario *player;
   SME_FROM_GPR(31, player);
 
-  const TPlayerData *playerParams = SME::TGlobals::getPlayerParams(player);
+  const TPlayerParams *params =
+      SME::TGlobals::getPlayerParams(player)->getParams();
 
-  if (!playerParams)
-    return player->mState & static_cast<u32>(TMario::State::AIRBORN);
+  if (params->mSizeMultiplier.get() *
+          TStageParams::sStageConfig->mPlayerSizeMultiplier.get() >
+      1.5f)
+    return false;
 
   if (player->mState & static_cast<u32>(TMario::State::WATERBORN))
-    return playerParams->getParams()->mCanRideYoshi.get();
+    return params->mCanRideYoshi.get();
   else
     return ((player->mState & static_cast<u32>(TMario::State::AIRBORN)) &&
-            playerParams->getParams()->mCanRideYoshi.get());
+            params->mCanRideYoshi.get());
 }
 
 // 0x80281148

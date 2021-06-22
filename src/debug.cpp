@@ -9,7 +9,7 @@
 
 using namespace SME;
 
-static bool gInXYZMode = false;
+bool gInXYZMode = false;
 
 // extern SME.cpp
 // 0x8024D194
@@ -24,8 +24,6 @@ bool Patch::Debug::xyzModifierMario(TMario *player) {
   const JUTGamePad::CStick &mainStick = player->mController->mControlStick;
   const f32 speedMultiplier =
       SME::Util::Math::lerp<f32>(1, 2, player->mController->mButtons.mAnalogR);
-
-  constexpr u32 mapInstrAddress = SME_PORT_REGION(0x80297A64, 0, 0, 0);
 
   if (gpMarDirector->mLastState == 0xA)
     return (player->_114 & 0x400) == 0x400;

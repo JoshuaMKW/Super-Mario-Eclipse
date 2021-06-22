@@ -11,6 +11,8 @@ using namespace SME;
 using namespace SME::Util;
 using namespace SME::Class;
 
+extern bool gInXYZMode;
+
 Memory::Protection::MemoryMap gCodeProtector;
 
 // 0x80005328
@@ -145,6 +147,7 @@ TMarDirector *SME::Patch::Init::initFileMods() {
   TStageParams::sStageConfig->load(SME::Util::getStageName(&gpApplication));
 
   gCharacterID = characterID;
+  gInXYZMode = false;
 
   SME::Util::Mario::swapBinary(characterID);
   SME::Util::Mario::loadParams();

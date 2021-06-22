@@ -165,9 +165,9 @@ SME_PATCH_BL(SME_PORT_REGION(0x802A744C, 0, 0, 0), moduleLoad);
   // SME_PATCH_B(SME_PORT_REGION(0x80027548, 0x80245134, 0, 0),
   //             Patch::Camera::modifyCameraRangeToSize);
 
-  // // CheatCode.cpp
-  // SME_PATCH_B(SME_PORT_REGION(0x80295B6C, 0x8028da04, 0, 0),
-  //             Patch::Cheat::handleDebugCheat);
+  // CheatCode.cpp
+  SME_PATCH_B(SME_PORT_REGION(0x80295B6C, 0x8028da04, 0, 0),
+              Patch::Cheat::handleDebugCheat);
 
   // collision.cpp
   SME_PATCH_BL(SME_PORT_REGION(0x80258334, 0x802500c0, 0, 0),
@@ -258,8 +258,8 @@ SME_PATCH_BL(SME_PORT_REGION(0x802A744C, 0, 0, 0), moduleLoad);
   // SME_PATCH_BL(SME_PORT_REGION(0x80298420, 0x802902b8, 0, 0),
   //              Patch::Init::initMusicTrack);
   // SME_WRITE_32(SME_PORT_REGION(0x80276C90, 0x8026ea1c, 0, 0), 0x60000000);
-  SME_PATCH_BL(SME_PORT_REGION(0x80276C94, 0x8026ea20, 0, 0),
-               Patch::Init::fromMarioInit);
+  // SME_PATCH_BL(SME_PORT_REGION(0x80276C94, 0x8026ea20, 0, 0),
+  //              Patch::Init::fromMarioInit);
   // SME_PATCH_BL(SME_PORT_REGION(0x800397DC, 0, 0, 0),
   //              Patch::Init::fromShadowMarioInit);
   // SME_PATCH_BL(SME_PORT_REGION(0x80271580, 0, 0, 0), Patch::Init::initYoshi);
@@ -364,9 +364,9 @@ SME_PATCH_BL(SME_PORT_REGION(0x802A744C, 0, 0, 0), moduleLoad);
   //              Patch::Music::stopMusicOnStageExit);
 
   // patches.cpp
-  SME_PATCH_BL(SME_PORT_REGION(0x802320E0, 0, 0, 0),
+  SME_PATCH_BL(SME_PORT_REGION(0x802320E0, 0x8022a034, 0, 0),
                Patch::Fixes::shadowCrashPatch);
-  SME_PATCH_BL(SME_PORT_REGION(0x802571F0, 0, 0, 0), Patch::Fixes::patchYStorage);
+  SME_PATCH_BL(SME_PORT_REGION(0x802571F0, 0x8024ef7c, 0, 0), Patch::Fixes::patchYStorage);
 
   // shine.cpp
   SME_PATCH_BL(SME_PORT_REGION(0x801BD664, 0x801b551c, 0, 0),
@@ -417,15 +417,14 @@ SME_PATCH_BL(SME_PORT_REGION(0x802A744C, 0, 0, 0), moduleLoad);
   SME_WRITE_32(SME_PORT_REGION(0x801BCD40, 0x801b4bf8, 0, 0), 0x28030001);
   SME_PATCH_BL(SME_PORT_REGION(0x801BCEEC, 0x801b4da4, 0, 0),
                Patch::Shine::setKillState);
-  SME_PATCH_BL(SME_PORT_REGION(0x8029A590, 0x80292460, 0, 0), shine_thinkCloseCamera);
+  SME_PATCH_BL(SME_PORT_REGION(0x8029A590, 0x80292460, 0, 0), Patch::Shine::thinkCloseCamera);
   SME_WRITE_32(SME_PORT_REGION(0x8029A594, 0x80292464, 0, 0), 0x28000000);
 
   // Need PAL equivalent in shine.s
-  // SME_PATCH_BL(SME_PORT_REGION(0x802999D8, 0x80291870, 0, 0),
-  //              shine_animationFreezeCheck);
-  // SME_WRITE_32(SME_PORT_REGION(0x802999DC, 0x80291874, 0, 0), 0x48000034);
+  SME_PATCH_BL(SME_PORT_REGION(0x802999D8, 0x80291870, 0, 0),
+                Patch::Shine::animationFreezeCheck);
+  SME_WRITE_32(SME_PORT_REGION(0x802999DC, 0x80291874, 0, 0), 0x48000034);
   // Make Shines glow more
-
   SME_WRITE_32(SME_PORT_REGION(0x803C9190, 0x803c0980, 0, 0), 0x3F19999A);
 
   // // stage.cpp
@@ -440,7 +439,7 @@ SME_PATCH_BL(SME_PORT_REGION(0x802A744C, 0, 0, 0), moduleLoad);
   // SME_PATCH_BL(SME_PORT_REGION(0x80289920, 0x802816ac, 0, 0),
   //              Patch::Spc::initCustomFunctions);
 
-  // // yoshi.cpp
+  // yoshi.cpp
   // SME_WRITE_32(SME_PORT_REGION(0x8026E068, 0x80265df4, 0, 0),
   //              0x2C000001); // Turn green when out of juice
   // SME_WRITE_32(SME_PORT_REGION(0x8026E0A0, 0x80265e28, 0, 0),
@@ -553,11 +552,11 @@ SME_PATCH_BL(SME_PORT_REGION(0x802A744C, 0, 0, 0), moduleLoad);
 
   /* -- PATCHES -- */
 
-  // // Restore Chao Seed
-  // SME_WRITE_32(SME_PORT_REGION(0x802FD1A0, 0x802f5330, 0, 0), 0x808D8C70);
+  // Restore Chao Seed
+  SME_WRITE_32(SME_PORT_REGION(0x802FD1A0, 0x802f5330, 0, 0), 0x808D8C70);
 
-  // // Show Exception Handler
-  // SME_WRITE_32(SME_PORT_REGION(0x8029D0BC, 0x80294f98, 0, 0), 0x60000000);
+  // Show Exception Handler
+  SME_WRITE_32(SME_PORT_REGION(0x8029D0BC, 0x80294f98, 0, 0), 0x60000000);
 
   // Extend Exception Handler
   SME_WRITE_32(SME_PORT_REGION(0x802C7638, 0x802bf6cc, 0, 0), 0x60000000); // gpr info

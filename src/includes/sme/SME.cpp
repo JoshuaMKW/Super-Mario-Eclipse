@@ -47,6 +47,15 @@ using namespace SME;
     !defined(SME_BUILD_KAMEK_INLINE)
 KURIBO_MODULE_BEGIN(SME_MODULE_NAME, SME_AUTHOR_NAME, SME_VERSION_TAG) {
   KURIBO_EXECUTE_ON_LOAD {
+    OSReport("~~~~~~~~~~~~~~~~~~~~~~~\n"
+             "[KURIBO] Game patched with module:\n"
+             "         Name:     	" SME_MODULE_NAME "\n"
+             "         Author:   	" SME_AUTHOR_NAME "\n"
+             "         Version:  	" SME_VERSION_TAG "\n"
+             "\n"
+             "         Built:    	" __DATE__ " at " __TIME__ "\n"
+             "         Compiler: 	" __VERSION__ "\n"
+             "~~~~~~~~~~~~~~~~~~~~~~~\n");
     SME_DEBUG_LOG(
         "Codeblocker - Creating OSAlarm at %p; Calls %p every %0.4f seconds\n",
         &gctAlarm, &SME::Util::Security::checkUserCodes, 0.001f);
@@ -91,7 +100,8 @@ static void moduleLoad(int size, bool unk) {
       &gctAlarm, OSGetTime(), OSMillisecondsToTicks(1),
       reinterpret_cast<OSAlarmHandler>(&SME::Util::Security::checkUserCodes));
   SME_DEBUG_LOG("Mario health offset = %X\n", offsetof(TMario, mHealth));
-  SME_DEBUG_LOG("J3DFrameCtrl offset = 0x%X\n", offsetof(J3DFrameCtrl, mFrameRate));
+  SME_DEBUG_LOG("J3DFrameCtrl offset = 0x%X\n",
+                offsetof(J3DFrameCtrl, mFrameRate));
   Patch::Init::initCodeProtection();
 }
 
@@ -175,7 +185,7 @@ SME_PATCH_BL(SME_PORT_REGION(0x802A744C, 0, 0, 0), moduleLoad);
   SME_PATCH_BL(SME_PORT_REGION(0x8024D194, 0x80244f20, 0, 0),
                Patch::Debug::xyzModifierMario);
   SME_WRITE_32(SME_PORT_REGION(0x8024D198, 0x80244f24, 0, 0),
-               0x2C030000);    
+               0x2C030000);
 
   // file_flags.cpp
   SME_PATCH_BL(SME_PORT_REGION(0x802B1794, 0x802a96a4, 0, 0),
@@ -352,6 +362,11 @@ SME_PATCH_BL(SME_PORT_REGION(0x802A744C, 0, 0, 0), moduleLoad);
   //             Patch::Music::stopMusicOnStop);
   // SME_PATCH_BL(SME_PORT_REGION(0x802A670C, 0x8029e664, 0, 0),
   //              Patch::Music::stopMusicOnStageExit);
+
+  // patches.cpp
+  SME_PATCH_BL(SME_PORT_REGION(0x802320E0, 0, 0, 0),
+               Patch::Fixes::shadowCrashPatch);
+  SME_PATCH_BL(SME_PORT_REGION(0x802571F0, 0, 0, 0), Patch::Fixes::patchYStorage);
 
   // shine.cpp
   SME_PATCH_BL(SME_PORT_REGION(0x801BD664, 0x801b551c, 0, 0),
@@ -544,9 +559,9 @@ SME_PATCH_BL(SME_PORT_REGION(0x802A744C, 0, 0, 0), moduleLoad);
   // // Show Exception Handler
   // SME_WRITE_32(SME_PORT_REGION(0x8029D0BC, 0x80294f98, 0, 0), 0x60000000);
 
-  // // Extend Exception Handler
-  // SME_WRITE_32(SME_PORT_REGION(0x802C7638, 0x802bf6cc, 0, 0), 0x60000000);
-  // //SME_WRITE_32(SME_PORT_REGION(0x802C7690, 0, 0, 0), 0x60000000);
+  // Extend Exception Handler
+  SME_WRITE_32(SME_PORT_REGION(0x802C7638, 0x802bf6cc, 0, 0), 0x60000000); // gpr info
+  // SME_WRITE_32(SME_PORT_REGION(0x802C7690, 0, 0, 0), 0x60000000); // float info
 
 // #ifdef SME_DEBUG
 //   // Skip FMVs

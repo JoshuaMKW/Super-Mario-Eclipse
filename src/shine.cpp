@@ -29,8 +29,9 @@ void Patch::Shine::manageShineVanish(JGeometry::TVec3<f32> *marioPos) {
     shine->JSGSetScaling(reinterpret_cast<Vec &>(size));
     shine->JSGSetRotation(reinterpret_cast<Vec &>(size));
     shine->mGlowSize.set(1.0f, 1.0f, 1.0f);
-    setAnmFromIndex__12MActorAnmBckFiPUs(shine->mActorData->mBckInfo, -1, nullptr);
-    //shine->mActorData->mBckInfo->setAnmFromIndex(-1, nullptr);
+    setAnmFromIndex__12MActorAnmBckFiPUs(shine->mActorData->mBckInfo, -1,
+                                         nullptr);
+    // shine->mActorData->mBckInfo->setAnmFromIndex(-1, nullptr);
     shine->kill();
   } else if (gpMarioAddress->mState !=
              static_cast<u32>(TMario::State::SHINE_C)) {
@@ -206,4 +207,41 @@ void Patch::Shine::setKillState() {
   SME_FROM_GPR(31, shine);
 
   shine->mType = (shine->mType & 0x10) | 1;
+}
+
+SME_PURE_ASM void Patch::Shine::thinkCloseCamera() {
+  asm volatile("lbz       0, 0x190 (4)        \n\t"
+               "lwz       4, 0x154 (4)        \n\t"
+               "rlwinm.   4, 4, 0, 27, 27     \n\t"
+               "bne       .Ltmp0              \n\t"
+               "li        0, 0                \n\t"
+
+               ".Ltmp0:                       \n\t"
+               "blr                           \n\t");
+}
+
+SME_PURE_ASM void Patch::Shine::animationFreezeCheck() {
+  asm volatile("lbz       0, 0x64(26)         \n\t"
+               "cmpwi     0, 10               \n\t"
+               "beq-      .loc_0x38           \n\t"
+               "bge-      .loc_0x18           \n\t"
+               "cmpwi     0, 5                \n\t"
+               "bne-      .loc_0x3C           \n\t"
+
+               ".loc_0x18:                    \n\t"
+               "cmpwi     0, 13               \n\t"
+               "bge-      .loc_0x3C           \n\t"
+               "lis 3,    gpMarioAddress@ha   \n\t"
+               "lwz 3,    gpMarioAddress@l (3)\n\t"
+               "lwz       3, 0x7C(3)          \n\t"
+               "cmpwi     3, 0x1302           \n\t"
+               "bne-      .loc_0x38           \n\t"
+               "cmpwi     0, 11               \n\t"
+               "beq-      .loc_0x3C           \n\t"
+
+               ".loc_0x38:                    \n\t"
+               "ori       27, 27, 0x3         \n\t"
+
+               ".loc_0x3C:                    \n\t"
+               "blr                           \n\t");
 }

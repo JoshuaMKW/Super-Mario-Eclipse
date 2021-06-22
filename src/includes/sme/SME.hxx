@@ -20,17 +20,19 @@
 #include "params/StageParams.hxx"
 
 #include "OS.h"
+#include "MTX.h"
 #include "defines.h"
 #include "macros.h"
 #include "sms/JSystem/J2D/J2DOrthoGraph.hxx"
 #include "sms/JSystem/JGeometry.hxx"
-#include "sms/SMS.hxx"
 #include "sms/game/Conductor.hxx"
 #include "sms/npc/BaseNPC.hxx"
 #include "sms/object/ResetFruit.hxx"
 #include "sms/screen/ShineFader.hxx"
 #include "sms/sound/MSBGM.hxx"
 #include "sms/talk/Talk2D2.hxx"
+#include "sms/enemy/EnemyMario.hxx"
+#include "sms/SMS.hxx"
 #include "types.h"
 
 #ifndef KURIBO_NO_TYPES
@@ -43,7 +45,12 @@
 
 #define SME_MODULE_NAME "Eclipse"
 #define SME_AUTHOR_NAME "JoshuaMK"
-#define SME_VERSION_TAG __VERSION__ "[" SME_STRINGIZE(SME_MAX_SHINES) " Shines]"
+
+#ifdef SME_DEBUG
+#define SME_VERSION_TAG "(DEBUG) " SME_VERSION "[" SME_STRINGIZE(SME_MAX_SHINES) " Shines]"
+#else
+#define SME_VERSION_TAG "(RELEASE) " SME_VERSION "[" SME_STRINGIZE(SME_MAX_SHINES) " Shines]"
+#endif
 
 // init_mods.cpp
 SME_EXTERN_C OSBootInfo BootInfo;
@@ -116,6 +123,13 @@ bool xyzModifierMario(TMario *player);
 
 } // namespace Debug
 
+namespace Fixes {
+
+void shadowCrashPatch();
+u32 patchYStorage();
+
+}
+
 namespace Flag {
 
 TCardBookmarkInfo *setFileCompleteBool(TCardManager *cardManager);
@@ -187,11 +201,10 @@ void getClimbingAnimSpd(TMario *player, TMario::Animation anim, f32 speed);
 void scaleHangSpeed(TMario *player);
 void checkGraffitiAffected(TMario *player);
 void rescaleHeldObj(Mtx holderMatrix, Mtx destMatrix);
-u32 patchYStorage();
 void manageExtraJumps(TMario *player);
-f32 calcJumpPower(TMario *player, f32 factor, f32 curYVelocity, f32 jumpPower);
+void normJumpMultiplier();
 f32 checkGroundSpeedLimit();
-void manageEMarioHealthWrapper(s32 chan, JUtility::TColor *color);
+void manageEMarioHealthWrapper(TEnemyMario *eMario, Mtx *posMtx);
 
 } // namespace Mario
 
@@ -208,7 +221,7 @@ void setMarioOverhaul(TMarDirector *director);
 namespace Music {
 
 u32 setIsValid(MSStageInfo musicID);
-void initMusic();
+JAISound *initMusic(JAISound *jai);
 void stopMusicOnStop();
 void stopMusicOnStageExit(TMarioGamePad *gamepad);
 
@@ -231,6 +244,8 @@ void extendFlagManagerSave(JSUMemoryOutputStream &stream);
 void thinkSetBootFlag(TShineFader *shineFader, u32 unk_1, u32 unk_2);
 u32 loadAfterMaskState();
 void setKillState();
+void thinkCloseCamera();
+void animationFreezeCheck();
 
 } // namespace Shine
 

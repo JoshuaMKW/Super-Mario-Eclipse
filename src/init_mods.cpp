@@ -11,6 +11,8 @@ using namespace SME;
 using namespace SME::Util;
 using namespace SME::Class;
 
+extern bool gInXYZMode;
+
 Memory::Protection::MemoryMap gCodeProtector;
 
 // 0x80005328
@@ -145,6 +147,7 @@ TMarDirector *SME::Patch::Init::initFileMods() {
   TStageParams::sStageConfig->load(SME::Util::getStageName(&gpApplication));
 
   gCharacterID = characterID;
+  gInXYZMode = false;
 
   SME::Util::Mario::swapBinary(characterID);
   SME::Util::Mario::loadParams();
@@ -184,7 +187,7 @@ void SME::Patch::Init::initShineShadow() {
         TLightContext::ActiveType::STATIC) {
       LightContext.mNextSize =
           LightContext.mShineShadowBase +
-          powf(((1300.0f / SME_MAX_SHINES) * CurrentShineCount), 1.5f);
+          powf(((1350.0f / SME_MAX_SHINES) * CurrentShineCount), 1.5f);
 
       if (config->mLightDarkLevel.get() == 255)
         gpModelWaterManager->mDarkLevel =
@@ -202,24 +205,36 @@ void SME::Patch::Init::initShineShadow() {
   }
 }
 
+// for future intro sound patch
+static u8 gOldAreaID = 0;
+static u8 gOldEpisodeID = 0;
+
 // 0x802B7A4C
 void SME::Patch::Init::initSoundBank(u8 areaID, u8 episodeID) {
   TStageParams *config = TStageParams::sStageConfig;
-  setMSoundEnterStage__10MSMainProcFUcUc(config->mMusicAreaID.get(),
-                                         config->mMusicEpisodeID.get());
+
+  gOldAreaID = areaID;
+  gOldEpisodeID = episodeID;
+  if (config->mMusicSetCustom.get()) {
+    areaID = config->mMusicAreaID.get();
+    episodeID = config->mMusicEpisodeID.get();
+  }
+  setMSoundEnterStage__10MSMainProcFUcUc(areaID, episodeID);
 }
 
 // 0x802983F0
 // 0x80298420
 void SME::Patch::Init::initMusicTrack() {
   TStageParams *config = TStageParams::sStageConfig;
-  if (config->mMusicEnabled.get()) {
+
+  if (config->mMusicSetCustom.get())
     gStageBGM = 0x80010000 | config->mMusicID.get();
     gAudioSpeed = config->mMusicSpeed.get();
     gAudioPitch = config->mMusicPitch.get();
     gAudioVolume = Max(Min(config->mMusicVolume.get(), 1), 0);
-  }
-  startStageBGM__10MSMainProcFUcUc();
+
+  if (config->mMusicEnabled.get())
+    startStageBGM__10MSMainProcFUcUc();
 }
 
 static void initFludd(TMario *player, TPlayerData *params) {
@@ -270,10 +285,13 @@ static void initFludd(TMario *player, TPlayerData *params) {
 }
 
 static void initMario(TMario *player, bool isMario) {
+  TStageParams *config = TStageParams::sStageConfig;
+
   TPlayerData *params = new TPlayerData(player, nullptr, isMario);
   SME::TGlobals::registerPlayerParams(params);
 
-  TStageParams *config = TStageParams::sStageConfig;
+  params->scalePlayerAttrs(config->mPlayerSizeMultiplier.get());
+
   if (config->isCustomConfig()) {
     params->setPlayerID(gCharacterID);
     player->mHealth = config->mPlayerHealth.get();

@@ -34,7 +34,8 @@
         "int_lib.h": "c",
         "*.inc": "c",
         "types.h": "c",
-        "*.tcc": "c"
+        "*.tcc": "c",
+        "os.h": "c"
     },
     "cmake.configureOnOpen": false
 }

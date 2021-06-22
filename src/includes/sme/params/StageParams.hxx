@@ -161,6 +161,7 @@ struct TStageParams : public TParams {
         CONSTRUCT_PARAM(mMusicID, 1), CONSTRUCT_PARAM(mMusicAreaID, 1),
         CONSTRUCT_PARAM(mMusicEpisodeID, 0),
         CONSTRUCT_PARAM(mMusicEnabled, true),
+        CONSTRUCT_PARAM(mMusicSetCustom, false),
         CONSTRUCT_PARAM(mGravityMultiplier, 1.0f),
         CONSTRUCT_PARAM(mMaxFrameRate, 30.0f) {
     delete sStageConfig;
@@ -240,6 +241,7 @@ struct TStageParams : public TParams {
   TParamT<u8> mMusicAreaID;
   TParamT<u8> mMusicEpisodeID;
   TParamT<bool> mMusicEnabled;
+  TParamT<bool> mMusicSetCustom;
 
   // Global Info
   TParamT<f32> mGravityMultiplier;

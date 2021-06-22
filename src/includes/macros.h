@@ -50,8 +50,10 @@
 
 #ifdef __MWERKS__
 #define SME_REGISTER register
+#define SME_PURE_ASM asm
 #else
 #define SME_REGISTER
+#define SME_PURE_ASM __attribute__((naked))
 #endif
 
 #define SME_CALL_NAIVE(addr, ...) ((void(*)(...))addr)(__VA_ARGS__)

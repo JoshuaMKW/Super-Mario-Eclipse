@@ -99,7 +99,7 @@ class TPlayerData {
 public:
   struct ParamHistory {
     ParamHistory();
-    ParamHistory(TMario *);
+    ParamHistory(TMario *player);
 
     bool hasHistory() const { return mHasHistory; }
 

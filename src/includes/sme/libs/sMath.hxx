@@ -17,8 +17,8 @@ constexpr f32 radiansToAngle(f32 r) {
 }
 constexpr f64 radiansToAngle(f64 r) { return (180.0 / M_PI) * r; }
 
-template <typename T> constexpr T scaleLinear(T value, T scale) {
-  return (value * scale) + (static_cast<T>(1) - scale);
+template <typename T> constexpr T scaleLinearAtAnchor(T value, T scale, T anchor) {
+  return (value * scale) + (anchor - scale);
 }
 
 /*
@@ -28,7 +28,7 @@ template <typename T> constexpr T scaleLinear(T value, T scale) {
 / c = x offset
 / b = steepness
 /
-/ Graphing Calculator: https://www.desmos.com/calculator/kn9tpwdan5
+/ Graphing Calculator: https://www.desmos.com/calculator/gfcphg11cn
 */
 inline f32 sigmoidCurve(f32 x, f32 f, f32 r, f32 c, f32 b) {
   return f + ((r - f) / (1.0f + expf((b * -1.0f) * (x - c))));

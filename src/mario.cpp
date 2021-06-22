@@ -1,4 +1,5 @@
 #include "MTX.h"
+#include "math.h"
 #include "types.h"
 
 #include "sms/actor/Mario.hxx"
@@ -164,8 +165,8 @@ TMario *SME::Patch::Mario::scaleNPCThrowLength(TMario *player, float *params) {
 
   if (playerParams->isMario())
     _f11 *= playerParams->getParams()->mThrowPowerMultiplier.get() *
-            Util::Math::scaleLinear<f32>(
-                playerParams->getParams()->mSizeMultiplier.get(), 0.5f);
+            Util::Math::scaleLinearAtAnchor<f32>(
+                playerParams->getParams()->mSizeMultiplier.get(), 0.5f, 1.0f);
 
   if (player->mState == static_cast<u32>(TMario::State::NPC_THROW) ||
       player->mState == static_cast<u32>(TMario::State::NPC_JUMPTHROW)) {
@@ -188,8 +189,8 @@ u32 SME::Patch::Mario::scaleNPCThrowHeight(u32 _r3, f32 z, f32 y) {
 
   if (playerParams->isMario())
     y *= playerParams->getParams()->mThrowPowerMultiplier.get() *
-         Util::Math::scaleLinear<f32>(
-             playerParams->getParams()->mSizeMultiplier.get(), 0.5f);
+         Util::Math::scaleLinearAtAnchor<f32>(
+             playerParams->getParams()->mSizeMultiplier.get(), 0.5f, 1.0f);
 
   if (player->mState == static_cast<u32>(TMario::State::NPC_THROW) ||
       player->mState == static_cast<u32>(TMario::State::NPC_JUMPTHROW))
@@ -591,18 +592,6 @@ static asm void scaleNPCTalkRadius(){
 #endif
 
 // extern -> SME.cpp
-// 0x802571F0
-u32 SME::Patch::Mario::patchYStorage() {
-  TMario *player;
-  SME_FROM_GPR(31, player);
-
-  if (player->mState != static_cast<u32>(TMario::State::IDLE))
-    player->mSpeed.y = 0.0f;
-
-  return 0;
-}
-
-// extern -> SME.cpp
 // 0x8024E02C
 void SME::Patch::Mario::manageExtraJumps(TMario *player) {
   SME::Class::TPlayerData *playerParams =
@@ -639,24 +628,38 @@ void SME::Patch::Mario::manageExtraJumps(TMario *player) {
   stateMachine__6TMarioFv(player);
 }
 
-// extern -> SME.cpp
-// 0x8024E02C
-f32 SME::Patch::Mario::calcJumpPower(TMario *player, f32 factor,
-                                     f32 curYVelocity, f32 jumpPower) {
+static f32 calcJumpPower(TMario *player, f32 factor, f32 curYVelocity,
+                         f32 jumpPower) {
   SME::Class::TPlayerData *playerParams =
       SME::TGlobals::getPlayerParams(player);
 
   jumpPower *= playerParams->getParams()->mBaseJumpMultiplier.get();
+  jumpPower *= SME::Util::Math::scaleLinearAtAnchor<f32>(
+      playerParams->getParams()->mSizeMultiplier.get() *
+          SME::Class::TStageParams::sStageConfig->mPlayerSizeMultiplier.get(),
+      0.5f, 1.0f);
   if (player->mState & static_cast<u32>(TMario::State::AIRBORN)) {
-    jumpPower *= powf(playerParams->getParams()->mMultiJumpMultiplier.get(),
-                      (f32)playerParams->mCurJump);
+    f32 multiplier = playerParams->getParams()->mMultiJumpMultiplier.get();
+    for (u32 i = 1; i < playerParams->mCurJump; ++i) {
+      multiplier *= multiplier;
+    }
+    jumpPower *= multiplier;
     player->mForwardSpeed *=
         playerParams->getParams()->mMultiJumpFSpeedMulti.get();
   }
   return (curYVelocity * factor) + jumpPower;
 }
 
+// extern -> SME.cpp
+// 0x80254534
+void SME::Patch::Mario::normJumpMultiplier() {
+  TMario *player;
+  SME_FROM_GPR(30, player);
+
+  player->mSpeed.y = calcJumpPower(player, 0.25f, player->mForwardSpeed, 42.0f);
+}
 #if 0
+
 static asm void jumpPowerWrapper(){
   mflr r0 stw r0,
   0x4(sp)stwu sp,
@@ -997,7 +1000,7 @@ kmWrite32(0x80256D0C, 0xEC0100BC);
 
 static JUtility::TColor getEMarioHealthBarRGBA(TEnemyMario *eMario) {
   JUtility::TColor color;
-  s16 maxHealth = ((s16 *)eMario->mEnemyManager)[0x40 / 2];
+  const s16 maxHealth = ((s16 *)eMario->mEnemyManager)[0x40 / 2];
 
   color.set(0xFF, 0x00, 0x00, 0xFF);
   color.g = SME::Util::Math::lerp<u8>(0, 255,
@@ -1009,12 +1012,9 @@ static JUtility::TColor getEMarioHealthBarRGBA(TEnemyMario *eMario) {
 }
 
 // extern -> SME.cpp
-// 0x8003FFEC
-void SME::Patch::Mario::manageEMarioHealthWrapper(s32 chan, JUtility::TColor *color) {
-  TEnemyMario *eMario;
-  SME_FROM_GPR(30, eMario);
-
-  JUtility::TColor healthColor = getEMarioHealthBarRGBA(eMario);
-  GXSetChanMatColor(chan, (healthColor.r << 24) | (healthColor.g << 16) |
-                              (healthColor.b << 8) | healthColor.a);
+// 0x8003FDAC
+void SME::Patch::Mario::manageEMarioHealthWrapper(TEnemyMario *eMario,
+                                                  Mtx *posMtx) {
+  *(JUtility::TColor *)0x8040FA90 = getEMarioHealthBarRGBA(eMario);
+  drawHPMeter__11TEnemyMarioFPA4_f(eMario, posMtx);
 }

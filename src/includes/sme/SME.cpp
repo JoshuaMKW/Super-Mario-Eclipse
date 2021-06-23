@@ -146,14 +146,14 @@ SME_PATCH_BL(SME_PORT_REGION(0x802A744C, 0, 0, 0), moduleLoad);
   SME_PATCH_BL(SME_PORT_REGION(0x802998B8, 0x80291750, 0, 0), Patch::CKit::onSetup);
   SME_PATCH_BL(SME_PORT_REGION(0x802A616C, 0x8029e07c, 0, 0), Patch::CKit::onUpdate);
   SME_PATCH_BL(SME_PORT_REGION(0x80143F14, 0x80138b50, 0, 0), Patch::CKit::onDraw2D);
-  // SME_PATCH_B(SME_PORT_REGION(0x802A8B58, 0x802a0c00, 0, 0), Util::SMS::isExMap);
-  // SME_PATCH_B(SME_PORT_REGION(0x802A8B30, 0x802a0bd8, 0, 0),
-  //             Util::SMS::isMultiplayerMap);
-  // SME_PATCH_B(SME_PORT_REGION(0x802A8AFC, 0x802a0ba4, 0, 0), Util::SMS::isDivingMap);
-  // SME_PATCH_B(SME_PORT_REGION(0x802A8AE0, 0x802a0b88, 0, 0), Util::SMS::isOptionMap);
-  // SME_PATCH_BL(SME_PORT_REGION(0x8027C6A4, 0x80274430, 0, 0),
-  //              Patch::CKit::manageLightSize);
-  // SME_WRITE_32(SME_PORT_REGION(0x8027C6A8, 0x80274434, 0, 0), 0x28030001);
+  SME_PATCH_B(SME_PORT_REGION(0x802A8B58, 0x802a0c00, 0, 0), Util::SMS::isExMap);
+  SME_PATCH_B(SME_PORT_REGION(0x802A8B30, 0x802a0bd8, 0, 0),
+              Util::SMS::isMultiplayerMap);
+  SME_PATCH_B(SME_PORT_REGION(0x802A8AFC, 0x802a0ba4, 0, 0), Util::SMS::isDivingMap);
+  SME_PATCH_B(SME_PORT_REGION(0x802A8AE0, 0x802a0b88, 0, 0), Util::SMS::isOptionMap);
+  SME_PATCH_BL(SME_PORT_REGION(0x8027C6A4, 0x80274430, 0, 0),
+               Patch::CKit::manageLightSize);
+  SME_WRITE_32(SME_PORT_REGION(0x8027C6A8, 0x80274434, 0, 0), 0x28030001);
   SME_PATCH_BL(SME_PORT_REGION(0x80153DE8, 0x80148d68, 0, 0),
                Patch::CKit::formatTalkMessage);
   SME_PATCH_BL(SME_PORT_REGION(0x80153E1C, 0x80148d9c, 0, 0),
@@ -178,8 +178,9 @@ SME_PATCH_BL(SME_PORT_REGION(0x802A744C, 0, 0, 0), moduleLoad);
                Patch::Collision::checkIsRestoreTypeNoFallDamage);
   SME_PATCH_BL(SME_PORT_REGION(0x80250CA0, 0x80247e44, 0, 0),
                Patch::Collision::masterGroundCollisionHandler);
-  SME_PATCH_BL(SME_PORT_REGION(0x8025059C, 0x80248a2c, 0, 0),
-               Patch::Collision::masterAllCollisionHandler);
+  // causing invalid reads
+  // SME_PATCH_BL(SME_PORT_REGION(0x8025059C, 0x80248a2c, 0, 0),
+  //              Patch::Collision::masterAllCollisionHandler);
 
   // debug.cpp
   SME_PATCH_BL(SME_PORT_REGION(0x8024D194, 0x80244f20, 0, 0),
@@ -194,41 +195,41 @@ SME_PATCH_BL(SME_PORT_REGION(0x802A744C, 0, 0, 0), moduleLoad);
   // flagmanager.cpp
   SME_PATCH_B(SME_PORT_REGION(0x80294EF4, 0x8028cd0c, 0, 0), Patch::Flag::resetStage);
 
-  // // fludd.cpp
-  // SME_PATCH_B(SME_PORT_REGION(0x80248F14, 0x80240ca0, 0, 0), Patch::Fludd::isPumpOK);
-  // SME_WRITE_32(SME_PORT_REGION(0x803DCA00, 0x803d41e2, 0, 0),
-  //              0x00300000 | TMarioAnimeData::FLUDD::FLUDD_ENABLED);
-  // SME_PATCH_BL(SME_PORT_REGION(0x8014206C, 0x80136c80, 0, 0),
-  //              Patch::Fludd::hasWaterCardOpen);
-  // SME_WRITE_32(SME_PORT_REGION(0x80142070, 0x80136c84, 0, 0), 0x28030000);
-  // SME_PATCH_BL(SME_PORT_REGION(0x80283058, 0x8027ade4, 0, 0),
-  //              Patch::Fludd::canCollectFluddItem);
-  // SME_PATCH_BL(SME_PORT_REGION(0x800678C4, 0x80060f64, 0, 0),
-  //              Patch::Fludd::sprayGoopMap);
-  // SME_PATCH_BL(SME_PORT_REGION(0x801A3ED0, 0x8019c758, 0, 0),
-  //              Patch::Fludd::sprayGoopMap);
-  // SME_PATCH_BL(SME_PORT_REGION(0x801B42D8, 0x801ac190, 0, 0),
-  //              Patch::Fludd::sprayGoopMap);
-  // SME_PATCH_BL(SME_PORT_REGION(0x8024E710, 0x8024649c, 0, 0),
-  //              Patch::Fludd::sprayGoopMap);
-  // SME_PATCH_BL(SME_PORT_REGION(0x8027F7DC, 0x80277568, 0, 0),
-  //              Patch::Fludd::sprayGoopMap);
-  // SME_PATCH_BL(SME_PORT_REGION(0x8027F94C, 0x802776d8, 0, 0),
-  //              Patch::Fludd::sprayGoopMap);
-  // SME_PATCH_BL(SME_PORT_REGION(0x800FED3C, 0x800f83dc, 0, 0),
-  //              Patch::Fludd::canCleanSeals);
-  // SME_WRITE_32(SME_PORT_REGION(0x800FED40, 0x800f83e0, 0, 0), 0x2C030000);
-  // SME_PATCH_BL(SME_PORT_REGION(0x8024D53C, 0x802452c8, 0, 0),
-  //              Patch::Fludd::bindFluddtojoint);
-  // SME_PATCH_BL(SME_PORT_REGION(0x8024E548, 0x802462d4, 0, 0),
-  //              Patch::Fludd::checkExecWaterGun);
-  // SME_PATCH_BL(SME_PORT_REGION(0x8026C370, 0x802640fc, 0, 0),
-  //              Patch::Fludd::killTriggerNozzle);
-  // SME_PATCH_BL(SME_PORT_REGION(0x8026C018, 0x80263da4, 0, 0),
-  //              Patch::Fludd::spamHoverWrapper);
-  // SME_PATCH_BL(SME_PORT_REGION(0x80262580, 0x8025a30c, 0, 0),
-  //              Patch::Fludd::checkAirNozzle);
-  // SME_WRITE_32(SME_PORT_REGION(0x80262584, 0x8025a310, 0, 0), 0x2C030000);
+  // fludd.cpp
+  SME_PATCH_B(SME_PORT_REGION(0x80248F14, 0x80240ca0, 0, 0), Patch::Fludd::isPumpOK);
+  SME_WRITE_32(SME_PORT_REGION(0x803DCA00, 0x803d41e2, 0, 0),
+               0x00300000 | TMarioAnimeData::FLUDD::FLUDD_ENABLED);
+  SME_PATCH_BL(SME_PORT_REGION(0x8014206C, 0x80136c80, 0, 0),
+               Patch::Fludd::hasWaterCardOpen);
+  SME_WRITE_32(SME_PORT_REGION(0x80142070, 0x80136c84, 0, 0), 0x28030000);
+  SME_PATCH_BL(SME_PORT_REGION(0x80283058, 0x8027ade4, 0, 0),
+               Patch::Fludd::canCollectFluddItem);
+  SME_PATCH_BL(SME_PORT_REGION(0x800678C4, 0x80060f64, 0, 0),
+               Patch::Fludd::sprayGoopMap);
+  SME_PATCH_BL(SME_PORT_REGION(0x801A3ED0, 0x8019c758, 0, 0),
+               Patch::Fludd::sprayGoopMap);
+  SME_PATCH_BL(SME_PORT_REGION(0x801B42D8, 0x801ac190, 0, 0),
+               Patch::Fludd::sprayGoopMap);
+  SME_PATCH_BL(SME_PORT_REGION(0x8024E710, 0x8024649c, 0, 0),
+               Patch::Fludd::sprayGoopMap);
+  SME_PATCH_BL(SME_PORT_REGION(0x8027F7DC, 0x80277568, 0, 0),
+               Patch::Fludd::sprayGoopMap);
+  SME_PATCH_BL(SME_PORT_REGION(0x8027F94C, 0x802776d8, 0, 0),
+               Patch::Fludd::sprayGoopMap);
+  SME_PATCH_BL(SME_PORT_REGION(0x800FED3C, 0x800f83dc, 0, 0),
+               Patch::Fludd::canCleanSeals);
+  SME_WRITE_32(SME_PORT_REGION(0x800FED40, 0x800f83e0, 0, 0), 0x2C030000);
+  SME_PATCH_BL(SME_PORT_REGION(0x8024D53C, 0x802452c8, 0, 0),
+               Patch::Fludd::bindFluddtojoint);
+  SME_PATCH_BL(SME_PORT_REGION(0x8024E548, 0x802462d4, 0, 0),
+               Patch::Fludd::checkExecWaterGun);
+  SME_PATCH_BL(SME_PORT_REGION(0x8026C370, 0x802640fc, 0, 0),
+               Patch::Fludd::killTriggerNozzle);
+  SME_PATCH_BL(SME_PORT_REGION(0x8026C018, 0x80263da4, 0, 0),
+               Patch::Fludd::spamHoverWrapper);
+  SME_PATCH_BL(SME_PORT_REGION(0x80262580, 0x8025a30c, 0, 0),
+               Patch::Fludd::checkAirNozzle);
+  SME_WRITE_32(SME_PORT_REGION(0x80262584, 0x8025a310, 0, 0), 0x2C030000);
 
   // fruit.cpp
   SME_PATCH_BL(SME_PORT_REGION(0x801E542C, 0x801dd304, 0, 0),
@@ -249,25 +250,25 @@ SME_PATCH_BL(SME_PORT_REGION(0x802A744C, 0, 0, 0), moduleLoad);
   // SME_PATCH_BL(SME_PORT_REGION(0x802A716C, 0x8029f058, 0, 0),
   //              Patch::Init::initFirstModel);
   // SME_PATCH_BL(SME_PORT_REGION(0x802998B4, 0x8029174c, 0, 0), Patch::Init::initFileMods);
-  // SME_PATCH_B(SME_PORT_REGION(0x80280180, 0x80277f0c, 0, 0),
-  //             Patch::Init::initShineShadow);
-  // SME_PATCH_BL(SME_PORT_REGION(0x802B7A4C, 0x802afa1c, 0, 0),
-  //              Patch::Init::initSoundBank);
-  // SME_PATCH_BL(SME_PORT_REGION(0x802983F0, 0x80290288, 0, 0),
-  //              Patch::Init::initMusicTrack);
-  // SME_PATCH_BL(SME_PORT_REGION(0x80298420, 0x802902b8, 0, 0),
-  //              Patch::Init::initMusicTrack);
-  // SME_WRITE_32(SME_PORT_REGION(0x80276C90, 0x8026ea1c, 0, 0), 0x60000000);
-  // SME_PATCH_BL(SME_PORT_REGION(0x80276C94, 0x8026ea20, 0, 0),
-  //              Patch::Init::fromMarioInit);
-  // SME_PATCH_BL(SME_PORT_REGION(0x800397DC, 0, 0, 0),
+  SME_PATCH_B(SME_PORT_REGION(0x80280180, 0x80277f0c, 0, 0),
+              Patch::Init::initShineShadow);
+  SME_PATCH_BL(SME_PORT_REGION(0x802B7A4C, 0x802afa1c, 0, 0),
+               Patch::Init::initSoundBank);
+  SME_PATCH_BL(SME_PORT_REGION(0x802983F0, 0x80290288, 0, 0),
+               Patch::Init::initMusicTrack);
+  SME_PATCH_BL(SME_PORT_REGION(0x80298420, 0x802902b8, 0, 0),
+               Patch::Init::initMusicTrack);
+  SME_WRITE_32(SME_PORT_REGION(0x80276C90, 0x8026ea1c, 0, 0), 0x60000000);
+  SME_PATCH_BL(SME_PORT_REGION(0x80276C94, 0x8026ea20, 0, 0),
+               Patch::Init::fromMarioInit);
+  // SME_PATCH_BL(SME_PORT_REGION(0x800397DC, 0x80039894, 0, 0),
   //              Patch::Init::fromShadowMarioInit);
-  // SME_PATCH_BL(SME_PORT_REGION(0x80271580, 0, 0, 0), Patch::Init::initYoshi);
-  // SME_PATCH_B(SME_PORT_REGION(0x8029CCB0, 0, 0, 0),
+  // SME_PATCH_BL(SME_PORT_REGION(0x80271580, 0x8026930c, 0, 0), Patch::Init::initYoshi);
+  // SME_PATCH_B(SME_PORT_REGION(0x8029CCB0, 0x80294b8c, 0, 0),
   //             Patch::Init::initCardColors);
-  // SME_PATCH_BL(SME_PORT_REGION(0x802B8B20, 0, 0, 0),
+  // SME_PATCH_BL(SME_PORT_REGION(0x802B8B20, 0x802b0af0, 0, 0),
   //              Patch::Init::initCollisionWarpLinks);
-  // SME_PATCH_BL(SME_PORT_REGION(0x802B57E4, 0, 0, 0), Patch::Init::createUIHeap);
+  // SME_PATCH_BL(SME_PORT_REGION(0x802B57E4, 0x802ad768, 0, 0), Patch::Init::createUIHeap);
 
   // // mario.cpp
   // SME_PATCH_BL(SME_PORT_REGION(0x802320E0, 0, 0, 0), mario_shadowCrashPatch);
@@ -328,40 +329,15 @@ SME_PATCH_BL(SME_PORT_REGION(0x802A744C, 0, 0, 0), moduleLoad);
   // Patch::Multiplayer::setMarioOverhaul);
   // SME_PATCH_BL(SME_PORT_REGION(0x802984D8, 0, 0, 0),
   // Patch::Multiplayer::setMarioOverhaul);
-  // SME_PATCH_BL(SME_PORT_REGION(0x800397DC, 0x80039894, 0, 0),
-  //              Patch::Init::fromShadowMarioInit);
-  // SME_PATCH_BL(SME_PORT_REGION(0x80271580, 0x8026930c, 0, 0), Patch::Init::initYoshi);
-  // SME_PATCH_B(SME_PORT_REGION(0x8029CCB0, 0x80294b8c, 0, 0),
-  //             Patch::Init::initCardColors);
-  // SME_PATCH_BL(SME_PORT_REGION(0x802B8B20, 0x802b0af0, 0, 0),
-  //              Patch::Init::initCollisionWarpLinks);
-  // SME_PATCH_BL(SME_PORT_REGION(0x802B57E4, 0x802ad768, 0, 0), Patch::Init::createUIHeap);
 
-
-
-  // // multiplayer.cpp
-  // // SME_PATCH_B(SME_PORT_REGION(0x802EFAB4, 0, 0, 0),
-  // // Patch::Multiplayer::draw3DOverhaul);
-  // SME_PATCH_BL(SME_PORT_REGION(0x8029D7E8, 0x802956c4, 0, 0),
-  //              Patch::Multiplayer::makeMarios);
-  // // SME_PATCH_B(SME_PORT_REGION(0x80276BD0, 0, 0, 0),
-  // // Patch::Multiplayer::loadMarioTrickyOverhaul);
-  // // SME_PATCH_B(SME_PORT_REGION(0x8024D2A8, 0, 0, 0),
-  // // Patch::Multiplayer::performMarioTrickyOverhaul);
-  // // SME_PATCH_BL(SME_PORT_REGION(0x802983F8, 0, 0, 0),
-  // // Patch::Multiplayer::setMarioOverhaul);
-  // // SME_PATCH_BL(SME_PORT_REGION(0x80298428, 0, 0, 0),
-  // // Patch::Multiplayer::setMarioOverhaul);
-  // // SME_PATCH_BL(SME_PORT_REGION(0x802984D8, 0, 0, 0),
-  // // Patch::Multiplayer::setMarioOverhaul);
 
   // music.cpp
-  // SME_PATCH_BL(SME_PORT_REGION(0x80016998, 0x800169f4, 0, 0), Patch::Music::setIsValid);
-  // SME_PATCH_B(SME_PORT_REGION(0x80016ABC, 0x80016b18, 0, 0), Patch::Music::initMusic);
-  // SME_PATCH_B(SME_PORT_REGION(0x80016948, 0x800169a4, 0, 0),
-  //             Patch::Music::stopMusicOnStop);
-  // SME_PATCH_BL(SME_PORT_REGION(0x802A670C, 0x8029e664, 0, 0),
-  //              Patch::Music::stopMusicOnStageExit);
+  SME_PATCH_BL(SME_PORT_REGION(0x80016998, 0x800169f4, 0, 0), Patch::Music::setIsValid);
+  SME_PATCH_B(SME_PORT_REGION(0x80016ABC, 0x80016b18, 0, 0), Patch::Music::initMusic);
+  SME_PATCH_B(SME_PORT_REGION(0x80016948, 0x800169a4, 0, 0),
+              Patch::Music::stopMusicOnStop);
+  SME_PATCH_BL(SME_PORT_REGION(0x802A670C, 0x8029e664, 0, 0),
+               Patch::Music::stopMusicOnStageExit);
 
   // patches.cpp
   SME_PATCH_BL(SME_PORT_REGION(0x802320E0, 0x8022a034, 0, 0),

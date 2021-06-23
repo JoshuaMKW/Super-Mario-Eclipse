@@ -30,7 +30,7 @@ void SME::Patch::Init::initCodeProtection() {
 // extern -> SME.cpp
 JKRExpHeap *SME::Patch::Init::createGlobalHeaps(void *newHeap, size_t size,
                                                 JKRHeap *rootHeap, bool unk_1) {
-  constexpr size_t charactersize = 0x1A0000;
+  constexpr size_t charactersize = 0x100000; // Will need to figure out a good size for this
   constexpr size_t globalsize = 0x8000;
 
 #ifdef SME_DETACHED_HEAPS
@@ -68,7 +68,7 @@ JKRExpHeap *SME::Patch::Init::createGlobalHeaps(void *newHeap, size_t size,
 
     SME::TGlobals::sCharacterHeap->alloc(
         SME::TGlobals::sCharacterHeap->getFreeSize(), 4);
-
+    SME_DEBUG_LOG("sStageConfig\n");
     TStageParams::sStageConfig =
         new (JKRHeap::sRootHeap, 4) TStageParams(nullptr);
 

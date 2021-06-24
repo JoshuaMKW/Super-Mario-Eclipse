@@ -528,6 +528,8 @@ SME_PATCH_BL(SME_PORT_REGION(0x802A744C, 0, 0, 0), moduleLoad);
 
   /* -- PATCHES -- */
 
+  SME_PATCH_BL(SME_PORT_REGION(0x8016B1D4, 0x802a20fc, 0, 0), Patch::FireyPetey::createInstance);
+
   // Restore Chao Seed
   SME_WRITE_32(SME_PORT_REGION(0x802FD1A0, 0x802f5330, 0, 0), 0x808D8C70);
 

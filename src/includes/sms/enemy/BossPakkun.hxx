@@ -7,6 +7,11 @@
 #include "sms/JSystem/JDrama.hxx"
 
 
+
+class TBossPakkun : public TSpineEnemy
+{
+
+private:
 class TBPPolDrop: public THitActor
 {
 
@@ -22,10 +27,6 @@ public:
     f32 _02;                              //0x0088
 
 };
-
-
-class TBossPakkun : public TSpineEnemy
-{
 
 public:
 
@@ -68,3 +69,5 @@ public:
     s8  _12;                    //0x01C4
     u32 _13;                    //0x01CC          
 };
+
+

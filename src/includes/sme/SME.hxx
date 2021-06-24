@@ -263,6 +263,13 @@ void initCustomFunctions(TSpcBinary *spcBinary, const char *symbol,
 
 }
 
+namespace FireyPetey{
+
+  
+  void createInstance(const char* name);
+
+} // namespace FireyPetey
+
 namespace Yoshi {
 
 bool isYoshiDie(TMario *player);

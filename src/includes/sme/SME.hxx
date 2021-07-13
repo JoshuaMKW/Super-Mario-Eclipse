@@ -40,6 +40,27 @@
 #define KURIBO_NO_TYPES
 #endif
 
+#include "common_sdk.h"
+
+#if defined(SME_BUILD_KURIBO)
+#define SME_PATCH_B(source, target) pp::PatchB(source, target)
+#define SME_PATCH_BL(source, target) pp::PatchBL(source, target)
+#define SME_WRITE_8(source, value)                                             \
+  SME::Util::Memory::PPC::write<u8>(reinterpet_cast<u8 *>(source), value)
+#define SME_WRITE_16(source, value)                                            \
+  SME::Util::Memory::PPC::write<u16>(reinterpet_cast<u16 *>(source), value)
+#define SME_WRITE_32(source, value) pp::Patch32(source, value)
+#elif defined(SME_BUILD_KAMEK) || defined(SME_BUILD_KAMEK_INLINE)
+#define SME_PATCH_B(source, target) kmBranch(source, target)
+#define SME_PATCH_BL(source, target) kmCall(source, target)
+#define SME_WRITE_8(source, value) kmWrite8(source, value)
+#define SME_WRITE_16(source, value) kmWrite16(source, value)
+#define SME_WRITE_32(source, value) kmWrite32(source, value)
+#else
+#error                                                                         \
+    "Build type unspecified. Define either SME_BUILD_KAMEK or SME_BUILD_KAMEK_INLINE or SME_BUILD_KURIBO"
+#endif
+
 #ifndef __ppc__
 #define __ppc__
 #endif
@@ -198,6 +219,7 @@ bool canGrabAtNPC();
 bool canCarryNPC();
 TMario *scaleNPCThrowLength(TMario *player, float *params);
 u32 scaleNPCThrowHeight(u32 _r3, f32 z, f32 y);
+void scaleNPCTalkRadius();
 f32 getTreeClimbMinFall();
 TMapObjBase *getTreeClimbMaxFall(TMapObjBase *tree, f32 speed);
 bool scaleTreeSlideSpeed(f32 _f1, f32 _f2);

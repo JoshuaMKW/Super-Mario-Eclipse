@@ -22,6 +22,9 @@ struct TPlayerParams : public TParams {
 
   TPlayerParams()
       : TParams(), CONSTRUCT_PARAM(mMaxJumps, 1),
+        CONSTRUCT_PARAM(mMaxHealth, 8),
+        CONSTRUCT_PARAM(mMaxWallHangTimer, 2400),
+        CONSTRUCT_PARAM(mMaxWallClimbTimer, 1200),
         CONSTRUCT_PARAM(mCanRideYoshi, true),
         CONSTRUCT_PARAM(mCanUseFludd, true),
         CONSTRUCT_PARAM(mPlayerHasHelmet, false),
@@ -31,12 +34,16 @@ struct TPlayerParams : public TParams {
         CONSTRUCT_PARAM(mGoopAffected, true),
         CONSTRUCT_PARAM(mCanHoldNPCs, false),
         CONSTRUCT_PARAM(mCanClimbWalls, false),
+        CONSTRUCT_PARAM(mGravityMultiplier, 1.0f),
         CONSTRUCT_PARAM(mSizeMultiplier, 1.0f),
         CONSTRUCT_PARAM(mSpeedMultiplier, 1.0f),
         CONSTRUCT_PARAM(mBaseJumpMultiplier, 1.0f),
         CONSTRUCT_PARAM(mMultiJumpMultiplier, 0.875f),
         CONSTRUCT_PARAM(mMultiJumpFSpeedMulti, 0.9f),
         CONSTRUCT_PARAM(mThrowPowerMultiplier, 1.0f),
+        CONSTRUCT_PARAM(mUnderwaterHealthMultiplier, 1.0f),
+        CONSTRUCT_PARAM(mFallDamageMinMultiplier, 1.0f),
+        CONSTRUCT_PARAM(mSlideMultiplier, 1.0f),
         CONSTRUCT_PARAM(mSprayNozzleUsable, true),
         CONSTRUCT_PARAM(mRocketNozzleUsable, true),
         CONSTRUCT_PARAM(mUnderwaterNozzleUsable, true),
@@ -61,6 +68,9 @@ struct TPlayerParams : public TParams {
   enum class FluddCleanType : u8 { NONE, CLEAN, GOOP };
 
   TParamRT<u8> mMaxJumps;
+  TParamRT<u8> mMaxHealth;
+  TParamRT<u16> mMaxWallHangTimer;
+  TParamRT<s16> mMaxWallClimbTimer;
   TParamRT<bool> mCanRideYoshi;
   TParamRT<bool> mCanUseFludd;
   TParamRT<bool> mPlayerHasHelmet;
@@ -70,12 +80,16 @@ struct TPlayerParams : public TParams {
   TParamRT<bool> mGoopAffected;
   TParamRT<bool> mCanHoldNPCs;
   TParamRT<bool> mCanClimbWalls;
+  TParamRT<f32> mGravityMultiplier;
   TParamRT<f32> mSizeMultiplier;
   TParamRT<f32> mSpeedMultiplier;
   TParamRT<f32> mBaseJumpMultiplier;
   TParamRT<f32> mMultiJumpMultiplier;
   TParamRT<f32> mMultiJumpFSpeedMulti;
   TParamRT<f32> mThrowPowerMultiplier;
+  TParamRT<f32> mUnderwaterHealthMultiplier;
+  TParamRT<f32> mFallDamageMinMultiplier;
+  TParamRT<f32> mSlideMultiplier;
   TParamRT<bool> mSprayNozzleUsable;
   TParamRT<bool> mRocketNozzleUsable;
   TParamRT<bool> mUnderwaterNozzleUsable;

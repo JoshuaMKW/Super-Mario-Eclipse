@@ -25,13 +25,13 @@ extern OSStopwatch gctStopwatch;
 using namespace SME;
 
 #if defined(SME_BUILD_KURIBO)
-#define SME_PATCH_B(source, target) KURIBO_PATCH_B(source, target)
-#define SME_PATCH_BL(source, target) KURIBO_PATCH_BL(source, target)
+#define SME_PATCH_B(source, target) pp::PatchB(source, target)
+#define SME_PATCH_BL(source, target) pp::PatchBL(source, target)
 #define SME_WRITE_8(source, value)                                             \
   SME::Util::Memory::PPC::write<u8>(reinterpet_cast<u8 *>(source), value)
 #define SME_WRITE_16(source, value)                                            \
   SME::Util::Memory::PPC::write<u16>(reinterpet_cast<u16 *>(source), value)
-#define SME_WRITE_32(source, value) kWrite32(source, value)
+#define SME_WRITE_32(source, value) pp::Patch32(source, value)
 #elif defined(SME_BUILD_KAMEK) || defined(SME_BUILD_KAMEK_INLINE)
 #define SME_PATCH_B(source, target) kmBranch(source, target)
 #define SME_PATCH_BL(source, target) kmCall(source, target)
@@ -43,41 +43,40 @@ using namespace SME;
     "Build type unspecified. Define either SME_BUILD_KAMEK or SME_BUILD_KAMEK_INLINE or SME_BUILD_KURIBO"
 #endif
 
+static void initMod() {
+  SME_DEBUG_LOG(
+      "Codeblocker - Creating OSAlarm at %p; Calls %p every %0.4f seconds\n",
+      &gctAlarm, &SME::Util::Security::checkUserCodes, 0.001f);
+#ifdef SME_DEBUG
+  OSInitStopwatch(&gctStopwatch, "Codeblocker");
+#endif
+  OSCreateAlarm(&gctAlarm);
+  OSSetPeriodicAlarm(
+      &gctAlarm, OSGetTime(), OSMillisecondsToTicks(1),
+      reinterpret_cast<OSAlarmHandler>(&SME::Util::Security::checkUserCodes));
+  SME_DEBUG_LOG("Mario health offset = 0x%X\n", offsetof(TMario, mHealth));
+  SME_DEBUG_LOG("J3DFrameCtrl offset = 0x%X\n", offsetof(J3DFrameCtrl, _04));
+  Patch::Init::initCodeProtection();
+}
+
+static void destroyMod() {
+  SME_DEBUG_LOG("-- Destroying Module --\n");
+#ifdef SME_DEBUG
+  OSStopStopwatch(&gctStopwatch);
+#endif
+  OSCancelAlarm(&gctAlarm);
+}
+
 #if defined(SME_BUILD_KURIBO) && !defined(SME_BUILD_KAMEK) &&                  \
     !defined(SME_BUILD_KAMEK_INLINE)
-KURIBO_MODULE_BEGIN(SME_MODULE_NAME, SME_AUTHOR_NAME, SME_VERSION_TAG) {
-  KURIBO_EXECUTE_ON_LOAD {
-    OSReport("~~~~~~~~~~~~~~~~~~~~~~~\n"
-             "[KURIBO] Game patched with module:\n"
-             "         Name:     	" SME_MODULE_NAME "\n"
-             "         Author:   	" SME_AUTHOR_NAME "\n"
-             "         Version:  	" SME_VERSION_TAG "\n"
-             "\n"
-             "         Built:    	" __DATE__ " at " __TIME__ "\n"
-             "         Compiler: 	" __VERSION__ "\n"
-             "~~~~~~~~~~~~~~~~~~~~~~~\n");
-    SME_DEBUG_LOG(
-        "Codeblocker - Creating OSAlarm at %p; Calls %p every %0.4f seconds\n",
-        &gctAlarm, &SME::Util::Security::checkUserCodes, 0.001f);
-#ifdef SME_DEBUG
-    OSInitStopwatch(&gctStopwatch, "Codeblocker");
-#endif
-    OSCreateAlarm(&gctAlarm);
-    OSSetPeriodicAlarm(
-        &gctAlarm, OSGetTime(), OSMillisecondsToTicks(1),
-        reinterpret_cast<OSAlarmHandler>(&SME::Util::Security::checkUserCodes));
-    SME_DEBUG_LOG("Mario health offset = 0x%X\n", offsetof(TMario, mHealth));
-    SME_DEBUG_LOG("J3DFrameCtrl offset = 0x%X\n", offsetof(J3DFrameCtrl, _04));
-  }
-  KURIBO_EXECUTE_ON_UNLOAD {
-    SME_DEBUG_LOG("-- Destroying Module --\n");
-#ifdef SME_DEBUG
-    OSStopStopwatch(&gctStopwatch);
-#endif
-    OSCancelAlarm(&gctAlarm);
-  }
+
+pp::DefineModule(SME_MODULE_NAME, SME_AUTHOR_NAME, SME_VERSION_TAG);
+pp::OnLoad(initMod);
+pp::OnUnload(destroyMod);
+
 #elif !defined(SME_BUILD_KURIBO) && !defined(SME_BUILD_KAMEK) &&               \
     defined(SME_BUILD_KAMEK_INLINE)
+
 static void moduleLoad(int size, bool unk) {
   JKRExpHeap::createRoot(size, unk);
   SME_LOG("~~~~~~~~~~~~~~~~~~~~~~~\n"
@@ -89,23 +88,10 @@ static void moduleLoad(int size, bool unk) {
           "         Built:    	" __DATE__ " at " __TIME__ "\n"
           "         Compiler: 	" __VERSION__ "\n"
           "~~~~~~~~~~~~~~~~~~~~~~~\n");
-  SME_DEBUG_LOG(
-      "Codeblocker - Creating OSAlarm at %p; Calls %p every %0.4f seconds\n",
-      &gctAlarm, &SME::Util::Security::checkUserCodes, 0.001f);
-#ifdef SME_DEBUG
-  OSInitStopwatch(&gctStopwatch, "Codeblocker");
-#endif
-  OSCreateAlarm(&gctAlarm);
-  OSSetPeriodicAlarm(
-      &gctAlarm, OSGetTime(), OSMillisecondsToTicks(1),
-      reinterpret_cast<OSAlarmHandler>(&SME::Util::Security::checkUserCodes));
-  SME_DEBUG_LOG("Mario health offset = %X\n", offsetof(TMario, mHealth));
-  SME_DEBUG_LOG("J3DFrameCtrl offset = 0x%X\n",
-                offsetof(J3DFrameCtrl, mFrameRate));
-  Patch::Init::initCodeProtection();
+  initMod();
 }
-
 SME_PATCH_BL(SME_PORT_REGION(0x802A744C, 0, 0, 0), moduleLoad);
+
 #elif !defined(SME_BUILD_KURIBO) && defined(SME_BUILD_KAMEK) &&                \
     !defined(SME_BUILD_KAMEK_INLINE)
 
@@ -121,21 +107,11 @@ static void moduleLoad(int size, bool unk) {
             "         Built:    	" __DATE__ " at " __TIME__ "\n"
             "         Compiler: 	" __VERSION__ "\n"
             "~~~~~~~~~~~~~~~~~~~~~~~\n", );
-    SME_DEBUG_LOG(
-        "Codeblocker - Creating OSAlarm at %p; Calls %p every %0.4f seconds\n",
-        &gctAlarm, &SME::Util::Security::checkUserCodes, 0.001f);
-#ifdef SME_DEBUG
-    OSInitStopwatch(&gctStopwatch, "Codeblocker");
-#endif
-    OSCreateAlarm(&gctAlarm);
-    OSSetPeriodicAlarm(
-        &gctAlarm, OSGetTime(), OSMillisecondsToTicks(1),
-        reinterpret_cast<OSAlarmHandler>(&SME::Util::Security::checkUserCodes));
-    SME_DEBUG_LOG("Mario health offset = %X\n", offsetof(TMario, mHealth));
+    initMod();
   }
-  Patch::Init::initCodeProtection();
 }
 SME_PATCH_BL(SME_PORT_REGION(0x802A744C, 0, 0, 0), moduleLoad);
+
 #endif
 
 #ifdef _SME_PATCH_RAM
@@ -586,15 +562,4 @@ SME_PATCH_BL(SME_PORT_REGION(0x802A744C, 0, 0, 0), moduleLoad);
   // // Sunscript logging restoration
   // SME_WRITE_32(SME_PORT_REGION(0x8003DB3C, 0x8003d98c, 0, 0), 0x48306B08);
 
-#if defined(SME_BUILD_KURIBO) && !defined(SME_BUILD_KAMEK) &&                  \
-    !defined(SME_BUILD_KAMEK_INLINE)
-  Patch::Init::initCodeProtection();
-#endif
-
-#endif
-
-#if defined(SME_BUILD_KURIBO) && !defined(SME_BUILD_KAMEK) &&                  \
-    !defined(SME_BUILD_KAMEK_INLINE)
-}
-KURIBO_MODULE_END();
 #endif

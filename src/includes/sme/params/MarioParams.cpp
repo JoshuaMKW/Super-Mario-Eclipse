@@ -1,6 +1,7 @@
 #include "params/MarioParams.hxx"
 #include "OS.h"
 #include "libs/sAssert.hxx"
+#include "libs/sLogging.hxx"
 #include "libs/sMath.hxx"
 #include "libs/sMemory.hxx"
 #include "sms/JSystem/JSU/JSUMemoryStream.hxx"
@@ -11,24 +12,39 @@
 using namespace SME::Class;
 
 TPlayerData::TPlayerData(TMario *player, CPolarSubCamera *camera, bool isMario)
-    : mPlayer(player), mCamera(camera), mParams(nullptr), mIsEMario(!isMario),
-      mCanUseFludd(true), mPlayerID(SME::Enum::Player::MARIO), mCurJump(0),
-      mIsClimbTired(false), mPrevCollisionType(0), mCollisionTimer(0),
-      mClimbTiredTimer(0), mYoshiWaterSpeed(0.0f, 0.0f, 0.0f),
-      mDefaultAttrs(player) {
+    : mPlayer(player), mCamera(camera), mIsEMario(!isMario),
+      mPlayerID(SME::Enum::Player::MARIO), mCurJump(0), mIsClimbTired(false),
+      mPrevCollisionType(0), mCollisionTimer(0), mClimbTiredTimer(0),
+      mYoshiWaterSpeed(0.0f, 0.0f, 0.0f), mDefaultAttrs(player) {
+
+  mParams = new TPlayerParams();
 
   mFluddHistory.mHadFludd = false;
   mFluddHistory.mMainNozzle = TWaterGun::Spray;
   mFluddHistory.mSecondNozzle = TWaterGun::Hover;
   mFluddHistory.mWaterLevel = 0;
 
-  loadPrm("/sme.prm");
+  mCollisionFlags.mIsAirborn = false;
+  mCollisionFlags.mIsCollisionUsed = false;
+  mCollisionFlags.mIsDisableInput = false;
+  mCollisionFlags.mIsFaceUsed = false;
+  mCollisionFlags.mIsSpinBounce = false;
+
+  if (isMario && loadPrm("/sme.prm")) {
+    SME_DEBUG_LOG("Custom character params loaded!\n");
+  } else {
+    SME_DEBUG_LOG("Default character params loaded!\n");
+  }
+
+  mCanUseFludd = mParams->mCanUseFludd.get();
 
   if (mParams->mPlayerHasGlasses.get())
     wearGlass__6TMarioFv(player);
 
   scalePlayerAttrs(mParams->mSizeMultiplier.get());
 }
+
+static u32 Timer = 0;
 
 void TPlayerData::scalePlayerAttrs(f32 scale) {
   if (scale <= 0.0f)
@@ -39,7 +55,6 @@ void TPlayerData::scalePlayerAttrs(f32 scale) {
 
   mPlayer->JSGSetScaling(reinterpret_cast<Vec &>(size));
   mPlayer->mModelData->mModel->mScale.set(size);
-
 
   mDefaultAttrs.applyHistoryTo(const_cast<TMario *>(getPlayer()));
 
@@ -53,12 +68,22 @@ void TPlayerData::scalePlayerAttrs(f32 scale) {
   f32 factor = Util::Math::scaleLinearAtAnchor<f32>(scale, 0.5f, 1.0f);
   f32 speedMultiplier = params->mSpeedMultiplier.get();
   f32 jumpMultiplier = params->mBaseJumpMultiplier.get();
+  f32 gravityMultiplier = params->mGravityMultiplier.get();
   if (onYoshi__6TMarioCFv(mPlayer)) {
     factor = 1.0f;
     scale = 1.0f;
     speedMultiplier = 1.0f;
     jumpMultiplier = 1.0f;
   }
+
+  if (Timer++ % 1000 == 0)
+    SME_DEBUG_LOG("{\n"
+                  "  Factor:        %.04f\n"
+                  "  Scale:         %.04f\n"
+                  "  Speed:         %.04f\n"
+                  "  Jump:          %.04f\n"
+                  "}\n",
+                  factor, scale, speedMultiplier, jumpMultiplier);
 
   SCALE_PARAM(mPlayer->mDeParams.mRunningMax, factor * speedMultiplier);
   SCALE_PARAM(mPlayer->mDeParams.mDashMax, factor * speedMultiplier);
@@ -74,7 +99,8 @@ void TPlayerData::scalePlayerAttrs(f32 scale) {
   SCALE_PARAM(mPlayer->mDeParams.mQuakeRadius, scale);
   SCALE_PARAM(mPlayer->mDeParams.mQuakeHeight, scale);
   SCALE_PARAM(mPlayer->mDeParams.mJumpWallHeight, factor);
-  SCALE_PARAM(mPlayer->mDeParams.mThrowPower, factor);
+  SCALE_PARAM(mPlayer->mDeParams.mThrowPower,
+              factor * params->mThrowPowerMultiplier.get());
   SCALE_PARAM(mPlayer->mDeParams.mFeelDeep, factor);
   SCALE_PARAM(mPlayer->mDeParams.mDamageFallHeight, factor);
   SCALE_PARAM(mPlayer->mDeParams.mClashSpeed, factor * speedMultiplier);
@@ -84,8 +110,9 @@ void TPlayerData::scalePlayerAttrs(f32 scale) {
   SCALE_PARAM(mPlayer->mPunchFenceParams.mHeight, factor);
   SCALE_PARAM(mPlayer->mKickRoofParams.mRadius, factor);
   SCALE_PARAM(mPlayer->mKickRoofParams.mHeight, factor);
-  SCALE_PARAM(mPlayer->mJumpParams.mGravity, factor);
-  SCALE_PARAM(mPlayer->mJumpParams.mSpinJumpGravity, factor);
+  SCALE_PARAM(mPlayer->mJumpParams.mGravity, factor * gravityMultiplier);
+  SCALE_PARAM(mPlayer->mJumpParams.mSpinJumpGravity,
+              factor * gravityMultiplier);
   SCALE_PARAM(mPlayer->mJumpParams.mPopUpSpeedY, factor * jumpMultiplier);
   SCALE_PARAM(mPlayer->mJumpParams.mJumpingMax, factor * jumpMultiplier);
   SCALE_PARAM(mPlayer->mJumpParams.mFenceSpeed, factor * speedMultiplier);
@@ -95,10 +122,13 @@ void TPlayerData::scalePlayerAttrs(f32 scale) {
   SCALE_PARAM(mPlayer->mJumpParams.mRotateJumpForceY, factor * jumpMultiplier);
   SCALE_PARAM(mPlayer->mJumpParams.mBackJumpForce, factor);
   SCALE_PARAM(mPlayer->mJumpParams.mBackJumpForceY, factor * jumpMultiplier);
-  SCALE_PARAM(mPlayer->mJumpParams.mHipAttackSpeedY, factor);
-  SCALE_PARAM(mPlayer->mJumpParams.mSuperHipAttackSpeedY, factor);
+  SCALE_PARAM(mPlayer->mJumpParams.mHipAttackSpeedY,
+              factor * gravityMultiplier);
+  SCALE_PARAM(mPlayer->mJumpParams.mSuperHipAttackSpeedY,
+              factor * gravityMultiplier);
   SCALE_PARAM(mPlayer->mJumpParams.mRotBroadJumpForce, factor);
-  SCALE_PARAM(mPlayer->mJumpParams.mRotBroadJumpForceY, factor * jumpMultiplier);
+  SCALE_PARAM(mPlayer->mJumpParams.mRotBroadJumpForceY,
+              factor * jumpMultiplier);
   SCALE_PARAM(mPlayer->mJumpParams.mSecJumpForce, factor * jumpMultiplier);
   SCALE_PARAM(mPlayer->mJumpParams.mUltraJumpForce, factor * jumpMultiplier);
   SCALE_PARAM(mPlayer->mJumpParams.mTurnJumpForce, factor * jumpMultiplier);
@@ -122,7 +152,7 @@ void TPlayerData::scalePlayerAttrs(f32 scale) {
   SCALE_PARAM(mPlayer->mRunParams.mTurnNeedSp, factor);
   SCALE_PARAM(mPlayer->mSwimParams.mStartSp, factor);
   SCALE_PARAM(mPlayer->mSwimParams.mMoveSp, factor * speedMultiplier);
-  SCALE_PARAM(mPlayer->mSwimParams.mGravity, factor);
+  SCALE_PARAM(mPlayer->mSwimParams.mGravity, factor * gravityMultiplier);
   SCALE_PARAM(mPlayer->mSwimParams.mWaitBouyancy, factor);
   SCALE_PARAM(mPlayer->mSwimParams.mMoveBouyancy, factor);
   SCALE_PARAM(mPlayer->mSwimParams.mCanJumpDepth, scale);
@@ -135,6 +165,10 @@ void TPlayerData::scalePlayerAttrs(f32 scale) {
   SCALE_PARAM(mPlayer->mSwimParams.mPaddleDown, factor * speedMultiplier);
   SCALE_PARAM(mPlayer->mSwimParams.mCanBreathDepth, scale);
   SCALE_PARAM(mPlayer->mSwimParams.mWaitSinkSpeed, factor);
+  SCALE_PARAM(mPlayer->mSwimParams.mAirDec,
+              1 / params->mUnderwaterHealthMultiplier.get());
+  SCALE_PARAM(mPlayer->mSwimParams.mAirDecDive,
+              1 / params->mUnderwaterHealthMultiplier.get());
   SCALE_PARAM(mPlayer->mHangFenceParams.mMoveSp, factor * speedMultiplier);
   SCALE_PARAM(mPlayer->mHangFenceParams.mDescentSp, factor * speedMultiplier);
   SCALE_PARAM(mPlayer->mPullBGBeakParams.mPullRateV, factor);
@@ -186,9 +220,6 @@ void TPlayerData::setPlayer(TMario *player) {
 bool TPlayerData::loadPrm(const char *prm = "/sme.prm") {
   JKRArchive *archive = JKRFileLoader::getVolume("mario");
   SME_DEBUG_ASSERT(archive, "Mario archive could not be located!");
-
-  if (!mParams)
-    mParams = new TPlayerParams();
 
   void *resource = archive->getResource(prm);
   if (resource) {

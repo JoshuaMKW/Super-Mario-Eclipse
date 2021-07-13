@@ -56,7 +56,6 @@ bool Patch::Fludd::hasWaterCardOpen() {
   const SME::Class::TPlayerData *playerParams =
       SME::TGlobals::getPlayerParams(gpMarioAddress);
 
-
   if (gpMarioAddress->mYoshi->mState != TYoshi::State::MOUNTED &&
       !gpMarioAddress->mAttributes.mHasFludd && !gcConsole->mWaterCardFalling &&
       gcConsole->mIsWaterCard)
@@ -70,9 +69,8 @@ bool Patch::Fludd::hasWaterCardOpen() {
 // 0x80283058
 // extern -> SME.cpp
 bool Patch::Fludd::canCollectFluddItem(TMario *player) {
-  return onYoshi__6TMarioCFv(player) || !SME::TGlobals::getPlayerParams(player)
-                                             ->getParams()
-                                             ->mCanUseFludd.get();
+  return onYoshi__6TMarioCFv(player) ||
+         !SME::TGlobals::getPlayerParams(player)->getCanUseFludd();
 }
 
 // 0x800678C4, 0x801A3ED0, 0x801B42D8, 0x8027F7DC, 0x8027F94C, 0x8024E710
@@ -113,12 +111,11 @@ TWaterGun *Patch::Fludd::bindFluddtojoint() {
   SME_FROM_GPR(31, player);
 
   if (!SME::TGlobals::getPlayerParams(player))
-      return player->mFludd;
+    return player->mFludd;
 
   player->mBindBoneIDArray[0] =
-      SME::TGlobals::getPlayerParams(player)
-          ->getNozzleBoneID(static_cast<TWaterGun::NozzleType>(
-              player->mFludd->mCurrentNozzle));
+      SME::TGlobals::getPlayerParams(player)->getNozzleBoneID(
+          static_cast<TWaterGun::NozzleType>(player->mFludd->mCurrentNozzle));
 
   return player->mFludd;
 }

@@ -31,5 +31,5 @@ typedef double f64;
 #ifdef __cplusplus
 #define KURIBO_EXTERN_C extern "C"
 #else
-#define KURIBO_EXTERN_C extern
+#define KURIBO_EXTERN_C
 #endif

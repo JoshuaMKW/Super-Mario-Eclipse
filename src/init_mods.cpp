@@ -183,8 +183,7 @@ void SME::Patch::Init::initShineShadow() {
     gpModelWaterManager->LightType.mMaskObjects = true;
     gpModelWaterManager->LightType.mShowShadow = true;
 
-    if (LightContext.mLightType ==
-        TLightContext::ActiveType::STATIC) {
+    if (LightContext.mLightType == TLightContext::ActiveType::STATIC) {
       LightContext.mNextSize =
           LightContext.mShineShadowBase +
           powf(((1350.0f / SME_MAX_SHINES) * CurrentShineCount), 1.5f);
@@ -196,7 +195,7 @@ void SME::Patch::Init::initShineShadow() {
                                      static_cast<f32>(SME_MAX_SHINES));
       else
         gpModelWaterManager->mDarkLevel = config->mLightDarkLevel.get();
-        
+
       gpModelWaterManager->mSize = LightContext.mNextSize;
       gpModelWaterManager->mSphereStep = gpModelWaterManager->mSize / 2.0f;
     }
@@ -229,9 +228,9 @@ void SME::Patch::Init::initMusicTrack() {
 
   if (config->mMusicSetCustom.get())
     gStageBGM = 0x80010000 | config->mMusicID.get();
-    gAudioSpeed = config->mMusicSpeed.get();
-    gAudioPitch = config->mMusicPitch.get();
-    gAudioVolume = Max(Min(config->mMusicVolume.get(), 1), 0);
+  gAudioSpeed = config->mMusicSpeed.get();
+  gAudioPitch = config->mMusicPitch.get();
+  gAudioVolume = Max(Min(config->mMusicVolume.get(), 1), 0);
 
   if (config->mMusicEnabled.get())
     startStageBGM__10MSMainProcFUcUc();
@@ -248,8 +247,8 @@ static void initFludd(TMario *player, TPlayerData *params) {
           static_cast<TWaterGun::NozzleType>(player->mFludd->mCurrentNozzle))) {
     for (u8 i = 0; i < 7; ++i) {
       if (params->canUseNozzle(static_cast<TWaterGun::NozzleType>(i))) {
-        player->mFludd->mCurrentNozzle = i;
         player->mAttributes.mHasFludd = params->getCanUseFludd();
+        player->mFludd->mCurrentNozzle = i;
         player->mFludd->mCurrentWater =
             player->mFludd->mNozzleList[(u8)player->mFludd->mCurrentNozzle]
                 ->mMaxWater;
@@ -265,8 +264,8 @@ static void initFludd(TMario *player, TPlayerData *params) {
           static_cast<TWaterGun::NozzleType>(player->mFludd->mSecondNozzle))) {
     for (u8 i = 0; i < 7; ++i) {
       if (params->canUseNozzle(static_cast<TWaterGun::NozzleType>(i))) {
-        player->mFludd->mSecondNozzle = i;
         player->mAttributes.mHasFludd = params->getCanUseFludd();
+        player->mFludd->mSecondNozzle = i;
         break;
       }
       player->mFludd->mSecondNozzle = player->mFludd->mCurrentNozzle;
@@ -288,19 +287,20 @@ static void initMario(TMario *player, bool isMario) {
   TStageParams *config = TStageParams::sStageConfig;
 
   TPlayerData *params = new TPlayerData(player, nullptr, isMario);
-  SME::TGlobals::registerPlayerParams(params);
+  TGlobals::registerPlayerParams(params);
 
   params->scalePlayerAttrs(config->mPlayerSizeMultiplier.get());
 
   if (config->isCustomConfig()) {
-    params->setPlayerID(gCharacterID);
+    params->setPlayerID(isMario ? gCharacterID : Enum::Player::SHADOW_MARIO);
     player->mHealth = config->mPlayerHealth.get();
     player->mDeParams.mHPMax.set(config->mPlayerMaxHealth.get());
     player->mJumpParams.mGravity.set(config->mGravityMultiplier.get());
 
     if (isMario) {
       player->mAttributes.mGainHelmet = config->mPlayerHasHelmet.get();
-      player->mAttributes.mHasFludd = config->mPlayerHasFludd.get();
+      player->mAttributes.mHasFludd =
+          config->mPlayerHasFludd.get() && params->getCanUseFludd();
       player->mAttributes.mIsShineShirt = config->mPlayerHasShirt.get();
     }
 

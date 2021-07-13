@@ -29,6 +29,24 @@ marioDataArray[i], 0, 0);
 }
 */
 
+// extern -> SME.cpp
+// 0x802558A4
+void SME::Patch::Mario::addVelocity(TMario *player, f32 velocity) {
+  player->mForwardSpeed += velocity;
+  SME::Class::TPlayerData *playerParams =
+      SME::TGlobals::getPlayerParams(player);
+
+  if (!onYoshi__6TMarioCFv(player)) {
+    if (player->mForwardSpeed >
+        (99.0f * playerParams->getParams()->mSpeedMultiplier.get()))
+      player->mForwardSpeed =
+          (99.0f * playerParams->getParams()->mSpeedMultiplier.get());
+  } else {
+    if (player->mForwardSpeed > 99.0f)
+      player->mForwardSpeed = 99.0f;
+  }
+}
+
 /* MASTER MARIO.CPP UPDATER */
 
 u32 SME::Patch::Mario::updateContexts(TMario *player) {
@@ -591,63 +609,73 @@ static asm void scaleNPCTalkRadius(){
     -0x6220(r13)blr} kmCall(0x80213314, &scaleNPCTalkRadius);
 #endif
 
+static f32 calcJumpPower(TMario *player, f32 factor, f32 base,
+                         f32 jumpPower) {
+  SME::Class::TPlayerData *playerParams =
+      SME::TGlobals::getPlayerParams(player);
+  const SME::Class::TPlayerParams *params = playerParams->getParams();
+
+  jumpPower *= params->mBaseJumpMultiplier.get();
+  jumpPower *= SME::Util::Math::scaleLinearAtAnchor<f32>(
+      params->mSizeMultiplier.get() *
+          SME::Class::TStageParams::sStageConfig->mPlayerSizeMultiplier.get(),
+      0.5f, 1.0f);
+  if (player->mState & static_cast<u32>(TMario::State::AIRBORN)) {
+    f32 multiplier = params->mMultiJumpMultiplier.get();
+    for (u32 i = 1; i < playerParams->mCurJump; ++i) {
+      multiplier *= multiplier;
+    }
+    jumpPower *= multiplier;
+    player->mForwardSpeed *=
+        params->mMultiJumpFSpeedMulti.get();
+  }
+  return Max(base, (base * factor) + jumpPower);
+}
+
 // extern -> SME.cpp
 // 0x8024E02C
 void SME::Patch::Mario::manageExtraJumps(TMario *player) {
   SME::Class::TPlayerData *playerParams =
       SME::TGlobals::getPlayerParams(player);
 
-  if (!playerParams->isMario()) {
-    stateMachine__6TMarioFv(player);
-    return;
-  }
+  const s32 jumpsLeft =
+      (playerParams->getParams()->mMaxJumps.get() - playerParams->mCurJump);
 
   if ((player->mState & static_cast<u32>(TMario::State::AIRBORN)) == false ||
       (player->mState & 0x800000) || player->mYoshi->mState == TYoshi::MOUNTED)
     playerParams->mCurJump = 1;
-  else {
-    if (player->mController->mButtons.mFrameInput & TMarioGamePad::Buttons::A &&
-        playerParams->mCurJump < playerParams->getParams()->mMaxJumps.get() &&
-        player->mState != static_cast<u32>(TMario::State::WALLSLIDE)) {
-      if ((playerParams->getParams()->mMaxJumps.get() -
-           playerParams->mCurJump) == 1) {
-        if (player->mState != static_cast<u32>(TMario::State::TRIPLE_J))
-          changePlayerJumping__6TMarioFUlUl(
-              player, static_cast<u32>(TMario::State::TRIPLE_J), 0);
-        else
-          setStatusToJumping__6TMarioFUlUl(
-              player, static_cast<u32>(TMario::State::TRIPLE_J), 0);
-      } else if ((player->mState - static_cast<u32>(TMario::State::JUMP)) > 1)
-        changePlayerJumping__6TMarioFUlUl(
-            player, static_cast<u32>(TMario::State::JUMP), 0);
-      else
-        changePlayerJumping__6TMarioFUlUl(player, player->mState ^ 1, 0);
-      playerParams->mCurJump += 1;
+  else if ((player->mController->mButtons.mFrameInput &
+            TMarioGamePad::Buttons::A) &&
+           jumpsLeft > 0 &&
+           player->mState != static_cast<u32>(TMario::State::WALLSLIDE)) {
+    u32 state = player->mState;
+    u32 voiceID = 0;
+    u32 animID = 0;
+    
+    if (jumpsLeft == 1) {
+      state = static_cast<u32>(TMario::State::TRIPLE_J);
+      voiceID = 0x78B6;
+      animID = 0x6F;
+    } else if (jumpsLeft % 2) {
+      state = static_cast<u32>(TMario::State::JUMP);
+      voiceID = 0x78B1;
+      animID = 0x4D;
+    } else {
+      state = static_cast<u32>(TMario::State::D_JUMP);
+      voiceID = 0x78B6;
+      animID = 0x50;
     }
+
+    startVoice__6TMarioFUl(player, voiceID);
+    setAnimation__6TMarioFif(player, animID, 1.0f);
+
+    player->mSpeed.y = calcJumpPower(player, 0.25f, player->mSpeed.y, 65.0f);
+    player->mPrevState = player->mState;
+    player->mState = state;
+
+    playerParams->mCurJump += 1;
   }
   stateMachine__6TMarioFv(player);
-}
-
-static f32 calcJumpPower(TMario *player, f32 factor, f32 curYVelocity,
-                         f32 jumpPower) {
-  SME::Class::TPlayerData *playerParams =
-      SME::TGlobals::getPlayerParams(player);
-
-  jumpPower *= playerParams->getParams()->mBaseJumpMultiplier.get();
-  jumpPower *= SME::Util::Math::scaleLinearAtAnchor<f32>(
-      playerParams->getParams()->mSizeMultiplier.get() *
-          SME::Class::TStageParams::sStageConfig->mPlayerSizeMultiplier.get(),
-      0.5f, 1.0f);
-  if (player->mState & static_cast<u32>(TMario::State::AIRBORN)) {
-    f32 multiplier = playerParams->getParams()->mMultiJumpMultiplier.get();
-    for (u32 i = 1; i < playerParams->mCurJump; ++i) {
-      multiplier *= multiplier;
-    }
-    jumpPower *= multiplier;
-    player->mForwardSpeed *=
-        playerParams->getParams()->mMultiJumpFSpeedMulti.get();
-  }
-  return (curYVelocity * factor) + jumpPower;
 }
 
 // extern -> SME.cpp
@@ -658,34 +686,20 @@ void SME::Patch::Mario::normJumpMultiplier() {
 
   player->mSpeed.y = calcJumpPower(player, 0.25f, player->mForwardSpeed, 42.0f);
 }
-#if 0
 
-static asm void jumpPowerWrapper(){
-  mflr r0 stw r0,
-  0x4(sp)stwu sp,
-  -0x10(sp)stw r31,
-  0x8(sp)mr r31,
-  r4 lwz r3,
-  -0x60B8(r13)cmpw r30,
-  r3 fmadds f0,
-  f2,
-  f1,
-  f0 bne notMario mr r3,
-  r30 fmr f3,
-  f0 bl calcJumpPower fmr f0,
-  f1 notMario : mr r3,
-  r30 mr r4,
-  r31 lwz r31,
-  0x8(sp)addi sp,
-  sp,
-  0x10 lwz r0,
-  0x4(sp)mtlr r0 blr
-} kmCall(0x80254540, &jumpPowerWrapper);
-kmCall(0x802546B0, &jumpPowerWrapper);
-kmCall(0x802546E4, &jumpPowerWrapper);
-kmCall(0x8025474C, &jumpPowerWrapper);
-kmCall(0x80254884, &jumpPowerWrapper);
-#endif
+// extern -> SME.cpp
+// 0x80256678
+void SME::Patch::Mario::checkYSpdForTerminalVelocity() {
+  TMario *player;
+  SME_FROM_GPR(31, player);
+
+  float terminalVelocity;
+  if (SME::TGlobals::getPlayerParams(player)->mCollisionFlags.mIsSpinBounce)
+    terminalVelocity = -20.0f * player->mJumpParams.mGravity.get();
+  else
+    terminalVelocity = -75.0f * player->mJumpParams.mGravity.get();
+  player->mSpeed.y = Max(player->mSpeed.y, terminalVelocity);
+}
 
 // extern -> SME.cpp
 // 0x8025B8C0
@@ -699,10 +713,48 @@ f32 SME::Patch::Mario::checkGroundSpeedLimit() {
   f32 multiplier = 1.0f;
   if (onYoshi__6TMarioCFv(player)) {
     multiplier *= player->mYoshiParams.mRunYoshiMult.get();
-  } else if (playerParams->isMario() && !onYoshi__6TMarioCFv(player)) {
+  } else {
     multiplier *= playerParams->getParams()->mSpeedMultiplier.get();
   }
   return multiplier;
+}
+
+// extern -> SME.cpp
+// 0x8024CC6C
+void SME::Patch::Mario::checkJumpSpeedLimit(f32 speed) {
+  TMario *player;
+  SME_FROM_GPR(31, player);
+
+  SME::Class::TPlayerData *playerParams =
+      SME::TGlobals::getPlayerParams(player);
+
+  f32 speedCap = 32.0f;
+  f32 speedReducer = 0.2f;
+
+  if (playerParams->isMario() && !onYoshi__6TMarioCFv(player)) {
+    speedCap *= playerParams->getParams()->mSpeedMultiplier.get();
+  }
+
+  if (speed > speedCap) {
+    player->mForwardSpeed = (speed - speedReducer);
+  }
+}
+
+// extern -> SME.cpp
+// 0x8024CC2C
+TMario *SME::Patch::Mario::checkJumpSpeedMulti(TMario *player, f32 factor, f32 max) {
+  SME::Class::TPlayerData *playerParams =
+      SME::TGlobals::getPlayerParams(player);
+
+  if (playerParams->isMario() && !onYoshi__6TMarioCFv(player)) {
+    player->mForwardSpeed =
+        ((factor * playerParams->getParams()->mSpeedMultiplier.get()) * max) +
+        player->mForwardSpeed;
+    return player;
+  } else {
+    player->mForwardSpeed = (factor * max) + player->mForwardSpeed;
+    return player;
+  }
 }
 
 #if 0
@@ -720,42 +772,6 @@ static f32 checkGroundSpeedMulti() {
     return player->mRunSlowdownFactor2;
 }
 kmCall(0x8025B8F8, &checkGroundSpeedMulti);
-
-static void checkJumpSpeedLimit(f32 speed) {
-  TMario *player;
-  __asm { mr player, r31}
-  ;
-
-  f32 speedCap = 32;
-  f32 speedReducer = 0.2;
-
-  if (playerParams->isMario() && !onYoshi__6TMarioCFv(player)) {
-    speedCap *= playerParams->mParams->Attributes.mSpeedMultiplier;
-    speedReducer *= playerParams->mParams->Attributes.mSpeedMultiplier;
-  }
-
-  if (speed > speedCap) {
-    player->mForwardSpeed = (speed - speedReducer);
-  }
-}
-kmWrite32(0x8024CC60, 0x60000000);
-kmWrite32(0x8024CC64, 0x60000000);
-kmWrite32(0x8024CC68, 0x60000000);
-kmCall(0x8024CC6C, &checkJumpSpeedLimit);
-
-static TMario *checkJumpSpeedMulti(TMario *player, f32 factor, f32 max) {
-  if (playerParams->isMario() && !onYoshi__6TMarioCFv(player)) {
-    player->mForwardSpeed =
-        ((factor * playerParams->mParams->Attributes.mSpeedMultiplier) * max) +
-        player->mForwardSpeed;
-    return player;
-  } else {
-    player->mForwardSpeed = (factor * max) + player->mForwardSpeed;
-    return player;
-  }
-}
-kmCall(0x8024CC2C, &checkJumpSpeedMulti);
-kmWrite32(0x8024CC30, 0x60000000);
 
 // 0x80272FF0 - fSpeed Multplier - swim
 static void checkSwimSpeedMulti(f32 max, f32 factor) {
@@ -828,20 +844,6 @@ static void checkHoverSpeedMulti(f32 factor, f32 max) {
 kmCall(0x8024AE80, &checkHoverSpeedMulti);
 kmWrite32(0x8024AE84, 0x60000000);
 
-static void mario_addVelocity(TMario *player, f32 add) {
-  player->mForwardSpeed += add;
-  if (playerParams->isMario() && !onYoshi__6TMarioCFv(player)) {
-    if (player->mForwardSpeed >
-        (99.0f * playerParams->mParams->Attributes.mSpeedMultiplier))
-      player->mForwardSpeed =
-          (99.0f * playerParams->mParams->Attributes.mSpeedMultiplier);
-  } else {
-    if (player->mForwardSpeed > 99.0f)
-      player->mForwardSpeed = 99.0f;
-  }
-}
-kmBranch(0x802558A4, &mario_addVelocity);
-
 static TMario *checkOilSlipSpeedMulti(f32 factor, f32 max) {
   TMario *player;
   __asm { mr player, r31}
@@ -888,21 +890,6 @@ static f32 checkRunningWallBonk(f32 f1, f32 speed) {
 kmWrite32(0x8025B148, 0xC05F00B0);
 kmCall(0x8025B14C, &checkRunningWallBonk);
 kmWrite32(0x8025B150, 0xFC020840);
-
-static void checkYSpdForTerminalVelocity() {
-  TMario *player;
-  SME_FROM_GPR(31, player);
-
-  float terminalVelocity;
-  = -75.0f * player->mJumpParams.mGravity.get();
-  if (SME::TGlobals::getPlayerParams(player)->mCollisionFlags.mIsGlideBounce)
-    terminalVelocity = -20.0f * player->mJumpParams.mGravity.get();
-  else
-    terminalVelocity = -75.0f * player->mJumpParams.mGravity.get();
-  player->mSpeed.y = Max(player->mSpeed.y, terminalVelocity);
-}
-kmCall(0x80256678, &checkYSpdForTerminalVelocity);
-kmWrite32(0x8025667C, 0x60000000);
 
 static void scaleDiveSpeed() {
   TMario *player;

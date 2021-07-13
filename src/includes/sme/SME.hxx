@@ -19,21 +19,22 @@
 #include "params/MarioParams.hxx"
 #include "params/StageParams.hxx"
 
-#include "OS.h"
 #include "MTX.h"
+#include "OS.h"
 #include "defines.h"
 #include "macros.h"
 #include "sms/JSystem/J2D/J2DOrthoGraph.hxx"
 #include "sms/JSystem/JGeometry.hxx"
+#include "sms/SMS.hxx"
+#include "sms/enemy/EnemyMario.hxx"
 #include "sms/game/Conductor.hxx"
 #include "sms/npc/BaseNPC.hxx"
 #include "sms/object/ResetFruit.hxx"
 #include "sms/screen/ShineFader.hxx"
 #include "sms/sound/MSBGM.hxx"
 #include "sms/talk/Talk2D2.hxx"
-#include "sms/enemy/EnemyMario.hxx"
-#include "sms/SMS.hxx"
 #include "types.h"
+
 
 #ifndef KURIBO_NO_TYPES
 #define KURIBO_NO_TYPES
@@ -47,9 +48,11 @@
 #define SME_AUTHOR_NAME "JoshuaMK"
 
 #ifdef SME_DEBUG
-#define SME_VERSION_TAG "(DEBUG) " SME_VERSION "[" SME_STRINGIZE(SME_MAX_SHINES) " Shines]"
+#define SME_VERSION_TAG                                                        \
+  "(DEBUG) " SME_VERSION "[" SME_STRINGIZE(SME_MAX_SHINES) " Shines]"
 #else
-#define SME_VERSION_TAG "(RELEASE) " SME_VERSION "[" SME_STRINGIZE(SME_MAX_SHINES) " Shines]"
+#define SME_VERSION_TAG                                                        \
+  "(RELEASE) " SME_VERSION "[" SME_STRINGIZE(SME_MAX_SHINES) " Shines]"
 #endif
 
 // init_mods.cpp
@@ -128,7 +131,7 @@ namespace Fixes {
 void shadowCrashPatch();
 u32 patchYStorage();
 
-}
+} // namespace Fixes
 
 namespace Flag {
 
@@ -188,6 +191,7 @@ JKRHeap *useCustomHUDHeap(u32 size, s32 alignment);
 
 namespace Mario {
 
+void addVelocity(TMario *player, f32 velocity);
 u32 updateContexts(TMario *player);
 u32 carryOrTalkNPC(TBaseNPC *npc);
 bool canGrabAtNPC();
@@ -202,8 +206,11 @@ void scaleHangSpeed(TMario *player);
 void checkGraffitiAffected(TMario *player);
 void rescaleHeldObj(Mtx holderMatrix, Mtx destMatrix);
 void manageExtraJumps(TMario *player);
+void checkYSpdForTerminalVelocity();
 void normJumpMultiplier();
 f32 checkGroundSpeedLimit();
+void checkJumpSpeedLimit(f32 speed);
+TMario *checkJumpSpeedMulti(TMario *player, f32 factor, f32 max);
 void manageEMarioHealthWrapper(TEnemyMario *eMario, Mtx *posMtx);
 
 } // namespace Mario

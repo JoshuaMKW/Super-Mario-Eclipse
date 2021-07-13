@@ -1,5 +1,5 @@
 /*========================================
-||    Kuribo SDK 2.0
+||    Kuribo SDK 3.0
 ==========================================
 
 Supported targets:
@@ -32,6 +32,7 @@ Provided Types:
 Changelog:
  - 1.0: Initial revision
  - 2.0: Added linking APIs
+ - 3.0: Added C++ API
 
 Example Usage:
   KURIBO_MODULE_BEGIN("Demo Module", "riidefi", "Beta")
@@ -73,10 +74,10 @@ Example Usage:
     // =======================
     // KURIBO LINKING APIs
     // =======================
-      // Export a function symbol as a specified name. 
+      // Export a function symbol as a specified name.
       KURIBO_EXPORT_AS(MySqrt, "sqrt");
 
-      // Export a function symbol. 
+      // Export a function symbol.
       KURIBO_EXPORT(MySqrt);
 
       // Get the address of a procedure.
@@ -146,4 +147,142 @@ Example Usage:
 #define kWrite32(address, value) KURIBO_PATCH_32(address, value)
 #define kVtable(vtable_address, function_index, function)                      \
   KURIBO_PATCH_32(KURIBO_VTABLE(vtable_address, function_index), +[] function)
+#endif
+
+#if defined(__cplusplus)
+
+namespace pp {
+
+struct Patch {
+  u32 mAddr; // Address in memory
+  u32 mVal;  // New value
+  u32 mSave; // Value before apply
+
+  bool mApplied; // If the patch has been applied
+};
+
+// Grabs data lazily
+inline Patch CreatePatch(u32 addr, u32 val) {
+  Patch data;
+  data.mAddr = addr;
+  data.mVal = val;
+  data.mSave = 0xCCCCCCCC; // Acquired right before apply
+  data.mApplied = false;
+  return data;
+}
+
+inline void EnablePatch(Patch& patch) {
+  if (patch.mApplied)
+    return;
+
+  u32* addr = (u32*)patch.mAddr;
+
+  patch.mSave = *addr;
+  *addr = patch.mVal;
+  icbi(addr);
+
+  patch.mApplied = true;
+}
+
+inline void DisablePatch(Patch& patch) {
+  if (!patch.mApplied)
+    return;
+
+  u32* addr = (u32*)patch.mAddr;
+
+  *addr = patch.mSave;
+  icbi(patch.mAddr);
+  patch.mSave = 0xCCCCCCCC;
+
+  patch.mApplied = false;
+}
+
+inline u32 PPCBranchInstr(u32 delta, bool lk) {
+  return 0x48000000 | (delta & 0x3fffffc) | (lk ? 1 : 0);
+}
+
+class auto_patch {
+public:
+  auto_patch(u32 addr, u32 val, bool by_default = true)
+      : mPatch(CreatePatch(addr, val)) {
+    if (by_default)
+      enable();
+  }
+  ~auto_patch() { disable(); }
+
+  bool is_enabled() const { return mPatch.mApplied; }
+
+  void enable() { EnablePatch(mPatch); }
+  void disable() { DisablePatch(mPatch); }
+
+  u32 overwritten_value() const { return mPatch.mSave; }
+  u32 new_value() const { return mPatch.mVal; }
+
+private:
+  Patch mPatch;
+};
+
+class togglable_ppc_b : public auto_patch {
+public:
+  togglable_ppc_b(u32 addr, void* target, bool by_default = true)
+      : auto_patch(addr, PPCBranchInstr((u32)target - addr, false),
+                   by_default) {}
+};
+class togglable_ppc_bl : public auto_patch {
+public:
+  togglable_ppc_bl(u32 addr, void* target, bool by_default = true)
+      : auto_patch(addr, PPCBranchInstr((u32)target - addr, true), by_default) {
+  }
+};
+
+#define PatchIdentifier MACRO_CONCAT(_patch, __COUNTER__)
+
+#define PatchB(a, b) togglable_ppc_b PatchIdentifier((u32)a, (void*)b)
+#define PatchBL(a, b) togglable_ppc_bl PatchIdentifier((u32)a, (void*)b)
+#define Patch32(a, b) auto_patch PatchIdentifier((u32)a, (u32)b)
+
+struct dummy {};
+
+#define DefineModule(name, author, version)                                    \
+  dummy module_is_defined;                                                     \
+  KURIBO_MODULE_BEGIN(name, author, version)                                   \
+  KURIBO_MODULE_END()
+
+struct export_as {
+  export_as(void* func, const char* name) {
+    if (__kuribo_ctx.register_procedure) {
+      __kuribo_ctx.register_procedure(name, (u32)func);
+    }
+  }
+  ~export_as() {
+    // There is no easy way to revoke an export, currently
+    // We could re-register as nullptr
+  }
+};
+
+#define ExportAs(a, b) export_as PatchIdentifier((void*)a, b)
+#define Export(a) export_as PatchIdentifier((void*)a, ##a)
+
+typedef void (*VoidFunc)();
+
+struct on_load {
+  on_load(VoidFunc fn) { fn(); }
+};
+
+struct on_unload {
+  on_unload(VoidFunc fn) : _fn(fn) {}
+  ~on_unload() { _fn(); }
+
+  VoidFunc _fn;
+};
+
+#define OnLoad(fn) on_load PatchIdentifier(fn)
+#define OnUnload(fn) on_unload PatchIdentifier(fn)
+
+//! You probably don't want to use this: the linker will automatically call this
+//! for you when you call an external function
+inline void* Import(const char* name) { return KURIBO_GET_PROCEDURE(name); }
+
+} // namespace pp
+
 #endif

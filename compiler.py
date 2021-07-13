@@ -16,7 +16,7 @@ TMPDIR = Path("tmp-compiler")
 @atexit.register
 def clean_resources():
     if TMPDIR.is_dir():
-        pass  # shutil.rmtree(TMPDIR)
+        shutil.rmtree(TMPDIR)
 
 
 class Define(object):
@@ -193,6 +193,7 @@ class Compiler(object):
                         sObjects.append(str(f.resolve()))
 
                 if len(cppObjects) > 0:
+                    print(" ".join([str(cppCompiler.resolve()), *cppObjects, *self._includes, *self._defines, *self.cxxOptions, "-o", str(TMPDIR / f"cpp_obj.o")]))
                     subprocess.run([str(cppCompiler.resolve()), *cppObjects, *self._includes, *self._defines, *self.cxxOptions, "-o", str(TMPDIR / f"cpp_obj.o")],
                                    text=True)
                     linkObjects.append(str(TMPDIR / f"cpp_obj.o"))

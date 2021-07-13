@@ -1,5 +1,5 @@
 /*========================================
-||    Kuribo SDK 3.0
+||    Kuribo SDK 3.1
 ==========================================
 
 Supported targets:
@@ -33,6 +33,7 @@ Changelog:
  - 1.0: Initial revision
  - 2.0: Added linking APIs
  - 3.0: Added C++ API
+ - 3.1: Added pp::GetPatch(), pp::Instructions
 
 Example Usage:
   KURIBO_MODULE_BEGIN("Demo Module", "riidefi", "Beta")
@@ -215,6 +216,13 @@ public:
   void enable() { EnablePatch(mPatch); }
   void disable() { DisablePatch(mPatch); }
 
+  void set_enabled(bool s) {
+    if (s)
+      enable();
+    else
+      disable();
+  }
+
   u32 overwritten_value() const { return mPatch.mSave; }
   u32 new_value() const { return mPatch.mVal; }
 
@@ -235,11 +243,34 @@ public:
   }
 };
 
-#define PatchIdentifier MACRO_CONCAT(_patch, __COUNTER__)
+template <typename T, bool enabled> struct scoped_guard {
+  scoped_guard(T& toggle) : mToggle(toggle), mSave(toggle.is_enabled()) {
+    mToggle.set_enabled(enabled);
+  }
+  ~scoped_guard() { mToggle.set_enabled(mSave); }
 
-#define PatchB(a, b) togglable_ppc_b PatchIdentifier((u32)a, (void*)b)
-#define PatchBL(a, b) togglable_ppc_bl PatchIdentifier((u32)a, (void*)b)
-#define Patch32(a, b) auto_patch PatchIdentifier((u32)a, (u32)b)
+  T& mToggle;
+  bool mSave;
+};
+
+template <typename T> inline u32 decay(T* p) {
+  return reinterpret_cast<u32>(reinterpret_cast<const void*>(p));
+}
+
+#define PatchIdentifier(identifier) MACRO_CONCAT(ppPatch, identifier)
+
+#define PatchB(a, b)                                                           \
+  togglable_ppc_b PatchIdentifier(a)(pp::decay(a),                             \
+                                     reinterpret_cast<void*>(pp::decay(b)))
+#define PatchBL(a, b)                                                          \
+  togglable_ppc_bl PatchIdentifier(a)(pp::decay(a),                            \
+                                      reinterpret_cast<void*>(pp::decay(b)))
+
+#define Patch32(a, b) auto_patch PatchIdentifier(a)(pp::decay(a), pp::decay(b))
+
+#define GetPatch(a)                                                            \
+  dummy MACRO_CONCAT(__getpatch, __COUNTER__);                                 \
+  PatchIdentifier(a)
 
 struct dummy {};
 
@@ -260,8 +291,10 @@ struct export_as {
   }
 };
 
-#define ExportAs(a, b) export_as PatchIdentifier((void*)a, b)
-#define Export(a) export_as PatchIdentifier((void*)a, ##a)
+#define ExportAs(a, b)                                                         \
+  export_as PatchIdentifier(a)(reinterpret_cast<void*>(pp::decay(a)), b)
+#define Export(a)                                                              \
+  export_as PatchIdentifier(a)(reinterpret_cast<void*>(pp::decay(a)), ##a)
 
 typedef void (*VoidFunc)();
 
@@ -276,12 +309,14 @@ struct on_unload {
   VoidFunc _fn;
 };
 
-#define OnLoad(fn) on_load PatchIdentifier(fn)
-#define OnUnload(fn) on_unload PatchIdentifier(fn)
+#define OnLoad(fn) on_load PatchIdentifier(fn)(fn)
+#define OnUnload(fn) on_unload PatchIdentifier(fn)(fn)
 
 //! You probably don't want to use this: the linker will automatically call this
 //! for you when you call an external function
 inline void* Import(const char* name) { return KURIBO_GET_PROCEDURE(name); }
+
+enum Instructions { SkipInstruction = 0x60000000, Return = 0x4E800020 };
 
 } // namespace pp
 

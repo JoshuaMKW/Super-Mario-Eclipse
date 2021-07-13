@@ -2,7 +2,6 @@
 #include "OS.h"
 
 #include "Kernel.hxx"
-#include "common_sdk.h"
 #include "macros.h"
 #include "sms/actor/Mario.hxx"
 
@@ -23,25 +22,6 @@ extern OSStopwatch gctStopwatch;
 #endif
 
 using namespace SME;
-
-#if defined(SME_BUILD_KURIBO)
-#define SME_PATCH_B(source, target) pp::PatchB(source, target)
-#define SME_PATCH_BL(source, target) pp::PatchBL(source, target)
-#define SME_WRITE_8(source, value)                                             \
-  SME::Util::Memory::PPC::write<u8>(reinterpet_cast<u8 *>(source), value)
-#define SME_WRITE_16(source, value)                                            \
-  SME::Util::Memory::PPC::write<u16>(reinterpet_cast<u16 *>(source), value)
-#define SME_WRITE_32(source, value) pp::Patch32(source, value)
-#elif defined(SME_BUILD_KAMEK) || defined(SME_BUILD_KAMEK_INLINE)
-#define SME_PATCH_B(source, target) kmBranch(source, target)
-#define SME_PATCH_BL(source, target) kmCall(source, target)
-#define SME_WRITE_8(source, value) kmWrite8(source, value)
-#define SME_WRITE_16(source, value) kmWrite16(source, value)
-#define SME_WRITE_32(source, value) kmWrite32(source, value)
-#else
-#error                                                                         \
-    "Build type unspecified. Define either SME_BUILD_KAMEK or SME_BUILD_KAMEK_INLINE or SME_BUILD_KURIBO"
-#endif
 
 static void initMod() {
   SME_DEBUG_LOG(
@@ -106,7 +86,7 @@ static void moduleLoad(int size, bool unk) {
             "\n"
             "         Built:    	" __DATE__ " at " __TIME__ "\n"
             "         Compiler: 	" __VERSION__ "\n"
-            "~~~~~~~~~~~~~~~~~~~~~~~\n", );
+            "~~~~~~~~~~~~~~~~~~~~~~~\n");
     initMod();
   }
 }
@@ -239,6 +219,7 @@ SME_PATCH_BL(SME_PORT_REGION(0x802815F0, 0, 0, 0), Patch::Mario::canGrabAtNPC);
 SME_WRITE_32(SME_PORT_REGION(0x802815F4, 0, 0, 0), 0x2C030000);
 SME_PATCH_BL(SME_PORT_REGION(0x80207430, 0, 0, 0), Patch::Mario::canCarryNPC);
 SME_WRITE_32(SME_PORT_REGION(0x80207434, 0, 0, 0), 0x2C030000);
+SME_PATCH_BL(SME_PORT_REGION(0x80213314, 0, 0, 0), Patch::Mario::scaleNPCTalkRadius);
 #if 0
   SME_PATCH_BL(SME_PORT_REGION(0x802145F0, 0, 0, 0),
                Patch::Mario::scaleNPCThrowLength);

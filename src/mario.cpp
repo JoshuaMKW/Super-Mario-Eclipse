@@ -601,16 +601,18 @@ void SME::Patch::Mario::rescaleHeldObj(Mtx holderMatrix, Mtx destMatrix) {
                   1 / holderSize.z);
 }
 
-#if 0
 // 0x80213314
-static asm void scaleNPCTalkRadius(){
-    nofralloc lis r3,    0x8041 lwz r3, -0x1EF8(r3)lfs f0,
-    0x002C(r3)fmuls f30, f30,           f0 lwz r3,
-    -0x6220(r13)blr} kmCall(0x80213314, &scaleNPCTalkRadius);
-#endif
+SME_PURE_ASM void SME::Patch::Mario::scaleNPCTalkRadius() {
+  asm volatile("lis 3, gpMarioAddress@ha                \n\t"
+               "lwz 3, gpMarioAddress@l (3)             \n\t"
+               "lfs 0, 0x2C (3)                         \n\t"
+               "fmuls 30, 30, 0                         \n\t"
+               "lis 3, mPtrSaveNormal__8TBaseNPC@ha     \n\t"
+               "lwz 3, mPtrSaveNormal__8TBaseNPC@l (3)  \n\t"
+               "blr                                     \n\t");
+}
 
-static f32 calcJumpPower(TMario *player, f32 factor, f32 base,
-                         f32 jumpPower) {
+static f32 calcJumpPower(TMario *player, f32 factor, f32 base, f32 jumpPower) {
   SME::Class::TPlayerData *playerParams =
       SME::TGlobals::getPlayerParams(player);
   const SME::Class::TPlayerParams *params = playerParams->getParams();
@@ -626,8 +628,7 @@ static f32 calcJumpPower(TMario *player, f32 factor, f32 base,
       multiplier *= multiplier;
     }
     jumpPower *= multiplier;
-    player->mForwardSpeed *=
-        params->mMultiJumpFSpeedMulti.get();
+    player->mForwardSpeed *= params->mMultiJumpFSpeedMulti.get();
   }
   return Max(base, (base * factor) + jumpPower);
 }
@@ -651,7 +652,7 @@ void SME::Patch::Mario::manageExtraJumps(TMario *player) {
     u32 state = player->mState;
     u32 voiceID = 0;
     u32 animID = 0;
-    
+
     if (jumpsLeft == 1) {
       state = static_cast<u32>(TMario::State::TRIPLE_J);
       voiceID = 0x78B6;
@@ -742,7 +743,8 @@ void SME::Patch::Mario::checkJumpSpeedLimit(f32 speed) {
 
 // extern -> SME.cpp
 // 0x8024CC2C
-TMario *SME::Patch::Mario::checkJumpSpeedMulti(TMario *player, f32 factor, f32 max) {
+TMario *SME::Patch::Mario::checkJumpSpeedMulti(TMario *player, f32 factor,
+                                               f32 max) {
   SME::Class::TPlayerData *playerParams =
       SME::TGlobals::getPlayerParams(player);
 

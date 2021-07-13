@@ -30,7 +30,7 @@ void SME::Patch::Init::initCodeProtection() {
 // extern -> SME.cpp
 JKRExpHeap *SME::Patch::Init::createGlobalHeaps(void *newHeap, size_t size,
                                                 JKRHeap *rootHeap, bool unk_1) {
-  constexpr size_t charactersize = 0x1A0000;
+  constexpr size_t charactersize = 0x1C0000;
   constexpr size_t globalsize = 0x8000;
 
 #ifdef SME_DETACHED_HEAPS

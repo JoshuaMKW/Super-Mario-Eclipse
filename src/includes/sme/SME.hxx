@@ -221,7 +221,7 @@ TMario *scaleNPCThrowLength(TMario *player, float *params);
 u32 scaleNPCThrowHeight(u32 _r3, f32 z, f32 y);
 void scaleNPCTalkRadius();
 f32 getTreeClimbMinFall();
-TMapObjBase *getTreeClimbMaxFall(TMapObjBase *tree, f32 speed);
+void getTreeClimbMaxFall();
 bool scaleTreeSlideSpeed(f32 _f1, f32 _f2);
 void getClimbingAnimSpd(TMario *player, TMario::Animation anim, f32 speed);
 void scaleHangSpeed(TMario *player);

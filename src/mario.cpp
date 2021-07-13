@@ -105,20 +105,18 @@ u32 SME::Patch::Mario::updateContexts(TMario *player) {
 
 /* NPC CARRY CODE */
 
+// 0x8029A87C
 u32 SME::Patch::Mario::carryOrTalkNPC(TBaseNPC *npc) {
   const SME::Class::TPlayerData *playerParams =
       SME::TGlobals::getPlayerParams(gpMarioAddress);
 
-  if (!playerParams)
+  if (!playerParams->isMario())
     return isNowCanTaken__8TBaseNPCCFv();
 
   if ((*(u32 *)(&npc->mStateFlags) & 0x840007) != 0)
     return 0;
 
   if (gpMarioAddress->mState == static_cast<u32>(TMario::State::IDLE))
-    return 0;
-
-  if (!playerParams->isMario())
     return 0;
 
   bool oldTake = npc->mStateFlags.mCanBeTaken;
@@ -130,6 +128,7 @@ u32 SME::Patch::Mario::carryOrTalkNPC(TBaseNPC *npc) {
   return ret;
 }
 
+// 0x802815F0
 bool SME::Patch::Mario::canGrabAtNPC() {
   TBaseNPC *npc;
   SME_FROM_GPR(30, npc);
@@ -140,15 +139,12 @@ bool SME::Patch::Mario::canGrabAtNPC() {
   if (!playerParams->isMario())
     return npc->mStateFlags.mCanBeTaken;
 
-  if (npc->mStateFlags.mCanBeTaken)
-    return true;
-
-  if (gpMarioAddress->mState == static_cast<u32>(TMario::State::IDLE))
-    return false;
-
-  return playerParams->getParams()->mCanHoldNPCs.get();
+  return (playerParams->getParams()->mCanHoldNPCs.get() &&
+          gpMarioAddress->mState == static_cast<u32>(TMario::State::IDLE)) ||
+         npc->mStateFlags.mCanBeTaken;
 }
 
+// 0x80207430
 bool SME::Patch::Mario::canCarryNPC() {
   TBaseNPC *npc;
   SME_FROM_GPR(29, npc);
@@ -156,19 +152,12 @@ bool SME::Patch::Mario::canCarryNPC() {
   const SME::Class::TPlayerData *playerParams =
       SME::TGlobals::getPlayerParams(gpMarioAddress);
 
-  if (!playerParams)
+  if (!playerParams->isMario())
     return npc->mStateFlags.mCanBeTaken;
 
-  if (npc->mStateFlags.mCanBeTaken)
-    return true;
-
-  if (gpMarioAddress->mState == static_cast<u32>(TMario::State::IDLE))
-    return false;
-
-  if (!playerParams->isMario())
-    return false;
-
-  return playerParams->getParams()->mCanHoldNPCs.get();
+  return (playerParams->getParams()->mCanHoldNPCs.get() &&
+          gpMarioAddress->mState == static_cast<u32>(TMario::State::IDLE)) ||
+         npc->mStateFlags.mCanBeTaken;
 }
 
 // extern -> SME.cpp
@@ -220,7 +209,6 @@ u32 SME::Patch::Mario::scaleNPCThrowHeight(u32 _r3, f32 z, f32 y) {
   return _r3;
 }
 
-#ifdef MARIO_MODS
 /* TREE CLIMB CODE */
 
 // extern -> SME.cpp
@@ -237,23 +225,32 @@ f32 SME::Patch::Mario::getTreeClimbMinFall() {
 
 // extern -> SME.cpp
 // 0x802619CC
-TMapObjBase *SME::Patch::Mario::getTreeClimbMaxFall(TMapObjBase *tree,
-                                                    f32 speed) {
-  TMario *player;
-  f32 ret;
-  SME_FROM_GPR(31, player);
-  SME_FROM_FPR(3, ret);
-
-  Vec size;
-  player->JSGGetScaling(&size);
-
-  ret = tree->mReceiveHeight / ((size.y * 0.2f) + (1.0f - 0.2f));
-
-  SME_TO_FPR(1, speed);
-  SME_TO_FPR(3, ret);
-  return tree;
+SME_PURE_ASM void SME::Patch::Mario::getTreeClimbMaxFall() {
+  asm volatile (
+    "mflr 0                   \n\t"
+    "stw 0, 0x8 (1)           \n\t"
+    "stwu 1, -0x10 (1)        \n\t"
+    "lfs 3, 0x5C (3)          \n\t"
+    "bl _localdata            \n\t"
+    ".float 0.2, 1.0          \n\t"
+    "_localdata:              \n\t"
+    "mflr 11                  \n\t"
+    "lfs 0, 0 (11)            \n\t"
+    "lfs 2, 4 (11)            \n\t"
+    "lfs 4, 0x28 (31)         \n\t"
+    "fmuls 4, 4, 0            \n\t"
+    "fsubs 2, 2, 0            \n\t"
+    "fadds 4, 4, 2            \n\t"
+    "fdivs 3, 3, 4            \n\t"
+    "lfs 2, 0x14 (31)         \n\t"
+    "addi 1, 1, 0x10          \n\t"
+    "lwz 0, 0x8 (1)           \n\t"
+    "mtlr 0                   \n\t"
+    "blr                      \n\t"
+  );
 }
 
+#ifdef MARIO_MODS
 // extern -> SME.cpp
 // 0x80261CF4
 bool SME::Patch::Mario::scaleTreeSlideSpeed(f32 _f1, f32 _f2) {

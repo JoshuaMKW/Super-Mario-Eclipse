@@ -292,6 +292,7 @@ char *String::intToString(s32 num, char *buffer, size_t base) {
     break;
   case 10:
     snprintf(buffer, 11, "%ld", num);
+    break;
   default:
     SME_DEBUG_LOG("Invalid base specified (%ld) for string format", base);
   }

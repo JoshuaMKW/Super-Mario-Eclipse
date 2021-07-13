@@ -295,8 +295,16 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     path = Path(args.path)
-    dest = Path(args.dest) if args.dest else path / "out"
-    dest.parent.mkdir(parents=True, exist_ok=True)
+    if args.dest:
+        dest = Path(args.dest)
+        if dest.suffix == "":
+            dest.mkdir(parents=True, exist_ok=True)
+        else:
+            dest.parent.mkdir(parents=True, exist_ok=True)
+    elif path.is_file():
+        dest = path.with_suffix(".prm")
+    else:
+        dest = path / "out"
 
     if args.job == "i":
         init_template(path)

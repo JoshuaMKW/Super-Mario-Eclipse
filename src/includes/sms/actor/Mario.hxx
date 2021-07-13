@@ -155,7 +155,7 @@ public:
     TParamT<f32> mDashBrake;       // Turbo Nozzle stop speed?
     TParamT<f32> mDashStartTime;   // Turbo Nozzle start
     TParamT<f32> mWaitingRotSp;    // Waiting rotation speed
-    TParamT<f32> mRunningRotSpMin; // Running rotation speed
+    TParamT<f32> mRunningRotSpMin; // Running rotation speed min
     TParamT<f32> mRunningRotSpMax; // Running rotation speed max
     TParamT<f32> mRocketRotSp;     // Rocket Nozzle rotation speed
     TParamT<f32> mPumpingRotSpMin; // Pumping rotation speed min

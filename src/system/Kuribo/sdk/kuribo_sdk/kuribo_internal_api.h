@@ -41,6 +41,9 @@ typedef struct {
   /* kxGetProcedure, if available */
   u32 (*get_procedure)(const char* symbol);
 
+  /* Valid only for ATTACH events */
+  char* start_address;
+
   /* Communication channel */
   union {
     /* for KURIBO_REASON_INQUIRE_META_DESC */

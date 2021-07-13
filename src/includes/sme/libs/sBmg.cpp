@@ -56,6 +56,5 @@ char *Util::formatBMGRaw(char *dst, const char *src, size_t len)
     msg.replaceAll("%btime%", SME::Util::Time::buildTime());
     msg.replaceAll("%cardslot%", gpCardManager->mChannel == CARD_SLOTA ? "A" : "B");
 
-    strncpy(dst, msg.data(), len);
-    return dst;
+    return strncpy(dst, msg.data(), len);
 }

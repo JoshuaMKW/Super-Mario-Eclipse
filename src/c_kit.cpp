@@ -280,20 +280,41 @@ static void maintainYoshi(TYoshi *yoshi) {
 }
 
 // 0x8024D3A8
+// 0x8003F8F0
 // extern -> SME.cpp
 void Patch::CKit::realTimeCustomAttrsHandler(TMario *player) {
-  maintainYoshi(player->mYoshi);
+  if (player->mYoshi)
+    maintainYoshi(player->mYoshi);
 
   Class::TPlayerData *playerParams = TGlobals::getPlayerParams(player);
   Class::TStageParams *stageParams = Class::TStageParams::sStageConfig;
 
   const Class::TPlayerParams *params = playerParams->getParams();
-  //const Class::TPlayerData::ParamHistory &defaults = playerParams->mDefaultAttrs;
   const f32 sizeMultiplier = params->mSizeMultiplier.get() * stageParams->mPlayerSizeMultiplier.get();
   const f32 speedMultiplier = params->mSpeedMultiplier.get();
-  //const f32 diminishedSizeMultiplier = SME::Util::Math::scaleLinearAtAnchor(sizeMultiplier, 0.5f, 1.0f);
 
   playerParams->scalePlayerAttrs(sizeMultiplier);
+
+#define SCALE_PARAM(param, scale) param.set(param.get() * scale)
+
+  switch (playerParams->getPlayerID()) {
+  case Enum::Player::MARIO:
+  case Enum::Player::LUIGI:
+  case Enum::Player::IL_PIANTISSIMO:
+  case Enum::Player::SHADOW_MARIO:
+    break;
+  case Enum::Player::DRY_BONES:
+    SCALE_PARAM(player->mRunParams.mMotBlendRunSp, 100.0f);
+    SCALE_PARAM(player->mSwimParams.mWaitBouyancy, -1.0f);
+    SCALE_PARAM(player->mSwimParams.mMoveBouyancy, 0.0f);
+    SCALE_PARAM(player->mSwimParams.mPaddleDown, 2.0f);
+    SCALE_PARAM(player->mSwimParams.mPaddleSpeedUp, 0.5f);
+    break;
+  default:
+    break;
+  }
+
+#undef SCALE_PARAM
 
   setPositions__6TMarioFv(player);
 }

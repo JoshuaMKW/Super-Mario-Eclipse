@@ -235,11 +235,11 @@ public:
   }
 };
 
-#define PatchIdentifier MACRO_CONCAT(_patch, __COUNTER__)
+#define PatchIdentifier(a) MACRO_CONCAT(_patch##a, __COUNTER__)
 
-#define PatchB(a, b) togglable_ppc_b PatchIdentifier((u32)a, (void*)b)
-#define PatchBL(a, b) togglable_ppc_bl PatchIdentifier((u32)a, (void*)b)
-#define Patch32(a, b) auto_patch PatchIdentifier((u32)a, (u32)b)
+#define PatchB(a, b) togglable_ppc_b PatchIdentifier(a)((u32)a, (void*)b)
+#define PatchBL(a, b) togglable_ppc_bl PatchIdentifier(a)((u32)a, (void*)b)
+#define Patch32(a, b) auto_patch PatchIdentifier(a)((u32)a, (u32)b)
 
 struct dummy {};
 
@@ -260,8 +260,8 @@ struct export_as {
   }
 };
 
-#define ExportAs(a, b) export_as PatchIdentifier((void*)a, b)
-#define Export(a) export_as PatchIdentifier((void*)a, ##a)
+#define ExportAs(a, b) export_as PatchIdentifier(a)((void*)a, b)
+#define Export(a) export_as PatchIdentifier(a)((void*)a, ##a)
 
 typedef void (*VoidFunc)();
 
@@ -276,8 +276,8 @@ struct on_unload {
   VoidFunc _fn;
 };
 
-#define OnLoad(fn) on_load PatchIdentifier(fn)
-#define OnUnload(fn) on_unload PatchIdentifier(fn)
+#define OnLoad(fn) on_load PatchIdentifier(fn)(fn)
+#define OnUnload(fn) on_unload PatchIdentifier(fn)(fn)
 
 //! You probably don't want to use this: the linker will automatically call this
 //! for you when you call an external function

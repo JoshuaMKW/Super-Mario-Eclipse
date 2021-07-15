@@ -226,50 +226,58 @@ f32 SME::Patch::Mario::getTreeClimbMinFall() {
 // extern -> SME.cpp
 // 0x802619CC
 SME_PURE_ASM void SME::Patch::Mario::getTreeClimbMaxFall() {
-  asm volatile (
-    "mflr 0                   \n\t"
-    "stw 0, 0x8 (1)           \n\t"
-    "stwu 1, -0x10 (1)        \n\t"
-    "lfs 3, 0x5C (3)          \n\t"
-    "bl _localdata            \n\t"
-    ".float 0.2, 1.0          \n\t"
-    "_localdata:              \n\t"
-    "mflr 11                  \n\t"
-    "lfs 0, 0 (11)            \n\t"
-    "lfs 2, 4 (11)            \n\t"
-    "lfs 4, 0x28 (31)         \n\t"
-    "fmuls 4, 4, 0            \n\t"
-    "fsubs 2, 2, 0            \n\t"
-    "fadds 4, 4, 2            \n\t"
-    "fdivs 3, 3, 4            \n\t"
-    "lfs 2, 0x14 (31)         \n\t"
-    "addi 1, 1, 0x10          \n\t"
-    "lwz 0, 0x8 (1)           \n\t"
-    "mtlr 0                   \n\t"
-    "blr                      \n\t"
-  );
+  asm volatile("mflr 0                   \n\t"
+               "stw 0, 0x8 (1)           \n\t"
+               "stwu 1, -0x10 (1)        \n\t"
+               "lfs 3, 0x5C (3)          \n\t"
+               "bl _localdata            \n\t"
+               ".float 0.2, 1.0          \n\t"
+               "_localdata:              \n\t"
+               "mflr 11                  \n\t"
+               "lfs 0, 0 (11)            \n\t"
+               "lfs 2, 4 (11)            \n\t"
+               "lfs 4, 0x28 (31)         \n\t"
+               "fmuls 4, 4, 0            \n\t"
+               "fsubs 2, 2, 0            \n\t"
+               "fadds 4, 4, 2            \n\t"
+               "fdivs 3, 3, 4            \n\t"
+               "lfs 2, 0x14 (31)         \n\t"
+               "addi 1, 1, 0x10          \n\t"
+               "lwz 0, 0x8 (1)           \n\t"
+               "mtlr 0                   \n\t"
+               "blr                      \n\t");
 }
 
-#ifdef MARIO_MODS
 // extern -> SME.cpp
 // 0x80261CF4
-bool SME::Patch::Mario::scaleTreeSlideSpeed(f32 _f1, f32 _f2) {
-  TMario *player;
-  SME_FROM_GPR(31, player);
-
-  _f1 = 0.00195313f * player->mJumpParams.mGravity.get();
-
-  SME_TO_FPR(1, _f1);
-  SME_TO_FPR(2, _f2);
-
-  if (_f2 < -16.0f) {
-    return true;
-  } else {
-    player->mSpeed.y = 0.0f;
-    return false;
-  }
+SME_PURE_ASM void scaleTreeSlideSpeed() {
+  // F2 IS UNSAFE
+  asm volatile("mflr 0                      \n\t"
+               "stw 0, 0x8 (1)              \n\t"
+               "stwu 1, -0x10 (1)           \n\t"
+               "lfs 3, 0x5C (3)             \n\t"
+               "bl _localdata_              \n\t"
+               ".float 0.00195313, -16      \n\t"
+               "_localdata_:                \n\t"
+               "mflr 11                     \n\t"
+               "lfs 0, 0 (11)               \n\t"
+               "lfs 1, 4 (11)               \n\t"
+               "lfs 4, 0xB18 (31)           \n\t"
+               "fmuls 4, 4, 0               \n\t"
+               "fcmpo 0, 2, 1               \n\t"
+               "li 3, 1                     \n\t"
+               "blt _exit666                \n\t"
+               "li 3, 0                     \n\t"
+               "stw 3, 0xA8 (31)            \n\t"
+               "_exit666:                   \n\t"
+               "addi 1, 1, 0x10             \n\t"
+               "lwz 0, 0x8 (1)              \n\t"
+               "mtlr 0                      \n\t"
+               "blr                         \n\t");
 }
-#endif
+SME_PATCH_BL(SME_PORT_REGION(0x80261CF4, 0, 0, 0), scaleTreeSlideSpeed);
+SME_WRITE_32(SME_PORT_REGION(0x80261CF8, 0, 0, 0), 0x2C030000);
+SME_WRITE_32(SME_PORT_REGION(0x80261CFC, 0, 0, 0), 0x41820070);
 
 /* GLOBAL CLIMB CODE */
 
@@ -289,40 +297,34 @@ void SME::Patch::Mario::getClimbingAnimSpd(TMario *player,
   setAnimation__6TMarioFif(player, anim, speed);
 }
 
-#if 0
 /* ROOF HANG CODE */
 
-static void scaleRoofClimbHeight(f32 yCoord, f32 speed) {
-  TMario *player;
-  __asm { mr player, r31}
-  ;
-
-  player->mPosition.y = yCoord - (160.0f * player->mSize.y);
-
-  __asm volatile {fmr f2, speed};
+static SME_PURE_ASM void scaleRoofClimbHeight(f32 yCoord, f32 speed) {
+  asm volatile("lfs 0, " SME_STRINGIZE(SME_PORT_REGION(
+      -0xDE0, 0, 0, 0)) "(2)        \n\t"
+                        "lfs 3, 0x28(31)                                \n\t"
+                        "fmuls 0, 0, 3                                  \n\t"
+                        "blr                                            \n\t");
 }
-kmCall(0x8025D66C, &scaleRoofClimbHeight);
-kmWrite32(0x8025D670, 0x60000000);
-kmWrite32(0x8025D674, 0x60000000);
+SME_PATCH_BL(SME_PORT_REGION(0x8025D66C, 0, 0, 0), scaleRoofClimbHeight);
 
-static asm void scaleRoofSquashedHeight(){
-    nofralloc lfs f3, -0xDE0(rtoc)lfs f5, 0x28(r30)fmuls f3, f5,
-    f3 blr} kmCall(0x802617EC, &scaleRoofSquashedHeight);
-
-static void scaleRoofMoveDiff() {
-  TMario *player;
-  f32 _f0;
-
-  __asm { mr player, r30
-            fmr _f0, f0}
-  ;
-
-  _f0 = 30.0f * player->mSize.y;
-
-  __asm volatile {fmr f0, _f0};
+static SME_PURE_ASM void scaleRoofSquashedHeight() {
+  asm volatile("lfs 3, " SME_STRINGIZE(SME_PORT_REGION(
+      -0xDE0, 0, 0, 0)) "(2)        \n\t"
+                        "lfs 5, 0x28(30)                                \n\t"
+                        "fmuls 3, 5, 3                                  \n\t"
+                        "blr                                            \n\t");
 }
-kmCall(0x80261824, &scaleRoofMoveDiff);
-#endif
+SME_PATCH_BL(SME_PORT_REGION(0x802617EC, 0, 0, 0), scaleRoofSquashedHeight);
+
+static SME_PURE_ASM void scaleRoofMoveDiff() {
+  asm volatile("lfs 0, " SME_STRINGIZE(SME_PORT_REGION(
+      -0xD7C, 0, 0, 0)) "(2)        \n\t"
+                        "lfs 3, 0x28(30)                                \n\t"
+                        "fmuls 0, 0, 3                                  \n\t"
+                        "blr                                            \n\t");
+}
+SME_PATCH_BL(SME_PORT_REGION(0x80261824, 0, 0, 0), scaleRoofMoveDiff);
 
 // extern -> SME.cpp
 // 0x802615AC
@@ -339,29 +341,29 @@ void SME::Patch::Mario::scaleHangSpeed(TMario *player) {
     player->mForwardSpeed = Min(player->mForwardSpeed, 4.0f);
 }
 
-#if 0
-static TBGCheckData *canHangOnRoof(TBGCheckData *roof) {
-  bool canCling;
-  __asm { mr canCling, r4}
-  ;
-
+static bool canHangOnRoof(TBGCheckData *roof /*, u16 colType*/) {
   TMario *player;
-  __asm { mr player, r30}
-  ;
+  SME_FROM_GPR(30, player);
 
-  if (playerParams->isMario())
-    canCling = (roof->mCollisionType == 266 ||
-                playerParams->mParams->Attributes.mCanClimbWalls);
-  else
-    canCling = roof->mCollisionType == 266;
+  u16 colType;
+  SME_FROM_GPR(4, colType);
 
-  __asm volatile {mr r4, canCling};
+  SME::Class::TPlayerData *playerParams =
+      SME::TGlobals::getPlayerParams(player);
 
-  return roof;
+  if (playerParams->isMario() &&
+      playerParams->getParams()->mCanClimbWalls.get())
+    return true;
+
+  return colType == 266;
 }
-kmCall(0x802617C0, &canHangOnRoof);
-kmWrite32(0x802617C4, 0x2C040000);
-kmWrite32(0x802617C8, 0x4182000C);
+SME_WRITE_32(SME_PORT_REGION(0x802617C0, 0, 0, 0), 0xA0830000);
+SME_PATCH_BL(SME_PORT_REGION(0x802617C4, 0, 0, 0), canHangOnRoof);
+SME_WRITE_32(SME_PORT_REGION(0x802617C8, 0, 0, 0), 0x60000000);
+SME_WRITE_32(SME_PORT_REGION(0x802617CC, 0, 0, 0), 0x60000000);
+SME_WRITE_32(SME_PORT_REGION(0x802617D0, 0, 0, 0), 0x60000000);
+SME_WRITE_32(SME_PORT_REGION(0x802617D4, 0, 0, 0), 0x60000000);
+SME_WRITE_32(SME_PORT_REGION(0x802617D8, 0, 0, 0), 0x2C030000);
 
 /* WALL CLIMB CODE */
 
@@ -374,35 +376,40 @@ kmWrite32(0x802617C8, 0x4182000C);
 
 // 80415DEC <- this float controls the climbing speed, scale accordingly
 
+#if 0
 static f32 scaleClimbSpeed(f32 speed) {
   TMario *player;
-  __asm { mr player, r30}
-  ;
+  SME_FROM_GPR(30, player);
+
 
   f32 _f0;
   f32 _f3;
   f32 _f7;
 
-  __asm { fmr _f0, f0
-            fmr _f3, f3
-            fmr _f7, f7}
-  ;
+  SME_FROM_FPR(0, _f0);
+  SME_FROM_FPR(3, _f3);
+  SME_FROM_FPR(7, _f7);
+
+  SME::Class::TPlayerData *playerParams =
+      SME::TGlobals::getPlayerParams(player);
 
   f32 scale = 0.015625f;
 
   if (playerParams->isMario())
-    scale *= playerParams->mParams->Attributes.mSpeedMultiplier;
+    scale *= playerParams->getParams()->mSpeedMultiplier.get();
 
-  __asm volatile {fmr f0, _f0 fmr f3, _f3 fmr f7, _f7};
+  SME_TO_FPR(0, _f0);
+  SME_TO_FPR(3, _f3);
+  SME_TO_FPR(7, _f7);
 
   return scale;
 }
-kmCall(0x8025E19C, &scaleClimbSpeed);
-kmWrite32(0x8025E1A0, 0x807E0010);
-kmWrite32(0x8025E1A4, 0x801E0014);
-kmWrite32(0x8025E1C4, 0xC0440014);
-kmCall(0x8025E218, &scaleClimbSpeed);
-kmWrite32(0x8025E21C, 0x7FC3F378);
+SME_PATCH_BL(SME_PORT_REGION(0x8025E19C, 0, 0, 0), scaleClimbSpeed);
+SME_WRITE_32(SME_PORT_REGION(0x8025E1A0, 0, 0, 0), 0x807E0010);
+SME_WRITE_32(SME_PORT_REGION(0x8025E1A4, 0, 0, 0), 0x801E0014);
+SME_WRITE_32(SME_PORT_REGION(0x8025E1C4, 0, 0, 0), 0xC0440014);
+SME_PATCH_BL(SME_PORT_REGION(0x8025E218, 0, 0, 0), scaleClimbSpeed);
+SME_WRITE_32(SME_PORT_REGION(0x8025E21C, 0, 0, 0), 0x7FC3F378);
 
 static TBGCheckData *checkClimbingWallPlane(TMario *player,
                                             JGeometry::TVec3<float> pos, f32 w,
@@ -415,129 +422,127 @@ kmCall(0x8025DEB8, &checkClimbingWallPlane);
 kmCall(0x8025E184, &checkClimbingWallPlane);
 kmCall(0x8025E2D0, &checkClimbingWallPlane);
 kmCall(0x8025E2E8, &checkClimbingWallPlane);
+#endif
 
-static TBGCheckData *canJumpClingWall(TBGCheckData *wall) {
-  bool canCling;
-  __asm { mr canCling, r4}
-  ;
-
+#if 0
+static bool canJumpClingWall(TBGCheckData *wall, u16 colType) {
   TMario *player;
-  __asm { mr player, r28}
-  ;
+  SME_FROM_GPR(28, player);
 
-  if (playerParams->isMario())
-    canCling =
-        wall->mCollisionType == 266 ||
-        (playerParams->mParams->Attributes.mCanClimbWalls &&
-         player->mController->mButtons.mInput & TMarioGamePad::Buttons::Z);
-  else
-    canCling = wall->mCollisionType == 266;
+  if (colType == 266)
+    return true;
 
-  __asm volatile {mr r4, canCling};
+  SME::Class::TPlayerData *playerParams =
+      SME::TGlobals::getPlayerParams(player);
 
-  return wall;
+  if (playerParams->isMario() &&
+      playerParams->getParams()->mCanClimbWalls.get() &&
+      player->mController->mButtons.mInput & TMarioGamePad::Buttons::Z)
+    return true;
+
+  return false;
 }
-kmCall(0x8024C888, &canJumpClingWall);
-kmWrite32(0x8024C88C, 0x2C040000);
-kmWrite32(0x8024C890, 0x4182000C);
+SME_WRITE_32(SME_PORT_REGION(0x8024C888, 0, 0, 0), 0xA0830000);
+SME_PATCH_BL(SME_PORT_REGION(0x8024C88C, 0, 0, 0), canJumpClingWall);
+SME_WRITE_32(SME_PORT_REGION(0x8024C890, 0, 0, 0), 0x2C030000);
+SME_WRITE_32(SME_PORT_REGION(0x8024C894, 0, 0, 0), 0x807C00D8);
+SME_WRITE_32(SME_PORT_REGION(0x8024C898, 0, 0, 0), 0x60000000);
+SME_WRITE_32(SME_PORT_REGION(0x8024C89C, 0, 0, 0), 0x60000000);
+SME_WRITE_32(SME_PORT_REGION(0x8024C8A0, 0, 0, 0), 0x60000000);
 
-static TBGCheckData *canUnkActionWall(TBGCheckData *wall) {
-  bool canCling;
-  __asm { mr canCling, r4}
-  ;
-
+static bool canUnkActionWall(TBGCheckData *wall, u16 colType) {
   TMario *player;
-  __asm { mr player, r22}
-  ;
+  SME_FROM_GPR(22, player);
 
-  if (playerParams->isMario())
-    canCling =
-        wall->mCollisionType == 266 ||
-        (playerParams->mParams->Attributes.mCanClimbWalls &&
-         player->mController->mButtons.mInput & TMarioGamePad::Buttons::Z &&
-         wall->mCollisionType != 5);
-  else
-    canCling = wall->mCollisionType == 266;
+  if (colType == 266)
+    return true;
 
-  __asm volatile {mr r4, canCling};
+  SME::Class::TPlayerData *playerParams =
+      SME::TGlobals::getPlayerParams(player);
 
-  return wall;
+  if (playerParams->isMario() &&
+      playerParams->getParams()->mCanClimbWalls.get() &&
+      player->mController->mButtons.mInput & TMarioGamePad::Buttons::Z)
+    return true;
+
+  return false;
 }
-kmCall(0x80256A3C, &canUnkActionWall);
-kmWrite32(0x80256A40, 0x2C040000);
-kmWrite32(0x80256A44, 0x4182000C);
+SME_WRITE_32(SME_PORT_REGION(0x80256A3C, 0, 0, 0), 0xA0830000);
+SME_PATCH_BL(SME_PORT_REGION(0x80256A40, 0, 0, 0), canUnkActionWall);
+SME_WRITE_32(SME_PORT_REGION(0x80256A44, 0, 0, 0), 0x60000000);
+SME_WRITE_32(SME_PORT_REGION(0x80256A48, 0, 0, 0), 0x60000000);
+SME_WRITE_32(SME_PORT_REGION(0x80256A4C, 0, 0, 0), 0x60000000);
+SME_WRITE_32(SME_PORT_REGION(0x80256A50, 0, 0, 0), 0x60000000);
+SME_WRITE_32(SME_PORT_REGION(0x80256A54, 0, 0, 0), 0x2C030000);
 
-static TBGCheckData *canRunClingWall(TBGCheckData *wall) {
-  bool canCling;
-  __asm { mr canCling, r4}
-  ;
-
+static bool canRunClingWall(TBGCheckData *wall, u16 colType) {
   TMario *player;
-  __asm { mr player, r31}
-  ;
+  SME_FROM_GPR(31, player);
 
-  if (playerParams->isMario())
-    canCling =
-        wall->mCollisionType == 266 ||
-        (playerParams->mParams->Attributes.mCanClimbWalls &&
-         player->mController->mButtons.mInput & TMarioGamePad::Buttons::Z &&
-         wall->mCollisionType != 5);
-  else
-    canCling = wall->mCollisionType == 266;
+  if (colType == 266)
+    return true;
 
-  __asm volatile {mr r4, canCling};
+  SME::Class::TPlayerData *playerParams =
+      SME::TGlobals::getPlayerParams(player);
 
-  return wall;
+  if (playerParams->isMario() &&
+      playerParams->getParams()->mCanClimbWalls.get() &&
+      player->mController->mButtons.mInput & TMarioGamePad::Buttons::Z)
+    return true;
+
+  return false;
 }
-kmCall(0x8025B200, &canRunClingWall);
-kmWrite32(0x8025B204, 0x2C040000);
-kmWrite32(0x8025B208, 0x4182000C);
+SME_WRITE_32(SME_PORT_REGION(0x8025B1FC, 0, 0, 0), 0xA0830000);
+SME_PATCH_BL(SME_PORT_REGION(0x8025B200, 0, 0, 0), canRunClingWall);
+SME_WRITE_32(SME_PORT_REGION(0x8025B204, 0, 0, 0), 0x807F00D8);
+SME_WRITE_32(SME_PORT_REGION(0x8025B208, 0, 0, 0), 0x2C030000);
+SME_WRITE_32(SME_PORT_REGION(0x8025B20C, 0, 0, 0), 0x60000000);
+SME_WRITE_32(SME_PORT_REGION(0x8025B210, 0, 0, 0), 0x60000000);
+SME_WRITE_32(SME_PORT_REGION(0x8025B214, 0, 0, 0), 0x60000000);
+SME_WRITE_32(SME_PORT_REGION(0x8025B218, 0, 0, 0), 0x60000000);
 
-static TBGCheckData *canMoveOnWall1() {
-  bool canCling;
-  __asm { mr canCling, r4}
-  ;
-
+static bool canMoveOnWall1(u16 colType) {
   TMario *player;
-  __asm { mr player, r30}
-  ;
+  SME_FROM_GPR(30, player);
 
   TBGCheckData *wall;
-  __asm { mr wall, r29}
-  ;
+  SME_FROM_GPR(29, wall);
 
-  if (playerParams->isMario())
-    canCling = (wall->mCollisionType == 266 ||
-                playerParams->mParams->Attributes.mCanClimbWalls);
-  else
-    canCling = wall->mCollisionType == 266;
+  if (colType == 266)
+    return true;
 
-  __asm volatile {mr r4, canCling};
+  SME::Class::TPlayerData *playerParams =
+      SME::TGlobals::getPlayerParams(player);
 
-  return wall;
+  if (playerParams->isMario() &&
+      playerParams->getParams()->mCanClimbWalls.get())
+    return true;
+
+  return false;
 }
-kmCall(0x8025E2F4, &canMoveOnWall1);
-kmWrite32(0x8025E2F8, 0x2C040000);
-kmWrite32(0x8025E2FC, 0x4182000C);
+SME_WRITE_32(SME_PORT_REGION(0x8025E2F4, 0, 0, 0), 0xA0830000);
+SME_PATCH_BL(SME_PORT_REGION(0x8025E2F8, 0, 0, 0), canRunClingWall);
+SME_WRITE_32(SME_PORT_REGION(0x8025E2FC, 0, 0, 0), 0x2C030000);
+SME_WRITE_32(SME_PORT_REGION(0x8025E300, 0, 0, 0), 0x60000000);
+SME_WRITE_32(SME_PORT_REGION(0x8025E304, 0, 0, 0), 0x60000000);
+SME_WRITE_32(SME_PORT_REGION(0x8025E308, 0, 0, 0), 0x60000000);
+SME_WRITE_32(SME_PORT_REGION(0x8025E30C, 0, 0, 0), 0x60000000);
 
-static TBGCheckData *canMoveOnWall2(TBGCheckData *wall) {
-  bool canCling;
-  __asm { mr canCling, r4}
-  ;
-
+static bool canMoveOnWall2(TBGCheckData *wall, u16 colType) {
   TMario *player;
-  __asm { mr player, r30}
-  ;
+  SME_FROM_GPR(30, player);
 
-  if (playerParams->isMario())
-    canCling = (wall->mCollisionType == 266 ||
-                playerParams->mParams->Attributes.mCanClimbWalls);
-  else
-    canCling = wall->mCollisionType == 266;
+  if (colType == 266)
+    return true;
 
-  __asm volatile {mr r4, canCling};
+  SME::Class::TPlayerData *playerParams =
+      SME::TGlobals::getPlayerParams(player);
 
-  return wall;
+  if (playerParams->isMario() &&
+      playerParams->getParams()->mCanClimbWalls.get())
+    return true;
+
+  return false;
 }
 kmCall(0x8025E31C, &canMoveOnWall2);
 kmWrite32(0x8025E320, 0x2C040000);
@@ -645,7 +650,8 @@ void SME::Patch::Mario::manageExtraJumps(TMario *player) {
   else if ((player->mController->mButtons.mFrameInput &
             TMarioGamePad::Buttons::A) &&
            jumpsLeft > 0 &&
-           player->mState != static_cast<u32>(TMario::State::WALLSLIDE)) {
+           player->mState != static_cast<u32>(TMario::State::WALLSLIDE) &&
+           player->mState != static_cast<u32>(TMario::State::F_KNCK_H)) {
     u32 state = player->mState;
     u32 voiceID = 0;
     u32 animID = 0;
@@ -756,48 +762,17 @@ TMario *SME::Patch::Mario::checkJumpSpeedMulti(TMario *player, f32 factor,
   }
 }
 
-#if 0
-static f32 checkGroundSpeedMulti() {
+static f64 checkSlideSpeedMulti(f32 max, f32 factor) {
   TMario *player;
-  SME_FROM_GPR(31, player);
+  SME_FROM_GPR(30, player);
 
   SME::Class::TPlayerData *playerParams =
       SME::TGlobals::getPlayerParams(player);
 
-  if (playerParams->isMario() && !onYoshi__6TMarioCFv(player))
-    return player->mRunSlowdownFactor2 /
-           playerParams->mParams->Attributes.mSpeedMultiplier;
-  else
-    return player->mRunSlowdownFactor2;
-}
-kmCall(0x8025B8F8, &checkGroundSpeedMulti);
-
-// 0x80272FF0 - fSpeed Multplier - swim
-static void checkSwimSpeedMulti(f32 max, f32 factor) {
-  TMario *player;
-  __asm { mr player, r31}
-  ;
-
-  if (playerParams->isMario() && !onYoshi__6TMarioCFv(player)) {
-    player->mForwardSpeed =
-        ((factor * playerParams->mParams->Attributes.mSpeedMultiplier) * max) +
-        player->mForwardSpeed;
-  } else {
-    player->mForwardSpeed = (factor * max) + player->mForwardSpeed;
-  }
-}
-kmCall(0x80272FF0, &checkSwimSpeedMulti);
-kmWrite32(0x80272FF4, 0x60000000);
-
-static f64 checkSlideSpeedMulti(f32 max, f32 factor) {
-  TMario *player;
-  __asm { mr player, r30}
-  ;
-
   f64 slowFactor = 0.5;
 
   if (playerParams->isMario() && !onYoshi__6TMarioCFv(player)) {
-    slowFactor /= playerParams->mParams->Attributes.mSpeedMultiplier;
+    slowFactor /= playerParams->getParams()->mSpeedMultiplier.get();
   }
 
   if (player->mFludd && isEmitting__9TWaterGunFv(player->mFludd)) {
@@ -810,23 +785,12 @@ static f64 checkSlideSpeedMulti(f32 max, f32 factor) {
   }
   return slowFactor;
 }
-kmCall(0x8025C3E0, &checkSlideSpeedMulti);
-kmWrite32(0x8025C3E8, 0xFC4100F2);
-kmWrite32(0x8025C3EC, 0xFC2300F2);
+SME_PATCH_BL(SME_PORT_REGION(0x8025C3E0, 0, 0, 0), &checkSlideSpeedMulti);
+SME_WRITE_32(SME_PORT_REGION(0x8025C3E8, 0, 0, 0), 0xFC4100F2);
+SME_WRITE_32(SME_PORT_REGION(0x8025C3EC, 0, 0, 0), 0xFC2300F2);
 
-static f32 checkGroundSpeedCap() {
-  TMario *player;
-  __asm { mr player, r31}
-  ;
 
-  if (playerParams->isMario() && !onYoshi__6TMarioCFv(player))
-    return player->mMaxGroundSpeed *
-           playerParams->mParams->Attributes.mSpeedMultiplier;
-  else
-    return player->mMaxGroundSpeed;
-}
-kmCall(0x8025BC44, &checkGroundSpeedCap);
-
+#if 0
 static void checkHoverSpeedMulti(f32 factor, f32 max) {
   TMario *player;
   __asm { mr player, r30}
@@ -842,147 +806,106 @@ static void checkHoverSpeedMulti(f32 factor, f32 max) {
 }
 kmCall(0x8024AE80, &checkHoverSpeedMulti);
 kmWrite32(0x8024AE84, 0x60000000);
-
-static TMario *checkOilSlipSpeedMulti(f32 factor, f32 max) {
-  TMario *player;
-  __asm { mr player, r31}
-  ;
-
-  if (playerParams->isMario() && !onYoshi__6TMarioCFv(player)) {
-    player->mForwardSpeed =
-        ((factor * playerParams->mParams->Attributes.mSpeedMultiplier) * max) +
-        player->mForwardSpeed;
-  } else {
-    player->mForwardSpeed = (factor * max) + player->mForwardSpeed;
-  }
-  return player;
-}
-kmCall(0x80259368, &checkOilSlipSpeedMulti);
-kmWrite32(0x8025936C, 0x60000000);
-
-static f32 checkJumpingWallBonk(f32 f1, f32 speed) {
-  TMario *player;
-  __asm { mr player, r28}
-  ;
-
-  if (playerParams->isMario() && !onYoshi__6TMarioCFv(player))
-    return player->mWallBonkThreshold *
-           playerParams->mParams->Attributes.mSpeedMultiplier;
-  else
-    return player->mWallBonkThreshold;
-}
-kmWrite32(0x8024C7C0, 0xC05C00B0);
-kmCall(0x8024C7C4, &checkJumpingWallBonk);
-kmWrite32(0x8024C7C8, 0xFC020840);
-
-static f32 checkRunningWallBonk(f32 f1, f32 speed) {
-  TMario *player;
-  __asm { mr player, r31}
-  ;
-
-  if (playerParams->isMario() && !onYoshi__6TMarioCFv(player))
-    return player->mWallBonkThreshold *
-           playerParams->mParams->Attributes.mSpeedMultiplier;
-  else
-    return player->mWallBonkThreshold;
-}
-kmWrite32(0x8025B148, 0xC05F00B0);
-kmCall(0x8025B14C, &checkRunningWallBonk);
-kmWrite32(0x8025B150, 0xFC020840);
-
-static void scaleDiveSpeed() {
-  TMario *player;
-  __asm { mr player, r30}
-  ;
-
-  f32 _f0;
-  __asm { fmr _f0, f0}
-  ;
-
-  if (playerParams->isMario())
-    _f0 = 48.0f * playerParams->mParams->Attributes.mSpeedMultiplier;
-  else
-    _f0 = 48.0f;
-
-  __asm volatile {fmr f0, _f0};
-}
-kmCall(0x80254904, &scaleDiveSpeed);
-kmWrite32(0x80254908, 0xC042F0DC);
-kmWrite32(0x8025490C, 0xC03E00B0);
+#endif
 
 // 8024afe0 <- hover air Y spd
 
-static asm void scaleHoverInitYSpd(){
-    nofralloc lfs f0, -0x0FE0(rtoc)lfs f4, 0x28(r30)fmuls f0, f0,
-    f4 blr} kmCall(0x80254A2C, &scaleHoverInitYSpd);
+static SME_PURE_ASM void scaleHoverInitYSpd() {
+  asm volatile (
+    "lfs 0, " SME_STRINGIZE(
+      SME_PORT_REGION(-0xEDC, 0, 0, 0)) "(2)  \n\t"
+    "lfs 4, 0x28(30)                          \n\t"
+    "fmuls 0, 0, 4                            \n\t"
+    "blr                                      \n\t"
+  );
+} 
+SME_PATCH_BL(SME_PORT_REGION(0x80254A2C, 0, 0, 0), scaleHoverInitYSpd);
 
 static f32 setBounceYSpeed() {
   TMario *player;
-  __asm { mr player, r30}
-  ;
+  SME_FROM_GPR(30, player);
 
-  return 130.0f * player->mSize.y;
+  Vec size;
+  player->JSGGetScaling(&size);
+
+  return 130.0f * size.y;
 }
-kmCall(0x80254720, &setBounceYSpeed);
-kmWrite32(0x80254724, 0xD01E00A8);
+SME_PATCH_BL(SME_PORT_REGION(0x80254720, 0, 0, 0), &setBounceYSpeed);
+SME_WRITE_32(SME_PORT_REGION(0x80254724, 0, 0, 0), 0xD01E00A8);
 
-static asm void checkGrabHeight(){
-  nofralloc lfs f0,
-  -0xEBC(rtoc)lfs f4,
-  0x28(r29)fcmpo cr0,
-  f4,
-  f0 lfs f0,
-  -0x0ED4(rtoc)bgt skipmul
+static SME_PURE_ASM void checkGrabHeight() {
+  asm volatile("lfs 0, " SME_STRINGIZE(SME_PORT_REGION(
+      -0xEDC, 0, 0, 0)) "(2)\n\t"
+                        "lfs 4, 0x28(29)            \n\t"
+                        "fcmpo 0, 4, 0              \n\t"
+                        "lfs 0, " SME_STRINGIZE(SME_PORT_REGION(
+                            -0xEDC, 0, 0,
+                            0)) "(2)\n\t"
+                                "bgt _skipmul                        \n\t"
+                                "fmuls 0, 0, 4                       \n\t"
+                                "_skipmul:                           \n\t"
+                                "blr                                 \n\t");
+}
+SME_PATCH_BL(SME_PORT_REGION(0x80256D34, 0, 0, 0), checkGrabHeight);
 
-      fmuls f0,
-  f0,
-  f4
+static SME_PURE_ASM void setCollisionHeight1() {
+  asm volatile("lfs 1, " SME_STRINGIZE(
+      SME_PORT_REGION(-0xEDC, 0, 0, 0)) "(2)                        \n\t"
+                                        "lfs 0, 0x28(22)            \n\t"
+                                        "fmuls 1, 0, 1              \n\t"
+                                        "blr                        \n\t");
+}
+SME_PATCH_BL(SME_PORT_REGION(0x8025696C, 0, 0, 0), setCollisionHeight1);
 
-  skipmul : blr
-} kmCall(0x80256D34, &checkGrabHeight);
+static SME_PURE_ASM void setCollisionHeight2() {
+  asm volatile("lfs 2, " SME_STRINGIZE(
+      SME_PORT_REGION(-0xEDC, 0, 0, 0)) "(2)                        \n\t"
+                                        "lfs 0, 0x28(29)            \n\t"
+                                        "fmuls 2, 0, 2              \n\t"
+                                        "blr                        \n\t");
+}
+SME_PATCH_BL(SME_PORT_REGION(0x80256D14, 0, 0, 0), setCollisionHeight2);
 
-static asm void setCollisionHeight1(){
-    nofralloc lfs f1, -0xEDC(rtoc)lfs f0, 0x28(r22)fmuls f1, f0,
-    f1 blr} kmCall(0x8025696C, &setCollisionHeight1);
-
-static asm void setCollisionHeight2(){
-    nofralloc lfs f2, -0xEDC(rtoc)lfs f0, 0x28(r29)fmuls f2, f0,
-    f2 blr} kmCall(0x80256D14, &setCollisionHeight2);
-
-static asm void setCollisionHeight3(){
-    nofralloc lfs f0, -0xEDC(rtoc)lfs f2, 0x28(r30)fmuls f0, f2,
-    f0 blr} kmCall(0x802573FC, &setCollisionHeight3);
+static SME_PURE_ASM void setCollisionHeight3() {
+  asm volatile("lfs 0, " SME_STRINGIZE(
+      SME_PORT_REGION(-0xEDC, 0, 0, 0)) "(2)                        \n\t"
+                                        "lfs 2, 0x28(30)            \n\t"
+                                        "fmuls 0, 2, 0              \n\t"
+                                        "blr                        \n\t");
+}
+SME_PATCH_BL(SME_PORT_REGION(0x802573FC, 0, 0, 0), setCollisionHeight3);
 
 static void setCollisionWidth() {
   TMario *player;
-  __asm { mr player, r29}
-  ;
+  SME_FROM_GPR(29, player);
 
-  f32 width;
-  __asm { fmr width, f0}
-  ;
+  f32 width = 50.0f;
 
-  if (playerParams->isMario()) {
-    player->mCollisionXZSize =
-        playerParams->DefaultAttrs.mCollisionWidth * player->mSize.x;
-  } else {
-    player->mCollisionXZSize = width;
-  }
+  Vec size;
+  player->JSGGetScaling(&size);
+
+  SME::Class::TPlayerData *playerParams =
+      SME::TGlobals::getPlayerParams(player);
+  if (playerParams->isMario())
+    width *= size.x;
+
+  player->mCollisionXZSize = width;
 }
-kmCall(0x802505F4, &setCollisionWidth);
+SME_PATCH_BL(SME_PORT_REGION(0x802505F4, 0, 0, 0), setCollisionWidth);
 
 static f32 manageGrabLength() {
   TMario *player;
-  __asm { mr player, r29}
-  ;
+  SME_FROM_GPR(29, player);
 
-  return 60 * player->mSize.z;
+  Vec size;
+  player->JSGGetScaling(&size);
+
+  return 60.0f * size.z;
 }
-kmCall(0x80256CE8, &manageGrabLength);
-kmWrite32(0x80256CFC, 0xEC01283C);
-kmWrite32(0x80256D04, 0xC05E003C);
-kmWrite32(0x80256D0C, 0xEC0100BC);
-#endif
+SME_PATCH_BL(SME_PORT_REGION(0x80256CE8, 0, 0, 0), manageGrabLength);
+SME_WRITE_32(SME_PORT_REGION(0x80256CFC, 0, 0, 0), 0xEC01283C);
+SME_WRITE_32(SME_PORT_REGION(0x80256D04, 0, 0, 0), 0xC05E003C);
+SME_WRITE_32(SME_PORT_REGION(0x80256D0C, 0, 0, 0), 0xEC0100BC);
 
 static JUtility::TColor getEMarioHealthBarRGBA(TEnemyMario *eMario) {
   JUtility::TColor color;

@@ -134,11 +134,11 @@ void TPlayerData::scalePlayerAttrs(f32 scale) {
   SCALE_PARAM(mPlayer->mJumpParams.mTurnJumpForce, factor * jumpMultiplier);
   SCALE_PARAM(mPlayer->mJumpParams.mTriJumpEnableSp, scale);
   SCALE_PARAM(mPlayer->mJumpParams.mValleyDepth, factor);
-  SCALE_PARAM(mPlayer->mJumpParams.mTremblePower, 1 / factor);
-  SCALE_PARAM(mPlayer->mJumpParams.mTrembleTime, static_cast<s16>(1 / factor));
+  SCALE_PARAM(mPlayer->mJumpParams.mTremblePower, 1.0f / factor);
+  SCALE_PARAM(mPlayer->mJumpParams.mTrembleTime, static_cast<s16>(1.0f / factor));
   SCALE_PARAM(mPlayer->mJumpParams.mGetOffYoshiY, factor);
   SCALE_PARAM(mPlayer->mJumpParams.mSuperHipAttackCt,
-              static_cast<s16>(1 / factor));
+              static_cast<s16>(1.0f / factor));
   SCALE_PARAM(mPlayer->mRunParams.mMaxSpeed, factor * speedMultiplier);
   SCALE_PARAM(mPlayer->mRunParams.mAddBase, factor * speedMultiplier);
   SCALE_PARAM(mPlayer->mRunParams.mDecBrake, factor * speedMultiplier);
@@ -162,13 +162,14 @@ void TPlayerData::scalePlayerAttrs(f32 scale) {
   SCALE_PARAM(mPlayer->mSwimParams.mPaddleSpeedUp, factor * speedMultiplier);
   SCALE_PARAM(mPlayer->mSwimParams.mPaddleJumpUp, factor * speedMultiplier);
   SCALE_PARAM(mPlayer->mSwimParams.mFloatUp, factor);
+  SCALE_PARAM(mPlayer->mSwimParams.mWaterLevelCheckHeight, 1.0f / scale);
   SCALE_PARAM(mPlayer->mSwimParams.mPaddleDown, factor * speedMultiplier);
   SCALE_PARAM(mPlayer->mSwimParams.mCanBreathDepth, scale);
   SCALE_PARAM(mPlayer->mSwimParams.mWaitSinkSpeed, factor);
   SCALE_PARAM(mPlayer->mSwimParams.mAirDec,
-              1 / params->mUnderwaterHealthMultiplier.get());
+              1.0f / params->mUnderwaterHealthMultiplier.get());
   SCALE_PARAM(mPlayer->mSwimParams.mAirDecDive,
-              1 / params->mUnderwaterHealthMultiplier.get());
+              1.0f / params->mUnderwaterHealthMultiplier.get());
   SCALE_PARAM(mPlayer->mHangFenceParams.mMoveSp, factor * speedMultiplier);
   SCALE_PARAM(mPlayer->mHangFenceParams.mDescentSp, factor * speedMultiplier);
   SCALE_PARAM(mPlayer->mPullBGBeakParams.mPullRateV, factor);

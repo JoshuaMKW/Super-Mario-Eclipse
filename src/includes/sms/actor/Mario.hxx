@@ -980,7 +980,7 @@ public:
 
   struct {
     u32 _04 : 10;
-    bool mIsInactive : 1;
+    bool mIsPerforming : 1;
     bool mIsShineShirt : 1;
     u32 _03 : 2;
     bool mIsWater : 1;

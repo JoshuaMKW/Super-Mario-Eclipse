@@ -46,29 +46,28 @@ bool Patch::Yoshi::isYoshiEggNeedFruit(THitActor *gpFruit) {
   return true;
 }
 
+#define EGG_IGNORE 0
+#define EGG_SUCCESS 1
+#define EGG_REJECT 2
+
 // 0x801BC8B4
 // extern -> SME.cpp
 u8 Patch::Yoshi::isYoshiEggFree(TEggYoshi *gpEgg, THitActor *gpFruit) {
   const TPlayerData *playerParams =
       SME::TGlobals::getPlayerParams(gpMarioAddress);
-  if (!playerParams) {
-    if (gpEgg->mWantedFruit != gpFruit->mObjectID)
-      return 2;
-    else
-      return 1;
-  }
   if (gpEgg->mState == 14 || gpEgg->mState == 6)
-    return 0;
+    return EGG_IGNORE;
   else if (!playerParams->getParams()->mCanRideYoshi.get())
-    return 0;
-  else if (!TStageParams::sStageConfig->mIsEggFree.get()) {
-    if (gpEgg->mWantedFruit != gpFruit->mObjectID)
-      return 2;
-    else
-      return 1;
-  } else
-    return 1;
+    return EGG_REJECT;
+  else if (!TStageParams::sStageConfig->mIsEggFree.get())
+    return gpEgg->mWantedFruit == gpFruit->mObjectID ? EGG_SUCCESS : EGG_REJECT;
+  else
+    return EGG_SUCCESS;
 }
+
+#undef EGG_IGNORE
+#undef EGG_SUCCESS
+#undef EGG_REJECT
 
 // 0x8024D68C
 // extern -> SME.cpp
@@ -218,22 +217,34 @@ bool Patch::Yoshi::isYoshiValidDrip(TYoshi *yoshi) {
 
 // 0x801BC128
 // extern -> SME.cpp
-void Patch::Yoshi::initFreeEggCard(MActorAnmBck *bckData) {
+void Patch::Yoshi::initFreeEggCard(J3DFrameCtrl *frameCtrl) {
   if (!TStageParams::sStageConfig->mIsEggFree.get())
     return;
 
-  // bckData->mFrameCtrl.mCurFrame = 11.0f;
+  frameCtrl->mCurFrame = 11.0f;
 }
 
 // 0x801BC380
 // extern -> SME.cpp
-u32 Patch::Yoshi::checkFreeEggCard(MActorAnmBck *bckData) {
+u32 Patch::Yoshi::checkFreeEggCard(J3DFrameCtrl *frameCtrl) {
   if (!TStageParams::sStageConfig->mIsEggFree.get())
     return 0;
 
-  // bckData->mFrameCtrl.mCurFrame = 11.0f;
+  frameCtrl->mCurFrame = 11.0f;
   return 0;
 }
+
+// 0x801BC6B8
+// extern -> SME.cpp
+u32 updateFreeEggCard(J3DFrameCtrl *frameCtrl) {
+  if (!TStageParams::sStageConfig->mIsEggFree.get())
+    return 1;
+
+  frameCtrl->mCurFrame = 11.0f;
+  return 1;
+}
+SME_PATCH_BL(SME_PORT_REGION(0x801BC6B8, 0, 0, 0), updateFreeEggCard);
+SME_WRITE_32(SME_PORT_REGION(0x801BC6BC, 0, 0, 0), 0xB07F00FC);
 
 // 0x8028121C
 // extern -> SME.cpp

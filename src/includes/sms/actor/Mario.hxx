@@ -950,9 +950,7 @@ public:
   u16 _A0;
   JGeometry::TVec3<f32> mSpeed; // 0x00A4
   f32 mForwardSpeed;            // 0x00B0
-  f32 _B4;
-  f32 _B8;
-  f32 _BC;
+  JGeometry::TVec3<f32> mPrevSpeed; //?
   f32 _C0;
   u16 _C4;
   f32 _C8;

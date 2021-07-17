@@ -291,6 +291,8 @@ static void initMario(TMario *player, bool isMario) {
 
   params->scalePlayerAttrs(config->mPlayerSizeMultiplier.get());
 
+  bool isGlasses = false;
+
   if (config->isCustomConfig()) {
     params->setPlayerID(isMario ? gCharacterID : Enum::Player::SHADOW_MARIO);
     player->mHealth = config->mPlayerHealth.get();
@@ -300,17 +302,25 @@ static void initMario(TMario *player, bool isMario) {
     if (isMario) {
       player->mAttributes.mGainHelmet = config->mPlayerHasHelmet.get();
       player->mAttributes.mHasFludd =
-          config->mPlayerHasFludd.get() && params->getCanUseFludd();
+          config->mPlayerHasFludd.get();
       player->mAttributes.mIsShineShirt = config->mPlayerHasShirt.get();
     }
 
-    if (config->mPlayerHasGlasses.get())
-      wearGlass__6TMarioFv(player);
+    isGlasses = config->mPlayerHasGlasses.get();
   }
 
   if (isMario) {
+    player->mAttributes.mGainHelmet = params->getParams()->mPlayerHasHelmet.get();
+    player->mAttributes.mHasFludd =
+        params->getParams()->mCanUseFludd.get();
+    player->mAttributes.mIsShineShirt = params->getParams()->mPlayerHasShirt.get();
+    isGlasses = params->getParams()->mPlayerHasGlasses.get();
+
     initFludd(player, params);
   }
+
+  if (isGlasses)
+    wearGlass__6TMarioFv(player);
 }
 
 // 0x80276C94

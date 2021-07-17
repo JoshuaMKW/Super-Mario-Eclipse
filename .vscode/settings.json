@@ -35,7 +35,9 @@
         "*.inc": "c",
         "types.h": "c",
         "*.tcc": "c",
-        "os.h": "c"
+        "os.h": "c",
+        "algorithm": "cpp",
+        "memory": "cpp"
     },
     "cmake.configureOnOpen": false
 }

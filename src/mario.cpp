@@ -32,18 +32,17 @@ marioDataArray[i], 0, 0);
 // extern -> SME.cpp
 // 0x802558A4
 void SME::Patch::Mario::addVelocity(TMario *player, f32 velocity) {
-  player->mForwardSpeed += velocity;
   SME::Class::TPlayerData *playerParams =
       SME::TGlobals::getPlayerParams(player);
 
   if (!onYoshi__6TMarioCFv(player)) {
-    if (player->mForwardSpeed >
-        (99.0f * playerParams->getParams()->mSpeedMultiplier.get()))
-      player->mForwardSpeed =
-          (99.0f * playerParams->getParams()->mSpeedMultiplier.get());
+    player->mForwardSpeed =
+        Min(player->mForwardSpeed + velocity,
+            (99.0f * playerParams->getParams()->mSpeedMultiplier.get()) *
+                playerParams->mSlideSpeedMultiplier);
   } else {
-    if (player->mForwardSpeed > 99.0f)
-      player->mForwardSpeed = 99.0f;
+    player->mForwardSpeed = Min(player->mForwardSpeed + velocity,
+                                99.0f * playerParams->mSlideSpeedMultiplier);
   }
 }
 
@@ -140,7 +139,7 @@ bool SME::Patch::Mario::canGrabAtNPC() {
     return npc->mStateFlags.mCanBeTaken;
 
   return (playerParams->getParams()->mCanHoldNPCs.get() &&
-          gpMarioAddress->mState == static_cast<u32>(TMario::State::IDLE)) ||
+          gpMarioAddress->mState != static_cast<u32>(TMario::State::IDLE)) ||
          npc->mStateFlags.mCanBeTaken;
 }
 
@@ -156,7 +155,7 @@ bool SME::Patch::Mario::canCarryNPC() {
     return npc->mStateFlags.mCanBeTaken;
 
   return (playerParams->getParams()->mCanHoldNPCs.get() &&
-          gpMarioAddress->mState == static_cast<u32>(TMario::State::IDLE)) ||
+          gpMarioAddress->mState != static_cast<u32>(TMario::State::IDLE)) ||
          npc->mStateFlags.mCanBeTaken;
 }
 
@@ -735,8 +734,10 @@ void SME::Patch::Mario::checkJumpSpeedLimit(f32 speed) {
   f32 speedCap = 32.0f;
   f32 speedReducer = 0.2f;
 
-  if (playerParams->isMario() && !onYoshi__6TMarioCFv(player)) {
+  if (!onYoshi__6TMarioCFv(player)) {
     speedCap *= playerParams->getParams()->mSpeedMultiplier.get();
+    speedReducer *= Util::Math::scaleLinearAtAnchor<f32>(
+        playerParams->getParams()->mSpeedMultiplier.get(), 3.0f, 1.0f);
   }
 
   if (speed > speedCap) {
@@ -762,33 +763,49 @@ TMario *SME::Patch::Mario::checkJumpSpeedMulti(TMario *player, f32 factor,
   }
 }
 
-static f64 checkSlideSpeedMulti(f32 max, f32 factor) {
+static f32 checkSlideSpeedMulti() {
   TMario *player;
   SME_FROM_GPR(30, player);
 
   SME::Class::TPlayerData *playerParams =
       SME::TGlobals::getPlayerParams(player);
 
-  f64 slowFactor = 0.5;
-
-  if (playerParams->isMario() && !onYoshi__6TMarioCFv(player)) {
-    slowFactor /= playerParams->getParams()->mSpeedMultiplier.get();
-  }
+  constexpr f32 speedCap = 100.0f;
+  constexpr f32 rocketMultiplier = 1.8f;
+  constexpr f32 hoverMultiplier = 1.2f;
+  constexpr f32 brakeRate = 0.005f;
 
   if (player->mFludd && isEmitting__9TWaterGunFv(player->mFludd)) {
-    if (player->mFludd->mCurrentNozzle == TWaterGun::Hover)
-      slowFactor /= 1.3;
+    if (player->mFludd->mCurrentNozzle == TWaterGun::Hover ||
+        player->mFludd->mCurrentNozzle == TWaterGun::Underwater)
+      playerParams->mSlideSpeedMultiplier = hoverMultiplier;
     else if (player->mFludd->mCurrentNozzle == TWaterGun::Rocket) {
-      slowFactor /= 2;
-      addVelocity__6TMarioFf(player, 20.0f);
+      const f32 multiplier =
+          (rocketMultiplier *
+           ((speedCap * rocketMultiplier) / player->mForwardSpeed));
+      playerParams->mSlideSpeedMultiplier = rocketMultiplier;
+      player->mPrevSpeed.scale(multiplier);
+    } else {
+      playerParams->mSlideSpeedMultiplier =
+          Max(playerParams->mSlideSpeedMultiplier - brakeRate, 1.0f);
     }
+  } else {
+    playerParams->mSlideSpeedMultiplier =
+        Max(playerParams->mSlideSpeedMultiplier - brakeRate, 1.0f);
   }
-  return slowFactor;
-}
-SME_PATCH_BL(SME_PORT_REGION(0x8025C3E0, 0, 0, 0), &checkSlideSpeedMulti);
-SME_WRITE_32(SME_PORT_REGION(0x8025C3E8, 0, 0, 0), 0xFC4100F2);
-SME_WRITE_32(SME_PORT_REGION(0x8025C3EC, 0, 0, 0), 0xFC2300F2);
 
+  if (!onYoshi__6TMarioCFv(player)) {
+    return speedCap * playerParams->mSlideSpeedMultiplier;
+  } else {
+    return speedCap;
+  }
+}
+SME_WRITE_32(SME_PORT_REGION(0x8025C3D8, 0, 0, 0), 0x40810028);
+SME_WRITE_32(SME_PORT_REGION(0x8025C3FC, 0, 0, 0), 0xFC800018);
+SME_WRITE_32(SME_PORT_REGION(0x8025C400, 0, 0, 0), 0xD09E00B0);
+SME_PATCH_BL(SME_PORT_REGION(0x8025C404, 0, 0, 0), checkSlideSpeedMulti);
+SME_WRITE_32(SME_PORT_REGION(0x8025C408, 0, 0, 0), 0xFC400890);
+SME_WRITE_32(SME_PORT_REGION(0x8025C410, 0, 0, 0), 0x60000000);
 
 #if 0
 static void checkHoverSpeedMulti(f32 factor, f32 max) {
@@ -811,14 +828,12 @@ kmWrite32(0x8024AE84, 0x60000000);
 // 8024afe0 <- hover air Y spd
 
 static SME_PURE_ASM void scaleHoverInitYSpd() {
-  asm volatile (
-    "lfs 0, " SME_STRINGIZE(
-      SME_PORT_REGION(-0xEDC, 0, 0, 0)) "(2)  \n\t"
-    "lfs 4, 0x28(30)                          \n\t"
-    "fmuls 0, 0, 4                            \n\t"
-    "blr                                      \n\t"
-  );
-} 
+  asm volatile("lfs 0, " SME_STRINGIZE(SME_PORT_REGION(
+      -0xEDC, 0, 0, 0)) "(2)  \n\t"
+                        "lfs 4, 0x28(30)                          \n\t"
+                        "fmuls 0, 0, 4                            \n\t"
+                        "blr                                      \n\t");
+}
 SME_PATCH_BL(SME_PORT_REGION(0x80254A2C, 0, 0, 0), scaleHoverInitYSpd);
 
 static f32 setBounceYSpeed() {

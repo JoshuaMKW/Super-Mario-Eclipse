@@ -122,15 +122,8 @@ public:
   void init(const char *, const char *);
   s32 partsNameToIdx(const char *);
 
-  u32 mAnimationID; // 0x0000
-  void *vTable;     // 0x0004
-  u8 mLoopType;     // 0x0008
-  u8 _09;           // 0x0009
-  u16 _01;          // 0x000A
-  u16 mNumFrames;   // 0x000C
-  u16 _02;          // 0x000E
-  f32 mFrameRate;   // 0x0010
-  f32 mCurFrame;    // 0x0014
+  u32 mAnimationID;
+  J3DFrameCtrl mFrameCtrl;
   u32 _18;
   u8 _1C;
   u32 _20;

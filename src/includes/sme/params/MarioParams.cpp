@@ -15,7 +15,8 @@ TPlayerData::TPlayerData(TMario *player, CPolarSubCamera *camera, bool isMario)
     : mPlayer(player), mCamera(camera), mIsEMario(!isMario),
       mPlayerID(SME::Enum::Player::MARIO), mCurJump(0), mIsClimbTired(false),
       mPrevCollisionType(0), mCollisionTimer(0), mClimbTiredTimer(0),
-      mYoshiWaterSpeed(0.0f, 0.0f, 0.0f), mDefaultAttrs(player) {
+      mSlideSpeedMultiplier(1.0f), mYoshiWaterSpeed(0.0f, 0.0f, 0.0f),
+      mDefaultAttrs(player) {
 
   mParams = new TPlayerParams();
 
@@ -47,8 +48,7 @@ TPlayerData::TPlayerData(TMario *player, CPolarSubCamera *camera, bool isMario)
 static u32 Timer = 0;
 
 void TPlayerData::scalePlayerAttrs(f32 scale) {
-  if (scale <= 0.0f)
-    scale = 0.0f;
+  scale = Max(scale, 0.0f);
 
   JGeometry::TVec3<f32> size(1.0f, 1.0f, 1.0f);
   size.scale(scale);
@@ -113,6 +113,8 @@ void TPlayerData::scalePlayerAttrs(f32 scale) {
   SCALE_PARAM(mPlayer->mJumpParams.mGravity, factor * gravityMultiplier);
   SCALE_PARAM(mPlayer->mJumpParams.mSpinJumpGravity,
               factor * gravityMultiplier);
+  SCALE_PARAM(mPlayer->mJumpParams.mJumpSpeedAccelControl,
+              factor * speedMultiplier);
   SCALE_PARAM(mPlayer->mJumpParams.mPopUpSpeedY, factor * jumpMultiplier);
   SCALE_PARAM(mPlayer->mJumpParams.mJumpingMax, factor * jumpMultiplier);
   SCALE_PARAM(mPlayer->mJumpParams.mFenceSpeed, factor * speedMultiplier);
@@ -135,7 +137,8 @@ void TPlayerData::scalePlayerAttrs(f32 scale) {
   SCALE_PARAM(mPlayer->mJumpParams.mTriJumpEnableSp, scale);
   SCALE_PARAM(mPlayer->mJumpParams.mValleyDepth, factor);
   SCALE_PARAM(mPlayer->mJumpParams.mTremblePower, 1.0f / factor);
-  SCALE_PARAM(mPlayer->mJumpParams.mTrembleTime, static_cast<s16>(1.0f / factor));
+  SCALE_PARAM(mPlayer->mJumpParams.mTrembleTime,
+              static_cast<s16>(1.0f / factor));
   SCALE_PARAM(mPlayer->mJumpParams.mGetOffYoshiY, factor);
   SCALE_PARAM(mPlayer->mJumpParams.mSuperHipAttackCt,
               static_cast<s16>(1.0f / factor));

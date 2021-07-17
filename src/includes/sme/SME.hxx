@@ -307,8 +307,8 @@ u32 calcYoshiSwimVelocity(TMario *player, u32 arg1);
 u32 isYoshiWaterFlutter();
 u32 isYoshiValidWaterFlutter(s32 anmIdx, u32 unk1, TMario *player);
 bool isYoshiValidDrip(TYoshi *yoshi);
-void initFreeEggCard(MActorAnmBck *bckData);
-u32 checkFreeEggCard(MActorAnmBck *bckData);
+void initFreeEggCard(J3DFrameCtrl *frameCtrl);
+u32 checkFreeEggCard(J3DFrameCtrl *frameCtrl);
 void saveNozzles(TYoshi *yoshi);
 void restoreNozzles(TMario *player);
 

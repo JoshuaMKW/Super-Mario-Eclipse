@@ -39,8 +39,8 @@ TPlayerData::TPlayerData(TMario *player, CPolarSubCamera *camera, bool isMario)
 
   mCanUseFludd = mParams->mCanUseFludd.get();
 
-  if (mParams->mPlayerHasGlasses.get())
-    wearGlass__6TMarioFv(player);
+  if (mParams->mPlayerHasGlasses.get() && player->mCap)
+    reinterpret_cast<u16 *>(player->mCap)[2] |= 0b100;
 
   scalePlayerAttrs(mParams->mSizeMultiplier.get());
 }
@@ -118,7 +118,7 @@ void TPlayerData::scalePlayerAttrs(f32 scale) {
   SCALE_PARAM(mPlayer->mJumpParams.mPopUpSpeedY, factor * jumpMultiplier);
   SCALE_PARAM(mPlayer->mJumpParams.mJumpingMax, factor * jumpMultiplier);
   SCALE_PARAM(mPlayer->mJumpParams.mFenceSpeed, factor * speedMultiplier);
-  SCALE_PARAM(mPlayer->mJumpParams.mFireBackVelocity, factor * jumpMultiplier);
+  //SCALE_PARAM(mPlayer->mJumpParams.mFireBackVelocity, factor * jumpMultiplier);
   SCALE_PARAM(mPlayer->mJumpParams.mBroadJumpForce, factor);
   SCALE_PARAM(mPlayer->mJumpParams.mBroadJumpForceY, factor * jumpMultiplier);
   SCALE_PARAM(mPlayer->mJumpParams.mRotateJumpForceY, factor * jumpMultiplier);

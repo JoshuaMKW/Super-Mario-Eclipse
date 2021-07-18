@@ -319,8 +319,8 @@ static void initMario(TMario *player, bool isMario) {
     initFludd(player, params);
   }
 
-  if (isGlasses)
-    wearGlass__6TMarioFv(player);
+  if (isGlasses && player->mCap)
+    reinterpret_cast<u16 *>(player->mCap)[2] |= 0b100;
 }
 
 // 0x80276C94

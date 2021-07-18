@@ -147,7 +147,7 @@ static void *t_swapCharacter(void *context) {
   gHeapAllocState ^= 1;
 
   // Make the player inactive
-  gPlayerToSwap->mAttributes.mIsInactive = true;
+  gPlayerToSwap->mAttributes.mIsPerforming = true;
 
   // Free buffer and swap pointers
   CharacterHeap->free(gpArcBufferMario);
@@ -180,7 +180,7 @@ static void *t_swapCharacter(void *context) {
     // Restore interrupts
     OSRestoreInterrupts(interruptStatus);
 
-    gPlayerToSwap->mAttributes.mIsInactive = false;
+    gPlayerToSwap->mAttributes.mIsPerforming = false;
     gPlayerToSwap->JSGSetTranslation(position);
     gPlayerToSwap->JSGSetRotation(rotation);
   }

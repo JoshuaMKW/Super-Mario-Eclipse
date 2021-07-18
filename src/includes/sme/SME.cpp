@@ -542,3 +542,6 @@ SME_WRITE_32(SME_PORT_REGION(0x8003DB3C, 0, 0, 0), 0x48306B08);
 // Upsize Shadow Mario's hitbox to be the same as Mario
 SME_WRITE_32(SME_PORT_REGION(0x8040FAA4, 0, 0, 0), 80.0f);
 SME_WRITE_32(SME_PORT_REGION(0x8040FAA8, 0, 0, 0), 50.0f);
+
+// Remove blue coin prompts
+SME_WRITE_32(SME_PORT_REGION(0x8029A73C, 0, 0, 0), 0x60000000);

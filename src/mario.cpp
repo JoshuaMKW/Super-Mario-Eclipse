@@ -827,14 +827,14 @@ kmWrite32(0x8024AE84, 0x60000000);
 
 // 8024afe0 <- hover air Y spd
 
-static SME_PURE_ASM void scaleHoverInitYSpd() {
+static SME_PURE_ASM void scaleFluddInitYSpd() {
   asm volatile("lfs 0, " SME_STRINGIZE(SME_PORT_REGION(
-      -0xEDC, 0, 0, 0)) "(2)  \n\t"
+      -0xFE0, 0, 0, 0)) "(2)  \n\t"
                         "lfs 4, 0x28(30)                          \n\t"
                         "fmuls 0, 0, 4                            \n\t"
                         "blr                                      \n\t");
 }
-SME_PATCH_BL(SME_PORT_REGION(0x80254A2C, 0, 0, 0), scaleHoverInitYSpd);
+SME_PATCH_BL(SME_PORT_REGION(0x80254A2C, 0, 0, 0), scaleFluddInitYSpd);
 
 static f32 setBounceYSpeed() {
   TMario *player;
@@ -850,7 +850,7 @@ SME_WRITE_32(SME_PORT_REGION(0x80254724, 0, 0, 0), 0xD01E00A8);
 
 static SME_PURE_ASM void checkGrabHeight() {
   asm volatile("lfs 0, " SME_STRINGIZE(SME_PORT_REGION(
-      -0xEDC, 0, 0, 0)) "(2)\n\t"
+      -0xED4, 0, 0, 0)) "(2)\n\t"
                         "lfs 4, 0x28(29)            \n\t"
                         "fcmpo 0, 4, 0              \n\t"
                         "lfs 0, " SME_STRINGIZE(SME_PORT_REGION(

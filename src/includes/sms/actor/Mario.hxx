@@ -941,7 +941,7 @@ public:
   u32 mPrevState;     // 0x0080
   u16 mSubState;      // 0x0084
   u16 mSubStateTimer; // 0x0086
-  u32 _88;
+  u32 mJumpSlipState;
   f32 mBaseAcceleration;        // 0x008C
   u16 mAccelerationDirection;   // 0x0090
   u16 _92;                      // padding?

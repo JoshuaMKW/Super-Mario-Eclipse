@@ -82,8 +82,12 @@ static void checkIsCannonType(TMario *player) {
 
 static void changeNozzleType(TMario *player, u16 type) {
   SME::Class::TPlayerData *playerData = SME::TGlobals::getPlayerParams(player);
+  TWaterGun *fludd = player->mFludd;
 
-  if (playerData->mCollisionFlags.mIsFaceUsed || !isMario__6TMarioFv(player))
+  if (playerData->mCollisionFlags.mIsFaceUsed || !fludd)
+    return;
+
+  if (!playerData->getCanUseFludd())
     return;
 
   player->mAttributes.mHasFludd = player->mFloorTriangle->mValue4 == 1;
@@ -94,19 +98,35 @@ static void changeNozzleType(TMario *player, u16 type) {
   else
     nozzle = static_cast<TWaterGun::NozzleType>(type - 16090);
 
-  changeNozzle__9TWaterGunFQ29TWaterGun11TNozzleTypeb(player->mFludd, nozzle,
-                                                      1);
+  if (fludd->mCurrentNozzle != nozzle) {
+    changeNozzle__9TWaterGunFQ29TWaterGun11TNozzleTypeb(player->mFludd, nozzle,
+                                                        true);
+    emitGetEffect__6TMarioFv(player);
+  } else if (fludd->mCurrentWater < fludd->mNozzleList[nozzle]->mMaxWater) {
+    emitGetWaterEffect__6TMarioFv(player);
+  }
+
+  fludd->mCurrentWater = fludd->mNozzleList[nozzle]->mMaxWater;
   playerData->mCollisionFlags.mIsFaceUsed = true;
 }
 
 static void boostPadCol(TMario *player) {
   SME::Class::TPlayerData *playerData = SME::TGlobals::getPlayerParams(player);
 
-  player->mForwardSpeed = player->mFloorTriangle->mValue4;
+  const f32 newSpeed = player->mFloorTriangle->mValue4;
+  const f32 scale = newSpeed / player->mForwardSpeed;
+  player->mForwardSpeed = newSpeed;
+  player->mPrevSpeed.scale(scale);
+
+  u32 targetState =
+      (player->mState == static_cast<u32>(TMario::State::DIVESLIDE) ||
+       player->mState == static_cast<u32>(TMario::State::GOOPSLIDE))
+          ? player->mState
+          : static_cast<u32>(TMario::State::RUNNING);
   if (player->mState == static_cast<u32>(TMario::State::IDLE) ||
       !playerData->mCollisionFlags.mIsFaceUsed) {
     changePlayerStatus__6TMarioFUlUlb(
-        player, static_cast<u32>(TMario::State::RUNNING), 0, 0);
+        player, targetState, 0, 0);
     startVoice__6TMarioFUl(player, static_cast<u32>(TMario::Voice::JUMP));
   }
 }
@@ -132,6 +152,7 @@ static void antiGravityCol(TMario *player) {
     changePlayerStatus__6TMarioFUlUlb(
         player, static_cast<u32>(TMario::State::FALL), 0, 0);
   }
+  player->mSubStateTimer = 0;
 }
 
 static void warpToLinkedCol(TMario *player) {

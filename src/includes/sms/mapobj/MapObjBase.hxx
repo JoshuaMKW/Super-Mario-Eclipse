@@ -148,8 +148,8 @@ public:
                                        const JGeometry::TVec3<f32> &, f32, f32);
   static bool waterHitPlane(THitActor *);
 
-  u32 _00;             // 0x00F4
-  char *mRegisterName; // 0x00F8
+  char *mRegisterName; // 0x00F4
+  u32 _00;             // 0x00F8
   u16 mState;          // 0x00FC
   u16 _01;             // 0x00FE
   u32 _02;             // 0x0100

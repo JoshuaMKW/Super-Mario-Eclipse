@@ -2,12 +2,11 @@
 #include "OS.h"
 
 #include "Kernel.hxx"
-#include "common_sdk.h"
 #include "macros.h"
 #include "sms/actor/Mario.hxx"
 
 // mario.cpp
-extern "C" s16 mario_shadowCrashPatch();
+// extern "C" s16 mario_shadowCrashPatch();
 
 // shine.cpp
 extern "C" void shine_animationFreezeCheck();
@@ -23,25 +22,6 @@ extern OSStopwatch gctStopwatch;
 #endif
 
 using namespace SME;
-
-#if defined(SME_BUILD_KURIBO)
-#define SME_PATCH_B(source, target) pp::PatchB(source, target)
-#define SME_PATCH_BL(source, target) pp::PatchBL(source, target)
-#define SME_WRITE_8(source, value)                                             \
-  SME::Util::Memory::PPC::write<u8>(reinterpet_cast<u8 *>(source), value)
-#define SME_WRITE_16(source, value)                                            \
-  SME::Util::Memory::PPC::write<u16>(reinterpet_cast<u16 *>(source), value)
-#define SME_WRITE_32(source, value) pp::Patch32(source, value)
-#elif defined(SME_BUILD_KAMEK) || defined(SME_BUILD_KAMEK_INLINE)
-#define SME_PATCH_B(source, target) kmBranch(source, target)
-#define SME_PATCH_BL(source, target) kmCall(source, target)
-#define SME_WRITE_8(source, value) kmWrite8(source, value)
-#define SME_WRITE_16(source, value) kmWrite16(source, value)
-#define SME_WRITE_32(source, value) kmWrite32(source, value)
-#else
-#error                                                                         \
-    "Build type unspecified. Define either SME_BUILD_KAMEK or SME_BUILD_KAMEK_INLINE or SME_BUILD_KURIBO"
-#endif
 
 static void initMod() {
   SME_DEBUG_LOG(
@@ -106,7 +86,7 @@ static void moduleLoad(int size, bool unk) {
             "\n"
             "         Built:    	" __DATE__ " at " __TIME__ "\n"
             "         Compiler: 	" __VERSION__ "\n"
-            "~~~~~~~~~~~~~~~~~~~~~~~\n", );
+            "~~~~~~~~~~~~~~~~~~~~~~~\n");
     initMod();
   }
 }
@@ -114,9 +94,8 @@ SME_PATCH_BL(SME_PORT_REGION(0x802A744C, 0, 0, 0), moduleLoad);
 
 #endif
 
-#ifdef _SME_PATCH_RAM
+/* -- HOOKS -- */
 
-  /* -- HOOKS -- */
 
   // c_kit.cpp
   SME_PATCH_BL(SME_PORT_REGION(0x802998B8, 0x80291750, 0, 0), Patch::CKit::onSetup);
@@ -246,49 +225,72 @@ SME_PATCH_BL(SME_PORT_REGION(0x802A744C, 0, 0, 0), moduleLoad);
                Patch::Init::initCollisionWarpLinks);
   SME_PATCH_BL(SME_PORT_REGION(0x802B57E4, 0x802ad768, 0, 0), Patch::Init::createUIHeap);
 
-  // // mario.cpp
-  // SME_PATCH_BL(SME_PORT_REGION(0x802320E0, 0, 0, 0), mario_shadowCrashPatch);
-  // SME_PATCH_BL(SME_PORT_REGION(0x802500B8, 0, 0, 0),
-  //              Patch::Mario::updateContexts);
-  // SME_PATCH_BL(SME_PORT_REGION(0x8029A87C, 0, 0, 0),
-  //              Patch::Mario::carryOrTalkNPC);
-  // SME_PATCH_BL(SME_PORT_REGION(0x802815F0, 0, 0, 0),
-  //              Patch::Mario::canGrabAtNPC);
-  // SME_WRITE_32(SME_PORT_REGION(0x802815F4, 0, 0, 0), 0x2C030000);
-  // SME_PATCH_BL(SME_PORT_REGION(0x80207430, 0, 0, 0), Patch::Mario::canCarryNPC);
-  // SME_WRITE_32(SME_PORT_REGION(0x80207434, 0, 0, 0), 0x2C030000);
-  // SME_PATCH_BL(0x802145F0, Patch::Mario::scaleNPCThrowLength);
-  // SME_WRITE_32(0x802145F4, 0xC002E5E0);
-  // SME_WRITE_32(0x802145F8, 0xC0230034);
-  // SME_WRITE_32(0x8021462C, 0xEC0B0032);
-  // SME_WRITE_32(0x80214634, 0xEC2B0072);
-  // SME_PATCH_BL(0x8021463C, Patch::Mario::scaleNPCThrowHeight);
-  // #if 0
-  // SME_PATCH_BL(0x80261C3C, Patch::Mario::getTreeClimbMinFall);
-  // SME_WRITE_32(0x80261C40, 0xC05F038C);
-  // SME_WRITE_32(0x80261C44, 0xFC020040);
-  // SME_PATCH_BL(0x802619CC, Patch::Mario::getTreeClimbMaxFall);
-  // SME_WRITE_32(0x802619D0, 0xC05F0014);
-  // SME_PATCH_BL(0x80261CF4, Patch::Mario::scaleTreeSlideSpeed);
-  // SME_WRITE_32(0x80261CF8, 0x2C030000);
-  // SME_WRITE_32(0x80261CFC, 0x41820070);
-  // SME_PATCH_BL(0x8025D588, Patch::Mario::getClimbingAnimSpd);
-  // SME_PATCH_BL(0x8025D63C, Patch::Mario::getClimbingAnimSpd);
-  // SME_PATCH_BL(0x8025D650, Patch::Mario::getClimbingAnimSpd);
-  // SME_PATCH_BL(0x8025DBC4, Patch::Mario::getClimbingAnimSpd);
-  // SME_PATCH_BL(0x8025E38C, Patch::Mario::getClimbingAnimSpd);
-  // SME_PATCH_BL(0x802615AC, Patch::Mario::scaleHangSpeed);
-  // SME_WRITE_32(0x802615B0, 0x60000000);
-  // SME_PATCH_BL(0x8024E288, Patch::Mario::checkGraffitiAffected);
-  // // SME_PATCH_BL(0x801E4118, Patch::Mario::rescaleHeldObj);
-  // SME_PATCH_BL(0x802571F0, Patch::Mario::patchYStorage);
-  // SME_PATCH_BL(0x8024E02C, Patch::Mario::manageExtraJumps);
-  // SME_WRITE_32(0x8025B8BC, 0x60000000);
-  // SME_PATCH_BL(0x8025B8C0, Patch::Mario::checkGroundSpeedLimit);
-  // SME_WRITE_32(0x8025B8C4, 0xEFFF0072);
-  // #endif
-  // SME_PATCH_BL(0x8003FFEC, Patch::Mario::manageEMarioHealthWrapper);
-  // SME_WRITE_32(0x8003FD94, 0x60000000);
+  // mario.cpp
+// SME_PATCH_B(SME_PORT_REGION(0x802558A4, 0, 0, 0), Patch::Mario::addVelocity);
+// SME_PATCH_BL(SME_PORT_REGION(0x802500B8, 0, 0, 0),
+//              Patch::Mario::updateContexts);
+// SME_PATCH_BL(SME_PORT_REGION(0x8029A87C, 0, 0, 0),
+//              Patch::Mario::carryOrTalkNPC);
+// SME_PATCH_BL(SME_PORT_REGION(0x802815F0, 0, 0, 0), Patch::Mario::canGrabAtNPC);
+// SME_WRITE_32(SME_PORT_REGION(0x802815F4, 0, 0, 0), 0x2C030000);
+// SME_PATCH_BL(SME_PORT_REGION(0x80207430, 0, 0, 0), Patch::Mario::canCarryNPC);
+// SME_WRITE_32(SME_PORT_REGION(0x80207434, 0, 0, 0), 0x2C030000);
+// SME_PATCH_BL(SME_PORT_REGION(0x80213314, 0, 0, 0), Patch::Mario::scaleNPCTalkRadius);
+// SME_PATCH_BL(SME_PORT_REGION(0x80261C3C, 0, 0, 0), Patch::Mario::getTreeClimbMinFall);
+// SME_WRITE_32(SME_PORT_REGION(0x80261C40, 0, 0, 0), 0xC05F038C);
+// SME_WRITE_32(SME_PORT_REGION(0x80261C44, 0, 0, 0), 0xFC020040);
+// SME_PATCH_BL(SME_PORT_REGION(0x802619CC, 0, 0, 0), Patch::Mario::getTreeClimbMaxFall);
+// SME_WRITE_32(SME_PORT_REGION(0x802619D0, 0, 0, 0), 0x60000000);
+// #if 0
+//   SME_PATCH_BL(SME_PORT_REGION(0x802145F0, 0, 0, 0),
+//                Patch::Mario::scaleNPCThrowLength);
+//   SME_WRITE_32(SME_PORT_REGION(0x802145F4, 0, 0, 0), 0xC002E5E0);
+//   SME_WRITE_32(SME_PORT_REGION(0x802145F8, 0, 0, 0), 0xC0230034);
+//   SME_WRITE_32(SME_PORT_REGION(0x8021462C, 0, 0, 0), 0xEC0B0032);
+//   SME_WRITE_32(SME_PORT_REGION(0x80214634, 0, 0, 0), 0xEC2B0072);
+//   SME_PATCH_BL(SME_PORT_REGION(0x8021463C, 0, 0, 0),
+//                Patch::Mario::scaleNPCThrowHeight);
+//   SME_PATCH_BL(SME_PORT_REGION(0x80261CF4, 0, 0, 0), Patch::Mario::scaleTreeSlideSpeed);
+//   SME_WRITE_32(SME_PORT_REGION(0x80261CF8, 0, 0, 0), 0x2C030000);
+//   SME_WRITE_32(SME_PORT_REGION(0x80261CFC, 0, 0, 0), 0x41820070);
+//   SME_PATCH_BL(SME_PORT_REGION(0x8025D588, 0, 0, 0), Patch::Mario::getClimbingAnimSpd);
+//   SME_PATCH_BL(SME_PORT_REGION(0x8025D63C, 0, 0, 0), Patch::Mario::getClimbingAnimSpd);
+//   SME_PATCH_BL(SME_PORT_REGION(0x8025D650, 0, 0, 0), Patch::Mario::getClimbingAnimSpd);
+//   SME_PATCH_BL(SME_PORT_REGION(0x8025DBC4, 0, 0, 0), Patch::Mario::getClimbingAnimSpd);
+//   SME_PATCH_BL(SME_PORT_REGION(0x8025E38C, 0, 0, 0), Patch::Mario::getClimbingAnimSpd);
+//   SME_PATCH_BL(SME_PORT_REGION(0x802615AC, 0, 0, 0), Patch::Mario::scaleHangSpeed);
+//   SME_WRITE_32(SME_PORT_REGION(0x802615B0, 0, 0, 0), 0x60000000);
+//   SME_PATCH_BL(SME_PORT_REGION(0x8024E288, 0, 0, 0), Patch::Mario::checkGraffitiAffected);
+//   // SME_PATCH_BL(0x801E4118, Patch::Mario::rescaleHeldObj);
+// #endif
+// SME_PATCH_BL(SME_PORT_REGION(0x8024E02C, 0, 0, 0),
+//              Patch::Mario::manageExtraJumps);
+// SME_PATCH_BL(SME_PORT_REGION(0x80254534, 0, 0, 0),
+//              Patch::Mario::normJumpMultiplier);
+// SME_WRITE_32(SME_PORT_REGION(0x80254538, 0, 0, 0), 0x60000000);
+// SME_WRITE_32(SME_PORT_REGION(0x8025453C, 0, 0, 0), 0x60000000);
+// SME_WRITE_32(SME_PORT_REGION(0x80254540, 0, 0, 0), 0x60000000);
+// SME_WRITE_32(SME_PORT_REGION(0x80254544, 0, 0, 0), 0x60000000);
+// SME_PATCH_BL(SME_PORT_REGION(0x80256678, 0, 0, 0),
+//              Patch::Mario::checkYSpdForTerminalVelocity);
+// SME_WRITE_32(SME_PORT_REGION(0x8025667C, 0, 0, 0), 0x60000000);
+// SME_WRITE_32(SME_PORT_REGION(0x8025B8BC, 0, 0, 0), 0x60000000);
+// SME_PATCH_BL(SME_PORT_REGION(0x8025B8C0, 0, 0, 0), Patch::Mario::checkGroundSpeedLimit);
+// SME_WRITE_32(SME_PORT_REGION(0x8025B8C4, 0, 0, 0), 0xEFFF0072);
+// SME_WRITE_32(SME_PORT_REGION(0x8024CB00, 0, 0, 0), 0xC162EF70);
+// SME_WRITE_32(SME_PORT_REGION(0x8024CC50, 0, 0, 0), 0xED600072);
+// SME_WRITE_32(SME_PORT_REGION(0x8024CC60, 0, 0, 0), 0x60000000);
+// SME_WRITE_32(SME_PORT_REGION(0x8024CC64, 0, 0, 0), 0x60000000);
+// SME_WRITE_32(SME_PORT_REGION(0x8024CC68, 0, 0, 0), 0x60000000);
+// SME_PATCH_BL(SME_PORT_REGION(0x8024CC6C, 0, 0, 0), Patch::Mario::checkJumpSpeedLimit);
+// SME_WRITE_32(SME_PORT_REGION(0x8024CCF8, 0, 0, 0), 0xEC0B007A);
+// SME_WRITE_32(SME_PORT_REGION(0x8024CD24, 0, 0, 0), 0xEC0B007A);
+// SME_PATCH_BL(SME_PORT_REGION(0x8024CC2C, 0, 0, 0), Patch::Mario::checkJumpSpeedMulti);
+// SME_WRITE_32(SME_PORT_REGION(0x8024CC30, 0, 0, 0), 0x57C5043E);
+
+// SME_PATCH_BL(SME_PORT_REGION(0x8003FDAC, 0, 0, 0),
+//              Patch::Mario::manageEMarioHealthWrapper);
+// SME_WRITE_32(SME_PORT_REGION(0x8003FD94, 0, 0, 0), 0x60000000);
 
   // multiplayer.cpp
   // SME_PATCH_B(SME_PORT_REGION(0x802EFAB4, 0, 0, 0),
@@ -536,12 +538,12 @@ SME_PATCH_BL(SME_PORT_REGION(0x802A744C, 0, 0, 0), moduleLoad);
 //   SME_WRITE_32(SME_PORT_REGION(0x802A6788, 0, 0, 0), 0x3BC00009);
 // #endif
 
-//   // Fix Infinte Flutter
-//   #if defined(PAL)
-//   kWrite32(SME_PORT_REGION(0x80278ec8, 0x80278ec8, 0, 0), 0xC002F69C);
-//   #else
-//   kWrite32(SME_PORT_REGION(0x8028113C, 0, 0, 0), 0xC002F824);
-//   #endif
+  // Fix Infinte Flutter
+  #if defined(PAL)
+  SME_WRITE_32(SME_PORT_REGION(0x80278ec8, 0x80278ec8, 0, 0), 0xC002F69C);
+  #else
+  SME_WRITE_32(SME_PORT_REGION(0x8028113C, 0, 0, 0), 0xC002F824);
+  #endif
 
   // Remove Dive While Wall Sliding
   SME_WRITE_32(SME_PORT_REGION(0x8024BC10, 0x8024399c, 0, 0), 0x48000068);
@@ -571,4 +573,9 @@ SME_PATCH_BL(SME_PORT_REGION(0x802A744C, 0, 0, 0), moduleLoad);
   // Sunscript logging restoration
   //SME_WRITE_32(SME_PORT_REGION(0x8003DB3C, 0x8003d98c, 0, 0), 0x48306B08);
 
-#endif
+  // Upsize Shadow Mario's hitbox to be the same as Mario
+  SME_WRITE_32(SME_PORT_REGION(0x8040FAA4, 0x80407188, 0, 0), 80.0f);
+  SME_WRITE_32(SME_PORT_REGION(0x8040FAA8, 0x8040718c, 0, 0), 50.0f);
+
+  // // Remove blue coin prompts
+  SME_WRITE_32(SME_PORT_REGION(0x8029A73C, 0x80292618, 0, 0), 0x60000000);

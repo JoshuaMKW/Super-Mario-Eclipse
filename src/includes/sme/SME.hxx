@@ -33,12 +33,34 @@
 #include "sms/screen/ShineFader.hxx"
 #include "sms/sound/MSBGM.hxx"
 #include "sms/talk/Talk2D2.hxx"
-#include "sme/enemy/FireyPetey.hxx"
 #include "types.h"
+
+#include "enemy/FireyPetey.hxx"
 
 
 #ifndef KURIBO_NO_TYPES
 #define KURIBO_NO_TYPES
+#endif
+
+#include "common_sdk.h"
+
+#if defined(SME_BUILD_KURIBO)
+#define SME_PATCH_B(source, target) pp::PatchB(source, target)
+#define SME_PATCH_BL(source, target) pp::PatchBL(source, target)
+#define SME_WRITE_8(source, value)                                             \
+  SME::Util::Memory::PPC::write<u8>(reinterpet_cast<u8 *>(source), value)
+#define SME_WRITE_16(source, value)                                            \
+  SME::Util::Memory::PPC::write<u16>(reinterpet_cast<u16 *>(source), value)
+#define SME_WRITE_32(source, value) pp::Patch32(source, value)
+#elif defined(SME_BUILD_KAMEK) || defined(SME_BUILD_KAMEK_INLINE)
+#define SME_PATCH_B(source, target) kmBranch(source, target)
+#define SME_PATCH_BL(source, target) kmCall(source, target)
+#define SME_WRITE_8(source, value) kmWrite8(source, value)
+#define SME_WRITE_16(source, value) kmWrite16(source, value)
+#define SME_WRITE_32(source, value) kmWrite32(source, value)
+#else
+#error                                                                         \
+    "Build type unspecified. Define either SME_BUILD_KAMEK or SME_BUILD_KAMEK_INLINE or SME_BUILD_KURIBO"
 #endif
 
 #ifndef __ppc__
@@ -199,8 +221,9 @@ bool canGrabAtNPC();
 bool canCarryNPC();
 TMario *scaleNPCThrowLength(TMario *player, float *params);
 u32 scaleNPCThrowHeight(u32 _r3, f32 z, f32 y);
+void scaleNPCTalkRadius();
 f32 getTreeClimbMinFall();
-TMapObjBase *getTreeClimbMaxFall(TMapObjBase *tree, f32 speed);
+void getTreeClimbMaxFall();
 bool scaleTreeSlideSpeed(f32 _f1, f32 _f2);
 void getClimbingAnimSpd(TMario *player, TMario::Animation anim, f32 speed);
 void scaleHangSpeed(TMario *player);
@@ -271,13 +294,6 @@ void initCustomFunctions(TSpcBinary *spcBinary, const char *symbol,
 
 }
 
-namespace FireyPetey{
-
-  
-  TBossPakkun* createInstance();
-
-} // namespace FireyPetey
-
 namespace Yoshi {
 
 bool isYoshiDie(TMario *player);
@@ -293,12 +309,19 @@ u32 calcYoshiSwimVelocity(TMario *player, u32 arg1);
 u32 isYoshiWaterFlutter();
 u32 isYoshiValidWaterFlutter(s32 anmIdx, u32 unk1, TMario *player);
 bool isYoshiValidDrip(TYoshi *yoshi);
-void initFreeEggCard(MActorAnmBck *bckData);
-u32 checkFreeEggCard(MActorAnmBck *bckData);
+void initFreeEggCard(J3DFrameCtrl *frameCtrl);
+u32 checkFreeEggCard(J3DFrameCtrl *frameCtrl);
 void saveNozzles(TYoshi *yoshi);
 void restoreNozzles(TMario *player);
 
 } // namespace Yoshi
+
+namespace FireyPetey{
+
+  
+  TBossPakkun* createInstance();
+
+} // namespace FireyPetey
 
 } // namespace Patch
 

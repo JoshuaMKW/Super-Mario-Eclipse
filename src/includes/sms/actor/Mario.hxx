@@ -941,7 +941,7 @@ public:
   u32 mPrevState;     // 0x0080
   u16 mSubState;      // 0x0084
   u16 mSubStateTimer; // 0x0086
-  u32 _88;
+  u32 mJumpSlipState;
   f32 mBaseAcceleration;        // 0x008C
   u16 mAccelerationDirection;   // 0x0090
   u16 _92;                      // padding?
@@ -950,9 +950,7 @@ public:
   u16 _A0;
   JGeometry::TVec3<f32> mSpeed; // 0x00A4
   f32 mForwardSpeed;            // 0x00B0
-  f32 _B4;
-  f32 _B8;
-  f32 _BC;
+  JGeometry::TVec3<f32> mPrevSpeed; //?
   f32 _C0;
   u16 _C4;
   f32 _C8;
@@ -982,7 +980,7 @@ public:
 
   struct {
     u32 _04 : 10;
-    bool mIsInactive : 1;
+    bool mIsPerforming : 1;
     bool mIsShineShirt : 1;
     u32 _03 : 2;
     bool mIsWater : 1;

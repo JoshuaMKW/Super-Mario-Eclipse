@@ -15,7 +15,8 @@ TPlayerData::TPlayerData(TMario *player, CPolarSubCamera *camera, bool isMario)
     : mPlayer(player), mCamera(camera), mIsEMario(!isMario),
       mPlayerID(SME::Enum::Player::MARIO), mCurJump(0), mIsClimbTired(false),
       mPrevCollisionType(0), mCollisionTimer(0), mClimbTiredTimer(0),
-      mYoshiWaterSpeed(0.0f, 0.0f, 0.0f), mDefaultAttrs(player) {
+      mSlideSpeedMultiplier(1.0f), mYoshiWaterSpeed(0.0f, 0.0f, 0.0f),
+      mDefaultAttrs(player) {
 
   mParams = new TPlayerParams();
 
@@ -38,8 +39,8 @@ TPlayerData::TPlayerData(TMario *player, CPolarSubCamera *camera, bool isMario)
 
   mCanUseFludd = mParams->mCanUseFludd.get();
 
-  if (mParams->mPlayerHasGlasses.get())
-    wearGlass__6TMarioFv(player);
+  if (mParams->mPlayerHasGlasses.get() && player->mCap)
+    reinterpret_cast<u16 *>(player->mCap)[2] |= 0b100;
 
   scalePlayerAttrs(mParams->mSizeMultiplier.get());
 }
@@ -47,8 +48,7 @@ TPlayerData::TPlayerData(TMario *player, CPolarSubCamera *camera, bool isMario)
 static u32 Timer = 0;
 
 void TPlayerData::scalePlayerAttrs(f32 scale) {
-  if (scale <= 0.0f)
-    scale = 0.0f;
+  scale = Max(scale, 0.0f);
 
   JGeometry::TVec3<f32> size(1.0f, 1.0f, 1.0f);
   size.scale(scale);
@@ -113,10 +113,12 @@ void TPlayerData::scalePlayerAttrs(f32 scale) {
   SCALE_PARAM(mPlayer->mJumpParams.mGravity, factor * gravityMultiplier);
   SCALE_PARAM(mPlayer->mJumpParams.mSpinJumpGravity,
               factor * gravityMultiplier);
+  SCALE_PARAM(mPlayer->mJumpParams.mJumpSpeedAccelControl,
+              factor * speedMultiplier);
   SCALE_PARAM(mPlayer->mJumpParams.mPopUpSpeedY, factor * jumpMultiplier);
   SCALE_PARAM(mPlayer->mJumpParams.mJumpingMax, factor * jumpMultiplier);
   SCALE_PARAM(mPlayer->mJumpParams.mFenceSpeed, factor * speedMultiplier);
-  SCALE_PARAM(mPlayer->mJumpParams.mFireBackVelocity, factor * jumpMultiplier);
+  //SCALE_PARAM(mPlayer->mJumpParams.mFireBackVelocity, factor * jumpMultiplier);
   SCALE_PARAM(mPlayer->mJumpParams.mBroadJumpForce, factor);
   SCALE_PARAM(mPlayer->mJumpParams.mBroadJumpForceY, factor * jumpMultiplier);
   SCALE_PARAM(mPlayer->mJumpParams.mRotateJumpForceY, factor * jumpMultiplier);
@@ -134,11 +136,12 @@ void TPlayerData::scalePlayerAttrs(f32 scale) {
   SCALE_PARAM(mPlayer->mJumpParams.mTurnJumpForce, factor * jumpMultiplier);
   SCALE_PARAM(mPlayer->mJumpParams.mTriJumpEnableSp, scale);
   SCALE_PARAM(mPlayer->mJumpParams.mValleyDepth, factor);
-  SCALE_PARAM(mPlayer->mJumpParams.mTremblePower, 1 / factor);
-  SCALE_PARAM(mPlayer->mJumpParams.mTrembleTime, static_cast<s16>(1 / factor));
+  SCALE_PARAM(mPlayer->mJumpParams.mTremblePower, 1.0f / factor);
+  SCALE_PARAM(mPlayer->mJumpParams.mTrembleTime,
+              static_cast<s16>(1.0f / factor));
   SCALE_PARAM(mPlayer->mJumpParams.mGetOffYoshiY, factor);
   SCALE_PARAM(mPlayer->mJumpParams.mSuperHipAttackCt,
-              static_cast<s16>(1 / factor));
+              static_cast<s16>(1.0f / factor));
   SCALE_PARAM(mPlayer->mRunParams.mMaxSpeed, factor * speedMultiplier);
   SCALE_PARAM(mPlayer->mRunParams.mAddBase, factor * speedMultiplier);
   SCALE_PARAM(mPlayer->mRunParams.mDecBrake, factor * speedMultiplier);
@@ -162,13 +165,14 @@ void TPlayerData::scalePlayerAttrs(f32 scale) {
   SCALE_PARAM(mPlayer->mSwimParams.mPaddleSpeedUp, factor * speedMultiplier);
   SCALE_PARAM(mPlayer->mSwimParams.mPaddleJumpUp, factor * speedMultiplier);
   SCALE_PARAM(mPlayer->mSwimParams.mFloatUp, factor);
+  SCALE_PARAM(mPlayer->mSwimParams.mWaterLevelCheckHeight, 1.0f / scale);
   SCALE_PARAM(mPlayer->mSwimParams.mPaddleDown, factor * speedMultiplier);
   SCALE_PARAM(mPlayer->mSwimParams.mCanBreathDepth, scale);
   SCALE_PARAM(mPlayer->mSwimParams.mWaitSinkSpeed, factor);
   SCALE_PARAM(mPlayer->mSwimParams.mAirDec,
-              1 / params->mUnderwaterHealthMultiplier.get());
+              1.0f / params->mUnderwaterHealthMultiplier.get());
   SCALE_PARAM(mPlayer->mSwimParams.mAirDecDive,
-              1 / params->mUnderwaterHealthMultiplier.get());
+              1.0f / params->mUnderwaterHealthMultiplier.get());
   SCALE_PARAM(mPlayer->mHangFenceParams.mMoveSp, factor * speedMultiplier);
   SCALE_PARAM(mPlayer->mHangFenceParams.mDescentSp, factor * speedMultiplier);
   SCALE_PARAM(mPlayer->mPullBGBeakParams.mPullRateV, factor);

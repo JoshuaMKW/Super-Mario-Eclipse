@@ -5,14 +5,28 @@
 
 
 
+class TNerveFPSleep{
+    public:
+    TNerveFPSleep();
+    virtual ~TNerveFPSleep();
+    virtual bool execute(TSpineBase<TLiveActor> *mSpineBase);
+};
+
+class TNerveFPBreakSleep{
+    public:
+    TNerveFPBreakSleep();
+    virtual ~TNerveFPBreakSleep();
+    virtual bool execute(TSpineBase<TLiveActor> *mSpineBase);
+};
+
 class TFireyPetey : public TBossPakkun
 {
-    public:
-    TFireyPetey();
-    TFireyPetey(const char *);
-    ~TFireyPetey();
 
-    virtual void perform(u32, JDrama::TGraphics *) override;
+    public:
+    TFireyPetey(const char *);
+    virtual ~TFireyPetey();
+    virtual void init(TLiveManager *) override;
+    virtual bool receiveMessage(THitActor *,u32) override;
 };
 
 

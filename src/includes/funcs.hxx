@@ -5593,7 +5593,7 @@
 #define __dt__10TLiveActorFv ((int(*)(...))0x80210d28)
 #define __ct__10TLiveActorFPCc ((int(*)(...))0x80210dc4)
 #define __sinit_liveactor_cpp ((int(*)(...))0x80210ef4)
-#define NerveGetByIndex__Fi ((int(*)(...))0x802129bc)
+#define NerveGetByIndex__Fi ((void*(*)(...))0x802129bc)
 #define hasMapCollision__12TLiveManagerCFv ((int(*)(...))0x80212d54)
 #define getActorByFlag__12TLiveManagerCFUl ((int(*)(...))0x80212d9c)
 #define perform__12TLiveManagerFUlPQ26JDrama9TGraphics ((int(*)(...))0x80212ddc)

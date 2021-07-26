@@ -33,6 +33,7 @@
 #include "sms/screen/ShineFader.hxx"
 #include "sms/sound/MSBGM.hxx"
 #include "sms/talk/Talk2D2.hxx"
+#include "sme/enemy/FireyPetey.hxx"
 #include "types.h"
 
 
@@ -273,7 +274,7 @@ void initCustomFunctions(TSpcBinary *spcBinary, const char *symbol,
 namespace FireyPetey{
 
   
-  void createInstance(const char* name);
+  TBossPakkun* createInstance();
 
 } // namespace FireyPetey
 

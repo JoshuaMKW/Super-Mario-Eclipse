@@ -31,15 +31,17 @@ public:
 public:
 
     TBossPakkun(const char *);
-    ~TBossPakkun();
+    virtual ~TBossPakkun();
 
     virtual void perform(u32, JDrama::TGraphics *) override;
     virtual bool receiveMessage(THitActor *, u32) override;
     virtual void init(TLiveManager *) override;
     virtual void setGroundCollision() override;
     virtual void kill() override;
+    virtual void* getBasNameTable() const override;
 
-    void changeBck(u32);
+
+    void changeBck(int);
     void launchPolDrop();
     void getHipDropDamage() const;
     void showMessage(u32);
@@ -48,7 +50,6 @@ public:
     
 
 
-    void* tWalker;              //0x0088
     f32 _00;                    //0x0154
     TBPPolDrop *mPollutionDrop; //0x0158
     void*  TBPVomit;            //0x015C
@@ -63,6 +64,7 @@ public:
     u32 _07;                    //0x0188
     void* TWaterEmitInfo;       //0x018C
     s8  _08;                    //0x0190
+    u32 _0c[6];                 //0x01B8
     u32 _09;                    //0x01B8
     s8  _10;                    //0x01BC
     u32 _11;                    //0x01C0

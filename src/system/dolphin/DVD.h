@@ -62,7 +62,7 @@ extern "C"
         u32 mLength;                 // _14
         void *mAddress;              // _18
         u32 mCurTransferSize;        // _1C
-        u32 mTransferredSize;        // _20
+        u32 mCommandResult;        // _20
         DVDDiskID *mDiskID;          // _24
         DVDCBCallback mCB;           // _28
         void *mData;                 // _2C
@@ -86,6 +86,8 @@ extern "C"
     } DVDDriveInfo;
 
     void DVDInit();
+    void DVDPause();
+    void DVDResume();
 
     s32 DVDConvertPathToEntrynum(const char *path);
     bool DVDOpen(const char *name, DVDFileInfo *info);
@@ -98,10 +100,20 @@ extern "C"
     bool DVDReadAsyncPrio(DVDFileInfo *info, void *address, s32 length, s32 offset, DVDCallback cb, s32 priority);
     s32 DVDReadPrio(DVDFileInfo *info, void *address, s32 length, s32 offset, s32 priority);
 
+
     bool DVDPrepareStreamAsync(DVDFileInfo *info, u32 length, u32 offset, DVDCallback cb);
     bool DVDCancelStreamAsync(DVDCommandBlock *cmdBlock, DVDCBCallback cb);
     bool DVDStopStreamAtEndAsync(DVDCommandBlock *cmdBlock, DVDCBCallback cb);
-    bool DVDGetStreamPlayAddrAsync(DVDCommandBlock *cmdBlock, DVDCBCallback cb);
+    bool DVDGetStreamErrorStatusAsync(DVDCommandBlock *cmdblock, DVDCBCallback cb);
+    u32 DVDGetStreamErrorStatus(DVDCommandBlock *cmdblock);
+    bool DVDGetStreamLengthAsync(DVDCommandBlock *cmdblock, DVDCBCallback cb);
+    u32 DVDGetStreamLength(DVDCommandBlock *cmdblock);
+    bool DVDGetStreamPlayAddrAsync(DVDCommandBlock *cmdblock, DVDCBCallback cb);
+    u32 DVDGetStreamPlayAddr(DVDCommandBlock *cmdblock);
+    bool DVDGetStreamStartAddrAsync(DVDCommandBlock *cmdblock, DVDCBCallback cb);
+    u32 DVDGetStreamStartAddr(DVDCommandBlock *cmdblock);
+    u32 DVDGetTransferredSize(DVDCommandBlock *cmdblock);
+    u32 DVDStopStreamAtEnd(DVDCommandBlock *cmdblock);
 
     s32 DVDGetCommandBlockStatus(DVDCommandBlock *cmdBlock);
     s32 DVDGetDriveStatus();

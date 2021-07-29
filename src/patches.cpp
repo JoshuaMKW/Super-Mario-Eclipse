@@ -1,6 +1,7 @@
+#include "sms/JSystem/JKR/JKRFileLoader.hxx"
 #include "sms/actor/Mario.hxx"
 #include "sms/mapobj/MapObjTree.hxx"
-#include "sms/JSystem/JKR/JKRFileLoader.hxx"
+
 
 #include "SME.hxx"
 #include "macros.h"
@@ -27,6 +28,19 @@ u32 SME::Patch::Fixes::patchYStorage() {
   return 0;
 }
 
+static bool canDiePlane(f32 floorY) {
+  TMario *player;
+  SME_FROM_GPR(31, player);
+
+  Vec playerPos;
+  player->JSGGetTranslation(&playerPos);
+
+  return (floorY > playerPos.y) && !player->mAttributes.mIsGameOver;
+}
+SME_PATCH_BL(SME_PORT_REGION(0x8024FB54, 0, 0, 0), canDiePlane);
+SME_WRITE_32(SME_PORT_REGION(0x8024FB58, 0, 0, 0), 0x2C030000);
+SME_WRITE_32(SME_PORT_REGION(0x8024FB5C, 0, 0, 0), 0x41820084);
+
 // make tree leaf count dynamic, based on number of leaf col files
 static TMapObjTree *getLeafCount(TMapObjTree *tree) {
   char cacheBuffer[128];
@@ -36,8 +50,8 @@ static TMapObjTree *getLeafCount(TMapObjTree *tree) {
   strcat(cacheBuffer, "%02d.col");
 
   s32 num = 0;
-  while (true && num < 100) {
-    snprintf(buffer, 100, cacheBuffer, num+1);
+  while (true && num < 255) {
+    snprintf(buffer, 100, cacheBuffer, num + 1);
     if (!JKRFileLoader::getGlbResource(buffer)) {
       tree->mLeafCount = num;
       return tree;

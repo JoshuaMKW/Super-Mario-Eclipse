@@ -851,15 +851,9 @@ SME_WRITE_32(SME_PORT_REGION(0x80254724, 0, 0, 0), 0xD01E00A8);
 static SME_PURE_ASM void checkGrabHeight() {
   asm volatile("lfs 0, " SME_STRINGIZE(SME_PORT_REGION(
       -0xED4, 0, 0, 0)) "(2)\n\t"
-                        "lfs 4, 0x28(29)            \n\t"
-                        "fcmpo 0, 4, 0              \n\t"
-                        "lfs 0, " SME_STRINGIZE(SME_PORT_REGION(
-                            -0xEDC, 0, 0,
-                            0)) "(2)\n\t"
-                                "bgt _skipmul                        \n\t"
-                                "fmuls 0, 0, 4                       \n\t"
-                                "_skipmul:                           \n\t"
-                                "blr                                 \n\t");
+                        "lfs 4, 0x28(29)                     \n\t"
+                        "fmuls 0, 0, 4                       \n\t"
+                        "blr                                 \n\t");
 }
 SME_PATCH_BL(SME_PORT_REGION(0x80256D34, 0, 0, 0), checkGrabHeight);
 

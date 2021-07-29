@@ -80,8 +80,6 @@ static void restoreMario(TMarDirector *gpMarDirector, u32 curState) {
     else
       gpMarioAddress->mState = static_cast<u32>(TMario::State::IDLE);
 
-    MSBgm::stopBGM(BGM_GET_SHINE, 20);
-    MSBgm::startBGM(gStageBGM);
     gpCamera->endDemoCamera();
   } else
     gpMarDirector->mGameState |= TMarDirector::State::WARP_OUT;
@@ -126,9 +124,8 @@ void Patch::Shine::shineFlagSetter(TFlagManager *flagManager, u32 flag,
     if (flag < 0x40)
       ((u32 *)&flagManager->Type6Flag)[flag] = val;
     else {
-      u32 shiftedFlag = flag >> 3;
-      u32 mask = (flag & 7);
-      u8 *flagField = &((u8 *)&flagManager->Type6Flag)[shiftedFlag];
+      const u32 mask = (flag & 7);
+      u8 *flagField = &((u8 *)&flagManager->Type6Flag)[flag >> 3];
 
       *flagField &= 1 << mask;
       *flagField |= (val & 1) << mask;
@@ -142,9 +139,8 @@ u32 Patch::Shine::shineFlagGetter(TFlagManager *flagManager, u32 flag) {
     if (flag < 0x40)
       return ((u32 *)&flagManager->Type6Flag)[flag];
     else {
-      u32 shiftedFlag = flag >> 3;
-      u32 mask = (flag & 7);
-      u8 *flagField = &((u8 *)&flagManager->Type6Flag)[shiftedFlag];
+      const u32 mask = (flag & 7);
+      u8 *flagField = &((u8 *)&flagManager->Type6Flag)[flag >> 3];
 
       return (*flagField >> mask) & 1;
     }
@@ -189,10 +185,24 @@ void Patch::Shine::thinkSetBootFlag(TShineFader *shineFader, u32 unk_1,
   SME_FROM_GPR(31, gpMarDirector);
 
   if (!(gpMarDirector->mCollectedShine->mType & 0x10)) {
+    for (s32 i = 0; i < 3; ++i) {
+      if ((3 >> i) == 0)
+        break;
+
+      MSBgm::stopTrackBGM(i, 0);
+    }
     shineFader->registFadeout(unk_1, unk_2);
     gpMarDirector->mGameState |= TMarDirector::State::WARP_OUT;
   }
 }
+
+// 0x80297C84
+void thinkSetNextSequence(TGameSequence *sequence, u8 area, u8 episode, JDrama::TFlagT<u16> flag) {
+  if (!(gpMarDirector->mCollectedShine->mType & 0x10)) {
+    sequence->set(area, episode, flag);
+  }
+}
+SME_PATCH_BL(SME_PORT_REGION(0x80297C84, 0, 0, 0), thinkSetNextSequence);
 
 u32 Patch::Shine::loadAfterMaskState() {
   TShine *shine;
@@ -245,3 +255,6 @@ SME_PURE_ASM void Patch::Shine::animationFreezeCheck() {
                ".loc_0x3C:                    \n\t"
                "blr                           \n\t");
 }
+
+// Remove auto disable sound
+SME_WRITE_32(SME_PORT_REGION(0x800169B0, 0, 0, 0), 0x60000000);

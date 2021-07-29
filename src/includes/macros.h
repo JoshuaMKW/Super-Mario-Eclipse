@@ -48,12 +48,28 @@
 #define SME_NO_INLINE __declspec(noinline)
 #endif
 
+#define SME_ATOMIC_CODE(code) \
+u32 _atomic_interrupt_state = OSDisableInterrupts(); \
+code  \
+OSRestoreInterrupts(_atomic_interrupt_state);
+
 #ifdef __MWERKS__
 #define SME_REGISTER register
 #define SME_PURE_ASM asm
 #else
 #define SME_REGISTER
 #define SME_PURE_ASM __attribute__((naked))
+#endif
+
+#if defined(__GNUC__) || (defined(__MWERKS__) && (__MWERKS__ >= 0x3000)) ||    \
+    (defined(__ICC) && (__ICC >= 600))
+#define SME_FUNC_SIG __PRETTY_FUNCTION__
+#elif defined(__FUNCSIG__)
+#define SME_FUNC_SIG __FUNCSIG__
+#elif defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901)
+#define SME_FUNC_SIG __func__
+#else
+#define SME_FUNC_SIG "UNDEFINED"
 #endif
 
 #define SME_CALL_NAIVE(addr, ...) ((void(*)(...))addr)(__VA_ARGS__)

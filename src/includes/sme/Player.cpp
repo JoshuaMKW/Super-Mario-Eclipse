@@ -8,14 +8,14 @@
 #include "Globals.hxx"
 #include "Player.hxx"
 #include "libs/sAssert.hxx"
+#include "macros.h"
 #include "stage/FileUtils.hxx"
 
 using namespace SME;
 
-static JKRSolidHeap gJ3DHeap = *JKRSolidHeap::create(0x2000,
-                             JKRHeap::sSystemHeap, false);
+static u8 gJ3DBuffer[0x2000];
+static JKRSolidHeap gJ3DHeap(&gJ3DBuffer, sizeof(gJ3DBuffer), nullptr, false);
 static OSThread gCharacterSwapThread;
-static TMario *gPlayerToSwap;
 static Enum::Player gTargetCharacterID;
 static u8 gCharacterSwapStack[0x4000];
 static bool gFadeInOut = true;
@@ -65,7 +65,7 @@ bool Util::Mario::swapBinary(Enum::Player id) {
   if (id == Enum::Player::UNKNOWN) {
     id = Enum::Player::MARIO;
   }
-  
+
   char buffer[32];
   sprintf(buffer, "/data/chr%hhu.szs", id);
 
@@ -105,7 +105,8 @@ bool Util::Mario::swapBinary(Enum::Player id) {
   return true;
 }
 
-static void *t_swapCharacter(void *context) {
+static void *t_swapCharacter(void *param) {
+  TMario *player = reinterpret_cast<TMario *>(param);
   gSwapSuccessful = false;
 
   char buffer[32];
@@ -125,6 +126,7 @@ static void *t_swapCharacter(void *context) {
   if (gFadeInOut) {
     gpApplication.mFader->startWipe(TSMSFader::WipeRequest::FADE_CIRCLE_OUT,
                                     1.0f, 0.0f);
+    CharacterHeap->freeAll();
     marioData = reinterpret_cast<u32 *>(SME::Util::loadArchive(
         buffer, CharacterHeap,
         static_cast<JKRDvdRipper::EAllocDirection>(gHeapAllocState)));
@@ -134,6 +136,7 @@ static void *t_swapCharacter(void *context) {
       asm volatile("");
     }
   } else {
+    CharacterHeap->freeAll();
     marioData = reinterpret_cast<u32 *>(SME::Util::loadArchive(
         buffer, CharacterHeap,
         static_cast<JKRDvdRipper::EAllocDirection>(gHeapAllocState)));
@@ -147,10 +150,9 @@ static void *t_swapCharacter(void *context) {
   gHeapAllocState ^= 1;
 
   // Make the player inactive
-  gPlayerToSwap->mAttributes.mIsPerforming = true;
+  player->mAttributes.mIsPerforming = true;
 
   // Free buffer and swap pointers
-  CharacterHeap->free(gpArcBufferMario);
   gpArcBufferMario = marioData;
 
   // Refresh mounted handle
@@ -159,30 +161,27 @@ static void *t_swapCharacter(void *context) {
 
   // -- Update player data -- //
   {
-    const s16 health = gPlayerToSwap->mHealth;
+    const s16 health = player->mHealth;
     Vec position;
     Vec rotation;
 
-    gPlayerToSwap->JSGGetTranslation(&position);
-    gPlayerToSwap->JSGGetRotation(&rotation);
+    player->JSGGetTranslation(&position);
+    player->JSGGetRotation(&rotation);
 
     // Prevent other threads from interrupting
-    const bool interruptStatus = OSDisableInterrupts();
+    SME_ATOMIC_CODE(
+      JKRHeap *currentHeap = gJ3DHeap.becomeCurrentHeap();
+      gJ3DHeap.freeAll();
 
-    JKRHeap *currentHeap = gJ3DHeap.becomeCurrentHeap();
-    gJ3DHeap.freeAll();
+      player->initValues();
+      player->loadAfter();
 
-    gPlayerToSwap->initValues();
-    gPlayerToSwap->loadAfter();
+      currentHeap->becomeCurrentHeap();
+    )
 
-    currentHeap->becomeCurrentHeap();
-
-    // Restore interrupts
-    OSRestoreInterrupts(interruptStatus);
-
-    gPlayerToSwap->mAttributes.mIsPerforming = false;
-    gPlayerToSwap->JSGSetTranslation(position);
-    gPlayerToSwap->JSGSetRotation(rotation);
+    player->mAttributes.mIsPerforming = false;
+    player->JSGSetTranslation(position);
+    player->JSGSetRotation(rotation);
   }
 
   if (gFadeInOut) {
@@ -200,13 +199,12 @@ static void *t_swapCharacter(void *context) {
 
 void Util::Mario::switchCharacter(TMario *player, Enum::Player id,
                                   bool fadeInOut) {
-  gPlayerToSwap = player;
   gTargetCharacterID = id;
   gFadeInOut = fadeInOut;
 
   if (OSIsThreadTerminated(&gCharacterSwapThread)) {
     // fix stack bug, gets overwritten due to obnoxious pointer
-    OSCreateThread(&gCharacterSwapThread, &t_swapCharacter, nullptr,
+    OSCreateThread(&gCharacterSwapThread, &t_swapCharacter, player,
                    (u8 *)(&gCharacterSwapStack) + sizeof(gCharacterSwapStack),
                    sizeof(gCharacterSwapStack), 18, 0);
     OSResumeThread(&gCharacterSwapThread);

@@ -36,7 +36,7 @@ static void initMod() {
       reinterpret_cast<OSAlarmHandler>(&SME::Util::Security::checkUserCodes));
   SME_DEBUG_LOG("Mario health offset = 0x%X\n", offsetof(TMario, mHealth));
   SME_DEBUG_LOG("J3DFrameCtrl offset = 0x%X\n", offsetof(J3DFrameCtrl, _04));
-  Patch::Init::initCodeProtection();
+  //Patch::Init::initCodeProtection();
 }
 
 static void destroyMod() {
@@ -293,12 +293,12 @@ SME_PATCH_BL(SME_PORT_REGION(0x8029D7E8, 0, 0, 0),
 // Patch::Multiplayer::setMarioOverhaul);
 
 // music.cpp
-//SME_PATCH_BL(SME_PORT_REGION(0x80016998, 0, 0, 0), Patch::Music::setIsValid);
-//SME_PATCH_B(SME_PORT_REGION(0x80016ABC, 0, 0, 0), Patch::Music::initMusic);
-//SME_PATCH_B(SME_PORT_REGION(0x80016948, 0, 0, 0),
-//            Patch::Music::stopMusicOnStop);
-//SME_PATCH_BL(SME_PORT_REGION(0x802A670C, 0, 0, 0),
-//             Patch::Music::stopMusicOnStageExit);
+SME_PATCH_BL(SME_PORT_REGION(0x80016998, 0, 0, 0), Patch::Music::setIsValid);
+SME_PATCH_B(SME_PORT_REGION(0x80016ABC, 0, 0, 0), Patch::Music::initMusic);
+SME_PATCH_B(SME_PORT_REGION(0x80016948, 0, 0, 0),
+            Patch::Music::stopMusicOnStop);
+SME_PATCH_BL(SME_PORT_REGION(0x802A670C, 0, 0, 0),
+             Patch::Music::stopMusicOnStageExit);
 
 // patches.cpp
 SME_PATCH_BL(SME_PORT_REGION(0x802320E0, 0, 0, 0),
@@ -540,8 +540,8 @@ SME_WRITE_32(SME_PORT_REGION(0x801B751C, 0, 0, 0), 0x418200A4);
 SME_WRITE_32(SME_PORT_REGION(0x8003DB3C, 0, 0, 0), 0x48306B08);
 
 // Upsize Shadow Mario's hitbox to be the same as Mario
-SME_WRITE_32(SME_PORT_REGION(0x8040FAA4, 0, 0, 0), 80.0f);
-SME_WRITE_32(SME_PORT_REGION(0x8040FAA8, 0, 0, 0), 50.0f);
+SME_WRITE_32(SME_PORT_REGION(0x8040FAA4, 0, 0, 0), 0x42A00000);
+SME_WRITE_32(SME_PORT_REGION(0x8040FAA8, 0, 0, 0), 0x42480000);
 
 // Remove blue coin prompts
 SME_WRITE_32(SME_PORT_REGION(0x8029A73C, 0, 0, 0), 0x60000000);

@@ -115,7 +115,14 @@ public:
   void warpPosAndAt(f32, s16);
   void warpPosAndAt(const Vec &, const Vec &);
 
-  u32 _00[0x1C / 4];            // 0x0050
+  u32 _00[0x14 / 4];            // 0x0050
+  struct {
+    u8 _00 : 4;
+    bool mCenterUp : 1;
+    bool mDisableMovement : 1;
+    u32 _01 : 10;
+  } mStateFlags;                // 0x0064
+  u32 _68;
   TCameraInbetween *mInbetween; // 0x006C
   u32 _01[0x34 / 4];            // 0x0070
   u16 _02;                      // 0x00A4

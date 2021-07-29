@@ -152,7 +152,8 @@ static void antiGravityCol(TMario *player) {
     changePlayerStatus__6TMarioFUlUlb(
         player, static_cast<u32>(TMario::State::FALL), 0, 0);
   }
-  player->mSubStateTimer = 0;
+  if (player->mState == static_cast<u32>(TMario::State::FALL))
+    player->mSubStateTimer = 0;
 }
 
 static void warpToLinkedCol(TMario *player) {

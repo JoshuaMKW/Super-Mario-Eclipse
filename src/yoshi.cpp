@@ -243,8 +243,8 @@ u32 updateFreeEggCard(J3DFrameCtrl *frameCtrl) {
   frameCtrl->mCurFrame = 11.0f;
   return 1;
 }
-SME_PATCH_BL(SME_PORT_REGION(0x801BC6B8, 0, 0, 0), updateFreeEggCard);
-SME_WRITE_32(SME_PORT_REGION(0x801BC6BC, 0, 0, 0), 0xB07F00FC);
+// SME_PATCH_BL(SME_PORT_REGION(0x801BC6B8, 0x801b4570, 0, 0), updateFreeEggCard);
+// SME_WRITE_32(SME_PORT_REGION(0x801BC6BC, 0x801b4574, 0, 0), 0xB07F00FC);
 
 // 0x8028121C
 // extern -> SME.cpp

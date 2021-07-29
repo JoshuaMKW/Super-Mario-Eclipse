@@ -10,7 +10,7 @@
 #define SME_CONCATENATE(a, b) SME_CONCATENATE_(a, b)
 
 #if !defined(NTSCU) && !defined(PAL) && !defined(NTSCJ) && !defined (NTSCK)
-#define NTSCU
+#define PAL
 #endif
 
 #if defined(NTSCU)

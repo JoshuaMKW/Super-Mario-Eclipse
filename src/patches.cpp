@@ -47,8 +47,8 @@ static TMapObjTree *getLeafCount(TMapObjTree *tree) {
   tree->mLeafCount = 0;
   return tree;
 }
-SME_PATCH_B(SME_PORT_REGION(0x801F6AE4, 0, 0, 0), getLeafCount);
-SME_PATCH_B(SME_PORT_REGION(0x801F6B20, 0, 0, 0), getLeafCount);
-SME_PATCH_B(SME_PORT_REGION(0x801F6B5C, 0, 0, 0), getLeafCount);
-SME_PATCH_B(SME_PORT_REGION(0x801F6B98, 0, 0, 0), getLeafCount);
-SME_PATCH_B(SME_PORT_REGION(0x801F6BD4, 0, 0, 0), getLeafCount);
+// SME_PATCH_B(SME_PORT_REGION(0x801F6AE4, 0x801ee9bc, 0, 0), getLeafCount);
+// SME_PATCH_B(SME_PORT_REGION(0x801F6B20, 0x801ee9f8, 0, 0), getLeafCount);
+// SME_PATCH_B(SME_PORT_REGION(0x801F6B5C, 0x801eea34, 0, 0), getLeafCount);
+// SME_PATCH_B(SME_PORT_REGION(0x801F6B98, 0x801eea70, 0, 0), getLeafCount);
+// SME_PATCH_B(SME_PORT_REGION(0x801F6BD4, 0x801eeaac, 0, 0), getLeafCount);

@@ -274,9 +274,9 @@ SME_PURE_ASM void scaleTreeSlideSpeed() {
                "mtlr 0                      \n\t"
                "blr                         \n\t");
 }
-SME_PATCH_BL(SME_PORT_REGION(0x80261CF4, 0, 0, 0), scaleTreeSlideSpeed);
-SME_WRITE_32(SME_PORT_REGION(0x80261CF8, 0, 0, 0), 0x2C030000);
-SME_WRITE_32(SME_PORT_REGION(0x80261CFC, 0, 0, 0), 0x41820070);
+// SME_PATCH_BL(SME_PORT_REGION(0x80261CF4, 0x80259a80, 0, 0), scaleTreeSlideSpeed);
+// SME_WRITE_32(SME_PORT_REGION(0x80261CF8, 0x80259a84, 0, 0), 0x2C030000);
+// SME_WRITE_32(SME_PORT_REGION(0x80261CFC, 0x80259a88, 0, 0), 0x41820070);
 
 /* GLOBAL CLIMB CODE */
 
@@ -300,30 +300,30 @@ void SME::Patch::Mario::getClimbingAnimSpd(TMario *player,
 
 static SME_PURE_ASM void scaleRoofClimbHeight(f32 yCoord, f32 speed) {
   asm volatile("lfs 0, " SME_STRINGIZE(SME_PORT_REGION(
-      -0xDE0, 0, 0, 0)) "(2)        \n\t"
+      -0xDE0, -0xf68, 0, 0)) "(2)        \n\t"
                         "lfs 3, 0x28(31)                                \n\t"
                         "fmuls 0, 0, 3                                  \n\t"
                         "blr                                            \n\t");
 }
-SME_PATCH_BL(SME_PORT_REGION(0x8025D66C, 0, 0, 0), scaleRoofClimbHeight);
+// SME_PATCH_BL(SME_PORT_REGION(0x8025D66C, 0x802553f8, 0, 0), scaleRoofClimbHeight);
 
 static SME_PURE_ASM void scaleRoofSquashedHeight() {
   asm volatile("lfs 3, " SME_STRINGIZE(SME_PORT_REGION(
-      -0xDE0, 0, 0, 0)) "(2)        \n\t"
+      -0xDE0, -0xf68, 0, 0)) "(2)        \n\t"
                         "lfs 5, 0x28(30)                                \n\t"
                         "fmuls 3, 5, 3                                  \n\t"
                         "blr                                            \n\t");
 }
-SME_PATCH_BL(SME_PORT_REGION(0x802617EC, 0, 0, 0), scaleRoofSquashedHeight);
+// SME_PATCH_BL(SME_PORT_REGION(0x802617EC, 0x80259578, 0, 0), scaleRoofSquashedHeight);
 
 static SME_PURE_ASM void scaleRoofMoveDiff() {
   asm volatile("lfs 0, " SME_STRINGIZE(SME_PORT_REGION(
-      -0xD7C, 0, 0, 0)) "(2)        \n\t"
+      -0xD7C, -0xf04, 0, 0)) "(2)        \n\t"
                         "lfs 3, 0x28(30)                                \n\t"
                         "fmuls 0, 0, 3                                  \n\t"
                         "blr                                            \n\t");
 }
-SME_PATCH_BL(SME_PORT_REGION(0x80261824, 0, 0, 0), scaleRoofMoveDiff);
+// SME_PATCH_BL(SME_PORT_REGION(0x80261824, 0x802595b0, 0, 0), scaleRoofMoveDiff);
 
 // extern -> SME.cpp
 // 0x802615AC
@@ -356,13 +356,13 @@ static bool canHangOnRoof(TBGCheckData *roof /*, u16 colType*/) {
 
   return colType == 266;
 }
-SME_WRITE_32(SME_PORT_REGION(0x802617C0, 0, 0, 0), 0xA0830000);
-SME_PATCH_BL(SME_PORT_REGION(0x802617C4, 0, 0, 0), canHangOnRoof);
-SME_WRITE_32(SME_PORT_REGION(0x802617C8, 0, 0, 0), 0x60000000);
-SME_WRITE_32(SME_PORT_REGION(0x802617CC, 0, 0, 0), 0x60000000);
-SME_WRITE_32(SME_PORT_REGION(0x802617D0, 0, 0, 0), 0x60000000);
-SME_WRITE_32(SME_PORT_REGION(0x802617D4, 0, 0, 0), 0x60000000);
-SME_WRITE_32(SME_PORT_REGION(0x802617D8, 0, 0, 0), 0x2C030000);
+// SME_WRITE_32(SME_PORT_REGION(0x802617C0, 0x8025954c, 0, 0), 0xA0830000);
+// SME_PATCH_BL(SME_PORT_REGION(0x802617C4, 0x80259550, 0, 0), canHangOnRoof);
+// SME_WRITE_32(SME_PORT_REGION(0x802617C8, 0x80259554, 0, 0), 0x60000000);
+// SME_WRITE_32(SME_PORT_REGION(0x802617CC, 0x80259558, 0, 0), 0x60000000);
+// SME_WRITE_32(SME_PORT_REGION(0x802617D0, 0x8025955c, 0, 0), 0x60000000);
+// SME_WRITE_32(SME_PORT_REGION(0x802617D4, 0x80259560, 0, 0), 0x60000000);
+// SME_WRITE_32(SME_PORT_REGION(0x802617D8, 0x80259564, 0, 0), 0x2C030000);
 
 /* WALL CLIMB CODE */
 
@@ -800,12 +800,12 @@ static f32 checkSlideSpeedMulti() {
     return speedCap;
   }
 }
-SME_WRITE_32(SME_PORT_REGION(0x8025C3D8, 0, 0, 0), 0x40810028);
-SME_WRITE_32(SME_PORT_REGION(0x8025C3FC, 0, 0, 0), 0xFC800018);
-SME_WRITE_32(SME_PORT_REGION(0x8025C400, 0, 0, 0), 0xD09E00B0);
-SME_PATCH_BL(SME_PORT_REGION(0x8025C404, 0, 0, 0), checkSlideSpeedMulti);
-SME_WRITE_32(SME_PORT_REGION(0x8025C408, 0, 0, 0), 0xFC400890);
-SME_WRITE_32(SME_PORT_REGION(0x8025C410, 0, 0, 0), 0x60000000);
+// SME_WRITE_32(SME_PORT_REGION(0x8025C3D8, 0x80254164, 0, 0), 0x40810028);
+// SME_WRITE_32(SME_PORT_REGION(0x8025C3FC, 0x80254168, 0, 0), 0xFC800018);
+// SME_WRITE_32(SME_PORT_REGION(0x8025C400, 0x8025416c, 0, 0), 0xD09E00B0);
+// SME_PATCH_BL(SME_PORT_REGION(0x8025C404, 0x80254170, 0, 0), checkSlideSpeedMulti);
+// SME_WRITE_32(SME_PORT_REGION(0x8025C408, 0x80254174, 0, 0), 0xFC400890);
+// SME_WRITE_32(SME_PORT_REGION(0x8025C410, 0x80254178, 0, 0), 0x60000000);
 
 #if 0
 static void checkHoverSpeedMulti(f32 factor, f32 max) {
@@ -829,12 +829,12 @@ kmWrite32(0x8024AE84, 0x60000000);
 
 static SME_PURE_ASM void scaleFluddInitYSpd() {
   asm volatile("lfs 0, " SME_STRINGIZE(SME_PORT_REGION(
-      -0xFE0, 0, 0, 0)) "(2)  \n\t"
+      -0xFE0, -0x1168, 0, 0)) "(2)  \n\t"
                         "lfs 4, 0x28(30)                          \n\t"
                         "fmuls 0, 0, 4                            \n\t"
                         "blr                                      \n\t");
 }
-SME_PATCH_BL(SME_PORT_REGION(0x80254A2C, 0, 0, 0), scaleFluddInitYSpd);
+// SME_PATCH_BL(SME_PORT_REGION(0x80254A2C, 0x8024c7b8, 0, 0), scaleFluddInitYSpd);
 
 static f32 setBounceYSpeed() {
   TMario *player;
@@ -845,50 +845,50 @@ static f32 setBounceYSpeed() {
 
   return 130.0f * size.y;
 }
-SME_PATCH_BL(SME_PORT_REGION(0x80254720, 0, 0, 0), &setBounceYSpeed);
-SME_WRITE_32(SME_PORT_REGION(0x80254724, 0, 0, 0), 0xD01E00A8);
+// SME_PATCH_BL(SME_PORT_REGION(0x80254720, 0x8024c4ac, 0, 0), &setBounceYSpeed);
+// SME_WRITE_32(SME_PORT_REGION(0x80254724, 0x8024c4b0, 0, 0), 0xD01E00A8);
 
 static SME_PURE_ASM void checkGrabHeight() {
   asm volatile("lfs 0, " SME_STRINGIZE(SME_PORT_REGION(
-      -0xED4, 0, 0, 0)) "(2)\n\t"
+      -0xED4, -0x105c, 0, 0)) "(2)\n\t"
                         "lfs 4, 0x28(29)            \n\t"
                         "fcmpo 0, 4, 0              \n\t"
                         "lfs 0, " SME_STRINGIZE(SME_PORT_REGION(
-                            -0xEDC, 0, 0,
+                            -0xEDC, -0x1064, 0,
                             0)) "(2)\n\t"
                                 "bgt _skipmul                        \n\t"
                                 "fmuls 0, 0, 4                       \n\t"
                                 "_skipmul:                           \n\t"
                                 "blr                                 \n\t");
 }
-SME_PATCH_BL(SME_PORT_REGION(0x80256D34, 0, 0, 0), checkGrabHeight);
+SME_PATCH_BL(SME_PORT_REGION(0x80256D34, 0x8024eac0, 0, 0), checkGrabHeight);
 
 static SME_PURE_ASM void setCollisionHeight1() {
   asm volatile("lfs 1, " SME_STRINGIZE(
-      SME_PORT_REGION(-0xEDC, 0, 0, 0)) "(2)                        \n\t"
+      SME_PORT_REGION(-0xEDC, -0x105c, 0, 0)) "(2)                        \n\t"
                                         "lfs 0, 0x28(22)            \n\t"
                                         "fmuls 1, 0, 1              \n\t"
                                         "blr                        \n\t");
 }
-SME_PATCH_BL(SME_PORT_REGION(0x8025696C, 0, 0, 0), setCollisionHeight1);
+SME_PATCH_BL(SME_PORT_REGION(0x8025696C, 0x8024e6f8, 0, 0), setCollisionHeight1);
 
 static SME_PURE_ASM void setCollisionHeight2() {
   asm volatile("lfs 2, " SME_STRINGIZE(
-      SME_PORT_REGION(-0xEDC, 0, 0, 0)) "(2)                        \n\t"
+      SME_PORT_REGION(-0xEDC, -0x105c, 0, 0)) "(2)                        \n\t"
                                         "lfs 0, 0x28(29)            \n\t"
                                         "fmuls 2, 0, 2              \n\t"
                                         "blr                        \n\t");
 }
-SME_PATCH_BL(SME_PORT_REGION(0x80256D14, 0, 0, 0), setCollisionHeight2);
+SME_PATCH_BL(SME_PORT_REGION(0x80256D14, 0x8024eaa0, 0, 0), setCollisionHeight2);
 
 static SME_PURE_ASM void setCollisionHeight3() {
   asm volatile("lfs 0, " SME_STRINGIZE(
-      SME_PORT_REGION(-0xEDC, 0, 0, 0)) "(2)                        \n\t"
+      SME_PORT_REGION(-0xEDC, -0x105c, 0, 0)) "(2)                        \n\t"
                                         "lfs 2, 0x28(30)            \n\t"
                                         "fmuls 0, 2, 0              \n\t"
                                         "blr                        \n\t");
 }
-SME_PATCH_BL(SME_PORT_REGION(0x802573FC, 0, 0, 0), setCollisionHeight3);
+// SME_PATCH_BL(SME_PORT_REGION(0x802573FC, 0x8024f188, 0, 0), setCollisionHeight3);
 
 static void setCollisionWidth() {
   TMario *player;
@@ -906,7 +906,7 @@ static void setCollisionWidth() {
 
   player->mCollisionXZSize = width;
 }
-SME_PATCH_BL(SME_PORT_REGION(0x802505F4, 0, 0, 0), setCollisionWidth);
+// SME_PATCH_BL(SME_PORT_REGION(0x802505F4, 0x80248380, 0, 0), setCollisionWidth);
 
 static f32 manageGrabLength() {
   TMario *player;
@@ -917,10 +917,10 @@ static f32 manageGrabLength() {
 
   return 60.0f * size.z;
 }
-SME_PATCH_BL(SME_PORT_REGION(0x80256CE8, 0, 0, 0), manageGrabLength);
-SME_WRITE_32(SME_PORT_REGION(0x80256CFC, 0, 0, 0), 0xEC01283C);
-SME_WRITE_32(SME_PORT_REGION(0x80256D04, 0, 0, 0), 0xC05E003C);
-SME_WRITE_32(SME_PORT_REGION(0x80256D0C, 0, 0, 0), 0xEC0100BC);
+// SME_PATCH_BL(SME_PORT_REGION(0x80256CE8, 0x8024ea74, 0, 0), manageGrabLength);
+// SME_WRITE_32(SME_PORT_REGION(0x80256CFC, 0x8024ea78, 0, 0), 0xEC01283C);
+// SME_WRITE_32(SME_PORT_REGION(0x80256D04, 0x8024ea7c, 0, 0), 0xC05E003C);
+// SME_WRITE_32(SME_PORT_REGION(0x80256D0C, 0x8024ea80, 0, 0), 0xEC0100BC);
 
 static JUtility::TColor getEMarioHealthBarRGBA(TEnemyMario *eMario) {
   JUtility::TColor color;

@@ -45,8 +45,6 @@ TPlayerData::TPlayerData(TMario *player, CPolarSubCamera *camera, bool isMario)
   scalePlayerAttrs(mParams->mSizeMultiplier.get());
 }
 
-static u32 Timer = 0;
-
 void TPlayerData::scalePlayerAttrs(f32 scale) {
   scale = Max(scale, 0.0f);
 
@@ -75,15 +73,6 @@ void TPlayerData::scalePlayerAttrs(f32 scale) {
     speedMultiplier = 1.0f;
     jumpMultiplier = 1.0f;
   }
-
-  if (Timer++ % 1000 == 0)
-    SME_DEBUG_LOG("{\n"
-                  "  Factor:        %.04f\n"
-                  "  Scale:         %.04f\n"
-                  "  Speed:         %.04f\n"
-                  "  Jump:          %.04f\n"
-                  "}\n",
-                  factor, scale, speedMultiplier, jumpMultiplier);
 
   SCALE_PARAM(mPlayer->mDeParams.mRunningMax, factor * speedMultiplier);
   SCALE_PARAM(mPlayer->mDeParams.mDashMax, factor * speedMultiplier);
@@ -118,7 +107,7 @@ void TPlayerData::scalePlayerAttrs(f32 scale) {
   SCALE_PARAM(mPlayer->mJumpParams.mPopUpSpeedY, factor * jumpMultiplier);
   SCALE_PARAM(mPlayer->mJumpParams.mJumpingMax, factor * jumpMultiplier);
   SCALE_PARAM(mPlayer->mJumpParams.mFenceSpeed, factor * speedMultiplier);
-  //SCALE_PARAM(mPlayer->mJumpParams.mFireBackVelocity, factor * jumpMultiplier);
+  SCALE_PARAM(mPlayer->mJumpParams.mFireBackVelocity, factor * jumpMultiplier);
   SCALE_PARAM(mPlayer->mJumpParams.mBroadJumpForce, factor);
   SCALE_PARAM(mPlayer->mJumpParams.mBroadJumpForceY, factor * jumpMultiplier);
   SCALE_PARAM(mPlayer->mJumpParams.mRotateJumpForceY, factor * jumpMultiplier);

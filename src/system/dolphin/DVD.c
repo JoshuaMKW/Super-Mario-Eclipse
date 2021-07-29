@@ -33,7 +33,8 @@ static bool issueCommand(u32 command, DVDCommandBlock *cmdblock) {
   return ret;
 }
 
-static void cbForGetStreamErrorStatusSync(s32 result, DVDCommandBlock *cmdblock) {
+static void cbForGetStreamErrorStatusSync(s32 result,
+                                          DVDCommandBlock *cmdblock) {
   cmdblock->mCommandResult = result;
   OSWakeupThread(&__DVDThreadQueue);
 }
@@ -173,12 +174,12 @@ u32 DVDGetTransferredSize(DVDCommandBlock *cmdblock) {
     return cmdblock->mCommandResult;
 
   if (cmdblock->mCurState == DVD_STATE_BUSY) {
-    volatile u32 *DVDTransferredSize = 0xCC006018;
+    volatile u32 *DVDTransferredSize = (volatile u32 *)0xCC006018;
     return (cmdblock->mCurTransferSize - *DVDTransferredSize) +
            cmdblock->mCommandResult;
   }
 
-  return cmdblock;
+  return (u32)cmdblock;
 }
 
 #ifdef SME_DVD_OVERRIDE
@@ -210,23 +211,23 @@ u32 DVDStopStreamAtEnd(DVDCommandBlock *cmdblock) {
 }
 
 void DVDPause() {
-    u32 _atomic_state = OSDisableInterrupts();
+  u32 _atomic_state = OSDisableInterrupts();
 
-    PauseFlag = true;
-    if (!executing)
-        PausingFlag = true;
-    
-    OSRestoreInterrupts(_atomic_state);
+  PauseFlag = true;
+  if (!executing)
+    PausingFlag = true;
+
+  OSRestoreInterrupts(_atomic_state);
 }
 
 void DVDResume() {
-    u32 _atomic_state = OSDisableInterrupts();
+  u32 _atomic_state = OSDisableInterrupts();
 
-    PauseFlag = false;
-    if (executing) {
-        PausingFlag = false;
-        stateReady();
-    }
-    
-    OSRestoreInterrupts(_atomic_state);
+  PauseFlag = false;
+  if (executing) {
+    PausingFlag = false;
+    stateReady();
+  }
+
+  OSRestoreInterrupts(_atomic_state);
 }

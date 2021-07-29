@@ -100,7 +100,6 @@ extern "C"
     bool DVDReadAsyncPrio(DVDFileInfo *info, void *address, s32 length, s32 offset, DVDCallback cb, s32 priority);
     s32 DVDReadPrio(DVDFileInfo *info, void *address, s32 length, s32 offset, s32 priority);
 
-
     bool DVDPrepareStreamAsync(DVDFileInfo *info, u32 length, u32 offset, DVDCallback cb);
     bool DVDCancelStreamAsync(DVDCommandBlock *cmdBlock, DVDCBCallback cb);
     bool DVDStopStreamAtEndAsync(DVDCommandBlock *cmdBlock, DVDCBCallback cb);

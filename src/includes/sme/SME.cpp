@@ -133,60 +133,59 @@ SME_PATCH_BL(SME_PORT_REGION(0x8024C558, 0x802442e4, 0, 0),
              Patch::Collision::checkIsRestoreTypeNoFallDamage);
 SME_PATCH_BL(SME_PORT_REGION(0x80250CA0, 0x80247e44, 0, 0),
              Patch::Collision::masterGroundCollisionHandler);
-// causing invalid reads
 SME_PATCH_BL(SME_PORT_REGION(0x8025059C, 0x80248a2c, 0, 0),
              Patch::Collision::masterAllCollisionHandler);
 
-// // debug.cpp
+// debug.cpp
 SME_PATCH_BL(SME_PORT_REGION(0x8024D194, 0x80244f20, 0, 0),
              Patch::Debug::xyzModifierMario);
 SME_WRITE_32(SME_PORT_REGION(0x8024D198, 0x80244f24, 0, 0), 0x2C030000);
 
-// // file_flags.cpp
+// file_flags.cpp
 SME_PATCH_BL(SME_PORT_REGION(0x802B1794, 0x802a96a4, 0, 0),
              Patch::Flag::setFileCompleteBool);
 
-// // flagmanager.cpp
-// SME_PATCH_B(SME_PORT_REGION(0x80294EF4, 0x8028cd0c, 0, 0), Patch::Flag::resetStage);
+// flagmanager.cpp
+SME_PATCH_B(SME_PORT_REGION(0x80294EF4, 0x8028cd0c, 0, 0), Patch::Flag::resetStage);
 
-// // fludd.cpp
-// SME_PATCH_B(SME_PORT_REGION(0x80248F14, 0x80240ca0, 0, 0), Patch::Fludd::isPumpOK);
-// SME_WRITE_32(SME_PORT_REGION(0x803DCA00, 0x803d41e2, 0, 0),
-//              0x00300000 | TMarioAnimeData::FLUDD::FLUDD_ENABLED);
-// SME_PATCH_BL(SME_PORT_REGION(0x8014206C, 0x80136c80, 0, 0),
-//              Patch::Fludd::hasWaterCardOpen);
-// SME_WRITE_32(SME_PORT_REGION(0x80142070, 0x80136c84, 0, 0), 0x28030000);
-// SME_PATCH_BL(SME_PORT_REGION(0x80283058, 0x8027ade4, 0, 0),
-//              Patch::Fludd::canCollectFluddItem);
-// SME_PATCH_BL(SME_PORT_REGION(0x800678C4, 0x80060f64, 0, 0), Patch::Fludd::sprayGoopMap);
-// SME_PATCH_BL(SME_PORT_REGION(0x801A3ED0, 0x8019c758, 0, 0), Patch::Fludd::sprayGoopMap);
-// SME_PATCH_BL(SME_PORT_REGION(0x801B42D8, 0x801ac190, 0, 0), Patch::Fludd::sprayGoopMap);
-// SME_PATCH_BL(SME_PORT_REGION(0x8024E710, 0x8024649c, 0, 0), Patch::Fludd::sprayGoopMap);
-// SME_PATCH_BL(SME_PORT_REGION(0x8027F7DC, 0x80277568, 0, 0), Patch::Fludd::sprayGoopMap);
-// SME_PATCH_BL(SME_PORT_REGION(0x8027F94C, 0x802776d8, 0, 0), Patch::Fludd::sprayGoopMap);
-// SME_PATCH_BL(SME_PORT_REGION(0x800FED3C, 0x800f83dc, 0, 0), Patch::Fludd::canCleanSeals);
-// SME_WRITE_32(SME_PORT_REGION(0x800FED40, 0x800f83e0, 0, 0), 0x2C030000);
-// SME_PATCH_BL(SME_PORT_REGION(0x8024D53C, 0x802452c8, 0, 0),
-//              Patch::Fludd::bindFluddtojoint);
-// SME_PATCH_BL(SME_PORT_REGION(0x8024E548, 0x802462d4, 0, 0),
-//              Patch::Fludd::checkExecWaterGun);
-// SME_PATCH_BL(SME_PORT_REGION(0x8026C370, 0x802640fc, 0, 0),
-//              Patch::Fludd::killTriggerNozzle);
-// SME_PATCH_BL(SME_PORT_REGION(0x8026C018, 0x80263da4, 0, 0),
-//              Patch::Fludd::spamHoverWrapper);
-// SME_PATCH_BL(SME_PORT_REGION(0x80262580, 0x8025a30c, 0, 0),
-//              Patch::Fludd::checkAirNozzle);
-// SME_WRITE_32(SME_PORT_REGION(0x80262584, 0x8025a310, 0, 0), 0x2C030000);
+// fludd.cpp
+SME_PATCH_B(SME_PORT_REGION(0x80248F14, 0x80240ca0, 0, 0), Patch::Fludd::isPumpOK);
+SME_WRITE_32(SME_PORT_REGION(0x803DCA00, 0x803d41e2, 0, 0),
+             0x00300000 | TMarioAnimeData::FLUDD::FLUDD_ENABLED);
+SME_PATCH_BL(SME_PORT_REGION(0x8014206C, 0x80136c80, 0, 0),
+             Patch::Fludd::hasWaterCardOpen);
+SME_WRITE_32(SME_PORT_REGION(0x80142070, 0x80136c84, 0, 0), 0x28030000);
+SME_PATCH_BL(SME_PORT_REGION(0x80283058, 0x8027ade4, 0, 0),
+             Patch::Fludd::canCollectFluddItem);
+SME_PATCH_BL(SME_PORT_REGION(0x800678C4, 0x80060f64, 0, 0), Patch::Fludd::sprayGoopMap);
+SME_PATCH_BL(SME_PORT_REGION(0x801A3ED0, 0x8019c758, 0, 0), Patch::Fludd::sprayGoopMap);
+SME_PATCH_BL(SME_PORT_REGION(0x801B42D8, 0x801ac190, 0, 0), Patch::Fludd::sprayGoopMap);
+SME_PATCH_BL(SME_PORT_REGION(0x8024E710, 0x8024649c, 0, 0), Patch::Fludd::sprayGoopMap);
+SME_PATCH_BL(SME_PORT_REGION(0x8027F7DC, 0x80277568, 0, 0), Patch::Fludd::sprayGoopMap);
+SME_PATCH_BL(SME_PORT_REGION(0x8027F94C, 0x802776d8, 0, 0), Patch::Fludd::sprayGoopMap);
+SME_PATCH_BL(SME_PORT_REGION(0x800FED3C, 0x800f83dc, 0, 0), Patch::Fludd::canCleanSeals);
+SME_WRITE_32(SME_PORT_REGION(0x800FED40, 0x800f83e0, 0, 0), 0x2C030000);
+SME_PATCH_BL(SME_PORT_REGION(0x8024D53C, 0x802452c8, 0, 0),
+             Patch::Fludd::bindFluddtojoint);
+SME_PATCH_BL(SME_PORT_REGION(0x8024E548, 0x802462d4, 0, 0),
+             Patch::Fludd::checkExecWaterGun);
+SME_PATCH_BL(SME_PORT_REGION(0x8026C370, 0x802640fc, 0, 0),
+             Patch::Fludd::killTriggerNozzle);
+SME_PATCH_BL(SME_PORT_REGION(0x8026C018, 0x80263da4, 0, 0),
+             Patch::Fludd::spamHoverWrapper);
+SME_PATCH_BL(SME_PORT_REGION(0x80262580, 0x8025a30c, 0, 0),
+             Patch::Fludd::checkAirNozzle);
+SME_WRITE_32(SME_PORT_REGION(0x80262584, 0x8025a310, 0, 0), 0x2C030000);
 
-// // fruit.cpp
-// SME_PATCH_BL(SME_PORT_REGION(0x801E542C, 0x801dd304, 0, 0),
-//              Patch::Fruit::canFruitDieWater);
-// SME_WRITE_32(SME_PORT_REGION(0x801E5430, 0x801dd308, 0, 0), 0x2C030000);
-// SME_WRITE_32(SME_PORT_REGION(0x801E5434, 0x801dd30c, 0, 0), 0x41820140);
-// SME_PATCH_BL(SME_PORT_REGION(0x8023F964, 0x802376f0, 0, 0),
-//              Patch::Fruit::chooseGrabDistancing);
-// SME_PATCH_BL(SME_PORT_REGION(0x8023F9DC, 0x80237768, 0, 0),
-//              Patch::Fruit::isGrabWaitOver);
+// fruit.cpp
+SME_PATCH_BL(SME_PORT_REGION(0x801E542C, 0x801dd304, 0, 0),
+             Patch::Fruit::canFruitDieWater);
+SME_WRITE_32(SME_PORT_REGION(0x801E5430, 0x801dd308, 0, 0), 0x2C030000);
+SME_WRITE_32(SME_PORT_REGION(0x801E5434, 0x801dd30c, 0, 0), 0x41820140);
+SME_PATCH_BL(SME_PORT_REGION(0x8023F964, 0x802376f0, 0, 0),
+             Patch::Fruit::chooseGrabDistancing);
+SME_PATCH_BL(SME_PORT_REGION(0x8023F9DC, 0x80237768, 0, 0),
+             Patch::Fruit::isGrabWaitOver);
 
 // // init_mods.cpp
 SME_PATCH_BL(SME_PORT_REGION(0x802A7140, 0x8029f02c, 0, 0),
@@ -200,98 +199,98 @@ SME_PATCH_BL(SME_PORT_REGION(0x802998B4, 0x8029174c, 0, 0), Patch::Init::initFil
 // // SME_PATCH_BL(SME_PORT_REGION(0x802B7A4C, 0x802afa1c, 0, 0), Patch::Init::initSoundBank);
 // SME_PATCH_BL(SME_PORT_REGION(0x802983F0, 0x80290288, 0, 0), Patch::Init::initMusicTrack);
 // SME_PATCH_BL(SME_PORT_REGION(0x80298420, 0x802902b8, 0, 0), Patch::Init::initMusicTrack);
-// SME_WRITE_32(SME_PORT_REGION(0x80276C90, 0x8026ea1c, 0, 0), 0x60000000);
+SME_WRITE_32(SME_PORT_REGION(0x80276C90, 0x8026ea1c, 0, 0), 0x60000000);
 SME_PATCH_BL(SME_PORT_REGION(0x80276C94, 0x8026ea20, 0, 0), Patch::Init::fromMarioInit);
 SME_PATCH_BL(SME_PORT_REGION(0x800397DC, 0x80039894, 0, 0),
              Patch::Init::fromShadowMarioInit);
-// SME_PATCH_BL(SME_PORT_REGION(0x80271580, 0x8026930c, 0, 0), Patch::Init::initYoshi);
-// SME_PATCH_B(SME_PORT_REGION(0x8029CCB0, 0x80294b8c, 0, 0), Patch::Init::initCardColors);
-// SME_PATCH_BL(SME_PORT_REGION(0x802B8B20, 0x802b0af0, 0, 0),
-//              Patch::Init::initCollisionWarpLinks);
-// SME_PATCH_BL(SME_PORT_REGION(0x802B57E4, 0x802ad768, 0, 0), Patch::Init::createUIHeap);
+SME_PATCH_BL(SME_PORT_REGION(0x80271580, 0x8026930c, 0, 0), Patch::Init::initYoshi);
+SME_PATCH_B(SME_PORT_REGION(0x8029CCB0, 0x80294b8c, 0, 0), Patch::Init::initCardColors);
+SME_PATCH_BL(SME_PORT_REGION(0x802B8B20, 0x802b0af0, 0, 0),
+             Patch::Init::initCollisionWarpLinks);
+SME_PATCH_BL(SME_PORT_REGION(0x802B57E4, 0x802ad768, 0, 0), Patch::Init::createUIHeap);
 
-// // // mario.cpp
-// // SME_PATCH_B(SME_PORT_REGION(0x802558A4, 0, 0, 0), Patch::Mario::addVelocity);
-// // SME_PATCH_BL(SME_PORT_REGION(0x802500B8, 0, 0, 0),
-// //              Patch::Mario::updateContexts);
-// // SME_PATCH_BL(SME_PORT_REGION(0x8029A87C, 0, 0, 0),
-// //              Patch::Mario::carryOrTalkNPC);
-// // SME_PATCH_BL(SME_PORT_REGION(0x802815F0, 0, 0, 0), Patch::Mario::canGrabAtNPC);
-// // SME_WRITE_32(SME_PORT_REGION(0x802815F4, 0, 0, 0), 0x2C030000);
-// // SME_PATCH_BL(SME_PORT_REGION(0x80207430, 0, 0, 0), Patch::Mario::canCarryNPC);
-// // SME_WRITE_32(SME_PORT_REGION(0x80207434, 0, 0, 0), 0x2C030000);
-// // SME_PATCH_BL(SME_PORT_REGION(0x80213314, 0, 0, 0), Patch::Mario::scaleNPCTalkRadius);
-// // SME_PATCH_BL(SME_PORT_REGION(0x80261C3C, 0, 0, 0), Patch::Mario::getTreeClimbMinFall);
-// // SME_WRITE_32(SME_PORT_REGION(0x80261C40, 0, 0, 0), 0xC05F038C);
-// // SME_WRITE_32(SME_PORT_REGION(0x80261C44, 0, 0, 0), 0xFC020040);
-// // SME_PATCH_BL(SME_PORT_REGION(0x802619CC, 0, 0, 0), Patch::Mario::getTreeClimbMaxFall);
-// // SME_WRITE_32(SME_PORT_REGION(0x802619D0, 0, 0, 0), 0x60000000);
-// // #if 0
-// //   SME_PATCH_BL(SME_PORT_REGION(0x802145F0, 0, 0, 0),
-// //                Patch::Mario::scaleNPCThrowLength);
-// //   SME_WRITE_32(SME_PORT_REGION(0x802145F4, 0, 0, 0), 0xC002E5E0);
-// //   SME_WRITE_32(SME_PORT_REGION(0x802145F8, 0, 0, 0), 0xC0230034);
-// //   SME_WRITE_32(SME_PORT_REGION(0x8021462C, 0, 0, 0), 0xEC0B0032);
-// //   SME_WRITE_32(SME_PORT_REGION(0x80214634, 0, 0, 0), 0xEC2B0072);
-// //   SME_PATCH_BL(SME_PORT_REGION(0x8021463C, 0, 0, 0),
-// //                Patch::Mario::scaleNPCThrowHeight);
-// //   SME_PATCH_BL(SME_PORT_REGION(0x80261CF4, 0, 0, 0), Patch::Mario::scaleTreeSlideSpeed);
-// //   SME_WRITE_32(SME_PORT_REGION(0x80261CF8, 0, 0, 0), 0x2C030000);
-// //   SME_WRITE_32(SME_PORT_REGION(0x80261CFC, 0, 0, 0), 0x41820070);
-// //   SME_PATCH_BL(SME_PORT_REGION(0x8025D588, 0, 0, 0), Patch::Mario::getClimbingAnimSpd);
-// //   SME_PATCH_BL(SME_PORT_REGION(0x8025D63C, 0, 0, 0), Patch::Mario::getClimbingAnimSpd);
-// //   SME_PATCH_BL(SME_PORT_REGION(0x8025D650, 0, 0, 0), Patch::Mario::getClimbingAnimSpd);
-// //   SME_PATCH_BL(SME_PORT_REGION(0x8025DBC4, 0, 0, 0), Patch::Mario::getClimbingAnimSpd);
-// //   SME_PATCH_BL(SME_PORT_REGION(0x8025E38C, 0, 0, 0), Patch::Mario::getClimbingAnimSpd);
-// //   SME_PATCH_BL(SME_PORT_REGION(0x802615AC, 0, 0, 0), Patch::Mario::scaleHangSpeed);
-// //   SME_WRITE_32(SME_PORT_REGION(0x802615B0, 0, 0, 0), 0x60000000);
-// //   SME_PATCH_BL(SME_PORT_REGION(0x8024E288, 0, 0, 0), Patch::Mario::checkGraffitiAffected);
-// //   // SME_PATCH_BL(0x801E4118, Patch::Mario::rescaleHeldObj);
-// // #endif
-// // SME_PATCH_BL(SME_PORT_REGION(0x8024E02C, 0, 0, 0),
-// //              Patch::Mario::manageExtraJumps);
-// // SME_PATCH_BL(SME_PORT_REGION(0x80254534, 0, 0, 0),
-// //              Patch::Mario::normJumpMultiplier);
-// // SME_WRITE_32(SME_PORT_REGION(0x80254538, 0, 0, 0), 0x60000000);
-// // SME_WRITE_32(SME_PORT_REGION(0x8025453C, 0, 0, 0), 0x60000000);
-// // SME_WRITE_32(SME_PORT_REGION(0x80254540, 0, 0, 0), 0x60000000);
-// // SME_WRITE_32(SME_PORT_REGION(0x80254544, 0, 0, 0), 0x60000000);
-// // SME_PATCH_BL(SME_PORT_REGION(0x80256678, 0, 0, 0),
-// //              Patch::Mario::checkYSpdForTerminalVelocity);
-// // SME_WRITE_32(SME_PORT_REGION(0x8025667C, 0, 0, 0), 0x60000000);
-// // SME_WRITE_32(SME_PORT_REGION(0x8025B8BC, 0, 0, 0), 0x60000000);
-// // SME_PATCH_BL(SME_PORT_REGION(0x8025B8C0, 0, 0, 0), Patch::Mario::checkGroundSpeedLimit);
-// // SME_WRITE_32(SME_PORT_REGION(0x8025B8C4, 0, 0, 0), 0xEFFF0072);
-// // SME_WRITE_32(SME_PORT_REGION(0x8024CB00, 0, 0, 0), 0xC162EF70);
-// // SME_WRITE_32(SME_PORT_REGION(0x8024CC50, 0, 0, 0), 0xED600072);
-// // SME_WRITE_32(SME_PORT_REGION(0x8024CC60, 0, 0, 0), 0x60000000);
-// // SME_WRITE_32(SME_PORT_REGION(0x8024CC64, 0, 0, 0), 0x60000000);
-// // SME_WRITE_32(SME_PORT_REGION(0x8024CC68, 0, 0, 0), 0x60000000);
-// // SME_PATCH_BL(SME_PORT_REGION(0x8024CC6C, 0, 0, 0), Patch::Mario::checkJumpSpeedLimit);
-// // SME_WRITE_32(SME_PORT_REGION(0x8024CCF8, 0, 0, 0), 0xEC0B007A);
-// // SME_WRITE_32(SME_PORT_REGION(0x8024CD24, 0, 0, 0), 0xEC0B007A);
-// // SME_PATCH_BL(SME_PORT_REGION(0x8024CC2C, 0, 0, 0), Patch::Mario::checkJumpSpeedMulti);
-// // SME_WRITE_32(SME_PORT_REGION(0x8024CC30, 0, 0, 0), 0x57C5043E);
+// // mario.cpp
+// SME_PATCH_B(SME_PORT_REGION(0x802558A4, 0, 0, 0), Patch::Mario::addVelocity);
+// SME_PATCH_BL(SME_PORT_REGION(0x802500B8, 0, 0, 0),
+//              Patch::Mario::updateContexts);
+// SME_PATCH_BL(SME_PORT_REGION(0x8029A87C, 0, 0, 0),
+//              Patch::Mario::carryOrTalkNPC);
+// SME_PATCH_BL(SME_PORT_REGION(0x802815F0, 0, 0, 0), Patch::Mario::canGrabAtNPC);
+// SME_WRITE_32(SME_PORT_REGION(0x802815F4, 0, 0, 0), 0x2C030000);
+// SME_PATCH_BL(SME_PORT_REGION(0x80207430, 0, 0, 0), Patch::Mario::canCarryNPC);
+// SME_WRITE_32(SME_PORT_REGION(0x80207434, 0, 0, 0), 0x2C030000);
+// SME_PATCH_BL(SME_PORT_REGION(0x80213314, 0, 0, 0), Patch::Mario::scaleNPCTalkRadius);
+// SME_PATCH_BL(SME_PORT_REGION(0x80261C3C, 0, 0, 0), Patch::Mario::getTreeClimbMinFall);
+// SME_WRITE_32(SME_PORT_REGION(0x80261C40, 0, 0, 0), 0xC05F038C);
+// SME_WRITE_32(SME_PORT_REGION(0x80261C44, 0, 0, 0), 0xFC020040);
+// SME_PATCH_BL(SME_PORT_REGION(0x802619CC, 0, 0, 0), Patch::Mario::getTreeClimbMaxFall);
+// SME_WRITE_32(SME_PORT_REGION(0x802619D0, 0, 0, 0), 0x60000000);
+// #if 0
+//   SME_PATCH_BL(SME_PORT_REGION(0x802145F0, 0, 0, 0),
+//                Patch::Mario::scaleNPCThrowLength);
+//   SME_WRITE_32(SME_PORT_REGION(0x802145F4, 0, 0, 0), 0xC002E5E0);
+//   SME_WRITE_32(SME_PORT_REGION(0x802145F8, 0, 0, 0), 0xC0230034);
+//   SME_WRITE_32(SME_PORT_REGION(0x8021462C, 0, 0, 0), 0xEC0B0032);
+//   SME_WRITE_32(SME_PORT_REGION(0x80214634, 0, 0, 0), 0xEC2B0072);
+//   SME_PATCH_BL(SME_PORT_REGION(0x8021463C, 0, 0, 0),
+//                Patch::Mario::scaleNPCThrowHeight);
+//   SME_PATCH_BL(SME_PORT_REGION(0x80261CF4, 0, 0, 0), Patch::Mario::scaleTreeSlideSpeed);
+//   SME_WRITE_32(SME_PORT_REGION(0x80261CF8, 0, 0, 0), 0x2C030000);
+//   SME_WRITE_32(SME_PORT_REGION(0x80261CFC, 0, 0, 0), 0x41820070);
+//   SME_PATCH_BL(SME_PORT_REGION(0x8025D588, 0, 0, 0), Patch::Mario::getClimbingAnimSpd);
+//   SME_PATCH_BL(SME_PORT_REGION(0x8025D63C, 0, 0, 0), Patch::Mario::getClimbingAnimSpd);
+//   SME_PATCH_BL(SME_PORT_REGION(0x8025D650, 0, 0, 0), Patch::Mario::getClimbingAnimSpd);
+//   SME_PATCH_BL(SME_PORT_REGION(0x8025DBC4, 0, 0, 0), Patch::Mario::getClimbingAnimSpd);
+//   SME_PATCH_BL(SME_PORT_REGION(0x8025E38C, 0, 0, 0), Patch::Mario::getClimbingAnimSpd);
+//   SME_PATCH_BL(SME_PORT_REGION(0x802615AC, 0, 0, 0), Patch::Mario::scaleHangSpeed);
+//   SME_WRITE_32(SME_PORT_REGION(0x802615B0, 0, 0, 0), 0x60000000);
+//   SME_PATCH_BL(SME_PORT_REGION(0x8024E288, 0, 0, 0), Patch::Mario::checkGraffitiAffected);
+//   // SME_PATCH_BL(0x801E4118, Patch::Mario::rescaleHeldObj);
+// #endif
+// SME_PATCH_BL(SME_PORT_REGION(0x8024E02C, 0, 0, 0),
+//              Patch::Mario::manageExtraJumps);
+// SME_PATCH_BL(SME_PORT_REGION(0x80254534, 0, 0, 0),
+//              Patch::Mario::normJumpMultiplier);
+// SME_WRITE_32(SME_PORT_REGION(0x80254538, 0, 0, 0), 0x60000000);
+// SME_WRITE_32(SME_PORT_REGION(0x8025453C, 0, 0, 0), 0x60000000);
+// SME_WRITE_32(SME_PORT_REGION(0x80254540, 0, 0, 0), 0x60000000);
+// SME_WRITE_32(SME_PORT_REGION(0x80254544, 0, 0, 0), 0x60000000);
+// SME_PATCH_BL(SME_PORT_REGION(0x80256678, 0, 0, 0),
+//              Patch::Mario::checkYSpdForTerminalVelocity);
+// SME_WRITE_32(SME_PORT_REGION(0x8025667C, 0, 0, 0), 0x60000000);
+// SME_WRITE_32(SME_PORT_REGION(0x8025B8BC, 0, 0, 0), 0x60000000);
+// SME_PATCH_BL(SME_PORT_REGION(0x8025B8C0, 0, 0, 0), Patch::Mario::checkGroundSpeedLimit);
+// SME_WRITE_32(SME_PORT_REGION(0x8025B8C4, 0, 0, 0), 0xEFFF0072);
+// SME_WRITE_32(SME_PORT_REGION(0x8024CB00, 0, 0, 0), 0xC162EF70);
+// SME_WRITE_32(SME_PORT_REGION(0x8024CC50, 0, 0, 0), 0xED600072);
+// SME_WRITE_32(SME_PORT_REGION(0x8024CC60, 0, 0, 0), 0x60000000);
+// SME_WRITE_32(SME_PORT_REGION(0x8024CC64, 0, 0, 0), 0x60000000);
+// SME_WRITE_32(SME_PORT_REGION(0x8024CC68, 0, 0, 0), 0x60000000);
+// SME_PATCH_BL(SME_PORT_REGION(0x8024CC6C, 0, 0, 0), Patch::Mario::checkJumpSpeedLimit);
+// SME_WRITE_32(SME_PORT_REGION(0x8024CCF8, 0, 0, 0), 0xEC0B007A);
+// SME_WRITE_32(SME_PORT_REGION(0x8024CD24, 0, 0, 0), 0xEC0B007A);
+// SME_PATCH_BL(SME_PORT_REGION(0x8024CC2C, 0, 0, 0), Patch::Mario::checkJumpSpeedMulti);
+// SME_WRITE_32(SME_PORT_REGION(0x8024CC30, 0, 0, 0), 0x57C5043E);
 
-// // SME_PATCH_BL(SME_PORT_REGION(0x8003FDAC, 0, 0, 0),
-// //              Patch::Mario::manageEMarioHealthWrapper);
-// // SME_WRITE_32(SME_PORT_REGION(0x8003FD94, 0, 0, 0), 0x60000000);
+// SME_PATCH_BL(SME_PORT_REGION(0x8003FDAC, 0, 0, 0),
+//              Patch::Mario::manageEMarioHealthWrapper);
+// SME_WRITE_32(SME_PORT_REGION(0x8003FD94, 0, 0, 0), 0x60000000);
 
-// // multiplayer.cpp
-// // SME_PATCH_B(SME_PORT_REGION(0x802EFAB4, 0, 0, 0),
-// // Patch::Multiplayer::draw3DOverhaul);
-// SME_PATCH_BL(SME_PORT_REGION(0x8029D7E8, 0x802956c4, 0, 0),
-//              Patch::Multiplayer::makeMarios);
-// // SME_PATCH_B(SME_PORT_REGION(0x80276BD0, 0, 0, 0),
-// // Patch::Multiplayer::loadMarioTrickyOverhaul);
-// // SME_PATCH_B(SME_PORT_REGION(0x8024D2A8, 0, 0, 0),
-// // Patch::Multiplayer::performMarioTrickyOverhaul);
-// // SME_PATCH_BL(SME_PORT_REGION(0x802983F8, 0, 0, 0),
-// // Patch::Multiplayer::setMarioOverhaul);
-// // SME_PATCH_BL(SME_PORT_REGION(0x80298428, 0, 0, 0),
-// // Patch::Multiplayer::setMarioOverhaul);
-// // SME_PATCH_BL(SME_PORT_REGION(0x802984D8, 0, 0, 0),
-// // Patch::Multiplayer::setMarioOverhaul);
+// multiplayer.cpp
+// SME_PATCH_B(SME_PORT_REGION(0x802EFAB4, 0, 0, 0),
+// Patch::Multiplayer::draw3DOverhaul);
+SME_PATCH_BL(SME_PORT_REGION(0x8029D7E8, 0x802956c4, 0, 0),
+             Patch::Multiplayer::makeMarios);
+// SME_PATCH_B(SME_PORT_REGION(0x80276BD0, 0, 0, 0),
+// Patch::Multiplayer::loadMarioTrickyOverhaul);
+// SME_PATCH_B(SME_PORT_REGION(0x8024D2A8, 0, 0, 0),
+// Patch::Multiplayer::performMarioTrickyOverhaul);
+// SME_PATCH_BL(SME_PORT_REGION(0x802983F8, 0, 0, 0),
+// Patch::Multiplayer::setMarioOverhaul);
+// SME_PATCH_BL(SME_PORT_REGION(0x80298428, 0, 0, 0),
+// Patch::Multiplayer::setMarioOverhaul);
+// SME_PATCH_BL(SME_PORT_REGION(0x802984D8, 0, 0, 0),
+// Patch::Multiplayer::setMarioOverhaul);
 
 // // music.cpp
 // //SME_PATCH_BL(SME_PORT_REGION(0x80016998, 0, 0, 0), Patch::Music::setIsValid);
@@ -306,73 +305,73 @@ SME_PATCH_BL(SME_PORT_REGION(0x800397DC, 0x80039894, 0, 0),
 //              Patch::Fixes::shadowCrashPatch);
 // SME_PATCH_BL(SME_PORT_REGION(0x802571F0, 0x8024ef7c, 0, 0), Patch::Fixes::patchYStorage);
 
-// // shine.cpp
-// SME_PATCH_BL(SME_PORT_REGION(0x801BD664, 0x801b551c, 0, 0),
-//              Patch::Shine::manageShineVanish);
-// SME_WRITE_32(SME_PORT_REGION(0x801BD668, 0x801b5520, 0, 0), 0x48000568);
-// SME_PATCH_BL(SME_PORT_REGION(0x802413E0, 0x8023916c, 0, 0),
-//              Patch::Shine::isKillEnemiesShine);
-// SME_PATCH_BL(SME_PORT_REGION(0x802995BC, 0x80291454, 0, 0), Patch::Shine::checkBootOut);
-// SME_WRITE_32(SME_PORT_REGION(0x80297BE8, 0x8028fa80, 0, 0), 0x60848200);
-// SME_PATCH_BL(SME_PORT_REGION(0x80293B10, 0x8028b928, 0, 0),
-//              Patch::Shine::extendShineIDLogic);
-// SME_PATCH_BL(SME_PORT_REGION(0x801BCC98, 0x801b4b50, 0, 0),
-//              Patch::Shine::shineObjectStringMod);
-// SME_WRITE_32(SME_PORT_REGION(0x803DEE50, 0x803d6630, 0, 0),
-//              Patch::Shine::shineFlagSetter);
-// SME_WRITE_32(SME_PORT_REGION(0x803DEE7C, 0x803d665c, 0, 0),
-//              Patch::Shine::shineFlagGetter);
-// SME_PATCH_BL(SME_PORT_REGION(0x802946D4, 0x8028c4ec, 0, 0),
-//              Patch::Shine::shineSetClamper);
-// SME_WRITE_32(SME_PORT_REGION(0x80294744, 0x8028c55c, 0, 0), 0x60000000);
-// SME_PATCH_BL(SME_PORT_REGION(0x8029474C, 0x8028c564, 0, 0),
-//              Patch::Shine::shineGetClamper);
-// /*Shine casts, fix light*/
-// SME_WRITE_32(SME_PORT_REGION(0x80412548, 0x80409a90, 0, 0), f32(SME_MAX_SHINES));
-// SME_WRITE_32(SME_PORT_REGION(0x80293AF8, 0x8028b910, 0, 0), 0x3BFF03E7);
-// SME_WRITE_32(SME_PORT_REGION(0x802946B8, 0x8028c4d0, 0, 0), 0x280003E7);
-// SME_WRITE_32(SME_PORT_REGION(0x8017BE78, 0x80171ea8, 0, 0), 0x5464037E);
-// SME_WRITE_32(SME_PORT_REGION(0x8017BEF4, 0x80171f24, 0, 0), 0x5464037E);
-// SME_WRITE_32(SME_PORT_REGION(0x8017BF34, 0x80171f6c, 0, 0), 0x5464037E);
-// SME_WRITE_32(SME_PORT_REGION(0x801BCE30, 0x801b4ce8, 0, 0), 0x5464037E);
-// SME_WRITE_32(SME_PORT_REGION(0x801FF850, 0x801f7734, 0, 0), 0x5404037E);
-// SME_WRITE_32(SME_PORT_REGION(0x802946B4, 0x8028c4cc, 0, 0), 0x5480043E);
-// SME_WRITE_32(SME_PORT_REGION(0x80294730, 0x8028c548, 0, 0), 0x5480043E);
-// SME_WRITE_32(SME_PORT_REGION(0x80294734, 0x8028c54c, 0, 0), 0x280003E7);
-// SME_WRITE_32(SME_PORT_REGION(0x80297BA0, 0x8028fa38, 0, 0), 0x5404037E);
-// SME_PATCH_BL(SME_PORT_REGION(0x80294334, 0x8028c14c, 0, 0),
-//              Patch::Shine::extendFlagManagerLoad);
-// SME_WRITE_32(SME_PORT_REGION(0x80294338, 0x8028c150, 0, 0), 0x48000010);
-// SME_PATCH_BL(SME_PORT_REGION(0x802939B8, 0x8028b7d0, 0, 0),
-//              Patch::Shine::extendFlagManagerSave);
-// SME_WRITE_32(SME_PORT_REGION(0x802939BC, 0x8028b7d4, 0, 0), 0x48000014);
-// SME_PATCH_BL(SME_PORT_REGION(0x80297BD8, 0x8028fa70, 0, 0),
-//              Patch::Shine::thinkSetBootFlag);
-// SME_PATCH_BL(SME_PORT_REGION(0x801BCD20, 0x801b4bd8, 0, 0),
-//              Patch::Shine::loadAfterMaskState);
-// SME_WRITE_32(SME_PORT_REGION(0x801BCD24, 0x801b4bdc, 0, 0), 0x28030002);
-// SME_WRITE_32(SME_PORT_REGION(0x801BCD40, 0x801b4bf8, 0, 0), 0x28030001);
-// SME_PATCH_BL(SME_PORT_REGION(0x801BCEEC, 0x801b4da4, 0, 0),
-//              Patch::Shine::setKillState);
-// SME_PATCH_BL(SME_PORT_REGION(0x8029A590, 0x80292460, 0, 0), Patch::Shine::thinkCloseCamera);
-// SME_WRITE_32(SME_PORT_REGION(0x8029A594, 0x80292464, 0, 0), 0x28000000);
-// SME_PATCH_BL(SME_PORT_REGION(0x802999D8, 0x80291870, 0, 0),
-//               Patch::Shine::animationFreezeCheck);
-// SME_WRITE_32(SME_PORT_REGION(0x802999DC, 0x80291874, 0, 0), 0x48000034);
-// // Make Shines glow more
-// SME_WRITE_32(SME_PORT_REGION(0x803C9190, 0x803c0980, 0, 0), 0x3F19999A);
+// shine.cpp
+SME_PATCH_BL(SME_PORT_REGION(0x801BD664, 0x801b551c, 0, 0),
+             Patch::Shine::manageShineVanish);
+SME_WRITE_32(SME_PORT_REGION(0x801BD668, 0x801b5520, 0, 0), 0x48000568);
+SME_PATCH_BL(SME_PORT_REGION(0x802413E0, 0x8023916c, 0, 0),
+             Patch::Shine::isKillEnemiesShine);
+SME_PATCH_BL(SME_PORT_REGION(0x802995BC, 0x80291454, 0, 0), Patch::Shine::checkBootOut);
+SME_WRITE_32(SME_PORT_REGION(0x80297BE8, 0x8028fa80, 0, 0), 0x60848200);
+SME_PATCH_BL(SME_PORT_REGION(0x80293B10, 0x8028b928, 0, 0),
+             Patch::Shine::extendShineIDLogic);
+SME_PATCH_BL(SME_PORT_REGION(0x801BCC98, 0x801b4b50, 0, 0),
+             Patch::Shine::shineObjectStringMod);
+SME_WRITE_32(SME_PORT_REGION(0x803DEE50, 0x803d6630, 0, 0),
+             Patch::Shine::shineFlagSetter);
+SME_WRITE_32(SME_PORT_REGION(0x803DEE7C, 0x803d665c, 0, 0),
+             Patch::Shine::shineFlagGetter);
+SME_PATCH_BL(SME_PORT_REGION(0x802946D4, 0x8028c4ec, 0, 0),
+             Patch::Shine::shineSetClamper);
+SME_WRITE_32(SME_PORT_REGION(0x80294744, 0x8028c55c, 0, 0), 0x60000000);
+SME_PATCH_BL(SME_PORT_REGION(0x8029474C, 0x8028c564, 0, 0),
+             Patch::Shine::shineGetClamper);
+/*Shine casts, fix light*/
+SME_WRITE_32(SME_PORT_REGION(0x80412548, 0x80409a90, 0, 0), f32(SME_MAX_SHINES));
+SME_WRITE_32(SME_PORT_REGION(0x80293AF8, 0x8028b910, 0, 0), 0x3BFF03E7);
+SME_WRITE_32(SME_PORT_REGION(0x802946B8, 0x8028c4d0, 0, 0), 0x280003E7);
+SME_WRITE_32(SME_PORT_REGION(0x8017BE78, 0x80171ea8, 0, 0), 0x5464037E);
+SME_WRITE_32(SME_PORT_REGION(0x8017BEF4, 0x80171f24, 0, 0), 0x5464037E);
+SME_WRITE_32(SME_PORT_REGION(0x8017BF34, 0x80171f6c, 0, 0), 0x5464037E);
+SME_WRITE_32(SME_PORT_REGION(0x801BCE30, 0x801b4ce8, 0, 0), 0x5464037E);
+SME_WRITE_32(SME_PORT_REGION(0x801FF850, 0x801f7734, 0, 0), 0x5404037E);
+SME_WRITE_32(SME_PORT_REGION(0x802946B4, 0x8028c4cc, 0, 0), 0x5480043E);
+SME_WRITE_32(SME_PORT_REGION(0x80294730, 0x8028c548, 0, 0), 0x5480043E);
+SME_WRITE_32(SME_PORT_REGION(0x80294734, 0x8028c54c, 0, 0), 0x280003E7);
+SME_WRITE_32(SME_PORT_REGION(0x80297BA0, 0x8028fa38, 0, 0), 0x5404037E);
+SME_PATCH_BL(SME_PORT_REGION(0x80294334, 0x8028c14c, 0, 0),
+             Patch::Shine::extendFlagManagerLoad);
+SME_WRITE_32(SME_PORT_REGION(0x80294338, 0x8028c150, 0, 0), 0x48000010);
+SME_PATCH_BL(SME_PORT_REGION(0x802939B8, 0x8028b7d0, 0, 0),
+             Patch::Shine::extendFlagManagerSave);
+SME_WRITE_32(SME_PORT_REGION(0x802939BC, 0x8028b7d4, 0, 0), 0x48000014);
+SME_PATCH_BL(SME_PORT_REGION(0x80297BD8, 0x8028fa70, 0, 0),
+             Patch::Shine::thinkSetBootFlag);
+SME_PATCH_BL(SME_PORT_REGION(0x801BCD20, 0x801b4bd8, 0, 0),
+             Patch::Shine::loadAfterMaskState);
+SME_WRITE_32(SME_PORT_REGION(0x801BCD24, 0x801b4bdc, 0, 0), 0x28030002);
+SME_WRITE_32(SME_PORT_REGION(0x801BCD40, 0x801b4bf8, 0, 0), 0x28030001);
+SME_PATCH_BL(SME_PORT_REGION(0x801BCEEC, 0x801b4da4, 0, 0),
+             Patch::Shine::setKillState);
+SME_PATCH_BL(SME_PORT_REGION(0x8029A590, 0x80292460, 0, 0), Patch::Shine::thinkCloseCamera);
+SME_WRITE_32(SME_PORT_REGION(0x8029A594, 0x80292464, 0, 0), 0x28000000);
+SME_PATCH_BL(SME_PORT_REGION(0x802999D8, 0x80291870, 0, 0),
+              Patch::Shine::animationFreezeCheck);
+SME_WRITE_32(SME_PORT_REGION(0x802999DC, 0x80291874, 0, 0), 0x48000034);
+// Make Shines glow more
+SME_WRITE_32(SME_PORT_REGION(0x803C9190, 0x803c0980, 0, 0), 0x3F19999A);
 
-// // stage.cpp
-// SME_PATCH_BL(SME_PORT_REGION(0x80299230, 0x802910c8, 0, 0),
-//              Patch::Stage::setStageOnExit);
-// SME_PATCH_BL(SME_PORT_REGION(0x80175F58, 0x8016befc, 0, 0),
-//              Patch::Stage::startEpisodeSelect);
+// stage.cpp
+SME_PATCH_BL(SME_PORT_REGION(0x80299230, 0x802910c8, 0, 0),
+             Patch::Stage::setStageOnExit);
+SME_PATCH_BL(SME_PORT_REGION(0x80175F58, 0x8016befc, 0, 0),
+             Patch::Stage::startEpisodeSelect);
 
-// // sunscript.cpp
-// SME_PATCH_BL(SME_PORT_REGION(0x80219380, 0x802112d4, 0, 0),
-//              Patch::Spc::initCustomFunctions);
-// SME_PATCH_BL(SME_PORT_REGION(0x80289920, 0x802816ac, 0, 0),
-//              Patch::Spc::initCustomFunctions);
+// sunscript.cpp
+SME_PATCH_BL(SME_PORT_REGION(0x80219380, 0x802112d4, 0, 0),
+             Patch::Spc::initCustomFunctions);
+SME_PATCH_BL(SME_PORT_REGION(0x80289920, 0x802816ac, 0, 0),
+             Patch::Spc::initCustomFunctions);
 
 // yoshi.cpp
 // SME_WRITE_32(SME_PORT_REGION(0x8026E068, 0, 0, 0),

@@ -64,8 +64,8 @@
         }
     ],
     "rename": {
-        "data/mario.szs": "chr0.szs",
-        "data/game_6.szs": "game_6.szs"
+        "files/data/mario.szs": "chr0.szs",
+        "files/data/game_6.szs": "game_6.szs"
     },
     "delete": {},
     "ignore": [

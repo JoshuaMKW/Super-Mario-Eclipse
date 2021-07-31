@@ -8,7 +8,7 @@ using namespace SME::Class;
 
 static bool startStreamedBGM(MSStageInfo musicID, bool loopMusic) {
   char buffer[0x20];
-  DVDFileInfo *handle = (DVDFileInfo *)SME_PORT_REGION(0x803FDB7C, 0, 0, 0);
+  DVDFileInfo *handle = (DVDFileInfo *)SME_PORT_REGION(0x803FDB7C, 0x803f531c, 0, 0);
 
   sprintf(buffer, "/AudioRes/Streams/Music/%lu.adp", (u32)(musicID & 0x3FF));
 
@@ -17,7 +17,7 @@ static bool startStreamedBGM(MSStageInfo musicID, bool loopMusic) {
 
   MSBgm::stopBGM(gStageBGM, 32);
   DVDPrepareStreamAsync(handle, 0, 0,
-                        (DVDCallback)SME_PORT_REGION(0x803184E4, 0, 0, 0));
+                        (DVDCallback)SME_PORT_REGION(0x803184E4, 0x80310674, 0, 0));
 
   if (!loopMusic)
     DVDStopStreamAtEndAsync(&handle->mCmdBlock, 0);
@@ -26,7 +26,7 @@ static bool startStreamedBGM(MSStageInfo musicID, bool loopMusic) {
 
 static bool startStreamedSFX(u32 sfxID) {
   char buffer[0x20];
-  DVDFileInfo *handle = (DVDFileInfo *)0x803FDB7C;
+  DVDFileInfo *handle = (DVDFileInfo *)SME_PORT_REGION(0x803FDB7C, 0x803f531c, 0, 0);
 
   sprintf(buffer, "/AudioRes/Streams/SFX/%lu.adp", (sfxID & 0x3FF));
 
@@ -34,7 +34,7 @@ static bool startStreamedSFX(u32 sfxID) {
     return false;
 
   DVDPrepareStreamAsync(handle, 0, 0,
-                        (DVDCallback)SME_PORT_REGION(0x803184E4, 0, 0, 0));
+                        (DVDCallback)SME_PORT_REGION(0x803184E4, 0x80310674, 0, 0));
   DVDStopStreamAtEndAsync(&handle->mCmdBlock, 0);
 
   return true;
@@ -48,7 +48,7 @@ u32 SME::Patch::Music::setIsValid(MSStageInfo musicID) {
 
 // 0x80016ABC
 JAISound *SME::Patch::Music::initMusic(JAISound *jai) {
-  DVDFileInfo *handle = (DVDFileInfo *)SME_PORT_REGION(0x803FDB7C, 0, 0, 0);
+  DVDFileInfo *handle = (DVDFileInfo *)SME_PORT_REGION(0x803FDB7C, 0x803f531c, 0, 0);
 
   if (!TGlobals::sIsAudioStreaming &&
       (TStageParams::sStageConfig->mMusicID.get() & 0x400))
@@ -65,7 +65,7 @@ JAISound *SME::Patch::Music::initMusic(JAISound *jai) {
 
 // 0x80016948
 void SME::Patch::Music::stopMusicOnStop() {
-  DVDFileInfo *handle = (DVDFileInfo *)SME_PORT_REGION(0x803FDB7C, 0, 0, 0);
+  DVDFileInfo *handle = (DVDFileInfo *)SME_PORT_REGION(0x803FDB7C, 0x803f531c, 0, 0);
 
   if (TGlobals::sIsAudioStreaming) {
     DVDCancelStreamAsync(&handle->mCmdBlock, 0);
@@ -75,7 +75,7 @@ void SME::Patch::Music::stopMusicOnStop() {
 
 // 0x802A670C
 void SME::Patch::Music::stopMusicOnStageExit(TMarioGamePad *gamepad) {
-  DVDFileInfo *handle = (DVDFileInfo *)SME_PORT_REGION(0x803FDB7C, 0, 0, 0);
+  DVDFileInfo *handle = (DVDFileInfo *)SME_PORT_REGION(0x803FDB7C, 0x803f531c, 0, 0);
 
   if (TGlobals::sIsAudioStreaming) {
     DVDCancelStreamAsync(&handle->mCmdBlock, 0);

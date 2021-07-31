@@ -271,11 +271,11 @@ void Patch::CKit::formatTalkMessage(Talk2D2 *talker, char *msgfield,
 
 static void maintainYoshi(TYoshi *yoshi) {
   if (yoshi->isGreenYoshi()) {
-    *(f32 *)0x80415F4C = 480.0f; // tounge
-    *(f32 *)0x80415F68 = 16384.0f;
+    *(f32 *)SME_PORT_REGION(0x80415F4C, 0x8040d4a4, 0, 0) = 480.0f; // tounge
+    *(f32 *)SME_PORT_REGION(0x80415F68, 0x8040d4a8, 0, 0) = 16384.0f;
   } else {
-    *(f32 *)0x80415F4C = 300.0f;
-    *(f32 *)0x80415F68 = 10000.0f;
+    *(f32 *)SME_PORT_REGION(0x80415F4C, 0x8040d4a4, 0, 0) = 300.0f;
+    *(f32 *)SME_PORT_REGION(0x80415F68, 0x8040d4a8, 0, 0) = 10000.0f;
   }
 }
 

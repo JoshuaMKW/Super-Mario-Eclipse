@@ -87,7 +87,7 @@ void Multiplayer::loadMarioTrickyOverhaul(TMario *player,
     gpMarioAddress = SME::TGlobals::getPlayerByIndex(i);
     SMS_SetMarioAccessParams__Fv();
     stream->seek(pos, JSUStreamSeekFrom::BEGIN);
-    avoidRecurseCall(SME_PORT_REGION(0x80276BD4, 0, 0, 0), gpMarioAddress,
+    avoidRecurseCall(SME_PORT_REGION(0x80276BD4, 0x8026e960, 0, 0), gpMarioAddress,
                      stream);
   }
   gpMarioAddress = player;

@@ -202,7 +202,7 @@ void thinkSetNextSequence(TGameSequence *sequence, u8 area, u8 episode, JDrama::
     sequence->set(area, episode, flag);
   }
 }
-SME_PATCH_BL(SME_PORT_REGION(0x80297C84, 0, 0, 0), thinkSetNextSequence);
+SME_PATCH_BL(SME_PORT_REGION(0x80297C84, 0x8028fb1c, 0, 0), thinkSetNextSequence);
 
 u32 Patch::Shine::loadAfterMaskState() {
   TShine *shine;
@@ -220,6 +220,16 @@ void Patch::Shine::setKillState() {
 }
 
 SME_PURE_ASM void Patch::Shine::thinkCloseCamera() {
+  #if defined(PAL)
+    asm volatile("lbz       0, 0x190 (31)        \n\t"
+               "lwz       4, 0x154 (31)        \n\t"
+               "rlwinm.   4, 4, 0, 27, 27     \n\t"
+               "bne       .Ltmp0              \n\t"
+               "li        0, 0                \n\t"
+
+               ".Ltmp0:                       \n\t"
+               "blr                           \n\t");
+  #else
   asm volatile("lbz       0, 0x190 (4)        \n\t"
                "lwz       4, 0x154 (4)        \n\t"
                "rlwinm.   4, 4, 0, 27, 27     \n\t"
@@ -228,6 +238,7 @@ SME_PURE_ASM void Patch::Shine::thinkCloseCamera() {
 
                ".Ltmp0:                       \n\t"
                "blr                           \n\t");
+  #endif
 }
 
 SME_PURE_ASM void Patch::Shine::animationFreezeCheck() {
@@ -257,4 +268,4 @@ SME_PURE_ASM void Patch::Shine::animationFreezeCheck() {
 }
 
 // Remove auto disable sound
-SME_WRITE_32(SME_PORT_REGION(0x800169B0, 0, 0, 0), 0x60000000);
+SME_WRITE_32(SME_PORT_REGION(0x800169B0, 0x80016a0c, 0, 0), 0x60000000);

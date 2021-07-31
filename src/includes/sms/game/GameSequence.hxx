@@ -60,6 +60,8 @@ public:
         CORONABOSS = 0x3C
     };
 
+    void set(u8 area, u8 episode, JDrama::TFlagT<u16> flag);
+
     u8 mAreaID;
     u8 mEpisodeID;
     JDrama::TFlagT<u16> mFlag;

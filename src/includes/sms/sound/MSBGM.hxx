@@ -68,4 +68,6 @@ public:
     static u32 *startBGM(u32);
     static u32 getSceneNo(u32);
     static void init();
+
+    static void *smBGMInTrack[4]; // JASystem::TTrack
 };

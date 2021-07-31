@@ -42,7 +42,7 @@ static bool startStreamedSFX(u32 sfxID) {
 
 // 0x80016998
 u32 SME::Patch::Music::setIsValid(MSStageInfo musicID) {
-  TGlobals::sIsAudioStreamAllowed = SME::Util::Music::isValidBGM(musicID);
+  TGlobals::sIsAudioStreamAllowed = SME::Util::Music::isValidBGM(static_cast<MSStageInfo>(musicID & 0x800103FF));
   return musicID & 0x3FF;
 }
 

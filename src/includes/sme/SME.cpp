@@ -36,7 +36,7 @@ static void initMod() {
       reinterpret_cast<OSAlarmHandler>(&SME::Util::Security::checkUserCodes));
   SME_DEBUG_LOG("Mario health offset = 0x%X\n", offsetof(TMario, mHealth));
   SME_DEBUG_LOG("J3DFrameCtrl offset = 0x%X\n", offsetof(J3DFrameCtrl, _04));
-  Patch::Init::initCodeProtection();
+  //Patch::Init::initCodeProtection();
 }
 
 static void destroyMod() {
@@ -539,8 +539,8 @@ SME_WRITE_32(SME_PORT_REGION(0x801B751C, 0x801af3d4, 0, 0), 0x418200A4);
 SME_WRITE_32(SME_PORT_REGION(0x8003DB3C, 0x8003d98c, 0, 0), SME_PORT_REGION(0x48306B08, 0x482fee38, 0, 0));
 
 // Upsize Shadow Mario's hitbox to be the same as Mario
-SME_WRITE_32(SME_PORT_REGION(0x8040FAA4, 0x80407188, 0, 0), 80.0f);
-SME_WRITE_32(SME_PORT_REGION(0x8040FAA8, 0x8040718c, 0, 0), 50.0f);
+SME_WRITE_32(SME_PORT_REGION(0x8040FAA4, 0x80407188, 0, 0), 0x42A00000);
+SME_WRITE_32(SME_PORT_REGION(0x8040FAA8, 0x8040718c, 0, 0), 0x42A00000);
 
 // Remove blue coin prompts
 SME_WRITE_32(SME_PORT_REGION(0x8029A73C, 0x80292618, 0, 0), 0x60000000);

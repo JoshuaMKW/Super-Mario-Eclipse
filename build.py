@@ -490,7 +490,7 @@ class FilePatcher(Compiler):
                 self._fileTables.setdefault(f.suffix, []).append(f)
 
     def _get_matching_filepath(self, path: Path) -> Path:
-        retpath = self._get_path_from_config(self.solutionRegionDir, path)
+        retpath = self._get_path_from_config(self.solutionRegionDir, path,self.region.lower())
         if retpath:
             return retpath
         retpath = self._get_path_from_config(self.solutionAnyDir, path)
@@ -504,11 +504,11 @@ class FilePatcher(Compiler):
         except KeyError:
             return None
 
-    def _get_path_from_config(self, solutionPath: Path, path: Path) -> Path:
+    def _get_path_from_config(self, solutionPath: Path, path: Path, region="any") -> Path:
         if self.is_release():
-            parentGlob = f"*/release/{self.region.lower()}/"
+            parentGlob = f"*/release/{region}/"
         elif self.is_debug():
-            parentGlob = f"*/debug/{self.region.lower()}/"
+            parentGlob = f"*/debug/{region}/"
         else:
             raise ValueError("Invalid State!")
 

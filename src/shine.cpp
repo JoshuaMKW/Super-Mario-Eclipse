@@ -202,7 +202,7 @@ void thinkSetNextSequence(TGameSequence *sequence, u8 area, u8 episode, JDrama::
     sequence->set(area, episode, flag);
   }
 }
-SME_PATCH_BL(SME_PORT_REGION(0x80297C84, 0, 0, 0), thinkSetNextSequence);
+SME_PATCH_BL(SME_PORT_REGION(0x80297C84, 0x8028fb1c, 0, 0), thinkSetNextSequence);
 
 u32 Patch::Shine::loadAfterMaskState() {
   TShine *shine;
@@ -268,4 +268,4 @@ SME_PURE_ASM void Patch::Shine::animationFreezeCheck() {
 }
 
 // Remove auto disable sound
-SME_WRITE_32(SME_PORT_REGION(0x800169B0, 0, 0, 0), 0x60000000);
+SME_WRITE_32(SME_PORT_REGION(0x800169B0, 0x80016a0c, 0, 0), 0x60000000);

@@ -37,9 +37,9 @@ static bool canDiePlane(f32 floorY) {
 
   return (floorY > playerPos.y) && !player->mAttributes.mIsGameOver;
 }
-SME_PATCH_BL(SME_PORT_REGION(0x8024FB54, 0, 0, 0), canDiePlane);
-SME_WRITE_32(SME_PORT_REGION(0x8024FB58, 0, 0, 0), 0x2C030000);
-SME_WRITE_32(SME_PORT_REGION(0x8024FB5C, 0, 0, 0), 0x41820084);
+SME_PATCH_BL(SME_PORT_REGION(0x8024FB54, 0x802478e4, 0, 0), canDiePlane);
+SME_WRITE_32(SME_PORT_REGION(0x8024FB58, 0x802478e8, 0, 0), 0x2C030000);
+SME_WRITE_32(SME_PORT_REGION(0x8024FB5C, 0x802478ec, 0, 0), 0x41820084);
 
 // make tree leaf count dynamic, based on number of leaf col files
 static TMapObjTree *getLeafCount(TMapObjTree *tree) {

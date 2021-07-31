@@ -131,8 +131,8 @@ class AllocationMap(object):
 _ALLOC_LO_INFO = AllocationMap({
     Region.US: (AllocationMap.AllocationPacket(0x80341E74, [AllocationMap.InstructionInfo(0x3C600000, AllocationMap.RelocationType.HI), AllocationMap.InstructionInfo(0x60630000, AllocationMap.RelocationType.LO)]),
                 AllocationMap.AllocationPacket(0x80341EAC, [AllocationMap.InstructionInfo(0x3C600000, AllocationMap.RelocationType.HI), AllocationMap.InstructionInfo(0x60630000, AllocationMap.RelocationType.LO)])),
-    Region.EU: (AllocationMap.AllocationPacket(0x80341E74, [AllocationMap.InstructionInfo(0x3C600000, AllocationMap.RelocationType.HI), AllocationMap.InstructionInfo(0x60630000, AllocationMap.RelocationType.LO)]),
-                AllocationMap.AllocationPacket(0x80341EAC, [AllocationMap.InstructionInfo(0x3C600000, AllocationMap.RelocationType.HI), AllocationMap.InstructionInfo(0x60630000, AllocationMap.RelocationType.LO)])),
+    Region.EU: (AllocationMap.AllocationPacket(0x80339ff4, [AllocationMap.InstructionInfo(0x3C600000, AllocationMap.RelocationType.HI), AllocationMap.InstructionInfo(0x60630000, AllocationMap.RelocationType.LO)]),
+                (AllocationMap.AllocationPacket(0x8033a02c, [AllocationMap.InstructionInfo(0x3C600000, AllocationMap.RelocationType.HI), AllocationMap.InstructionInfo(0x60630000, AllocationMap.RelocationType.LO)]))),
     Region.JP: (AllocationMap.AllocationPacket(0x80341E74, [AllocationMap.InstructionInfo(0x3C600000, AllocationMap.RelocationType.HI), AllocationMap.InstructionInfo(0x60630000, AllocationMap.RelocationType.LO)]),
                 AllocationMap.AllocationPacket(0x80341EAC, [AllocationMap.InstructionInfo(0x3C600000, AllocationMap.RelocationType.HI), AllocationMap.InstructionInfo(0x60630000, AllocationMap.RelocationType.LO)])),
     Region.KR: (AllocationMap.AllocationPacket(0x80341E74, [AllocationMap.InstructionInfo(0x3C600000, AllocationMap.RelocationType.HI), AllocationMap.InstructionInfo(0x60630000, AllocationMap.RelocationType.LO)]),
@@ -211,6 +211,15 @@ class FilePatcher(Compiler):
             _defines.append(Define("SME_BUILD_KURIBO"))
         elif self.is_kamek():
             _defines.append(Define("SME_BUILD_KAMEK_INLINE"))
+
+        if self.region == Region.US:
+            _defines.append(Define("NTSCU"))
+        elif self.region == Region.EU:
+            _defines.append(Define("PAL"))
+        elif self.region == Region.JP:
+            _defines.append(Define("NTSCJ"))
+        elif self.region == Region.KR:
+            _defines.append(Define("NTSCK"))
 
         self.defines = _defines
 
@@ -390,8 +399,8 @@ class FilePatcher(Compiler):
                 _doldata.insert_branch(
                     injectaddr + 4, blockstart + (codelen - 4))
 
-            _doldata.write_uint32(self.by_region(0x802A73F0, 0, 0, 0), 0x60000000)
-            _doldata.write_uint32(self.by_region(0x802A7404, 0, 0, 0), 0x60000000)
+            _doldata.write_uint32(self.by_region(0x802A73F0, 0x8029f46c, 0, 0), 0x60000000)
+            _doldata.write_uint32(self.by_region(0x802A7404, 0x8029f480, 0, 0), 0x60000000)
 
             with self.dest.open("wb") as dest:
                 _doldata.save(dest)

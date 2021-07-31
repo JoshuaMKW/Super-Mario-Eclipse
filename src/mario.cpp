@@ -801,11 +801,11 @@ static f32 checkSlideSpeedMulti() {
   }
 }
 SME_WRITE_32(SME_PORT_REGION(0x8025C3D8, 0x80254164, 0, 0), 0x40810028);
-SME_WRITE_32(SME_PORT_REGION(0x8025C3FC, 0x80254168, 0, 0), 0xFC800018);
-SME_WRITE_32(SME_PORT_REGION(0x8025C400, 0x8025416c, 0, 0), 0xD09E00B0);
-SME_PATCH_BL(SME_PORT_REGION(0x8025C404, 0x80254170, 0, 0), checkSlideSpeedMulti);
-SME_WRITE_32(SME_PORT_REGION(0x8025C408, 0x80254174, 0, 0), 0xFC400890);
-SME_WRITE_32(SME_PORT_REGION(0x8025C410, 0x80254178, 0, 0), 0x60000000);
+SME_WRITE_32(SME_PORT_REGION(0x8025C3FC, 0x80254178, 0, 0), 0xFC800018);
+SME_WRITE_32(SME_PORT_REGION(0x8025C400, 0x8025417c, 0, 0), 0xD09E00B0);
+SME_PATCH_BL(SME_PORT_REGION(0x8025C404, 0x80254180, 0, 0), checkSlideSpeedMulti);
+SME_WRITE_32(SME_PORT_REGION(0x8025C408, 0x80254184, 0, 0), 0xFC400890);
+SME_WRITE_32(SME_PORT_REGION(0x8025C410, 0x80254188, 0, 0), 0x60000000);
 
 #if 0
 static void checkHoverSpeedMulti(f32 factor, f32 max) {
@@ -851,21 +851,15 @@ SME_WRITE_32(SME_PORT_REGION(0x80254724, 0x8024c4b0, 0, 0), 0xD01E00A8);
 static SME_PURE_ASM void checkGrabHeight() {
   asm volatile("lfs 0, " SME_STRINGIZE(SME_PORT_REGION(
       -0xED4, -0x105c, 0, 0)) "(2)\n\t"
-                        "lfs 4, 0x28(29)            \n\t"
-                        "fcmpo 0, 4, 0              \n\t"
-                        "lfs 0, " SME_STRINGIZE(SME_PORT_REGION(
-                            -0xEDC, -0x1064, 0,
-                            0)) "(2)\n\t"
-                                "bgt _skipmul                        \n\t"
-                                "fmuls 0, 0, 4                       \n\t"
-                                "_skipmul:                           \n\t"
-                                "blr                                 \n\t");
+                        "lfs 4, 0x28(29)                     \n\t"
+                        "fmuls 0, 0, 4                       \n\t"
+                        "blr                                 \n\t");
 }
 SME_PATCH_BL(SME_PORT_REGION(0x80256D34, 0x8024eac0, 0, 0), checkGrabHeight);
 
 static SME_PURE_ASM void setCollisionHeight1() {
   asm volatile("lfs 1, " SME_STRINGIZE(
-      SME_PORT_REGION(-0xEDC, -0x105c, 0, 0)) "(2)                        \n\t"
+      SME_PORT_REGION(-0xEDC, -0x1064, 0, 0)) "(2)                        \n\t"
                                         "lfs 0, 0x28(22)            \n\t"
                                         "fmuls 1, 0, 1              \n\t"
                                         "blr                        \n\t");
@@ -874,7 +868,7 @@ SME_PATCH_BL(SME_PORT_REGION(0x8025696C, 0x8024e6f8, 0, 0), setCollisionHeight1)
 
 static SME_PURE_ASM void setCollisionHeight2() {
   asm volatile("lfs 2, " SME_STRINGIZE(
-      SME_PORT_REGION(-0xEDC, -0x105c, 0, 0)) "(2)                        \n\t"
+      SME_PORT_REGION(-0xEDC, -0x1064, 0, 0)) "(2)                        \n\t"
                                         "lfs 0, 0x28(29)            \n\t"
                                         "fmuls 2, 0, 2              \n\t"
                                         "blr                        \n\t");
@@ -883,7 +877,7 @@ SME_PATCH_BL(SME_PORT_REGION(0x80256D14, 0x8024eaa0, 0, 0), setCollisionHeight2)
 
 static SME_PURE_ASM void setCollisionHeight3() {
   asm volatile("lfs 0, " SME_STRINGIZE(
-      SME_PORT_REGION(-0xEDC, -0x105c, 0, 0)) "(2)                        \n\t"
+      SME_PORT_REGION(-0xEDC, -0x1064, 0, 0)) "(2)                        \n\t"
                                         "lfs 2, 0x28(30)            \n\t"
                                         "fmuls 0, 2, 0              \n\t"
                                         "blr                        \n\t");
@@ -918,9 +912,9 @@ static f32 manageGrabLength() {
   return 60.0f * size.z;
 }
 SME_PATCH_BL(SME_PORT_REGION(0x80256CE8, 0x8024ea74, 0, 0), manageGrabLength);
-SME_WRITE_32(SME_PORT_REGION(0x80256CFC, 0x8024ea78, 0, 0), 0xEC01283C);
-SME_WRITE_32(SME_PORT_REGION(0x80256D04, 0x8024ea7c, 0, 0), 0xC05E003C);
-SME_WRITE_32(SME_PORT_REGION(0x80256D0C, 0x8024ea80, 0, 0), 0xEC0100BC);
+SME_WRITE_32(SME_PORT_REGION(0x80256CFC, 0x8024ea88, 0, 0), 0xEC01283C);
+SME_WRITE_32(SME_PORT_REGION(0x80256D04, 0x8024ea90, 0, 0), 0xC05E003C);
+SME_WRITE_32(SME_PORT_REGION(0x80256D0C, 0x8024ea98, 0, 0), 0xEC0100BC);
 
 static JUtility::TColor getEMarioHealthBarRGBA(TEnemyMario *eMario) {
   JUtility::TColor color;

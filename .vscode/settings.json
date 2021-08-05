@@ -37,7 +37,8 @@
         "*.tcc": "c",
         "os.h": "c",
         "algorithm": "cpp",
-        "memory": "cpp"
+        "memory": "cpp",
+        "iterator": "cpp"
     },
     "cmake.configureOnOpen": false
 }

@@ -92,6 +92,26 @@ builtin memcmp(dst, src, len);
 builtin memset(dst, fill, len);
 
 // ================================================= \\
+// MUSIC
+// ================================================= \\
+
+builtin playStream();
+builtin pauseStream();
+builtin stopStream();
+builtin seekStream(where, whence);
+builtin nextStream(delay);
+builtin skipStream(delay);
+
+// return: u16
+builtin getStreamVolume();
+builtin setStreamVolume();
+
+// return: bool
+builtin getStreamLooping();
+builtin setStreamLooping(looping);
+
+
+// ================================================= \\
 // MISCELLANEOUS
 // ================================================= \\
 

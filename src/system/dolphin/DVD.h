@@ -103,6 +103,7 @@ extern "C"
     bool DVDPrepareStreamAsync(DVDFileInfo *info, u32 length, u32 offset, DVDCallback cb);
     bool DVDCancelStreamAsync(DVDCommandBlock *cmdBlock, DVDCBCallback cb);
     bool DVDStopStreamAtEndAsync(DVDCommandBlock *cmdBlock, DVDCBCallback cb);
+    u32 DVDStopStreamAtEnd(DVDCommandBlock *cmdblock);
     bool DVDGetStreamErrorStatusAsync(DVDCommandBlock *cmdblock, DVDCBCallback cb);
     u32 DVDGetStreamErrorStatus(DVDCommandBlock *cmdblock);
     bool DVDGetStreamLengthAsync(DVDCommandBlock *cmdblock, DVDCBCallback cb);
@@ -112,7 +113,6 @@ extern "C"
     bool DVDGetStreamStartAddrAsync(DVDCommandBlock *cmdblock, DVDCBCallback cb);
     u32 DVDGetStreamStartAddr(DVDCommandBlock *cmdblock);
     u32 DVDGetTransferredSize(DVDCommandBlock *cmdblock);
-    u32 DVDStopStreamAtEnd(DVDCommandBlock *cmdblock);
 
     s32 DVDGetCommandBlockStatus(DVDCommandBlock *cmdBlock);
     s32 DVDGetDriveStatus();

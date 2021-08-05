@@ -35,5 +35,16 @@ void Patch::Spc::initCustomFunctions(TSpcBinary *spcBinary, const char *symbol, 
     BIND_SYMBOL(spcBinary, "memcmp", Util::Spc::memcmp_);
     BIND_SYMBOL(spcBinary, "memset", Util::Spc::memset_);
     BIND_SYMBOL(spcBinary, "formatStrBySpec", Util::Spc::formatStrBySpec);
+    BIND_SYMBOL(spcBinary, "queueStream", Util::Spc::queueStream);
+    BIND_SYMBOL(spcBinary, "playStream", Util::Spc::playStream);
+    BIND_SYMBOL(spcBinary, "pauseStream", Util::Spc::pauseStream);
+    BIND_SYMBOL(spcBinary, "stopStream", Util::Spc::stopStream);
+    BIND_SYMBOL(spcBinary, "seekStream", Util::Spc::seekStream);
+    BIND_SYMBOL(spcBinary, "nextStream", Util::Spc::nextStream);
+    BIND_SYMBOL(spcBinary, "skipStream", Util::Spc::skipStream);
+    BIND_SYMBOL(spcBinary, "getStreamVolume", Util::Spc::getStreamVolume);
+    BIND_SYMBOL(spcBinary, "setStreamVolume", Util::Spc::setStreamVolume);
+    BIND_SYMBOL(spcBinary, "getStreamLooping", Util::Spc::getStreamLooping);
+    BIND_SYMBOL(spcBinary, "setStreamLooping", Util::Spc::setStreamLooping);
 }
 #undef BIND_SYMBOL

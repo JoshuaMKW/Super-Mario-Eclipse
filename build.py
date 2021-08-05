@@ -27,6 +27,7 @@ TMPDIR = Path("tmp-compiler")
 
 @atexit.register
 def clean_resources():
+    return
     if TMPDIR.is_dir():
         shutil.rmtree(TMPDIR)
 

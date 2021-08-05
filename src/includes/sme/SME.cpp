@@ -293,12 +293,14 @@ SME_PATCH_BL(SME_PORT_REGION(0x8029D7E8, 0, 0, 0),
 // Patch::Multiplayer::setMarioOverhaul);
 
 // music.cpp
+#if 1
 SME_PATCH_BL(SME_PORT_REGION(0x80016998, 0, 0, 0), Patch::Music::setIsValid);
 SME_PATCH_B(SME_PORT_REGION(0x80016ABC, 0, 0, 0), Patch::Music::initMusic);
 SME_PATCH_B(SME_PORT_REGION(0x80016948, 0, 0, 0),
             Patch::Music::stopMusicOnStop);
 SME_PATCH_BL(SME_PORT_REGION(0x802A670C, 0, 0, 0),
              Patch::Music::stopMusicOnStageExit);
+#endif
 
 // patches.cpp
 SME_PATCH_BL(SME_PORT_REGION(0x802320E0, 0, 0, 0),

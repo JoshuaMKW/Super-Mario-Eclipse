@@ -15,6 +15,7 @@ TMPDIR = Path("tmp-compiler")
 
 @atexit.register
 def clean_resources():
+    return
     if TMPDIR.is_dir():
         shutil.rmtree(TMPDIR)
 
@@ -171,7 +172,7 @@ class Compiler(object):
             cppObjects = []
             cObjects = []
             sObjects = []
-            linkObjects = []
+            linkObjects = [lib for lib in Path("lib/").iterdir() if lib.suffix == ".a"]
 
             if src.is_file():
                 if src.suffix in (".cpp", ".cxx", ".c++"):

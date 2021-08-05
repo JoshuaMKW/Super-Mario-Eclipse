@@ -249,7 +249,7 @@ void setMarioOverhaul(TMarDirector *director);
 
 namespace Music {
 
-u32 setIsValid(MSStageInfo musicID);
+u32 setIsValid(u32 musicID);
 JAISound *initMusic(JAISound *jai);
 void stopMusicOnStop();
 void stopMusicOnStageExit(TMarioGamePad *gamepad);

@@ -6,7 +6,7 @@
 extern OSThreadQueue __DVDThreadQueue;
 
 extern bool autoInvalidation;
-extern bool executing;
+extern DVDCommandBlock *executing;
 extern bool PauseFlag;
 extern bool PausingFlag;
 
@@ -74,8 +74,8 @@ u32 DVDGetStreamErrorStatus(DVDCommandBlock *cmdblock) {
 
   u32 _atomic_state = OSDisableInterrupts();
 
-  while (cmdblock->mCurState != DVD_STATE_END ||
-         cmdblock->mCurState != DVD_STATE_CANCELED ||
+  while (cmdblock->mCurState != DVD_STATE_END &&
+         cmdblock->mCurState != DVD_STATE_CANCELED &&
          cmdblock->mCurState != DVD_STATE_FATAL_ERROR) {
     OSSleepThread(&__DVDThreadQueue);
   }
@@ -100,9 +100,11 @@ u32 DVDGetStreamLength(DVDCommandBlock *cmdblock) {
 
   u32 _atomic_state = OSDisableInterrupts();
 
-  while (cmdblock->mCurState != DVD_STATE_END ||
-         cmdblock->mCurState != DVD_STATE_CANCELED ||
-         cmdblock->mCurState != DVD_STATE_FATAL_ERROR) {
+  while (true) {
+    if (cmdblock->mCurState == DVD_STATE_END ||
+         cmdblock->mCurState == DVD_STATE_CANCELED ||
+         cmdblock->mCurState == DVD_STATE_FATAL_ERROR)
+         break;
     OSSleepThread(&__DVDThreadQueue);
   }
 
@@ -128,8 +130,8 @@ u32 DVDGetStreamPlayAddr(DVDCommandBlock *cmdblock) {
 
   u32 _atomic_state = OSDisableInterrupts();
 
-  while (cmdblock->mCurState != DVD_STATE_END ||
-         cmdblock->mCurState != DVD_STATE_CANCELED ||
+  while (cmdblock->mCurState != DVD_STATE_END &&
+         cmdblock->mCurState != DVD_STATE_CANCELED &&
          cmdblock->mCurState != DVD_STATE_FATAL_ERROR) {
     OSSleepThread(&__DVDThreadQueue);
   }
@@ -154,8 +156,8 @@ u32 DVDGetStreamStartAddr(DVDCommandBlock *cmdblock) {
 
   u32 _atomic_state = OSDisableInterrupts();
 
-  while (cmdblock->mCurState != DVD_STATE_END ||
-         cmdblock->mCurState != DVD_STATE_CANCELED ||
+  while (cmdblock->mCurState != DVD_STATE_END &&
+         cmdblock->mCurState != DVD_STATE_CANCELED &&
          cmdblock->mCurState != DVD_STATE_FATAL_ERROR) {
     OSSleepThread(&__DVDThreadQueue);
   }
@@ -199,8 +201,8 @@ u32 DVDStopStreamAtEnd(DVDCommandBlock *cmdblock) {
 
   u32 _atomic_state = OSDisableInterrupts();
 
-  while (cmdblock->mCurState != DVD_STATE_END ||
-         cmdblock->mCurState != DVD_STATE_CANCELED ||
+  while (cmdblock->mCurState != DVD_STATE_END &&
+         cmdblock->mCurState != DVD_STATE_CANCELED &&
          cmdblock->mCurState != DVD_STATE_FATAL_ERROR) {
     OSSleepThread(&__DVDThreadQueue);
   }

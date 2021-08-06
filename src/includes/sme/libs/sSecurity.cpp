@@ -4,7 +4,7 @@
 OSAlarm gctAlarm;
 
 #ifdef SME_DEBUG
-    OSStopwatch gctStopwatch;
+    //OSStopwatch gctStopwatch;
 #endif
 
 static constexpr u32 sEnabledmagic = 0x00D0C0DE;
@@ -31,7 +31,7 @@ bool Util::Security::areGeckoCodesPresent(void *handlerBuffer, size_t maxlen, u3
 void *Util::Security::checkUserCodes(OSAlarm *alarm, OSContext *context)
 {
     #ifdef SME_DEBUG
-        OSStartStopwatch(&gctStopwatch);
+        //OSStartStopwatch(&gctStopwatch);
     #endif
     
     u32 *searchcontext = (u32 *)(0x80001C00);
@@ -40,9 +40,9 @@ void *Util::Security::checkUserCodes(OSAlarm *alarm, OSContext *context)
     if (sCachedAddr) {
         if (areGeckoCodesPresent(sCachedAddr, 8)) {
             #ifdef SME_DEBUG
-                OSStopStopwatch(&gctStopwatch);
-                if (gctStopwatch.mHits % 60000 == 0)
-                    OSDumpStopwatch(&gctStopwatch);
+                //OSStopStopwatch(&gctStopwatch);
+                //if (gctStopwatch.mHits % 60000 == 0)
+                //    OSDumpStopwatch(&gctStopwatch);
             #endif
 
             SME::TGlobals::sPlayerHasGeckoCodes = true;
@@ -53,8 +53,8 @@ void *Util::Security::checkUserCodes(OSAlarm *alarm, OSContext *context)
         areGeckoCodesPresent(static_cast<void *>(searchcontext), searchlength, &sCachedAddr);
 
     #ifdef SME_DEBUG
-        OSStopStopwatch(&gctStopwatch);
-        if (gctStopwatch.mHits % 60000 == 0) OSDumpStopwatch(&gctStopwatch);
+        //OSStopStopwatch(&gctStopwatch);
+        //if (gctStopwatch.mHits % 60000 == 0) OSDumpStopwatch(&gctStopwatch);
     #endif
 
     return nullptr;

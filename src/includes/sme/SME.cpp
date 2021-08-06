@@ -18,7 +18,7 @@ extern OSAlarm gctAlarm;
 #define _SME_EXECUTE_LOADS
 
 #ifdef SME_DEBUG
-extern OSStopwatch gctStopwatch;
+//extern OSStopwatch gctStopwatch;
 #endif
 
 using namespace SME;
@@ -28,7 +28,7 @@ static void initMod() {
       "Codeblocker - Creating OSAlarm at %p; Calls %p every %0.4f seconds\n",
       &gctAlarm, &SME::Util::Security::checkUserCodes, 0.001f);
 #ifdef SME_DEBUG
-  OSInitStopwatch(&gctStopwatch, "Codeblocker");
+  //OSInitStopwatch(&gctStopwatch, "Codeblocker");
 #endif
   OSCreateAlarm(&gctAlarm);
   OSSetPeriodicAlarm(
@@ -42,7 +42,7 @@ static void initMod() {
 static void destroyMod() {
   SME_DEBUG_LOG("-- Destroying Module --\n");
 #ifdef SME_DEBUG
-  OSStopStopwatch(&gctStopwatch);
+  //OSStopStopwatch(&gctStopwatch);
 #endif
   OSCancelAlarm(&gctAlarm);
 }

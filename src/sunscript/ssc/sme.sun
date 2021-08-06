@@ -6,6 +6,19 @@
 \* ================================================= */
 
 // ================================================= \\
+// VECTOR
+// ================================================= \\
+
+builtin vectorTranslate(vectorA, vectorB);
+builtin vectorTranslatef(vector, x, y, z);
+builtin vectorScalef(vector, scale);
+
+// return: float
+builtin vectorMagnitude(vector);
+
+builtin vectorNormalize(vector);
+
+// ================================================= \\
 // ACTOR
 // ================================================= \\
 
@@ -95,12 +108,18 @@ builtin memset(dst, fill, len);
 // MUSIC
 // ================================================= \\
 
+// return: int
+builtin getStageBGM();
+
+// accepts a filepath or an int
+builtin queueStream(descriptor);
+
 builtin playStream();
-builtin pauseStream();
-builtin stopStream();
+builtin pauseStream(fadeTime);
+builtin stopStream(fadeTime);
 builtin seekStream(where, whence);
-builtin nextStream(delay);
-builtin skipStream(delay);
+builtin nextStream(fadeTime);
+builtin skipStream(fadeTime);
 
 // return: u16
 builtin getStreamVolume();
@@ -114,6 +133,8 @@ builtin setStreamLooping(looping);
 // ================================================= \\
 // MISCELLANEOUS
 // ================================================= \\
+
+builtin sprintf(dst, src, ...);
 
 // return: char *
 builtin formatStrBySpec(str);

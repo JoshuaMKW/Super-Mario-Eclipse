@@ -2,10 +2,16 @@
 
 #include "types.h"
 #include "MTX.h"
+#include "GX.h"
 #include "../JSU/JSUInputStream.hxx"
 #include "../JSU/JSUList.hxx"
 #include "../JUT/JUTColor.hxx"
 #include "../JUT/JUTRect.hxx"
+
+enum J2DBasePosition {
+    UNK_BASEPOS_4 = 4,
+    UNK_BASEPOS_5 = 5
+};
 
 class J2DGrafContext
 {
@@ -70,29 +76,29 @@ public:
 
 	void draw(int, int, const J2DGrafContext *, bool);
 	void clip(const JUTRect &);
-	void setCullBack(u32); // GXCullback
-	void setBasePosition(u32); // J2DBasePosition
+	void setCullBack(GXCullback cullback);
+	void setBasePosition(J2DBasePosition basePos);
 
     u16 _4;
     u16 _6;       // padding?
-    u32 id;       // _8
-    bool isVisible; // _C
+    u32 mID;       // _8
+    bool mIsVisible; // _C
     u8 _D;        // padding?
     u8 _E;        // ^^
     u8 _F;        // ^^
     u32 _10;
-    JUTRect rect;         // _14
-    JUTRect cRect;        // _24
-    JUTRect clipRect;     // _34
-    JUTRect scissorBound; // _44
+    JUTRect mRect;         // _14
+    JUTRect mCRect;        // _24
+    JUTRect mClipRect;     // _34
+    JUTRect mScissorBound; // _44
     Mtx _54;
     u8 _84[0xB4 - 0x84];
     u32 _B4;
     u32 _B8;
     u8 _BC;
-    f32 rotation;     // _C0
-    u32 basePosition; // _C4 (J2DBasePosition)
-    u32 cullingMode;  // _C8
+    f32 mRotation;     // _C0
+    u32 mBasePosition; // _C4 (J2DBasePosition)
+    u32 mCullingMode;  // _C8
     u8 _CC;
     u8 _CD;
     u8 _CE;

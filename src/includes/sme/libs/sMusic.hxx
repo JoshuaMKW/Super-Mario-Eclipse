@@ -24,6 +24,8 @@ public:
     SKIP,
     NEXT,
     SEEK,
+    FADE_OUT,
+    FADE_IN
   };
 
   struct AudioPacket {
@@ -57,7 +59,7 @@ public:
   AudioStreamer(void *(*mainLoop)(void *), OSPriority priority, DVDFileInfo *fInfo,
                 DVDCommandBlock *cb)
       : mAudioHandle(fInfo), mAudioCommandBlock(cb), mAudioIndex(0),
-        mDelayedTime(0.0f), _mWhere(0), _mWhence(JSUStreamSeekFrom::BEGIN),
+        mDelayedTime(0.0f), mFadeTime(0.0f), _mWhere(0), _mWhence(JSUStreamSeekFrom::BEGIN),
         mIsPlaying(false), mIsPaused(false), mIsLooping(false), mVolLeft(0x7F),
         mVolRight(0x7F) {
     mAudioStack =
@@ -86,11 +88,16 @@ public:
   void setVolumeLR(u8 left, u8 right);
 
   bool queueAudio(AudioPacket &packet);
+  void fadeAudioOut(f32 fadeTime);
+  void fadeAudioIn(f32 fadeTime);
+  void fadeAudioOut_();
+  void fadeAudioIn_();
+
   void play();
-  void pause();
-  void stop();
-  void skip(f32 delay);
-  void next(f32 delay);
+  void pause(f32 fadeTime);
+  void stop(f32 fadeTime);
+  void skip(f32 fadeTime);
+  void next(f32 fadeTime);
   void seek(s32 where, JSUStreamSeekFrom whence);
   void seek(f64 seconds, JSUStreamSeekFrom whence);
 
@@ -113,6 +120,7 @@ private:
   AudioPacket *mAudioQueue[AudioQueueSize];
   s32 mAudioIndex;
   f32 mDelayedTime;
+  f32 mFadeTime;
 
   s32 _mWhere;
   JSUStreamSeekFrom _mWhence;
@@ -132,5 +140,7 @@ namespace SME::Util::Music {
 
 bool isValidBGM(u32 id);
 bool isValidBGM(MSStageInfo id);
+bool isWeakBGM(u32 id);
+bool isWeakBGM(MSStageInfo id);
 
 } // namespace SME::Util::Music

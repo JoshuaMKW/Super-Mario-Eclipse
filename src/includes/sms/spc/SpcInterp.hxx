@@ -8,7 +8,7 @@
 
 class TSpcInterp {
 public:
-  TSpcBinary *mSpcBinary; // _0
+  //TSpcBinary *mSpcBinary; // _0
   u32 _4;
   u32 _8;
   u32 _C;

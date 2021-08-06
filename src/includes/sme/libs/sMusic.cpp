@@ -48,6 +48,12 @@ static void *mainLoop(void *param) {
     case AudioStreamer::AudioCommand::SEEK:
       streamer->seek_();
       break;
+    case AudioStreamer::AudioCommand::FADE_OUT:
+      streamer->fadeAudioOut_();
+      break;
+    case AudioStreamer::AudioCommand::FADE_IN:
+      streamer->fadeAudioIn_();
+      break;
     default:
       break;
     }
@@ -110,30 +116,96 @@ bool AudioStreamer::queueAudio(AudioPacket &packet) {
   return false;
 }
 
+void AudioStreamer::fadeAudioOut(f32 fadeTime) {
+  sAudioCommand = AudioCommand::FADE_OUT;
+  mFadeTime = fadeTime;
+  OSSendMessage(&mMessageQueue, &sAudioCommand, OS_MESSAGE_NOBLOCK);
+}
+
+void AudioStreamer::fadeAudioIn(f32 fadeTime) {
+  sAudioCommand = AudioCommand::FADE_IN;
+  mFadeTime = fadeTime;
+  OSSendMessage(&mMessageQueue, &sAudioCommand, OS_MESSAGE_NOBLOCK);
+}
+
+void AudioStreamer::fadeAudioOut_() {
+  OSTime startTime = OSGetTime();
+
+  const f32 fadeTime = mDelayedTime;
+
+  f32 curTime = OSTicksToSeconds(f32(OSGetTime() - startTime));
+  u8 cVolL = mVolLeft;
+  u8 cVolR = mVolRight;
+  u8 volL = mVolLeft;
+  u8 volR = mVolRight;
+  while (curTime < fadeTime) {
+    volL = Math::lerp<u8>(mVolLeft, 0, curTime / fadeTime);
+    volR = Math::lerp<u8>(mVolRight, 0, curTime / fadeTime);
+    if (volL != cVolL) {
+      SME_DEBUG_LOG("VolLeft %d\n", volL);
+      AISetStreamVolLeft(volL);
+      cVolL = volL;
+    }
+    if (volR != cVolR) {
+      SME_DEBUG_LOG("VolRight %d\n", volR);
+      AISetStreamVolRight(volR);
+      cVolR = volR;
+    }
+    curTime = OSTicksToSeconds(f32(OSGetTime() - startTime));
+  }
+}
+
+void AudioStreamer::fadeAudioIn_() {
+  OSTime startTime = OSGetTime();
+
+  const f32 fadeTime = mDelayedTime;
+
+  f32 curTime = OSTicksToSeconds(f32(OSGetTime() - startTime));
+  u8 cVolL = mVolLeft;
+  u8 cVolR = mVolRight;
+  u8 volL = mVolLeft;
+  u8 volR = mVolRight;
+  while (curTime < fadeTime) {
+    volL = Math::lerp<u8>(0, mVolLeft, curTime / fadeTime);
+    volR = Math::lerp<u8>(0, mVolRight, curTime / fadeTime);
+    if (volL != cVolL) {
+      AISetStreamVolLeft(volL);
+      cVolL = volL;
+    }
+    if (volR != cVolR) {
+      AISetStreamVolRight(volR);
+      cVolR = volR;
+    }
+    curTime = OSTicksToSeconds(f32(OSGetTime() - startTime));
+  }
+}
+
 void AudioStreamer::play() {
   sAudioCommand = AudioCommand::PLAY;
   OSSendMessage(&mMessageQueue, &sAudioCommand, OS_MESSAGE_NOBLOCK);
 }
 
-void AudioStreamer::pause() {
+void AudioStreamer::pause(f32 fadeTime) {
   sAudioCommand = AudioCommand::PAUSE;
+  mDelayedTime = fadeTime;
   OSSendMessage(&mMessageQueue, &sAudioCommand, OS_MESSAGE_NOBLOCK);
 }
 
-void AudioStreamer::stop() {
+void AudioStreamer::stop(f32 fadeTime) {
   sAudioCommand = AudioCommand::STOP;
+  mDelayedTime = fadeTime;
   OSSendMessage(&mMessageQueue, &sAudioCommand, OS_MESSAGE_NOBLOCK);
 }
 
-void AudioStreamer::skip(f32 delay) {
+void AudioStreamer::skip(f32 fadeTime) {
   sAudioCommand = AudioCommand::SKIP;
-  mDelayedTime = delay;
+  mDelayedTime = fadeTime;
   OSSendMessage(&mMessageQueue, &sAudioCommand, OS_MESSAGE_NOBLOCK);
 }
 
-void AudioStreamer::next(f32 delay) {
+void AudioStreamer::next(f32 fadeTime) {
   sAudioCommand = AudioCommand::NEXT;
-  mDelayedTime = delay;
+  mDelayedTime = fadeTime;
   OSSendMessage(&mMessageQueue, &sAudioCommand, OS_MESSAGE_NOBLOCK);
 }
 
@@ -161,6 +233,9 @@ bool AudioStreamer::play_() {
   if (isPlaying()) {
     if (isPaused()) {
       AISetStreamPlayState(1);
+
+      fadeAudioIn_();
+
       mIsPaused = false;
       return true;
     } else {
@@ -183,8 +258,9 @@ bool AudioStreamer::pause_() {
   if (!mIsPlaying)
     return false;
 
-  AISetStreamVolLeft(0);
-  AISetStreamVolRight(0);
+  mFadeTime = mDelayedTime;
+  fadeAudioOut_();
+
   AISetStreamPlayState(0);
   mIsPaused = true;
   return true;
@@ -194,7 +270,11 @@ bool AudioStreamer::stop_() {
   if (!mIsPlaying)
     return false;
 
+  mFadeTime = mDelayedTime;
+  fadeAudioOut_();
+
   DVDCancelStreamAsync(mAudioCommandBlock, 0);
+  AISetStreamPlayState(0);
   mIsPaused = false;
   mIsPlaying = false;
   return true;
@@ -206,12 +286,6 @@ bool AudioStreamer::skip_() {
 }
 
 void AudioStreamer::next_() {
-  const f32 waitTime = mDelayedTime;
-  OSTime startTime = OSGetTime();
-  while (OSTicksToSeconds(static_cast<f32>(OSGetTime() - startTime)) <
-         waitTime) {
-    asm volatile("");
-  }
   stop_();
 
   // clang-format off
@@ -234,7 +308,8 @@ bool AudioStreamer::seek_() {
     streamPos = _mWhere;
     break;
   case JSUStreamSeekFrom::CURRENT:
-    streamPos = (DVDGetStreamPlayAddr(mAudioCommandBlock) - streamStart) + _mWhere;
+    streamPos =
+        (DVDGetStreamPlayAddr(mAudioCommandBlock) - streamStart) + _mWhere;
     break;
   case JSUStreamSeekFrom::END:
     streamPos = streamSize - _mWhere;
@@ -248,21 +323,14 @@ bool AudioStreamer::seek_() {
   }
   streamPos += streamStart;
 
-  DVDPrepareStreamAsync(mAudioHandle, packet->mLoopEnd - packet->mLoopStart,
-                        packet->mLoopStart, cbForPrepareStreamAsync_);
+  return DVDPrepareStreamAsync(mAudioHandle,
+                               packet->mLoopEnd - packet->mLoopStart,
+                               packet->mLoopStart, cbForPrepareStreamAsync_);
 }
 
 static u32 _sLastOfs = 0;
-static OSStopwatch _sStopWatch;
-static bool _sSwInit = false;
-static bool _sSwStarted = false;
 
 void AudioStreamer::update_() {
-  if (!_sSwInit) {
-    OSInitStopwatch(&_sStopWatch, "AudioStreamer");
-    _sSwInit = true;
-  }
-
   if (!isPlaying())
     return;
 
@@ -275,10 +343,6 @@ void AudioStreamer::update_() {
       (packet->mLoopEnd != 0xFFFFFFFF && packet->mLoopStart != 0xFFFFFFFF);
 
   if (streamCur != _sLastOfs) {
-    OSStopStopwatch(&_sStopWatch);
-    OSDumpStopwatch(&_sStopWatch);
-    _sSwStarted = false;
-
     if (gpApplication.mGamePad1->mButtons.mInput ==
         (TMarioGamePad::Y | TMarioGamePad::X | TMarioGamePad::Z)) {
       SME_DEBUG_LOG(
@@ -308,9 +372,6 @@ void AudioStreamer::update_() {
     }
 
     _sLastOfs = streamCur;
-  } else if (!_sSwStarted) {
-    OSStartStopwatch(&_sStopWatch);
-    _sSwStarted = true;
   }
 }
 
@@ -373,33 +434,7 @@ bool Music::isValidBGM(MSStageInfo id) {
 }
 
 bool Music::isValidBGM(u32 id) {
-#if 0
-  return true;
-#else
   switch (id & 0x3FF) {
-#if 0
-  case 0x1A:
-  case 0x02:
-  case 0x1E:
-  case 0x15:
-  case 0x13:
-  case 0x01:
-  case 0x1F:
-  case 0x12:
-  case 0x03:
-  case 0x06:
-  case 0x14:
-  case 0x23:
-  case 0x1D:
-  case 0x18:
-  case 0x22:
-  case 0x07:
-  case 0x05:
-  case 0x04:
-  case 0x09:
-  case 0x08:
-  case 0x21:
-#else
   case BGM_AIRPORT & 0xFF:
   case BGM_BIANCO & 0xFF:
   case BGM_CASINO & 0xFF:
@@ -421,10 +456,28 @@ bool Music::isValidBGM(u32 id) {
   case BGM_RICCO & 0xFF:
   case BGM_SHILENA & 0xFF:
   case BGM_SKY_AND_SEA & 0xFF:
-#endif
     return true;
   default:
     return false;
   }
-#endif
+}
+
+bool Music::isWeakBGM(MSStageInfo id) {
+  switch (id) {
+  case BGM_UNDERGROUND:
+  case BGM_SHINE_APPEAR:
+    return true;
+  default:
+    return false;
+  }
+}
+
+bool Music::isWeakBGM(u32 id) {
+  switch (id & 0x3FF) {
+  case BGM_UNDERGROUND & 0xFF:
+  case BGM_SHINE_APPEAR & 0xFF:
+    return true;
+  default:
+    return false;
+  }
 }

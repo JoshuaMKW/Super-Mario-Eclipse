@@ -1,13 +1,14 @@
 #include "common.hxx"
 #include "sms/JSystem/JDrama.hxx"
+#include "sms/JSystem/JGeometry.hxx"
 
 using namespace SME::Util;
 
 void Spc::setActorPosToOther(TSpcInterp *interp, u32 argc) {
-  SME_ASSERT(argc == 2, "Incorrect number of arguments passed to spc::setActorPosToOther (%lu args passed, 2 needed)", argc);
-  JDrama::TActor *self =
-      reinterpret_cast<JDrama::TActor *>(Spc::Stack::popItem(interp).mValue);
+  interp->verifyArgNum(2, &argc);
   JDrama::TActor *target =
+      reinterpret_cast<JDrama::TActor *>(Spc::Stack::popItem(interp).mValue);
+  JDrama::TActor *self =
       reinterpret_cast<JDrama::TActor *>(Spc::Stack::popItem(interp).mValue);
   JGeometry::TVec3<f32> pos;
   target->JSGGetTranslation(reinterpret_cast<Vec *>(&pos));
@@ -15,48 +16,72 @@ void Spc::setActorPosToOther(TSpcInterp *interp, u32 argc) {
 }
 
 void Spc::setActorRotToOther(TSpcInterp *interp, u32 argc) {
-  SME_ASSERT(argc == 2, "Incorrect number of arguments passed to spc::setActorRotToOther (%lu args passed, 2 needed)", argc);
-  JDrama::TActor *self =
-      reinterpret_cast<JDrama::TActor *>(Spc::Stack::popItem(interp).mValue);
+  interp->verifyArgNum(2, &argc);
   JDrama::TActor *target =
       reinterpret_cast<JDrama::TActor *>(Spc::Stack::popItem(interp).mValue);
-  JGeometry::TVec3<f32> pos;
-  target->JSGGetRotation(reinterpret_cast<Vec *>(&pos));
-  self->JSGSetRotation(reinterpret_cast<Vec &>(pos));
+  JDrama::TActor *self =
+      reinterpret_cast<JDrama::TActor *>(Spc::Stack::popItem(interp).mValue);
+  JGeometry::TVec3<f32> rot;
+  target->JSGGetRotation(reinterpret_cast<Vec *>(&rot));
+  self->JSGSetRotation(reinterpret_cast<Vec &>(rot));
 }
 
 void Spc::getActorPos(TSpcInterp *interp, u32 argc) {
-  SME_ASSERT(argc == 1, "Incorrect number of arguments passed to spc::getActorPos (%lu args passed, 1 needed)", argc);
+  interp->verifyArgNum(1, &argc);
   JDrama::TActor *self =
       reinterpret_cast<JDrama::TActor *>(Spc::Stack::popItem(interp).mValue);
-  JGeometry::TVec3<f32> pos;
-  self->JSGGetTranslation(reinterpret_cast<Vec *>(&pos));
-  Spc::Stack::pushItem(interp, reinterpret_cast<u32>(&pos), Spc::ValueType::INT); // Return a value
+  JGeometry::TVec3<f32> *pos = new JGeometry::TVec3<f32>(0.0f, 0.0f, 0.0f);
+  self->JSGGetTranslation(reinterpret_cast<Vec *>(pos));
+  Spc::Stack::pushItem(interp, reinterpret_cast<u32>(pos), Spc::ValueType::INT); // Return a value
 }
 
 void Spc::setActorPos(TSpcInterp *interp, u32 argc) {
-  SME_ASSERT(argc == 1, "Incorrect number of arguments passed to spc::setActorPos (%lu args passed, 1 needed)", argc);
-  JDrama::TActor *self =
-      reinterpret_cast<JDrama::TActor *>(Spc::Stack::popItem(interp).mValue);
+  interp->verifyArgNum(2, &argc);
   JGeometry::TVec3<f32> *pos =
       reinterpret_cast<JGeometry::TVec3<f32> *>(Spc::Stack::popItem(interp).mValue);
+  JDrama::TActor *self =
+      reinterpret_cast<JDrama::TActor *>(Spc::Stack::popItem(interp).mValue);
   self->JSGSetTranslation(reinterpret_cast<Vec &>(*pos));
 }
 
-void Spc::getActorRot(TSpcInterp *interp, u32 argc) {
-  SME_ASSERT(argc == 1, "Incorrect number of arguments passed to spc::getActorRot (%lu args passed, 1 needed)", argc);
+void Spc::setActorPosf(TSpcInterp *interp, u32 argc) {
+  interp->verifyArgNum(4, &argc);
+  f32 z = static_cast<f32>(Spc::Stack::popItem(interp).mValue);
+  f32 y = static_cast<f32>(Spc::Stack::popItem(interp).mValue);
+  f32 x = static_cast<f32>(Spc::Stack::popItem(interp).mValue);
   JDrama::TActor *self =
       reinterpret_cast<JDrama::TActor *>(Spc::Stack::popItem(interp).mValue);
-  JGeometry::TVec3<f32> pos;
-  self->JSGGetRotation(reinterpret_cast<Vec *>(&pos));
-  Spc::Stack::pushItem(interp, reinterpret_cast<u32>(&pos), Spc::ValueType::INT); // Return a value
+
+  Vec pos {.x = x, .y = y, .z = z};
+  self->JSGSetTranslation(pos);
+}
+
+void Spc::getActorRot(TSpcInterp *interp, u32 argc) {
+  interp->verifyArgNum(1, &argc);
+  JDrama::TActor *self =
+      reinterpret_cast<JDrama::TActor *>(Spc::Stack::popItem(interp).mValue);
+  JGeometry::TVec3<f32> *pos = new JGeometry::TVec3<f32>(0.0f, 0.0f, 0.0f);
+  self->JSGGetRotation(reinterpret_cast<Vec *>(pos));
+  Spc::Stack::pushItem(interp, reinterpret_cast<u32>(pos), Spc::ValueType::INT); // Return a value
 }
 
 void Spc::setActorRot(TSpcInterp *interp, u32 argc) {
-  SME_ASSERT(argc == 1, "Incorrect number of arguments passed to spc::setActorRot (%lu args passed, 1 needed)", argc);
+  interp->verifyArgNum(2, &argc);
+  JGeometry::TVec3<f32> *rot =
+      reinterpret_cast<JGeometry::TVec3<f32> *>(Spc::Stack::popItem(interp).mValue);
   JDrama::TActor *self =
       reinterpret_cast<JDrama::TActor *>(Spc::Stack::popItem(interp).mValue);
-  JGeometry::TVec3<f32> *pos =
-      reinterpret_cast<JGeometry::TVec3<f32> *>(Spc::Stack::popItem(interp).mValue);
-  self->JSGSetRotation(reinterpret_cast<Vec &>(*pos));
+  self->JSGSetRotation(reinterpret_cast<Vec &>(*rot));
+}
+
+void Spc::setActorRotf(TSpcInterp *interp, u32 argc) {
+  interp->verifyArgNum(4, &argc);
+  f32 z = static_cast<f32>(Spc::Stack::popItem(interp).mValue);
+  f32 y = static_cast<f32>(Spc::Stack::popItem(interp).mValue);
+  f32 x = static_cast<f32>(Spc::Stack::popItem(interp).mValue);
+  JDrama::TActor *self =
+      reinterpret_cast<JDrama::TActor *>(Spc::Stack::popItem(interp).mValue);
+
+  Vec rot {.x = x, .y = y, .z = z};
+  self->JSGSetRotation(reinterpret_cast<Vec &>(rot));
 }

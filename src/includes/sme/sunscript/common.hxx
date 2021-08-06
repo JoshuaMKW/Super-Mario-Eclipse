@@ -5,7 +5,7 @@
 
 namespace SME::Util::Spc {
 
-enum class ValueType { INT, FLOAT };
+enum ValueType { INT, FLOAT, STRING };
 
 namespace Stack {
 
@@ -14,12 +14,19 @@ void pushItem(TSpcInterp *interp, u32 value, ValueType type);
 
 } // namespace Stack
 
+void vectorTranslate(TSpcInterp *interp, u32 argc);
+void vectorTranslatef(TSpcInterp *interp, u32 argc);
+void vectorScalef(TSpcInterp *interp, u32 argc);
+void vectorMagnitude(TSpcInterp *interp, u32 argc);
+void vectorNormalize(TSpcInterp *interp, u32 argc);
 void setActorPosToOther(TSpcInterp *interp, u32 argc);
 void setActorRotToOther(TSpcInterp *interp, u32 argc);
 void getActorPos(TSpcInterp *interp, u32 argc);
 void setActorPos(TSpcInterp *interp, u32 argc);
+void setActorPosf(TSpcInterp *interp, u32 argc);
 void getActorRot(TSpcInterp *interp, u32 argc);
 void setActorRot(TSpcInterp *interp, u32 argc);
+void setActorRotf(TSpcInterp *interp, u32 argc);
 void spawnObjByID(TSpcInterp *interp, u32 argc);
 void isMultiplayerActive(TSpcInterp *interp, u32 argc);
 void isFreePlayActive(TSpcInterp *interp, u32 argc);
@@ -40,7 +47,9 @@ void memcpy_(TSpcInterp *interp, u32 argc);
 void memmove_(TSpcInterp *interp, u32 argc);
 void memcmp_(TSpcInterp *interp, u32 argc);
 void memset_(TSpcInterp *interp, u32 argc);
+void sprintf(TSpcInterp *interp, u32 argc);
 void formatStrBySpec(TSpcInterp *interp, u32 argc);
+void getStageBGM(TSpcInterp *interp, u32 argc);
 void queueStream(TSpcInterp *interp, u32 argc);
 void playStream(TSpcInterp *interp, u32 argc);
 void pauseStream(TSpcInterp *interp, u32 argc);

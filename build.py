@@ -52,6 +52,7 @@ class Region:
     EU = "EU"
     JP = "JP"
     KR = "KR"
+    ANY = "ANY"
 
 
 class Patcher:
@@ -125,7 +126,7 @@ class AllocationMap(object):
                 Region.KR: []
             }
 
-    def group(self, region: Region.US) -> List[AllocationMap.AllocationPacket]:
+    def group(self, region: Region) -> List[AllocationMap.AllocationPacket]:
         return self._template[region]
 
 
@@ -498,9 +499,9 @@ class FilePatcher(Compiler):
 
     def _get_path_from_config(self, solutionPath: Path, path: Path) -> Path:
         if self.is_release():
-            parentGlob = f"*/release/{self.region.lower()}/"
+            parentGlob = f"*/release/{solutionPath.name}/"
         elif self.is_debug():
-            parentGlob = f"*/debug/{self.region.lower()}/"
+            parentGlob = f"*/debug/{solutionPath.name}/"
         else:
             raise ValueError("Invalid State!")
 

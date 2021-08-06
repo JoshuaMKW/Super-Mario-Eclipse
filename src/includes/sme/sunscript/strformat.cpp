@@ -3,13 +3,103 @@
 #include "libs/sMemory.hxx"
 #include "libs/sString.hxx"
 #include "libs/sTime.hxx"
+#include "macros.h"
+
 #include "sms/JSystem/JDrama.hxx"
 
 using namespace SME::Util;
 
+SME_PURE_ASM void Spc::sprintf(TSpcInterp *interp, u32 argc) {
+  asm volatile("mflr 0                                  \n\t"
+               "stw 0, 0x4 (1)                          \n\t"
+               "stwu 1, -0x80 (1)                       \n\t"
+               "stmw 22, 0x8 (1)                        \n\t"
+               "mr 31, 3                                \n\t"
+               "mr 30, 4                                \n\t"
+               "subi 4, 4, 2                            \n\t"
+               "cmpwi 4, 7                              \n\t"
+               "bgt 0                                   \n\t"
+               "cmpwi 4, 1                              \n\t"
+               "blt 0                                   \n\t"
+               "mtctr 4                                 \n\t"
+               "lwz 28, 0x20 (31)                       \n\t"
+               "bl _grabaddr_765                        \n\t"
+               "                                        \n\t"
+               "_grabaddr_765:                          \n\t"
+               "mflr 27                                 \n\t"
+               "                                        \n\t"
+               "lis 24, 0x20                            \n\t"
+               "mullw 24, 24, 4                         \n\t"
+               "li 25, _label_576567 - _grabaddr_765    \n\t"
+               "lwzx 5, 27, 25                          \n\t"
+               "addi 5, 5, 24                           \n\t"
+               "stwx 5, 27, 25                          \n\t"
+               "                                        \n\t"
+               "_loop_3456:                             \n\t"
+               "lwz 29, 0x1C (31)                       \n\t"
+               "cmpwi 29, 0                             \n\t"
+               "beq _exit_23848                         \n\t"
+               "subi 29, 29, 1                          \n\t"
+               "stw 29, 0x1C (31)                       \n\t"
+               "slwi 29, 29, 3                          \n\t"
+               "                                        \n\t"
+               "lwzx 21, 28, 29                         \n\t"
+               "_label_576567:                          \n\t"
+               "lwz 5, 4, (21)                          \n\t"
+               "                                        \n\t"
+               "li 25, _label_576567 - _grabaddr_765    \n\t"
+               "lwzx 26, 27, 25                         \n\t"
+               "subis 26, 26, 0x20                      \n\t"
+               "stwx 26, 27, 25                         \n\t"
+               "dcbf 25, 27                             \n\t"
+               "sync                                    \n\t"
+               "icbi 25, 27                             \n\t"
+               "isync                                   \n\t"
+               "bdnz+ _loop_3456                        \n\t"
+               "                                        \n\t"
+               "lis 24, 0x80B5                          \n\t"
+               "ori 24, 24, 0x0004                      \n\t"
+               "stwx 24, 27, 25                         \n\t"
+               "dcbf 25, 27                             \n\t"
+               "sync                                    \n\t"
+               "icbi 25, 27                             \n\t"
+               "isync                                   \n\t"
+               "                                        \n\t"
+               "lwz 29, 0x1C (31)                       \n\t"
+               "cmpwi 29, 0                             \n\t"
+               "beq _exit_23848                         \n\t"
+               "subi 29, 29, 1                          \n\t"
+               "stw 29, 0x1C (31)                       \n\t"
+               "slwi 29, 29, 3                          \n\t"
+               "lwzx 4, 28, 29                          \n\t"
+               "                                        \n\t"
+               "lwz 29, 0x1C (31)                       \n\t"
+               "cmpwi 29, 0                             \n\t"
+               "beq _exit_23848                         \n\t"
+               "subi 29, 29, 1                          \n\t"
+               "stw 29, 0x1C (31)                       \n\t"
+               "slwi 29, 29, 3                          \n\t"
+               "lwzx 3, 28, 29                          \n\t"
+               "                                        \n\t"
+               "lis 12, sprintf@h                       \n\t"
+               "ori 12, 12, sprintf@l                   \n\t"
+               "mtctr 12,                               \n\t"
+               "bctrl                                   \n\t"
+               "                                        \n\t"
+               "_exit_23848:                            \n\t"
+               "lmw 22, 0x8 (1)                         \n\t"
+               "addi 1, 1, 0x80                         \n\t"
+               "lwz 0, 0x4 (1)                          \n\t"
+               "mtlr 0                                  \n\t"
+               "blr                                     \n\t");
+}
+
 void Spc::formatStrBySpec(TSpcInterp *interp, u32 argc) {
-  SME_ASSERT(argc == 1, "Incorrect number of arguments passed to spc::getPlayerByIndex (%lu args passed, 1 needed)", argc);
+  interp->verifyArgNum(1, &argc);
   char *newstr = reinterpret_cast<char *>(SME::Util::Memory::calloc(1024, 4));
-  formatBMGRaw(newstr, reinterpret_cast<char *>(Spc::Stack::popItem(interp).mValue), 1024);
-  Spc::Stack::pushItem(interp, reinterpret_cast<u32>(newstr), Spc::ValueType::INT); // Return a value
+  formatBMGRaw(newstr,
+               reinterpret_cast<char *>(Spc::Stack::popItem(interp).mValue),
+               1024);
+  Spc::Stack::pushItem(interp, reinterpret_cast<u32>(newstr),
+                       Spc::ValueType::STRING); // Return a value
 }

@@ -26,9 +26,7 @@ void Spc::spawnObjByID(TSpcInterp *interp, u32 argc) {
     obj->JSGSetTranslation(reinterpret_cast<Vec &>(pos));
     obj->JSGSetRotation(reinterpret_cast<Vec &>(rot));
     obj->mSpeed = spd;
-  } else if (argc != 1) {
-    SpcTrace("Incorrect number of arguments passed to spc::setActorRotToOther "
-             "(%lu args passed, 1 or 4 needed)",
-             argc);
+  } else {
+    interp->verifyArgNum(1, &argc);
   }
 }

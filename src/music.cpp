@@ -6,12 +6,12 @@
 using namespace SME;
 using namespace SME::Class;
 
-#if 1
-
 AudioStreamer::AudioPacket packet(0xFFFFFFFF);
+static bool sIsWeakBGM = false;
 
 // 0x80016998
 u32 SME::Patch::Music::setIsValid(u32 musicID) {
+  sIsWeakBGM = Util::Music::isWeakBGM((MSStageInfo)((musicID & 0x3FF) | 0x80010000));
   TGlobals::sIsAudioStreamAllowed =
       SME::Util::Music::isValidBGM(musicID) && musicID == gStageBGM &&
       TStageParams::sStageConfig->mMusicSetCustom.get();
@@ -32,8 +32,11 @@ JAISound *SME::Patch::Music::initMusic(JAISound *jai) {
     }
     streamer->play();
     MSBgm::stopBGM(gStageBGM, 32);
-  } else if (streamer->isPlaying()) {
-    streamer->stop();
+  } else if (sIsWeakBGM) {
+    SME_DEBUG_LOG("BGM IS WEAK, PAUSING!\n");
+    streamer->pause(0.1f);
+  } else {
+    streamer->stop(0.0f);
   }
 
   return jai;
@@ -43,8 +46,12 @@ JAISound *SME::Patch::Music::initMusic(JAISound *jai) {
 void SME::Patch::Music::stopMusicOnStop() {
   AudioStreamer *streamer = AudioStreamer::getInstance();
 
-  if (streamer->isPlaying())
-    streamer->next(0.0f);
+  if (streamer->isPlaying()) {
+    if (sIsWeakBGM)
+      streamer->play();
+    else
+      streamer->next(0.0f);
+  }
 }
 
 // 0x802A670C
@@ -53,7 +60,6 @@ void SME::Patch::Music::stopMusicOnStageExit(TMarioGamePad *gamepad) {
 
   if (streamer->isPlaying())
     streamer->next(0.0f);
+  
   reset__9RumbleMgrFv(gamepad);
 }
-
-#endif

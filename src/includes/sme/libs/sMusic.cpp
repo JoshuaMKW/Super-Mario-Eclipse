@@ -28,7 +28,7 @@ static void *mainLoop(void *param) {
 
   while (true) {
     OSReceiveMessage(&streamer->mMessageQueue, &msg, OS_MESSAGE_BLOCK);
-    command = *reinterpret_cast<AudioStreamer::AudioCommand *>(msg);
+    command = static_cast<AudioStreamer::AudioCommand>(msg);
     switch (command) {
     case AudioStreamer::AudioCommand::PLAY:
       streamer->play_();
@@ -48,16 +48,15 @@ static void *mainLoop(void *param) {
     case AudioStreamer::AudioCommand::SEEK:
       streamer->seek_();
       break;
-    case AudioStreamer::AudioCommand::FADE_OUT:
-      streamer->fadeAudioOut_();
-      break;
-    case AudioStreamer::AudioCommand::FADE_IN:
-      streamer->fadeAudioIn_();
-      break;
     default:
       break;
     }
   }
+}
+
+static void volumeAlarm(OSAlarm *alarm, OSContext *context) {
+  AudioStreamer *streamer = AudioStreamer::getInstance();
+  streamer->fadeAudio_();
 }
 
 static void cbForStopStreamAtEndAsync_(s32 result, DVDCommandBlock *cmdblock);
@@ -96,12 +95,43 @@ AudioStreamer AudioStreamer::sInstance =
     AudioStreamer(mainLoop, 18, &sAudioFInfo, &sAudioCmdBlock);
 
 void AudioStreamer::setVolumeLR(u8 left, u8 right) {
-  mVolLeft = left;
-  mVolRight = right;
-  if (isPlaying()) {
+  if (mVolLeft != left) {
+    mVolLeft = left;
     AISetStreamVolLeft(left);
+  }
+  if (mVolRight != right) {
+    mVolRight = right;
     AISetStreamVolRight(right);
   }
+}
+
+AudioStreamer::AudioStreamer(void *(*mainLoop)(void *), OSPriority priority,
+                             DVDFileInfo *fInfo, DVDCommandBlock *cb)
+    : mAudioHandle(fInfo), mAudioCommandBlock(cb), mAudioIndex(0),
+      mDelayedTime(0.0f), mFadeTime(0.0f), _mWhere(0),
+      _mWhence(JSUStreamSeekFrom::BEGIN), mIsPlaying(false), mIsPaused(false),
+      mIsLooping(false), mVolLeft(0x7F), mVolRight(0x7F), mTargetVolume(0x7F),
+      mPreservedVolLeft(0x7F), mPreservedVolRight(0x7F) {
+  mAudioStack =
+      static_cast<u8 *>(JKRHeap::sRootHeap->alloc(AudioStackSize, 32));
+  OSInitMessageQueue(&mMessageQueue, mMessageList, AudioMessageQueueSize);
+  OSCreateAlarm(&mVolumeFadeAlarm);
+  OSSetPeriodicAlarm(&mVolumeFadeAlarm, OSGetTime(), OSMillisecondsToTicks(1),
+                     volumeAlarm);
+  OSCreateThread(&mMainThread, mainLoop, this, mAudioStack + AudioStackSize,
+                 AudioStackSize, priority, OS_THREAD_ATTR_DETACH);
+  OSResumeThread(&mMainThread);
+}
+
+AudioStreamer::~AudioStreamer() {
+  JKRHeap::sRootHeap->free(mAudioStack);
+  OSCancelAlarm(&mVolumeFadeAlarm);
+  OSCancelThread(&mMainThread);
+}
+
+void AudioStreamer::setVolumeFadeTo(u8 volume, f32 seconds) {
+  mTargetVolume = volume;
+  mFadeTime = seconds;
 }
 
 bool AudioStreamer::queueAudio(AudioPacket &packet) {
@@ -116,104 +146,84 @@ bool AudioStreamer::queueAudio(AudioPacket &packet) {
   return false;
 }
 
-void AudioStreamer::fadeAudioOut(f32 fadeTime) {
-  sAudioCommand = AudioCommand::FADE_OUT;
-  mFadeTime = fadeTime;
-  OSSendMessage(&mMessageQueue, &sAudioCommand, OS_MESSAGE_NOBLOCK);
-}
+static OSTime sStartTime;
+static bool _sHasFadeStarted = false;
 
-void AudioStreamer::fadeAudioIn(f32 fadeTime) {
-  sAudioCommand = AudioCommand::FADE_IN;
-  mFadeTime = fadeTime;
-  OSSendMessage(&mMessageQueue, &sAudioCommand, OS_MESSAGE_NOBLOCK);
-}
+void AudioStreamer::fadeAudio_() {
+  AudioStreamer *streamer = AudioStreamer::getInstance();
 
-void AudioStreamer::fadeAudioOut_() {
-  OSTime startTime = OSGetTime();
-
-  const f32 fadeTime = mDelayedTime;
-
-  f32 curTime = OSTicksToSeconds(f32(OSGetTime() - startTime));
-  u8 cVolL = mVolLeft;
-  u8 cVolR = mVolRight;
-  u8 volL = mVolLeft;
-  u8 volR = mVolRight;
-  while (curTime < fadeTime) {
-    volL = Math::lerp<u8>(mVolLeft, 0, curTime / fadeTime);
-    volR = Math::lerp<u8>(mVolRight, 0, curTime / fadeTime);
-    if (volL != cVolL) {
-      SME_DEBUG_LOG("VolLeft %d\n", volL);
-      AISetStreamVolLeft(volL);
-      cVolL = volL;
-    }
-    if (volR != cVolR) {
-      SME_DEBUG_LOG("VolRight %d\n", volR);
-      AISetStreamVolRight(volR);
-      cVolR = volR;
-    }
-    curTime = OSTicksToSeconds(f32(OSGetTime() - startTime));
+  u16 volume = streamer->getVolumeLR();
+  if (u8(volume >> 8) == streamer->mTargetVolume &&
+      u8(volume) == streamer->mTargetVolume) {
+    sStartTime = 0;
+    _sHasFadeStarted = false;
+    return;
   }
-}
 
-void AudioStreamer::fadeAudioIn_() {
-  OSTime startTime = OSGetTime();
-
-  const f32 fadeTime = mDelayedTime;
-
-  f32 curTime = OSTicksToSeconds(f32(OSGetTime() - startTime));
-  u8 cVolL = mVolLeft;
-  u8 cVolR = mVolRight;
-  u8 volL = mVolLeft;
-  u8 volR = mVolRight;
-  while (curTime < fadeTime) {
-    volL = Math::lerp<u8>(0, mVolLeft, curTime / fadeTime);
-    volR = Math::lerp<u8>(0, mVolRight, curTime / fadeTime);
-    if (volL != cVolL) {
-      AISetStreamVolLeft(volL);
-      cVolL = volL;
-    }
-    if (volR != cVolR) {
-      AISetStreamVolRight(volR);
-      cVolR = volR;
-    }
-    curTime = OSTicksToSeconds(f32(OSGetTime() - startTime));
+  if (!_sHasFadeStarted) {
+    sStartTime = OSGetTime();
+    _sHasFadeStarted = true;
   }
+
+  const OSTime now = OSGetTime();
+
+  f32 curTime = f32(OSTicksToMilliseconds(now - sStartTime)) / 1000.0f;
+
+  SME_DEBUG_LOG("ticks = %llu; curTime = %.04f\n",
+                now - sStartTime, curTime);
+
+  u8 volL = Math::lerp<u8>(u8(volume >> 8), streamer->mTargetVolume,
+                           curTime / streamer->mFadeTime);
+  u8 volR = Math::lerp<u8>(u8(volume), streamer->mTargetVolume,
+                           curTime / streamer->mFadeTime);
+
+  if (volL == u8(volume >> 8) && volR == u8(volume)) {
+    return;
+  }
+
+  setVolumeLR(volL, volR);
 }
 
 void AudioStreamer::play() {
   sAudioCommand = AudioCommand::PLAY;
-  OSSendMessage(&mMessageQueue, &sAudioCommand, OS_MESSAGE_NOBLOCK);
+  OSSendMessage(&mMessageQueue, static_cast<u32>(sAudioCommand),
+                OS_MESSAGE_NOBLOCK);
 }
 
 void AudioStreamer::pause(f32 fadeTime) {
   sAudioCommand = AudioCommand::PAUSE;
   mDelayedTime = fadeTime;
-  OSSendMessage(&mMessageQueue, &sAudioCommand, OS_MESSAGE_NOBLOCK);
+  OSSendMessage(&mMessageQueue, static_cast<u32>(sAudioCommand),
+                OS_MESSAGE_NOBLOCK);
 }
 
 void AudioStreamer::stop(f32 fadeTime) {
   sAudioCommand = AudioCommand::STOP;
   mDelayedTime = fadeTime;
-  OSSendMessage(&mMessageQueue, &sAudioCommand, OS_MESSAGE_NOBLOCK);
+  OSSendMessage(&mMessageQueue, static_cast<u32>(sAudioCommand),
+                OS_MESSAGE_NOBLOCK);
 }
 
 void AudioStreamer::skip(f32 fadeTime) {
   sAudioCommand = AudioCommand::SKIP;
   mDelayedTime = fadeTime;
-  OSSendMessage(&mMessageQueue, &sAudioCommand, OS_MESSAGE_NOBLOCK);
+  OSSendMessage(&mMessageQueue, static_cast<u32>(sAudioCommand),
+                OS_MESSAGE_NOBLOCK);
 }
 
 void AudioStreamer::next(f32 fadeTime) {
   sAudioCommand = AudioCommand::NEXT;
   mDelayedTime = fadeTime;
-  OSSendMessage(&mMessageQueue, &sAudioCommand, OS_MESSAGE_NOBLOCK);
+  OSSendMessage(&mMessageQueue, static_cast<u32>(sAudioCommand),
+                OS_MESSAGE_NOBLOCK);
 }
 
 void AudioStreamer::seek(s32 where, JSUStreamSeekFrom whence) {
   sAudioCommand = AudioCommand::SEEK;
   _mWhere = where;
   _mWhence = whence;
-  OSSendMessage(&mMessageQueue, &sAudioCommand, OS_MESSAGE_NOBLOCK);
+  OSSendMessage(&mMessageQueue, static_cast<u32>(sAudioCommand),
+                OS_MESSAGE_NOBLOCK);
 }
 
 void AudioStreamer::seek(f64 seconds, JSUStreamSeekFrom whence) {
@@ -223,18 +233,16 @@ void AudioStreamer::seek(f64 seconds, JSUStreamSeekFrom whence) {
       (seconds / OSTicksToSeconds(
                      23465670)); // magic number using mean of data go brrrrrr
   _mWhence = whence;
-  OSSendMessage(&mMessageQueue, &sAudioCommand, OS_MESSAGE_NOBLOCK);
+  OSSendMessage(&mMessageQueue, static_cast<u32>(sAudioCommand),
+                OS_MESSAGE_NOBLOCK);
 }
 
 bool AudioStreamer::play_() {
-  AISetStreamVolLeft(mVolLeft);
-  AISetStreamVolRight(mVolRight);
-
   if (isPlaying()) {
     if (isPaused()) {
       AISetStreamPlayState(1);
 
-      fadeAudioIn_();
+      setVolumeFadeTo((mPreservedVolLeft + mPreservedVolRight) / 2, mFadeTime);
 
       mIsPaused = false;
       return true;
@@ -259,9 +267,10 @@ bool AudioStreamer::pause_() {
     return false;
 
   mFadeTime = mDelayedTime;
-  fadeAudioOut_();
+  mPreservedVolLeft = mVolLeft;
+  mPreservedVolRight = mVolRight;
+  setVolumeFadeTo(0, mFadeTime);
 
-  AISetStreamPlayState(0);
   mIsPaused = true;
   return true;
 }
@@ -271,10 +280,10 @@ bool AudioStreamer::stop_() {
     return false;
 
   mFadeTime = mDelayedTime;
-  fadeAudioOut_();
+  mPreservedVolLeft = mVolLeft;
+  mPreservedVolRight = mVolRight;
+  setVolumeFadeTo(0, mFadeTime);
 
-  DVDCancelStreamAsync(mAudioCommandBlock, 0);
-  AISetStreamPlayState(0);
   mIsPaused = false;
   mIsPlaying = false;
   return true;
@@ -329,16 +338,44 @@ bool AudioStreamer::seek_() {
 }
 
 static u32 _sLastOfs = 0;
+static u8 _sLastVol = 0xFF;
+static bool _startPaused = false;
 
 void AudioStreamer::update_() {
+  const u8 vol = (mVolLeft + mVolRight) / 2;
+  if (_sLastVol > 0) {
+    if (mIsPaused && vol == 0) {
+      if (!mIsPlaying) {
+        DVDCancelStreamAsync(mAudioCommandBlock, nullptr);
+      }
+      AISetStreamPlayState(false);
+    } else if (!mIsPaused && !mIsPlaying && vol == 0) {
+      DVDCancelStreamAsync(mAudioCommandBlock, nullptr);
+      AISetStreamPlayState(false);
+    }
+  }
+  _sLastVol = vol;
+
   if (!isPlaying())
     return;
+
+  AudioPacket *packet = getCurrentAudio();
+  if (!packet)
+    return;
+
+  if (!_startPaused && gpMarDirector->mCurState == TMarDirector::PAUSE_MENU) {
+    pause(0.7f);
+    _startPaused = true;
+  } else if (_startPaused &&
+             gpMarDirector->mCurState != TMarDirector::PAUSE_MENU) {
+    play();
+    _startPaused = false;
+  }
 
   const u32 streamSize = mAudioHandle->mLen;
   const u32 streamStart = mAudioHandle->mStart;
   const u32 streamCur = DVDGetStreamPlayAddr(mAudioCommandBlock);
 
-  AudioPacket *packet = getCurrentAudio();
   const bool shouldLoop =
       (packet->mLoopEnd != 0xFFFFFFFF && packet->mLoopStart != 0xFFFFFFFF);
 
@@ -363,12 +400,11 @@ void AudioStreamer::update_() {
                  (streamCur == streamStart && _sLastOfs > streamStart)) {
         mDelayedTime = 0.0f;
         mIsPlaying = false;
-        play_();
+        play();
       }
     } else if (streamCur == streamStart && _sLastOfs > streamStart) {
-      mDelayedTime = 0.0f;
-      next_();
-      play_();
+      next(0.0f);
+      play();
     }
 
     _sLastOfs = streamCur;

@@ -61,7 +61,7 @@ public:
   u16 mGameState;           // 0x004C
   u16 _02;                  // 0x004E
   u32 _03[0x14 / 4];        // 0x0050
-  u8 mLastState;            // 0x0064
+  u8 mCurState;             // 0x0064
   u8 _04;                   // 0x0065
   u16 _05;                  // 0x0066
   u32 _06[0xC / 4];         // 0x0068
@@ -71,7 +71,7 @@ public:
   u8 mEpisodeID;            // 0x007D
   u16 _09;                  // 0x007E
   u32 _10[0x2C / 4];        // 0x0080
-  u32 *sNextState;          // 0x00AC
+  u32 *mpNextState;         // 0x00AC
   u32 _11;                  // 0x00B0
   u8 mNextState;            // 0x00B4
   u32 _12[0x1C / 4];        // 0x00B8

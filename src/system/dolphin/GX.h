@@ -103,6 +103,7 @@ void GXSetViewport(f32 xPos, f32 yPos, f32 width, f32 height, f32 nearZ,
                    f32 farZ);
 void GXSetViewportJitter(f32 xPos, f32 yPos, f32 width, f32 height, f32 nearZ,
                          f32 farZ, u32 field);
+void GXSetScissor(s32 x1, s32 y1, s32 width, s32 height);
 
 #ifdef __cplusplus
 }

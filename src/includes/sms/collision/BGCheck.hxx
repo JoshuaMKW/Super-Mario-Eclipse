@@ -17,9 +17,9 @@ public:
     bool isMarioThrough() const;
     bool isWaterSlip() const;
     bool isWaterSurface() const;
-    void setVertex(const JGeometry::TVec3<f32> &,
-                   const JGeometry::TVec3<f32> &,
-                   const JGeometry::TVec3<f32> &);
+    void setVertex(const JGeometry::TVec3<f32> &a,
+                   const JGeometry::TVec3<f32> &b,
+                   const JGeometry::TVec3<f32> &c);
 
     u16 mCollisionType;             //0x0000
     s16 mValue4;                    //0x0002
@@ -31,6 +31,7 @@ public:
     JGeometry::TVec3<f32> mVertexB; //0x001C
     JGeometry::TVec3<f32> mVertexC; //0x0028
     JGeometry::TVec3<f32> mNormal;  //0x0034
+    f32 _40;
     TLiveActor *mOwner;             //0x0044
 };
 

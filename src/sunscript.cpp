@@ -41,7 +41,6 @@ void Patch::Spc::initCustomFunctions(TSpcBinary *spcBinary, const char *symbol, 
     BIND_SYMBOL(spcBinary, "memmove", Util::Spc::memmove_);
     BIND_SYMBOL(spcBinary, "memcmp", Util::Spc::memcmp_);
     BIND_SYMBOL(spcBinary, "memset", Util::Spc::memset_);
-    BIND_SYMBOL(spcBinary, "sprintf", Util::Spc::sprintf);
     BIND_SYMBOL(spcBinary, "formatStrBySpec", Util::Spc::formatStrBySpec);
     BIND_SYMBOL(spcBinary, "getStageBGM", Util::Spc::getStageBGM);
     BIND_SYMBOL(spcBinary, "queueStream", Util::Spc::queueStream);

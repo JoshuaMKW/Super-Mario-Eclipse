@@ -9,20 +9,26 @@ extern "C"
 {
 #endif
 
-#define OS_BUS_CLOCK *(u32 *)0x800000F8
-#define OS_CORE_CLOCK *(u32 *)0x800000FC
+typedef u32 OSTick;
+typedef u64 OSTime;
+typedef s32 OSPriority; // 0 is highest priority, 31 is lowest
+typedef u32 OSHeapHandle;
+typedef u32 OSMessage;
+
+#define OS_BUS_CLOCK *(OSTick *)0x800000F8
+#define OS_CORE_CLOCK *(OSTick *)0x800000FC
 #define OS_TIMER_CLOCK OS_BUS_CLOCK / 4
 
 #define OSDiffTick(tick1, tick0) ((tick1) - (tick0))
-#define OSTicksToCycles(ticks) (((ticks) * ((OS_CORE_CLOCK * 2) / OS_TIMER_CLOCK)) / 2)
-#define OSTicksToSeconds(ticks) ((ticks) / OS_TIMER_CLOCK)
-#define OSTicksToMilliseconds(ticks) ((ticks) / (OS_TIMER_CLOCK / 1000u))
-#define OSTicksToMicroseconds(ticks) (((ticks)*8u) / (OS_TIMER_CLOCK / 125000u))
-#define OSTicksToNanoseconds(ticks) (((ticks)*8000u) / (OS_TIMER_CLOCK / 125000u))
-#define OSSecondsToTicks(sec) ((sec)*OS_TIMER_CLOCK)
-#define OSMillisecondsToTicks(msec) (((msec)*OS_TIMER_CLOCK) / 1000u)
-#define OSMicrosecondsToTicks(usec) (((usec)*OS_TIMER_CLOCK) / 125000u)
-#define OSNanosecondsToTicks(nsec) (((nsec) * (OS_TIMER_CLOCK) / 125000u) / 8000u)
+#define OSTicksToCycles(ticks) (((ticks) * (((OS_CORE_CLOCK) * 2) / (OS_TIMER_CLOCK))) / 2)
+#define OSSecondsToTicks(val)        ((val) * (OS_TIMER_CLOCK))
+#define OSMillisecondsToTicks(val)  (((val) * (OS_TIMER_CLOCK)) / 1000ul)
+#define OSMicrosecondsToTicks(val)  (((val) * (OS_TIMER_CLOCK)) / 1000000ul)
+#define OSNanosecondsToTicks(val)   (((val) * ((OS_TIMER_CLOCK)) / 31250ul) / 32000ul)
+#define OSTicksToSeconds(val)        ((val) / (OS_TIMER_CLOCK))
+#define OSTicksToMilliseconds(val)  (((val) * 1000ul) / (OS_TIMER_CLOCK))
+#define OSTicksToMicroseconds(val)  (((val) * 1000000ul) / (OS_TIMER_CLOCK))
+#define OSTicksToNanoseconds(val)   (((val) * 32000ul) / ((OS_TIMER_CLOCK) / 31250ul))
 
 #define OSRoundUp32B(x) (((u32)(x) + 32 - 1) & ~(32 - 1))
 #define OSRoundDown32B(x) (((u32)(x)) & ~(32 - 1))
@@ -59,12 +65,6 @@ extern "C"
 #define OS_THREAD_ATTR_ATTACH 0
 // clang-format on
 
-typedef u32 OSTick;
-typedef u64 OSTime;
-typedef s32 OSPriority; // 0 is highest priority, 31 is lowest
-typedef u32 OSHeapHandle;
-typedef void *OSMessage;
-
 typedef struct OSAlarm OSAlarm;
 typedef struct OSContext OSContext;
 typedef struct OSMutex OSMutex;
@@ -98,7 +98,7 @@ typedef struct OSMutexLink {
 
 typedef struct OSMessageQueue {
   OSThreadQueue mSentQueue;     // _0
-  OSThreadQueue mRecievedQueue; // _8
+  OSThreadQueue mReceivedQueue; // _8
   OSMessage *mMessageArray;     // _10
   s32 mMessageCount;            // _14
   s32 mFirstIndex;              // _18
@@ -222,7 +222,11 @@ void OSCreateAlarm(void *alarm);
 void OSSetAlarm(OSAlarm *alarm, OSTime tick, OSAlarmHandler handler);
 void OSSetPeriodicAlarm(OSAlarm *alarm, OSTime start, OSTime period,
                         OSAlarmHandler handler);
+#if 0
+void InsertAlarm(OSAlarm *alarm, OSTick unk_1, OSTime time, OSAlarmHandler handler);
+#else
 void InsertAlarm(OSAlarm *alarm, OSTime time, OSAlarmHandler handler);
+#endif
 void OSCancelAlarm(OSAlarm *alarm);
 
 OSContext *OSGetCurrentContext();
@@ -244,7 +248,7 @@ void OSInitThreadQueue(OSThreadQueue *queue);
 OSPriority OSGetThreadPriority(OSThread *thread);
 bool OSIsThreadTerminated(OSThread *thread);
 
-void OSSendMessage(OSMessageQueue *queue, void *message, bool block);
+void OSSendMessage(OSMessageQueue *queue, u32 message, bool block);
 void OSReceiveMessage(OSMessageQueue *queue, void *message, bool block);
 
 void OSInitMessageQueue(OSMessageQueue *queue, OSMessage *msgbox,

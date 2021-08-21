@@ -41,11 +41,15 @@ public:
     return false;
   }
 
+  static bool isWideScreen() { return *(f32 *)SME_PORT_REGION(0x80416620, 0, 0, 0) >= 700.0f; }
   static bool isFreePlayMode() { return sIsFreePlay; }
   static bool isMultiplayerActive() { return sActivePlayers > 1; }
   static bool isMusicBeingStreamed() { return sIsAudioStreaming; }
   static bool isMusicStreamingAllowed() { return sIsAudioStreamAllowed; }
   static bool areCodesPresent() { return sPlayerHasGeckoCodes; }
+
+  static f32 getScreenWidth() { return *(f32 *)SME_PORT_REGION(0x80416620, 0, 0, 0); }
+  static f32 getScreenToFullScreenRatio() { return getScreenWidth() / 600.0f; }
 
   static Class::TLightContext sLightData;
 
@@ -69,6 +73,7 @@ public:
   static bool sIsFreePlay;
   static u8 sActivePlayers;
   static u8 sMaxPlayers;
+  static Enum::Player sCharacterIDList[SME_MAX_PLAYERS];
 };
 
 } // namespace SME

@@ -62,14 +62,14 @@ void Patch::Shine::isKillEnemiesShine(TConductor *gpConductor,
 static void restoreMario(TMarDirector *gpMarDirector, u32 curState) {
   TShine *shine = gpMarDirector->mCollectedShine;
 
-  if (!shine || !(shine->mType & 0x10) || !gpMarDirector->sNextState)
+  if (!shine || !(shine->mType & 0x10) || !gpMarDirector->mpNextState)
     return;
 
   u8 *curSaveCard =
-      reinterpret_cast<u8 *>(gpMarDirector->sNextState[0x118 / 4]);
+      reinterpret_cast<u8 *>(gpMarDirector->mpNextState[0x118 / 4]);
 
   if (curState != TMarDirector::Status::NORMAL ||
-      gpMarDirector->mLastState != TMarDirector::Status::SAVE_CARD ||
+      gpMarDirector->mCurState != TMarDirector::Status::SAVE_CARD ||
       gpMarioAddress->mState != static_cast<u32>(TMario::State::SHINE_C))
     return;
 

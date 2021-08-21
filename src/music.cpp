@@ -34,7 +34,7 @@ JAISound *SME::Patch::Music::initMusic(JAISound *jai) {
     MSBgm::stopBGM(gStageBGM, 32);
   } else if (sIsWeakBGM) {
     SME_DEBUG_LOG("BGM IS WEAK, PAUSING!\n");
-    streamer->pause(0.1f);
+    streamer->pause(0.2f);
   } else {
     streamer->stop(0.0f);
   }

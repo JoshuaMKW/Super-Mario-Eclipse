@@ -125,8 +125,7 @@ static void boostPadCol(TMario *player) {
           : static_cast<u32>(TMario::State::RUNNING);
   if (player->mState == static_cast<u32>(TMario::State::IDLE) ||
       !playerData->mCollisionFlags.mIsFaceUsed) {
-    changePlayerStatus__6TMarioFUlUlb(
-        player, targetState, 0, 0);
+    changePlayerStatus__6TMarioFUlUlb(player, targetState, 0, 0);
     startVoice__6TMarioFUl(player, static_cast<u32>(TMario::Voice::JUMP));
   }
 }
@@ -156,18 +155,19 @@ static void antiGravityCol(TMario *player) {
     player->mSubStateTimer = 0;
 }
 
-static void warpToLinkedCol(TMario *player) {
+static SME_NO_INLINE void warpToLinkedCol(TMario *player) {
   SME::Class::TPlayerData *playerData = SME::TGlobals::getPlayerParams(player);
 
   TBGCheckData *linkedCol = SME::TGlobals::sWarpColArray->resolveCollisionWarp(
       player->mFloorTriangle);
-  SME::Class::TVectorTriangle colTriangle(
-      linkedCol->mVertexA, linkedCol->mVertexB, linkedCol->mVertexC);
 
   if (!linkedCol) {
     playerData->mCollisionTimer = 0;
     return;
   }
+
+  SME::Class::TVectorTriangle colTriangle(
+      linkedCol->mVertexA, linkedCol->mVertexB, linkedCol->mVertexC);
 
   const f32 speed = Vector::magnitude(player->mSpeed);
 
@@ -199,14 +199,19 @@ static void warpToLinkedCol(TMario *player) {
         f32 z = SME::Util::Math::lerp<f32>(cameraPos.z, playerPos.z, 0.9375f);
         cameraPos.set(x, y, z);
       }
-      gpCamera->mHorizontalAngle =
-          static_cast<u16>(SME::Class::TVectorTriangle::bearingAngleY(
-              playerPos, cameraPos)) *
-          182;
+      // gpCamera->mHorizontalAngle =
+      //    static_cast<u16>(SME::Class::TVectorTriangle::bearingAngleY(
+      //        playerPos, cameraPos)) *
+      //    182;
+      player->JSGSetTranslation(reinterpret_cast<Vec &>(playerPos));
+      gpCamera->JSGSetViewPosition(reinterpret_cast<Vec &>(cameraPos));
+      gpCamera->JSGSetViewTargetPosition(reinterpret_cast<Vec &>(playerPos));
     } else if (playerData->mCollisionTimer > 80) {
+      if (!playerData->mCollisionFlags.mIsDisableInput) {
+        emitGetEffect__6TMarioFv(player);
+      }
       playerData->mCollisionFlags.mIsDisableInput = true;
       player->mController->State.mReadInput = false;
-      emitGetEffect__6TMarioFv(player);
     }
   } else {
     if (playerData->mCollisionTimer > 60) {
@@ -222,11 +227,12 @@ static void warpToLinkedColPreserve(TMario *player, bool fluid) {
 
   TBGCheckData *linkedCol = SME::TGlobals::sWarpColArray->resolveCollisionWarp(
       player->mFloorTriangle);
-  SME::Class::TVectorTriangle colTriangle(
-      linkedCol->mVertexA, linkedCol->mVertexB, linkedCol->mVertexC);
 
   if (!linkedCol)
     return;
+    
+  SME::Class::TVectorTriangle colTriangle(
+      linkedCol->mVertexA, linkedCol->mVertexB, linkedCol->mVertexC);
 
   if (!playerData->mCollisionFlags.mIsFaceUsed) {
     JGeometry::TVec3<f32> playerPos;
@@ -295,7 +301,8 @@ static inline void resetValuesOnStateChange(TMario *player) {
 static inline void resetValuesOnGroundContact(TMario *player) {
   SME::Class::TPlayerData *playerData = SME::TGlobals::getPlayerParams(player);
 
-  if (!(player->mState & static_cast<u32>(TMario::State::AIRBORN))) {
+  if (!(player->mState & static_cast<u32>(TMario::State::AIRBORN)) &&
+      playerData->mCollisionFlags.mIsAirborn == true) {
     playerData->mCollisionFlags.mIsAirborn = false;
     playerData->mCollisionFlags.mIsDisableInput = false;
   }
@@ -304,8 +311,11 @@ static inline void resetValuesOnGroundContact(TMario *player) {
 static inline void resetValuesOnAirborn(TMario *player) {
   SME::Class::TPlayerData *playerData = SME::TGlobals::getPlayerParams(player);
 
-  if (!(player->mState & static_cast<u32>(TMario::State::AIRBORN)))
+  if (!(player->mState & static_cast<u32>(TMario::State::AIRBORN)) ||
+      playerData->mCollisionFlags.mIsAirborn == true)
     return;
+
+  playerData->mCollisionFlags.mIsAirborn = true;
 }
 
 static inline void resetValuesOnCollisionChange(TMario *player) {
@@ -369,10 +379,10 @@ u16 Patch::Collision::masterGroundCollisionHandler(TBGCheckData *colTriangle) {
     warpToLinkedCol(player);
     break;
   case 16041:
-  case 16042:
+  case 17041:
     warpToLinkedColPreserve(player, false);
     break;
-  case 17041:
+  case 16042:
   case 17042:
     warpToLinkedColPreserve(player, true);
     break;

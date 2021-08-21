@@ -30,9 +30,10 @@ public:
 	virtual void drawSelf(int, int);
 	virtual void drawSelf(int, int, Mtx *);
 
-	void drawFullSet(int, int, int, int, J2DBinding, u32, bool, J2DWrapMode, J2DWrapMode, Mtx *);
-	void draw(int, int, int, int, bool, bool, bool);
-	void drawTexCoord(int, int, int, int, f32, f32, f32, f32, f32, f32, f32, f32, Mtx *);
+	void drawFullSet(int x, int y, int w, int h, J2DBinding binding, u32, bool, J2DWrapMode wrapH, J2DWrapMode wrapV, Mtx *);
+	void draw(int x, int y, int w, int h, bool invertX, bool invertY, bool rotate90);
+	void drawTexCoord(int x, int y, int w, int h, f32, f32, f32, f32, f32, f32, f32, f32, Mtx *);
+    void remove(u8);
 	void setTevMode();
 	void swap(f32 &, f32 &);
 	void setBlendKonstColor();
@@ -53,4 +54,12 @@ public:
     u8 _133; // ^^
     u32 _134;
     u32 _138;
+    JUtility::TColor mFillColor;
+    u32 _140;
+    u32 _144;
+    u32 _148;
+    u32 _14C;
+    u32 _150;
+    u32 _154;
+    u32 _158;
 };

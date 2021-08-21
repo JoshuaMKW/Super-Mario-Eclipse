@@ -3,12 +3,14 @@
 #include "AI.h"
 #include "DVD.h"
 #include "OS.h"
-#include "sms/JSystem/JSU/JSUStream.hxx"
 #include "sms/JSystem/JKR/JKRHeap.hxx"
+#include "sms/JSystem/JSU/JSUStream.hxx"
 #include "sms/sound/MSBGM.hxx"
+
 
 using namespace SME::Util;
 
+constexpr size_t AudioMessageQueueSize = 16;
 constexpr size_t AudioQueueSize = 4;
 constexpr size_t AudioStackSize = 0x4000;
 
@@ -56,24 +58,9 @@ public:
   };
 
 public:
-  AudioStreamer(void *(*mainLoop)(void *), OSPriority priority, DVDFileInfo *fInfo,
-                DVDCommandBlock *cb)
-      : mAudioHandle(fInfo), mAudioCommandBlock(cb), mAudioIndex(0),
-        mDelayedTime(0.0f), mFadeTime(0.0f), _mWhere(0), _mWhence(JSUStreamSeekFrom::BEGIN),
-        mIsPlaying(false), mIsPaused(false), mIsLooping(false), mVolLeft(0x7F),
-        mVolRight(0x7F) {
-    mAudioStack =
-        static_cast<u8 *>(JKRHeap::sRootHeap->alloc(AudioStackSize, 32));
-    OSInitMessageQueue(&mMessageQueue, mMessageList, sizeof(mMessageList));
-    OSCreateThread(&mMainThread, mainLoop, this, mAudioStack + AudioStackSize,
-                   AudioStackSize, priority, OS_THREAD_ATTR_DETACH);
-    OSResumeThread(&mMainThread);
-  }
-
-  ~AudioStreamer() {
-    JKRHeap::sRootHeap->free(mAudioStack);
-    OSCancelThread(&mMainThread);
-  }
+  AudioStreamer(void *(*mainLoop)(void *), OSPriority priority,
+                DVDFileInfo *fInfo, DVDCommandBlock *cb);
+  ~AudioStreamer();
 
   static AudioStreamer *getInstance() { return &sInstance; }
   AudioPacket *getCurrentAudio() const { return mAudioQueue[mAudioIndex]; }
@@ -86,12 +73,10 @@ public:
   bool isLooping() const { return mIsLooping; }
 
   void setVolumeLR(u8 left, u8 right);
+  void setVolumeFadeTo(u8 vol, f32 seconds);
 
   bool queueAudio(AudioPacket &packet);
-  void fadeAudioOut(f32 fadeTime);
-  void fadeAudioIn(f32 fadeTime);
-  void fadeAudioOut_();
-  void fadeAudioIn_();
+  void fadeAudio_();
 
   void play();
   void pause(f32 fadeTime);
@@ -110,8 +95,9 @@ public:
   void update_();
 
   OSThread mMainThread;
+  OSAlarm mVolumeFadeAlarm;
   OSMessageQueue mMessageQueue;
-  OSMessage mMessageList[16];
+  OSMessage mMessageList[AudioMessageQueueSize];
   DVDFileInfo *mAudioHandle;
   DVDCommandBlock *mAudioCommandBlock;
   u8 *mAudioStack;
@@ -121,6 +107,9 @@ private:
   s32 mAudioIndex;
   f32 mDelayedTime;
   f32 mFadeTime;
+  u8 mTargetVolume;
+  u8 mPreservedVolLeft;
+  u8 mPreservedVolRight;
 
   s32 _mWhere;
   JSUStreamSeekFrom _mWhence;

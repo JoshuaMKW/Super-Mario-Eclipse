@@ -134,7 +134,5 @@ builtin setStreamLooping(looping);
 // MISCELLANEOUS
 // ================================================= \\
 
-builtin sprintf(dst, src, ...);
-
 // return: char *
 builtin formatStrBySpec(str);

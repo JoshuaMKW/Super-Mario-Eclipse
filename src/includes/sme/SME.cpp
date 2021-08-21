@@ -30,10 +30,10 @@ static void initMod() {
 #ifdef SME_DEBUG
   //OSInitStopwatch(&gctStopwatch, "Codeblocker");
 #endif
-  OSCreateAlarm(&gctAlarm);
-  OSSetPeriodicAlarm(
-      &gctAlarm, OSGetTime(), OSMillisecondsToTicks(1),
-      reinterpret_cast<OSAlarmHandler>(&SME::Util::Security::checkUserCodes));
+  //OSCreateAlarm(&gctAlarm);
+  //OSSetPeriodicAlarm(
+  //    &gctAlarm, OSGetTime(), OSMillisecondsToTicks(1),
+  //    reinterpret_cast<OSAlarmHandler>(&SME::Util::Security::checkUserCodes));
   SME_DEBUG_LOG("Mario health offset = 0x%X\n", offsetof(TMario, mHealth));
   SME_DEBUG_LOG("J3DFrameCtrl offset = 0x%X\n", offsetof(J3DFrameCtrl, _04));
   //Patch::Init::initCodeProtection();
@@ -547,3 +547,6 @@ SME_WRITE_32(SME_PORT_REGION(0x8040FAA8, 0, 0, 0), 0x42480000);
 
 // Remove blue coin prompts
 SME_WRITE_32(SME_PORT_REGION(0x8029A73C, 0, 0, 0), 0x60000000);
+
+// Fruit don't time out
+SME_WRITE_32(SME_PORT_REGION(0x8040C918, 0, 0, 0), 0x7FFFFFFF);

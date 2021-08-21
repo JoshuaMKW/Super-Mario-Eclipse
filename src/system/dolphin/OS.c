@@ -9,6 +9,28 @@ u32 BI2DebugFlagHolder;
 bool AreWeInitialized;
 void *OSExceptionTable;
 
+#if 0
+OSTime __OSTimeToSystemTime(OSTime time) {
+  u32 _atomic_state = OSDisableInterrupts();
+  time += *(OSTime *)0x800030D8;
+  OSRestoreInterrupts(_atomic_state);
+  return time;
+}
+
+void OSSetPeriodicAlarm(OSAlarm *alarm, OSTime start, OSTime period,
+                        OSAlarmHandler handler) {
+  u32 _atomic_state = OSDisableInterrupts();
+
+  alarm->mPeriod = period;
+
+  OSTime transTime = __OSTimeToSystemTime(start);
+  alarm->mStart = transTime;
+
+  InsertAlarm(alarm, (OSTick)transTime, 0, handler);
+
+  OSRestoreInterrupts(_atomic_state);
+}
+#else
 void OSSetPeriodicAlarm(OSAlarm *alarm, OSTime start, OSTime period,
                         OSAlarmHandler handler) {
   const u32 iStatus = OSDisableInterrupts();
@@ -20,6 +42,7 @@ void OSSetPeriodicAlarm(OSAlarm *alarm, OSTime start, OSTime period,
 
   OSRestoreInterrupts(iStatus);
 }
+#endif
 
 void OSDumpStopwatch(OSStopwatch *watch) {
   OSReport("============================\n"

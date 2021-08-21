@@ -57,6 +57,12 @@
             }
         },
         {
+            "music/*.adp": {
+                "destination": "files/AudioRes/Streams/Music/",
+                "rename": ""
+            }
+        },
+        {
             "opening.bnr": {
                 "destination": "files/",
                 "rename": ""

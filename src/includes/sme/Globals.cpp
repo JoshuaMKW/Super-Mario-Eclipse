@@ -24,7 +24,7 @@ SME::Class::TWarpCollisionList *TGlobals::sWarpColArray = nullptr;
 SME::Class::TWarpCollisionList *TGlobals::sWarpColPreserveArray = nullptr;
 
 SME::Class::TPlayerData *TGlobals::sPlayerCfgArray[] = {nullptr, nullptr,
-                                                          nullptr, nullptr};
+                                                        nullptr, nullptr};
 TMario *TGlobals::sPlayers[] = {nullptr, nullptr, nullptr, nullptr};
 bool TGlobals::sPlayerHasGeckoCodes = false;
 bool TGlobals::sIsAudioStreaming = false;
@@ -32,6 +32,9 @@ bool TGlobals::sIsAudioStreamAllowed = false;
 bool TGlobals::sIsFreePlay = false;
 u8 TGlobals::sActivePlayers = 0;
 u8 TGlobals::sMaxPlayers = SME_MAX_PLAYERS;
+Enum::Player TGlobals::sCharacterIDList[] = {
+    Enum::Player::MARIO, Enum::Player::UNKNOWN, Enum::Player::UNKNOWN,
+    Enum::Player::UNKNOWN};
 
 TMario *TGlobals::getPlayerByIndex(u8 index) {
   SME_DEBUG_ASSERT(index < SME_MAX_PLAYERS, "Invalid player index provided");

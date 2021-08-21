@@ -97,10 +97,10 @@ public:
     u32 _B8;
     u8 _BC;
     f32 mRotation;     // _C0
-    u32 mBasePosition; // _C4 (J2DBasePosition)
-    u32 mCullingMode;  // _C8
-    u8 _CC;
-    u8 _CD;
+    J2DBasePosition mBasePosition; // _C4
+    GXCullback mCullingMode;  // _C8
+    u8 mAlpha;
+    u8 mAlphaCopy;
     u8 _CE;
     u8 _CF; // connectParent
     JSUPtrList _D0;

@@ -7,6 +7,6 @@ class JUTPoint
 public:
     JUTPoint();
 
-    u32 x; // _0
-    u32 y; // _4
+    s32 x; // _0
+    s32 y; // _4
 };

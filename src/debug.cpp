@@ -25,7 +25,7 @@ bool Patch::Debug::xyzModifierMario(TMario *player) {
   const f32 speedMultiplier =
       SME::Util::Math::lerp<f32>(1, 2, player->mController->mButtons.mAnalogR);
 
-  if (gpMarDirector->mLastState == 0xA)
+  if (gpMarDirector->mCurState == 0xA)
     return (player->_114 & 0x400) == 0x400;
 
   if (player->mController->mButtons.mFrameInput &

@@ -8,8 +8,8 @@
 #include "SME.hxx"
 
 using namespace SME;
-using namespace SME::Util;
-using namespace SME::Class;
+using namespace Util;
+using namespace Class;
 
 extern bool gInXYZMode;
 
@@ -17,7 +17,7 @@ Memory::Protection::MemoryMap gCodeProtector;
 
 // 0x80005328
 // extern -> SME.cpp
-void SME::Patch::Init::initCodeProtection() {
+void Patch::Init::initCodeProtection() {
   OSInit();
   gCodeProtector.setIndex(2);
   gCodeProtector.setStart(0x80003800);
@@ -28,8 +28,8 @@ void SME::Patch::Init::initCodeProtection() {
 
 // 0x802A750C
 // extern -> SME.cpp
-JKRExpHeap *SME::Patch::Init::createGlobalHeaps(void *newHeap, size_t size,
-                                                JKRHeap *rootHeap, bool unk_1) {
+JKRExpHeap *Patch::Init::createGlobalHeaps(void *newHeap, size_t size,
+                                           JKRHeap *rootHeap, bool unk_1) {
   constexpr size_t charactersize = 0x1C0000;
   constexpr size_t globalsize = 0x8000;
 
@@ -42,10 +42,10 @@ JKRExpHeap *SME::Patch::Init::createGlobalHeaps(void *newHeap, size_t size,
 
     void *heap = OSGetArenaHi();
     if (charactersize > sizeof(JKRExpHeap))
-      SME::TGlobals::sCharacterHeap = new (JKRExpHeap::sSystemHeap, 4)
+      TGlobals::sCharacterHeap = new (JKRExpHeap::sSystemHeap, 4)
           JKRExpHeap(heap, charactersize - sizeof(JKRExpHeap), nullptr, false);
     if (globalsize > sizeof(JKRExpHeap))
-      SME::TGlobals::sGlobalHeap = new (JKRExpHeap::sSystemHeap, 4)
+      TGlobals::sGlobalHeap = new (JKRExpHeap::sSystemHeap, 4)
           JKRExpHeap(heap, globalsize - sizeof(JKRExpHeap), nullptr, false);
 
     currentHeap->becomeCurrentHeap();
@@ -60,14 +60,13 @@ JKRExpHeap *SME::Patch::Init::createGlobalHeaps(void *newHeap, size_t size,
     JKRHeap *currentHeap = JKRHeap::sCurrentHeap;
 
     if (charactersize > sizeof(JKRExpHeap))
-      SME::TGlobals::sCharacterHeap = JKRExpHeap::create(
+      TGlobals::sCharacterHeap = JKRExpHeap::create(
           charactersize - sizeof(JKRExpHeap), JKRHeap::sRootHeap, false);
     if (globalsize > sizeof(JKRExpHeap))
-      SME::TGlobals::sGlobalHeap = JKRExpHeap::create(
+      TGlobals::sGlobalHeap = JKRExpHeap::create(
           globalsize - sizeof(JKRExpHeap), JKRHeap::sRootHeap, false);
 
-    SME::TGlobals::sCharacterHeap->alloc(
-        SME::TGlobals::sCharacterHeap->getFreeSize(), 4);
+    TGlobals::sCharacterHeap->alloc(TGlobals::sCharacterHeap->getFreeSize(), 4);
 
     TStageParams::sStageConfig =
         new (JKRHeap::sRootHeap, 4) TStageParams(nullptr);
@@ -83,10 +82,10 @@ JKRExpHeap *SME::Patch::Init::createGlobalHeaps(void *newHeap, size_t size,
 
 // 0x802A7140
 // extern -> SME.cpp
-s32 SME::Patch::Init::setupMarioDatas(char *filepath) {
+s32 Patch::Init::setupMarioDatas(char *filepath) {
   TMarioGamePad *gpGamePad = gpApplication.mGamePad1;
-  SME::Enum::Player playerID =
-      SME::Util::Mario::getPlayerIDFromInput(gpGamePad->mButtons.mInput);
+  Enum::Player playerID =
+      Util::Mario::getPlayerIDFromInput(gpGamePad->mButtons.mInput);
 
   sprintf(filepath, "/data/chr%d.szs", static_cast<u8>(playerID));
   return DVDConvertPathToEntrynum(filepath);
@@ -94,18 +93,17 @@ s32 SME::Patch::Init::setupMarioDatas(char *filepath) {
 
 // 0x802A716C
 // extern -> SME.cpp
-u32 *SME::Patch::Init::initFirstModel(char *path, u32 unk_1, u32 unk_2,
-                                      u32 unk_3, JKRHeap *heap,
-                                      JKRDvdRipper::EAllocDirection direction,
-                                      u32 unk_5, u32 unk_6) {
+u32 *Patch::Init::initFirstModel(char *path, u32 unk_1, u32 unk_2, u32 unk_3,
+                                 JKRHeap *heap,
+                                 JKRDvdRipper::EAllocDirection direction,
+                                 u32 unk_5, u32 unk_6) {
 #ifndef SME_DETACHED_HEAPS
-  SME::TGlobals::sCharacterHeap->freeAll();
+  TGlobals::sCharacterHeap->freeAll();
 #endif
   u32 *archive = static_cast<u32 *>(
-      SME::Util::loadArchive(path, SME::TGlobals::sCharacterHeap, direction));
+      Util::loadArchive(path, TGlobals::sCharacterHeap, direction));
 #ifndef SME_DETACHED_HEAPS
-  SME::TGlobals::sCharacterHeap->alloc(
-      SME::TGlobals::sCharacterHeap->getFreeSize(), 4);
+  TGlobals::sCharacterHeap->alloc(TGlobals::sCharacterHeap->getFreeSize(), 4);
 #endif
   return archive;
 }
@@ -125,43 +123,45 @@ static void resetGlobalValues() {
   gAudioSpeed = 1.0f;
 }
 
-static Enum::Player gCharacterID;
-
 // 0x802998B4
-TMarDirector *SME::Patch::Init::initFileMods() {
+TMarDirector *Patch::Init::initFileMods() {
   TMarDirector *director;
   SME_FROM_GPR(26, director);
 
   TMarioGamePad *gpGamePad = gpApplication.mGamePad1;
 
 #ifdef SME_DEBUG
-  SME::Enum::Player characterID =
-      SME::Util::Mario::getPlayerIDFromInput(gpGamePad->mButtons.mInput);
+  Enum::Player characterID =
+      Util::Mario::getPlayerIDFromInput(gpGamePad->mButtons.mInput);
 #else
-  SME::Enum::Player characterID = SME::Enum::Player::UNKNOWN;
+  Enum::Player characterID = Enum::Player::UNKNOWN;
 #endif
 
   resetGlobalValues();
-  SME::TGlobals::clearAllPlayerParams();
+  TGlobals::clearAllPlayerParams();
   TStageParams::sStageConfig->reset();
-  TStageParams::sStageConfig->load(SME::Util::getStageName(&gpApplication));
+  TStageParams::sStageConfig->load(Util::getStageName(&gpApplication));
 
-  gCharacterID = characterID;
+#ifdef CHARACTER_SELECT
+
+#else
+  TGlobals::sCharacterIDList[0] = characterID;
+#endif
   gInXYZMode = false;
 
-  SME::Util::Mario::swapBinary(characterID);
-  SME::Util::Mario::loadParams();
+  Util::Mario::swapBinary(characterID);
+  Util::Mario::loadParams();
 
   return director;
 }
 
 // 0x80280180
-void SME::Patch::Init::initShineShadow() {
+void Patch::Init::initShineShadow() {
   TStageParams *config = TStageParams::sStageConfig;
   if (config->mLightType.get() == TLightContext::ActiveType::DISABLED)
     return;
 
-  Class::TLightContext &LightContext = SME::TGlobals::sLightData;
+  Class::TLightContext &LightContext = TGlobals::sLightData;
 
   s32 &CurrentShineCount = TFlagManager::smInstance->Type4Flag.mShineCount;
   if (CurrentShineCount < SME_MAX_SHINES) {
@@ -209,7 +209,7 @@ static u8 gOldAreaID = 0;
 static u8 gOldEpisodeID = 0;
 
 // 0x802B7A4C
-void SME::Patch::Init::initSoundBank(u8 areaID, u8 episodeID) {
+void Patch::Init::initSoundBank(u8 areaID, u8 episodeID) {
   TStageParams *config = TStageParams::sStageConfig;
 
   gOldAreaID = areaID;
@@ -223,7 +223,7 @@ void SME::Patch::Init::initSoundBank(u8 areaID, u8 episodeID) {
 
 // 0x802983F0
 // 0x80298420
-void SME::Patch::Init::initMusicTrack() {
+void Patch::Init::initMusicTrack() {
   TStageParams *config = TStageParams::sStageConfig;
 
   if (config->mMusicSetCustom.get())
@@ -294,15 +294,15 @@ static void initMario(TMario *player, bool isMario) {
   bool isGlasses = false;
 
   if (config->isCustomConfig()) {
-    params->setPlayerID(isMario ? gCharacterID : Enum::Player::SHADOW_MARIO);
+    params->setPlayerID(isMario ? TGlobals::sCharacterIDList[0]
+                                : Enum::Player::SHADOW_MARIO);
     player->mHealth = config->mPlayerHealth.get();
     player->mDeParams.mHPMax.set(config->mPlayerMaxHealth.get());
     player->mJumpParams.mGravity.set(config->mGravityMultiplier.get());
 
     if (isMario) {
       player->mAttributes.mGainHelmet = config->mPlayerHasHelmet.get();
-      player->mAttributes.mHasFludd =
-          config->mPlayerHasFludd.get();
+      player->mAttributes.mHasFludd = config->mPlayerHasFludd.get();
       player->mAttributes.mIsShineShirt = config->mPlayerHasShirt.get();
     }
 
@@ -310,10 +310,11 @@ static void initMario(TMario *player, bool isMario) {
   }
 
   if (isMario) {
-    player->mAttributes.mGainHelmet = params->getParams()->mPlayerHasHelmet.get();
-    player->mAttributes.mHasFludd =
-        params->getParams()->mCanUseFludd.get();
-    player->mAttributes.mIsShineShirt = params->getParams()->mPlayerHasShirt.get();
+    player->mAttributes.mGainHelmet =
+        params->getParams()->mPlayerHasHelmet.get();
+    player->mAttributes.mHasFludd = params->getParams()->mCanUseFludd.get();
+    player->mAttributes.mIsShineShirt =
+        params->getParams()->mPlayerHasShirt.get();
     isGlasses = params->getParams()->mPlayerHasGlasses.get();
 
     initFludd(player, params);
@@ -324,14 +325,14 @@ static void initMario(TMario *player, bool isMario) {
 }
 
 // 0x80276C94
-TMario *SME::Patch::Init::fromMarioInit(TMario *player) {
+TMario *Patch::Init::fromMarioInit(TMario *player) {
   player->initValues();
   initMario(player, true);
   return player;
 }
 
 // 0x800397DC
-bool SME::Patch::Init::fromShadowMarioInit() {
+bool Patch::Init::fromShadowMarioInit() {
   TMario *player;
   asm volatile("lwz %0, 0x150 (31)" : "=r"(player));
   initMario(player, false);
@@ -339,8 +340,7 @@ bool SME::Patch::Init::fromShadowMarioInit() {
 }
 
 // 0x80271580
-void SME::Patch::Init::initYoshi(MAnmSound *anmSound, void *r4, u32 r5,
-                                 f32 f1) {
+void Patch::Init::initYoshi(MAnmSound *anmSound, void *r4, u32 r5, f32 f1) {
   initAnmSound__9MAnmSoundFPvUlf(anmSound, r4, r5, f1);
 
   TYoshi *yoshi;
@@ -366,28 +366,37 @@ void SME::Patch::Init::initYoshi(MAnmSound *anmSound, void *r4, u32 r5,
 }
 
 // 0x8029CCB0
-void SME::Patch::Init::initCardColors() {
+void Patch::Init::initCardColors() {
   TStageParams *config = TStageParams::sStageConfig;
 
   if (!config->isCustomConfig())
     return;
 
+  TGCConsole2 *gcConsole = gpMarDirector->mGCConsole;
   JUtility::TColor waterColor = config->mFluddWaterColor.get();
 
-  gpMarDirector->mGCConsole->mJuiceCardOrange = config->mYoshiColorOrange.get();
-  gpMarDirector->mGCConsole->mJuiceCardPurple = config->mYoshiColorPurple.get();
-  gpMarDirector->mGCConsole->mJuiceCardPink = config->mYoshiColorPink.get();
+  gcConsole->mJuiceCardOrangeColor = config->mYoshiColorOrange.get();
+  gcConsole->mJuiceCardPurpleColor = config->mYoshiColorPurple.get();
+  gcConsole->mJuiceCardPinkColor = config->mYoshiColorPink.get();
 
   if (config->mFluddShouldColorWater.get()) {
-    gpMarDirector->mGCConsole->mWaterLeftPanel = waterColor;
-    gpMarDirector->mGCConsole->mWaterRightPanel.r =
+    gcConsole->mWaterLeftPanelColor = waterColor;
+    gcConsole->mWaterRightPanelColor.r =
         Math::lerp<u8>(0, waterColor.r, 0.8125f);
-    gpMarDirector->mGCConsole->mWaterRightPanel.g =
+    gcConsole->mWaterRightPanelColor.g =
         Math::lerp<u8>(0, waterColor.g, 0.8125f);
-    gpMarDirector->mGCConsole->mWaterRightPanel.b =
+    gcConsole->mWaterRightPanelColor.b =
         Math::lerp<u8>(0, waterColor.b, 0.8125f);
-    gpMarDirector->mGCConsole->mWaterRightPanel.a =
+    gcConsole->mWaterRightPanelColor.a =
         Math::lerp<u8>(0, waterColor.a, 0.8125f);
+    gcConsole->mWaterTopPanel->mFillColor.r =
+        Math::lerp<u8>(0, waterColor.r, 1.1875f);
+    gcConsole->mWaterTopPanel->mFillColor.g =
+        Math::lerp<u8>(0, waterColor.g, 1.1875f);
+    gcConsole->mWaterTopPanel->mFillColor.b =
+        Math::lerp<u8>(0, waterColor.b, 1.1875f);
+    gcConsole->mWaterTopPanel->mFillColor.a =
+        Math::lerp<u8>(0, waterColor.a, 1.1875f);
   }
 }
 
@@ -403,44 +412,41 @@ static void parseWarpLinks(TMapCollisionData *col, TWarpCollisionList *links,
   u32 curDataIndex = 0;
 
   for (u32 i = 0; i < col->mFloorArraySize; ++i) {
-    if (((col->mColTable[i].mCollisionType & 0x7FFF) - validID) <=
-            idGroupSize ||
-        ((col->mColTable[i].mCollisionType & 0x7FFF) - validID) <=
-            idGroupSize + 1000) {
+    if (TCollisionLink::isValidWarpCol(&col->mColTable[i])) {
 
-      links->mColList[curDataIndex] = TCollisionLink(
+      TCollisionLink link(
           &col->mColTable[i], (u8)(col->mColTable[i].mValue4 >> 8),
-          (u8)col->mColTable[i].mValue4);
-      if (curDataIndex >= 0xFF)
+          (u8)col->mColTable[i].mValue4,
+          TCollisionLink::getSearchModeFrom(&col->mColTable[i]));
+
+      links->addLink(link);
+      if (curDataIndex > 0xFF)
         break;
-      ++curDataIndex;
     }
   }
-  links->mArrayLength = curDataIndex;
 }
 
 // 0x802B8B20
-u32 SME::Patch::Init::initCollisionWarpLinks(const char *name) {
-  TWarpCollisionList *warpDataArray = new TWarpCollisionList();
-  TWarpCollisionList *warpDataPreserveArray = new TWarpCollisionList();
-  SME::TGlobals::sWarpColArray = warpDataArray;
-  SME::TGlobals::sWarpColPreserveArray = warpDataPreserveArray;
+u32 Patch::Init::initCollisionWarpLinks(const char *name) {
+  TWarpCollisionList *warpDataArray = new TWarpCollisionList(2048);
+  TWarpCollisionList *warpDataPreserveArray = new TWarpCollisionList(1);
+  TGlobals::sWarpColArray = warpDataArray;
+  TGlobals::sWarpColPreserveArray = warpDataPreserveArray;
 
   if (warpDataArray) {
-    parseWarpLinks(gpMapCollisionData, warpDataArray, 16040);
-    parseWarpLinks(gpMapCollisionData, warpDataPreserveArray, 16041, 1);
+    parseWarpLinks(gpMapCollisionData, warpDataArray, 16040, 4);
   }
 
   return JDrama::TNameRef::calcKeyCode(name);
 }
 
 // 0x802B57E4
-void SME::Patch::Init::createUIHeap(u32 size, s32 alignment) {
+void Patch::Init::createUIHeap(u32 size, s32 alignment) {
   gpMarDirector->mGame6Data = (u32 *)Memory::malloc(size, alignment);
 }
 
 // 0x802A72A4
-u32 SME::Patch::Init::initHUDElements(char *filepath) {
+u32 Patch::Init::initHUDElements(char *filepath) {
   char buffer[32];
   s32 entrynum;
 
@@ -466,8 +472,8 @@ static JKRMemArchive *switchArchive(char *curArchive, void *newArchive) {
 }
 
 // 0x80172440
-JKRMemArchive *SME::Patch::Init::switchHUDOnStageLoad(char *curArchive,
-                                                      u32 *gameUI) {
+JKRMemArchive *Patch::Init::switchHUDOnStageLoad(char *curArchive,
+                                                 u32 *gameUI) {
   char buffer[32];
 
   if (gpApplication.mGamePad1->mButtons.mInput &
@@ -494,7 +500,7 @@ JKRMemArchive *SME::Patch::Init::switchHUDOnStageLoad(char *curArchive,
 // kmCall(0x80172440, &switchHUDOnStageLoad);
 
 // 0x802B57E4
-JKRHeap *SME::Patch::Init::useCustomHUDHeap(u32 size, s32 alignment) {
-  return nullptr; // SME::TGlobals::sGame6Heap;
+JKRHeap *Patch::Init::useCustomHUDHeap(u32 size, s32 alignment) {
+  return nullptr; // TGlobals::sGame6Heap;
 }
 // kmCall(0x802B57E4, &useCustomHUDHeap);

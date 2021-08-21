@@ -30,6 +30,20 @@ namespace JGeometry
         TVec3 &operator =(const TVec3 &);
         TVec3 &operator *=(const TVec3 &);
         TVec3 &operator -=(const TVec3 &);
+
+        TVec3 &operator +(const TVec3 &other) {
+            x += other.x;
+            y += other.y;
+            z += other.z;
+            return *this;
+        }
+        
+        TVec3 &operator -(const TVec3 &other) {
+            x -= other.x;
+            y -= other.y;
+            z -= other.z;
+            return *this;
+        }
         
         void add(const TVec3 &);
         void div(f32);

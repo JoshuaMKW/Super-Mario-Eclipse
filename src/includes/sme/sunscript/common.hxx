@@ -47,7 +47,6 @@ void memcpy_(TSpcInterp *interp, u32 argc);
 void memmove_(TSpcInterp *interp, u32 argc);
 void memcmp_(TSpcInterp *interp, u32 argc);
 void memset_(TSpcInterp *interp, u32 argc);
-void sprintf(TSpcInterp *interp, u32 argc);
 void formatStrBySpec(TSpcInterp *interp, u32 argc);
 void getStageBGM(TSpcInterp *interp, u32 argc);
 void queueStream(TSpcInterp *interp, u32 argc);

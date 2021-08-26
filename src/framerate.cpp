@@ -15,5 +15,3 @@ static void requestFadeTimeScaled(TSMSFader *fader, TSMSFader::WipeRequest *requ
     fader->requestWipe(request);
 }
 SME_PATCH_BL(SME_PORT_REGION(0x8013FE84, 0, 0, 0), requestFadeTimeScaled);
-SME_WRITE_8(0x80000000, 0xFF);
-SME_WRITE_16(0x80000002, 0xC0DE);

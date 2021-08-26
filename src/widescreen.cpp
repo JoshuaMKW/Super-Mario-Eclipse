@@ -9,7 +9,6 @@
 #include "sms/GC2D/SelectMenu.hxx"
 #include "sms/manager/SelectShineManager.hxx"
 
-#if 1
 
 static f32 getScreenTransX() {
   return (SME::TGlobals::getScreenToFullScreenRatio() - 1.0f) * 600.0f;
@@ -65,12 +64,16 @@ SME_PATCH_BL(SME_PORT_REGION(0x80176E58, 0, 0, 0), getShineSelectXRatio);
 SME_WRITE_32(SME_PORT_REGION(0x80176E5C, 0, 0, 0), 0xD03B004C);
 
 // Camera Width
-SME_PATCH_BL(SME_PORT_REGION(0x802B8B74, 0, 0, 0), getCameraXRatio);
+SME_WRITE_32(SME_PORT_REGION(0x802B8B6C, 0, 0, 0), 0x90010AE4);
+SME_PATCH_BL(SME_PORT_REGION(0x802B8B70, 0, 0, 0), getCameraXRatio);
+SME_WRITE_32(SME_PORT_REGION(0x802B8B74, 0, 0, 0), 0xC842FFF0);
 SME_WRITE_32(SME_PORT_REGION(0x802B8B78, 0, 0, 0), 0x3C80803E);
 SME_WRITE_32(SME_PORT_REGION(0x802B8B7C, 0, 0, 0), 0x3C60803E);
 SME_WRITE_32(SME_PORT_REGION(0x802B8B88, 0, 0, 0), 0xC8010AE0);
 SME_WRITE_32(SME_PORT_REGION(0x802B8B94, 0, 0, 0), 0xEC001028);
 SME_WRITE_32(SME_PORT_REGION(0x802B8B9C, 0, 0, 0), 0xEC010032);
+
+#if 1
 
 static void scaleNintendoIntro(JUTRect *rect, int x1, int y1, int x2, int y2) {
   const f32 translate = getScreenTransX();

@@ -1,6 +1,8 @@
 #include "types.h"
 #include "SME.hxx"
 
+#if 0
+
 static void setFrameRateThings() {
   const f32 frameRate = SME::TGlobals::isVariableFrameRate()
                             ? SME::TGlobals::getFrameRate()
@@ -15,3 +17,5 @@ static f32 setBoidSpeed(f32 thing) {
 SME_PATCH_BL(SME_PORT_REGION(0x800066E4, 0, 0, 0), setBoidSpeed);
 
 SME_WRITE_32(SME_PORT_REGION(0x802FCB24, 0, 0, 0), 0x60000000);
+
+#endif

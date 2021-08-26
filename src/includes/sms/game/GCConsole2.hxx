@@ -38,6 +38,7 @@ public:
   TExPane *mTelopWindow;                  // 0x0528
   u32 _528[0x50 / 4];
 
+  //0x1C4 = TExPane *LifeMeter
   //0x2F8 = TExPane *WaterBackPanel
 
   //0x314 = J2DPicture *FruitText

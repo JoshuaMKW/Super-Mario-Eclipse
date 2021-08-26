@@ -62,11 +62,9 @@ public:
   u16 _0E; //padding?
   u16 _10;
   u16 _12;
-  f32 mWipeTime;
+  f32 mWipeTimeCopy;
   JUtility::TColor mColor;
   bool _1C;
   EFadeStatus mFadeStatus;
   WipeRequest mQueuedWipeRequest;
-  u32 mRequestKind;
-  f32 mDelayTime;
 };

@@ -5,7 +5,6 @@
 #include "sms/actor/Mario.hxx"
 #include "sms/mapobj/MapObjTree.hxx"
 
-
 #include "SME.hxx"
 #include "macros.h"
 
@@ -69,5 +68,33 @@ SME_PATCH_B(SME_PORT_REGION(0x801F6B20, 0, 0, 0), getLeafCount);
 SME_PATCH_B(SME_PORT_REGION(0x801F6B5C, 0, 0, 0), getLeafCount);
 SME_PATCH_B(SME_PORT_REGION(0x801F6B98, 0, 0, 0), getLeafCount);
 SME_PATCH_B(SME_PORT_REGION(0x801F6BD4, 0, 0, 0), getLeafCount);
+
+static SME_PURE_ASM bool makeWaterHitCheckForDeath(TBGCheckData *col) {
+  // clang-format off
+  asm volatile (
+    "lhz 0, 0 (3)             \n\t"
+    "cmpwi 0, 2048            \n\t"
+    "bne .makeWaterCheck_tmp0 \n\t"
+    "li 0, 1025               \n\t"
+    ".makeWaterCheck_tmp0:    \n\t"
+    SME_PORT_REGION (
+      "lis 12, 0x8018           \n\t"
+      "ori 12, 12, 0xC36C       \n\t",
+
+      "lis 12, 0           \n\t"
+      "ori 12, 12, 0       \n\t",
+
+      "lis 12, 0           \n\t"
+      "ori 12, 12, 0       \n\t",
+
+      "lis 12, 0           \n\t"
+      "ori 12, 12, 0       \n\t"
+    )
+    "mtctr 12                 \n\t"
+    "bctr                     \n\t"
+  );
+  // clang-format on
+}
+SME_PATCH_B(SME_PORT_REGION(0x8018C368, 0, 0, 0), makeWaterHitCheckForDeath);
 
 // 801711dc

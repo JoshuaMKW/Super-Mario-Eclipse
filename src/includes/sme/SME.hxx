@@ -46,9 +46,9 @@
 #define SME_PATCH_B(source, target) pp::PatchB(source, target)
 #define SME_PATCH_BL(source, target) pp::PatchBL(source, target)
 #define SME_WRITE_8(source, value)                                             \
-  SME::Util::Memory::PPC::write<u8>(reinterpet_cast<u8 *>(source), value)
+  pp::Patch8(source, value)
 #define SME_WRITE_16(source, value)                                            \
-  SME::Util::Memory::PPC::write<u16>(reinterpet_cast<u16 *>(source), value)
+  pp::Patch16(source, value)
 #define SME_WRITE_32(source, value) pp::Patch32(source, value)
 #elif defined(SME_BUILD_KAMEK) || defined(SME_BUILD_KAMEK_INLINE)
 #define SME_PATCH_B(source, target) kmBranch(source, target)

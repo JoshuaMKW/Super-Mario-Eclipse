@@ -30,6 +30,16 @@ s32 Patch::CKit::onUpdate(void *director) { // movie director
   // run replaced call
   u32 func;
   SME_FROM_GPR(12, func);
+  
+  // ===== FRAME RATE ===== //
+  const f32 frameRate = SME::TGlobals::isVariableFrameRate()
+                            ? SME::TGlobals::getFrameRate()
+                            : SME::TGlobals::getFrameRate();
+  *(f32 *)SME_PORT_REGION(0x804167B8, 0, 0, 0) = 0.5f * (frameRate / 30.0f);
+  *(f32 *)SME_PORT_REGION(0x80414904, 0, 0, 0) = 0.01f * (frameRate / 30.0f);
+  gpApplication.mDisplay->mRetraceCount = frameRate > 30.0f ? 1 : 2;
+  SME_DEBUG_LOG("%.02f fps\n", frameRate);
+  // ====================== //
 
   TMarioGamePad *controller = gpApplication.mGamePad1;
   if ((controller->mButtons.mInput & 0x260) == 0x260) { // L + R + B + D-PAD UP

@@ -9,7 +9,6 @@
 #include "sms/GC2D/SelectMenu.hxx"
 #include "sms/manager/SelectShineManager.hxx"
 
-
 static f32 getScreenTransX() {
   return (SME::TGlobals::getScreenToFullScreenRatio() - 1.0f) * 600.0f;
 }
@@ -53,9 +52,7 @@ static f32 getScreenXRatio2() {
   return ratio + (ratio - 1.0f);
 }
 
-static f32 getShineSelectXRatio() {
-  return getScreenXRatio2() * 1.33333337307;
-}
+static f32 getShineSelectXRatio() { return getScreenXRatio2() * 1.33333337307; }
 
 static f32 getCameraXRatio() { return getScreenXRatio2() * 0.913461446762f; }
 
@@ -183,7 +180,7 @@ static void scaleGCConsoleExPane1C4(TExPane *pane) {
   TGCConsole2 *console;
   SME_FROM_GPR(31, console);
 
-  pane->mRect.mX1 -= getScreenTransX();
+  pane->mRect.mX1 += getScreenTransX();
 
   reinterpret_cast<TExPane **>(console)[0x1C4 / 4] = pane;
 }
@@ -204,12 +201,12 @@ SME_PATCH_BL(SME_PORT_REGION(0x8015600C, 0, 0, 0), scalePauseMenuMask);
 
 static void scaleSelectMenuMask(TSelectMenu *menu) {
   TExPane *pane;
-  
+
   pane = menu->mMask1;
   pane->mRect.mX1 -= getScreenTransX();
   pane->mRect.mX2 += getScreenTransX();
   pane->mPane->mRect.copy(pane->mRect);
-  
+
   pane = menu->mMask2;
   pane->mRect.mX1 -= getScreenTransX();
   pane->mRect.mX2 += getScreenTransX();
@@ -231,7 +228,7 @@ static void scaleSelectMenuGrad(u32 type, u32 idx, u32 count) {
 
   GXPosition3f32(-getScreenTransX(), 16.0f, -100.0f);
   GXColor3u8(grad->mColorX1.r, grad->mColorX1.g, grad->mColorX1.b);
-  
+
   GXPosition3f32(SME::TGlobals::getScreenWidth(), 16.0f, -100.0f);
   GXColor3u8(yColorR, yColorG, yColorB);
 
@@ -261,8 +258,7 @@ SME_PATCH_BL(SME_PORT_REGION(0x80171314, 0, 0, 0), fixShootingStarsNoDelete);
 SME_WRITE_32(SME_PORT_REGION(0x80171318, 0, 0, 0), 0x809F0028);
 
 static void fixShootingStarsWideScreen(TBoundPane *pane, u32 size,
-                                       JUTPoint &begin,
-                                       JUTPoint &mid,
+                                       JUTPoint &begin, JUTPoint &mid,
                                        JUTPoint &end) {
   const f32 ratio = SME::TGlobals::getScreenToFullScreenRatio() * 1.2f;
 
@@ -282,14 +278,14 @@ static void fixDemoMasksWideScreen(TConsoleStr *consoleStr) {
 
   for (u32 i = 0; i < 2; ++i) {
     JUTRect &rect = consoleStr->mDemoWipeExPanes[i]->mPane->mRect;
-    rect.mX1 = static_cast<s32>(-((ratio-1) * 600.0f));
+    rect.mX1 = static_cast<s32>(-((ratio - 1) * 600.0f));
     rect.mX2 = static_cast<s32>(SME::TGlobals::getScreenWidth());
 
     consoleStr->mDemoWipeExPanes[i]->mRect.copy(rect);
   }
 
   JUTRect *rect = &consoleStr->mDemoMaskExPanes[0]->mPane->mRect;
-  rect->mX1 = static_cast<s32>(-((ratio-1) * 600.0f));
+  rect->mX1 = static_cast<s32>(-((ratio - 1) * 600.0f));
 
   consoleStr->mDemoMaskExPanes[0]->mRect.copy(*rect);
 
@@ -303,7 +299,8 @@ SME_PATCH_BL(SME_PORT_REGION(0x801723F0, 0, 0, 0), fixDemoMasksWideScreen);
 static JUTRect sGuideBorderRects[2];
 static J2DPane sGuideBorderPanes[2];
 
-static void fixGuideWideScreenOpen(TSMSFader *fader, u32 type, f32 time, f32 delay) {
+static void fixGuideWideScreenOpen(TSMSFader *fader, u32 type, f32 time,
+                                   f32 delay) {
   TGuide *guide;
   SME_FROM_GPR(29, guide);
 
@@ -319,8 +316,8 @@ static void fixGuideWideScreenOpen(TSMSFader *fader, u32 type, f32 time, f32 del
 
   sGuideBorderRects[0] = *rect;
   sGuideBorderPanes[0] = *pane;
-  
-  rect->mX1 = static_cast<s32>(-((ratio-1) * 600.0f));
+
+  rect->mX1 = static_cast<s32>(-((ratio - 1) * 600.0f));
   rect->mX2 = guide->mScreen->mRect.mX1;
   pane->mAlpha = 0xFF;
   pane->mIsVisible = true;
@@ -342,27 +339,28 @@ static void fixGuideWideScreenOpen(TSMSFader *fader, u32 type, f32 time, f32 del
 }
 SME_PATCH_BL(SME_PORT_REGION(0x8017940C, 0, 0, 0), fixGuideWideScreenOpen);
 
-
-static void fixGuideWideScreenClose(TSMSFader *fader, u32 type, f32 time, f32 delay) {
+static void fixGuideWideScreenClose(TSMSFader *fader, u32 type, f32 time,
+                                    f32 delay) {
   fader->startWipe(type, time, delay);
 
   TConsoleStr *consoleStr = gpMarDirector->mGCConsole->mConsoleStr;
 
   JUTRect *rect = &consoleStr->mDemoMaskExPanes[0]->mRect;
   J2DPane *pane = consoleStr->mDemoMaskExPanes[0]->mPane;
-  
+
   *rect = sGuideBorderRects[0];
   *pane = sGuideBorderPanes[0];
 
   rect = &consoleStr->mDemoMaskExPanes[1]->mRect;
   pane = consoleStr->mDemoMaskExPanes[1]->mPane;
-  
+
   *rect = sGuideBorderRects[1];
   *pane = sGuideBorderPanes[1];
 }
 SME_PATCH_BL(SME_PORT_REGION(0x80179880, 0, 0, 0), fixGuideWideScreenClose);
 
-static void renderGuideWideScreenFix(J2DScreen *screen, int x, int y, J2DGrafContext *context) {
+static void renderGuideWideScreenFix(J2DScreen *screen, int x, int y,
+                                     J2DGrafContext *context) {
   TConsoleStr *consoleStr = gpMarDirector->mGCConsole->mConsoleStr;
   consoleStr->mOpeningDemoScreen->draw(x, y, context);
 
@@ -370,11 +368,13 @@ static void renderGuideWideScreenFix(J2DScreen *screen, int x, int y, J2DGrafCon
 }
 SME_PATCH_BL(SME_PORT_REGION(0x80179390, 0, 0, 0), renderGuideWideScreenFix);
 
-
 static void scaleGuideMap(TGuide *guide) {
   resetObjects__6TGuideFv(guide);
 
-  J2DPane *pane = reinterpret_cast<J2DPane *>(reinterpret_cast<J2DPane *>(guide->mScreen->mChildrenList.mFirst->mItemPtr)->mChildrenList.mFirst->mItemPtr);
+  J2DPane *pane = reinterpret_cast<J2DPane *>(
+      reinterpret_cast<J2DPane *>(
+          guide->mScreen->mChildrenList.mFirst->mItemPtr)
+          ->mChildrenList.mFirst->mItemPtr);
   pane->mRect.mX2 = 600.0f;
 }
 SME_PATCH_BL(SME_PORT_REGION(0x8017CB64, 0, 0, 0), scaleGuideMap);
@@ -382,7 +382,7 @@ SME_PATCH_BL(SME_PORT_REGION(0x8017CB64, 0, 0, 0), scaleGuideMap);
 static void fixDEBSWideScreenText(s32 x1, s32 y1, s32 width, s32 height) {
   const f32 ratio = SME::TGlobals::getScreenToFullScreenRatio();
 
-  const s32 offset = static_cast<s32>(((ratio-1) * 45.0f));
+  const s32 offset = static_cast<s32>(((ratio - 1) * 45.0f));
   x1 -= offset;
 
   GXSetScissor(x1, y1, width, height);
@@ -398,7 +398,7 @@ static void fixDEBSWideScreenPanel(TGCConsole2 *console) {
   pane->mRect.mX2 += offset;
   pane->mPane->mRect.mX1 -= offset;
   pane->mPane->mRect.mX2 += offset;
-  reinterpret_cast<J2DWindow *>(pane->mPane)->mFillRect.mX2 += offset*2;
+  reinterpret_cast<J2DWindow *>(pane->mPane)->mFillRect.mX2 += offset * 2;
 }
 
 static void fixYoshiFruitText(TGCConsole2 *console) {
@@ -416,6 +416,23 @@ static void loadAfterGCConsolePatches(TGCConsole2 *console) {
   fixYoshiFruitText(console);
 }
 SME_PATCH_BL(SME_PORT_REGION(0x8014D8A4, 0, 0, 0), loadAfterGCConsolePatches);
+
+static void patchSMSFaderInOut(JDrama::TRect *rect, JUtility::TColor color) {
+  rect->mX1 -= getScreenTransX();
+  rect->mX2 += getScreenTransX();
+  GXSetScissor(rect->mX1, rect->mY1, rect->mX2, rect->mY2);
+  GXSetViewport(rect->mX1, rect->mY1, rect->mX2, rect->mY2, 0.0f, 1.0f);
+  fill_rect__9(rect, color);
+}
+SME_PATCH_BL(SME_PORT_REGION(0x8013FDAC, 0, 0, 0), patchSMSFaderInOut);
+
+static void patchMenuBasePosition(J2DScreen *screen, int x, int y,
+                                  J2DGrafContext *context) {
+  reinterpret_cast<J2DPane *>(screen->mChildrenList.mFirst->mItemPtr)
+      ->mRect.move(getScreenTransX(), 0);
+  screen->draw(x, y, context);
+}
+SME_PATCH_BL(SME_PORT_REGION(0x8013F430, 0, 0, 0), patchMenuBasePosition);
 
 static SME_PURE_ASM void patchGXScissor() {
   // clang-format off

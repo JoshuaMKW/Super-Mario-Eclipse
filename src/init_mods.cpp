@@ -312,7 +312,7 @@ static void initMario(TMario *player, bool isMario) {
   if (isMario) {
     player->mAttributes.mGainHelmet =
         params->getParams()->mPlayerHasHelmet.get();
-    player->mAttributes.mHasFludd = params->getParams()->mCanUseFludd.get();
+    player->mAttributes.mHasFludd &= params->getParams()->mCanUseFludd.get();
     player->mAttributes.mIsShineShirt =
         params->getParams()->mPlayerHasShirt.get();
     isGlasses = params->getParams()->mPlayerHasGlasses.get();

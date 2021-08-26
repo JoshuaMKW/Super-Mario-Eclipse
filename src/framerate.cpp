@@ -1,21 +1,19 @@
 #include "types.h"
 #include "SME.hxx"
 
-#if 0
-
-static void setFrameRateThings() {
-  const f32 frameRate = SME::TGlobals::isVariableFrameRate()
-                            ? SME::TGlobals::getFrameRate()
-                            : SME::TGlobals::getFrameRate();
-  *(f32 *)SME_PORT_REGION(0x804167B8, 0, 0, 0) = 0.5f * (frameRate / 30.0f);
-  *(f32 *)SME_PORT_REGION(0x80414904, 0, 0, 0) = 0.01f * (frameRate / 30.0f);
-}
-
 static f32 setBoidSpeed(f32 thing) {
     return sqrt__Q29JGeometry8TUtil_f(thing) * (30.0f / SME::TGlobals::getFrameRate());
 }
 SME_PATCH_BL(SME_PORT_REGION(0x800066E4, 0, 0, 0), setBoidSpeed);
 
-SME_WRITE_32(SME_PORT_REGION(0x802FCB24, 0, 0, 0), 0x60000000);
-
-#endif
+static void requestFadeTimeScaled(TSMSFader *fader, TSMSFader::WipeRequest *request) {
+    #if 0
+    const f32 scale = (SME::TGlobals::getFrameRate() / 30.0f);
+    request->mWipeSpeed *= scale;
+    request->mDelayTime *= scale;
+    #endif
+    fader->requestWipe(request);
+}
+SME_PATCH_BL(SME_PORT_REGION(0x8013FE84, 0, 0, 0), requestFadeTimeScaled);
+SME_WRITE_8(0x80000000, 0xFF);
+SME_WRITE_16(0x80000002, 0xC0DE);

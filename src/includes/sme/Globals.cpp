@@ -36,7 +36,7 @@ Enum::Player TGlobals::sCharacterIDList[] = {
     Enum::Player::MARIO, Enum::Player::UNKNOWN, Enum::Player::UNKNOWN,
     Enum::Player::UNKNOWN};
 f32 TGlobals::sScreenWidth = 700.0f;
-f32 TGlobals::sFrameRate = 30.0f;
+f32 TGlobals::sFrameRate = 60.0f;
 bool TGlobals::sIsVariableFrameRate = true;
 
 TMario *TGlobals::getPlayerByIndex(u8 index) {

@@ -109,4 +109,20 @@ void GXSetScissor(s32 x1, s32 y1, s32 width, s32 height);
 }
 #endif
 
+inline void GXPosition3f32(f32 x, f32 y, f32 z) {
+  volatile f32 *pipe = (volatile f32 *)0xCC008000;
+
+  *pipe = x;
+  *pipe = y;
+  *pipe = z;
+}
+
+inline void GXColor3u8(u8 r, u8 g, u8 b) {
+  volatile u8 *pipe = (volatile u8 *)0xCC008000;
+
+  *pipe = r;
+  *pipe = g;
+  *pipe = b;
+}
+
 #endif

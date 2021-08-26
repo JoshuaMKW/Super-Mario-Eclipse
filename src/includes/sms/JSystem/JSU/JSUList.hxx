@@ -10,10 +10,10 @@ public:
     JSUPtrLink();
     ~JSUPtrLink();
 
-	void *_0;
-	JSUPtrList *mPtrList; // _4
-	u32 _8;
-	u32 _C;
+	void *mItemPtr;
+	JSUPtrList *mParentList; // _4
+	JSUPtrLink *mPrevLink;
+	JSUPtrLink *mNextLink;
 };
 
 class JSUPtrList
@@ -23,16 +23,16 @@ public:
     JSUPtrList(bool);
     ~JSUPtrList();
 
-    void append(JSUPtrLink *);
+    void append(JSUPtrLink *link);
     JSUPtrLink *getFirstLink() const;
     void initiate();
-    void insert(JSUPtrLink *, JSUPtrLink *);
-    void prepend(JSUPtrLink *);
-    void remove(JSUPtrLink *);
+    void insert(JSUPtrLink *atLink, JSUPtrLink *link);
+    void prepend(JSUPtrLink *link);
+    void remove(JSUPtrLink *link);
 
-	u32 _0;
-	u32 _4;
-	s32 mNumPtrs; // _8
+	JSUPtrLink *mFirst;
+	JSUPtrLink *mLast;
+	size_t mSize;
 };
 
 template <typename T>

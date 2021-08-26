@@ -57,10 +57,10 @@ private:
 };
 
 struct TRect {
-  u32 x; // 00
-  u32 y; // 04
-  u32 h; // 08
-  u32 w; // 0C
+  int mX1; // 00
+  int mY1; // 04
+  int mX2; // 08
+  int mY2; // 0C
 };
 
 class TGraphics {

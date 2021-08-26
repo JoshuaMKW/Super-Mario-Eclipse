@@ -1,6 +1,6 @@
 mMaxJumps = u8(1)
 mCanRideYoshi = bool(true)
-mCanUseFludd = bool(true)
+mCanUseFludd = bool(false)
 mPlayerHasHelmet = bool(false)
 mPlayerHasGlasses = bool(true)
 mPlayerHasShirt = bool(true)

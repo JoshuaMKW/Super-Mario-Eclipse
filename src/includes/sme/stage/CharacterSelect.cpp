@@ -71,7 +71,7 @@ void TCharacterSelect::draw(const JDrama::TRect &rect) {
     column = trueIndex % rowLength;
     row = trueIndex / rowLength;
 
-    mCharacterIcons[i]->drawGrid(rect.x, rect.y, row, column);
+    mCharacterIcons[i]->drawGrid(rect.mX1, rect.mY1, row, column);
     ++trueIndex;
   }
   // fill the rest later... draw cursor/token and each icon at dynamic positions!

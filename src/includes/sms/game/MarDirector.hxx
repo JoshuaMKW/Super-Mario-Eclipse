@@ -3,6 +3,7 @@
 #include "GCConsole2.hxx"
 #include "types.h"
 
+#include "sms/GC2D/Guide.hxx"
 #include "sms/JSystem/JDrama.hxx"
 #include "sms/JSystem/JGeometry.hxx"
 #include "sms/actor/Yoshi.hxx"
@@ -11,6 +12,7 @@
 #include "sms/game/GCConsole2.hxx"
 #include "sms/object/DemoCannon.hxx"
 #include "sms/screen/ShineFader.hxx"
+
 
 class TMarDirector : public JDrama::TDirector {
 public:
@@ -66,7 +68,7 @@ public:
   u16 _05;                  // 0x0066
   u32 _06[0xC / 4];         // 0x0068
   TGCConsole2 *mGCConsole;  // 0x0074
-  u32 _07;                  // 0x0078
+  TGuide *mGuide;           // 0x0078
   u8 mAreaID;               // 0x007C
   u8 mEpisodeID;            // 0x007D
   u16 _09;                  // 0x007E

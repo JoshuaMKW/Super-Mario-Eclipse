@@ -103,6 +103,6 @@ public:
     u8 mAlphaCopy;
     u8 _CE;
     u8 _CF; // connectParent
-    JSUPtrList _D0;
-    JSUPtrLink _DC;
+    JSUPtrList mChildrenList;
+    JSUPtrLink mPtrLink;
 };

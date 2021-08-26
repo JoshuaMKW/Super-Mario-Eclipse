@@ -35,21 +35,24 @@ u8 TGlobals::sMaxPlayers = SME_MAX_PLAYERS;
 Enum::Player TGlobals::sCharacterIDList[] = {
     Enum::Player::MARIO, Enum::Player::UNKNOWN, Enum::Player::UNKNOWN,
     Enum::Player::UNKNOWN};
+f32 TGlobals::sScreenWidth = 700.0f;
+f32 TGlobals::sFrameRate = 30.0f;
+bool TGlobals::sIsVariableFrameRate = true;
 
 TMario *TGlobals::getPlayerByIndex(u8 index) {
   SME_DEBUG_ASSERT(index < SME_MAX_PLAYERS, "Invalid player index provided");
-  return sPlayers[index];
+  return TGlobals::sPlayers[index];
 }
 
 Class::TPlayerData *TGlobals::getPlayerParams(u8 id) {
   SME_DEBUG_ASSERT(id < SME_MAX_PLAYERS, "Invalid player index provided");
-  return sPlayerCfgArray[id];
+  return TGlobals::sPlayerCfgArray[id];
 }
 
 Class::TPlayerData *TGlobals::getPlayerParams(TMario *player) {
   Class::TPlayerData *cfg;
   for (u32 i = 0; i < SME_MAX_PLAYERS; ++i) {
-    cfg = sPlayerCfgArray[i];
+    cfg = TGlobals::sPlayerCfgArray[i];
     if (!cfg)
       continue;
     else if (cfg->getPlayer() == player)
@@ -60,15 +63,15 @@ Class::TPlayerData *TGlobals::getPlayerParams(TMario *player) {
 
 void TGlobals::setPlayerByIndex(u8 index, TMario *player) {
   SME_DEBUG_ASSERT(index < SME_MAX_PLAYERS, "Invalid player index provided");
-  sPlayers[index] = player;
+  TGlobals::sPlayers[index] = player;
 }
 
 void TGlobals::registerPlayerParams(Class::TPlayerData *params) {
   for (u32 i = 0; i < SME_MAX_PLAYERS; ++i) {
-    if (sPlayerCfgArray[i] == params)
+    if (TGlobals::sPlayerCfgArray[i] == params)
       return;
-    else if (sPlayerCfgArray[i] == nullptr) {
-      sPlayerCfgArray[i] = params;
+    else if (TGlobals::sPlayerCfgArray[i] == nullptr) {
+      TGlobals::sPlayerCfgArray[i] = params;
       return;
     }
   }
@@ -76,16 +79,16 @@ void TGlobals::registerPlayerParams(Class::TPlayerData *params) {
 
 void TGlobals::deregisterPlayerParams(Class::TPlayerData *params) {
   for (u32 i = 0; i < SME_MAX_PLAYERS; ++i) {
-    if (sPlayerCfgArray[i] == params) {
-      sPlayerCfgArray[i] = nullptr;
+    if (TGlobals::sPlayerCfgArray[i] == params) {
+      TGlobals::sPlayerCfgArray[i] = nullptr;
       return;
-    } else if (sPlayerCfgArray[i] == nullptr)
+    } else if (TGlobals::sPlayerCfgArray[i] == nullptr)
       return;
   }
 }
 
 void TGlobals::clearAllPlayerParams() {
   for (u32 i = 0; i < SME_MAX_PLAYERS; ++i) {
-    sPlayerCfgArray[i] = nullptr;
+    TGlobals::sPlayerCfgArray[i] = nullptr;
   }
 }

@@ -14,11 +14,13 @@ extern "C" void shine_thinkCloseCamera();
 
 extern OSAlarm gctAlarm;
 
+// ================================= //
+
 #define _SME_PATCH_RAM
 #define _SME_EXECUTE_LOADS
 
 #ifdef SME_DEBUG
-//extern OSStopwatch gctStopwatch;
+extern OSStopwatch gctStopwatch;
 #endif
 
 using namespace SME;
@@ -28,21 +30,20 @@ static void initMod() {
       "Codeblocker - Creating OSAlarm at %p; Calls %p every %0.4f seconds\n",
       &gctAlarm, &SME::Util::Security::checkUserCodes, 0.001f);
 #ifdef SME_DEBUG
-  //OSInitStopwatch(&gctStopwatch, "Codeblocker");
+  OSInitStopwatch(&gctStopwatch, "Codeblocker");
 #endif
-  //OSCreateAlarm(&gctAlarm);
-  //OSSetPeriodicAlarm(
-  //    &gctAlarm, OSGetTime(), OSMillisecondsToTicks(1),
-  //    reinterpret_cast<OSAlarmHandler>(&SME::Util::Security::checkUserCodes));
-  SME_DEBUG_LOG("Mario health offset = 0x%X\n", offsetof(TMario, mHealth));
-  SME_DEBUG_LOG("J3DFrameCtrl offset = 0x%X\n", offsetof(J3DFrameCtrl, _04));
-  //Patch::Init::initCodeProtection();
+  OSCreateAlarm(&gctAlarm);
+  OSSetPeriodicAlarm(
+      &gctAlarm, OSGetTime(), OSMillisecondsToTicks(1),
+      reinterpret_cast<OSAlarmHandler>(&SME::Util::Security::checkUserCodes));
+  SME_DEBUG_LOG("Registered checkUserCodes at 0x%X\n", &SME::Util::Security::checkUserCodes);
+  // Patch::Init::initCodeProtection();
 }
 
 static void destroyMod() {
   SME_DEBUG_LOG("-- Destroying Module --\n");
 #ifdef SME_DEBUG
-  //OSStopStopwatch(&gctStopwatch);
+  OSStopStopwatch(&gctStopwatch);
 #endif
   OSCancelAlarm(&gctAlarm);
 }
@@ -219,11 +220,14 @@ SME_PATCH_BL(SME_PORT_REGION(0x802815F0, 0, 0, 0), Patch::Mario::canGrabAtNPC);
 SME_WRITE_32(SME_PORT_REGION(0x802815F4, 0, 0, 0), 0x2C030000);
 SME_PATCH_BL(SME_PORT_REGION(0x80207430, 0, 0, 0), Patch::Mario::canCarryNPC);
 SME_WRITE_32(SME_PORT_REGION(0x80207434, 0, 0, 0), 0x2C030000);
-SME_PATCH_BL(SME_PORT_REGION(0x80213314, 0, 0, 0), Patch::Mario::scaleNPCTalkRadius);
-SME_PATCH_BL(SME_PORT_REGION(0x80261C3C, 0, 0, 0), Patch::Mario::getTreeClimbMinFall);
+SME_PATCH_BL(SME_PORT_REGION(0x80213314, 0, 0, 0),
+             Patch::Mario::scaleNPCTalkRadius);
+SME_PATCH_BL(SME_PORT_REGION(0x80261C3C, 0, 0, 0),
+             Patch::Mario::getTreeClimbMinFall);
 SME_WRITE_32(SME_PORT_REGION(0x80261C40, 0, 0, 0), 0xC05F038C);
 SME_WRITE_32(SME_PORT_REGION(0x80261C44, 0, 0, 0), 0xFC020040);
-SME_PATCH_BL(SME_PORT_REGION(0x802619CC, 0, 0, 0), Patch::Mario::getTreeClimbMaxFall);
+SME_PATCH_BL(SME_PORT_REGION(0x802619CC, 0, 0, 0),
+             Patch::Mario::getTreeClimbMaxFall);
 SME_WRITE_32(SME_PORT_REGION(0x802619D0, 0, 0, 0), 0x60000000);
 #if 0
   SME_PATCH_BL(SME_PORT_REGION(0x802145F0, 0, 0, 0),
@@ -259,17 +263,20 @@ SME_PATCH_BL(SME_PORT_REGION(0x80256678, 0, 0, 0),
              Patch::Mario::checkYSpdForTerminalVelocity);
 SME_WRITE_32(SME_PORT_REGION(0x8025667C, 0, 0, 0), 0x60000000);
 SME_WRITE_32(SME_PORT_REGION(0x8025B8BC, 0, 0, 0), 0x60000000);
-SME_PATCH_BL(SME_PORT_REGION(0x8025B8C0, 0, 0, 0), Patch::Mario::checkGroundSpeedLimit);
+SME_PATCH_BL(SME_PORT_REGION(0x8025B8C0, 0, 0, 0),
+             Patch::Mario::checkGroundSpeedLimit);
 SME_WRITE_32(SME_PORT_REGION(0x8025B8C4, 0, 0, 0), 0xEFFF0072);
 SME_WRITE_32(SME_PORT_REGION(0x8024CB00, 0, 0, 0), 0xC162EF70);
 SME_WRITE_32(SME_PORT_REGION(0x8024CC50, 0, 0, 0), 0xED600072);
 SME_WRITE_32(SME_PORT_REGION(0x8024CC60, 0, 0, 0), 0x60000000);
 SME_WRITE_32(SME_PORT_REGION(0x8024CC64, 0, 0, 0), 0x60000000);
 SME_WRITE_32(SME_PORT_REGION(0x8024CC68, 0, 0, 0), 0x60000000);
-SME_PATCH_BL(SME_PORT_REGION(0x8024CC6C, 0, 0, 0), Patch::Mario::checkJumpSpeedLimit);
+SME_PATCH_BL(SME_PORT_REGION(0x8024CC6C, 0, 0, 0),
+             Patch::Mario::checkJumpSpeedLimit);
 SME_WRITE_32(SME_PORT_REGION(0x8024CCF8, 0, 0, 0), 0xEC0B007A);
 SME_WRITE_32(SME_PORT_REGION(0x8024CD24, 0, 0, 0), 0xEC0B007A);
-SME_PATCH_BL(SME_PORT_REGION(0x8024CC2C, 0, 0, 0), Patch::Mario::checkJumpSpeedMulti);
+SME_PATCH_BL(SME_PORT_REGION(0x8024CC2C, 0, 0, 0),
+             Patch::Mario::checkJumpSpeedMulti);
 SME_WRITE_32(SME_PORT_REGION(0x8024CC30, 0, 0, 0), 0x57C5043E);
 
 SME_PATCH_BL(SME_PORT_REGION(0x8003FDAC, 0, 0, 0),

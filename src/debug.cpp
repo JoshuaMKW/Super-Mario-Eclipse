@@ -15,6 +15,7 @@ bool gInXYZMode = false;
 // 0x8024D194
 bool Patch::Debug::xyzModifierMario(TMario *player) {
   constexpr f32 baseSpeed = 83.0f;
+  constexpr u32 buttons = TMarioGamePad::Buttons::DPAD_UP;
 
 #ifndef SME_DEBUG
   if (!SME::Class::TCheatHandler::sDebugHandler.isActive())
@@ -28,15 +29,12 @@ bool Patch::Debug::xyzModifierMario(TMario *player) {
   if (gpMarDirector->mCurState == 0xA)
     return (player->_114 & 0x400) == 0x400;
 
-  if (player->mController->mButtons.mFrameInput &
-          TMarioGamePad::Buttons::DPAD_RIGHT &&
-      !gInXYZMode) {
+  if (player->mController->mButtons.mFrameInput & buttons && !gInXYZMode) {
     setPlayerVelocity__6TMarioFf(player, 0.0f);
     player->mSpeed.y = 0.0f;
 
     gInXYZMode = true;
-  } else if (player->mController->mButtons.mFrameInput &
-                 TMarioGamePad::Buttons::DPAD_RIGHT &&
+  } else if (player->mController->mButtons.mFrameInput & buttons &&
              gInXYZMode) {
     player->mState = static_cast<u32>(TMario::State::IDLE);
     gInXYZMode = false;
@@ -60,16 +58,17 @@ bool Patch::Debug::xyzModifierMario(TMario *player) {
          speedMultiplier) *
         mainStick.mStickY;
     playerPos.x -=
-        ((-sinf(SME::Util::Math::angleToRadians(cameraRotY+90.0f)) * baseSpeed) *
+        ((-sinf(SME::Util::Math::angleToRadians(cameraRotY + 90.0f)) *
+          baseSpeed) *
          speedMultiplier) *
         mainStick.mStickX;
     playerPos.z -=
-        ((-cosf(SME::Util::Math::angleToRadians(cameraRotY+90.0f)) * baseSpeed) *
+        ((-cosf(SME::Util::Math::angleToRadians(cameraRotY + 90.0f)) *
+          baseSpeed) *
          speedMultiplier) *
         mainStick.mStickX;
 
-    if (player->mController->mButtons.mInput &
-        TMarioGamePad::Buttons::B) {
+    if (player->mController->mButtons.mInput & TMarioGamePad::Buttons::B) {
       playerPos.y -= (baseSpeed * speedMultiplier);
     } else if (player->mController->mButtons.mInput &
                TMarioGamePad::Buttons::A) {

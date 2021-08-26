@@ -17,12 +17,12 @@ public:
   virtual void perform(u32, JDrama::TGraphics *) override;
 
   s32 mState; // 0x0010
-
+  u32 _14[0xA8 / 4];
   J2DSetScreen *mScreen; // 0x00BC
   u32 _C0;
   u8 _C4;
   bool mIsSetUp;                 // 0x00C5
-  JUTTexture *mTextures[10];     // 0x00C8
+  u32 *mTextures[10];     // 0x00C8 - JUTTexture *
   J2DPane *mPane_ss_i;           // 0x00F4
   J2DPane *mPane_ss[2];          // 0x00F8
   J2DPane *mPane_sq_i;           // 0x0100

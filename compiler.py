@@ -414,26 +414,26 @@ def main():
                       for d in args.defines.split(",")]
 
     if worker.is_codewarrior():
-        worker.cxxOptions = ["-Cpp_exceptions off", "-gccinc", "-gccext on", "-enum int",
-                             "-fp hard", "-use_lmw_stmw on", "-O4,p", "-c", "-rostr", "-sdata 0", "-sdata2 0"]
+        worker.cxxOptions = ["-Cpp_exceptions off", "-gccinc", "-gccext on", "-enum int", "-RTTI off"
+                              "-fp fmadd", "-use_lmw_stmw on", "-O4,p", "-c", "-rostr", "-sdata 0", "-sdata2 0"]
     elif worker.is_clang():
-        worker.cxxOptions = ["--target=powerpc-gekko-ibm-kuribo-eabi", "-std=gnu++17", "-fno-exceptions", "-fno-rtti", "-fno-unwind-tables", "-ffast-math",
-                             "-flto", "-nodefaultlibs", "-nostdlib", "-fno-use-init-array", "-fuse-ld=lld", "-fpermissive", "-Wall", "-O3", "-r", "-v"]
-        worker.cOptions = ["--target=powerpc-gekko-ibm-kuribo-eabi", "-fno-exceptions", "-fno-rtti", "-fno-unwind-tables", "-ffast-math",
-                           "-flto", "-nodefaultlibs", "-nostdlib", "-fno-use-init-array", "-fuse-ld=lld", "-fpermissive", "-Wall", "-O3", "-r", "-v"]
-        worker.sOptions = ["--target=powerpc-gekko-ibm-kuribo-eabi", "-fno-exceptions", "-fno-rtti", "-fno-unwind-tables",
-                           "-flto", "-nodefaultlibs", "-nostdlib", "-fno-use-init-array", "-fuse-ld=lld", "-Wall", "-r", "-v"]
-        worker.linkOptions = ["--target=powerpc-gekko-ibm-kuribo-eabi", "-std=gnu++17", "-fno-exceptions", "-fno-rtti", "-fno-unwind-tables", "-ffast-math",
-                              "-flto", "-nodefaultlibs", "-nostdlib", "-fno-use-init-array", "-fuse-ld=lld", "-fpermissive", "-Wall", "-O3", "-r", "-v"]
+        worker.cxxOptions = ["--target=powerpc-gekko-ibm-kuribo-eabi", "-fdeclspec", "-std=gnu++17", "-fno-exceptions", "-fno-rtti", "-fno-unwind-tables", "-ffast-math",
+                              "-flto", "-nodefaultlibs", "-nostdlib", "-fno-use-init-array", "-fno-use-cxa-atexit", "-fno-c++-static-destructors", "-fno-function-sections", "-fno-data-sections", "-fuse-ld=lld", "-fpermissive", "-Werror", "-O3", "-r", "-v"]
+        worker.cOptions = ["--target=powerpc-gekko-ibm-kuribo-eabi", "-fdeclspec", "-fno-exceptions", "-fno-rtti", "-fno-unwind-tables", "-ffast-math", "-fdeclspec",
+                            "-flto", "-nodefaultlibs", "-nostdlib", "-fno-use-init-array", "-fno-use-cxa-atexit", "-fno-c++-static-destructors", "-fno-function-sections", "-fno-data-sections", "-fuse-ld=lld", "-fpermissive", "-Werror", "-O3", "-r", "-v"]
+        worker.sOptions = ["--target=powerpc-gekko-ibm-kuribo-eabi", "-fdeclspec", "-fno-exceptions", "-fno-rtti", "-fno-unwind-tables",
+                            "-flto", "-nodefaultlibs", "-nostdlib", "-fno-use-init-array", "-fno-use-cxa-atexit", "-fno-c++-static-destructors", "-fno-function-sections", "-fno-data-sections", "-fuse-ld=lld", "-Werror", "-r", "-v"]
+        worker.linkOptions = ["--target=powerpc-gekko-ibm-kuribo-eabi", "-fdeclspec", "-std=gnu++17", "-fno-exceptions", "-fno-rtti", "-fno-unwind-tables", "-ffast-math",
+                               "-flto", "-nodefaultlibs", "-nostdlib", "-fno-use-init-array", "-fno-use-cxa-atexit", "-fno-c++-static-destructors", "-fno-function-sections", "-fno-data-sections", "-fuse-ld=lld", "-fpermissive", "-Werror", "-O3", "-r", "-v"]
     elif worker.is_gcc():
         worker.cxxOptions = ["-nodefaultlibs", "-nostdlib", "-std=gnu++20",
-                             "-fno-exceptions", "-fno-rtti", "-ffast-math", "-fpermissive", "-Wall", "-O3", "-r"]
-        worker.cOptions = ["-nodefaultlibs", "-nostdlib", "-fno-exceptions",
-                           "-fno-rtti", "-ffast-math", "-fpermissive", "-Wall", "-O3", "-r"]
-        worker.sOptions = ["-nodefaultlibs", "-nostdlib",
-                           "-fno-exceptions", "-fno-rtti", "-Wall", "-O3", "-r"]
-        worker.linkOptions = ["-nodefaultlibs", "-nostdlib", "-std=gnu++20",
                               "-fno-exceptions", "-fno-rtti", "-ffast-math", "-fpermissive", "-Wall", "-O3", "-r"]
+        worker.cOptions = ["-nodefaultlibs", "-nostdlib", "-fno-exceptions",
+                            "-fno-rtti", "-ffast-math", "-fpermissive", "-Wall", "-O3", "-r"]
+        worker.sOptions = ["-nodefaultlibs", "-nostdlib",
+                            "-fno-exceptions", "-fno-rtti", "-Wall", "-O3", "-r"]
+        worker.linkOptions = ["-nodefaultlibs", "-nostdlib", "-std=gnu++20",
+                               "-fno-exceptions", "-fno-rtti", "-ffast-math", "-fpermissive", "-Wall", "-O3", "-r"]
 
     worker.run(args.src, args.dolfile)
 

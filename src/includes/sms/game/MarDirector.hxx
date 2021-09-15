@@ -12,6 +12,7 @@
 #include "sms/game/GCConsole2.hxx"
 #include "sms/object/DemoCannon.hxx"
 #include "sms/screen/ShineFader.hxx"
+#include "sms/npc/BaseNPC.hxx"
 
 
 class TMarDirector : public JDrama::TDirector {
@@ -43,7 +44,7 @@ public:
   void fireStartDemoCamera(char const *, JGeometry::TVec3<f32> const *, u32,
                            f32, bool, u32 (*)(u32, u32), u32, JDrama::TActor *,
                            JDrama::TFlagT<s16>);
-  void setNextStage(s16 stageID, JDrama::TActor *);
+  void setNextStage(u16 stageID, JDrama::TActor *);
   void movement();
   void fireRideYoshi(TYoshi *);
   void fireGetStar(TShine *);
@@ -72,7 +73,11 @@ public:
   u8 mAreaID;               // 0x007C
   u8 mEpisodeID;            // 0x007D
   u16 _09;                  // 0x007E
-  u32 _10[0x2C / 4];        // 0x0080
+  u32 _10;                  // 0x0080
+  void *mTalkCursor;        // TTalkCursor
+  u32 _88[0x18 / 4];
+  TBaseNPC *mTalkingNPC;    // 0x00A0
+  u32 _A4[2];
   u32 *mpNextState;         // 0x00AC
   u32 _11;                  // 0x00B0
   u8 mNextState;            // 0x00B4

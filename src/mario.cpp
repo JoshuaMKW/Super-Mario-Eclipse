@@ -8,14 +8,16 @@
 
 #include "SME.hxx"
 
+using namespace SME;
+
 // 0x8024D2C4
 /*
 TMario* updateMario(TMario* player) {
-    if (SME::TGlobals::PlayerData.mCurPlayerID[i] != prevPlayerID) {
+    if (TGlobals::PlayerData.mCurPlayerID[i] != prevPlayerID) {
         u32* marioVolumeData = (u32*)getVolume__13JKRFileLoaderFPCc("mario");
         u32* marioDataArray = (u32*)*(u32*)ARCBufferMario;
 
-        if (marioDataArray[SME::TGlobals::PlayerData.mCurPlayerID[i]]) {
+        if (marioDataArray[TGlobals::PlayerData.mCurPlayerID[i]]) {
             __dt__13JKRMemArchiveFv(marioVolumeData);
             __ct__13JKRMemArchiveFPvUl15JKRMemBreakFlag(marioVolumeData,
 marioDataArray[i], 0, 0);
@@ -31,9 +33,8 @@ marioDataArray[i], 0, 0);
 
 // extern -> SME.cpp
 // 0x802558A4
-void SME::Patch::Mario::addVelocity(TMario *player, f32 velocity) {
-  SME::Class::TPlayerData *playerParams =
-      SME::TGlobals::getPlayerParams(player);
+void Patch::Mario::addVelocity(TMario *player, f32 velocity) {
+  Class::TPlayerData *playerParams = TGlobals::getPlayerData(player);
 
   if (!onYoshi__6TMarioCFv(player)) {
     player->mForwardSpeed =
@@ -48,10 +49,9 @@ void SME::Patch::Mario::addVelocity(TMario *player, f32 velocity) {
 
 /* MASTER MARIO.CPP UPDATER */
 
-u32 SME::Patch::Mario::updateContexts(TMario *player) {
-  SME::Patch::Collision::updateCollisionContext(player);
-  SME::Class::TPlayerData *playerParams =
-      SME::TGlobals::getPlayerParams(player);
+u32 Patch::Mario::updateContexts(TMario *player) {
+  Patch::Collision::updateCollisionContext(player);
+  Class::TPlayerData *playerParams = TGlobals::getPlayerData(player);
 
   if (!playerParams->isMario()) {
     playerParams->mIsClimbTired = false;
@@ -80,7 +80,7 @@ u32 SME::Patch::Mario::updateContexts(TMario *player) {
         playerParams->mClimbTiredTimer = 0;
         playerParams->mIsClimbTired = false;
       } else {
-        if (SME::Util::Math::lerp<f32>(
+        if (Util::Math::lerp<f32>(
                 0.0f, 1.0f,
                 static_cast<f32>(playerParams->mClimbTiredTimer) /
                     player->mDeParams.mNoFreezeTime.get()) > 0.9f) {
@@ -105,12 +105,12 @@ u32 SME::Patch::Mario::updateContexts(TMario *player) {
 /* NPC CARRY CODE */
 
 // 0x8029A87C
-u32 SME::Patch::Mario::carryOrTalkNPC(TBaseNPC *npc) {
-  const SME::Class::TPlayerData *playerParams =
-      SME::TGlobals::getPlayerParams(gpMarioAddress);
+u32 Patch::Mario::carryOrTalkNPC(TBaseNPC *npc) {
+  const Class::TPlayerData *playerParams =
+      TGlobals::getPlayerData(gpMarioAddress);
 
   if (!playerParams->isMario())
-    return isNowCanTaken__8TBaseNPCCFv();
+    return isNowCanTaken__8TBaseNPCCFv(npc);
 
   if ((*(u32 *)(&npc->mStateFlags) & 0x840007) != 0)
     return 0;
@@ -128,12 +128,12 @@ u32 SME::Patch::Mario::carryOrTalkNPC(TBaseNPC *npc) {
 }
 
 // 0x802815F0
-bool SME::Patch::Mario::canGrabAtNPC() {
+bool Patch::Mario::canGrabAtNPC() {
   TBaseNPC *npc;
   SME_FROM_GPR(30, npc);
 
-  const SME::Class::TPlayerData *playerParams =
-      SME::TGlobals::getPlayerParams(gpMarioAddress);
+  const Class::TPlayerData *playerParams =
+      TGlobals::getPlayerData(gpMarioAddress);
 
   if (!playerParams->isMario())
     return npc->mStateFlags.mCanBeTaken;
@@ -144,12 +144,12 @@ bool SME::Patch::Mario::canGrabAtNPC() {
 }
 
 // 0x80207430
-bool SME::Patch::Mario::canCarryNPC() {
+bool Patch::Mario::canCarryNPC() {
   TBaseNPC *npc;
   SME_FROM_GPR(29, npc);
 
-  const SME::Class::TPlayerData *playerParams =
-      SME::TGlobals::getPlayerParams(gpMarioAddress);
+  const Class::TPlayerData *playerParams =
+      TGlobals::getPlayerData(gpMarioAddress);
 
   if (!playerParams->isMario())
     return npc->mStateFlags.mCanBeTaken;
@@ -161,13 +161,12 @@ bool SME::Patch::Mario::canCarryNPC() {
 
 // extern -> SME.cpp
 // 0x802145F0
-TMario *SME::Patch::Mario::scaleNPCThrowLength(TMario *player, float *params) {
+TMario *Patch::Mario::scaleNPCThrowLength(TMario *player, float *params) {
   f32 _f11;
   SME_FROM_FPR(11, _f11);
 
   _f11 = params[0x1D0 / 4];
-  SME::Class::TPlayerData *playerParams =
-      SME::TGlobals::getPlayerParams(player);
+  Class::TPlayerData *playerParams = TGlobals::getPlayerData(player);
 
   if (playerParams->isMario())
     _f11 *= playerParams->getParams()->mThrowPowerMultiplier.get() *
@@ -185,13 +184,12 @@ TMario *SME::Patch::Mario::scaleNPCThrowLength(TMario *player, float *params) {
 
 // extern -> SME.cpp
 // 0x8021463C
-u32 SME::Patch::Mario::scaleNPCThrowHeight(u32 _r3, f32 z, f32 y) {
+u32 Patch::Mario::scaleNPCThrowHeight(u32 _r3, f32 z, f32 y) {
   TBaseNPC *npc;
   SME_FROM_GPR(31, npc);
 
   TMario *player = (TMario *)npc->mPrevHolder;
-  SME::Class::TPlayerData *playerParams =
-      SME::TGlobals::getPlayerParams(player);
+  Class::TPlayerData *playerParams = TGlobals::getPlayerData(player);
 
   if (playerParams->isMario())
     y *= playerParams->getParams()->mThrowPowerMultiplier.get() *
@@ -212,7 +210,7 @@ u32 SME::Patch::Mario::scaleNPCThrowHeight(u32 _r3, f32 z, f32 y) {
 
 // extern -> SME.cpp
 // 0x80261C3C
-f32 SME::Patch::Mario::getTreeClimbMinFall() {
+f32 Patch::Mario::getTreeClimbMinFall() {
   TMario *player;
   SME_FROM_GPR(31, player);
 
@@ -224,7 +222,7 @@ f32 SME::Patch::Mario::getTreeClimbMinFall() {
 
 // extern -> SME.cpp
 // 0x802619CC
-SME_PURE_ASM void SME::Patch::Mario::getTreeClimbMaxFall() {
+SME_PURE_ASM void Patch::Mario::getTreeClimbMaxFall() {
   asm volatile("mflr 0                   \n\t"
                "stw 0, 0x8 (1)           \n\t"
                "stwu 1, -0x10 (1)        \n\t"
@@ -286,10 +284,9 @@ SME_WRITE_32(SME_PORT_REGION(0x80261CFC, 0, 0, 0), 0x41820070);
 // 0x8025D650
 // 0x8025DBC4
 // 0x8025E38C
-void SME::Patch::Mario::getClimbingAnimSpd(TMario *player,
-                                           TMario::Animation anim, f32 speed) {
-  SME::Class::TPlayerData *playerParams =
-      SME::TGlobals::getPlayerParams(player);
+void Patch::Mario::getClimbingAnimSpd(TMario *player, TMario::Animation anim,
+                                      f32 speed) {
+  Class::TPlayerData *playerParams = TGlobals::getPlayerData(player);
   if (playerParams->mIsClimbTired)
     speed = 6.0f;
 
@@ -319,17 +316,16 @@ SME_PATCH_BL(SME_PORT_REGION(0x802617EC, 0, 0, 0), scaleRoofSquashedHeight);
 static SME_PURE_ASM void scaleRoofMoveDiff() {
   asm volatile("lfs 0, " SME_STRINGIZE(SME_PORT_REGION(
       -0xD7C, 0, 0, 0)) "(2)        \n\t"
-                        "lfs 3, 0x28(30)                                \n\t"
-                        "fmuls 0, 0, 3                                  \n\t"
-                        "blr                                            \n\t");
+                        "lfs 10, 0x28(30)                                \n\t"
+                        "fmuls 0, 0, 10                                  \n\t"
+                        "blr                                             \n\t");
 }
 SME_PATCH_BL(SME_PORT_REGION(0x80261824, 0, 0, 0), scaleRoofMoveDiff);
 
 // extern -> SME.cpp
 // 0x802615AC
-void SME::Patch::Mario::scaleHangSpeed(TMario *player) {
-  SME::Class::TPlayerData *playerParams =
-      SME::TGlobals::getPlayerParams(player);
+void Patch::Mario::scaleHangSpeed(TMario *player) {
+  Class::TPlayerData *playerParams = TGlobals::getPlayerData(player);
   player->mForwardSpeed += 1.0f;
 
   if (playerParams->isMario())
@@ -347,8 +343,7 @@ static bool canHangOnRoof(TBGCheckData *roof /*, u16 colType*/) {
   u16 colType;
   SME_FROM_GPR(4, colType);
 
-  SME::Class::TPlayerData *playerParams =
-      SME::TGlobals::getPlayerParams(player);
+  Class::TPlayerData *playerParams = TGlobals::getPlayerData(player);
 
   if (playerParams->isMario() &&
       playerParams->getParams()->mCanClimbWalls.get())
@@ -389,8 +384,8 @@ static f32 scaleClimbSpeed(f32 speed) {
   SME_FROM_FPR(3, _f3);
   SME_FROM_FPR(7, _f7);
 
-  SME::Class::TPlayerData *playerParams =
-      SME::TGlobals::getPlayerParams(player);
+  Class::TPlayerData *playerParams =
+      TGlobals::getPlayerData(player);
 
   f32 scale = 0.015625f;
 
@@ -431,8 +426,8 @@ static bool canJumpClingWall(TBGCheckData *wall, u16 colType) {
   if (colType == 266)
     return true;
 
-  SME::Class::TPlayerData *playerParams =
-      SME::TGlobals::getPlayerParams(player);
+  Class::TPlayerData *playerParams =
+      TGlobals::getPlayerData(player);
 
   if (playerParams->isMario() &&
       playerParams->getParams()->mCanClimbWalls.get() &&
@@ -456,8 +451,8 @@ static bool canUnkActionWall(TBGCheckData *wall, u16 colType) {
   if (colType == 266)
     return true;
 
-  SME::Class::TPlayerData *playerParams =
-      SME::TGlobals::getPlayerParams(player);
+  Class::TPlayerData *playerParams =
+      TGlobals::getPlayerData(player);
 
   if (playerParams->isMario() &&
       playerParams->getParams()->mCanClimbWalls.get() &&
@@ -481,8 +476,8 @@ static bool canRunClingWall(TBGCheckData *wall, u16 colType) {
   if (colType == 266)
     return true;
 
-  SME::Class::TPlayerData *playerParams =
-      SME::TGlobals::getPlayerParams(player);
+  Class::TPlayerData *playerParams =
+      TGlobals::getPlayerData(player);
 
   if (playerParams->isMario() &&
       playerParams->getParams()->mCanClimbWalls.get() &&
@@ -510,8 +505,8 @@ static bool canMoveOnWall1(u16 colType) {
   if (colType == 266)
     return true;
 
-  SME::Class::TPlayerData *playerParams =
-      SME::TGlobals::getPlayerParams(player);
+  Class::TPlayerData *playerParams =
+      TGlobals::getPlayerData(player);
 
   if (playerParams->isMario() &&
       playerParams->getParams()->mCanClimbWalls.get())
@@ -534,8 +529,8 @@ static bool canMoveOnWall2(TBGCheckData *wall, u16 colType) {
   if (colType == 266)
     return true;
 
-  SME::Class::TPlayerData *playerParams =
-      SME::TGlobals::getPlayerParams(player);
+  Class::TPlayerData *playerParams =
+      TGlobals::getPlayerData(player);
 
   if (playerParams->isMario() &&
       playerParams->getParams()->mCanClimbWalls.get())
@@ -578,9 +573,8 @@ kmWrite32(0x80272668, 0x4182000C);
 
 // extern -> SME.cpp
 // 0x8024E288
-void SME::Patch::Mario::checkGraffitiAffected(TMario *player) {
-  SME::Class::TPlayerData *playerParams =
-      SME::TGlobals::getPlayerParams(player);
+void Patch::Mario::checkGraffitiAffected(TMario *player) {
+  Class::TPlayerData *playerParams = TGlobals::getPlayerData(player);
   if (!playerParams->isMario()) {
     checkGraffito__6TMarioFv(player);
   } else if (playerParams->getParams()->mGoopAffected.get()) {
@@ -590,7 +584,7 @@ void SME::Patch::Mario::checkGraffitiAffected(TMario *player) {
 
 // extern -> SME.cpp
 // 0x801E4118
-void SME::Patch::Mario::rescaleHeldObj(Mtx holderMatrix, Mtx destMatrix) {
+void Patch::Mario::rescaleHeldObj(Mtx holderMatrix, Mtx destMatrix) {
   TMapObjBase *heldObj;
   SME_FROM_GPR(31, heldObj);
 
@@ -603,7 +597,7 @@ void SME::Patch::Mario::rescaleHeldObj(Mtx holderMatrix, Mtx destMatrix) {
 }
 
 // 0x80213314
-SME_PURE_ASM void SME::Patch::Mario::scaleNPCTalkRadius() {
+SME_PURE_ASM void Patch::Mario::scaleNPCTalkRadius() {
   asm volatile("lis 3, gpMarioAddress@ha                \n\t"
                "lwz 3, gpMarioAddress@l (3)             \n\t"
                "lfs 0, 0x2C (3)                         \n\t"
@@ -614,14 +608,13 @@ SME_PURE_ASM void SME::Patch::Mario::scaleNPCTalkRadius() {
 }
 
 static f32 calcJumpPower(TMario *player, f32 factor, f32 base, f32 jumpPower) {
-  SME::Class::TPlayerData *playerParams =
-      SME::TGlobals::getPlayerParams(player);
-  const SME::Class::TPlayerParams *params = playerParams->getParams();
+  Class::TPlayerData *playerParams = TGlobals::getPlayerData(player);
+  const Class::TPlayerParams *params = playerParams->getParams();
 
   jumpPower *= params->mBaseJumpMultiplier.get();
-  jumpPower *= SME::Util::Math::scaleLinearAtAnchor<f32>(
+  jumpPower *= Util::Math::scaleLinearAtAnchor<f32>(
       params->mSizeMultiplier.get() *
-          SME::Class::TStageParams::sStageConfig->mPlayerSizeMultiplier.get(),
+          Class::TStageParams::sStageConfig->mPlayerSizeMultiplier.get(),
       0.5f, 1.0f);
   if (player->mState & static_cast<u32>(TMario::State::AIRBORN)) {
     f32 multiplier = params->mMultiJumpMultiplier.get();
@@ -636,21 +629,21 @@ static f32 calcJumpPower(TMario *player, f32 factor, f32 base, f32 jumpPower) {
 
 // extern -> SME.cpp
 // 0x8024E02C
-void SME::Patch::Mario::manageExtraJumps(TMario *player) {
-  SME::Class::TPlayerData *playerParams =
-      SME::TGlobals::getPlayerParams(player);
+void Patch::Mario::manageCustomJumps(TMario *player) {
+  Class::TPlayerData *playerParams = TGlobals::getPlayerData(player);
 
   const s32 jumpsLeft =
       (playerParams->getParams()->mMaxJumps.get() - playerParams->mCurJump);
 
   if ((player->mState & static_cast<u32>(TMario::State::AIRBORN)) == false ||
-      (player->mState & 0x800000) || player->mYoshi->mState == TYoshi::MOUNTED)
+      (player->mState & 0x800000) ||
+      player->mYoshi->mState == TYoshi::MOUNTED) {
     playerParams->mCurJump = 1;
-  else if ((player->mController->mButtons.mFrameInput &
-            TMarioGamePad::Buttons::A) &&
-           jumpsLeft > 0 &&
-           player->mState != static_cast<u32>(TMario::State::WALLSLIDE) &&
-           player->mState != static_cast<u32>(TMario::State::F_KNCK_H)) {
+  } else if ((player->mController->mButtons.mFrameInput &
+              TMarioGamePad::Buttons::A) &&
+             jumpsLeft > 0 &&
+             player->mState != static_cast<u32>(TMario::State::WALLSLIDE) &&
+             player->mState != static_cast<u32>(TMario::State::F_KNCK_H)) {
     u32 state = player->mState;
     u32 voiceID = 0;
     u32 animID = 0;
@@ -672,32 +665,141 @@ void SME::Patch::Mario::manageExtraJumps(TMario *player) {
     startVoice__6TMarioFUl(player, voiceID);
     setAnimation__6TMarioFif(player, animID, 1.0f);
 
+    TMarioGamePad *controller = player->mController;
+
+    if (controller->mControlStick.mLengthFromNeutral > 0.1f) {
+      player->mAngle.y = gpCamera->mHorizontalAngle +
+                         s16(Util::Math::radiansToAngle(
+                                 atan2f(controller->mControlStick.mStickX,
+                                        -controller->mControlStick.mStickY)) *
+                             182);
+    }
+
     player->mSpeed.y = calcJumpPower(player, 0.25f, player->mSpeed.y, 65.0f);
     player->mPrevState = player->mState;
     player->mState = state;
 
+    playerParams->mIsLongJumping = false;
     playerParams->mCurJump += 1;
   }
   stateMachine__6TMarioFv(player);
 }
 
-// extern -> SME.cpp
-// 0x80254534
-void SME::Patch::Mario::normJumpMultiplier() {
+static void setJumpOrLongJump(TMario *player, u32 state, u32 unk_0) {
+  constexpr u32 LongJumpSpecifier = TMarioGamePad::Buttons::Z;
+  constexpr f32 LongJumpMinSpeed = 10.0f;
+
+  Class::TPlayerData *playerParams = TGlobals::getPlayerData(player);
+  TMarioGamePad::CButton &buttons = player->mController->mButtons;
+
+  const bool isValidState =
+      !(player->mState & static_cast<u32>(TMario::State::AIRBORN)) &&
+      !(player->mState & static_cast<u32>(TMario::State::WATERBORN));
+
+  playerParams->mIsLongJumping = false;
+  if ((buttons.mInput & LongJumpSpecifier) == LongJumpSpecifier &&
+      (buttons.mFrameInput & TMarioGamePad::Buttons::A) &&
+      player->mForwardSpeed > LongJumpMinSpeed && isValidState) {
+    playerParams->mIsLongJumping = !player->mAttributes.mHasFludd &&
+                                   playerParams->isMario() &&
+                                   (player->mActionState & 0x8) == 0;
+    state = static_cast<u32>(TMario::State::JUMP);
+  }
+
+  setStatusToJumping__6TMarioFUlUl(player, state, unk_0);
+}
+SME_PATCH_BL(SME_PORT_REGION(0x802541BC, 0, 0, 0), setJumpOrLongJump);
+
+static void processJumpOrLongJumpAnim(TMario *player, int state, int anim,
+                                      int unk_0) {
+  Class::TPlayerData *playerData = TGlobals::getPlayerData(player);
+
+  if (playerData->mIsLongJumping) {
+    anim = 0xF6;
+  }
+
+  jumpingBasic__6TMarioFiii(player, state, anim, unk_0);
+}
+SME_PATCH_BL(SME_PORT_REGION(0x80249554, 0, 0, 0), processJumpOrLongJumpAnim);
+
+static void processJumpOrLongJump() {
   TMario *player;
   SME_FROM_GPR(30, player);
 
-  player->mSpeed.y = calcJumpPower(player, 0.25f, player->mForwardSpeed, 42.0f);
+  constexpr f32 LongJumpSpeedForward = 36.0f;
+  constexpr f32 LongJumpSpeedUp = 50.0f;
+
+  Class::TPlayerData *playerParams = TGlobals::getPlayerData(player);
+
+  if (!playerParams->mIsLongJumping) {
+    player->mSpeed.y =
+        calcJumpPower(player, 0.25f, player->mForwardSpeed, 42.0f);
+    return;
+  }
+
+  startVoice__6TMarioFUl(player, TMario::Voice::TRIPLE_JUMP);
+
+  player->mSpeed.y +=
+      LongJumpSpeedUp * playerParams->getParams()->mBaseJumpMultiplier.get();
+  player->mForwardSpeed +=
+      LongJumpSpeedForward * playerParams->getParams()->mSpeedMultiplier.get();
+  player->mPrevState = player->mState;
+  player->mState = static_cast<u32>(TMario::State::JUMP);
 }
+SME_PATCH_BL(SME_PORT_REGION(0x80254534, 0, 0, 0), processJumpOrLongJump);
+SME_WRITE_32(SME_PORT_REGION(0x80254538, 0, 0, 0), 0x60000000);
+SME_WRITE_32(SME_PORT_REGION(0x8025453C, 0, 0, 0), 0x60000000);
+SME_WRITE_32(SME_PORT_REGION(0x80254540, 0, 0, 0), 0x60000000);
+SME_WRITE_32(SME_PORT_REGION(0x80254544, 0, 0, 0), 0x60000000);
+
+static bool checkDivingWhenLongJumping(TMario *player) {
+  Class::TPlayerData *playerParams = TGlobals::getPlayerData(player);
+
+  return onYoshi__6TMarioCFv(player) || playerParams->mIsLongJumping;
+}
+SME_PATCH_BL(SME_PORT_REGION(0x8024C394, 0, 0, 0), checkDivingWhenLongJumping);
+
+static bool checkRotatingWhenLongJumping(TMario *player, int *unk_0) {
+  Class::TPlayerData *playerParams = TGlobals::getPlayerData(player);
+
+  return checkStickRotate__6TMarioFPi(player, unk_0) &&
+         !playerParams->mIsLongJumping;
+}
+SME_PATCH_BL(SME_PORT_REGION(0x8024C3F8, 0, 0, 0),
+             checkRotatingWhenLongJumping);
+
+static bool checkQuickFallWhenLongJumping() {
+  TMario *player;
+  SME_FROM_GPR(30, player);
+
+  Class::TPlayerData *playerParams = TGlobals::getPlayerData(player);
+
+  return ((player->mActionState & 0x80) != 0) || playerParams->mIsLongJumping;
+}
+SME_PATCH_BL(SME_PORT_REGION(0x802565D4, 0, 0, 0),
+             checkQuickFallWhenLongJumping);
+SME_WRITE_32(SME_PORT_REGION(0x802565D8, 0, 0, 0), 0x2C030000);
+
+static bool preserveRegisterCheckQuickFall() {
+  TMario *player;
+  SME_FROM_GPR(31, player);
+
+  return player->mState == static_cast<u32>(TMario::State::JUMPSPIN1) ||
+         player->mState == static_cast<u32>(TMario::State::JUMPSPIN2);
+}
+SME_PATCH_BL(SME_PORT_REGION(0x80256618, 0, 0, 0),
+             preserveRegisterCheckQuickFall);
+SME_WRITE_32(SME_PORT_REGION(0x8025661C, 0, 0, 0), 0x2C030000);
+SME_WRITE_32(SME_PORT_REGION(0x80256620, 0, 0, 0), 0x41820024);
 
 // extern -> SME.cpp
 // 0x80256678
-void SME::Patch::Mario::checkYSpdForTerminalVelocity() {
+void Patch::Mario::checkYSpdForTerminalVelocity() {
   TMario *player;
   SME_FROM_GPR(31, player);
 
   float terminalVelocity;
-  if (SME::TGlobals::getPlayerParams(player)->mCollisionFlags.mIsSpinBounce)
+  if (TGlobals::getPlayerData(player)->mCollisionFlags.mIsSpinBounce)
     terminalVelocity = -20.0f * player->mJumpParams.mGravity.get();
   else
     terminalVelocity = -75.0f * player->mJumpParams.mGravity.get();
@@ -706,12 +808,11 @@ void SME::Patch::Mario::checkYSpdForTerminalVelocity() {
 
 // extern -> SME.cpp
 // 0x8025B8C0
-f32 SME::Patch::Mario::checkGroundSpeedLimit() {
+f32 Patch::Mario::checkGroundSpeedLimit() {
   TMario *player;
   SME_FROM_GPR(31, player);
 
-  SME::Class::TPlayerData *playerParams =
-      SME::TGlobals::getPlayerParams(player);
+  Class::TPlayerData *playerParams = TGlobals::getPlayerData(player);
 
   f32 multiplier = 1.0f;
   if (onYoshi__6TMarioCFv(player)) {
@@ -724,12 +825,11 @@ f32 SME::Patch::Mario::checkGroundSpeedLimit() {
 
 // extern -> SME.cpp
 // 0x8024CC6C
-void SME::Patch::Mario::checkJumpSpeedLimit(f32 speed) {
+void Patch::Mario::checkJumpSpeedLimit(f32 speed) {
   TMario *player;
   SME_FROM_GPR(31, player);
 
-  SME::Class::TPlayerData *playerParams =
-      SME::TGlobals::getPlayerParams(player);
+  Class::TPlayerData *playerParams = TGlobals::getPlayerData(player);
 
   f32 speedCap = 32.0f;
   f32 speedReducer = 0.2f;
@@ -747,10 +847,8 @@ void SME::Patch::Mario::checkJumpSpeedLimit(f32 speed) {
 
 // extern -> SME.cpp
 // 0x8024CC2C
-TMario *SME::Patch::Mario::checkJumpSpeedMulti(TMario *player, f32 factor,
-                                               f32 max) {
-  SME::Class::TPlayerData *playerParams =
-      SME::TGlobals::getPlayerParams(player);
+TMario *Patch::Mario::checkJumpSpeedMulti(TMario *player, f32 factor, f32 max) {
+  Class::TPlayerData *playerParams = TGlobals::getPlayerData(player);
 
   if (playerParams->isMario() && !onYoshi__6TMarioCFv(player)) {
     player->mForwardSpeed =
@@ -767,8 +865,7 @@ static f32 checkSlideSpeedMulti() {
   TMario *player;
   SME_FROM_GPR(30, player);
 
-  SME::Class::TPlayerData *playerParams =
-      SME::TGlobals::getPlayerParams(player);
+  Class::TPlayerData *playerParams = TGlobals::getPlayerData(player);
 
   constexpr f32 speedCap = 100.0f;
   constexpr f32 rocketMultiplier = 1.8f;
@@ -893,8 +990,7 @@ static void setCollisionWidth() {
   Vec size;
   player->JSGGetScaling(&size);
 
-  SME::Class::TPlayerData *playerParams =
-      SME::TGlobals::getPlayerParams(player);
+  Class::TPlayerData *playerParams = TGlobals::getPlayerData(player);
   if (playerParams->isMario())
     width *= size.x;
 
@@ -921,9 +1017,9 @@ static JUtility::TColor getEMarioHealthBarRGBA(TEnemyMario *eMario) {
   const s16 maxHealth = ((s16 *)eMario->mEnemyManager)[0x40 / 2];
 
   color.set(0xFF, 0x00, 0x00, 0xFF);
-  color.g = SME::Util::Math::lerp<u8>(0, 255,
-                                      static_cast<float>(eMario->mEnemyHealth) /
-                                          static_cast<float>(maxHealth));
+  color.g = Util::Math::lerp<u8>(0, 255,
+                                 static_cast<float>(eMario->mEnemyHealth) /
+                                     static_cast<float>(maxHealth));
   color.r -= color.g;
 
   return color;
@@ -931,8 +1027,7 @@ static JUtility::TColor getEMarioHealthBarRGBA(TEnemyMario *eMario) {
 
 // extern -> SME.cpp
 // 0x8003FDAC
-void SME::Patch::Mario::manageEMarioHealthWrapper(TEnemyMario *eMario,
-                                                  Mtx *posMtx) {
+void Patch::Mario::manageEMarioHealthWrapper(TEnemyMario *eMario, Mtx *posMtx) {
   *(JUtility::TColor *)0x8040FA90 = getEMarioHealthBarRGBA(eMario);
   drawHPMeter__11TEnemyMarioFPA4_f(eMario, posMtx);
 }

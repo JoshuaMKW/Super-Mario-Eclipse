@@ -180,12 +180,14 @@ public:
   const u16 getPlayerKey() const {
     return JDrama::TNameRef::calcKeyCode(getPlayerName());
   }
+  bool getColliding() { return mCollisionFlags.mIsColliding; }
   bool isMario() const { return !mIsEMario; }
 
   void setCamera(CPolarSubCamera *camera);
   void setCanUseFludd(bool enable) { mCanUseFludd = enable; }
   void setPlayer(TMario *player);
   void setPlayerID(SME::Enum::Player id) { mPlayerID = id; }
+  void setColliding(bool colliding) { mCollisionFlags.mIsColliding = colliding; }
 
   bool canUseNozzle(TWaterGun::NozzleType nozzle) const;
   const char *getPlayerName() const;
@@ -204,18 +206,25 @@ private:
 
 public:
   u8 mCurJump;
+  bool mIsLongJumping;
   bool mIsClimbTired;
   u16 mPrevCollisionType;
+  TBGCheckData *mPrevCollisionFloor;
   s32 mCollisionTimer;
   s32 mClimbTiredTimer;
   f32 mSlideSpeedMultiplier;
 
   struct {
+    bool mIsColliding : 1;
     bool mIsAirborn : 1;
     bool mIsFaceUsed : 1;
     bool mIsSpinBounce : 1;
     bool mIsDisableInput : 1;
     bool mIsCollisionUsed : 1;
+    bool mIsWarpActive : 1;
+    bool mIsWarpUsed : 1;
+    Enum::WarpKind mWarpingType;
+    s16 mCrushedTimer;
   } mCollisionFlags;
 
   JGeometry::TVec3<f32> mYoshiWaterSpeed;

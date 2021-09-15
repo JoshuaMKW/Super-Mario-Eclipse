@@ -13,7 +13,7 @@ using namespace SME::Class;
 
 TPlayerData::TPlayerData(TMario *player, CPolarSubCamera *camera, bool isMario)
     : mPlayer(player), mCamera(camera), mIsEMario(!isMario),
-      mPlayerID(SME::Enum::Player::MARIO), mCurJump(0), mIsClimbTired(false),
+      mPlayerID(SME::Enum::Player::MARIO), mCurJump(0), mIsLongJumping(false), mIsClimbTired(false),
       mPrevCollisionType(0), mCollisionTimer(0), mClimbTiredTimer(0),
       mSlideSpeedMultiplier(1.0f), mYoshiWaterSpeed(0.0f, 0.0f, 0.0f),
       mDefaultAttrs(player) {

@@ -6,11 +6,12 @@ import functools
 import json
 import shutil
 import subprocess
+import sys
 import time
 from fnmatch import fnmatch
-from io import BytesIO
+from io import BytesIO, StringIO
 from pathlib import Path
-from typing import Any, Dict, Generator, List, Optional, Union
+from typing import IO, Any, Dict, Generator, List, Optional, Union
 
 import oead
 import psutil
@@ -27,7 +28,6 @@ TMPDIR = Path("tmp-compiler")
 
 @atexit.register
 def clean_resources():
-    return
     if TMPDIR.is_dir():
         shutil.rmtree(TMPDIR)
 
@@ -156,6 +156,14 @@ _ALLOC_HI_INFO = AllocationMap({
         0x3C600000, AllocationMap.RelocationType.HI), AllocationMap.InstructionInfo(0x60630000, AllocationMap.RelocationType.LO)]),)
 })
 
+class FileStream(object):
+    def __init__(self, path: str, stream: IO):
+        self.path = path
+        self.stream = stream
+
+    def __del__(self) -> None:
+        if not self.stream.closed:
+            self.stream.close()
 
 class FilePatcher(Compiler):
     class State:
@@ -172,7 +180,7 @@ class FilePatcher(Compiler):
     def __init__(self, build: State, gameDir: str, projectDir: str = Path.cwd(),
                  region: Region = Region.US, compiler: Compiler.Compilers = Compiler.Compilers.CODEWARRIOR,
                  patcher: Patcher = Patcher.KAMEK, bootfrom: BootType = BootType.DOL,
-                 startAddr: int = 0x80000000, shines: int = 120):
+                 startAddr: int = 0x80000000, shines: int = 120, fout: Optional[FileStream] = None):
 
         if isinstance(startAddr, str):
             startAddr = int(startAddr, 16)
@@ -183,6 +191,7 @@ class FilePatcher(Compiler):
         self.maxShines = shines
         self.bootType = bootfrom
         self.region = region
+        self._fout = fout
         self._fileTables = {}
 
         self._init_tables()
@@ -356,7 +365,7 @@ class FilePatcher(Compiler):
             elif self.is_debug():
                 print(f"Generating {self.maxShines} shines DEBUG build")
 
-            modules = self.run(Path("src"), dolPath)
+            modules = self.run(Path("src"), dolPath, fout=self._fout.stream)
             _doldata = DolFile(BytesIO(self.dest.read_bytes()))
 
             if isinstance(modules, list):
@@ -510,8 +519,6 @@ class FilePatcher(Compiler):
 
         for _set in config["userfiles"]:
             glob = list(_set.keys())[0]
-            if path.suffix == ".txt":
-                print(str(path).lower(), parentGlob + glob.strip().lower())
             if fnmatch(str(path).lower(), parentGlob + glob.strip().lower()):
                 if _set[glob]["rename"].strip() == "":
                     return self.gameDir / _set[glob]["destination"].strip() / path.name
@@ -573,6 +580,7 @@ def main():
                         choices=["DOL", "ISO", "NONE"], default="NONE")
     parser.add_argument(
         "--shines", help="Max shines allowed", type=int, default=120)
+    parser.add_argument("--out", help="File to output to")
 
     args = parser.parse_args()
 
@@ -591,21 +599,26 @@ def main():
     else:
         build = FilePatcher.State.RELEASE
 
+    if args.out:
+        out = FileStream(args.out, open(args.out, "w"))
+    else:
+        out = None
+
     patcher = FilePatcher(build, args.gamefolder, args.projectfolder, args.region, args.compiler, args.patcher,
-                          args.boot, args.startaddr, args.shines)
+                          args.boot, args.startaddr, args.shines, out)
 
     if patcher.is_codewarrior():
         patcher.cxxOptions = ["-Cpp_exceptions off", "-gccinc", "-gccext on", "-enum int", "-RTTI off"
                               "-fp fmadd", "-use_lmw_stmw on", "-O4,p", "-c", "-rostr", "-sdata 0", "-sdata2 0"]
     elif patcher.is_clang():
-        patcher.cxxOptions = ["--target=powerpc-gekko-ibm-kuribo-eabi", "-fdeclspec", "-std=gnu++17", "-fno-exceptions", "-fno-rtti", "-fno-unwind-tables", "-ffast-math",
-                              "-flto", "-nodefaultlibs", "-nostdlib", "-fno-use-init-array", "-fno-use-cxa-atexit", "-fno-c++-static-destructors", "-fno-function-sections", "-fno-data-sections", "-fuse-ld=lld", "-fpermissive", "-Werror", "-O3", "-r", "-v"]
-        patcher.cOptions = ["--target=powerpc-gekko-ibm-kuribo-eabi", "-fdeclspec", "-fno-exceptions", "-fno-rtti", "-fno-unwind-tables", "-ffast-math", "-fdeclspec",
-                            "-flto", "-nodefaultlibs", "-nostdlib", "-fno-use-init-array", "-fno-use-cxa-atexit", "-fno-c++-static-destructors", "-fno-function-sections", "-fno-data-sections", "-fuse-ld=lld", "-fpermissive", "-Werror", "-O3", "-r", "-v"]
-        patcher.sOptions = ["--target=powerpc-gekko-ibm-kuribo-eabi", "-fdeclspec", "-fno-exceptions", "-fno-rtti", "-fno-unwind-tables",
-                            "-flto", "-nodefaultlibs", "-nostdlib", "-fno-use-init-array", "-fno-use-cxa-atexit", "-fno-c++-static-destructors", "-fno-function-sections", "-fno-data-sections", "-fuse-ld=lld", "-Werror", "-r", "-v"]
-        patcher.linkOptions = ["--target=powerpc-gekko-ibm-kuribo-eabi", "-fdeclspec", "-std=gnu++17", "-fno-exceptions", "-fno-rtti", "-fno-unwind-tables", "-ffast-math",
-                               "-flto", "-nodefaultlibs", "-nostdlib", "-fno-use-init-array", "-fno-use-cxa-atexit", "-fno-c++-static-destructors", "-fno-function-sections", "-fno-data-sections", "-fuse-ld=lld", "-fpermissive", "-Werror", "-O3", "-r", "-v"]
+        patcher.cxxOptions = ["--target=powerpc-gekko-ibm-kuribo-eabi", "-std=gnu++17", "-fno-exceptions", "-fno-rtti", "-fno-unwind-tables", "-ffast-math",
+                             "-flto", "-nodefaultlibs", "-nostdlib", "-fno-use-init-array", "-fuse-ld=lld", "-fpermissive", "-Wall", "-O3", "-r", "-v"]
+        patcher.cOptions = ["--target=powerpc-gekko-ibm-kuribo-eabi", "-fno-exceptions", "-fno-rtti", "-fno-unwind-tables", "-ffast-math",
+                           "-flto", "-nodefaultlibs", "-nostdlib", "-fno-use-init-array", "-fuse-ld=lld", "-fpermissive", "-Wall", "-O3", "-r", "-v"]
+        patcher.sOptions = ["--target=powerpc-gekko-ibm-kuribo-eabi", "-fno-exceptions", "-fno-rtti", "-fno-unwind-tables",
+                           "-flto", "-nodefaultlibs", "-nostdlib", "-fno-use-init-array", "-fuse-ld=lld", "-Wall", "-r", "-v"]
+        patcher.linkOptions = ["--target=powerpc-gekko-ibm-kuribo-eabi", "-std=gnu++17", "-fno-exceptions", "-fno-rtti", "-fno-unwind-tables", "-ffast-math",
+                              "-flto", "-nodefaultlibs", "-nostdlib", "-fno-use-init-array", "-fuse-ld=lld", "-fpermissive", "-Wall", "-O3", "-r", "-v"]
     elif patcher.is_gcc():
         patcher.cxxOptions = ["-nodefaultlibs", "-nostdlib", "-std=gnu++20",
                               "-fno-exceptions", "-fno-rtti", "-ffast-math", "-fpermissive", "-Wall", "-O3", "-r"]
@@ -616,8 +629,13 @@ def main():
         patcher.linkOptions = ["-nodefaultlibs", "-nostdlib", "-std=gnu++20",
                                "-fno-exceptions", "-fno-rtti", "-ffast-math", "-fpermissive", "-Wall", "-O3", "-r"]
 
+    sys.stdout = out.stream
+    sys.stderr = out.stream
+
     patcher.patch_game()
 
+    sys.stdout = sys.__stdout__
+    sys.stderr = sys.__stderr__
 
 if __name__ == "__main__":
     main()

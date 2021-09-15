@@ -21,16 +21,40 @@ void Patch::CKit::onSetup(TMarDirector *director) {
   director->setupObjects();
 }
 
+extern void demoHandler(TMario *player);
+// extern void createWaterBalloonAndThrow(TMario *player);
+
 // this is ran every frame
 // extern -> SME.cpp
 s32 Patch::CKit::onUpdate(void *director) { // movie director
-  // xyzModifierMario();
-  // Patch::Cheat::drawCheatText(); //currently bugged
-
-  // run replaced call
   u32 func;
   SME_FROM_GPR(12, func);
-  
+
+  if (!gpMarioAddress)
+    return ((s32(*)(void *))func)(director);
+
+  if ((u32)gpMarioAddress->mController < 0x80000000 ||
+      (u32)gpMarioAddress->mController >= (0x81800000 - sizeof(TMarioGamePad)))
+    return ((s32(*)(void *))func)(director);
+
+  if (!gpMarDirector) {
+    return ((s32(*)(void *))func)(director);
+  }
+
+  if (gpMarDirector->mCurState == 0xA)
+    return ((s32(*)(void *))func)(director);
+
+  Debug::xyzModifierMario(gpMarioAddress);
+  Debug::updateDebugCollision(gpMarioAddress);
+  demoHandler(gpMarioAddress);
+
+  /*
+  if (!gpMarioAddress->mAttributes.mHasFludd &&
+      (gpMarioAddress->mController->mButtons.mFrameInput & TMarioGamePad::R))
+    createWaterBalloonAndThrow(gpMarioAddress);
+  */
+  // Patch::Cheat::drawCheatText(); //currently bugged
+
   // ===== FRAME RATE ===== //
   const f32 frameRate = SME::TGlobals::isVariableFrameRate()
                             ? SME::TGlobals::getFrameRate()
@@ -38,16 +62,16 @@ s32 Patch::CKit::onUpdate(void *director) { // movie director
   *(f32 *)SME_PORT_REGION(0x804167B8, 0, 0, 0) = 0.5f * (frameRate / 30.0f);
   *(f32 *)SME_PORT_REGION(0x80414904, 0, 0, 0) = 0.01f * (frameRate / 30.0f);
   gpApplication.mDisplay->mRetraceCount = frameRate > 30.0f ? 1 : 2;
-  SME_DEBUG_LOG("%.02f fps\n", frameRate);
   // ====================== //
 
   TMarioGamePad *controller = gpApplication.mGamePad1;
   if ((controller->mButtons.mInput & 0x260) == 0x260) { // L + R + B + D-PAD UP
-    SME::Util::Mario::switchCharacter(gpMarioAddress,
-                                      SME::Util::Mario::getPlayerIDFromInput(
-                                          controller->mButtons.mInput & 0xF),
-                                      true);
+    // SME::Util::Mario::switchCharacter(gpMarioAddress,
+    //                                  SME::Util::Mario::getPlayerIDFromInput(
+    //                                      controller->mButtons.mInput & 0xF),
+    //                                  true);
   }
+  // run replaced call
   return ((s32(*)(void *))func)(director);
 }
 
@@ -133,7 +157,7 @@ bool Patch::CKit::manageLightSize() {
             powf(((1350.0f / SME_MAX_SHINES) * CurrentShineCount), 1.5f);
         LightContext.mPrevDarkness = gpModelWaterManager->mDarkLevel;
         LightContext.mNextDarkness =
-            Util::Math::lerp<u8>(30, 190,
+            Util::Math::lerp<u8>(TGlobals::getMinDarkness(), 190,
                                  static_cast<f32>(CurrentShineCount) /
                                      static_cast<f32>(SME_MAX_SHINES));
 
@@ -153,7 +177,8 @@ bool Patch::CKit::manageLightSize() {
           static_cast<u8>(SME::Util::Math::sigmoidCurve(
               LightContext.mStepContext,
               static_cast<f32>(LightContext.mPrevDarkness),
-              static_cast<f32>(LightContext.mNextDarkness), sigOfs, sigStrength));
+              static_cast<f32>(LightContext.mNextDarkness), sigOfs,
+              sigStrength));
 
     constexpr f32 deadZone = 1.0f;
     constexpr f32 minSize = 0.0f;
@@ -296,11 +321,12 @@ void Patch::CKit::realTimeCustomAttrsHandler(TMario *player) {
   if (player->mYoshi)
     maintainYoshi(player->mYoshi);
 
-  Class::TPlayerData *playerParams = TGlobals::getPlayerParams(player);
+  Class::TPlayerData *playerParams = TGlobals::getPlayerData(player);
   Class::TStageParams *stageParams = Class::TStageParams::sStageConfig;
 
   const Class::TPlayerParams *params = playerParams->getParams();
-  const f32 sizeMultiplier = params->mSizeMultiplier.get() * stageParams->mPlayerSizeMultiplier.get();
+  const f32 sizeMultiplier =
+      params->mSizeMultiplier.get() * stageParams->mPlayerSizeMultiplier.get();
   const f32 speedMultiplier = params->mSpeedMultiplier.get();
 
   playerParams->scalePlayerAttrs(sizeMultiplier);

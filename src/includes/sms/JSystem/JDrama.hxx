@@ -91,10 +91,7 @@ public:
 
   virtual void load(JSUMemoryInputStream &);
 
-private:
   JGeometry::TVec3<f32> mPosition;
-
-public:
   TFlagT<u16> mPlacementFlags;
 };
 
@@ -132,9 +129,9 @@ public:
   virtual void JSGGetRotation(Vec *) const override;
   virtual void JSGSetRotation(const Vec &) override;
 
-private:
   JGeometry::TVec3<f32> mSize;     // 24
   JGeometry::TVec3<f32> mRotation; // 30
+private:
   u32 _02[0x8 / 4];                // 3C
 };
 

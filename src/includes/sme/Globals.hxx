@@ -20,8 +20,8 @@ public:
   static u8 getActivePlayers() { return sActivePlayers; }
   static u8 getMaxPlayers() { return sMaxPlayers; }
   static SME_NO_INLINE TMario *getPlayerByIndex(u8 index);
-  static SME_NO_INLINE SME::Class::TPlayerData *getPlayerParams(u8 id);
-  static SME_NO_INLINE SME::Class::TPlayerData *getPlayerParams(TMario *player);
+  static SME_NO_INLINE SME::Class::TPlayerData *getPlayerData(u8 id);
+  static SME_NO_INLINE SME::Class::TPlayerData *getPlayerData(TMario *player);
 
   static SME_NO_INLINE void setPlayerByIndex(u8 index, TMario *player);
 
@@ -52,10 +52,12 @@ public:
   static f32 getScreenWidth() { return sScreenWidth; }
   static f32 getFrameRate() { return sFrameRate; }
   static f32 getScreenToFullScreenRatio() { return sScreenWidth / 600.0f; }
+  static u8 getMinDarkness() { return sMinDarkness; }
 
   static void setScreenWidth(f32 width) { sScreenWidth = width; }
   static void setFrameRate(f32 framerate) { sFrameRate = framerate; }
   static void setVariableFrameRate(bool active) { sIsVariableFrameRate = active; }
+  static void setMinDarkness(u8 val) { sMinDarkness = val; }
 
   static Class::TLightContext sLightData;
 
@@ -83,6 +85,7 @@ public:
   static f32 sScreenWidth;
   static f32 sFrameRate;
   static bool sIsVariableFrameRate;
+  static u8 sMinDarkness;
 };
 
 } // namespace SME

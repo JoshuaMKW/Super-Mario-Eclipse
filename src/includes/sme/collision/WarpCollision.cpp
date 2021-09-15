@@ -94,10 +94,12 @@ bool TCollisionLink::isValidWarpCol(TBGCheckData *colTriangle) {
   case EXPAND_WARP_SET(16041):
   case EXPAND_WARP_SET(16042):
   case EXPAND_WARP_SET(16043):
+  case EXPAND_WARP_SET(16044):
   case EXPAND_WARP_SET(17040):
   case EXPAND_WARP_SET(17041):
   case EXPAND_WARP_SET(17042):
   case EXPAND_WARP_SET(17043):
+  case EXPAND_WARP_SET(17044):
     return true;
   default:
     return false;
@@ -105,6 +107,7 @@ bool TCollisionLink::isValidWarpCol(TBGCheckData *colTriangle) {
 }
 
 #undef EXPAND_WARP_SET
+#undef EXPAND_WARP_CATEGORY
 
 bool TCollisionLink::isTargetOf(TBGCheckData *other) const {
   if (!isValidWarpCol(other)) {

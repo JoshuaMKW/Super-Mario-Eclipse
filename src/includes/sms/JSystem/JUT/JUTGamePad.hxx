@@ -132,10 +132,9 @@ public:
     CButton mButtons;     // _18
     CStick mControlStick; // _48
     CStick mCStick;       // _58
-    CRumble mCumble;      // _68
+    CRumble mRumble;      // _68
     u16 mPort;            // _78
-    u8 mPortConnected;    // _79
-    u8 _7A;
+    u8 mPortConnected;    // _7A
     JSUPtrLink mPtrLink;  // _7C
     u32 _8C;
     u32 _90;

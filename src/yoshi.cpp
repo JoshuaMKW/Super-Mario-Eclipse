@@ -54,7 +54,7 @@ bool Patch::Yoshi::isYoshiEggNeedFruit(THitActor *gpFruit) {
 // extern -> SME.cpp
 u8 Patch::Yoshi::isYoshiEggFree(TEggYoshi *gpEgg, THitActor *gpFruit) {
   const TPlayerData *playerParams =
-      SME::TGlobals::getPlayerParams(gpMarioAddress);
+      SME::TGlobals::getPlayerData(gpMarioAddress);
   if (gpEgg->mState == 14 || gpEgg->mState == 6)
     return EGG_IGNORE;
   else if (!playerParams->getParams()->mCanRideYoshi.get())
@@ -75,7 +75,7 @@ bool Patch::Yoshi::isYoshiMaintainFluddModel() {
   TMario *player;
   SME_FROM_GPR(31, player);
 
-  const TPlayerData *playerParams = SME::TGlobals::getPlayerParams(player);
+  const TPlayerData *playerParams = SME::TGlobals::getPlayerData(player);
 
   if (!playerParams)
     return player->mAttributes.mHasFludd;
@@ -101,7 +101,7 @@ bool Patch::Yoshi::canMountYoshi() {
   SME_FROM_GPR(31, player);
 
   const TPlayerParams *params =
-      SME::TGlobals::getPlayerParams(player)->getParams();
+      SME::TGlobals::getPlayerData(player)->getParams();
 
   if (params->mSizeMultiplier.get() *
           TStageParams::sStageConfig->mPlayerSizeMultiplier.get() >
@@ -149,7 +149,7 @@ void Patch::Yoshi::canYoshiSpray(TWaterGun *gpWaterGun) {
 // 0x80273198
 // extern -> SME.cpp
 u32 Patch::Yoshi::calcYoshiSwimVelocity(TMario *player, u32 arg1) {
-  TPlayerData *playerParams = SME::TGlobals::getPlayerParams(player);
+  TPlayerData *playerParams = SME::TGlobals::getPlayerData(player);
   if (!playerParams) {
     return jumpProcess__6TMarioFi(player, arg1);
   }
@@ -251,7 +251,7 @@ SME_WRITE_32(SME_PORT_REGION(0x801BC6BC, 0, 0, 0), 0xB07F00FC);
 void Patch::Yoshi::saveNozzles(TYoshi *yoshi) {
   TMario *player = yoshi->mMario;
 
-  TPlayerData *playerParams = SME::TGlobals::getPlayerParams(player);
+  TPlayerData *playerParams = SME::TGlobals::getPlayerData(player);
   if (!playerParams->isMario()) {
     ride__6TYoshiFv(yoshi);
     return;
@@ -267,7 +267,7 @@ void Patch::Yoshi::saveNozzles(TYoshi *yoshi) {
 // 0x8024EC18
 // extern -> SME.cpp
 void Patch::Yoshi::restoreNozzles(TMario *player) {
-  TPlayerData *playerParams = SME::TGlobals::getPlayerParams(player);
+  TPlayerData *playerParams = SME::TGlobals::getPlayerData(player);
 
   if (!playerParams->isMario())
     return;

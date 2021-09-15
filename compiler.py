@@ -1,10 +1,11 @@
 import argparse
 import atexit
 import json
+import os
 import shutil
 import subprocess
 
-from io import BytesIO
+from io import BytesIO, StringIO
 from pathlib import Path
 from typing import List, Optional, Union
 
@@ -15,7 +16,6 @@ TMPDIR = Path("tmp-compiler")
 
 @atexit.register
 def clean_resources():
-    return
     if TMPDIR.is_dir():
         shutil.rmtree(TMPDIR)
 
@@ -164,25 +164,28 @@ class Compiler(object):
     def is_kuribo(self) -> bool:
         return self.patcher == Compiler.Patchers.KURIBO
 
-    def run(self, src: Union[str, Path], dol: Optional[Union[str, Path]] = None) -> Optional[Union[List[Path], Path]]:
+    def run(self, src: Union[str, Path], dol: Optional[Union[str, Path]] = None, fout: Optional[StringIO] = None) -> Optional[Union[List[Path], Path]]:
         def build_objects(cppCompiler: Path, cCompiler: Path, sCompiler: Path, linker: Optional[Path] = None) -> List[str]:
             print("Compiling source code...\n")
+
+            tmpStream = open("tmpstream_.log", "w+")
 
             tmpObject = "tmp.o"
             cppObjects = []
             cObjects = []
             sObjects = []
-            linkObjects = [lib for lib in Path("lib/").iterdir() if lib.suffix == ".a"]
+            linkObjects = [lib for lib in Path(
+                "lib/").iterdir() if lib.suffix == ".a"]
 
             if src.is_file():
                 if src.suffix in (".cpp", ".cxx", ".c++"):
-                    subprocess.run([str(cppCompiler.resolve()), str(src.resolve()), *self._includes, *self._defines, *self.cxxOptions, "-o", str(tmpObject)],
+                    subprocess.run([str(cppCompiler.resolve()), str(src.resolve()), *self._includes, *self._defines, *self.cxxOptions, "-o", str(tmpObject)], stdout=tmpStream, stderr=tmpStream,
                                    text=True)
                 elif src.suffix == ".c":
-                    subprocess.run([str(cCompiler.resolve()), str(src.resolve()), *self._includes, *self._defines, *self.cOptions, "-o", str(tmpObject)],
+                    subprocess.run([str(cCompiler.resolve()), str(src.resolve()), *self._includes, *self._defines, *self.cOptions, "-o", str(tmpObject)], stdout=tmpStream, stderr=tmpStream,
                                    text=True)
                 elif src.suffix == ".s":
-                    subprocess.run([str(sCompiler.resolve()), str(src.resolve()), *self._includes, *self._defines, *self.sOptions, "-o", str(tmpObject)],
+                    subprocess.run([str(sCompiler.resolve()), str(src.resolve()), *self._includes, *self._defines, *self.sOptions, "-o", str(tmpObject)], stdout=tmpStream, stderr=tmpStream,
                                    text=True)
             elif src.is_dir():
                 for f in src.rglob("*"):
@@ -194,28 +197,49 @@ class Compiler(object):
                         sObjects.append(str(f.resolve()))
 
                 if len(cppObjects) > 0:
-                    print(" ".join([str(cppCompiler.resolve()), *cppObjects, *self._includes, *self._defines, *self.cxxOptions, "-o", str(TMPDIR / f"cpp_obj.o")]))
-                    subprocess.run([str(cppCompiler.resolve()), *cppObjects, *self._includes, *self._defines, *self.cxxOptions, "-o", str(TMPDIR / f"cpp_obj.o")],
+                    print(" ".join([str(cppCompiler.resolve()), *cppObjects, *self._includes,
+                                    *self._defines, *self.cxxOptions, "-o", str(TMPDIR / f"cpp_obj.o")]))
+                    subprocess.run([str(cppCompiler.resolve()), *cppObjects, *self._includes, *self._defines, *self.cxxOptions, "-o", str(TMPDIR / f"cpp_obj.o")], stdout=tmpStream, stderr=tmpStream,
                                    text=True)
                     linkObjects.append(str(TMPDIR / f"cpp_obj.o"))
                 if len(cObjects) > 0:
-                    subprocess.run([str(cCompiler.resolve()), *cObjects, *self._includes, *self._defines, *self.cOptions, "-o", str(TMPDIR / f"c_obj.o")],
+                    subprocess.run([str(cCompiler.resolve()), *cObjects, *self._includes, *self._defines, *self.cOptions, "-o", str(TMPDIR / f"c_obj.o")], stdout=tmpStream, stderr=tmpStream,
                                    text=True)
                     linkObjects.append(str(TMPDIR / f"c_obj.o"))
                 if len(sObjects) > 0:
-                    subprocess.run([str(sCompiler.resolve()), *sObjects, *self._includes, *self._defines, *self.sOptions, "-o", str(TMPDIR / f"s_obj.o")],
+                    subprocess.run([str(sCompiler.resolve()), *sObjects, *self._includes, *self._defines, *self.sOptions, "-o", str(TMPDIR / f"s_obj.o")], stdout=tmpStream, stderr=tmpStream,
                                    text=True)
                     linkObjects.append(str(TMPDIR / f"s_obj.o"))
 
                 if len(linkObjects) == 0:
+                    tmpStream.seek(0)
+                    fout.write(tmpStream.read())
+                    tmpStream.close()
+                    os.unlink("tmpstream_.log")
                     return None
 
                 if linker:
-                    print([str(linker.resolve()), *linkObjects, *self.linkOptions, "-o", tmpObject])
-                    subprocess.run([str(linker.resolve()), *linkObjects, *self.linkOptions, "-o", tmpObject],
-                                text=True)
+                    print([str(linker.resolve()), *linkObjects,
+                           *self.linkOptions, "-o", tmpObject])
+                    subprocess.run([str(linker.resolve()), *linkObjects, *self.linkOptions, "-o", tmpObject], stdout=tmpStream, stderr=tmpStream,
+                                   text=True)
+                    tmpStream.seek(0)
+                    fout.write(tmpStream.read())
+                    tmpStream.close()
+                    os.unlink("tmpstream_.log")
+
                     return [tmpObject]
+                tmpStream.seek(0)
+                fout.write(tmpStream.read())
+                tmpStream.close()
+                os.unlink("tmpstream_.log")
                 return linkObjects
+
+            
+            tmpStream.seek(0)
+            fout.write(tmpStream.read())
+            tmpStream.close()
+            os.unlink("tmpstream_.log")
 
         buildDir = Path("PATCHER-BUILD")
         if not buildDir.exists():
@@ -266,7 +290,8 @@ class Compiler(object):
             _codewarriorLd = self._compilers["mwldeppc"]
 
             if self.is_kuribo():
-                obj, *_ = build_objects(_codewarriorCpp, _codewarriorCpp, _codewarriorAsm, _codewarriorLd)
+                obj, *_ = build_objects(_codewarriorCpp,
+                                        _codewarriorCpp, _codewarriorAsm, _codewarriorLd)
                 kxefile = Path(obj).with_suffix(".kxe")
                 subprocess.run(["tools/KuriboConverter/KuriboConverter.exe", str(obj), str(kxefile), str(self.linker.resolve())],
                                text=True)
@@ -275,9 +300,10 @@ class Compiler(object):
                 if self.dest.is_file():
                     self.dest.unlink()
 
-                linkObjects = build_objects(_codewarriorCpp, _codewarriorCpp, _codewarriorAsm)
+                linkObjects = build_objects(
+                    _codewarriorCpp, _codewarriorCpp, _codewarriorAsm)
                 args = [*linkObjects, "--static",
-                    f"0x{self.startaddr:08X}", *kCmdtype]
+                        f"0x{self.startaddr:08X}", *kCmdtype]
                 pykamek.main(args)
                 return tmpDumpCode
 
@@ -288,7 +314,8 @@ class Compiler(object):
                 self.linker = Path(self.linker)
 
             if self.is_kuribo():
-                obj, *_ = build_objects(_clangCpp, _clangCpp, _clangCpp, _clangCpp)
+                obj, *_ = build_objects(_clangCpp,
+                                        _clangCpp, _clangCpp, _clangCpp)
                 kxefile = Path(obj).with_suffix(".kxe")
                 subprocess.run(["tools/KuriboConverter/KuriboConverter.exe", str(obj), str(kxefile), str(self.linker.resolve())],
                                text=True)
@@ -299,7 +326,7 @@ class Compiler(object):
 
                 linkObjects = build_objects(_clangCpp, _clangCpp, _clangCpp)
                 args = [*linkObjects, "--static",
-                    f"0x{self.startaddr:08X}", *kCmdtype]
+                        f"0x{self.startaddr:08X}", *kCmdtype]
                 pykamek.main(args)
                 return tmpDumpCode
 
@@ -321,7 +348,7 @@ class Compiler(object):
 
                 linkObjects = build_objects(_gccCpp, _gccCpp, _gccCpp)
                 args = [*linkObjects, "--static",
-                    f"0x{self.startaddr:08X}", *kCmdtype]
+                        f"0x{self.startaddr:08X}", *kCmdtype]
                 pykamek.main(args)
                 return tmpDumpCode
 

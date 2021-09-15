@@ -24,4 +24,5 @@ public:
   JUTPoint mStartPos; // 0x38
   JUTPoint mMidPos;   // 0x40
   JUTPoint mEndPos;   // 0x48
+  u32 _50[0x18 / 4];
 };

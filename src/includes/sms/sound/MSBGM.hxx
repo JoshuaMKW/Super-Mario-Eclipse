@@ -1,6 +1,7 @@
 #pragma once
 
 #include "types.h"
+#include "JAISound.hxx"
 
 enum MSStageInfo
 {
@@ -63,10 +64,10 @@ public:
     static void setTrackVolume(u8, f32, u32, u8);
     static void stopTrackBGMs(u8, u32);
     static void stopTrackBGM(u8, u32);
-    static void stopBGM(u32, u32);
-    static u32 *getHandle(u8);
-    static u32 *startBGM(u32);
-    static u32 getSceneNo(u32);
+    static void stopBGM(u32 id, u32);
+    static JAISound *getHandle(u8);
+    static JAISound *startBGM(u32 id);
+    static u32 getSceneNo(u32 id);
     static void init();
 
     static void *smBgmInTrack[4]; // JASystem::TTrack

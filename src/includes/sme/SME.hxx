@@ -65,6 +65,9 @@
 #define __ppc__
 #endif
 
+#define SME_USE_PS_MATH
+#define SME_DEMO
+
 #define SME_MODULE_NAME "Eclipse"
 #define SME_AUTHOR_NAME "JoshuaMK"
 
@@ -143,7 +146,8 @@ u32 masterAllCollisionHandler(TMario *player);
 
 namespace Debug {
 
-bool xyzModifierMario(TMario *player);
+void xyzModifierMario(TMario *player);
+void updateDebugCollision(TMario *player);
 
 } // namespace Debug
 
@@ -197,7 +201,6 @@ u32 *initFirstModel(char *path, u32 unk_1, u32 unk_2, u32 unk_3, JKRHeap *heap,
 TMarDirector *initFileMods();
 void initShineShadow();
 void initSoundBank(u8 areaID, u8 episodeID);
-void initMusicTrack();
 TMario *fromMarioInit(TMario *player);
 bool fromShadowMarioInit();
 void initYoshi(MAnmSound *anmSound, void *r4, u32 r5, f32 f1);
@@ -227,7 +230,7 @@ void getClimbingAnimSpd(TMario *player, TMario::Animation anim, f32 speed);
 void scaleHangSpeed(TMario *player);
 void checkGraffitiAffected(TMario *player);
 void rescaleHeldObj(Mtx holderMatrix, Mtx destMatrix);
-void manageExtraJumps(TMario *player);
+void manageCustomJumps(TMario *player);
 void checkYSpdForTerminalVelocity();
 void normJumpMultiplier();
 f32 checkGroundSpeedLimit();
@@ -246,15 +249,6 @@ void performMarioTrickyOverhaul(TMario *player, JSUMemoryInputStream *stream);
 void setMarioOverhaul(TMarDirector *director);
 
 } // namespace Multiplayer
-
-namespace Music {
-
-u32 setIsValid(u32 musicID);
-JAISound *initMusic(JAISound *jai);
-void stopMusicOnStop();
-void stopMusicOnStageExit(TMarioGamePad *gamepad);
-
-} // namespace Music
 
 namespace Shine {
 

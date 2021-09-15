@@ -137,11 +137,6 @@ SME_PATCH_BL(SME_PORT_REGION(0x80250CA0, 0, 0, 0),
 SME_PATCH_BL(SME_PORT_REGION(0x8025059C, 0, 0, 0),
              Patch::Collision::masterAllCollisionHandler);
 
-// debug.cpp
-SME_PATCH_BL(SME_PORT_REGION(0x8024D194, 0, 0, 0),
-             Patch::Debug::xyzModifierMario);
-SME_WRITE_32(SME_PORT_REGION(0x8024D198, 0, 0, 0), 0x2C030000);
-
 // file_flags.cpp
 SME_PATCH_BL(SME_PORT_REGION(0x802B1794, 0, 0, 0),
              Patch::Flag::setFileCompleteBool);
@@ -198,8 +193,6 @@ SME_PATCH_BL(SME_PORT_REGION(0x802A716C, 0, 0, 0), Patch::Init::initFirstModel);
 SME_PATCH_BL(SME_PORT_REGION(0x802998B4, 0, 0, 0), Patch::Init::initFileMods);
 SME_PATCH_B(SME_PORT_REGION(0x80280180, 0, 0, 0), Patch::Init::initShineShadow);
 SME_PATCH_BL(SME_PORT_REGION(0x802B7A4C, 0, 0, 0), Patch::Init::initSoundBank);
-SME_PATCH_BL(SME_PORT_REGION(0x802983F0, 0, 0, 0), Patch::Init::initMusicTrack);
-SME_PATCH_BL(SME_PORT_REGION(0x80298420, 0, 0, 0), Patch::Init::initMusicTrack);
 SME_WRITE_32(SME_PORT_REGION(0x80276C90, 0, 0, 0), 0x60000000);
 SME_PATCH_BL(SME_PORT_REGION(0x80276C94, 0, 0, 0), Patch::Init::fromMarioInit);
 SME_PATCH_BL(SME_PORT_REGION(0x800397DC, 0, 0, 0),
@@ -252,13 +245,7 @@ SME_WRITE_32(SME_PORT_REGION(0x802619D0, 0, 0, 0), 0x60000000);
   // SME_PATCH_BL(0x801E4118, Patch::Mario::rescaleHeldObj);
 #endif
 SME_PATCH_BL(SME_PORT_REGION(0x8024E02C, 0, 0, 0),
-             Patch::Mario::manageExtraJumps);
-SME_PATCH_BL(SME_PORT_REGION(0x80254534, 0, 0, 0),
-             Patch::Mario::normJumpMultiplier);
-SME_WRITE_32(SME_PORT_REGION(0x80254538, 0, 0, 0), 0x60000000);
-SME_WRITE_32(SME_PORT_REGION(0x8025453C, 0, 0, 0), 0x60000000);
-SME_WRITE_32(SME_PORT_REGION(0x80254540, 0, 0, 0), 0x60000000);
-SME_WRITE_32(SME_PORT_REGION(0x80254544, 0, 0, 0), 0x60000000);
+             Patch::Mario::manageCustomJumps);
 SME_PATCH_BL(SME_PORT_REGION(0x80256678, 0, 0, 0),
              Patch::Mario::checkYSpdForTerminalVelocity);
 SME_WRITE_32(SME_PORT_REGION(0x8025667C, 0, 0, 0), 0x60000000);
@@ -298,16 +285,6 @@ SME_PATCH_BL(SME_PORT_REGION(0x8029D7E8, 0, 0, 0),
 // Patch::Multiplayer::setMarioOverhaul);
 // SME_PATCH_BL(SME_PORT_REGION(0x802984D8, 0, 0, 0),
 // Patch::Multiplayer::setMarioOverhaul);
-
-// music.cpp
-#if 1
-SME_PATCH_BL(SME_PORT_REGION(0x80016998, 0, 0, 0), Patch::Music::setIsValid);
-SME_PATCH_B(SME_PORT_REGION(0x80016ABC, 0, 0, 0), Patch::Music::initMusic);
-SME_PATCH_B(SME_PORT_REGION(0x80016948, 0, 0, 0),
-            Patch::Music::stopMusicOnStop);
-SME_PATCH_BL(SME_PORT_REGION(0x802A670C, 0, 0, 0),
-             Patch::Music::stopMusicOnStageExit);
-#endif
 
 // patches.cpp
 SME_PATCH_BL(SME_PORT_REGION(0x802320E0, 0, 0, 0),

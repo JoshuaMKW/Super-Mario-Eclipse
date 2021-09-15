@@ -39,7 +39,7 @@ JGeometry::TVec3<f32> TVectorTriangle::normal(bool normalize)
 
     JGeometry::TVec3<f32> normal = cross(vectorA, vectorB);
     if (normalize)
-        normal = Vector::normalized(normal);
+        normal = Vector3::normalized(normal);
 
     return normal;
 }

@@ -13,6 +13,7 @@ using namespace SME::Util;
 constexpr size_t AudioMessageQueueSize = 16;
 constexpr size_t AudioQueueSize = 4;
 constexpr size_t AudioStackSize = 0x4000;
+constexpr u8 AudioVolumeDefault = 127;
 
 namespace SME::Class {
 
@@ -37,6 +38,10 @@ public:
       u32 as_u32;
       char *as_string;
     };
+
+    AudioPacket() : mLoopStart(-1), mLoopEnd(-1) {
+      mIdentifier.as_u32 = 0xFFFFFFFF;
+    } 
 
     AudioPacket(u32 id) : mLoopStart(-1), mLoopEnd(-1) {
       mIdentifier.as_u32 = id;
@@ -63,8 +68,9 @@ public:
   ~AudioStreamer();
 
   static AudioStreamer *getInstance() { return &sInstance; }
-  AudioPacket *getCurrentAudio() const { return mAudioQueue[mAudioIndex]; }
+  AudioPacket &getCurrentAudio() { return mAudioQueue[mAudioIndex]; }
   u16 getVolumeLR() const { return (mVolLeft << 8) | mVolRight; }
+  u8 getFullVolumeLR() const { return (mFullVolLeft << 8) | mFullVolRight; }
 
   void setLooping(bool loop) { mIsLooping = loop; }
 
@@ -73,7 +79,10 @@ public:
   bool isLooping() const { return mIsLooping; }
 
   void setVolumeLR(u8 left, u8 right);
-  void setVolumeFadeTo(u8 vol, f32 seconds);
+  void setFullVolumeLR(u8 left, u8 right);
+  void resetVolumeToFull();
+
+  void setVolumeFadeTo(u8 to, f32 seconds);
 
   bool queueAudio(AudioPacket &packet);
   void fadeAudio_();
@@ -103,11 +112,16 @@ public:
   u8 *mAudioStack;
 
 private:
-  AudioPacket *mAudioQueue[AudioQueueSize];
+  AudioPacket mAudioQueue[AudioQueueSize];
   s32 mAudioIndex;
   f32 mDelayedTime;
   f32 mFadeTime;
+  u8 mSrcVolume;
   u8 mTargetVolume;
+  u8 mVolLeft;
+  u8 mVolRight;
+  u8 mFullVolLeft;
+  u8 mFullVolRight;
   u8 mPreservedVolLeft;
   u8 mPreservedVolRight;
 
@@ -117,8 +131,6 @@ private:
   bool mIsPlaying;
   bool mIsPaused;
   bool mIsLooping;
-  u8 mVolLeft;
-  u8 mVolRight;
 
   static AudioStreamer sInstance;
 };

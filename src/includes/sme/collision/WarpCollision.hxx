@@ -14,8 +14,8 @@ public:
   friend class TWarpCollisionList;
 
   static constexpr u8 NullID = 0xFF;
-  enum class SearchMode { HOME_TO_TARGET, DISTANCE, BOTH };
-  enum class WarpType {
+  enum class SearchMode : u8 { HOME_TO_TARGET, DISTANCE, BOTH };
+  enum class WarpType : u8 {
     SLOW_SPARKLE,
     PORTAL,
     PORTAL_FLUID,
@@ -36,6 +36,7 @@ public:
   static u8 getTargetIDFrom(TBGCheckData *colTriangle);
   static u8 getHomeIDFrom(TBGCheckData *colTriangle);
   static f32 getMinTargetDistanceFrom(TBGCheckData *colTriangle);
+  static u8 getCustomFlagFrom(TBGCheckData *colTriangle) { return reinterpret_cast<u8 *>(colTriangle)[7]; }
   
   // Check if the given TBGCheckData has a valid warp collision type
   static bool isValidWarpCol(TBGCheckData *colTriangle);

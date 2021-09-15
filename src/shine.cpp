@@ -6,14 +6,16 @@
 #include "SME.hxx"
 
 using namespace SME;
+using namespace SME::Class;
 
 // 0x801BD664
 // extern -> SME.cpp
+static bool sIsShineShrinking = false;
 void Patch::Shine::manageShineVanish(JGeometry::TVec3<f32> *marioPos) {
   TShine *shine;
   SME_FROM_GPR(30, shine);
 
-  const JGeometry::TVec3<f32> step(0.006f, 0.006f, 0.006f);
+  const JGeometry::TVec3<f32> step(0.007f, 0.007f, 0.007f);
 
   JGeometry::TVec3<f32> size;
   JGeometry::TVec3<f32> rotation;
@@ -35,6 +37,14 @@ void Patch::Shine::manageShineVanish(JGeometry::TVec3<f32> *marioPos) {
     shine->kill();
   } else if (gpMarioAddress->mState !=
              static_cast<u32>(TMario::State::SHINE_C)) {
+    if (!sIsShineShrinking) {
+      shine->mGlowSize.set(1.0f, 1.0f, 1.0f);
+
+      size.set(1.0f, 1.0f, 1.0f);
+      shine->JSGSetScaling(reinterpret_cast<Vec &>(size));
+
+      sIsShineShrinking = true;
+    }
     rotation.y += 3.0f;
     position.y += 4.0f;
     size.sub(step);
@@ -42,8 +52,10 @@ void Patch::Shine::manageShineVanish(JGeometry::TVec3<f32> *marioPos) {
     shine->JSGSetRotation(reinterpret_cast<Vec &>(rotation));
     shine->JSGSetTranslation(reinterpret_cast<Vec &>(position));
     shine->mGlowSize.sub(step);
-  } else
+  } else {
+    sIsShineShrinking = false;
     shine->JSGSetTranslation(reinterpret_cast<Vec &>(*marioPos));
+  }
 }
 
 // 0x802413E0
@@ -81,6 +93,10 @@ static void restoreMario(TMarDirector *gpMarDirector, u32 curState) {
       gpMarioAddress->mState = static_cast<u32>(TMario::State::IDLE);
 
     gpCamera->endDemoCamera();
+    
+    AudioStreamer *streamer = AudioStreamer::getInstance();
+    if (streamer->isPaused())
+      streamer->play();
   } else
     gpMarDirector->mGameState |= TMarDirector::State::WARP_OUT;
 }

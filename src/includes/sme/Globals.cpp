@@ -38,18 +38,19 @@ Enum::Player TGlobals::sCharacterIDList[] = {
 f32 TGlobals::sScreenWidth = 700.0f;
 f32 TGlobals::sFrameRate = 60.0f;
 bool TGlobals::sIsVariableFrameRate = true;
+u8 TGlobals::sMinDarkness = 60;
 
 TMario *TGlobals::getPlayerByIndex(u8 index) {
   SME_DEBUG_ASSERT(index < SME_MAX_PLAYERS, "Invalid player index provided");
   return TGlobals::sPlayers[index];
 }
 
-Class::TPlayerData *TGlobals::getPlayerParams(u8 id) {
+Class::TPlayerData *TGlobals::getPlayerData(u8 id) {
   SME_DEBUG_ASSERT(id < SME_MAX_PLAYERS, "Invalid player index provided");
   return TGlobals::sPlayerCfgArray[id];
 }
 
-Class::TPlayerData *TGlobals::getPlayerParams(TMario *player) {
+Class::TPlayerData *TGlobals::getPlayerData(TMario *player) {
   Class::TPlayerData *cfg;
   for (u32 i = 0; i < SME_MAX_PLAYERS; ++i) {
     cfg = TGlobals::sPlayerCfgArray[i];

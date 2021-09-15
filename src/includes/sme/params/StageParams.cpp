@@ -196,11 +196,10 @@ void TStageParams::load(const char *stageName) {
   if (entrynum >= 0) {
     DVDFastOpen(entrynum, &fileInfo);
     void *buffer = JKRHeap::alloc(fileInfo.mLen, 32, nullptr);
-    
+
     DVDReadPrio(&fileInfo, buffer, fileInfo.mLen, 0, 2);
     DVDClose(&fileInfo);
-    JSUMemoryInputStream stream(buffer,
-                                fileInfo.mLen);
+    JSUMemoryInputStream stream(buffer, fileInfo.mLen);
     TParams::load(stream);
     JKRHeap::free(buffer, nullptr);
     mIsCustomConfigLoaded = true;
@@ -218,8 +217,7 @@ void TStageParams::load(const char *stageName) {
 
     DVDReadPrio(&fileInfo, buffer, fileInfo.mLen, 0, 2);
     DVDClose(&fileInfo);
-    JSUMemoryInputStream stream(buffer,
-                                fileInfo.mLen);
+    JSUMemoryInputStream stream(buffer, fileInfo.mLen);
     TParams::load(stream);
     JKRHeap::free(buffer, nullptr);
     SME_DEBUG_LOG("Success: SME config loaded at %p\n", &sStageConfig);

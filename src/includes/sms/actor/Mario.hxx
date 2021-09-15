@@ -108,6 +108,7 @@ public:
   void reset();
   void updateMeaning();
 
+  u32 _A4;
   f32 _A8;
   f32 _AC;
   f32 _B0;

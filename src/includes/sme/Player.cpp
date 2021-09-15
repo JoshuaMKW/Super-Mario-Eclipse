@@ -12,6 +12,7 @@
 #include "stage/FileUtils.hxx"
 
 using namespace SME;
+using namespace SME::Util::Math;
 
 static u8 gJ3DBuffer[0x2000];
 static JKRSolidHeap gJ3DHeap(&gJ3DBuffer, sizeof(gJ3DBuffer), nullptr, false);
@@ -228,4 +229,81 @@ Enum::Player Util::Mario::getPlayerIDFromInput(u32 input) {
   }
 }
 
-Enum::Player getPlayerIDFromInt(u8 id) { return static_cast<Enum::Player>(id); }
+Enum::Player Util::Mario::getPlayerIDFromInt(u8 id) { return static_cast<Enum::Player>(id); }
+
+void Util::Mario::warpToCollisionFace(TMario *player, TBGCheckData *colTriangle, bool isFluid) {
+  constexpr s32 DisableMovementTime = 80;
+  constexpr s32 TeleportTime = 140;
+  constexpr s32 EnableMovementTime = 60;
+  constexpr f32 WipeKindInDelay = 1.0f;
+
+  if (!player) return;
+
+  SME::Class::TPlayerData *playerData = SME::TGlobals::getPlayerData(player);
+
+  SME::Class::TVectorTriangle vectorTri(
+      colTriangle->mVertexA, colTriangle->mVertexB, colTriangle->mVertexC);
+
+  if (!isFluid) {
+    JGeometry::TVec3<f32> playerPos;
+    JGeometry::TVec3<f32> cameraPos;
+    player->JSGGetTranslation(reinterpret_cast<Vec *>(&playerPos));
+    gpCamera->JSGGetViewPosition(reinterpret_cast<Vec *>(&cameraPos));
+
+    playerPos.set(vectorTri.center());
+
+    player->mFloorTriangle = colTriangle;
+    player->mFloorTriangleCopy = colTriangle;
+    player->mFloorBelow = playerPos.y;
+    playerData->mPrevCollisionFloor = colTriangle;
+
+    {
+      f32 x = lerp<f32>(cameraPos.x, playerPos.x, 0.9375f);
+      f32 y = playerPos.y + 300.0f;
+      f32 z = lerp<f32>(cameraPos.z, playerPos.z, 0.9375f);
+      cameraPos.set(x, y, z);
+    }
+        
+    player->JSGSetTranslation(reinterpret_cast<Vec &>(playerPos));
+    gpCamera->JSGSetViewPosition(reinterpret_cast<Vec &>(cameraPos));
+    gpCamera->JSGSetViewTargetPosition(reinterpret_cast<Vec &>(playerPos));
+  } else {
+    JGeometry::TVec3<f32> playerPos;
+    JGeometry::TVec3<f32> cameraPos;
+    player->JSGGetTranslation(reinterpret_cast<Vec *>(&playerPos));
+    gpCamera->JSGGetViewPosition(reinterpret_cast<Vec *>(&cameraPos));
+
+    player->mFloorTriangle = colTriangle;
+    player->mFloorTriangleCopy = colTriangle;
+    playerData->mCollisionFlags.mIsFaceUsed = true;
+
+    playerPos.set(vectorTri.center());
+
+    {
+      f32 x = lerp<f32>(cameraPos.x, playerPos.x, 0.9375f);
+      f32 y = playerPos.y + 300.0f;
+      f32 z = lerp<f32>(cameraPos.z, playerPos.z, 0.9375f);
+      cameraPos.set(x, y, z);
+    }
+
+    JGeometry::TVec3<f32> *colNormal = colTriangle->getNormal();
+
+    const f32 magnitude = PSVECMag(reinterpret_cast<Vec *>(&player->mSpeed));
+
+    player->mAngle.y =
+        static_cast<u16>(Vector3::getNormalAngle(*colNormal)) * 182;
+    setPlayerVelocity__6TMarioFf(player, magnitude * colNormal->x +
+                                             magnitude * colNormal->z);
+    player->mSpeed.y = magnitude * colNormal->y;
+
+    playerPos.add(JGeometry::TVec3<f32>{
+        40.0f * colNormal->x, 40.0f * colNormal->y, 40.0f * colNormal->z});
+
+    player->JSGSetTranslation(reinterpret_cast<Vec &>(playerPos));
+    gpCamera->JSGSetViewPosition(reinterpret_cast<Vec &>(cameraPos));
+    gpCamera->JSGSetViewTargetPosition(reinterpret_cast<Vec &>(playerPos));
+
+    changePlayerStatus__6TMarioFUlUlb(
+        player, static_cast<u32>(TMario::State::FALL), 0, 0);
+  }
+}

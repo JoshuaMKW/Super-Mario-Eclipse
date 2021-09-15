@@ -123,7 +123,7 @@ public:
   static void *getWaterPlane(THitActor *);
   static void *getWaterPos(THitActor *);
   static void *getWaterSpeed(THitActor *);
-  static void initPacketColor(J3DModel *, _GXTevRegID, const _GXColorS10 *);
+  static void initPacketColor(J3DModel *, GXTevRegID, const GXColorS10 *);
   static bool isCoin(THitActor *);
   static bool isDemo();
   static bool isFruit(THitActor *);

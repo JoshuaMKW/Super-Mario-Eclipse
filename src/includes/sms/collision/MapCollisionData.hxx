@@ -31,8 +31,8 @@ public:
     void removeCheckListData(u16, s32);
     void updateCheckListNode(s32, s32, s32);
 
-    f32 _00;                     //0x0000
-    f32 _04;                     //0x0004
+    f32 mAreaSizeX;                     //0x0000
+    f32 mAreaSizeZ;                     //0x0004
     u32 _08[0x8 / 4];              //0x0008
     u32 mUnkSize;                  //0x0010
     u32 _14[0x8 / 4];              //0x0014
@@ -47,4 +47,6 @@ public:
     u16 mEntries[256];             //0x0042
     u16 mEntryID;
     u32 _244;
+
+    static TBGCheckData mIllegalCheckData;
 };

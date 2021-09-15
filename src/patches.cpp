@@ -8,6 +8,8 @@
 #include "SME.hxx"
 #include "macros.h"
 
+constexpr f32 DrawDistance = 300000.0f * 100.0f;
+
 // extern -> SME.cpp
 // 0x802320E0
 SME_PURE_ASM void SME::Patch::Fixes::shadowCrashPatch() {
@@ -97,4 +99,73 @@ static SME_PURE_ASM bool makeWaterHitCheckForDeath(TBGCheckData *col) {
 }
 SME_PATCH_B(SME_PORT_REGION(0x8018C368, 0, 0, 0), makeWaterHitCheckForDeath);
 
-// 801711dc
+// Make illegal data not downwarp anymore
+SME_WRITE_32(SME_PORT_REGION(0x8018D08C, 0, 0, 0), 0x60000000);
+
+static void patchRideMovementUpWarp(Mtx out, Vec *ride, Vec *pos) {
+  TMario *player;
+  SME_FROM_GPR(30, player);
+
+  if (!(player->mState & static_cast<u32>(TMario::State::AIRBORN))) {
+    PSMTXMultVec(out, ride, pos);
+  }
+}
+SME_PATCH_BL(SME_PORT_REGION(0x80250514, 0, 0, 0), patchRideMovementUpWarp);
+
+static void initBinaryNullptrPatch(TSpcBinary *binary) {
+  if (binary)
+    binary->init();
+}
+SME_PATCH_BL(SME_PORT_REGION(0x80289098, 0, 0, 0), initBinaryNullptrPatch);
+
+static void scaleDrawDistanceNPC(f32 x, f32 y, f32 near, f32 far) {
+  SetViewFrustumClipCheckPerspective__Fffff(x, y, near, far * 2);
+}
+SME_PATCH_BL(SME_PORT_REGION(0x8020A2A4, 0, 0, 0), scaleDrawDistanceNPC);
+
+static bool scaleDrawDistanceCamera(CPolarSubCamera *cam) {
+  JSGSetProjectionFar__Q26JDrama7TCameraFf(cam, DrawDistance);
+  return cam->isNormalDeadDemo();
+}
+SME_PATCH_BL(SME_PORT_REGION(0x80023828, 0, 0, 0), scaleDrawDistanceCamera);
+
+// READY GO TEXT PATCH FOR THIS BULLSHIT THING DADDY NINTENDO DID
+SME_WRITE_32(SME_PORT_REGION(0x80171C30, 0, 0, 0), 0x2C000005);
+SME_WRITE_32(SME_PORT_REGION(0x80171C38, 0, 0, 0), 0x38000005);
+
+static void normalizeHoverSlopeSpeed(f32 floorPos) {
+  TMario *player;
+  SME_FROM_GPR(22, player);
+
+  player->mPosition.y = floorPos;
+
+  if (!(player->mState == static_cast<u32>(TMario::State::HOVER)))
+    return;
+
+  const f32 playerRotY = f32(player->mAngle.y) / 182.0f;
+  const Vec playerForward = {sinf(Math::angleToRadians(-playerRotY)), 0.0f,
+                             cosf(Math::angleToRadians(playerRotY))};
+  const Vec up = {0.0f, 1.0f, 0.0f};
+
+  Vec floorNormal;
+  PSVECNormalize(reinterpret_cast<Vec *>(player->mFloorTriangle->getNormal()),
+                 &floorNormal);
+
+  const f32 slopeStrength = PSVECDotProduct(&up, &floorNormal);
+  const f32 lookAtRatio =
+      Math::Vector3::lookAtRatio(playerForward, floorNormal);
+
+  player->mForwardSpeed =
+      Min(player->mForwardSpeed,
+          10.0f * Math::clamp(Math::scaleLinearAtAnchor(slopeStrength,
+                                                        lookAtRatio, 1.0f),
+                              0.0f, 1.0f));
+}
+SME_PATCH_BL(SME_PORT_REGION(0x802568F0, 0, 0, 0), normalizeHoverSlopeSpeed);
+
+static void touchEnemy__item(THitActor *touched) {
+  //...
+}
+
+// Make enemies collect coins
+// SME_WRITE_32(SME_PORT_REGION(0x803CA494, 0, 0, 0), 0x801bf2c0);

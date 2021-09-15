@@ -42,11 +42,7 @@
 #define SME_EXTERN_C extern
 #endif
 
-#ifndef _MSC_VER
 #define SME_NO_INLINE __attribute__((noinline))
-#else
-#define SME_NO_INLINE __declspec(noinline)
-#endif
 
 #define SME_ATOMIC_CODE(code) \
 u32 _atomic_interrupt_state = OSDisableInterrupts(); \

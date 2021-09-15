@@ -13,6 +13,10 @@ using namespace SME::Class;
 
 constexpr size_t AudioPreparePreOffset = 0;
 
+static u32 _sLastOfs = 0;
+static u8 _sLastVol = 0xFF;
+static bool _startPaused = false;
+
 static void updaterLoop() {
   main__Q28JASystem10HardStreamFv();
 
@@ -94,24 +98,16 @@ static AudioStreamer::AudioCommand sAudioCommand =
 AudioStreamer AudioStreamer::sInstance =
     AudioStreamer(mainLoop, 18, &sAudioFInfo, &sAudioCmdBlock);
 
-void AudioStreamer::setVolumeLR(u8 left, u8 right) {
-  if (mVolLeft != left) {
-    mVolLeft = left;
-    AISetStreamVolLeft(left);
-  }
-  if (mVolRight != right) {
-    mVolRight = right;
-    AISetStreamVolRight(right);
-  }
-}
-
 AudioStreamer::AudioStreamer(void *(*mainLoop)(void *), OSPriority priority,
                              DVDFileInfo *fInfo, DVDCommandBlock *cb)
     : mAudioHandle(fInfo), mAudioCommandBlock(cb), mAudioIndex(0),
       mDelayedTime(0.0f), mFadeTime(0.0f), _mWhere(0),
       _mWhence(JSUStreamSeekFrom::BEGIN), mIsPlaying(false), mIsPaused(false),
-      mIsLooping(false), mVolLeft(0x7F), mVolRight(0x7F), mTargetVolume(0x7F),
-      mPreservedVolLeft(0x7F), mPreservedVolRight(0x7F) {
+      mIsLooping(false), mVolLeft(AudioVolumeDefault),
+      mVolRight(AudioVolumeDefault), mFullVolLeft(AudioVolumeDefault),
+      mFullVolRight(AudioVolumeDefault), mTargetVolume(AudioVolumeDefault),
+      mPreservedVolLeft(AudioVolumeDefault),
+      mPreservedVolRight(AudioVolumeDefault) {
   mAudioStack =
       static_cast<u8 *>(JKRHeap::sRootHeap->alloc(AudioStackSize, 32));
   OSInitMessageQueue(&mMessageQueue, mMessageList, AudioMessageQueueSize);
@@ -129,19 +125,42 @@ AudioStreamer::~AudioStreamer() {
   OSCancelThread(&mMainThread);
 }
 
-void AudioStreamer::setVolumeFadeTo(u8 volume, f32 seconds) {
-  mTargetVolume = volume;
+void AudioStreamer::setVolumeLR(u8 left, u8 right) {
+  if (mVolLeft != left && mVolLeft <= mFullVolLeft) {
+    mVolLeft = left;
+    AISetStreamVolLeft(left);
+  }
+  if (mVolRight != right && mVolRight <= mFullVolRight) {
+    mVolRight = right;
+    AISetStreamVolRight(right);
+  }
+}
+
+void AudioStreamer::setFullVolumeLR(u8 left, u8 right) {
+  mFullVolLeft = left;
+  mFullVolRight = right;
+}
+
+void AudioStreamer::resetVolumeToFull() {
+  mTargetVolume = (mFullVolLeft + mFullVolRight) / 2;
+  setVolumeLR(mFullVolLeft, mFullVolRight);
+}
+
+void AudioStreamer::setVolumeFadeTo(u8 to, f32 seconds) {
+  mTargetVolume = to;
   mFadeTime = seconds;
+  SME_DEBUG_LOG("TargetVolume = %d; fadetime = %.04f\n", to, mFadeTime);
 }
 
 bool AudioStreamer::queueAudio(AudioPacket &packet) {
   for (u32 i = 0; i < AudioQueueSize; ++i) {
-    u32 index = (i + mAudioIndex) % AudioQueueSize;
-    if (mAudioQueue[index] == nullptr) {
-      mAudioQueue[index] = &packet;
+    AudioPacket &slot = mAudioQueue[(i + mAudioIndex) % AudioQueueSize];
+    if (slot.mIdentifier.as_u32 == 0xFFFFFFFF) {
+      slot = packet;
       return true;
     }
   }
+
   SME_LOG("%s: Queue is full!\n", SME_FUNC_SIG);
   return false;
 }
@@ -150,36 +169,43 @@ static OSTime sStartTime;
 static bool _sHasFadeStarted = false;
 
 void AudioStreamer::fadeAudio_() {
-  AudioStreamer *streamer = AudioStreamer::getInstance();
+  const u8 curVolume = ((mVolLeft + mVolRight) / 2);
 
-  u16 volume = streamer->getVolumeLR();
-  if (u8(volume >> 8) == streamer->mTargetVolume &&
-      u8(volume) == streamer->mTargetVolume) {
+  if (curVolume == mTargetVolume) {
+    sStartTime = 0;
+    _sHasFadeStarted = false;
+    return;
+  }
+
+  if (mFadeTime <= 0.0f) {
+    setVolumeLR(mTargetVolume, mTargetVolume);
     sStartTime = 0;
     _sHasFadeStarted = false;
     return;
   }
 
   if (!_sHasFadeStarted) {
+    mSrcVolume = curVolume;
     sStartTime = OSGetTime();
     _sHasFadeStarted = true;
   }
 
   const OSTime now = OSGetTime();
+  const f32 curTime = f32(OSTicksToMilliseconds(now - sStartTime)) / 1000.0f;
+  const f32 factor = curTime / mFadeTime;
 
-  f32 curTime = f32(OSTicksToMilliseconds(now - sStartTime)) / 1000.0f;
+  SME_DEBUG_LOG("ticks = %llu; curTime = %.04f; lerp = %.04f\n",
+                now - sStartTime, curTime, factor);
 
-  SME_DEBUG_LOG("ticks = %llu; curTime = %.04f\n",
-                now - sStartTime, curTime);
-
-  u8 volL = Math::lerp<u8>(u8(volume >> 8), streamer->mTargetVolume,
-                           curTime / streamer->mFadeTime);
-  u8 volR = Math::lerp<u8>(u8(volume), streamer->mTargetVolume,
-                           curTime / streamer->mFadeTime);
-
-  if (volL == u8(volume >> 8) && volR == u8(volume)) {
+  if (factor >= 1.0f) {
+    setVolumeLR(mTargetVolume, mTargetVolume);
+    sStartTime = 0;
+    _sHasFadeStarted = false;
     return;
   }
+
+  u8 volL = Math::lerp<u8>(mSrcVolume, mTargetVolume, factor);
+  u8 volR = Math::lerp<u8>(mSrcVolume, mTargetVolume, factor);
 
   setVolumeLR(volL, volR);
 }
@@ -242,7 +268,7 @@ bool AudioStreamer::play_() {
     if (isPaused()) {
       AISetStreamPlayState(1);
 
-      setVolumeFadeTo((mPreservedVolLeft + mPreservedVolRight) / 2, mFadeTime);
+      setVolumeFadeTo((mFullVolLeft + mFullVolRight) / 2, mFadeTime);
 
       mIsPaused = false;
       return true;
@@ -252,11 +278,10 @@ bool AudioStreamer::play_() {
     }
   }
 
-  AudioPacket *packet = getCurrentAudio();
-  if (packet) {
-    mIsPlaying = packet->exec(mAudioHandle);
-    return mIsPlaying;
-  }
+  mIsPlaying = getCurrentAudio().exec(mAudioHandle);
+  if (mIsPlaying)
+    resetVolumeToFull();
+  return mIsPlaying;
 
   SME_LOG("%s: No audio queued to play!\n", SME_FUNC_SIG);
   return false;
@@ -276,13 +301,16 @@ bool AudioStreamer::pause_() {
 }
 
 bool AudioStreamer::stop_() {
-  if (!mIsPlaying)
+  if (!mIsPlaying && !mIsPaused)
     return false;
 
   mFadeTime = mDelayedTime;
   mPreservedVolLeft = mVolLeft;
   mPreservedVolRight = mVolRight;
   setVolumeFadeTo(0, mFadeTime);
+
+  DVDCancelStreamAsync(mAudioCommandBlock, nullptr);
+  AISetStreamPlayState(false);
 
   mIsPaused = false;
   mIsPlaying = false;
@@ -299,14 +327,14 @@ void AudioStreamer::next_() {
 
   // clang-format off
   SME_ATOMIC_CODE (
-    mAudioQueue[mAudioIndex] = nullptr;
+    mAudioQueue[mAudioIndex] = AudioPacket();
     mAudioIndex = (mAudioIndex + 1) % AudioQueueSize;
   )
   // clang-format on
 }
 
 bool AudioStreamer::seek_() {
-  AudioPacket *packet = getCurrentAudio();
+  AudioPacket &packet = getCurrentAudio();
 
   const u32 streamSize = mAudioHandle->mLen;
   const u32 streamStart = mAudioHandle->mStart;
@@ -333,13 +361,9 @@ bool AudioStreamer::seek_() {
   streamPos += streamStart;
 
   return DVDPrepareStreamAsync(mAudioHandle,
-                               packet->mLoopEnd - packet->mLoopStart,
-                               packet->mLoopStart, cbForPrepareStreamAsync_);
+                               packet.mLoopEnd - packet.mLoopStart,
+                               packet.mLoopStart, cbForPrepareStreamAsync_);
 }
-
-static u32 _sLastOfs = 0;
-static u8 _sLastVol = 0xFF;
-static bool _startPaused = false;
 
 void AudioStreamer::update_() {
   const u8 vol = (mVolLeft + mVolRight) / 2;
@@ -359,9 +383,7 @@ void AudioStreamer::update_() {
   if (!isPlaying())
     return;
 
-  AudioPacket *packet = getCurrentAudio();
-  if (!packet)
-    return;
+  AudioPacket &packet = getCurrentAudio();
 
   if (!_startPaused && gpMarDirector->mCurState == TMarDirector::PAUSE_MENU) {
     pause(0.7f);
@@ -377,24 +399,24 @@ void AudioStreamer::update_() {
   const u32 streamCur = DVDGetStreamPlayAddr(mAudioCommandBlock);
 
   const bool shouldLoop =
-      (packet->mLoopEnd != 0xFFFFFFFF && packet->mLoopStart != 0xFFFFFFFF);
+      (packet.mLoopEnd != 0xFFFFFFFF && packet.mLoopStart != 0xFFFFFFFF);
 
   if (streamCur != _sLastOfs) {
     if (gpApplication.mGamePad1->mButtons.mInput ==
         (TMarioGamePad::Y | TMarioGamePad::X | TMarioGamePad::Z)) {
       SME_DEBUG_LOG(
           "%s: {\n  streamSize = %lu\n  streamStart = %lu\n  streamCur "
-          "= %lu\n  isLooping = %lu\n  isPlaying = %lu\n}\n",
+          "= %lu\n  isLooping = %lu\n  isPlaying = %lu\n}\n  streamVolL = %d\n "
+          " streamVolR = %d\n",
           SME_FUNC_SIG, streamSize, streamStart, streamCur, isLooping(),
-          isPlaying());
+          isPlaying(), mVolLeft, mVolRight);
     }
 
     if (isLooping()) {
       if (shouldLoop && (streamCur - streamStart) >=
-                            Max(packet->mLoopEnd - AudioPreparePreOffset, 0)) {
-        DVDPrepareStreamAsync(mAudioHandle,
-                              packet->mLoopEnd - packet->mLoopStart,
-                              packet->mLoopStart, cbForPrepareStreamAsync_);
+                            Max(packet.mLoopEnd - AudioPreparePreOffset, 0)) {
+        DVDPrepareStreamAsync(mAudioHandle, packet.mLoopEnd - packet.mLoopStart,
+                              packet.mLoopStart, cbForPrepareStreamAsync_);
       } else if (streamSize - (streamCur - streamStart) <=
                      AudioPreparePreOffset ||
                  (streamCur == streamStart && _sLastOfs > streamStart)) {
@@ -492,6 +514,10 @@ bool Music::isValidBGM(u32 id) {
   case BGM_RICCO & 0xFF:
   case BGM_SHILENA & 0xFF:
   case BGM_SKY_AND_SEA & 0xFF:
+#ifdef SME_DEMO
+  case BGM_CHUBOSS & 0xFF:
+  case BGM_CHUBOSS2 & 0xFF:
+#endif
     return true;
   default:
     return false;

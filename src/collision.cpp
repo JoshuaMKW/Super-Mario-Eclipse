@@ -1,16 +1,27 @@
 #include "sms/JSystem/JGeometry.hxx"
 #include "sms/actor/Mario.hxx"
+#include "sms/sound/MSoundSESystem.hxx"
 
+#include "MTX.h"
 #include "SME.hxx"
 #include "libs/sGeometry.hxx"
 
 using namespace SME;
 using namespace SME::Util::Math;
 
+/*
+static f32 checkGroundWithFlag(TMario *player, f32 x, f32 y, f32 z,
+                               TBGCheckData **dst) {
+  // gpMap->
+  return 0.0f;
+}
+// SME_PATCH_BL(SME_PORT_REGION(0x802510E4, 0, 0, 0), checkGroundWithFlag);
+*/
+
 // 0x80258334, 0x80264CFC
 // extern -> SME.cpp
 void Patch::Collision::checkIsGlideBounce(TMario *player) {
-  SME::Class::TPlayerData *playerData = SME::TGlobals::getPlayerParams(player);
+  SME::Class::TPlayerData *playerData = SME::TGlobals::getPlayerData(player);
 
   if ((player->mFloorTriangle->mCollisionType & 0x7FFF) == 16007 ||
       (player->mFloorTriangle->mCollisionType & 0x7FFF) == 17007) {
@@ -39,7 +50,7 @@ u16 Patch::Collision::checkIsRestoreTypeNoFallDamage(TBGCheckData *floor) {
 }
 
 static void checkRestoreHealth(TMario *player) {
-  SME::Class::TPlayerData *playerData = SME::TGlobals::getPlayerParams(player);
+  SME::Class::TPlayerData *playerData = SME::TGlobals::getPlayerData(player);
 
   if (playerData->mCollisionTimer <= 0) {
     incHP__6TMarioFi(player, 1);
@@ -49,7 +60,7 @@ static void checkRestoreHealth(TMario *player) {
 }
 
 static void checkIsCannonType(TMario *player) {
-  SME::Class::TPlayerData *playerData = SME::TGlobals::getPlayerParams(player);
+  SME::Class::TPlayerData *playerData = SME::TGlobals::getPlayerData(player);
 
   if (!(player->mController->mButtons.mInput &
         TMarioGamePad::Buttons::DPAD_UP) ||
@@ -81,7 +92,7 @@ static void checkIsCannonType(TMario *player) {
 }
 
 static void changeNozzleType(TMario *player, u16 type) {
-  SME::Class::TPlayerData *playerData = SME::TGlobals::getPlayerParams(player);
+  SME::Class::TPlayerData *playerData = SME::TGlobals::getPlayerData(player);
   TWaterGun *fludd = player->mFludd;
 
   if (playerData->mCollisionFlags.mIsFaceUsed || !fludd)
@@ -111,7 +122,7 @@ static void changeNozzleType(TMario *player, u16 type) {
 }
 
 static void boostPadCol(TMario *player) {
-  SME::Class::TPlayerData *playerData = SME::TGlobals::getPlayerParams(player);
+  SME::Class::TPlayerData *playerData = SME::TGlobals::getPlayerData(player);
 
   const f32 newSpeed = player->mFloorTriangle->mValue4;
   const f32 scale = newSpeed / player->mForwardSpeed;
@@ -155,136 +166,163 @@ static void antiGravityCol(TMario *player) {
     player->mSubStateTimer = 0;
 }
 
-static SME_NO_INLINE void warpToLinkedCol(TMario *player) {
-  SME::Class::TPlayerData *playerData = SME::TGlobals::getPlayerParams(player);
+static bool sIsWiping = false;
+
+static SME_NO_INLINE void warpToLinkedCol(TMario *player, Enum::WarpKind kind) {
+  constexpr s32 DisableMovementTime = 80;
+  constexpr s32 TeleportTime = 140;
+  constexpr s32 EnableMovementTime = 60;
+  constexpr f32 WipeKindInDelay = 1.0f;
+
+  SME::Class::TPlayerData *playerData = SME::TGlobals::getPlayerData(player);
 
   TBGCheckData *linkedCol = SME::TGlobals::sWarpColArray->resolveCollisionWarp(
       player->mFloorTriangle);
 
-  if (!linkedCol) {
-    playerData->mCollisionTimer = 0;
-    return;
-  }
+  const f32 speed = PSVECMag(reinterpret_cast<Vec *>(&player->mSpeed));
 
-  SME::Class::TVectorTriangle colTriangle(
-      linkedCol->mVertexA, linkedCol->mVertexB, linkedCol->mVertexC);
-
-  const f32 speed = Vector::magnitude(player->mSpeed);
-
-  if (speed > 1.0f) {
-    playerData->mCollisionTimer = 0;
-    return;
-  }
-
-  if (!playerData->mCollisionFlags.mIsFaceUsed) {
-    if (playerData->mCollisionTimer > 140) {
-      JGeometry::TVec3<f32> playerPos;
-      JGeometry::TVec3<f32> cameraPos;
-      player->JSGGetTranslation(reinterpret_cast<Vec *>(&playerPos));
-      gpCamera->JSGGetViewPosition(reinterpret_cast<Vec *>(&cameraPos));
-
-      playerPos.set(colTriangle.center());
-
-      player->mFloorTriangle = linkedCol;
-      player->mFloorTriangleCopy = linkedCol;
-      player->mFloorBelow = playerPos.y;
-      playerData->mCollisionFlags.mIsFaceUsed = true;
-      playerData->mCollisionTimer = 0;
-      startSoundActor__6TMarioFUl(player,
-                                  static_cast<u32>(TMario::Voice::JUMP));
-
-      {
-        f32 x = SME::Util::Math::lerp<f32>(cameraPos.x, playerPos.x, 0.9375f);
-        f32 y = playerPos.y + 300.0f;
-        f32 z = SME::Util::Math::lerp<f32>(cameraPos.z, playerPos.z, 0.9375f);
-        cameraPos.set(x, y, z);
+  if (playerData->mCollisionFlags.mIsWarpActive) {
+    switch (playerData->mCollisionFlags.mWarpingType) {
+    case Enum::WarpKind::SPARKLES: {
+      if (playerData->mCollisionTimer > EnableMovementTime) {
+        playerData->mCollisionFlags.mIsDisableInput = false;
+        playerData->mCollisionFlags.mIsWarpActive = false;
+        player->mController->State.mReadInput = true;
+        playerData->mCollisionTimer = 0;
+      } else {
+        playerData->mCollisionTimer += 1;
       }
-      // gpCamera->mHorizontalAngle =
-      //    static_cast<u16>(SME::Class::TVectorTriangle::bearingAngleY(
-      //        playerPos, cameraPos)) *
-      //    182;
-      player->JSGSetTranslation(reinterpret_cast<Vec &>(playerPos));
-      gpCamera->JSGSetViewPosition(reinterpret_cast<Vec &>(cameraPos));
-      gpCamera->JSGSetViewTargetPosition(reinterpret_cast<Vec &>(playerPos));
-    } else if (playerData->mCollisionTimer > 80) {
-      if (!playerData->mCollisionFlags.mIsDisableInput) {
-        emitGetEffect__6TMarioFv(player);
+      break;
+    }
+    case Enum::WarpKind::WIPE: {
+      if (gpApplication.mFader->mFadeStatus == TSMSFader::FADE_OFF) {
+        playerData->mCollisionFlags.mIsDisableInput = false;
+        playerData->mCollisionFlags.mIsWarpActive = false;
+        player->mController->State.mReadInput = true;
+        playerData->mCollisionTimer = 0;
+      } else {
+        playerData->mCollisionTimer += 1;
       }
-      playerData->mCollisionFlags.mIsDisableInput = true;
-      player->mController->State.mReadInput = false;
+      break;
+    }
+    case Enum::WarpKind::INSTANT:
+    default:
+      playerData->mCollisionFlags.mIsDisableInput = false;
+      playerData->mCollisionFlags.mIsWarpActive = false;
     }
   } else {
-    if (playerData->mCollisionTimer > 60) {
-      playerData->mCollisionFlags.mIsDisableInput = false;
-      player->mController->State.mReadInput = false;
+    if (!linkedCol) {
+      playerData->mCollisionTimer = 0;
+      return;
+    }
+
+    switch (kind) {
+    case Enum::WarpKind::SPARKLES: {
+      if (speed > 1.0f) {
+        playerData->mCollisionTimer = 0;
+        return;
+      }
+
+      if (!playerData->mCollisionFlags.mIsFaceUsed) {
+        if (playerData->mCollisionTimer > TeleportTime) {
+          Util::Mario::warpToCollisionFace(player, linkedCol, false);
+
+          playerData->mCollisionFlags.mWarpingType = kind;
+          playerData->mCollisionFlags.mIsFaceUsed = true;
+          playerData->mCollisionFlags.mIsWarpActive = true;
+          playerData->mCollisionFlags.mIsWarpUsed = true;
+          playerData->mCollisionTimer = 0;
+          startSoundActor__6TMarioFUl(player,
+                                      static_cast<u32>(TMario::Voice::JUMP));
+        } else if (playerData->mCollisionTimer > DisableMovementTime) {
+          if (!playerData->mCollisionFlags.mIsDisableInput) {
+            emitGetEffect__6TMarioFv(player);
+          }
+          playerData->mCollisionFlags.mIsDisableInput = true;
+          player->mController->State.mReadInput = false;
+        }
+      }
+      playerData->mCollisionTimer += 1;
+      return;
+    }
+    case Enum::WarpKind::WIPE: {
+      if (speed > 1.0f) {
+        playerData->mCollisionTimer = 0;
+        return;
+      }
+
+      if (!playerData->mCollisionFlags.mIsFaceUsed) {
+        if (gpApplication.mFader->mFadeStatus == TSMSFader::FADE_ON) {
+          Util::Mario::warpToCollisionFace(player, linkedCol, false);
+
+          playerData->mCollisionFlags.mWarpingType = kind;
+          playerData->mCollisionFlags.mIsFaceUsed = true;
+          playerData->mCollisionFlags.mIsWarpActive = true;
+          playerData->mCollisionFlags.mIsWarpUsed = true;
+          playerData->mCollisionTimer = 0;
+          sIsWiping = false;
+
+          gpApplication.mFader->startWipe(
+              TSMSFader::WipeRequest::FADE_CIRCLE_IN, 1.0f, WipeKindInDelay);
+        } else if (playerData->mCollisionTimer > DisableMovementTime) {
+          playerData->mCollisionFlags.mIsDisableInput = true;
+          player->mController->State.mReadInput = false;
+          if (gpApplication.mFader->mFadeStatus == TSMSFader::FADE_OFF &&
+              !sIsWiping) {
+            gpApplication.mFader->startWipe(
+                TSMSFader::WipeRequest::FADE_SPIRAL_OUT, 1.0f, 0.0f);
+            MSoundSESystem::MSoundSE::startSoundSystemSE(0x4859, 0, nullptr, 0);
+            sIsWiping = true;
+          }
+        }
+      }
+      playerData->mCollisionTimer += 1;
+      return;
+    }
+    case Enum::WarpKind::INSTANT:
+    default: {
+      if (!playerData->mCollisionFlags.mIsFaceUsed) {
+        Util::Mario::warpToCollisionFace(player, linkedCol, false);
+
+        playerData->mCollisionFlags.mWarpingType = kind;
+        playerData->mCollisionFlags.mIsFaceUsed = true;
+        playerData->mCollisionFlags.mIsWarpUsed = true;
+        playerData->mCollisionTimer = 0;
+      }
+      return;
+    }
     }
   }
-  playerData->mCollisionTimer += 1;
 }
 
 static void warpToLinkedColPreserve(TMario *player, bool fluid) {
-  SME::Class::TPlayerData *playerData = SME::TGlobals::getPlayerParams(player);
+  SME::Class::TPlayerData *playerData = SME::TGlobals::getPlayerData(player);
 
   TBGCheckData *linkedCol = SME::TGlobals::sWarpColArray->resolveCollisionWarp(
       player->mFloorTriangle);
 
   if (!linkedCol)
     return;
-    
-  SME::Class::TVectorTriangle colTriangle(
-      linkedCol->mVertexA, linkedCol->mVertexB, linkedCol->mVertexC);
 
   if (!playerData->mCollisionFlags.mIsFaceUsed) {
-    JGeometry::TVec3<f32> playerPos;
-    JGeometry::TVec3<f32> cameraPos;
-    player->JSGGetTranslation(reinterpret_cast<Vec *>(&playerPos));
-    gpCamera->JSGGetViewPosition(reinterpret_cast<Vec *>(&cameraPos));
-
-    player->mFloorTriangle = linkedCol;
-    player->mFloorTriangleCopy = linkedCol;
-    playerData->mCollisionFlags.mIsFaceUsed = true;
-
-    playerPos.set(colTriangle.center());
-
-    {
-      f32 x = SME::Util::Math::lerp<f32>(cameraPos.x, playerPos.x, 0.9375f);
-      f32 y = playerPos.y + 300.0f;
-      f32 z = SME::Util::Math::lerp<f32>(cameraPos.z, playerPos.z, 0.9375f);
-      cameraPos.set(x, y, z);
-    }
-    gpCamera->mHorizontalAngle =
-        static_cast<u16>(
-            SME::Class::TVectorTriangle::bearingAngleY(playerPos, cameraPos)) *
-        182;
-
-    JGeometry::TVec3<f32> colNormal = colTriangle.normal();
-
-    const f32 magnitude = fabsf(player->mSpeed.x) + fabsf(player->mSpeed.y) +
-                          fabsf(player->mSpeed.z);
-
-    player->mAngle.y =
-        static_cast<u16>(Vector::getNormalAngle(colNormal)) * 182;
-    setPlayerVelocity__6TMarioFf(player, magnitude * colNormal.x +
-                                             magnitude * colNormal.z);
-    player->mSpeed.y = magnitude * colNormal.y;
-
-    playerPos.add(JGeometry::TVec3<f32>{
-        40.0f * colNormal.x, 40.0f * colNormal.y, 40.0f * colNormal.z});
-
-    player->JSGSetTranslation(reinterpret_cast<Vec &>(playerPos));
-    gpCamera->JSGSetViewPosition(reinterpret_cast<Vec &>(cameraPos));
-
-    changePlayerStatus__6TMarioFUlUlb(
-        player, static_cast<u32>(TMario::State::FALL), 0, 0);
-  } else
+    Util::Mario::warpToCollisionFace(player, linkedCol, true);
+  } else {
     playerData->mCollisionFlags.mIsFaceUsed =
         (!(player->mController->mButtons.mFrameInput &
            TMarioGamePad::Buttons::DPAD_DOWN) &&
          !fluid);
+  }
 }
 
+#define EXPAND_WARP_SET(base)                                                  \
+  (base) : case ((base) + 10) : case ((base) + 20) : case ((base) + 30)
+#define EXPAND_WARP_CATEGORY(base)                                             \
+  (base)                                                                       \
+      : case ((base) + 1)                                                      \
+      : case ((base) + 2) : case ((base) + 3) : case ((base) + 4)
+
 static inline void resetValuesOnStateChange(TMario *player) {
-  SME::Class::TPlayerData *playerData = SME::TGlobals::getPlayerParams(player);
+  SME::Class::TPlayerData *playerData = SME::TGlobals::getPlayerData(player);
 
   switch (player->mPrevState) {
   case static_cast<u32>(TMario::State::JUMPSPIN1):
@@ -299,54 +337,91 @@ static inline void resetValuesOnStateChange(TMario *player) {
 }
 
 static inline void resetValuesOnGroundContact(TMario *player) {
-  SME::Class::TPlayerData *playerData = SME::TGlobals::getPlayerParams(player);
+  SME::Class::TPlayerData *playerData = SME::TGlobals::getPlayerData(player);
 
-  if (!(player->mState & static_cast<u32>(TMario::State::AIRBORN)) &&
-      playerData->mCollisionFlags.mIsAirborn == true) {
+  if ((player->mPrevState & static_cast<u32>(TMario::State::AIRBORN)) != 0 &&
+      (player->mState & static_cast<u32>(TMario::State::AIRBORN)) == 0 &&
+      playerData->mCollisionFlags.mIsAirborn) {
     playerData->mCollisionFlags.mIsAirborn = false;
     playerData->mCollisionFlags.mIsDisableInput = false;
   }
 }
 
 static inline void resetValuesOnAirborn(TMario *player) {
-  SME::Class::TPlayerData *playerData = SME::TGlobals::getPlayerParams(player);
+  SME::Class::TPlayerData *playerData = SME::TGlobals::getPlayerData(player);
 
-  if (!(player->mState & static_cast<u32>(TMario::State::AIRBORN)) ||
-      playerData->mCollisionFlags.mIsAirborn == true)
-    return;
-
-  playerData->mCollisionFlags.mIsAirborn = true;
+  if ((player->mPrevState & static_cast<u32>(TMario::State::AIRBORN)) == 0 &&
+      (player->mState & static_cast<u32>(TMario::State::AIRBORN)) != 0 &&
+      !playerData->mCollisionFlags.mIsAirborn) {
+    playerData->mCollisionFlags.mIsAirborn = true;
+  }
 }
 
 static inline void resetValuesOnCollisionChange(TMario *player) {
-  SME::Class::TPlayerData *playerData = SME::TGlobals::getPlayerParams(player);
+  SME::Class::TPlayerData *playerData = SME::TGlobals::getPlayerData(player);
+
+  if (!player->mFloorTriangle ||
+      (player->mFloorTriangle == playerData->mPrevCollisionFloor))
+    return;
 
   if (player->mFloorTriangle->mCollisionType !=
       playerData->mPrevCollisionType) {
     playerData->mPrevCollisionType = player->mFloorTriangle->mCollisionType;
+    playerData->mPrevCollisionFloor = player->mFloorTriangle;
     playerData->mCollisionFlags.mIsFaceUsed = false;
     playerData->mCollisionTimer = 0;
+  }
+
+  switch (player->mFloorTriangle->mCollisionType) {
+  case EXPAND_WARP_SET(16042):
+  case EXPAND_WARP_SET(17042):
+    playerData->setColliding(false);
+    break;
+  default:
+    playerData->setColliding(true);
+    break;
   }
 }
 
 // 0x802500B8
 // extern -> SME.cpp
 u32 Patch::Collision::updateCollisionContext(TMario *player) {
+  constexpr s16 CrushTimeToDie = 0;
+
   resetValuesOnStateChange(player);
   resetValuesOnGroundContact(player);
   resetValuesOnAirborn(player);
   resetValuesOnCollisionChange(player);
 
-  SME::Class::TPlayerData *playerData = SME::TGlobals::getPlayerParams(player);
+  SME::Class::TPlayerData *playerData = SME::TGlobals::getPlayerData(player);
 
-  f32 marioCollisionHeight =
-      *(f32 *)0x80415CC4 * playerData->getParams()->mSizeMultiplier.get();
+  const f32 marioCollisionHeight =
+      *(f32 *)SME_PORT_REGION(0x80415CC4, 0, 0, 0) *
+      playerData->getParams()->mSizeMultiplier.get();
 
-  if (player->mCeilingAbove - player->mFloorBelow < marioCollisionHeight &&
-      player->mRoofTriangle &&
-      !(player->mState & static_cast<u32>(TMario::State::AIRBORN))) {
-    loserExec__6TMarioFv(player);
+  Vec playerPos;
+  player->JSGGetTranslation(&playerPos);
+
+  TBGCheckData *roofTri;
+
+  f32 roofHeight = checkRoofPlane__6TMarioFRC3VecfPPC12TBGCheckData(
+      player, playerPos, playerPos.y + (marioCollisionHeight / 4), &roofTri);
+
+  if (!player->mAttributes.mIsGameOver) {
+    if (roofHeight - player->mFloorBelow < (marioCollisionHeight - 40.0f) &&
+        !(player->mState & static_cast<u32>(TMario::State::AIRBORN)) &&
+        player->mState != static_cast<u32>(TMario::State::HANG)) {
+      playerData->mCollisionFlags.mCrushedTimer += 1;
+    } else {
+      playerData->mCollisionFlags.mCrushedTimer = 0;
+    }
+
+    if (playerData->mCollisionFlags.mCrushedTimer > CrushTimeToDie) {
+      loserExec__6TMarioFv(player);
+      playerData->mCollisionFlags.mCrushedTimer = 0;
+    }
   }
+
   return 1;
 }
 
@@ -374,17 +449,25 @@ u16 Patch::Collision::masterGroundCollisionHandler(TBGCheckData *colTriangle) {
   case 17021:
     setGravityCol(player);
     break;
-  case 16040:
-  case 17040:
-    warpToLinkedCol(player);
+  case EXPAND_WARP_SET(16040):
+  case EXPAND_WARP_SET(17040):
+    warpToLinkedCol(player, Enum::WarpKind::SPARKLES);
     break;
-  case 16041:
-  case 17041:
+  case EXPAND_WARP_SET(16041):
+  case EXPAND_WARP_SET(17041):
     warpToLinkedColPreserve(player, false);
     break;
-  case 16042:
-  case 17042:
+  case EXPAND_WARP_SET(16042):
+  case EXPAND_WARP_SET(17042):
     warpToLinkedColPreserve(player, true);
+    break;
+  case EXPAND_WARP_SET(16043):
+  case EXPAND_WARP_SET(17043):
+    warpToLinkedCol(player, Enum::WarpKind::WIPE);
+    break;
+  case EXPAND_WARP_SET(16044):
+  case EXPAND_WARP_SET(17044):
+    warpToLinkedCol(player, Enum::WarpKind::INSTANT);
     break;
   case 16080:
   case 17080:
@@ -438,3 +521,6 @@ u32 Patch::Collision::masterAllCollisionHandler(TMario *player) {
   }
   return player->mState;
 }
+
+#undef EXPAND_WARP_SET
+#undef EXPAND_WARP_CATEGORY

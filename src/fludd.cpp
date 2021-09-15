@@ -1,5 +1,7 @@
 #include "sms/actor/Mario.hxx"
 #include "sms/nozzle/Watergun.hxx"
+#include "sms/sound/MSound.hxx"
+#include "sms/sound/MSoundSESystem.hxx"
 
 #include "SME.hxx"
 
@@ -44,7 +46,7 @@ static bool sIsTriggerNozzleDead;
 // extern -> SME.cpp
 bool Patch::Fludd::isPumpOK(TMarioAnimeData *animeData) {
   return (animeData->mFluddEnabled != TMarioAnimeData::FLUDD::FLUDD_DISABLED &&
-          SME::TGlobals::getPlayerParams(gpMarioAddress)->mCurJump <= 1);
+          SME::TGlobals::getPlayerData(gpMarioAddress)->mCurJump <= 1);
 }
 
 // 0x8014206C
@@ -54,7 +56,7 @@ bool Patch::Fludd::hasWaterCardOpen() {
   SME_FROM_GPR(31, gcConsole);
 
   const SME::Class::TPlayerData *playerParams =
-      SME::TGlobals::getPlayerParams(gpMarioAddress);
+      SME::TGlobals::getPlayerData(gpMarioAddress);
 
   if (gpMarioAddress->mYoshi->mState != TYoshi::State::MOUNTED &&
       !gpMarioAddress->mAttributes.mHasFludd && !gcConsole->mWaterCardFalling &&
@@ -70,15 +72,42 @@ bool Patch::Fludd::hasWaterCardOpen() {
 // extern -> SME.cpp
 bool Patch::Fludd::canCollectFluddItem(TMario *player) {
   return onYoshi__6TMarioCFv(player) ||
-         !SME::TGlobals::getPlayerParams(player)->getCanUseFludd();
+         !TGlobals::getPlayerData(player)->getCanUseFludd();
 }
+
+static s32 sNozzleBuzzCounter = -1;
+
+static bool canCollectFluddItem() {
+  TMario *player;
+  SME_FROM_GPR(30, player);
+
+  const bool isOnYoshi = onYoshi__6TMarioCFv(player);
+  if (!TGlobals::getPlayerData(player)->getCanUseFludd()) {
+    if (gpMSound->gateCheck(0x483E) && sNozzleBuzzCounter < 0) {
+      MSoundSESystem::MSoundSE::startSoundSystemSE(0x483E, 0, nullptr, 0);
+      sNozzleBuzzCounter = 120;
+    } else {
+      sNozzleBuzzCounter -= 1;
+    }
+  }
+  return isOnYoshi || !TGlobals::getPlayerData(player)->getCanUseFludd();
+}
+SME_PATCH_BL(SME_PORT_REGION(0x801BBD48, 0, 0, 0), canCollectFluddItem);
+
+static void resetNozzleBuzzer(TMapObjGeneral *obj) {
+  if (obj->mNumObjs <= 0) {
+    sNozzleBuzzCounter = Max(sNozzleBuzzCounter - 1, -1);
+  }
+  control__14TMapObjGeneralFv(obj);
+}
+SME_PATCH_BL(SME_PORT_REGION(0x801BBBF8, 0, 0, 0), resetNozzleBuzzer);
 
 // 0x800678C4, 0x801A3ED0, 0x801B42D8, 0x8027F7DC, 0x8027F94C, 0x8024E710
 // extern -> SME.cpp
 void Patch::Fludd::sprayGoopMap(TPollutionManager *gpPollutionManager, f32 x,
                                 f32 y, f32 z, f32 r) {
   const SME::Class::TPlayerData *playerParams =
-      SME::TGlobals::getPlayerParams(gpMarioAddress);
+      SME::TGlobals::getPlayerData(gpMarioAddress);
   const SME::Class::TPlayerParams *prm = playerParams->getParams();
 
   if (!playerParams->isMario())
@@ -99,7 +128,7 @@ void Patch::Fludd::sprayGoopMap(TPollutionManager *gpPollutionManager, f32 x,
 // extern -> SME.cpp
 bool Patch::Fludd::canCleanSeals(TWaterManager *gpWaterManager) {
   return gpWaterManager->mWaterCardType != 0 ||
-         SME::TGlobals::getPlayerParams(gpMarioAddress)
+         SME::TGlobals::getPlayerData(gpMarioAddress)
              ->getParams()
              ->mCanCleanSeals.get();
 }
@@ -110,11 +139,11 @@ TWaterGun *Patch::Fludd::bindFluddtojoint() {
   TMario *player;
   SME_FROM_GPR(31, player);
 
-  if (!SME::TGlobals::getPlayerParams(player))
+  if (!SME::TGlobals::getPlayerData(player))
     return player->mFludd;
 
   player->mBindBoneIDArray[0] =
-      SME::TGlobals::getPlayerParams(player)->getNozzleBoneID(
+      SME::TGlobals::getPlayerData(player)->getNozzleBoneID(
           static_cast<TWaterGun::NozzleType>(player->mFludd->mCurrentNozzle));
 
   return player->mFludd;

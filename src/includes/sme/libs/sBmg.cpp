@@ -9,7 +9,7 @@ String &Util::formatBMG(String &msg) {
     OSTicksToCalendarTime(OSGetTime(), &calendarTime);
 
     SME::Class::TPlayerData *playerData =
-        SME::TGlobals::getPlayerParams(gpMarioAddress);
+        SME::TGlobals::getPlayerData(gpMarioAddress);
 
     msg.replaceAll("%name%", playerData->getPlayerName());
     msg.replaceAll("%shine%",
@@ -39,7 +39,7 @@ char *Util::formatBMGRaw(char *dst, const char *src, size_t len)
     OSTicksToCalendarTime(OSGetTime(), &calendarTime);
 
     SME::Class::TPlayerData *playerData =
-        SME::TGlobals::getPlayerParams(gpMarioAddress);
+        SME::TGlobals::getPlayerData(gpMarioAddress);
 
     msg.replaceAll("%name%", playerData->getPlayerName());
     msg.replaceAll("%shine%",

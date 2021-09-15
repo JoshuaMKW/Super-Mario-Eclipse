@@ -12,7 +12,7 @@ void Patch::Camera::modifyCameraRangeToSize(f32 *params, f32 *saveParams) {
 
   // Custom code here
   const SME::Class::TPlayerData *playerParams =
-      SME::TGlobals::getPlayerParams(gpMarioAddress);
+      SME::TGlobals::getPlayerData(gpMarioAddress);
   const f32 scale = playerParams->getParams()->mSizeMultiplier.get();
 
   if (!gpMarioAddress->mYoshi ||

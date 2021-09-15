@@ -12,6 +12,7 @@ using namespace Util;
 using namespace Class;
 
 extern bool gInXYZMode;
+extern bool gIsSwappingWarp;
 
 Memory::Protection::MemoryMap gCodeProtector;
 
@@ -84,8 +85,14 @@ JKRExpHeap *Patch::Init::createGlobalHeaps(void *newHeap, size_t size,
 // extern -> SME.cpp
 s32 Patch::Init::setupMarioDatas(char *filepath) {
   TMarioGamePad *gpGamePad = gpApplication.mGamePad1;
+  #ifdef SME_DEMO
+  Enum::Player playerID = Enum::Player::MARIO;
+  #else
   Enum::Player playerID =
       Util::Mario::getPlayerIDFromInput(gpGamePad->mButtons.mInput);
+  #endif
+
+  TGlobals::sCharacterIDList[0] = playerID;
 
   sprintf(filepath, "/data/chr%d.szs", static_cast<u8>(playerID));
   return DVDConvertPathToEntrynum(filepath);
@@ -123,6 +130,8 @@ static void resetGlobalValues() {
   gAudioSpeed = 1.0f;
 }
 
+static bool isMario = true;
+
 // 0x802998B4
 TMarDirector *Patch::Init::initFileMods() {
   TMarDirector *director;
@@ -130,20 +139,39 @@ TMarDirector *Patch::Init::initFileMods() {
 
   TMarioGamePad *gpGamePad = gpApplication.mGamePad1;
 
-#ifdef SME_DEBUG
+#if defined(SME_DEMO)
+// demo
+  SME_DEBUG_LOG("...");
+  Enum::Player characterID = TGlobals::sCharacterIDList[0];
+  if (gIsSwappingWarp) {
+    if (isMario) {
+      characterID = Enum::Player::IL_PIANTISSIMO;
+    } else {
+      characterID = Enum::Player::MARIO;
+    }
+    isMario = !isMario;
+    gIsSwappingWarp = false;
+  }
+#elif defined(SME_DEBUG)
   Enum::Player characterID =
       Util::Mario::getPlayerIDFromInput(gpGamePad->mButtons.mInput);
 #else
   Enum::Player characterID = Enum::Player::UNKNOWN;
 #endif
 
+
   resetGlobalValues();
   TGlobals::clearAllPlayerParams();
   TStageParams::sStageConfig->reset();
   TStageParams::sStageConfig->load(Util::getStageName(&gpApplication));
 
-#ifdef CHARACTER_SELECT
+  TFlagManager::smInstance->setBool(true, 0x10060);
+  TFlagManager::smInstance->setBool(true, 0x10061);
+  TFlagManager::smInstance->setBool(true, 0x10063);
 
+
+#ifdef CHARACTER_SELECT
+  // ...
 #else
   TGlobals::sCharacterIDList[0] = characterID;
 #endif
@@ -190,7 +218,7 @@ void Patch::Init::initShineShadow() {
 
       if (config->mLightDarkLevel.get() == 255)
         gpModelWaterManager->mDarkLevel =
-            Util::Math::lerp<u8>(30, 190,
+            Util::Math::lerp<u8>(TGlobals::getMinDarkness(), 190,
                                  static_cast<f32>(CurrentShineCount) /
                                      static_cast<f32>(SME_MAX_SHINES));
       else
@@ -210,30 +238,15 @@ static u8 gOldEpisodeID = 0;
 
 // 0x802B7A4C
 void Patch::Init::initSoundBank(u8 areaID, u8 episodeID) {
-  TStageParams *config = TStageParams::sStageConfig;
+  /*TStageParams *config = TStageParams::sStageConfig;
 
   gOldAreaID = areaID;
   gOldEpisodeID = episodeID;
   if (config->mMusicSetCustom.get()) {
     areaID = config->mMusicAreaID.get();
     episodeID = config->mMusicEpisodeID.get();
-  }
+  }*/
   setMSoundEnterStage__10MSMainProcFUcUc(areaID, episodeID);
-}
-
-// 0x802983F0
-// 0x80298420
-void Patch::Init::initMusicTrack() {
-  TStageParams *config = TStageParams::sStageConfig;
-
-  if (config->mMusicSetCustom.get())
-    gStageBGM = 0x80010000 | config->mMusicID.get();
-  gAudioSpeed = config->mMusicSpeed.get();
-  gAudioPitch = config->mMusicPitch.get();
-  gAudioVolume = Max(Min(config->mMusicVolume.get(), 1), 0);
-
-  if (config->mMusicEnabled.get())
-    startStageBGM__10MSMainProcFUcUc();
 }
 
 static void initFludd(TMario *player, TPlayerData *params) {

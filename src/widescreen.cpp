@@ -243,17 +243,6 @@ static void scaleSelectMenuGrad(u32 type, u32 idx, u32 count) {
 SME_PATCH_BL(SME_PORT_REGION(0x80175868, 0, 0, 0), scaleSelectMenuGrad);
 SME_WRITE_32(SME_PORT_REGION(0x8017586C, 0, 0, 0), 0x48000090);
 
-static TBoundPane sGoText[3];
-
-static void resetGoTextBoundPanes(TConsoleStr *consoleStr) {
-  for (u32 i = 0; i < 3; ++i) {
-    TBoundPane *pane = consoleStr->mBoundPanes_Go[i];
-    pane->setPanePosition(40, sGoText[i].mStartPos, sGoText[i].mMidPos, sGoText[i].mEndPos);
-  }
-}
-SME_PATCH_BL(SME_PORT_REGION(0x802984AC, 0, 0, 0), resetGoTextBoundPanes);
-SME_PATCH_BL(SME_PORT_REGION(0x8028A250, 0, 0, 0), resetGoTextBoundPanes);
-
 static u32 fixShootingStarsNoDelete() {
   u32 *emitterManager4D2 = *(u32 **)SME_PORT_REGION(0x8040E1E4, 0, 0, 0);
   TConsoleStr *consoleStr;
@@ -286,10 +275,6 @@ SME_PATCH_BL(SME_PORT_REGION(0x80170F6C, 0, 0, 0), fixShootingStarsWideScreen);
 
 static void fixDemoMasksWideScreen_InitStaticGoPanes(TConsoleStr *consoleStr) {
   loadAfter__Q26JDrama8TNameRefFv(consoleStr);
-
-  sGoText[0] = *consoleStr->mBoundPanes_Go[0];
-  sGoText[1] = *consoleStr->mBoundPanes_Go[1];
-  sGoText[2] = *consoleStr->mBoundPanes_Go[2];
 
   const f32 ratio = SME::TGlobals::getScreenToFullScreenRatio();
 

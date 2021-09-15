@@ -40,7 +40,7 @@ TWaterGun::NozzleType nozzle, bool normalize) { if
 }
 */
 
-static bool sIsTriggerNozzleDead;
+static bool sIsTriggerNozzleDead = false;
 
 // 0x80248F14
 // extern -> SME.cpp

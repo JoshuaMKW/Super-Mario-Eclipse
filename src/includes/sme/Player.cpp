@@ -17,7 +17,7 @@ using namespace SME::Util::Math;
 static u8 gJ3DBuffer[0x2000];
 static JKRSolidHeap gJ3DHeap(&gJ3DBuffer, sizeof(gJ3DBuffer), nullptr, false);
 static OSThread gCharacterSwapThread;
-static Enum::Player gTargetCharacterID;
+static Enum::Player gTargetCharacterID = Enum::Player::UNKNOWN;
 static u8 gCharacterSwapStack[0x4000];
 static bool gFadeInOut = true;
 static bool gSwapSuccessful = false;

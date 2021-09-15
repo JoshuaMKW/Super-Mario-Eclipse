@@ -165,7 +165,7 @@ bool AudioStreamer::queueAudio(AudioPacket &packet) {
   return false;
 }
 
-static OSTime sStartTime;
+static OSTime sStartTime = 0;
 static bool _sHasFadeStarted = false;
 
 void AudioStreamer::fadeAudio_() {

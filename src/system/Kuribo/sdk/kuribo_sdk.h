@@ -247,7 +247,7 @@ template <typename T, bool enabled> struct scoped_guard {
   scoped_guard(T& toggle) : mToggle(toggle), mSave(toggle.is_enabled()) {
     mToggle.set_enabled(enabled);
   }
-  ~scoped_guard() { mToggle.set_enabled(mSave); }
+  //~scoped_guard() { mToggle.set_enabled(mSave); }
 
   T& mToggle;
   bool mSave;

@@ -87,6 +87,8 @@ public:
 
 class TPlacement : public TViewObj {
 public:
+  TPlacement(const char *name)
+      : TViewObj(name), mPosition(0.0f, 0.0f, 0.0f), mPlacementFlags(0) {}
   virtual ~TPlacement();
 
   virtual void load(JSUMemoryInputStream &);
@@ -132,7 +134,7 @@ public:
   JGeometry::TVec3<f32> mSize;     // 24
   JGeometry::TVec3<f32> mRotation; // 30
 private:
-  u32 _02[0x8 / 4];                // 3C
+  u32 _02[0x8 / 4]; // 3C
 };
 
 class TDirector : public TNameRef, public JStage::TSystem {

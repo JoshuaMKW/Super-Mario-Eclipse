@@ -38,7 +38,8 @@
         "os.h": "c",
         "algorithm": "cpp",
         "memory": "cpp",
-        "iterator": "cpp"
+        "iterator": "cpp",
+        "gx.h": "c"
     },
     "cmake.configureOnOpen": false
 }

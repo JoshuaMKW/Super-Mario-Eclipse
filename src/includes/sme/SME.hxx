@@ -40,6 +40,10 @@
 #define KURIBO_NO_TYPES
 #endif
 
+#ifndef HW_DOL
+#define HW_DOL
+#endif
+
 #include "common_sdk.h"
 
 #if defined(SME_BUILD_KURIBO)

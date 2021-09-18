@@ -1,4 +1,5 @@
 #include "WaterBalloon.hxx"
+#include "sms/mapobj/MapObjGeneral.hxx"
 #include "GX.h"
 #include "types.h"
 
@@ -60,6 +61,8 @@ void TWaterBalloon::kill() { TMapObjGeneral::kill(); }
 
 void TWaterBalloon::appear() { TMapObjGeneral::appear(); }
 
+void TWaterBalloon::touchActor(THitActor *actor) { blast(); }
+
 s32 TWaterBalloon::getLivingTime() const { return -1; }
 s32 TWaterBalloon::getFlushTime() const { return -1; }
 
@@ -83,7 +86,6 @@ void TWaterBalloon::touchWall(JGeometry::TVec3<f32> *pos, TBGWallCheckRecord *re
 
 void TWaterBalloon::touchRoof(JGeometry::TVec3<f32> *pos) { blast(); }
 
-void TWaterBalloon::touchActor(THitActor *actor) { blast(); }
 
 void TWaterBalloon::blast() {
   SME_DEBUG_LOG("Blasting!\n");

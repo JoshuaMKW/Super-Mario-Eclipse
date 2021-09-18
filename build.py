@@ -533,7 +533,7 @@ class FilePatcher(Compiler):
             return
 
         bnr = BNR(path, BNR.Regions.AMERICA)
-        bnr.save_bnr(self.gameDir / "opening.bnr")
+        bnr.save_bnr(self.gameDir / "files/opening.bnr")
 
     def _alloc_from_heap(self, dol: DolFile, size: int):
         size = (size + 31) & -32

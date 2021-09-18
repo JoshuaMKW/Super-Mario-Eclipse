@@ -1,1 +1,1 @@
-Insert your characters here
+Insert your stages here (go in `ISO:/data/scene/`)

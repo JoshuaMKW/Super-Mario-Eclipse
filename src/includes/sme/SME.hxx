@@ -75,7 +75,7 @@
 #define SME_MODULE_NAME "Eclipse"
 #define SME_AUTHOR_NAME "JoshuaMK"
 
-#ifdef SME_DEBUG
+#if defined(SME_DEBUG) && !defined(SME_RELEASE)
 #define SME_VERSION_TAG                                                        \
   "(DEBUG) " SME_VERSION "[" SME_STRINGIZE(SME_MAX_SHINES) " Shines]"
 #else

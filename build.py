@@ -528,6 +528,7 @@ class FilePatcher(Compiler):
         return None
 
     def _compile_bnr_to_game(self, path: Path):
+        print(path)
         if not path.exists():
             return
 

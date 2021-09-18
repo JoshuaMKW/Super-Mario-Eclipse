@@ -3,7 +3,7 @@
 
 OSAlarm gctAlarm;
 
-#ifdef SME_DEBUG
+#if defined(SME_DEBUG) && !defined(SME_RELEASE)
 OSStopwatch gctStopwatch;
 #endif
 
@@ -27,7 +27,7 @@ bool Util::Security::areGeckoCodesPresent(void *handlerBuffer, size_t maxlen,
 }
 
 void *Util::Security::checkUserCodes(OSAlarm *alarm, OSContext *context) {
-#ifdef SME_DEBUG
+#if defined(SME_DEBUG) && !defined(SME_RELEASE)
   OSStartStopwatch(&gctStopwatch);
 #endif
 
@@ -36,7 +36,7 @@ void *Util::Security::checkUserCodes(OSAlarm *alarm, OSContext *context) {
 
   if (sCachedAddr) {
     if (areGeckoCodesPresent(sCachedAddr, 8)) {
-#ifdef SME_DEBUG
+#if defined(SME_DEBUG) && !defined(SME_RELEASE)
       OSStopStopwatch(&gctStopwatch);
       // if (gctStopwatch.mHits % 60000 == 0)
       //    OSDumpStopwatch(&gctStopwatch);
@@ -49,7 +49,7 @@ void *Util::Security::checkUserCodes(OSAlarm *alarm, OSContext *context) {
   SME::TGlobals::sPlayerHasGeckoCodes = areGeckoCodesPresent(
       static_cast<void *>(searchcontext), searchlength, &sCachedAddr);
 
-#ifdef SME_DEBUG
+#if defined(SME_DEBUG) && !defined(SME_RELEASE)
   OSStopStopwatch(&gctStopwatch);
   // if (gctStopwatch.mHits % 60000 == 0) OSDumpStopwatch(&gctStopwatch);
 #endif

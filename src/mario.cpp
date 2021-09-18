@@ -637,7 +637,8 @@ void Patch::Mario::manageCustomJumps(TMario *player) {
 
   if ((player->mState & static_cast<u32>(TMario::State::AIRBORN)) == false ||
       (player->mState & 0x800000) ||
-      player->mYoshi->mState == TYoshi::MOUNTED) {
+      player->mYoshi->mState == TYoshi::MOUNTED ||
+      player->mState == static_cast<u32>(TMario::State::SLIP_JUMP)) {
     playerParams->mCurJump = 1;
   } else if ((player->mController->mButtons.mFrameInput &
               TMarioGamePad::Buttons::A) &&

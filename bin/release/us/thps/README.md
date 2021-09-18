@@ -1,1 +1,1 @@
-Insert your characters here
+Insert your THPs here (go in `ISO:/data/`)

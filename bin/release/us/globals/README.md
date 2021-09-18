@@ -1,1 +1,1 @@
-Insert your characters here
+Insert global files here (go in `ISO:/data/`)

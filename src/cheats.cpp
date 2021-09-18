@@ -24,7 +24,7 @@ static void debugModeNotify(Class::TCheatHandler *) {
   SME::Util::Memory::PPC::write<u32>((u32 *)0x802A6788, 0x3BC00009);
 
 #ifndef SME_DEBUG
-  gDebugTextBox.isVisible = true;
+  gDebugTextBox.mIsVisible = true;
 #endif
 }
 

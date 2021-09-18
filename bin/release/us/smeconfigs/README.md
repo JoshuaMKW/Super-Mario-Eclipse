@@ -1,1 +1,1 @@
-Insert your characters here
+Insert your SME stage configurations here

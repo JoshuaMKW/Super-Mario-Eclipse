@@ -23,7 +23,7 @@
     __OSUnhandledException(6, OSGetCurrentContext(), 0);                                           \
   }
 
-#ifdef SME_DEBUG
+#if defined(SME_DEBUG) && !defined(SME_RELEASE)
 #define SME_DEBUG_ASSERT(expr, msg, ...) SME_ASSERT(expr, msg, ##__VA_ARGS__)
 #else
 #define SME_DEBUG_ASSERT(expr, msg, ...)

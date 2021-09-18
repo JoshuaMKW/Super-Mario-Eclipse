@@ -1,5 +1,5 @@
 {
-    "buildpath": "C:/Users/Kyler-Josh/3D Objects/Dolphin/Dolphin-Games/Super Mario Kamek [GMSE04].iso",
+    "buildpath": "C:/Users/Kyler-Josh/3D Objects/Dolphin/Dolphin-Games/Super Mario Eclipse [GMSE01].iso",
     "dolphinpath": "C:/Users/Kyler-Josh/3D Objects/Dolphin/Dolphin-x64/Dolphin.exe",
     "userfiles": [
         {
@@ -9,7 +9,13 @@
             }
         },
         {
-            "smeconfigs/*.sme": {
+            "smeconfigs/*.[ts][xm][te]": {
+                "destination": "files/data/scene/sme/",
+                "rename": ""
+            }
+        },
+        {
+            "smeconfigs/*.txt": {
                 "destination": "files/data/scene/sme/",
                 "rename": ""
             }
@@ -75,10 +81,10 @@
     },
     "delete": {},
     "ignore": [
-        "*/README.md",
         ".config.json",
         "opening.png",
-        "opening.json"
+        "opening.json",
+        "*README.md"
     ],
     "gamebanner": "opening.png"
 }

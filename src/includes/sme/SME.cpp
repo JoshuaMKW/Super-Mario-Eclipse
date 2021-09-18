@@ -19,7 +19,7 @@ extern OSAlarm gctAlarm;
 #define _SME_PATCH_RAM
 #define _SME_EXECUTE_LOADS
 
-#ifdef SME_DEBUG
+#if defined(SME_DEBUG) && !defined(SME_RELEASE)
 extern OSStopwatch gctStopwatch;
 #endif
 
@@ -29,7 +29,7 @@ static void initMod() {
   SME_DEBUG_LOG(
       "Codeblocker - Creating OSAlarm at %p; Calls %p every %0.4f seconds\n",
       &gctAlarm, &SME::Util::Security::checkUserCodes, 0.001f);
-#ifdef SME_DEBUG
+#if defined(SME_DEBUG) && !defined(SME_RELEASE)
   OSInitStopwatch(&gctStopwatch, "Codeblocker");
 #endif
   OSCreateAlarm(&gctAlarm);
@@ -42,7 +42,7 @@ static void initMod() {
 
 static void destroyMod() {
   SME_DEBUG_LOG("-- Destroying Module --\n");
-#ifdef SME_DEBUG
+#if defined(SME_DEBUG) && !defined(SME_RELEASE)
   OSStopStopwatch(&gctStopwatch);
 #endif
   OSCancelAlarm(&gctAlarm);
@@ -480,13 +480,13 @@ SME_WRITE_32(SME_PORT_REGION(0x802C7638, 0, 0, 0), 0x60000000); // gpr info
 // SME_WRITE_32(SME_PORT_REGION(0x802C7690, 0, 0, 0), 0x60000000); // float
 // info
 
-#ifdef SME_DEBUG
+#if defined(SME_DEBUG) && !defined(SME_RELEASE)
 // Skip FMVs
 SME_WRITE_32(SME_PORT_REGION(0x802B5E8C, 0, 0, 0), 0x38600001);
 SME_WRITE_32(SME_PORT_REGION(0x802B5EF4, 0, 0, 0), 0x38600001);
 #endif
 
-#ifdef SME_DEBUG
+#if defined(SME_DEBUG) && !defined(SME_RELEASE)
 // Level Select
 SME_WRITE_32(SME_PORT_REGION(0x802A6788, 0, 0, 0), 0x3BC00009);
 #endif

@@ -10,7 +10,7 @@
     OSReport(errmsg, ##__VA_ARGS__);                                           \
 }
 
-#ifdef SME_DEBUG
+#if defined(SME_DEBUG) && !defined(SME_RELEASE)
 #define SME_DEBUG_LOG(msg, ...) SME_LOG(msg, ##__VA_ARGS__)
 #else
 #define SME_DEBUG_LOG(msg, ...)

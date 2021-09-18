@@ -5,6 +5,8 @@
 
 #include "SME.hxx"
 
+#if 0
+
 TWaterBalloon::TWaterBalloon(const char *name) : TMapObjGeneral(name) {}
 
 TWaterBalloon::~TWaterBalloon() {}
@@ -91,3 +93,5 @@ void TWaterBalloon::blast() {
   SME_DEBUG_LOG("Blasting!\n");
   kill();
 }
+
+#endif

@@ -50,8 +50,10 @@ public:
   void append(String &str);
   void append(String &str, size_t subpos, size_t sublen);
   void append(const char *str);
+  void append(const char chr);
   void append(size_t len, const char chr);
   void assign(const char *str);
+  void assign(const char chr);
   void assign(const char *str, size_t pos, size_t len);
   void assign(size_t len, const char chr);
   void clear() { memset(this->mString, 0, this->mBufferSize); };
@@ -71,6 +73,7 @@ public:
   void replaceAll(const char *oldstr, const char *newstr);
   void replaceAll(const char *oldstr, const char newstr);
   void resize(size_t size, const char fill);
-  String *substr(size_t pos, size_t len = String::npos);
+  void substr(char *out, size_t pos, size_t len = String::npos);
+  void substr(String *out, size_t pos, size_t len = String::npos);
   static char *intToString(s32 num, char *buffer, size_t base = 10);
 };

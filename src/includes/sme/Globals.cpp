@@ -38,6 +38,13 @@ Enum::Player TGlobals::sCharacterIDList[] = {
 f32 TGlobals::sScreenWidth = 700.0f;
 f32 TGlobals::sFrameRate = 60.0f;
 bool TGlobals::sIsVariableFrameRate = true;
+
+#if defined(SME_DEBUG) && !defined(SME_RELEASE)
+bool TGlobals::sIsDebugMode = true;
+#else
+bool TGlobals::sIsDebugMode = false;
+#endif
+
 u8 TGlobals::sMinDarkness = 60;
 
 TMario *TGlobals::getPlayerByIndex(u8 index) {

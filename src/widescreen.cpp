@@ -296,7 +296,8 @@ static void fixDemoMasksWideScreen_InitStaticGoPanes(TConsoleStr *consoleStr) {
 
   consoleStr->mDemoMaskExPanes[1]->mRect.copy(*rect);
 }
-SME_PATCH_BL(SME_PORT_REGION(0x801723F0, 0, 0, 0), fixDemoMasksWideScreen_InitStaticGoPanes);
+SME_PATCH_BL(SME_PORT_REGION(0x801723F0, 0, 0, 0),
+             fixDemoMasksWideScreen_InitStaticGoPanes);
 
 static JUTRect sGuideBorderRects[2];
 static J2DPane sGuideBorderPanes[2];
@@ -381,13 +382,42 @@ static void scaleGuideMap(TGuide *guide) {
 }
 SME_PATCH_BL(SME_PORT_REGION(0x8017CB64, 0, 0, 0), scaleGuideMap);
 
+// -- DEBS -- //
+
+static f32 sDEBSToTimerRatio = 0.0f;
+static bool sHasRedAppeared = false;
+static JUTRect sPaneRect;
+static JUTRect sFillRect;
+
+void setDEBSWidthByRedCoinTimer(TGCConsole2 *console, bool forceAppear) {
+  sDEBSToTimerRatio =
+      Math::lerp<f32>(0.0f, 1.0f, f32(console->mRedCoinCardTimer) / 117.1f);
+
+  TExPane *pane = console->mTelopWindow;
+  pane->mRect.mX1 = sPaneRect.mX1 + (180.0f * sDEBSToTimerRatio);
+  pane->mPane->mRect.mX1 = sPaneRect.mX1 + (180.0f * sDEBSToTimerRatio);
+  reinterpret_cast<J2DWindow *>(pane->mPane)->mFillRect.mX2 = sFillRect.mX2 - (180.0f * sDEBSToTimerRatio);
+
+  startAppearTelop__11TGCConsole2Fb(console, forceAppear);
+}
+
 static void fixDEBSWideScreenText(s32 x1, s32 y1, s32 width, s32 height) {
+  TGCConsole2 *console = gpMarDirector->mGCConsole;
   const f32 ratio = SME::TGlobals::getScreenToFullScreenRatio();
 
-  const s32 offset = static_cast<s32>(((ratio - 1) * 45.0f));
+  sDEBSToTimerRatio =
+      Math::lerp<f32>(0.0f, 1.0f, f32(console->mRedCoinCardTimer) / 117.1f);
+
+  TExPane *pane = console->mTelopWindow;
+  pane->mRect.mX1 = sPaneRect.mX1 + (180.0f * sDEBSToTimerRatio);
+  pane->mPane->mRect.mX1 = sPaneRect.mX1 + (180.0f * sDEBSToTimerRatio);
+  reinterpret_cast<J2DWindow *>(pane->mPane)->mFillRect.mX2 = sFillRect.mX2 - (180.0f * sDEBSToTimerRatio);
+
+  const s32 offset =
+      static_cast<s32>(((ratio - 1.0f) * 45.0f));
   x1 -= offset;
 
-  GXSetScissor(x1, y1, width, height);
+  GXSetScissor(x1 + (195.0f * sDEBSToTimerRatio), y1, width - (195.0f * sDEBSToTimerRatio), height);
 }
 SME_PATCH_BL(SME_PORT_REGION(0x80143FDC, 0, 0, 0), fixDEBSWideScreenText);
 
@@ -401,7 +431,25 @@ static void fixDEBSWideScreenPanel(TGCConsole2 *console) {
   pane->mPane->mRect.mX1 -= offset;
   pane->mPane->mRect.mX2 += offset;
   reinterpret_cast<J2DWindow *>(pane->mPane)->mFillRect.mX2 += offset * 2;
+
+  sPaneRect = pane->mRect;
+  sFillRect = reinterpret_cast<J2DWindow *>(pane->mPane)->mFillRect;
+
+  sDEBSToTimerRatio = 0.0f;
+  console->mRedCoinCardTimer = 0;
+  sHasRedAppeared = false;
 }
+
+static void fixDeathScreenRatio(u32 *cardsave, TMarioGamePad *gamepad) {
+  initData__9TCardSaveFP13TMarioGamePad(cardsave, gamepad);
+  
+  const s32 offset = getScreenTransX();
+  J2DPane *pane = reinterpret_cast<J2DScreen *>(cardsave[0x14 / 4])->search('mask');
+  
+  pane->mRect.mX1 -= offset;
+  pane->mRect.mX2 += offset;
+}
+SME_PATCH_BL(SME_PORT_REGION(0x80163468, 0, 0, 0), fixDeathScreenRatio);
 
 static void fixYoshiFruitText(TGCConsole2 *console) {
   const f32 ratio = SME::TGlobals::getScreenToFullScreenRatio();
@@ -426,10 +474,10 @@ static void patchSMSFaderInOut(JDrama::TRect *rect, JUtility::TColor color) {
   GXSetViewport(rect->mX1, rect->mY1, rect->mX2, rect->mY2, 0.0f, 1.0f);
   fill_rect__9(rect, color);
 }
-//SME_PATCH_BL(SME_PORT_REGION(0x8013FDAC, 0, 0, 0), patchSMSFaderInOut);
+// SME_PATCH_BL(SME_PORT_REGION(0x8013FDAC, 0, 0, 0), patchSMSFaderInOut);
 
 static void patchLevelSelectPosition(J2DScreen *screen, int x, int y,
-                                  J2DGrafContext *context) {
+                                     J2DGrafContext *context) {
   reinterpret_cast<J2DPane *>(screen->mChildrenList.mFirst->mItemPtr)
       ->mRect.move(getScreenTransX(), 0);
   screen->draw(x, y, context);

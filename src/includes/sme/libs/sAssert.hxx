@@ -4,6 +4,8 @@
 #include "PPCArch.h"
 #include "printf.h"
 
+#include "Globals.hxx"
+
 #if defined(__GNUC__) || (defined(__MWERKS__) && (__MWERKS__ >= 0x3000)) ||    \
     (defined(__ICC) && (__ICC >= 600))
 #define _SmeFunc __PRETTY_FUNCTION__
@@ -26,7 +28,7 @@
 #if defined(SME_DEBUG) && !defined(SME_RELEASE)
 #define SME_DEBUG_ASSERT(expr, msg, ...) SME_ASSERT(expr, msg, ##__VA_ARGS__)
 #else
-#define SME_DEBUG_ASSERT(expr, msg, ...)
+#define SME_DEBUG_ASSERT(expr, msg, ...) if (SME::TGlobals::isDebugMode()) { SME_ASSERT(expr, msg, ##__VA_ARGS__) }
 #endif
 
 #define SME_ERROR(msg, ...)                                                    \

@@ -168,6 +168,7 @@ TMarDirector *Patch::Init::initFileMods() {
   TFlagManager::smInstance->setBool(true, 0x10060);
   TFlagManager::smInstance->setBool(true, 0x10061);
   TFlagManager::smInstance->setBool(true, 0x10063);
+  TFlagManager::smInstance->setBool(true, 0x1038F);
 
 
 #ifdef CHARACTER_SELECT

@@ -3,32 +3,38 @@
 #include "string.h"
 #include "types.h"
 
-#include "libs/sLogging.hxx"
-#include "libs/sMath.hxx"
-#include "libs/sMemory.hxx"
-#include "libs/sString.hxx"
+#include "sLogging.hxx"
+#include "sMath.hxx"
+#include "sMemory.hxx"
+#include "sString.hxx"
 
 constexpr const char String::numbers[10] = {'0', '1', '2', '3', '4',
                                             '5', '6', '7', '8', '9'};
 
+static char sStringBuffer[1024 * 16];
+static JKRExpHeap sStringHeap(&sStringBuffer, sizeof(sStringBuffer), JKRHeap::sRootHeap, false); 
+
 String::String(size_t bufferSize)
     : mBufferSize(Min(bufferSize, 1024)), mStringSize(0) {
-  mString = static_cast<char *>(SME::Util::Memory::calloc(mBufferSize, 4));
+  mString = static_cast<char *>(sStringHeap.alloc(mBufferSize, 4));
+  memset(mString, 0, mBufferSize);
 }
 
 String::String(const char *str, size_t bufferSize)
     : mBufferSize(Min(bufferSize, 1024)), mStringSize(0) {
-  mString = static_cast<char *>(SME::Util::Memory::calloc(mBufferSize, 4));
+  mString = static_cast<char *>(sStringHeap.alloc(mBufferSize, 4));
+  memset(mString, 0, mBufferSize);
   assign(str);
 }
 
 String::String(const String &str, size_t bufferSize)
     : mBufferSize(Min(bufferSize, 1024)), mStringSize(0) {
-  mString = static_cast<char *>(SME::Util::Memory::calloc(mBufferSize, 4));
+  mString = static_cast<char *>(sStringHeap.alloc(mBufferSize, 4));
+  memset(mString, 0, mBufferSize);
   assign(str.data());
 }
 
-String::~String() { SME::Util::Memory::free(mString); }
+String::~String() { sStringHeap.free(mString); }
 
 String &String::operator=(const String &str) {
   mStringSize = str.size();
@@ -135,8 +141,13 @@ void String::append(String &str, size_t subpos, size_t sublen) {
 }
 
 void String::append(const char *str) {
-  strcat(mString, str);
+  strcat(mString + mStringSize, str);
   mStringSize += strlen(str);
+}
+
+void String::append(const char chr) {
+  mString[mStringSize] = chr;
+  mStringSize += 1;
 }
 
 void String::append(size_t len, const char chr) {
@@ -154,6 +165,11 @@ void String::assign(const char *str) {
 
   strncpy(mString, str, stringLen);
   mStringSize = stringLen;
+}
+
+void String::assign(const char chr) {
+  *mString = chr;
+  mStringSize = 1;
 }
 
 void String::assign(const char *str, size_t pos, size_t len) {
@@ -274,12 +290,17 @@ void String::resize(size_t size, const char fill) {
   }
 }
 
-String *String::substr(size_t pos, size_t len) {
-  String *substr = new String(Max(len, mBufferSize));
+void String::substr(char *out, size_t pos, size_t len) {
   if (pos < size()) {
-    strncpy(substr->mString, mString + pos, len);
+    strncpy(out, mString + pos, len);
+    out[strlen(out)] = '\0';
   }
-  return substr;
+}
+
+void String::substr(String *out, size_t pos, size_t len) {
+  if (pos < size()) {
+    out->assign(mString, pos, len);
+  }
 }
 
 char *String::intToString(s32 num, char *buffer, size_t base) {

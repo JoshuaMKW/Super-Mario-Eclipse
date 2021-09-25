@@ -41,6 +41,7 @@ public:
     return false;
   }
 
+  static bool isDebugMode() { return sIsDebugMode; }
   static bool isWideScreen() { return sScreenWidth > 640.0f; }
   static bool isVariableFrameRate() { return sIsVariableFrameRate; }
   static bool isFreePlayMode() { return sIsFreePlay; }
@@ -54,6 +55,7 @@ public:
   static f32 getScreenToFullScreenRatio() { return sScreenWidth / 600.0f; }
   static u8 getMinDarkness() { return sMinDarkness; }
 
+  static void setDebugMode(bool active) { sIsDebugMode = active; }
   static void setScreenWidth(f32 width) { sScreenWidth = width; }
   static void setFrameRate(f32 framerate) { sFrameRate = framerate; }
   static void setVariableFrameRate(bool active) { sIsVariableFrameRate = active; }
@@ -62,8 +64,8 @@ public:
   static Class::TLightContext sLightData;
 
   static void *sPRMFile;
-  static SME::Class::TWarpCollisionList *sWarpColArray;
-  static SME::Class::TWarpCollisionList *sWarpColPreserveArray;
+  static Class::TWarpCollisionList *sWarpColArray;
+  static Class::TWarpCollisionList *sWarpColPreserveArray;
 
   #ifdef SME_DETACHED_HEAPS
   static JKRExpHeap sCharacterHeap;
@@ -73,7 +75,7 @@ public:
   static JKRExpHeap *sGlobalHeap;
   #endif
 
-  static SME::Class::TPlayerData *sPlayerCfgArray[SME_MAX_PLAYERS];
+  static Class::TPlayerData *sPlayerCfgArray[SME_MAX_PLAYERS];
   static TMario *sPlayers[SME_MAX_PLAYERS];
   static bool sPlayerHasGeckoCodes;
   static bool sIsAudioStreaming;
@@ -85,6 +87,7 @@ public:
   static f32 sScreenWidth;
   static f32 sFrameRate;
   static bool sIsVariableFrameRate;
+  static bool sIsDebugMode;
   static u8 sMinDarkness;
 };
 

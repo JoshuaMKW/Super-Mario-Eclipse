@@ -8697,6 +8697,7 @@ __nwa__FUl=0x802C3CA4
 __nwa__FUli=0x802C3CEC
 __nwa__FUlP7JKRHeapi=0x802C3D38
 __dl__FPv=0x802C3DA4
+__dla__FPv=0x802C3E08
 sFPv=0x802C3E08
 state_register__7JKRHeapCFPQ27JKRHeap6TStateUl=0x802C3E6C
 state_compare__7JKRHeapCFRCQ27JKRHeap6TStateRCQ27JKRHeap6TState=0x802C3E70
@@ -14994,6 +14995,8 @@ sMareWB_BabyHatColorBuf0=0x804150C8
 sMareWB_BabyHatColorBuf1=0x804150D0
 sMareWB_BabyBedColorBuf0=0x804150D8
 sMareWB_BabyBedColorBuf1=0x804150E0
+
+BootInfo=0x80000000;
 
 
 gYoshiBodyColor=0x8039F934

@@ -25,6 +25,9 @@ String &Util::formatBMG(String &msg) {
     msg.replaceAll("%bdate%", SME::Util::Time::buildDate());
     msg.replaceAll("%btime%", SME::Util::Time::buildTime());
     msg.replaceAll("%cardslot%", gpCardManager->mChannel == CARD_SLOTA ? "A" : "B");
+    #ifdef SME_DEMO
+    msg.replaceAll("%c", gpCardManager->mChannel == CARD_SLOTA ? "A" : "B");
+    #endif
 
     return msg;
 }

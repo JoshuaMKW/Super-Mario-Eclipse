@@ -10,7 +10,7 @@ public:
   virtual ~J2DScreen();
 
   virtual void drawSelf(int, int, Mtx *);
-  virtual u32 *search(u32);
+  virtual J2DPane *search(u32 id);
 
   void makeHiearachyPanes(J2DPane *, JSURandomInputStream *, bool, bool, bool,
                           u32 *);

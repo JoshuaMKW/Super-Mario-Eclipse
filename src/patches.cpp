@@ -4,9 +4,11 @@
 #include "sms/JSystem/JKR/JKRFileLoader.hxx"
 #include "sms/actor/Mario.hxx"
 #include "sms/mapobj/MapObjTree.hxx"
+#include "sms/JSystem/J2D/J2DPrint.hxx"
 
 #include "SME.hxx"
 #include "macros.h"
+#include "defines.h"
 
 constexpr f32 DrawDistance = 300000.0f * 100.0f;
 
@@ -152,6 +154,9 @@ static void normalizeHoverSlopeSpeed(f32 floorPos) {
                  &floorNormal);
 
   const f32 slopeStrength = PSVECDotProduct(&up, &floorNormal);
+  if (slopeStrength < 0.0f)
+    return;
+    
   const f32 lookAtRatio =
       Math::Vector3::lookAtRatio(playerForward, floorNormal);
 
@@ -169,3 +174,106 @@ static void touchEnemy__item(THitActor *touched) {
 
 // Make enemies collect coins
 // SME_WRITE_32(SME_PORT_REGION(0x803CA494, 0, 0, 0), 0x801bf2c0);
+
+#if 0
+static u8 sLineBuffer[sizeof(String) * 64];
+static JKRSolidHeap sLineHeap(&sLineBuffer, 64, JKRHeap::sRootHeap, false);
+
+static SME_NO_INLINE size_t getSplitLines(const char *str, String **out, size_t maxLines = __UINT32_MAX__) {
+  String string(str, 1024);
+
+  size_t nlinePos = string.find('\n', 0);
+  size_t nlineLast = String::npos;
+  size_t numLines = 0;
+  do {
+    out[numLines] = new (&sLineHeap, 4) String(nlineLast+1 + nlinePos);
+    string.substr(out[numLines], nlineLast+1, nlinePos == String::npos ? String::npos : nlinePos + 1);
+    numLines += 1;
+  } while (nlinePos != String::npos && numLines < maxLines-1);
+
+  return numLines;
+}
+
+static int sPrintX = 0, sPrintY = 0;
+
+static void _capturePrintPos(J2DPane *pane, int x, int y) {
+  sPrintX = x;
+  sPrintY = y;
+  pane->makeMatrix(x, y);
+}
+SME_PATCH_BL(SME_PORT_REGION(0x802d0bec, 0, 0, 0), _capturePrintPos);
+
+static void cullJ2DPrint(J2DPrint *printer, int unk_0, int unk_1, u8 unk_2, const char *formatter, ...) {
+  constexpr int fontWidth = 20;
+
+  va_list vargs;
+  va_start(vargs, formatter);
+
+  char *msg = va_arg(vargs, char *);
+
+  va_end(vargs);
+
+  if (sPrintX > 0 && (sPrintX + strlen(msg)) < SME::TGlobals::getScreenWidth())
+    printer->print(0, 0, unk_2, formatter, msg);
+
+  String finalStr(1024);
+
+  String *lines[64];
+  size_t numLines = getSplitLines(msg, lines, 64);
+
+  for (u32 i = 0; i < numLines; ++i) {
+    String *line = lines[i];
+    size_t cullL = Max((-sPrintX / fontWidth) - 2, 0);
+    size_t cullR = ((-sPrintX + (line->size() * fontWidth)) / SME::TGlobals::getScreenWidth()) + 2;
+
+    line->substr(const_cast<char *>(finalStr.data()) + finalStr.end(), cullL, cullR);
+  }
+
+  printer->print(0, 0, unk_2, formatter, finalStr.data());
+}
+SME_PATCH_BL(SME_PORT_REGION(0x802d0c20, 0, 0, 0), cullJ2DPrint);
+
+#else
+
+static int sPrintX = 0, sPrintY = 0;
+
+static void _capturePrintPos(J2DPane *pane, int x, int y) {
+  sPrintX = x;
+  sPrintY = y;
+  pane->makeMatrix(x, y);
+}
+//SME_PATCH_BL(SME_PORT_REGION(0x802d0bec, 0, 0, 0), _capturePrintPos);
+
+static void cullJ2DPrint(J2DPrint *printer, int unk_0, int unk_1, u8 unk_2, const char *formatter, ...) {
+  constexpr f32 fontWidth = 16;
+
+  va_list vargs;
+  va_start(vargs, formatter);
+
+  char *msg = va_arg(vargs, char *);
+
+  va_end(vargs);
+
+  if ((sPrintX > 0 && (sPrintX + strlen(msg)) < SME::TGlobals::getScreenWidth()) ||
+      strchr(msg, '\n') != nullptr)
+    printer->print(0, 0, unk_2, formatter, msg);
+
+  String culledMsg(msg, 1024);
+
+  f32 cullL = Max((f32(-sPrintX) / fontWidth) - 2.0f, 0);
+  f32 cullR = Max(((f32(-sPrintX) + (f32(culledMsg.size()) * fontWidth)) / SME::TGlobals::getScreenWidth()) + 2.0f, cullL);
+
+  culledMsg.substr(&culledMsg, size_t(cullL), size_t(cullR));
+  culledMsg.append('\0');
+
+  printer->print(int(cullL * fontWidth), 0, unk_2, formatter, culledMsg.data());
+}
+//SME_PATCH_BL(SME_PORT_REGION(0x802d0c20, 0, 0, 0), cullJ2DPrint);
+
+#endif
+
+// Title Screen Never Fades to THP
+SME_WRITE_32(SME_PORT_REGION(0x8016D53C, 0, 0, 0), 0x48000344);
+
+// Load msound.aaf from AudioRes folder (NTSC-U) [Xayrga/JoshuaMK] 
+//SME_WRITE_32(SME_PORT_REGION(0x80014F9C, 0, 0, 0), 0x60000000);

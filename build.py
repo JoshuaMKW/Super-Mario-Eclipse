@@ -384,6 +384,8 @@ class FilePatcher(Compiler):
                 self._alloc_from_heap(
                     _doldata, (kernelPath.stat().st_size + 31) & -32)
 
+            self._create_signatures(_doldata, "Super Mario Eclipse\0")
+
             if self.is_kuribo():
                 tmpbin = Path("bin", f"kuriboloader-{self.region.lower()}.bin")
 
@@ -534,6 +536,12 @@ class FilePatcher(Compiler):
 
         bnr = BNR(path, BNR.Regions.AMERICA)
         bnr.save_bnr(self.gameDir / "files/opening.bnr")
+
+    def _create_signatures(self, dol: DolFile, name: str, encoding: str = "ascii"):
+        for section in dol.sections:
+            while (offset := section.data.getvalue().find("Super Mario Sunshine".encode(encoding))) != -1:
+                section.data.seek(offset)
+                section.data.write(name.encode(encoding))
 
     def _alloc_from_heap(self, dol: DolFile, size: int):
         size = (size + 31) & -32

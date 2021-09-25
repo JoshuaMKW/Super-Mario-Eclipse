@@ -3,12 +3,6 @@
 
 #include "macros.h"
 
-OSBootInfo BootInfo;
-u32 BI2DebugFlag;
-u32 BI2DebugFlagHolder;
-bool AreWeInitialized;
-void *OSExceptionTable;
-
 #if 0
 OSTime __OSTimeToSystemTime(OSTime time) {
   u32 _atomic_state = OSDisableInterrupts();

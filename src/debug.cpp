@@ -6,7 +6,6 @@
 #include "sms/enemy/EnemyMario.hxx"
 #include "sms/npc/BaseNPC.hxx"
 
-
 #include "SME.hxx"
 
 using namespace SME;
@@ -19,14 +18,12 @@ void Patch::Debug::xyzModifierMario(TMario *player) {
   constexpr f32 baseSpeed = 83.0f;
   constexpr u32 buttons = TMarioGamePad::Buttons::DPAD_UP;
 
-#ifndef SME_DEBUG
-  if (!SME::Class::TCheatHandler::sDebugHandler.isActive())
+  if (!TGlobals::isDebugMode())
     return;
-#endif
 
   const JUTGamePad::CStick &mainStick = player->mController->mControlStick;
   const f32 speedMultiplier =
-      SME::Util::Math::lerp<f32>(1, 2, player->mController->mButtons.mAnalogR);
+      Util::Math::lerp<f32>(1, 2, player->mController->mButtons.mAnalogR);
 
   if (player->mController->mButtons.mFrameInput & buttons && !gInXYZMode) {
     setPlayerVelocity__6TMarioFf(player, 0.0f);
@@ -49,20 +46,20 @@ void Patch::Debug::xyzModifierMario(TMario *player) {
                      static_cast<u32>(TMario::State::CUTSCENE);
 
     playerPos.x +=
-        ((-sinf(SME::Util::Math::angleToRadians(cameraRotY)) * baseSpeed) *
+        ((-sinf(Util::Math::angleToRadians(cameraRotY)) * baseSpeed) *
          speedMultiplier) *
         mainStick.mStickY;
     playerPos.z +=
-        ((-cosf(SME::Util::Math::angleToRadians(cameraRotY)) * baseSpeed) *
+        ((-cosf(Util::Math::angleToRadians(cameraRotY)) * baseSpeed) *
          speedMultiplier) *
         mainStick.mStickY;
     playerPos.x -=
-        ((-sinf(SME::Util::Math::angleToRadians(cameraRotY + 90.0f)) *
+        ((-sinf(Util::Math::angleToRadians(cameraRotY + 90.0f)) *
           baseSpeed) *
          speedMultiplier) *
         mainStick.mStickX;
     playerPos.z -=
-        ((-cosf(SME::Util::Math::angleToRadians(cameraRotY + 90.0f)) *
+        ((-cosf(Util::Math::angleToRadians(cameraRotY + 90.0f)) *
           baseSpeed) *
          speedMultiplier) *
         mainStick.mStickX;
@@ -90,7 +87,7 @@ void Patch::Debug::updateDebugCollision(TMario *player) {
       TMarioGamePad::Buttons::Z | TMarioGamePad::Buttons::DPAD_RIGHT;
 
 #ifndef SME_DEBUG
-  if (!SME::Class::TCheatHandler::sDebugHandler.isActive())
+  if (!Class::TCheatHandler::sDebugHandler.isActive())
     return;
 #endif
 

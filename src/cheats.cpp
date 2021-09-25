@@ -21,11 +21,12 @@ static void debugModeNotify(Class::TCheatHandler *) {
     startSoundActor__Q214MSoundSESystem8MSoundSEFUlPC3VecUlPP8JAISoundUlUc(
         gpMSound, MSound::SE_SHINE_TOUCH, 0, 0, 0, 4);
 
-  SME::Util::Memory::PPC::write<u32>((u32 *)0x802A6788, 0x3BC00009);
+  Util::Memory::PPC::write<u32>((u32 *)0x802A6788, 0x3BC00009);
+  TGlobals::setDebugMode(true);
+  SME_LOG("Debug mode activated!\n");
 
-#ifndef SME_DEBUG
-  gDebugTextBox.mIsVisible = true;
-#endif
+  if (!TGlobals::isDebugMode())
+    gDebugTextBox.mIsVisible = true;
 }
 
 // extern runtime_mods.cpp
@@ -33,7 +34,7 @@ void Patch::Cheat::drawCheatText() {
   if (gDebugTextBox.getStringPtr()) {
 #ifndef SME_DEBUG
     if (*gDebugTextBox.getStringPtr() != '\0' &&
-        SME::Class::TCheatHandler::sDebugHandler.isActive())
+        Class::TCheatHandler::sDebugHandler.isActive())
 #else
     if (*gDebugTextBox.getStringPtr() != '\0')
 #endif
@@ -46,13 +47,13 @@ void Patch::Cheat::drawCheatText() {
 // 0x80295B6C
 // extern -> SME.cpp
 void *Patch::Cheat::handleDebugCheat(void *GCLogoDir) {
-  if (!SME::Class::TCheatHandler::sDebugHandler.isInitialized()) {
-    SME::Class::TCheatHandler::sDebugHandler.setGamePad(
+  if (!Class::TCheatHandler::sDebugHandler.isInitialized()) {
+    Class::TCheatHandler::sDebugHandler.setGamePad(
         gpApplication.mGamePad1);
-    SME::Class::TCheatHandler::sDebugHandler.setInputList(gDebugModeCheatCode);
-    SME::Class::TCheatHandler::sDebugHandler.setSuccessCallBack(
+    Class::TCheatHandler::sDebugHandler.setInputList(gDebugModeCheatCode);
+    Class::TCheatHandler::sDebugHandler.setSuccessCallBack(
         &debugModeNotify);
   }
-  SME::Class::TCheatHandler::sDebugHandler.advanceInput();
+  Class::TCheatHandler::sDebugHandler.advanceInput();
   return GCLogoDir;
 }

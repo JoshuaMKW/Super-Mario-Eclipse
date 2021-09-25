@@ -410,7 +410,8 @@ u32 Patch::Collision::updateCollisionContext(TMario *player) {
   if (!player->mAttributes.mIsGameOver) {
     if (roofHeight - player->mFloorBelow < (marioCollisionHeight - 40.0f) &&
         !(player->mState & static_cast<u32>(TMario::State::AIRBORN)) &&
-        player->mState != static_cast<u32>(TMario::State::HANG)) {
+        player->mState != static_cast<u32>(TMario::State::HANG) &&
+        !isUnderWater__6TMarioCFv(player)) {
       playerData->mCollisionFlags.mCrushedTimer += 1;
     } else {
       playerData->mCollisionFlags.mCrushedTimer = 0;

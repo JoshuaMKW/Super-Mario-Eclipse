@@ -304,6 +304,8 @@ void OSInitCond(OSCond *condition);
 void OSWaitCond(OSCond *condition, OSMutex *mutex);
 void OSSignalCond(OSCond *condition);
 
+extern OSBootInfo BootInfo;
+
 #ifdef __cplusplus
 }
 #endif

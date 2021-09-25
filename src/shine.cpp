@@ -71,17 +71,17 @@ void Patch::Shine::isKillEnemiesShine(TConductor *gpConductor,
         gpConductor, playerCoordinates, range);
 }
 
-static void restoreMario(TMarDirector *gpMarDirector, u32 curState) {
-  TShine *shine = gpMarDirector->mCollectedShine;
+static void restoreMario(TMarDirector *marDirector, u32 curState) {
+  TShine *shine = marDirector->mCollectedShine;
 
-  if (!shine || !(shine->mType & 0x10) || !gpMarDirector->mpNextState)
+  if (!shine || !(shine->mType & 0x10) || !marDirector->mpNextState)
     return;
 
   u8 *curSaveCard =
-      reinterpret_cast<u8 *>(gpMarDirector->mpNextState[0x118 / 4]);
+      reinterpret_cast<u8 *>(marDirector->mpNextState[0x118 / 4]);
 
   if (curState != TMarDirector::Status::NORMAL ||
-      gpMarDirector->mCurState != TMarDirector::Status::SAVE_CARD ||
+      marDirector->mCurState != TMarDirector::Status::SAVE_CARD ||
       gpMarioAddress->mState != static_cast<u32>(TMario::State::SHINE_C))
     return;
 
@@ -93,18 +93,19 @@ static void restoreMario(TMarDirector *gpMarDirector, u32 curState) {
       gpMarioAddress->mState = static_cast<u32>(TMario::State::IDLE);
 
     gpCamera->endDemoCamera();
+    marDirector->mCollectedShine = nullptr;
     
     AudioStreamer *streamer = AudioStreamer::getInstance();
     if (streamer->isPaused())
       streamer->play();
   } else
-    gpMarDirector->mGameState |= TMarDirector::State::WARP_OUT;
+    marDirector->mGameState |= TMarDirector::State::WARP_OUT;
 }
 
 // 0x802995BC
-void Patch::Shine::checkBootOut(TMarDirector *gpMarDirector, u8 curState) {
-  restoreMario(gpMarDirector, curState);
-  gpMarDirector->currentStateFinalize(curState);
+void Patch::Shine::checkBootOut(TMarDirector *marDirector, u8 curState) {
+  restoreMario(marDirector, curState);
+  marDirector->currentStateFinalize(curState);
 }
 
 // 0x80293B10
@@ -215,6 +216,10 @@ void Patch::Shine::thinkSetBootFlag(TShineFader *shineFader, u32 unk_1,
 // 0x80297C84
 void thinkSetNextSequence(TGameSequence *sequence, u8 area, u8 episode, JDrama::TFlagT<u16> flag) {
   if (!(gpMarDirector->mCollectedShine->mType & 0x10)) {
+    #ifdef SME_DEMO
+    area = 1;
+    episode = 5;
+    #endif
     sequence->set(area, episode, flag);
   }
 }

@@ -426,13 +426,14 @@ u32 Patch::Collision::updateCollisionContext(TMario *player) {
   return 1;
 }
 
-// 0x80250CA0
+// 0x80250C9C
 // extern -> SME.cpp
-u16 Patch::Collision::masterGroundCollisionHandler(TBGCheckData *colTriangle) {
+static TBGCheckData *masterGroundCollisionHandler() {
   TMario *player;
   SME_FROM_GPR(29, player);
 
-  u16 type = colTriangle->mCollisionType & 0x7FFF;
+  TBGCheckData *floorCol = player->mFloorTriangle;
+  const u16 type = floorCol->mCollisionType & 0x7FFF;
   switch (type) {
   case 16007:
   case 17007:
@@ -489,12 +490,13 @@ u16 Patch::Collision::masterGroundCollisionHandler(TBGCheckData *colTriangle) {
     changeNozzleType(player, type);
     break;
   }
-  return type;
+  return floorCol;
 }
+SME_PATCH_BL(SME_PORT_REGION(0x80250C9C, 0, 0, 0), masterGroundCollisionHandler);
 
 // 0x8025059C
 // extern -> SME.cpp
-u32 Patch::Collision::masterAllCollisionHandler(TMario *player) {
+static u32 masterAllCollisionHandler(TMario *player) {
   u16 type = player->mFloorTriangle->mCollisionType & 0x7FFF;
   switch (type) {
   case 16022:
@@ -522,6 +524,9 @@ u32 Patch::Collision::masterAllCollisionHandler(TMario *player) {
   }
   return player->mState;
 }
+SME_PATCH_BL(SME_PORT_REGION(0x8025059C, 0, 0, 0),
+             masterAllCollisionHandler);
+SME_WRITE_32(SME_PORT_REGION(0x802505A0, 0, 0, 0), 0x546004E7);
 
 #undef EXPAND_WARP_SET
 #undef EXPAND_WARP_CATEGORY

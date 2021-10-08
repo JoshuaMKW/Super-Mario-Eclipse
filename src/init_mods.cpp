@@ -140,8 +140,6 @@ TMarDirector *Patch::Init::initFileMods() {
   TMarioGamePad *gpGamePad = gpApplication.mGamePad1;
 
 #if defined(SME_DEMO)
-// demo
-  SME_DEBUG_LOG("...");
   Enum::Player characterID = TGlobals::sCharacterIDList[0];
   if (gIsSwappingWarp) {
     if (isMario) {
@@ -165,10 +163,7 @@ TMarDirector *Patch::Init::initFileMods() {
   TStageParams::sStageConfig->reset();
   TStageParams::sStageConfig->load(Util::getStageName(&gpApplication));
 
-  TFlagManager::smInstance->setBool(true, 0x10060);
-  TFlagManager::smInstance->setBool(true, 0x10061);
-  TFlagManager::smInstance->setBool(true, 0x10063);
-  TFlagManager::smInstance->setBool(true, 0x1038F);
+  TFlagManager::smInstance->setBool(true, 0x1038F); // Yosh
 
 
 #ifdef CHARACTER_SELECT

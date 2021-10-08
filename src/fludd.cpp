@@ -211,16 +211,30 @@ static void checkSpamHover(TNozzleTrigger *nozzle, u32 r4,
   return;
 }
 
+static void checkRocketNozzleDiveBlast(TNozzleTrigger *nozzle, u32 r4,
+                                       TWaterEmitInfo *emitInfo) {
+  TMario *player = nozzle->mFludd->mMario;
+
+  if (nozzle->mFludd->mCurrentNozzle != TWaterGun::Rocket)
+    return;
+
+  nozzle->mForwardSpeedFactor =
+      player->mState != static_cast<u32>(TMario::State::DIVE) ? 0.0f : 1.0f;
+}
+
 // 0x80262580
 // extern -> SME.cpp
-void Patch::Fludd::spamHoverWrapper(TNozzleTrigger *nozzle, u32 r4,
-                                    TWaterEmitInfo *emitInfo) {
+void fluddEmitModWrapper(TNozzleTrigger *nozzle, u32 r4,
+                         TWaterEmitInfo *emitInfo) {
   void (*virtualFunc)(TNozzleTrigger *, u32, TWaterEmitInfo *);
   SME_FROM_GPR(12, virtualFunc);
 
   checkSpamHover(nozzle, r4, emitInfo);
+  checkRocketNozzleDiveBlast(nozzle, r4, emitInfo);
+
   virtualFunc(nozzle, r4, emitInfo);
 }
+SME_PATCH_BL(SME_PORT_REGION(0x8026C018, 0, 0, 0), fluddEmitModWrapper);
 
 // 0x80262580
 // extern -> SME.cpp

@@ -1,4 +1,5 @@
 #include "GX.h"
+#include "OS.h"
 
 #include "sms/GC2D/ConsoleStr.hxx"
 #include "sms/JSystem/JKR/JKRFileLoader.hxx"
@@ -112,7 +113,7 @@ static void patchRideMovementUpWarp(Mtx out, Vec *ride, Vec *pos) {
     PSMTXMultVec(out, ride, pos);
   }
 }
-SME_PATCH_BL(SME_PORT_REGION(0x80250514, 0, 0, 0), patchRideMovementUpWarp);
+//SME_PATCH_BL(SME_PORT_REGION(0x80250514, 0, 0, 0), patchRideMovementUpWarp);
 
 static void initBinaryNullptrPatch(TSpcBinary *binary) {
   if (binary)
@@ -270,10 +271,55 @@ static void cullJ2DPrint(J2DPrint *printer, int unk_0, int unk_1, u8 unk_2, cons
 }
 //SME_PATCH_BL(SME_PORT_REGION(0x802d0c20, 0, 0, 0), cullJ2DPrint);
 
+static Mtx44 sDrawMtx;
+
+static void captureTextboxDrawMtx(Mtx44 mtx, u8 index) {
+  PSMTXCopy(mtx, sDrawMtx);
+  GXLoadPosMtxImm(mtx, index);
+}
+SME_PATCH_BL(SME_PORT_REGION(0x802d0bf8, 0, 0, 0), captureTextboxDrawMtx);
+
+static void maybePrintChar(JUTFont *font, f32 x, f32 y, f32 w, f32 h, int ascii, bool unk_1) {
+  const int offset = static_cast<int>((SME::TGlobals::getScreenToFullScreenRatio() - 1.0f) * 600.0f);
+  const int fontWidth = font->getWidth();
+
+  int absX = static_cast<int>(sDrawMtx[0][3] + x);
+  int absY = static_cast<int>(sDrawMtx[1][3] + y);
+
+  if (absX + fontWidth > -offset && absX < SME::TGlobals::getScreenWidth())
+    font->drawChar_scale(x, y, w, h, ascii, unk_1);
+}
+SME_PATCH_BL(SME_PORT_REGION(0x802cec2c, 0, 0, 0), maybePrintChar);
+
+static OSStopwatch stopwatch;
+static bool sInitialized = false;
+static bool sIsWaiting = false;
+static OSTick sLastStart = 0;
+static void J2D_BenchMarkPrint(J2DTextBox *printer, int x, int y) {
+  if (!sInitialized) {
+    OSInitStopwatch(&stopwatch, "J2DPrintTest");
+    sInitialized = true;
+  }
+
+  if (!sIsWaiting) {
+    sLastStart = OSGetTick();
+    sIsWaiting = true;
+  }
+
+  OSStartStopwatch(&stopwatch);
+  printer->draw(x, y);
+  OSStopStopwatch(&stopwatch);
+
+  if (sIsWaiting && OSTicksToSeconds(OSGetTick() - sLastStart) > 5.0f) {
+    OSDumpStopwatch(&stopwatch);
+  }
+}
+//SME_PATCH_BL(SME_PORT_REGION(0x80144010, 0, 0, 0), J2D_BenchMarkPrint);
+
 #endif
 
 // Title Screen Never Fades to THP
 SME_WRITE_32(SME_PORT_REGION(0x8016D53C, 0, 0, 0), 0x48000344);
 
 // Load msound.aaf from AudioRes folder (NTSC-U) [Xayrga/JoshuaMK] 
-//SME_WRITE_32(SME_PORT_REGION(0x80014F9C, 0, 0, 0), 0x60000000);
+SME_WRITE_32(SME_PORT_REGION(0x80014F9C, 0, 0, 0), 0x60000000);

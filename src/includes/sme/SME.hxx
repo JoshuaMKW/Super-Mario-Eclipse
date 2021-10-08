@@ -143,8 +143,6 @@ namespace Collision {
 void checkIsGlideBounce(TMario *player);
 u16 checkIsRestoreTypeNoFallDamage(TBGCheckData *floor);
 u32 updateCollisionContext(TMario *player);
-u16 masterGroundCollisionHandler(TBGCheckData *colTriangle);
-u32 masterAllCollisionHandler(TMario *player);
 
 } // namespace Collision
 
@@ -180,7 +178,6 @@ bool canCleanSeals(TWaterManager *gpWaterManager);
 TWaterGun *bindFluddtojoint();
 void checkExecWaterGun(TWaterGun *fludd);
 void killTriggerNozzle();
-void spamHoverWrapper(TNozzleTrigger *nozzle, u32 r4, TWaterEmitInfo *emitInfo);
 bool checkAirNozzle();
 
 } // namespace Fludd
@@ -234,7 +231,6 @@ void getClimbingAnimSpd(TMario *player, TMario::Animation anim, f32 speed);
 void scaleHangSpeed(TMario *player);
 void checkGraffitiAffected(TMario *player);
 void rescaleHeldObj(Mtx holderMatrix, Mtx destMatrix);
-void manageCustomJumps(TMario *player);
 void checkYSpdForTerminalVelocity();
 void normJumpMultiplier();
 f32 checkGroundSpeedLimit();

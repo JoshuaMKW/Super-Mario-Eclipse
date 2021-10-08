@@ -629,7 +629,7 @@ static f32 calcJumpPower(TMario *player, f32 factor, f32 base, f32 jumpPower) {
 
 // extern -> SME.cpp
 // 0x8024E02C
-void Patch::Mario::manageCustomJumps(TMario *player) {
+static void manageCustomJumps(TMario *player) {
   Class::TPlayerData *playerParams = TGlobals::getPlayerData(player);
 
   const s32 jumpsLeft =
@@ -639,7 +639,8 @@ void Patch::Mario::manageCustomJumps(TMario *player) {
       (player->mState & 0x800000) ||
       player->mYoshi->mState == TYoshi::MOUNTED ||
       player->mState == static_cast<u32>(TMario::State::SLIP_JUMP) ||
-      player->mState == static_cast<u32>(TMario::State::THROWN)) {
+      player->mState == static_cast<u32>(TMario::State::THROWN) ||
+      player->mAttributes.mIsGameOver) {
     playerParams->mCurJump = 1;
   } else if ((player->mController->mButtons.mFrameInput &
               TMarioGamePad::Buttons::A) &&
@@ -677,6 +678,7 @@ void Patch::Mario::manageCustomJumps(TMario *player) {
                              182);
     }
 
+    player->mForwardSpeed *= controller->mControlStick.mLengthFromNeutral;
     player->mSpeed.y = calcJumpPower(player, 0.25f, player->mSpeed.y, 65.0f);
     player->mPrevState = player->mState;
     player->mState = state;
@@ -686,6 +688,7 @@ void Patch::Mario::manageCustomJumps(TMario *player) {
   }
   stateMachine__6TMarioFv(player);
 }
+SME_PATCH_BL(SME_PORT_REGION(0x8024E02C, 0, 0, 0), manageCustomJumps);
 
 static void setJumpOrLongJump(TMario *player, u32 state, u32 unk_0) {
   constexpr u32 LongJumpSpecifier = TMarioGamePad::Buttons::Z;

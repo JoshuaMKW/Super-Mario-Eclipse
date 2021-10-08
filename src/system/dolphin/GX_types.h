@@ -717,19 +717,21 @@ typedef enum _GXCullback {
  * work with textures.
  * @{
  */
-#define GX_TEXMAP0 0 /*!< Texture map slot 0 */
-#define GX_TEXMAP1 1 /*!< Texture map slot 1 */
-#define GX_TEXMAP2 2 /*!< Texture map slot 2 */
-#define GX_TEXMAP3 3 /*!< Texture map slot 3 */
-#define GX_TEXMAP4 4 /*!< Texture map slot 4 */
-#define GX_TEXMAP5 5 /*!< Texture map slot 5 */
-#define GX_TEXMAP6 6 /*!< Texture map slot 6 */
-#define GX_TEXMAP7 7 /*!< Texture map slot 7 */
-#define GX_MAX_TEXMAP 8
-#define GX_TEXMAP_NULL 0xff /*!< No texmap */
-#define GX_TEXMAP_DISABLE                                                      \
-  0x100 /*!< Disable texmap lookup for this texmap slot (use bitwise OR with a \
-           texture map slot). */
+
+typedef enum _GXTexMapID {
+  GX_TEXMAP0, /*!< Texture map slot 0 */
+  GX_TEXMAP1, /*!< Texture map slot 1 */
+  GX_TEXMAP2, /*!< Texture map slot 2 */
+  GX_TEXMAP3, /*!< Texture map slot 3 */
+  GX_TEXMAP4, /*!< Texture map slot 4 */
+  GX_TEXMAP5, /*!< Texture map slot 5 */
+  GX_TEXMAP6, /*!< Texture map slot 6 */
+  GX_TEXMAP7, /*!< Texture map slot 7 */
+  GX_MAX_TEXMAP,
+  GX_TEXMAP_NULL = 0xFF,    /*!< No texmap */
+  GX_TEXMAP_DISABLE = 0x100 /*!< Disable texmap lookup for this texmap slot (use
+          bitwise OR with a \ texture map slot). */
+} GXTexMapID;
 /*! @} */
 
 /*! \addtogroup alphaop Alpha combine control
@@ -1645,7 +1647,6 @@ typedef struct _GXRenderModeObj {
   u8 sample_pattern[12][2];
   u8 vfilter[7];
 } GXRenderModeObj;
-
 
 #ifdef __cplusplus
 }

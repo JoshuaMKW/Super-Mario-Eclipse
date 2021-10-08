@@ -4,6 +4,7 @@
 #include "MTX.h"
 #include "J2DPane.hxx"
 #include "../JSU/JSUInputStream.hxx"
+#include "../JUT/JUTTexture.hxx"
 
 enum J2DBinding
 {
@@ -30,6 +31,7 @@ public:
 	virtual void drawSelf(int, int);
 	virtual void drawSelf(int, int, Mtx *);
 
+    void changeTexture(const ResTIMG *timg, u8);
 	void drawFullSet(int x, int y, int w, int h, J2DBinding binding, u32, bool, J2DWrapMode wrapH, J2DWrapMode wrapV, Mtx *);
 	void draw(int x, int y, int w, int h, bool invertX, bool invertY, bool rotate90);
 	void drawTexCoord(int x, int y, int w, int h, f32, f32, f32, f32, f32, f32, f32, f32, Mtx *);

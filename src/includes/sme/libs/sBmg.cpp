@@ -20,10 +20,10 @@ String &Util::formatBMG(String &msg) {
         String::intToString(TFlagManager::smInstance->Type6Flag.mRedCoinCount, buffer));
     msg.replaceAll("%coin%",
         String::intToString(TFlagManager::smInstance->Type4Flag.mGoldCoinCount, buffer));
-    msg.replaceAll("%time%", SME::Util::Time::calendarToDate(calendarTime));
-    msg.replaceAll("%date%", SME::Util::Time::calendarToTime(calendarTime));
-    msg.replaceAll("%bdate%", SME::Util::Time::buildDate());
+    msg.replaceAll("%time%", SME::Util::Time::calendarToTime(calendarTime));
+    msg.replaceAll("%date%", SME::Util::Time::calendarToDate(calendarTime));
     msg.replaceAll("%btime%", SME::Util::Time::buildTime());
+    msg.replaceAll("%bdate%", SME::Util::Time::buildDate());
     msg.replaceAll("%cardslot%", gpCardManager->mChannel == CARD_SLOTA ? "A" : "B");
     #ifdef SME_DEMO
     msg.replaceAll("%c", gpCardManager->mChannel == CARD_SLOTA ? "A" : "B");

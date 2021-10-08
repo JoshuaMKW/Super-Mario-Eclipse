@@ -20,7 +20,9 @@ public:
     f32 mDistortionStrength;    //0x00B8
     u32 _BC[0x10 / 4];          //0x00BC
     s32 mMaxWater;              //0x00CC
-    u32 _D0[0x38 / 4];          //0x00D0
+    u32 _D0[0x10 / 4];          //0x00D0
+    f32 mForwardSpeedFactor;    //0x00E0
+    u32 _E4[0x24 / 4];
     s16 mWaterStep;             //0x0108
     u32 _10C[0x1DC / 4];        //0x010C
     s16 mMaxSprayQuarterFrames; //0x02E8

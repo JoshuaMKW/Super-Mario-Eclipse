@@ -3,6 +3,7 @@
 
 #include "sms/G2D/ExPane.hxx"
 #include "sms/JSystem/JUT/JUTRect.hxx"
+#include "sms/JSystem/JUT/JUTTexture.hxx"
 #include "sms/game/GCConsole2.hxx"
 
 #include "sms/GC2D/SelectDir.hxx"
@@ -442,7 +443,7 @@ static void fixDEBSWideScreenPanel(TGCConsole2 *console) {
 
 static void fixDeathScreenRatio(u32 *cardsave, TMarioGamePad *gamepad) {
   initData__9TCardSaveFP13TMarioGamePad(cardsave, gamepad);
-  
+
   const s32 offset = getScreenTransX();
   J2DPane *pane = reinterpret_cast<J2DScreen *>(cardsave[0x14 / 4])->search('mask');
   
@@ -464,6 +465,34 @@ static void loadAfterGCConsolePatches(TGCConsole2 *console) {
   loadAfter__Q26JDrama8TNameRefFv(console);
   fixDEBSWideScreenPanel(console);
   fixYoshiFruitText(console);
+
+  char buffer[64];
+  char namebuf[32];
+
+  J2DPicture *marioIcon = reinterpret_cast<J2DPicture *>(console->mMainScreen->search('m_ic'));
+
+  if (SME::TGlobals::getPlayerData(gpMarioAddress)->getPlayerID() == SME::Enum::Player::IL_PIANTISSIMO)
+    snprintf(buffer, 64, "/game_6/timg/%s_icon.bti", "piantissimo");
+  else
+    snprintf(buffer, 64, "/game_6/timg/%s_icon.bti", "mario");
+
+  ResTIMG *timg;
+  timg = (ResTIMG *)JKRFileLoader::getGlbResource(buffer);
+
+  if (timg)
+    marioIcon->changeTexture(timg, 0);
+
+  
+  J2DPicture *marioName = reinterpret_cast<J2DPicture *>(console->mMainScreen->search('m_tx'));
+
+  if (SME::TGlobals::getPlayerData(gpMarioAddress)->getPlayerID() == SME::Enum::Player::IL_PIANTISSIMO)
+    snprintf(buffer, 64, "/game_6/timg/%s_text.bti", "piantissimo");
+  else
+    snprintf(buffer, 64, "/game_6/timg/%s_text.bti", "mario");
+  timg = (ResTIMG *)JKRFileLoader::getGlbResource(buffer);
+
+  if (timg)
+    marioName->changeTexture(timg, 0);
 }
 SME_PATCH_BL(SME_PORT_REGION(0x8014D8A4, 0, 0, 0), loadAfterGCConsolePatches);
 

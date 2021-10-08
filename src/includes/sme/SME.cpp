@@ -132,10 +132,6 @@ SME_PATCH_BL(SME_PORT_REGION(0x80264CFC, 0, 0, 0),
              Patch::Collision::checkIsGlideBounce);
 SME_PATCH_BL(SME_PORT_REGION(0x8024C558, 0, 0, 0),
              Patch::Collision::checkIsRestoreTypeNoFallDamage);
-SME_PATCH_BL(SME_PORT_REGION(0x80250CA0, 0, 0, 0),
-             Patch::Collision::masterGroundCollisionHandler);
-SME_PATCH_BL(SME_PORT_REGION(0x8025059C, 0, 0, 0),
-             Patch::Collision::masterAllCollisionHandler);
 
 // file_flags.cpp
 SME_PATCH_BL(SME_PORT_REGION(0x802B1794, 0, 0, 0),
@@ -167,8 +163,6 @@ SME_PATCH_BL(SME_PORT_REGION(0x8024E548, 0, 0, 0),
              Patch::Fludd::checkExecWaterGun);
 SME_PATCH_BL(SME_PORT_REGION(0x8026C370, 0, 0, 0),
              Patch::Fludd::killTriggerNozzle);
-SME_PATCH_BL(SME_PORT_REGION(0x8026C018, 0, 0, 0),
-             Patch::Fludd::spamHoverWrapper);
 SME_PATCH_BL(SME_PORT_REGION(0x80262580, 0, 0, 0),
              Patch::Fludd::checkAirNozzle);
 SME_WRITE_32(SME_PORT_REGION(0x80262584, 0, 0, 0), 0x2C030000);
@@ -244,8 +238,7 @@ SME_WRITE_32(SME_PORT_REGION(0x802619D0, 0, 0, 0), 0x60000000);
   SME_PATCH_BL(SME_PORT_REGION(0x8024E288, 0, 0, 0), Patch::Mario::checkGraffitiAffected);
   // SME_PATCH_BL(0x801E4118, Patch::Mario::rescaleHeldObj);
 #endif
-SME_PATCH_BL(SME_PORT_REGION(0x8024E02C, 0, 0, 0),
-             Patch::Mario::manageCustomJumps);
+
 SME_PATCH_BL(SME_PORT_REGION(0x80256678, 0, 0, 0),
              Patch::Mario::checkYSpdForTerminalVelocity);
 SME_WRITE_32(SME_PORT_REGION(0x8025667C, 0, 0, 0), 0x60000000);
@@ -319,7 +312,7 @@ SME_WRITE_32(SME_PORT_REGION(0x802946B8, 0, 0, 0), 0x280003E7);
 SME_WRITE_32(SME_PORT_REGION(0x8017BE78, 0, 0, 0), 0x5464037E);
 SME_WRITE_32(SME_PORT_REGION(0x8017BEF4, 0, 0, 0), 0x5464037E);
 SME_WRITE_32(SME_PORT_REGION(0x8017BF34, 0, 0, 0), 0x5464037E);
-SME_WRITE_32(SME_PORT_REGION(0x801BCE30, 0, 0, 0), 0x5464037E);
+SME_WRITE_32(SME_PORT_REGION(0x801BCE30, 0, 0, 0), 0x5404037E);
 SME_WRITE_32(SME_PORT_REGION(0x801FF850, 0, 0, 0), 0x5404037E);
 SME_WRITE_32(SME_PORT_REGION(0x802946B4, 0, 0, 0), 0x5480043E);
 SME_WRITE_32(SME_PORT_REGION(0x80294730, 0, 0, 0), 0x5480043E);

@@ -64,13 +64,13 @@
         },
         {
             "audio/banks/*.aw": {
-                "destination": "files/AudioRes/Banks",
+                "destination": "files/AudioRes/Banks/",
                 "rename": ""
             }
         },
         {
             "audio/seqs/*.arc": {
-                "destination": "files/AudioRes/Seqs",
+                "destination": "files/AudioRes/Seqs/",
                 "rename": ""
             }
         },

@@ -1,5 +1,5 @@
 {
-    "buildpath": "C:/Users/Kyler-Josh/3D Objects/Dolphin/Dolphin-Games/Super Mario Kamek [GMSE04].iso",
+    "buildpath": "C:/Users/Kyler-Josh/3D Objects/Dolphin/Dolphin-Games/Super Mario Eclipse [GMSE04].iso",
     "dolphinpath": "C:/Users/Kyler-Josh/3D Objects/Dolphin/Dolphin-x64/Dolphin.exe",
     "userfiles": [
         {
@@ -9,7 +9,13 @@
             }
         },
         {
-            "smeconfigs/*.sme": {
+            "smeconfigs/*.[ts][xm][te]": {
+                "destination": "files/data/scene/sme/",
+                "rename": ""
+            }
+        },
+        {
+            "smeconfigs/*.txt": {
                 "destination": "files/data/scene/sme/",
                 "rename": ""
             }
@@ -51,7 +57,25 @@
             }
         },
         {
-            "music/*.adp": {
+            "audio/*.a[as][fn]": {
+                "destination": "files/AudioRes/",
+                "rename": ""
+            }
+        },
+        {
+            "audio/banks/*.aw": {
+                "destination": "files/AudioRes/Banks",
+                "rename": ""
+            }
+        },
+        {
+            "audio/seqs/*.arc": {
+                "destination": "files/AudioRes/Seqs",
+                "rename": ""
+            }
+        },
+        {
+            "audio/music/*.adp": {
                 "destination": "files/AudioRes/Streams/Music/",
                 "rename": ""
             }
@@ -77,7 +101,8 @@
     "ignore": [
         ".config.json",
         "opening.png",
-        "opening.json"
+        "opening.json",
+        "*README.md"
     ],
     "gamebanner": "opening.png"
 }

@@ -7,12 +7,12 @@
 using namespace SME;
 
 static u16 gDebugModeCheatCode[] = {
-    TMarioGamePad::Buttons::DPAD_UP,   TMarioGamePad::Buttons::DPAD_UP,
-    TMarioGamePad::Buttons::DPAD_DOWN, TMarioGamePad::Buttons::DPAD_DOWN,
-    TMarioGamePad::Buttons::DPAD_LEFT, TMarioGamePad::Buttons::DPAD_RIGHT,
-    TMarioGamePad::Buttons::DPAD_LEFT, TMarioGamePad::Buttons::DPAD_RIGHT,
-    TMarioGamePad::Buttons::B,         TMarioGamePad::Buttons::A,
-    TMarioGamePad::Buttons::START};
+    TMarioGamePad::DPAD_UP,   TMarioGamePad::DPAD_UP,
+    TMarioGamePad::DPAD_DOWN, TMarioGamePad::DPAD_DOWN,
+    TMarioGamePad::DPAD_LEFT, TMarioGamePad::DPAD_RIGHT,
+    TMarioGamePad::DPAD_LEFT, TMarioGamePad::DPAD_RIGHT,
+    TMarioGamePad::B,         TMarioGamePad::A,
+    TMarioGamePad::START};
 
 J2DTextBox gDebugTextBox;
 
@@ -21,7 +21,6 @@ static void debugModeNotify(Class::TCheatHandler *) {
     startSoundActor__Q214MSoundSESystem8MSoundSEFUlPC3VecUlPP8JAISoundUlUc(
         gpMSound, MSound::SE_SHINE_TOUCH, 0, 0, 0, 4);
 
-  Util::Memory::PPC::write<u32>((u32 *)0x802A6788, 0x3BC00009);
   TGlobals::setDebugMode(true);
   SME_LOG("Debug mode activated!\n");
 
@@ -57,3 +56,13 @@ void *Patch::Cheat::handleDebugCheat(void *GCLogoDir) {
   Class::TCheatHandler::sDebugHandler.advanceInput();
   return GCLogoDir;
 }
+
+static void isLevelSelectAvailable() {
+  u32 context;
+  SME_FROM_GPR(30, context);
+
+  if (context == 9 || context == 4)
+    context = TGlobals::isDebugMode() ? 9 : 4;
+  gpApplication.mContext = context;
+}
+SME_PATCH_BL(SME_PORT_REGION(0x802A6794, 0, 0, 0), isLevelSelectAvailable);

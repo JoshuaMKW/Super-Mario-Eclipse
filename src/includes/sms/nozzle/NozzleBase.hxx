@@ -24,7 +24,9 @@ public:
     f32 mForwardSpeedFactor;    //0x00E0
     u32 _E4[0x24 / 4];
     s16 mWaterStep;             //0x0108
-    u32 _10C[0x1DC / 4];        //0x010C
+    u32 _10C[0x24 / 4];         //0x010C
+    s32 mDamageLoss;            //0x0130
+    u32 _134[0x1B4 / 4];         //0X0134
     s16 mMaxSprayQuarterFrames; //0x02E8
     u16 _2EA;
     u32 _2EC[0x7C / 4]; //0x02EC

@@ -1035,7 +1035,7 @@ public:
   u32 _140;            // unknown
   u32 _144;
   u32 _148;
-  u16 _14C;
+  s16 mInvincibilityFrames;
   u16 _14E;
   u32 _150; // unknown
   u32 _154;

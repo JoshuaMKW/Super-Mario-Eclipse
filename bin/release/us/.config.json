@@ -57,7 +57,25 @@
             }
         },
         {
-            "music/*.adp": {
+            "audio/*.a[as][fn]": {
+                "destination": "files/AudioRes/",
+                "rename": ""
+            }
+        },
+        {
+            "audio/banks/*.aw": {
+                "destination": "files/AudioRes/Banks",
+                "rename": ""
+            }
+        },
+        {
+            "audio/seqs/*.arc": {
+                "destination": "files/AudioRes/Seqs",
+                "rename": ""
+            }
+        },
+        {
+            "audio/music/*.adp": {
                 "destination": "files/AudioRes/Streams/Music/",
                 "rename": ""
             }

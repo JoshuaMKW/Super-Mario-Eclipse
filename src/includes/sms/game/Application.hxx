@@ -29,7 +29,8 @@ public:
 
     u32 _00;                        //0x0000
     TMarDirector *mMarDirector;     //0x0004
-    u16 _01;                        //0x0008
+    u8 mContext;                    //0x0008
+    u8 _09;                         //padding?
     TGameSequence mPrevScene;       //0x000A
     TGameSequence mCurrentScene;    //0x000E
     TGameSequence mNextScene;       //0x0012

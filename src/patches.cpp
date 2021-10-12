@@ -2,14 +2,16 @@
 #include "OS.h"
 
 #include "sms/GC2D/ConsoleStr.hxx"
+#include "sms/JSystem/J2D/J2DPrint.hxx"
 #include "sms/JSystem/JKR/JKRFileLoader.hxx"
 #include "sms/actor/Mario.hxx"
 #include "sms/mapobj/MapObjTree.hxx"
-#include "sms/JSystem/J2D/J2DPrint.hxx"
+
 
 #include "SME.hxx"
-#include "macros.h"
 #include "defines.h"
+#include "macros.h"
+
 
 constexpr f32 DrawDistance = 300000.0f * 100.0f;
 
@@ -113,7 +115,7 @@ static void patchRideMovementUpWarp(Mtx out, Vec *ride, Vec *pos) {
     PSMTXMultVec(out, ride, pos);
   }
 }
-//SME_PATCH_BL(SME_PORT_REGION(0x80250514, 0, 0, 0), patchRideMovementUpWarp);
+// SME_PATCH_BL(SME_PORT_REGION(0x80250514, 0, 0, 0), patchRideMovementUpWarp);
 
 static void initBinaryNullptrPatch(TSpcBinary *binary) {
   if (binary)
@@ -126,11 +128,22 @@ static void scaleDrawDistanceNPC(f32 x, f32 y, f32 near, f32 far) {
 }
 SME_PATCH_BL(SME_PORT_REGION(0x8020A2A4, 0, 0, 0), scaleDrawDistanceNPC);
 
-static bool scaleDrawDistanceCamera(CPolarSubCamera *cam) {
-  JSGSetProjectionFar__Q26JDrama7TCameraFf(cam, DrawDistance);
+static f32 sLastFactor = 1.0f;
+static bool cameraQOLFixes(CPolarSubCamera *cam) {
+  JSGSetProjectionFar__Q26JDrama7TCameraFf(cam, DrawDistance); // Draw Distance
+
+  const f32 factor = Math::scaleLinearAtAnchor(gpMarioAddress->mForwardSpeed / 100.0f, 0.5f, 1.0f);
+  sLastFactor = Max(sLastFactor - 0.01f, 1.0f);
+
+  if (factor > 1.0f && gpMarioAddress->mState == static_cast<u32>(TMario::State::DIVESLIDE)) {
+    sLastFactor = factor;
+    reinterpret_cast<f32 *>(cam)[0x48 / 4] *= factor;
+  } else {
+    reinterpret_cast<f32 *>(cam)[0x48 / 4] *= sLastFactor;
+  }
   return cam->isNormalDeadDemo();
 }
-SME_PATCH_BL(SME_PORT_REGION(0x80023828, 0, 0, 0), scaleDrawDistanceCamera);
+SME_PATCH_BL(SME_PORT_REGION(0x80023828, 0, 0, 0), cameraQOLFixes);
 
 // READY GO TEXT PATCH FOR THIS BULLSHIT THING DADDY NINTENDO DID
 SME_WRITE_32(SME_PORT_REGION(0x80171C30, 0, 0, 0), 0x2C000005);
@@ -157,7 +170,7 @@ static void normalizeHoverSlopeSpeed(f32 floorPos) {
   const f32 slopeStrength = PSVECDotProduct(&up, &floorNormal);
   if (slopeStrength < 0.0f)
     return;
-    
+
   const f32 lookAtRatio =
       Math::Vector3::lookAtRatio(playerForward, floorNormal);
 
@@ -243,9 +256,10 @@ static void _capturePrintPos(J2DPane *pane, int x, int y) {
   sPrintY = y;
   pane->makeMatrix(x, y);
 }
-//SME_PATCH_BL(SME_PORT_REGION(0x802d0bec, 0, 0, 0), _capturePrintPos);
+// SME_PATCH_BL(SME_PORT_REGION(0x802d0bec, 0, 0, 0), _capturePrintPos);
 
-static void cullJ2DPrint(J2DPrint *printer, int unk_0, int unk_1, u8 unk_2, const char *formatter, ...) {
+static void cullJ2DPrint(J2DPrint *printer, int unk_0, int unk_1, u8 unk_2,
+                         const char *formatter, ...) {
   constexpr f32 fontWidth = 16;
 
   va_list vargs;
@@ -255,21 +269,25 @@ static void cullJ2DPrint(J2DPrint *printer, int unk_0, int unk_1, u8 unk_2, cons
 
   va_end(vargs);
 
-  if ((sPrintX > 0 && (sPrintX + strlen(msg)) < SME::TGlobals::getScreenWidth()) ||
+  if ((sPrintX > 0 &&
+       (sPrintX + strlen(msg)) < SME::TGlobals::getScreenWidth()) ||
       strchr(msg, '\n') != nullptr)
     printer->print(0, 0, unk_2, formatter, msg);
 
   String culledMsg(msg, 1024);
 
   f32 cullL = Max((f32(-sPrintX) / fontWidth) - 2.0f, 0);
-  f32 cullR = Max(((f32(-sPrintX) + (f32(culledMsg.size()) * fontWidth)) / SME::TGlobals::getScreenWidth()) + 2.0f, cullL);
+  f32 cullR = Max(((f32(-sPrintX) + (f32(culledMsg.size()) * fontWidth)) /
+                   SME::TGlobals::getScreenWidth()) +
+                      2.0f,
+                  cullL);
 
   culledMsg.substr(&culledMsg, size_t(cullL), size_t(cullR));
   culledMsg.append('\0');
 
   printer->print(int(cullL * fontWidth), 0, unk_2, formatter, culledMsg.data());
 }
-//SME_PATCH_BL(SME_PORT_REGION(0x802d0c20, 0, 0, 0), cullJ2DPrint);
+// SME_PATCH_BL(SME_PORT_REGION(0x802d0c20, 0, 0, 0), cullJ2DPrint);
 
 static Mtx44 sDrawMtx;
 
@@ -279,8 +297,10 @@ static void captureTextboxDrawMtx(Mtx44 mtx, u8 index) {
 }
 SME_PATCH_BL(SME_PORT_REGION(0x802d0bf8, 0, 0, 0), captureTextboxDrawMtx);
 
-static void maybePrintChar(JUTFont *font, f32 x, f32 y, f32 w, f32 h, int ascii, bool unk_1) {
-  const int offset = static_cast<int>((SME::TGlobals::getScreenToFullScreenRatio() - 1.0f) * 600.0f);
+static void maybePrintChar(JUTFont *font, f32 x, f32 y, f32 w, f32 h, int ascii,
+                           bool unk_1) {
+  const int offset = static_cast<int>(
+      (SME::TGlobals::getScreenToFullScreenRatio() - 1.0f) * 600.0f);
   const int fontWidth = font->getWidth();
 
   int absX = static_cast<int>(sDrawMtx[0][3] + x);
@@ -314,12 +334,12 @@ static void J2D_BenchMarkPrint(J2DTextBox *printer, int x, int y) {
     OSDumpStopwatch(&stopwatch);
   }
 }
-//SME_PATCH_BL(SME_PORT_REGION(0x80144010, 0, 0, 0), J2D_BenchMarkPrint);
+// SME_PATCH_BL(SME_PORT_REGION(0x80144010, 0, 0, 0), J2D_BenchMarkPrint);
 
 #endif
 
 // Title Screen Never Fades to THP
 SME_WRITE_32(SME_PORT_REGION(0x8016D53C, 0, 0, 0), 0x48000344);
 
-// Load msound.aaf from AudioRes folder (NTSC-U) [Xayrga/JoshuaMK] 
+// Load msound.aaf from AudioRes folder (NTSC-U) [Xayrga/JoshuaMK]
 SME_WRITE_32(SME_PORT_REGION(0x80014F9C, 0, 0, 0), 0x60000000);

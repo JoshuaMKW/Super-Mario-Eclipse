@@ -6,7 +6,7 @@
 using namespace SME;
 using namespace SME::Class;
 
-constexpr f32 PauseFadeSpeed = PauseFadeSpeed;
+constexpr f32 PauseFadeSpeed = 0.2f;
 
 // 0x802BB89C
 static void initExMusic(MSStageInfo bgm) {
@@ -209,7 +209,7 @@ static void stopMusicOnDeathExec(u32 musicID) {
 
   MSBgm::startBGM(musicID);
 }
-SME_PATCH_BL(SME_PORT_REGION(0x8024FB0C, 0, 0, 0), stopMusicOnDeathExec);
+SME_PATCH_BL(SME_PORT_REGION(0x80298868, 0, 0, 0), stopMusicOnDeathExec);
 
 static void stopMusicOnGameOver(u32 musicID) {
   if (!isGameEmulated()) {

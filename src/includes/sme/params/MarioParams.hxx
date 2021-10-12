@@ -213,6 +213,7 @@ public:
   s32 mCollisionTimer;
   s32 mClimbTiredTimer;
   f32 mSlideSpeedMultiplier;
+  f32 mMaxAddVelocity;
 
   struct {
     bool mIsColliding : 1;

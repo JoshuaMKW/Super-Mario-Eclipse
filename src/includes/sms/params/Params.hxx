@@ -24,6 +24,7 @@ public:
   static JKRMemArchive *mSceneArc;
 };
 
+// sizeof = 0x14
 template <typename T> class TParamT : public TBaseParam {
   T mValue;
 

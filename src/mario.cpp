@@ -39,11 +39,13 @@ void Patch::Mario::addVelocity(TMario *player, f32 velocity) {
   if (!onYoshi__6TMarioCFv(player)) {
     player->mForwardSpeed =
         Min(player->mForwardSpeed + velocity,
-            (99.0f * playerParams->getParams()->mSpeedMultiplier.get()) *
+            (playerParams->mMaxAddVelocity *
+             playerParams->getParams()->mSpeedMultiplier.get()) *
                 playerParams->mSlideSpeedMultiplier);
   } else {
     player->mForwardSpeed = Min(player->mForwardSpeed + velocity,
-                                99.0f * playerParams->mSlideSpeedMultiplier);
+                                playerParams->mMaxAddVelocity *
+                                    playerParams->mSlideSpeedMultiplier);
   }
 }
 
@@ -1016,6 +1018,28 @@ SME_PATCH_BL(SME_PORT_REGION(0x80256CE8, 0, 0, 0), manageGrabLength);
 SME_WRITE_32(SME_PORT_REGION(0x80256CFC, 0, 0, 0), 0xEC01283C);
 SME_WRITE_32(SME_PORT_REGION(0x80256D04, 0, 0, 0), 0xC05E003C);
 SME_WRITE_32(SME_PORT_REGION(0x80256D0C, 0, 0, 0), 0xEC0100BC);
+
+static void dynamicFallDamage(TMario *mario, int dmg, int type, int emitcount,
+                              int tremble) {
+#define floorDamageExec__6TMarioFiiii                                          \
+  ((void (*)(TMario *, int, int, int, int))SME_PORT_REGION(0x8024303C, 0, 0, 0))
+
+  dmg *= static_cast<int>((mario->mLastGroundedPos.y - mario->mPosition.y) /
+                          (mario->mDeParams.mDamageFallHeight.get() / 1.4f));
+  if (dmg > 2) {
+    type = 0; // shaky
+    emitcount = (dmg - 2) * 3;
+  }
+
+  floorDamageExec__6TMarioFiiii(mario, dmg, type, emitcount, tremble);
+
+#undef floorDamageExec__6TMarioFiiii
+}
+SME_PATCH_BL(SME_PORT_REGION(0x8024C73C, 0, 0, 0), dynamicFallDamage);
+
+// ------------ //
+// Shadow Mario //
+// ------------ //
 
 static JUtility::TColor getEMarioHealthBarRGBA(TEnemyMario *eMario) {
   JUtility::TColor color;

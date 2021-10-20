@@ -1,7 +1,6 @@
 #include "SME.hxx"
 #include "BlowWindObj.hxx"
 
-#if 0
 TBlowWindObj::TBlowWindObj(const char *name) : TMapObjBase(name) {}
 TBlowWindObj::~TBlowWindObj() {}
 
@@ -30,10 +29,10 @@ void TBlowWindObj::perform(u32 flags, JDrama::TGraphics *graphics) {
       speed = Math::lerp<f32>(mStrength, 0.0f, distFactor);
       break;
     case GradientMode::EXPONENTIAL:
-      speed = powf(5.0f, (-distFactor - 0.85f) * mStrength);
+      speed = powf(5.0f, (-distFactor - 0.85f) * mStrength * 1.4f);
       break;
     case GradientMode::INVERSE:
-      speed = powf(mStrength - 5.0f, (-distFactor - 0.85f) * mStrength);
+      speed = powf(mStrength - 5.0f, (-distFactor - 0.85f) * mStrength * 1.4f);
       break;
     }
 
@@ -49,4 +48,3 @@ void TBlowWindObj::perform(u32 flags, JDrama::TGraphics *graphics) {
     actor->mPosition.add(offset);
   }
 }
-#endif

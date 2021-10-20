@@ -141,8 +141,10 @@ void Patch::Shine::shineFlagSetter(TFlagManager *flagManager, u32 flag,
     if (flag < 0x40)
       ((u32 *)&flagManager->Type6Flag)[flag] = val;
     else {
+      flag -= 0x40;
+
       const u32 mask = (flag & 7);
-      u8 *flagField = &((u8 *)&flagManager->Type6Flag)[flag >> 3];
+      u8 *flagField = &((u8 *)(&flagManager->Type6Flag) + 0x100)[flag >> 3];
 
       *flagField &= 1 << mask;
       *flagField |= (val & 1) << mask;
@@ -156,8 +158,10 @@ u32 Patch::Shine::shineFlagGetter(TFlagManager *flagManager, u32 flag) {
     if (flag < 0x40)
       return ((u32 *)&flagManager->Type6Flag)[flag];
     else {
+      flag -= 0x40;
+      
       const u32 mask = (flag & 7);
-      u8 *flagField = &((u8 *)&flagManager->Type6Flag)[flag >> 3];
+      u8 *flagField = &((u8 *)(&flagManager->Type6Flag) + 0x100)[flag >> 3];
 
       return (*flagField >> mask) & 1;
     }

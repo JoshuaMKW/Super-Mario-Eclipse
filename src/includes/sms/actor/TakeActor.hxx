@@ -8,7 +8,7 @@ public:
       : THitActor(name), mHolder(nullptr), mHeldObject(nullptr) {}
   virtual ~TTakeActor();
 
-  virtual Mtx *getTakingMtx() = 0;
+  virtual Mtx44 *getTakingMtx() = 0;
   virtual void ensureTakeSituation();
   virtual u32 moveRequest(const JGeometry::TVec3<f32> &destPosition);
   virtual f32 getRadiusAtY(f32) const;

@@ -2,19 +2,21 @@
 
 #include "types.h"
 
+#include "sms/JSystem/JGeometry.hxx"
 #include "sms/JSystem/JUT/JUTColor.hxx"
 #include "sms/JSystem/JUT/JUTConsole.hxx"
 #include "sms/JSystem/JUT/JUTResFont.hxx"
-#include "sms/JSystem/JGeometry.hxx"
+
 
 #include "sms/actor/Mario.hxx"
-#include "sms/camera/PolarSubCamera.hxx"
 #include "sms/camera/CameraMarioData.hxx"
 #include "sms/camera/CameraShake.hxx"
+#include "sms/camera/PolarSubCamera.hxx"
 #include "sms/collision/MapCollisionData.hxx"
 #include "sms/game/Application.hxx"
-#include "sms/game/MarDirector.hxx"
 #include "sms/game/GCConsole2.hxx"
+#include "sms/game/MarDirector.hxx"
+#include "sms/game/Strategy.hxx"
 #include "sms/manager/FlagManager.hxx"
 #include "sms/manager/PollutionManager.hxx"
 #include "sms/manager/RumbleManager.hxx"
@@ -22,6 +24,7 @@
 #include "sms/map/Map.hxx"
 #include "sms/option/CardLoad.hxx"
 #include "sms/sound/MSound.hxx"
+
 
 extern JUtility::TColor gYoshiBodyColor[4];
 extern JGeometry::TVec3<f32> gShineShadowPos;
@@ -43,6 +46,7 @@ extern RumbleMgr *gpPad1RumbleMgr;
 extern RumbleMgr *gpPad2RumbleMgr;
 extern RumbleMgr *gpPad3RumbleMgr;
 extern RumbleMgr *gpPad4RumbleMgr;
+extern TStrategy *gpStrategy;
 extern TMario *gpMarioOriginal;
 extern TMario *gpMarioAddress;
 extern JGeometry::TVec3<f32> *gpMarioPos;

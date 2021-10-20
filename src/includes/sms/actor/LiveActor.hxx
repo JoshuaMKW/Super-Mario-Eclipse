@@ -25,9 +25,9 @@ public:
 	virtual void load(JSUMemoryInputStream &) override;
 	virtual void perform(u32, JDrama::TGraphics *) override;
 	virtual bool receiveMessage(THitActor *, u32) override;
-	virtual Mtx *getTakingMtx() override;
+	virtual Mtx44 *getTakingMtx() override;
 	virtual bool belongToGround() const;
-	virtual Mtx *getRootJointMtx() const;
+	virtual Mtx44 *getRootJointMtx() const;
 	virtual void init(TLiveManager *);
 	virtual void calcRootMatrix();
 	virtual void setGroundCollision();

@@ -343,3 +343,18 @@ SME_WRITE_32(SME_PORT_REGION(0x8016D53C, 0, 0, 0), 0x48000344);
 
 // Load msound.aaf from AudioRes folder (NTSC-U) [Xayrga/JoshuaMK]
 SME_WRITE_32(SME_PORT_REGION(0x80014F9C, 0, 0, 0), 0x60000000);
+
+static bool sIs100ShineSpawned = false;
+static bool is100CoinShine(TFlagManager *manager, u32 id) {
+  if (!sIs100ShineSpawned && manager->getFlag(id) > 100) {
+    sIs100ShineSpawned = true;
+    return true;
+  }
+  return false;
+}
+SME_PATCH_BL(SME_PORT_REGION(0x801BED3C, 0, 0, 0), is100CoinShine);
+SME_WRITE_32(SME_PORT_REGION(0x801BED40, 0, 0, 0), 0x2C030001);
+
+void patches_staticResetter() {
+  sIs100ShineSpawned = false;
+}

@@ -22,7 +22,7 @@ void Patch::CKit::onSetup(TMarDirector *director) {
 }
 
 extern void demoHandler(TMario *player);
-// extern void createWaterBalloonAndThrow(TMario *player);
+extern void createWaterBalloonAndThrow(TMario *player);
 
 // this is ran every frame
 // extern -> SME.cpp
@@ -48,11 +48,9 @@ s32 Patch::CKit::onUpdate(void *director) { // movie director
   Debug::updateDebugCollision(gpMarioAddress);
   demoHandler(gpMarioAddress);
 
-  /*
   if (!gpMarioAddress->mAttributes.mHasFludd &&
       (gpMarioAddress->mController->mButtons.mFrameInput & TMarioGamePad::R))
     createWaterBalloonAndThrow(gpMarioAddress);
-  */
   // Patch::Cheat::drawCheatText(); //currently bugged
 
   // ===== FRAME RATE ===== //

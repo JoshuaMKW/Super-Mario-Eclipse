@@ -922,7 +922,7 @@ public:
   virtual void loadAfter() override;
   virtual void perform(u32, JDrama::TGraphics *) override;
   virtual bool receiveMessage(THitActor *receiver, u32 msg) override;
-  virtual Mtx *getTakingMtx() override;
+  virtual Mtx44 *getTakingMtx() override;
   virtual u32 moveRequest(const JGeometry::TVec3<f32> &destPosition) override;
   virtual void initValues();
   virtual void checkReturn();

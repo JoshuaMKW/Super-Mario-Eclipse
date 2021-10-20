@@ -25,6 +25,8 @@ extern OSStopwatch gctStopwatch;
 
 using namespace SME;
 
+extern void makeExtendedObjDataTable();
+
 static void initMod() {
   SME_DEBUG_LOG(
       "Codeblocker - Creating OSAlarm at %p; Calls %p every %0.4f seconds\n",
@@ -37,6 +39,8 @@ static void initMod() {
       &gctAlarm, OSGetTime(), OSMillisecondsToTicks(1),
       reinterpret_cast<OSAlarmHandler>(&SME::Util::Security::checkUserCodes));
   SME_DEBUG_LOG("Registered checkUserCodes at 0x%X\n", &SME::Util::Security::checkUserCodes);
+
+  makeExtendedObjDataTable();
   // Patch::Init::initCodeProtection();
 }
 

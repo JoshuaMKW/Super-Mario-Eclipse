@@ -132,6 +132,8 @@ static void resetGlobalValues() {
 
 static bool isMario = true;
 
+extern void patches_staticResetter();
+
 // 0x802998B4
 TMarDirector *Patch::Init::initFileMods() {
   TMarDirector *director;
@@ -159,11 +161,13 @@ TMarDirector *Patch::Init::initFileMods() {
 
 
   resetGlobalValues();
+  patches_staticResetter();
   TGlobals::clearAllPlayerParams();
   TStageParams::sStageConfig->reset();
   TStageParams::sStageConfig->load(Util::getStageName(&gpApplication));
 
   TFlagManager::smInstance->setBool(true, 0x1038F); // Yosh
+  TFlagManager::smInstance->Type4Flag.mGoldCoinCount = 0;
 
 
 #ifdef CHARACTER_SELECT

@@ -10,13 +10,13 @@ public:
     void correctOptFlag();
     void decFlag(u32 flag, s32 num);
     void firstStart();
-    bool getBlueCoinFlag(s8 stageID, u8) const;
+    bool getBlueCoinFlag(u8 stageID, u8) const;
     bool getBool(u32 flag) const;
-    u32 getFlag(size_t flag) const;
-    bool getShineFlag(s8 stageID) const;
+    u32 getFlag(u32 flag) const;
+    bool getShineFlag(u8 stageID) const;
     u8 getNozzleRight(u8, u8) const;
     void incFlag(u32 flag, s32 num);
-    void incGoldCoinFlag(s8 stageID, s32);
+    void incGoldCoinFlag(u8 stageID, s32 num);
     void incMario(s32 num);
     void load(JSUMemoryInputStream &);
     void loadOption(JSUMemoryInputStream &);
@@ -29,10 +29,10 @@ public:
     void saveFail();
     void saveOption(JSUMemoryOutputStream &);
     void saveSuccess();
-    void setBlueCoinFlag(s8 stageID, u8);
+    void setBlueCoinFlag(u8 stageID, u8);
     void setBool(bool, u32 flag);
-    void setFlag(size_t flag, s32 value);
-    void setShineFlag(s8 stageID);
+    void setFlag(u32 flag, s32 value);
+    void setShineFlag(u8 stageID);
     void setNozzleRight(u8, u8);
     void start(JKRHeap *);
 
@@ -159,3 +159,21 @@ public:
 
     static TFlagManager *smInstance;
 };
+
+
+/*
+void TFlagManager::incGoldCoinFlag(u8 stageID, s32 num) {
+    constexpr u32 coin_id = 0x40002;
+
+    incFlag(coin_id, num);
+
+    u32 stageflag = 0x20000 + stageID;
+
+    const int coinRecord = getFlag(stageflag);
+    const int currentcoin = getFlag(coin_id);
+
+    if (currentcoin > coinRecord) {
+        setFlag(stageflag, currentcoin);
+    }
+}
+*/

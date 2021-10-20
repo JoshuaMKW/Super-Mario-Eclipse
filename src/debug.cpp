@@ -1,7 +1,7 @@
 #include "MTX.h"
 #include "types.h"
 
-//#include "sme/obj/WaterBalloon.hxx"
+#include "sme/obj/WaterBalloon.hxx"
 #include "sms/actor/Mario.hxx"
 #include "sms/enemy/EnemyMario.hxx"
 #include "sms/npc/BaseNPC.hxx"
@@ -93,10 +93,10 @@ void Patch::Debug::updateDebugCollision(TMario *player) {
 
   const JUTGamePad::CButton &buttons = player->mController->mButtons;
 
-  if (buttons.mFrameInput & SetHomeTriangleButtons) {
+  if (buttons.mFrameInput == SetHomeTriangleButtons) {
     sHomeTriangle = player->mFloorTriangle;
     sHomeID = (sHomeID + 1) % 255;
-  } else if (buttons.mFrameInput & SetTargetTriangleButtons && sHomeTriangle) {
+  } else if (buttons.mFrameInput == SetTargetTriangleButtons && sHomeTriangle) {
     if (sHomeTriangle == player->mFloorTriangle)
       return;
 
@@ -113,14 +113,13 @@ void Patch::Debug::updateDebugCollision(TMario *player) {
 }
 
 void createWaterBalloonAndThrow(TMario *player) {
-  return;
-  /*
+  #if 0
   TWaterBalloon *balloon = new TWaterBalloon("waterballoon");
 
   balloon->initAndRegister("waterballoon");
   balloon->awake();
 
-  hold__14TMapObjGeneralFP10TTakeActor(balloon, player);
+  balloon->hold(player);
   if (player->mState == static_cast<u32>(TMario::State::IDLE)) {
     changePlayerStatus__6TMarioFUlUlb(player, 0x80000387, 0, 0);
   } else if (player->mState == static_cast<u32>(TMario::State::RUNNING)) {
@@ -130,5 +129,5 @@ void createWaterBalloonAndThrow(TMario *player) {
              player->mState == static_cast<u32>(TMario::State::FALL)) {
     changePlayerStatus__6TMarioFUlUlb(player, 0x820008AB, 0, 0);
   }
-  */
+  #endif
 }

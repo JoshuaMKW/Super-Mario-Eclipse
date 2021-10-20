@@ -1,8 +1,6 @@
 #include "sms/mapobj/MapObjGeneral.hxx"
 #include "types.h"
 
-#if 0
-
 class TWaterBalloon : public TMapObjGeneral {
 public:
   TWaterBalloon(const char *name);
@@ -28,5 +26,3 @@ public:
 
   void blast();
 };
-
-#endif

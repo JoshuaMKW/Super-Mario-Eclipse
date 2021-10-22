@@ -1,7 +1,7 @@
 #pragma once
 
-#include "sms/JSystem/J3D/J3DAnimation.hxx"
-#include "sms/JSystem/JDrama.hxx"
+#include "J3D/J3DAnimation.hxx"
+#include "JDrama/JDRGraphics.hxx"
 
 class TLensGlow : public JDrama::TViewObj {
 public:

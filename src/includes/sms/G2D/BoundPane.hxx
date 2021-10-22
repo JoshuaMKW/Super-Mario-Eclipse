@@ -1,9 +1,9 @@
 #pragma once
 
 #include "types.h"
-#include "sms/JSystem/JUT/JUTPoint.hxx"
-#include "sms/JSystem/J2D/J2DPane.hxx"
-#include "sms/JSystem/JUT/JUTRect.hxx"
+#include "JUT/JUTPoint.hxx"
+#include "J2D/J2DPane.hxx"
+#include "JUT/JUTRect.hxx"
 
 class TBoundPane {
 public:

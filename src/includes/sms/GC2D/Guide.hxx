@@ -2,16 +2,17 @@
 
 #include "sms/G2D/BoundPane.hxx"
 #include "sms/G2D/ExPane.hxx"
-#include "sms/JSystem/J2D/J2DPicture.hxx"
-#include "sms/JSystem/J2D/J2DSetScreen.hxx"
-#include "sms/JSystem/J2D/J2DTextBox.hxx"
-#include "sms/JSystem/JDrama.hxx"
+#include "J2D/J2DPicture.hxx"
+#include "J2D/J2DSetScreen.hxx"
+#include "J2D/J2DTextBox.hxx"
+#include "JDrama/JDRGraphics.hxx"
+#include "JDrama/JDRViewObj.hxx"
 
 class TGuide : public JDrama::TViewObj {
 public:
   TGuide(const char *);
   virtual ~TGuide();
-  
+
   virtual void load(JSUMemoryInputStream &) override;
   virtual void loadAfter() override;
   virtual void perform(u32, JDrama::TGraphics *) override;
@@ -22,7 +23,7 @@ public:
   u32 _C0;
   u8 _C4;
   bool mIsSetUp;                 // 0x00C5
-  u32 *mTextures[10];     // 0x00C8 - JUTTexture *
+  u32 *mTextures[10];            // 0x00C8 - JUTTexture *
   J2DPane *mPane_ss_i;           // 0x00F4
   J2DPane *mPane_ss[2];          // 0x00F8
   J2DPane *mPane_sq_i;           // 0x0100

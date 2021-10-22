@@ -3,7 +3,7 @@
 #include "types.h"
 #include "JDRGraphics.hxx"
 #include "JDRViewObj.hxx"
-#include "../JSU/JSUMemoryStream.hxx"
+#include "JSU/JSUMemoryStream.hxx"
 
 namespace JDrama {
 

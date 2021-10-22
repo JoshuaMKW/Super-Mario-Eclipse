@@ -2,8 +2,8 @@
 
 #include "types.h"
 #include "JDRPlacement.hxx"
-#include "../JGeometry.hxx"
-#include "../JStage/JSGActor.hxx"
+#include "JGeometry.hxx"
+#include "JStage/JSGActor.hxx"
 
 namespace JDrama {
 

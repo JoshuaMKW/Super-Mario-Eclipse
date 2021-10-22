@@ -2,7 +2,7 @@
 
 #include "MTX.h"
 #include "sMath.hxx"
-#include "sms/JSystem/JGeometry.hxx"
+#include "JGeometry.hxx"
 #include "types.h"
 
 namespace SME::Class {

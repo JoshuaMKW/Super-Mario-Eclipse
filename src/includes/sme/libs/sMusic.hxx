@@ -3,8 +3,8 @@
 #include "AI.h"
 #include "DVD.h"
 #include "OS.h"
-#include "sms/JSystem/JKR/JKRHeap.hxx"
-#include "sms/JSystem/JSU/JSUStream.hxx"
+#include "JKR/JKRHeap.hxx"
+#include "JSU/JSUStream.hxx"
 #include "sms/sound/MSBGM.hxx"
 
 

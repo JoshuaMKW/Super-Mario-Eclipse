@@ -3,7 +3,7 @@
 #include "types.h"
 #include "JDRViewObj.hxx"
 
-#include "../JStage/JSGAmbientLight.hxx"
+#include "JStage/JSGAmbientLight.hxx"
 
 namespace JDrama {
 

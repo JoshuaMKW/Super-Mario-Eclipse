@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../JSU/JSUMemoryStream.hxx"
+#include "JSU/JSUMemoryStream.hxx"
 #include "JDRNameRef.hxx"
 #include "types.h"
 

@@ -2,7 +2,7 @@
 
 #include "types.h"
 
-#include "../JGeometry.hxx"
+#include "JGeometry.hxx"
 #include "JDRNameRef.hxx"
 #include "JDRViewObj.hxx"
 #include "JDRViewport.hxx"

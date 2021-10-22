@@ -2,9 +2,9 @@
 
 #include "types.h"
 
-#include "sms/JSystem/JDrama/JDRActor.hxx"
-#include "sms/JSystem/JDrama/JDRDirector.hxx"
-#include "sms/JSystem/JGeometry.hxx"
+#include "JDrama/JDRActor.hxx"
+#include "JDrama/JDRDirector.hxx"
+#include "JGeometry.hxx"
 
 #include "sms/GC2D/Guide.hxx"
 

@@ -1,8 +1,9 @@
 #pragma once
 
 #include "types.h"
-#include "sms/JSystem/JDrama.hxx"
-#include "sms/JSystem/JUT/JUTRect.hxx"
+#include "JDrama/JDRGraphics.hxx"
+#include "JDrama/JDRNameRef.hxx"
+#include "JUT/JUTRect.hxx"
 #include "sms/option/CardManager.hxx"
 #include "sms/option/OptionControl.hxx"
 

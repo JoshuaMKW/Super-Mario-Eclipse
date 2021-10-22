@@ -2,7 +2,7 @@
 
 #include "types.h"
 #include "MTX.h"
-#include "sms/JSystem/JKR/JKRHeap.hxx"
+#include "JKR/JKRHeap.hxx"
 #include "sms/sound/JAIBasic.hxx"
 
 enum MS_SCENE_WAVE

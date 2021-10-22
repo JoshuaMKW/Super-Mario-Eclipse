@@ -2,7 +2,7 @@
 #include "DVD.h"
 #include "OS.h"
 #include "printf.h"
-#include "sms/JSystem/JSU/JSUStream.hxx"
+#include "JSU/JSUStream.hxx"
 #include "sms/sound/MSBGM.hxx"
 
 #include "SME.hxx"

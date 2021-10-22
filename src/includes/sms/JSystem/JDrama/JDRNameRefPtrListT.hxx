@@ -2,8 +2,8 @@
 
 #include "types.h"
 
-#include "../JGadget/List.hxx"
-#include "../JGeometry.hxx"
+#include "JGadget/List.hxx"
+#include "JGeometry.hxx"
 #include "JDRNameRef.hxx"
 
 namespace JDrama {

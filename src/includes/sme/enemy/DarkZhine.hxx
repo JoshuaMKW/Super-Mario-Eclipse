@@ -2,7 +2,7 @@
 
 #ifdef ZHINE_BOSS
 
-#include "sms/JSystem/JGeometry.hxx"
+#include "JGeometry.hxx"
 #include "sms/enemy/BossGesso.hxx"
 
 #include "SME.hxx"

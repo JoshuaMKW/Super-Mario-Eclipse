@@ -5,9 +5,9 @@
 #include "types.h"
 
 #include "funcs.hxx"
-#include "sms/JSystem/JGeometry.hxx"
-#include "sms/JSystem/JSU/JSUMemoryStream.hxx"
-#include "sms/JSystem/JUT/JUTColor.hxx"
+#include "JGeometry.hxx"
+#include "JSU/JSUMemoryStream.hxx"
+#include "JUT/JUTColor.hxx"
 #include "sms/actor/Mario.hxx"
 #include "sms/camera/PolarSubCamera.hxx"
 

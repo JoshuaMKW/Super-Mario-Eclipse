@@ -1,8 +1,9 @@
 #pragma once
 
 #include "types.h"
-#include "sms/JSystem/JDrama.hxx"
-#include "sms/JSystem/JSU/JSUMemoryStream.hxx"
+#include "JDrama/JDRGraphics.hxx"
+#include "JDrama/JDRViewObj.hxx"
+#include "JSU/JSUMemoryStream.hxx"
 #include "sms/actor/HitActor.hxx"
 #include "sms/object/ObjChara.hxx"
 

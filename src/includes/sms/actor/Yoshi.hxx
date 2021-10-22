@@ -2,8 +2,8 @@
 
 #include "types.h"
 #include "sms/actor/MActor.hxx"
-#include "sms/JSystem/JDrama.hxx"
-#include "sms/JSystem/JGeometry.hxx"
+#include "JDrama/JDRGraphics.hxx"
+#include "JGeometry.hxx"
 #include "sms/object/EggYoshi.hxx"
 
 class TMario;

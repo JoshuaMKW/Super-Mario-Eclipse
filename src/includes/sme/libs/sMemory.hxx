@@ -3,7 +3,7 @@
 #pragma once
 
 #include "OS.h"
-#include "sms/JSystem/JKR/JKRHeap.hxx"
+#include "JKR/JKRHeap.hxx"
 #include "types.h"
 
 namespace SME::Util::Cache {

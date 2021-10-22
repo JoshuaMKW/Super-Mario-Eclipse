@@ -3,7 +3,7 @@
 #pragma once
 
 #include "macros.h"
-#include "sms/JSystem/JGeometry.hxx"
+#include "JGeometry.hxx"
 #include "types.h"
 
 namespace SME::Util::Math {

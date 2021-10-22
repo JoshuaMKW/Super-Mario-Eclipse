@@ -1,6 +1,5 @@
 #include "common.hxx"
-#include "sms/JSystem/JDrama.hxx"
-#include "sms/JSystem/JGeometry.hxx"
+#include "JGeometry.hxx"
 
 using namespace SME::Util;
 

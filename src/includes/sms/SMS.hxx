@@ -2,10 +2,10 @@
 
 #include "types.h"
 
-#include "sms/JSystem/JGeometry.hxx"
-#include "sms/JSystem/JUT/JUTColor.hxx"
-#include "sms/JSystem/JUT/JUTConsole.hxx"
-#include "sms/JSystem/JUT/JUTResFont.hxx"
+#include "JGeometry.hxx"
+#include "JUT/JUTColor.hxx"
+#include "JUT/JUTConsole.hxx"
+#include "JUT/JUTResFont.hxx"
 
 
 #include "sms/actor/Mario.hxx"

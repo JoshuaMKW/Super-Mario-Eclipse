@@ -1,7 +1,7 @@
 #pragma once
 
 #include "types.h"
-#include "../JKR/JKRDisposer.hxx"
+#include "JKR/JKRDisposer.hxx"
 
 class JUTConsole : public JKRDisposer
 {

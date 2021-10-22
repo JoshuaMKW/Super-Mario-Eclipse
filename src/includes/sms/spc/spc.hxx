@@ -1,6 +1,5 @@
 #pragma once
 
-#include "sms/JSystem/JDrama.hxx"
 #include "sms/event/EventWatcher.hxx"
 #include "sms/spc/SpcTypedInterp.hxx"
 

@@ -2,7 +2,7 @@
 
 #include "types.h"
 #include "JKRAramHeap.hxx"
-#include "../JSU/JSUList.hxx"
+#include "JSU/JSUList.hxx"
 
 class JKRAramBlock
 {

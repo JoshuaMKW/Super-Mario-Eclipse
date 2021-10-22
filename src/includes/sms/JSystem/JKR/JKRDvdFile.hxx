@@ -4,7 +4,7 @@
 #include "DVD.h"
 #include "OS.h"
 #include "JKRFile.hxx"
-#include "../JSU/JSUList.hxx"
+#include "JSU/JSUList.hxx"
 
 class JKRDvdFile : public JKRFile
 {

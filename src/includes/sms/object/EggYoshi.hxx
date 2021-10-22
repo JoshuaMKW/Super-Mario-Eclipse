@@ -1,7 +1,7 @@
 #pragma once
 
 #include "types.h"
-#include "sms/JSystem/JSU/JSUMemoryStream.hxx"
+#include "JSU/JSUMemoryStream.hxx"
 #include "sms/actor/MActor.hxx"
 #include "sms/actor/HitActor.hxx"
 #include "sms/mapobj/MapObjGeneral.hxx"

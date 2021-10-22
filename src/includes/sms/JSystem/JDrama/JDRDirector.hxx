@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../JStage/JSGSystem.hxx"
-#include "../JUT/JUTGamePad.hxx"
+#include "JStage/JSGSystem.hxx"
+#include "JUT/JUTGamePad.hxx"
 #include "JDRNameRef.hxx"
 #include "sms/game/PerformList.hxx"
 #include "types.h"

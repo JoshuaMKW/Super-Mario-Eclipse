@@ -3,8 +3,8 @@
 #include "types.h"
 #include "JDRFlagT.hxx"
 #include "JDRViewObj.hxx"
-#include "../JGeometry.hxx"
-#include "../JSU/JSUMemoryStream.hxx"
+#include "JGeometry.hxx"
+#include "JSU/JSUMemoryStream.hxx"
 
 namespace JDrama {
 

@@ -1,8 +1,8 @@
 #pragma once
 
 #include "types.h"
-#include "sms/JSystem/JDrama.hxx"
-#include "sms/JSystem/JSU/JSUMemoryStream.hxx"
+#include "JDrama/JDRCharacter.hxx"
+#include "JSU/JSUMemoryStream.hxx"
 
 class TObjChara : public JDrama::TCharacter
 {

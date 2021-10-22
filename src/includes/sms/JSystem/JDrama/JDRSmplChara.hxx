@@ -2,8 +2,8 @@
 
 #include "types.h"
 
-#include "../JGeometry.hxx"
-#include "../JKR/JKRArchivePri.hxx"
+#include "JGeometry.hxx"
+#include "JKR/JKRArchivePri.hxx"
 #include "JDRCharacter.hxx"
 #include "JDRNameRef.hxx"
 

@@ -1,8 +1,8 @@
 #include "FileUtils.hxx"
 #include "SME.hxx"
-#include "sms/JSystem/JKR/JKRDvdRipper.hxx"
-#include "sms/JSystem/JKR/JKRHeap.hxx"
-#include "sms/JSystem/JUT/JUTGamePad.hxx"
+#include "JKR/JKRDvdRipper.hxx"
+#include "JKR/JKRHeap.hxx"
+#include "JUT/JUTGamePad.hxx"
 #include "sms/game/Application.hxx"
 
 

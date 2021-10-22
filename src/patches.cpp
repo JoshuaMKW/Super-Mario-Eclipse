@@ -2,8 +2,8 @@
 #include "OS.h"
 
 #include "sms/GC2D/ConsoleStr.hxx"
-#include "sms/JSystem/J2D/J2DPrint.hxx"
-#include "sms/JSystem/JKR/JKRFileLoader.hxx"
+#include "J2D/J2DPrint.hxx"
+#include "JKR/JKRFileLoader.hxx"
 #include "sms/actor/Mario.hxx"
 #include "sms/mapobj/MapObjTree.hxx"
 

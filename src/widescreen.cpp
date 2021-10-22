@@ -2,8 +2,8 @@
 #include "types.h"
 
 #include "sms/G2D/ExPane.hxx"
-#include "sms/JSystem/JUT/JUTRect.hxx"
-#include "sms/JSystem/JUT/JUTTexture.hxx"
+#include "JUT/JUTRect.hxx"
+#include "JUT/JUTTexture.hxx"
 #include "sms/game/GCConsole2.hxx"
 
 #include "sms/GC2D/SelectDir.hxx"

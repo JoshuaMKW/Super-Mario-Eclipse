@@ -1,11 +1,11 @@
 #pragma once
 
-#include "BaseParam.hxx"
-#include "sms/JSystem/JDrama.hxx"
-#include "sms/JSystem/JKR/JKRMemArchive.hxx"
-#include "sms/JSystem/JSU/JSUMemoryStream.hxx"
-#include "types.h"
 #include "macros.h"
+#include "types.h"
+
+#include "BaseParam.hxx"
+#include "JKR/JKRMemArchive.hxx"
+#include "JSU/JSUMemoryStream.hxx"
 
 class TParams {
 public:
@@ -37,7 +37,7 @@ public:
 
   void load(JSUMemoryInputStream &stream) {
     u32 fakeit;
-    SME_FROM_GPR(29, fakeit); //Hack to keep r29 from being used..
+    SME_FROM_GPR(29, fakeit); // Hack to keep r29 from being used..
 
     u32 buffer;
     stream.read(&buffer, 4);

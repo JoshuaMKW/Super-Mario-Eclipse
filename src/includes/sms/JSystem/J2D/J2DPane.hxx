@@ -1,9 +1,9 @@
 #pragma once
 
-#include "../JSU/JSUInputStream.hxx"
-#include "../JSU/JSUList.hxx"
-#include "../JUT/JUTColor.hxx"
-#include "../JUT/JUTRect.hxx"
+#include "JSU/JSUInputStream.hxx"
+#include "JSU/JSUList.hxx"
+#include "JUT/JUTColor.hxx"
+#include "JUT/JUTRect.hxx"
 #include "GX.h"
 #include "MTX.h"
 #include "types.h"

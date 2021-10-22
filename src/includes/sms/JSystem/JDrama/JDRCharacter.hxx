@@ -2,7 +2,7 @@
 
 #include "types.h"
 #include "JDRNameRef.hxx"
-#include "../JGeometry.hxx"
+#include "JGeometry.hxx"
 
 namespace JDrama {
 

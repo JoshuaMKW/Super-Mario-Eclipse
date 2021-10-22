@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../J3D/J3DDrawBuffer.hxx"
-#include "../JGeometry.hxx"
+#include "J3D/J3DDrawBuffer.hxx"
+#include "JGeometry.hxx"
 #include "JDRPlacement.hxx"
 #include "types.h"
 

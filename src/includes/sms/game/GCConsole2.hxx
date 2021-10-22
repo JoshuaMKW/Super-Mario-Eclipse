@@ -1,9 +1,9 @@
 #pragma once
 
 #include "sms/GC2D/ConsoleStr.hxx"
-#include "sms/JSystem/J2D/J2DPicture.hxx"
-#include "sms/JSystem/J2D/J2DWindow.hxx"
-#include "sms/JSystem/JUT/JUTColor.hxx"
+#include "J2D/J2DPicture.hxx"
+#include "J2D/J2DWindow.hxx"
+#include "JUT/JUTColor.hxx"
 #include "types.h"
 
 class TGCConsole2 {

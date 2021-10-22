@@ -1,6 +1,6 @@
 #pragma once
 
-#include "sms/JSystem/JDrama.hxx"
+#include "JDrama/JDRGraphics.hxx"
 #include "sms/camera/CameraInbetween.hxx"
 #include "sms/camera/CameraMapTool.hxx"
 #include "sms/npc/BaseNPC.hxx"

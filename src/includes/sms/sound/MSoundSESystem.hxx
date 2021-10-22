@@ -1,6 +1,6 @@
 #pragma once
 
-#include "sms/JSystem/JGeometry.hxx"
+#include "JGeometry.hxx"
 #include "sms/sound/JAISound.hxx"
 #include "types.h"
 

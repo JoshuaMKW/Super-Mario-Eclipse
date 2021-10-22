@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Player.hxx"
-#include "sms/JSystem/J2D/J2DPicture.hxx"
+#include "J2D/J2DPicture.hxx"
 #include "funcs.hxx"
 #include "defines.h"
 

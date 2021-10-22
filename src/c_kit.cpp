@@ -1,7 +1,7 @@
 #include "CARD.h"
 #include "printf.h"
-#include "sms/JSystem/J2D/J2DOrthoGraph.hxx"
-#include "sms/JSystem/J2D/J2DTextBox.hxx"
+#include "J2D/J2DOrthoGraph.hxx"
+#include "J2D/J2DTextBox.hxx"
 #include "sms/talk/Talk2D2.hxx"
 #include "string.h"
 

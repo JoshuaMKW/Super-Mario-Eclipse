@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../JSU/JSUList.hxx"
+#include "JSU/JSUList.hxx"
 #include "JKRAramBlock.hxx"
 #include "JKRAramHeap.hxx"
 #include "JKRDvdRipper.hxx"

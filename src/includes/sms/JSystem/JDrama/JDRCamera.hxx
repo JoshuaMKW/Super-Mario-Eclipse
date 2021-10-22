@@ -1,8 +1,8 @@
 #pragma once
 
-#include "../JGeometry.hxx"
-#include "../JSU/JSUMemoryStream.hxx"
-#include "../JStage/JSGCamera.hxx"
+#include "JGeometry.hxx"
+#include "JSU/JSUMemoryStream.hxx"
+#include "JStage/JSGCamera.hxx"
 #include "JDRPlacement.hxx"
 #include "types.h"
 

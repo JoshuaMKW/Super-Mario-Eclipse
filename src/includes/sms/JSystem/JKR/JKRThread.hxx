@@ -3,7 +3,7 @@
 #include "types.h"
 #include "JKRDisposer.hxx"
 #include "JKRHeap.hxx"
-#include "../JSU/JSUList.hxx"
+#include "JSU/JSUList.hxx"
 
 class JKRThread : public JKRDisposer
 {

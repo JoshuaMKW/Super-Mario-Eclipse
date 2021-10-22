@@ -4,7 +4,7 @@
 #include "types.h"
 
 
-#include "../JKR/JKRArchivePri.hxx"
+#include "JKR/JKRArchivePri.hxx"
 #include "JUTColor.hxx"
 #include "JUTFont.hxx"
 

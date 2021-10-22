@@ -1,10 +1,10 @@
 #pragma once
 
 #include "MTX.h"
-#include "sms/JSystem/J3D/J3DDrawBuffer.hxx"
-#include "sms/JSystem/JDrama.hxx"
-#include "sms/JSystem/JGeometry.hxx"
-#include "sms/JSystem/JUT/JUTGamePad.hxx"
+#include "J3D/J3DDrawBuffer.hxx"
+#include "JDrama/JDRGraphics.hxx"
+#include "JGeometry.hxx"
+#include "JUT/JUTGamePad.hxx"
 #include "types.h"
 
 #include "sms/actor/TakeActor.hxx"

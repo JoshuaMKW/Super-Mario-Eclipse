@@ -2,10 +2,10 @@
 
 #include "types.h"
 #include "J2DPane.hxx"
-#include "../JSU/JSUInputStream.hxx"
-#include "../JUT/JUTColor.hxx"
-#include "../JUT/JUTFont.hxx"
-#include "../JUT/JUTResFont.hxx"
+#include "JSU/JSUInputStream.hxx"
+#include "JUT/JUTColor.hxx"
+#include "JUT/JUTFont.hxx"
+#include "JUT/JUTResFont.hxx"
 
 enum class J2DTextBoxHBinding
 {

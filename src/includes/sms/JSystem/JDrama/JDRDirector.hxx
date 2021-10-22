@@ -1,10 +1,10 @@
 #pragma once
 
-#include "types.h"
-#include "NameRef.hxx"
-#include "../JStage.hxx"
+#include "../JStage/JSGSystem.hxx"
 #include "../JUT/JUTGamePad.hxx"
+#include "JDRNameRef.hxx"
 #include "sms/game/PerformList.hxx"
+#include "types.h"
 
 namespace JDrama {
 
@@ -24,4 +24,4 @@ public:
   TPerformList *mPerformListSilhouette;
 };
 
-}
+} // namespace JDrama

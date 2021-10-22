@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../JSU/JSUMemoryStream.hxx"
-#include "NameRef.hxx"
+#include "JDRNameRef.hxx"
 #include "types.h"
 
 namespace JDrama {

@@ -1,9 +1,9 @@
 #pragma once
 
 #include "types.h"
-#include "Placement.hxx"
+#include "JDRPlacement.hxx"
 #include "../JGeometry.hxx"
-#include "../JStage.hxx"
+#include "../JStage/JSGActor.hxx"
 
 namespace JDrama {
 

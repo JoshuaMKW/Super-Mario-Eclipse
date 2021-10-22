@@ -3,7 +3,6 @@
 #include "../JSU/JSUMemoryStream.hxx"
 #include "types.h"
 
-
 namespace JDrama {
 
 class TNameRef {

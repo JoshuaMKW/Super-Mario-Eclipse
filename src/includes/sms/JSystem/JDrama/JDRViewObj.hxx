@@ -1,9 +1,9 @@
 #pragma once
 
 #include "types.h"
-#include "FlagT.hxx"
-#include "Graphics.hxx"
-#include "NameRef.hxx"
+#include "JDRFlagT.hxx"
+#include "JDRGraphics.hxx"
+#include "JDRNameRef.hxx"
 
 namespace JDrama {
 

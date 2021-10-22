@@ -1,8 +1,8 @@
 #pragma once
 
 #include "types.h"
-#include "Graphics.hxx"
-#include "ViewObj.hxx"
+#include "JDRGraphics.hxx"
+#include "JDRViewObj.hxx"
 #include "../JSU/JSUMemoryStream.hxx"
 
 namespace JDrama {

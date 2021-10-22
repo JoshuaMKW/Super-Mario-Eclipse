@@ -1,9 +1,8 @@
 #pragma once
 
 #include "types.h"
-#include "NameRef.hxx"
+#include "JDRNameRef.hxx"
 #include "../JGeometry.hxx"
-#include "../JStage.hxx"
 
 namespace JDrama {
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Object.hxx"
+#include "JSGObject.hxx"
 #include "types.h"
 #include "MTX.h"
 

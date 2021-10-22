@@ -6,7 +6,8 @@
                 "${workspaceFolder}/src/system/dolphin",
                 "${workspaceFolder}/src/system",
                 "${workspaceFolder}/src/includes/sme",
-                "${workspaceFolder}/src/includes"
+                "${workspaceFolder}/src/includes",
+                "${workspaceFolder}/src/includes/sms/JSystem"
             ],
             "defines": [
                 "_DEBUG",

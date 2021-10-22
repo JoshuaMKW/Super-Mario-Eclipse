@@ -1,8 +1,7 @@
 #pragma once
 
-#include "Rect.hxx"
+#include "JDRRect.hxx"
 #include "types.h"
-
 
 namespace JDrama {
 

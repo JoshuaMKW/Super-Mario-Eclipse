@@ -1,9 +1,9 @@
 #pragma once
 
 #include "types.h"
-#include "ViewObj.hxx"
+#include "JDRViewObj.hxx"
 
-#include "../JStage/AmbientLight.hxx"
+#include "../JStage/JSGAmbientLight.hxx"
 
 namespace JDrama {
 

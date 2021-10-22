@@ -1,7 +1,9 @@
 #pragma once
 
-#include "sms/JSystem/JDrama.hxx"
-#include "sms/JSystem/JGadget.hxx"
+#include "sms/JSystem/JDrama/JDRGraphics.hxx"
+#include "sms/JSystem/JDrama/JDRViewObj.hxx"
+#include "sms/JSystem/JGadget/List.hxx"
+#include "sms/JSystem/JSU/JSUMemoryStream.hxx"
 
 class TPerformList : public JDrama::TViewObj,
                      public JGadget::TSingleNodeLinkList {

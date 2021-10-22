@@ -1,8 +1,8 @@
 #pragma once
 
 #include "types.h"
-#include "FlagT.hxx"
-#include "ViewObj.hxx"
+#include "JDRFlagT.hxx"
+#include "JDRViewObj.hxx"
 #include "../JGeometry.hxx"
 #include "../JSU/JSUMemoryStream.hxx"
 

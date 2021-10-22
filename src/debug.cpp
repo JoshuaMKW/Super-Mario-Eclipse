@@ -113,10 +113,12 @@ void Patch::Debug::updateDebugCollision(TMario *player) {
 }
 
 void createWaterBalloonAndThrow(TMario *player) {
-  #if 0
-  TWaterBalloon *balloon = new TWaterBalloon("waterballoon");
+  #if 1
+  TWaterBalloon *balloon = new TWaterBalloon("WaterBalloon");
 
-  balloon->initAndRegister("waterballoon");
+  //balloon->initAndRegister("WaterBalloon");
+  //balloon->initAndRegister("WoodBarrel");
+  gpMarDirector->mPerformListMovement->push_back(balloon, 1);
   balloon->awake();
 
   balloon->hold(player);

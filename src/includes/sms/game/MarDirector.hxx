@@ -1,6 +1,5 @@
 #pragma once
 
-#include "GCConsole2.hxx"
 #include "types.h"
 
 #include "sms/GC2D/Guide.hxx"
@@ -14,6 +13,8 @@
 #include "sms/screen/ShineFader.hxx"
 #include "sms/npc/BaseNPC.hxx"
 
+#include "GCConsole2.hxx"
+#include "PerformList.hxx"
 
 class TMarDirector : public JDrama::TDirector {
 public:
@@ -60,7 +61,16 @@ public:
   void initLoadParticle();
   void loadResource();
 
-  u32 _00[0x28 / 4];        // 0x0024
+  TPerformList *mPerformListGXPost; // 0x0024
+  TPerformList *mPerformListMovement; // 0x0028
+  TPerformList *mPerformListCalcAnim; // 0x002C
+  TPerformList *mPerformListUIElements; // 0x0030
+  TPerformList *mPerformListPreDraw; // 0x0034 ?
+  TPerformList *mPerformListUnk1; // 0x0038
+  TPerformList *mPerformListUnk2; // 0x003C
+  TPerformList *mPerformListPostDraw; // 0x0040 ?
+  TPerformList *mPerformListShineMove; // 0x0044
+  TPerformList *mPerformListShineAnim; // 0x0048
   u16 mGameState;           // 0x004C
   u16 _02;                  // 0x004E
   u32 _03[0x14 / 4];        // 0x0050

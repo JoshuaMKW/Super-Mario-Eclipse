@@ -15,16 +15,16 @@ static u16 *sObjLoadAddrTable[LoadAddrTableSize][2] {
 
 #define OBJ_NAME_DEF(name) static const char name[] = #name;
 
-OBJ_NAME_DEF(waterballoon);
-OBJ_NAME_DEF(blowwind);
+OBJ_NAME_DEF(WaterBalloon);
+OBJ_NAME_DEF(BlowWind);
 
 #undef OBJ_NAME_DEF
 
 // SME.cpp
 extern void makeExtendedObjDataTable() {
     memcpy(sObjDataTable, (u32 *)SME_PORT_REGION(0x803C8580, 0, 0, 0), sizeof(u32) * OBJDefaultCount);
-    sObjDataTable[OBJDefaultCount] = const_cast<char *>(waterballoon);
-    sObjDataTable[OBJDefaultCount + 1] = const_cast<char *>(blowwind);
+    sObjDataTable[OBJDefaultCount] = const_cast<char *>(WaterBalloon);
+    sObjDataTable[OBJDefaultCount + 1] = const_cast<char *>(BlowWind);
     {
         u32 addr = reinterpret_cast<u32>(&sObjDataTable);
         u16 lo = addr;

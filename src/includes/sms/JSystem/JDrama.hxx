@@ -1,171 +1,21 @@
 #pragma once
 
+#include "types.h"
 #include "GX.h"
+
 #include "J3D/J3DDrawBuffer.hxx"
 #include "JGeometry.hxx"
 #include "JKR/JKRArchivePri.hxx"
 #include "JSU/JSUMemoryStream.hxx"
+#include "JUT/JUTGamePad.hxx"
+#include "sms/game/PerformList.hxx"
 #include "JStage.hxx"
-#include "types.h"
 
 class TCamConnector;
 
 namespace JDrama {
 
-class TNameRef {
-public:
-  TNameRef(const char *);
-  virtual ~TNameRef();
 
-  virtual u32 getType() const;
-  virtual void load(JSUMemoryInputStream &stream);
-  virtual void save(JSUMemoryOutputStream &stream);
-  virtual void loadAfter();
-  virtual TNameRef *searchF(u16, const char *);
-
-  void genObject(JSUMemoryInputStream &stream, JSUMemoryInputStream &);
-  u32 getType(JSUMemoryInputStream &stream, JSUMemoryInputStream &);
-  void search(const char *);
-
-  static s16 calcKeyCode(const char *);
-
-  char *mTypeName;
-  u16 mKeyCode;
-  u16 _0A;
-};
-
-class TNameRefGen {
-public:
-  virtual void load(JSUMemoryInputStream &stream);
-  virtual TNameRef *getNameRef(const char *) const;
-
-  TNameRef *getRootNameRef();
-  static TNameRefGen *getInstance();
-
-private:
-  TNameRef *mRootName;
-};
-
-template <typename T> class TFlagT {
-public:
-  TFlagT(T);
-  TFlagT(const TFlagT &);
-  void set(T);
-
-private:
-  T mFlag;
-};
-
-struct TRect {
-  int mX1; // 00
-  int mY1; // 04
-  int mX2; // 08
-  int mY2; // 0C
-};
-
-class TGraphics {
-public:
-  void setViewport(const TRect &, f32, f32);
-
-  u8 _0[0x20];
-  bool _20;
-  u8 _21[0x54 - 0x21];
-  TRect mViewPortSpace;
-};
-
-class TViewObj : public TNameRef {
-public:
-  TViewObj(const char *);
-  virtual ~TViewObj();
-
-  virtual void perform(u32, TGraphics *) = 0;
-
-  void testPerform(u32, TGraphics *);
-
-  TFlagT<u16> mViewFlags; // 0x000C
-};
-
-class TPlacement : public TViewObj {
-public:
-  TPlacement(const char *name)
-      : TViewObj(name), mPosition(0.0f, 0.0f, 0.0f), mPlacementFlags(0) {}
-  virtual ~TPlacement();
-
-  virtual void load(JSUMemoryInputStream &);
-
-  JGeometry::TVec3<f32> mPosition;
-  TFlagT<u16> mPlacementFlags;
-};
-
-class TLightMap : public TViewObj {
-public:
-  class TLightInfo {
-  public:
-    TLightInfo();
-
-    u32 _0;
-    u32 _4;
-  };
-
-  virtual ~TLightMap();
-
-  virtual void load(JSUMemoryInputStream &stream);
-  virtual void perform(u32, TGraphics *);
-
-  s32 mLightArryCount;                   // 10
-  TLightMap::TLightInfo *mLightInfoArry; // 14
-};
-
-class TActor : public TPlacement, public JStage::TActor {
-public:
-  TActor(const char *);
-  virtual ~TActor();
-
-  virtual u32 getType() const override;
-  virtual void load(JSUMemoryInputStream &) override;
-  virtual void perform(u32, TGraphics *) override;
-  virtual void JSGGetTranslation(Vec *) const override;
-  virtual void JSGSetTranslation(const Vec &) override;
-  virtual void JSGGetScaling(Vec *) const override;
-  virtual void JSGSetScaling(const Vec &) override;
-  virtual void JSGGetRotation(Vec *) const override;
-  virtual void JSGSetRotation(const Vec &) override;
-
-  JGeometry::TVec3<f32> mSize;     // 24
-  JGeometry::TVec3<f32> mRotation; // 30
-private:
-  u32 _02[0x8 / 4]; // 3C
-};
-
-class TDirector : public TNameRef, public JStage::TSystem {
-public:
-  virtual ~TDirector();
-
-  virtual TDirector *searchF(u16, const char *);
-  virtual JStage::TObject *
-  JSGFindObject(const char *, JStage::TEObject) const; // JStage::TEObject
-  virtual s32 direct();
-
-  u32 *_10;
-  u32 *_14; // padding?
-  u32 _18;  // ^^
-  u32 _1C;  // ^^
-  u32 _20;
-};
-
-class TCharacter : public TNameRef {
-public:
-  virtual ~TCharacter();
-};
-
-template <typename T, typename U> class TNameRefPtrListT : public TNameRef {
-public:
-  virtual ~TNameRefPtrListT();
-
-  virtual void load(JSUMemoryInputStream &stream);
-  virtual void loadAfter();
-  T *searchF(u16, const char *);
-};
 
 class TAmbColor : public TViewObj, public JStage::TAmbientLight {
 public:

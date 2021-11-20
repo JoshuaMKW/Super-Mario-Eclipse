@@ -16,10 +16,10 @@ public:
 
   static JKRArchive *getVolume(const char *);
   static void changeDirectory(const char *dirName);
-  static u32 *getGlbResource(const char *);
-  static u32 *getGlbResource(const char *, JKRFileLoader *);
+  static void *getGlbResource(const char *);
+  static void *getGlbResource(const char *, JKRFileLoader *);
   static u32 getResSize(void *resource, JKRFileLoader *);
-  static u32 *findVolume(const char **);
+  static void *findVolume(const char **);
   static JKRArchive *findFirstFile(const char *);
   static u8 *fetchVolumeName(u8 *, u32, const char *);
 

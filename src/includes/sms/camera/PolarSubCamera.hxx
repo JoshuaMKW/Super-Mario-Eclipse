@@ -1,22 +1,19 @@
 #pragma once
 
+#include "JDrama/JDRCamera.hxx"
 #include "JDrama/JDRGraphics.hxx"
 #include "sms/camera/CameraInbetween.hxx"
 #include "sms/camera/CameraMapTool.hxx"
 #include "sms/npc/BaseNPC.hxx"
 #include "types.h"
 
-
 class CPolarSubCamera : public JDrama::TLookAtCamera {
 public:
-  enum EnumNoticeOnOffMode {
-      UNK_MODE_0,
-      UNK_MODE_1,
-      UNK_MODE_2
-  };
+  enum EnumNoticeOnOffMode { UNK_MODE_0, UNK_MODE_1, UNK_MODE_2 };
 
   CPolarSubCamera(const char *);
   virtual ~CPolarSubCamera();
+  
   virtual void loadAfter() override;
   virtual void perform(u32, JDrama::TGraphics *) override;
 
@@ -108,20 +105,21 @@ public:
   void setNoticeInfo();
   void setUpFromLButtonCamera_();
   void setUpToLButtonCamera_(int);
-  void startDemoCamera(const char *, const JGeometry::TVec3<f32> *, s32, f32, bool);
+  void startDemoCamera(const char *, const JGeometry::TVec3<f32> *, s32, f32,
+                       bool);
   void startGateDemoCamera(const JDrama::TActor *);
   void updateDemoCamera_(bool);
   void updateGateDemoCamera_();
   void warpPosAndAt(f32, s16);
   void warpPosAndAt(const Vec &, const Vec &);
 
-  u32 _00[0x14 / 4];            // 0x0050
+  u32 _00[0x14 / 4]; // 0x0050
   struct {
     u8 _00 : 4;
     bool mCenterUp : 1;
     bool mDisableMovement : 1;
     u32 _01 : 10;
-  } mStateFlags;                // 0x0064
+  } mStateFlags; // 0x0064
   u32 _68;
   TCameraInbetween *mInbetween; // 0x006C
   u32 _01[0x34 / 4];            // 0x0070

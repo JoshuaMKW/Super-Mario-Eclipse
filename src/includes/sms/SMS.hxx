@@ -20,7 +20,7 @@
 #include "sms/manager/FlagManager.hxx"
 #include "sms/manager/PollutionManager.hxx"
 #include "sms/manager/RumbleManager.hxx"
-#include "sms/manager/WaterManager.hxx"
+#include "sms/manager/ModelWaterManager.hxx"
 #include "sms/map/Map.hxx"
 #include "sms/option/CardLoad.hxx"
 #include "sms/sound/MSound.hxx"
@@ -50,7 +50,7 @@ extern TStrategy *gpStrategy;
 extern TMario *gpMarioOriginal;
 extern TMario *gpMarioAddress;
 extern JGeometry::TVec3<f32> *gpMarioPos;
-extern TWaterManager *gpModelWaterManager;
+extern TModelWaterManager *gpModelWaterManager;
 extern TMarDirector *gpMarDirector;
 extern MSound *gpMSound;
 extern TCardManager *gpCardManager;

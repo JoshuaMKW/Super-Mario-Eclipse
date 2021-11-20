@@ -355,6 +355,42 @@ static bool is100CoinShine(TFlagManager *manager, u32 id) {
 SME_PATCH_BL(SME_PORT_REGION(0x801BED3C, 0, 0, 0), is100CoinShine);
 SME_WRITE_32(SME_PORT_REGION(0x801BED40, 0, 0, 0), 0x2C030001);
 
+static void *loadFromGlobalAndScene(const char *mdl, u32 unk_0, const char *path) {
+  u32 **sdlModel = reinterpret_cast<u32 **>(loadModelData__16TModelDataKeeperFPCcUlPCc(mdl, unk_0, path));
+  if (*sdlModel == nullptr) {
+    delete sdlModel;
+    sdlModel = reinterpret_cast<u32 **>(loadModelData__16TModelDataKeeperFPCcUlPCc(mdl, unk_0, "/common/mapobj"));
+  }
+  return sdlModel;
+}
+SME_PATCH_BL(SME_PORT_REGION(0x8021CD34, 0, 0, 0), loadFromGlobalAndScene);
+
+void checkInstantReset_NormalLift(u32 *railflags) {
+  s16 *mRailObj;
+  SME_FROM_GPR(31, mRailObj);
+
+  u32 flag = railflags[2];
+  if (flag & 0x2000) {
+    mRailObj[0x14A / 2] = 0;
+  } else {
+    mRailObj[0x14A / 2] = 180;
+  }
+}
+
+void checkInstantReset_RailObj(s16 *mRailObj, u32 *railflags) {
+  u32 flag = railflags[2];
+  if (flag & 0x2000) {
+    mRailObj[0x14A / 2] = 0;
+  } else {
+    mRailObj[0x14A / 2] = 180;
+  }
+}
+
+SME_PATCH_BL(SME_PORT_REGION(0x801F0B90, 0, 0, 0), checkInstantReset_NormalLift);
+SME_PATCH_BL(SME_PORT_REGION(0x801F1054, 0, 0, 0), checkInstantReset_RailObj);
+
+// STATIC RESETTER
 void patches_staticResetter() {
   sIs100ShineSpawned = false;
 }
+

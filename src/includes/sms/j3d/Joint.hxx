@@ -4,7 +4,7 @@
 #include "J3D/J3DModel.hxx"
 #include "JDrama/JDRGraphics.hxx"
 #include "JDrama/JDRViewObj.hxx"
-#include "sms/actor/MActor.hxx"
+#include "sms/M3DUtil/MActor.hxx"
 #include "types.h"
 
 

@@ -174,7 +174,7 @@ bool hasWaterCardOpen();
 bool canCollectFluddItem(TMario *player);
 void sprayGoopMap(TPollutionManager *gpPollutionManager, f32 x, f32 y, f32 z,
                   f32 r);
-bool canCleanSeals(TWaterManager *gpWaterManager);
+bool canCleanSeals(TModelWaterManager *gpWaterManager);
 TWaterGun *bindFluddtojoint();
 void checkExecWaterGun(TWaterGun *fludd);
 void killTriggerNozzle();

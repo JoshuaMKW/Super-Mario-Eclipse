@@ -133,6 +133,7 @@ static void resetGlobalValues() {
 static bool isMario = true;
 
 extern void patches_staticResetter();
+extern void objects_staticResetter();
 
 // 0x802998B4
 TMarDirector *Patch::Init::initFileMods() {
@@ -161,6 +162,7 @@ TMarDirector *Patch::Init::initFileMods() {
 
 
   resetGlobalValues();
+  objects_staticResetter();
   patches_staticResetter();
   TGlobals::clearAllPlayerParams();
   TStageParams::sStageConfig->reset();

@@ -5,10 +5,6 @@
 #include "string.h"
 
 class String {
-  char *mString;
-  size_t mBufferSize;
-  size_t mStringSize;
-
 public:
   static const size_t npos = -1;
   static const char numbers[10];
@@ -76,4 +72,9 @@ public:
   void substr(char *out, size_t pos, size_t len = String::npos);
   void substr(String *out, size_t pos, size_t len = String::npos);
   static char *intToString(s32 num, char *buffer, size_t base = 10);
+
+private:
+  char *mString;
+  size_t mBufferSize;
+  size_t mStringSize;
 };

@@ -126,7 +126,7 @@ void Patch::Fludd::sprayGoopMap(TPollutionManager *gpPollutionManager, f32 x,
 
 // 0x800FED3C
 // extern -> SME.cpp
-bool Patch::Fludd::canCleanSeals(TWaterManager *gpWaterManager) {
+bool Patch::Fludd::canCleanSeals(TModelWaterManager *gpWaterManager) {
   return gpWaterManager->mWaterCardType != 0 ||
          SME::TGlobals::getPlayerData(gpMarioAddress)
              ->getParams()

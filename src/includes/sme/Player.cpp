@@ -27,7 +27,7 @@ bool Util::Mario::loadParams() {
   JKRMemArchive *marioVolumeData =
       static_cast<JKRMemArchive *>(JKRFileLoader::getVolume("mario"));
 
-  u8 *params = marioVolumeData->getResource("/params.szs");
+  u8 *params = static_cast<u8 *>(marioVolumeData->getResource("/params.szs"));
 
   void *allocation;
   if (params) {

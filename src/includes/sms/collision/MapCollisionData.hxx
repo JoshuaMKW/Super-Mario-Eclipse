@@ -1,8 +1,8 @@
 #pragma once
 
 #include "types.h"
-#include "sms/JSystem/JSU/JSUMemoryStream.hxx"
-#include "sms/JSystem/JGeometry.hxx"
+#include "JSU/JSUMemoryStream.hxx"
+#include "JGeometry.hxx"
 
 #include "sms/actor/LiveActor.hxx"
 #include "sms/collision/BGCheck.hxx"

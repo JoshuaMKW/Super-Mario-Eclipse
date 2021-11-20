@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../JSU/JSUList.hxx"
+#include "JSU/JSUList.hxx"
 #include "JKRHeap.hxx"
 #include "types.h"
 

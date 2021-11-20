@@ -1,6 +1,7 @@
 #pragma once
 
-#include "sms/JSystem/JDrama.hxx"
+#include "JDrama/JDRGraphics.hxx"
+#include "JDrama/JDRViewObj.hxx"
 
 class TStrategy : public JDrama::TViewObj {
 public:

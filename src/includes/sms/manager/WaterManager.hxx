@@ -1,7 +1,7 @@
 #pragma once
 
 #include "types.h"
-#include "sms/JSystem/JUT/JUTColor.hxx"
+#include "JUT/JUTColor.hxx"
 
 class TWaterManager
 {

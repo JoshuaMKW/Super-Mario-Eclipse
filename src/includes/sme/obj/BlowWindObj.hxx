@@ -1,6 +1,6 @@
 #pragma once
 
-#include "sms/JSystem/JDrama.hxx"
+#include "JDrama/JDRGraphics.hxx"
 #include "sms/mapobj/MapObjBase.hxx"
 
 class TBlowWindObj : public TMapObjBase {

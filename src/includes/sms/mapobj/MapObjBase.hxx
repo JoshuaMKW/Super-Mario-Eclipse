@@ -1,8 +1,8 @@
 #pragma once
 
 #include "GX.h"
-#include "sms/JSystem/J3D/J3DModel.hxx"
-#include "sms/JSystem/JSU/JSUMemoryStream.hxx"
+#include "J3D/J3DModel.hxx"
+#include "JSU/JSUMemoryStream.hxx"
 #include "sms/actor/HitActor.hxx"
 #include "sms/actor/LiveActor.hxx"
 #include "types.h"

@@ -3,7 +3,7 @@
 #include "types.h"
 #include "OS.h"
 #include "PAD.h"
-#include "../JKR/JKRDisposer.hxx"
+#include "JKR/JKRDisposer.hxx"
 
 enum EPadPort
 {

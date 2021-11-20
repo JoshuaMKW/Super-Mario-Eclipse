@@ -1,5 +1,5 @@
 #include "GX.h"
-#include "sms/JSystem/J3D/J3DDrawBuffer.hxx"
+#include "J3D/J3DDrawBuffer.hxx"
 
 #include "SME.hxx"
 

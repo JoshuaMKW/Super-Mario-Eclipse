@@ -1,7 +1,7 @@
 #pragma once
 
-#include "sms/JSystem/JDrama.hxx"
-#include "sms/JSystem/J3D/J3DAnimation.hxx"
+#include "JDrama/JDRGraphics.hxx"
+#include "J3D/J3DAnimation.hxx"
 
 class TSunModel : public JDrama::TActor {
 public:

@@ -4,11 +4,12 @@
 #include "SelectGrad.hxx"
 #include "sms/G2D/BoundPane.hxx"
 #include "sms/G2D/ExPane.hxx"
-#include "sms/JSystem/J2D/J2DPicture.hxx"
-#include "sms/JSystem/J2D/J2DSetScreen.hxx"
-#include "sms/JSystem/J2D/J2DTextBox.hxx"
-#include "sms/JSystem/J2D/J2DTexture.hxx"
-#include "sms/JSystem/JDrama.hxx"
+#include "J2D/J2DPicture.hxx"
+#include "J2D/J2DSetScreen.hxx"
+#include "J2D/J2DTextBox.hxx"
+#include "J2D/J2DTexture.hxx"
+#include "JDrama/JDRGraphics.hxx"
+#include "JDrama/JDRViewObj.hxx"
 #include "sms/manager/SelectShineManager.hxx"
 
 class TSelectMenu : public JDrama::TViewObj {
@@ -30,12 +31,12 @@ public:
   TBoundPane *mBoundPaneDynName1; // 0x0034
   TBoundPane *mBoundPaneDynName2; // 0x0038
 
-  TExPane *mS_0;      // 0x0040
+  TExPane *mS_0;            // 0x0040
   J2DTextBox *mSttxTextBox; // 0x0044
-  J2DPicture *mPicture0; // 0x0048
-  J2DPicture *mPicture1; // 0x004C
+  J2DPicture *mPicture0;    // 0x0048
+  J2DPicture *mPicture1;    // 0x004C
 
-  TExPane *m0_0;      // 0x0068
+  TExPane *m0_0;            // 0x0068
   J2DTextBox *m0ttxTextBox; // 0x006C
 
   J2DTexture *mShineCountNumberTex[8]; // 0x0080

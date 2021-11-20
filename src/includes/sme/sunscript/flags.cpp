@@ -1,6 +1,5 @@
 #include "common.hxx"
 #include "Globals.hxx"
-#include "sms/JSystem/JDrama.hxx"
 
 using namespace SME::Util;
 

@@ -2,8 +2,8 @@
 
 #include "types.h"
 #include "JSUInputStream.hxx"
-#include "../JKR/JKRFile.hxx"
-#include "../JKR/JKRDvdFile.hxx"
+#include "JKR/JKRFile.hxx"
+#include "JKR/JKRDvdFile.hxx"
 
 class JSUFileInputStream : public JSURandomInputStream
 {

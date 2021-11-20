@@ -2,8 +2,8 @@
 #include "OS.h"
 
 #include "sms/GC2D/ConsoleStr.hxx"
-#include "sms/JSystem/J2D/J2DPrint.hxx"
-#include "sms/JSystem/JKR/JKRFileLoader.hxx"
+#include "J2D/J2DPrint.hxx"
+#include "JKR/JKRFileLoader.hxx"
 #include "sms/actor/Mario.hxx"
 #include "sms/mapobj/MapObjTree.hxx"
 
@@ -346,7 +346,7 @@ SME_WRITE_32(SME_PORT_REGION(0x80014F9C, 0, 0, 0), 0x60000000);
 
 static bool sIs100ShineSpawned = false;
 static bool is100CoinShine(TFlagManager *manager, u32 id) {
-  if (!sIs100ShineSpawned && manager->getFlag(id) > 100) {
+  if (!sIs100ShineSpawned && manager->getFlag(id) > 99) {
     sIs100ShineSpawned = true;
     return true;
   }

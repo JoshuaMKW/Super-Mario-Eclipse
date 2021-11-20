@@ -3,7 +3,7 @@
 #include "types.h"
 #include "OS.h"
 #include "JUTDirectPrint.hxx"
-#include "../JKR/JKRThread.hxx"
+#include "JKR/JKRThread.hxx"
 
 class JUTException : public JKRThread
 {

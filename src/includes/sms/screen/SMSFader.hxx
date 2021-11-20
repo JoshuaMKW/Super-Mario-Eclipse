@@ -1,19 +1,15 @@
 #pragma once
 
-#include "sms/JSystem/JDrama.hxx"
-#include "sms/JSystem/JUT/JUTColor.hxx"
+#include "JDrama/JDRGraphics.hxx"
+#include "JDrama/JDRRect.hxx"
+#include "JUT/JUTColor.hxx"
 
 class TSMSFader : public JDrama::TNameRef {
 public:
-  enum EFadeStatus {
-    FADE_ON,
-    FADE_OFF,
-    FADE_IN,
-    FADE_OUT
-  };
+  enum EFadeStatus { FADE_ON, FADE_OFF, FADE_IN, FADE_OUT };
 
   class WipeRequest {
-    public:
+  public:
     enum ERequest {
       FADE_NONE,
       FADE_CIRCLE_IN,
@@ -34,7 +30,7 @@ public:
       FADE_SQUARE_IN,
       FADE_SQUARE_OUT
     };
-    
+
     u32 mWipeRequest;
     f32 mWipeSpeed;
     f32 mDelayTime;
@@ -59,7 +55,7 @@ public:
   void startWipe(u32 requestKind, f32 fadeTime, f32 delayTime);
 
   u16 _0C;
-  u16 _0E; //padding?
+  u16 _0E; // padding?
   u16 _10;
   u16 _12;
   f32 mWipeTimeCopy;

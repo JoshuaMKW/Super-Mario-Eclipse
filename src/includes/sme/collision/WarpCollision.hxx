@@ -1,11 +1,11 @@
 #pragma once
 
-#include "sms/JSystem/JGeometry.hxx"
+#include "JGeometry.hxx"
 #include "sms/collision/BGCheck.hxx"
 #include "types.h"
 
 #include "libs/sGeometry.hxx"
-#include "sms/JSystem/JKR/JKRHeap.hxx"
+#include "JKR/JKRHeap.hxx"
 
 namespace SME::Class {
 

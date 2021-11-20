@@ -1,10 +1,10 @@
 #pragma once
 
-#include "sms/JSystem/J3D/J3DAnimation.hxx"
-#include "sms/JSystem/J3D/J3DModel.hxx"
-#include "sms/JSystem/J3D/J3DModelLoader.hxx"
-#include "sms/JSystem/JDrama.hxx"
-#include "sms/JSystem/JGeometry.hxx"
+#include "J3D/J3DAnimation.hxx"
+#include "J3D/J3DModel.hxx"
+#include "J3D/J3DModelLoader.hxx"
+#include "JDrama/JDRGraphics.hxx"
+#include "JGeometry.hxx"
 #include "sms/collision/BGCheck.hxx"
 #include "types.h"
 

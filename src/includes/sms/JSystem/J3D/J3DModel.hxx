@@ -7,7 +7,7 @@
 #include "J3DJoint.hxx"
 #include "J3DNode.hxx"
 #include "J3DVertex.hxx"
-#include "../JGeometry.hxx"
+#include "JGeometry.hxx"
 
 class J3DModelHierarchy;
 class J3DNode;

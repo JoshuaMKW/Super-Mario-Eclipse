@@ -1,8 +1,8 @@
 #include "printf.h"
-#include "sms/JSystem/JDrama.hxx"
-#include "sms/JSystem/JKR/JKRDecomp.hxx"
-#include "sms/JSystem/JKR/JKRHeap.hxx"
-#include "sms/JSystem/JKR/JKRMemArchive.hxx"
+#include "JDrama/JDRNameRef.hxx"
+#include "JKR/JKRDecomp.hxx"
+#include "JKR/JKRHeap.hxx"
+#include "JKR/JKRMemArchive.hxx"
 #include "stdlib.h"
 
 #include "SME.hxx"

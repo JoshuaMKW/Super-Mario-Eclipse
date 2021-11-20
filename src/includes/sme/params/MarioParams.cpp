@@ -4,7 +4,7 @@
 #include "libs/sLogging.hxx"
 #include "libs/sMath.hxx"
 #include "libs/sMemory.hxx"
-#include "sms/JSystem/JSU/JSUMemoryStream.hxx"
+#include "JSU/JSUMemoryStream.hxx"
 #include "sms/actor/Mario.hxx"
 #include "sms/camera/PolarSubCamera.hxx"
 #include "string.h"

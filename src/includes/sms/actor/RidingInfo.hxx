@@ -1,7 +1,7 @@
 #pragma once
 
 #include "types.h"
-#include "sms/JSystem/JGeometry.hxx"
+#include "JGeometry.hxx"
 #include "sms/actor/HitActor.hxx"
 
 struct TRidingInfo

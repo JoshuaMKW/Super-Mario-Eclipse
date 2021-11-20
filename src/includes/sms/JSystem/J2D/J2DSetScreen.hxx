@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../JKR/JKRArchivePri.hxx"
+#include "JKR/JKRArchivePri.hxx"
 #include "J2DScreen.hxx"
 #include "types.h"
 

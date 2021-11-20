@@ -1,6 +1,6 @@
 #pragma once
 
-#include "sms/JSystem/JGeometry.hxx"
+#include "JGeometry.hxx"
 #include "types.h"
 
 class TLiveActor;

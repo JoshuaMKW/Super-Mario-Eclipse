@@ -3,7 +3,7 @@
 #include "types.h"
 #include "CARD.h"
 #include "OS.h"
-#include "sms/JSystem/JSU/JSUMemoryStream.hxx"
+#include "JSU/JSUMemoryStream.hxx"
 
 class TCardBookmarkInfo
 {

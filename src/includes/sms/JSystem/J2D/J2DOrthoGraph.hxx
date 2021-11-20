@@ -2,7 +2,7 @@
 
 #include "types.h"
 #include "J2DPane.hxx"
-#include "../JUT/JUTRect.hxx"
+#include "JUT/JUTRect.hxx"
 
 class J2DOrthoGraph : public J2DGrafContext
 {

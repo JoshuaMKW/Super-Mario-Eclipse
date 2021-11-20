@@ -2,9 +2,10 @@
 
 #include "sms/G2D/BoundPane.hxx"
 #include "sms/G2D/ExPane.hxx"
-#include "sms/JSystem/J2D/J2DTextBox.hxx"
-#include "sms/JSystem/J2D/J2DSetScreen.hxx"
-#include "sms/JSystem/JDrama.hxx"
+#include "J2D/J2DTextBox.hxx"
+#include "J2D/J2DSetScreen.hxx"
+#include "JDrama/JDRGraphics.hxx"
+#include "JDrama/JDRViewObj.hxx"
 
 class TConsoleStr : public JDrama::TViewObj {
 public:

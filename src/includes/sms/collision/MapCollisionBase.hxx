@@ -1,7 +1,7 @@
 #pragma once
 
 #include "types.h"
-#include "sms/JSystem/JGeometry.hxx"
+#include "JGeometry.hxx"
 
 #include "sms/actor/LiveActor.hxx"
 #include "sms/collision/BGCheck.hxx"

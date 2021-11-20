@@ -1,19 +1,24 @@
 #pragma once
 
-#include "GCConsole2.hxx"
 #include "types.h"
 
+#include "JDrama/JDRActor.hxx"
+#include "JDrama/JDRDirector.hxx"
+#include "JGeometry.hxx"
+
 #include "sms/GC2D/Guide.hxx"
-#include "sms/JSystem/JDrama.hxx"
-#include "sms/JSystem/JGeometry.hxx"
+
 #include "sms/actor/Yoshi.hxx"
 #include "sms/actor/item/Coin.hxx"
 #include "sms/actor/item/Shine.hxx"
+
 #include "sms/game/GCConsole2.hxx"
+#include "sms/npc/BaseNPC.hxx"
 #include "sms/object/DemoCannon.hxx"
 #include "sms/screen/ShineFader.hxx"
-#include "sms/npc/BaseNPC.hxx"
 
+#include "GCConsole2.hxx"
+#include "PerformList.hxx"
 
 class TMarDirector : public JDrama::TDirector {
 public:
@@ -60,23 +65,32 @@ public:
   void initLoadParticle();
   void loadResource();
 
-  u32 _00[0x28 / 4];        // 0x0024
-  u16 mGameState;           // 0x004C
-  u16 _02;                  // 0x004E
-  u32 _03[0x14 / 4];        // 0x0050
-  u8 mCurState;             // 0x0064
-  u8 _04;                   // 0x0065
-  u16 _05;                  // 0x0066
-  u32 _06[0xC / 4];         // 0x0068
-  TGCConsole2 *mGCConsole;  // 0x0074
-  TGuide *mGuide;           // 0x0078
-  u8 mAreaID;               // 0x007C
-  u8 mEpisodeID;            // 0x007D
-  u16 _09;                  // 0x007E
-  u32 _10;                  // 0x0080
-  void *mTalkCursor;        // TTalkCursor
+  TPerformList *mPerformListGXPost;     // 0x0024
+  TPerformList *mPerformListMovement;   // 0x0028
+  TPerformList *mPerformListCalcAnim;   // 0x002C
+  TPerformList *mPerformListUIElements; // 0x0030
+  TPerformList *mPerformListPreDraw;    // 0x0034 ?
+  TPerformList *mPerformListUnk1;       // 0x0038
+  TPerformList *mPerformListUnk2;       // 0x003C
+  TPerformList *mPerformListPostDraw;   // 0x0040 ?
+  TPerformList *mPerformListShineMove;  // 0x0044
+  TPerformList *mPerformListShineAnim;  // 0x0048
+  u16 mGameState;                       // 0x004C
+  u16 _02;                              // 0x004E
+  u32 _03[0x14 / 4];                    // 0x0050
+  u8 mCurState;                         // 0x0064
+  u8 _04;                               // 0x0065
+  u16 _05;                              // 0x0066
+  u32 _06[0xC / 4];                     // 0x0068
+  TGCConsole2 *mGCConsole;              // 0x0074
+  TGuide *mGuide;                       // 0x0078
+  u8 mAreaID;                           // 0x007C
+  u8 mEpisodeID;                        // 0x007D
+  u16 _09;                              // 0x007E
+  u32 _10;                              // 0x0080
+  void *mTalkCursor;                    // TTalkCursor
   u32 _88[0x18 / 4];
-  TBaseNPC *mTalkingNPC;    // 0x00A0
+  TBaseNPC *mTalkingNPC; // 0x00A0
   u32 _A4[2];
   u32 *mpNextState;         // 0x00AC
   u32 _11;                  // 0x00B0

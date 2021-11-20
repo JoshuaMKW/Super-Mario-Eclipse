@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../JSU/JSUInputStream.hxx"
+#include "JSU/JSUInputStream.hxx"
 #include "J2DPane.hxx"
 #include "types.h"
 

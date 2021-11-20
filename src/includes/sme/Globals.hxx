@@ -2,8 +2,8 @@
 
 #include "types.h"
 #include "defines.h"
-#include "sms/JSystem/JGeometry.hxx"
-#include "sms/JSystem/JKR/JKRHeap.hxx"
+#include "JGeometry.hxx"
+#include "JKR/JKRHeap.hxx"
 #include "sms/actor/Mario.hxx"
 #include "sms/option/CardManager.hxx"
 #include "sms/SMS.hxx"

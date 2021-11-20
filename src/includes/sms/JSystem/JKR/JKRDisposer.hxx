@@ -1,7 +1,7 @@
 #pragma once
 
 #include "types.h"
-#include "../JSU/JSUList.hxx"
+#include "JSU/JSUList.hxx"
 
 class JKRDisposer
 {

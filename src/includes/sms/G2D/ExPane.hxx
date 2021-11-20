@@ -2,8 +2,8 @@
 
 #include "types.h"
 #include "sms/GC2D/Coord2D.hxx"
-#include "sms/JSystem/J2D/J2DPane.hxx"
-#include "sms/JSystem/JUT/JUTRect.hxx"
+#include "J2D/J2DPane.hxx"
+#include "JUT/JUTRect.hxx"
 
 class TExPane {
 public:

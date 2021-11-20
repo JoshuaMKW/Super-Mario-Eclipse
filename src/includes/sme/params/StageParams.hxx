@@ -2,9 +2,9 @@
 
 #include "DVD.h"
 #include "ctype.h"
-#include "sms/JSystem/JGeometry.hxx"
-#include "sms/JSystem/JSU/JSUFileStream.hxx"
-#include "sms/JSystem/JUT/JUTColor.hxx"
+#include "JGeometry.hxx"
+#include "JSU/JSUFileStream.hxx"
+#include "JUT/JUTColor.hxx"
 #include "sms/sound/MSound.hxx"
 #include "string.h"
 #include "types.h"

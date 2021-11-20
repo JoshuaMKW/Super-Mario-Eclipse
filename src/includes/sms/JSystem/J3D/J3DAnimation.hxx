@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../JUT/JUTNameTab.hxx"
+#include "JUT/JUTNameTab.hxx"
 #include "J3DTransform.hxx"
 #include "types.h"
 

@@ -1,5 +1,5 @@
 #include "sms/actor/item/Shine.hxx"
-#include "sms/JSystem/JGeometry.hxx"
+#include "JGeometry.hxx"
 #include "sms/game/Conductor.hxx"
 #include "sms/sound/MSBGM.hxx"
 

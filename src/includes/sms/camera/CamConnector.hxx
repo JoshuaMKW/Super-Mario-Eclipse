@@ -1,6 +1,6 @@
 #pragma once
 
-#include "sms/JSystem/JDrama.hxx"
+#include "JDrama/JDRViewConnector.hxx"
 
 class TCamConnector : public JDrama::TViewConnector
 {

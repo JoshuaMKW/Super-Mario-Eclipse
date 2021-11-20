@@ -3,8 +3,8 @@
 #include "libs/sLogging.hxx"
 #include "libs/sMath.hxx"
 #include "mem.h"
-#include "sms/JSystem/JGeometry.hxx"
-#include "sms/JSystem/JKR/JKRHeap.hxx"
+#include "JGeometry.hxx"
+#include "JKR/JKRHeap.hxx"
 
 using namespace SME;
 using namespace SME::Util::Math;

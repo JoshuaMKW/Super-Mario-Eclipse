@@ -3,8 +3,8 @@
 #include "types.h"
 #include "MTX.h"
 #include "J2DPane.hxx"
-#include "../JSU/JSUInputStream.hxx"
-#include "../JUT/JUTTexture.hxx"
+#include "JSU/JSUInputStream.hxx"
+#include "JUT/JUTTexture.hxx"
 
 enum J2DBinding
 {

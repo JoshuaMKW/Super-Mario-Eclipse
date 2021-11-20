@@ -1,0 +1,4 @@
+--------------------------------------
+KuriboConverter v1.0 by riidefi
+ Compatible with kernel version 0
+--------------------------------------

@@ -6,7 +6,7 @@
 
 namespace JGadget {
 
-template <typename _T, typename _A> class TVector {
+template <class _T, template<class> class _A> class TVector {
   class TNode_ {
     TNode_ *mPrev;
     TNode_ *mNext;
@@ -47,7 +47,7 @@ public:
   f32 _10;
   u32 _14;
 
-  class TVector_pointer_void : public TVector<void *, JGadget::TAllocator> {
+  class TVector_pointer_void : public TVector<void *, TAllocator> {
     TVector_pointer_void();
     ~TVector_pointer_void();
 

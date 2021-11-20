@@ -2,6 +2,7 @@
 #include "printf.h"
 #include "J2D/J2DOrthoGraph.hxx"
 #include "J2D/J2DTextBox.hxx"
+#include "J3D/J3DVertex.hxx"
 #include "sms/talk/Talk2D2.hxx"
 #include "string.h"
 

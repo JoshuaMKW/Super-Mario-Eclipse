@@ -17,14 +17,12 @@ public:
   virtual void makeObjDefault() override;
   virtual f32 getDepthAtFloating() override;
   virtual s32 getLivingTime() const override;
-  virtual void appearing() override;
-  virtual void breaking() override;
-  virtual void waitingToAppear() override;
   virtual void hold(TTakeActor *) override;
   virtual void put() override;
   virtual void touchGround(JGeometry::TVec3<f32> *) override;
   virtual void checkWallCollision(JGeometry::TVec3<f32> *) override;
-  virtual void touchWall(JGeometry::TVec3<f32> *, TBGWallCheckRecord *) override;
+  virtual void touchWall(JGeometry::TVec3<f32> *,
+                         TBGWallCheckRecord *) override;
   virtual void touchRoof(JGeometry::TVec3<f32> *) override;
   virtual void rebound(JGeometry::TVec3<f32> *);
   virtual void touchWaterSurface();

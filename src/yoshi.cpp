@@ -132,7 +132,7 @@ void Patch::Yoshi::fixYoshiJuiceDecrement() {
 
   TMario *player = yoshi->mMario;
   if (player->mFludd->mIsEmitWater && yoshi->isMounted())
-    yoshi->mCurJuice -= player->mFludd->mEmitInfo->mEmitCount;
+    yoshi->mCurJuice -= player->mFludd->mEmitInfo->mNum.get();
 }
 
 // 0x8024E58C

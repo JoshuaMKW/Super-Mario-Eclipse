@@ -2,7 +2,7 @@
 
 #include "types.h"
 #include "sms/actor/LiveActor.hxx"
-#include "sms/node/GraphTracer.hxx"
+#include "sms/graph/GraphTracer.hxx"
 
 class TSpineEnemy : public TLiveActor
 {

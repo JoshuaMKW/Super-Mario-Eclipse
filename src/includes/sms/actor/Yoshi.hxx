@@ -1,7 +1,7 @@
 #pragma once
 
 #include "types.h"
-#include "sms/actor/MActor.hxx"
+#include "sms/M3DUtil/MActor.hxx"
 #include "JDrama/JDRGraphics.hxx"
 #include "JGeometry.hxx"
 #include "sms/object/EggYoshi.hxx"

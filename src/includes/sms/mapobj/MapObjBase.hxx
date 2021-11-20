@@ -1,12 +1,13 @@
 #pragma once
 
+#include "types.h"
 #include "GX.h"
+
 #include "J3D/J3DModel.hxx"
 #include "JSU/JSUMemoryStream.hxx"
+#include "MapObjInit.hxx"
 #include "sms/actor/HitActor.hxx"
 #include "sms/actor/LiveActor.hxx"
-#include "types.h"
-
 
 class TMapObjBase : public TLiveActor {
 public:
@@ -154,6 +155,10 @@ public:
   u16 _01;             // 0x00FE
   u32 _02;             // 0x0100
   s32 mStateTimer;     // 0x0104
-  u32 _03[0x2C / 4];   // 0x0108
+  u32 _03;   // 0x0108
+  JGeometry::TVec3<f32> mInitialPosition; // 0x010C
+  JGeometry::TVec3<f32> mInitialRotation; // 0x0118
+  u32 _124[3];
+  ObjData *mObjData;   // 0x0130
   u32 mMapObjID;       // 0x0134
 };

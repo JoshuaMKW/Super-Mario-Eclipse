@@ -6,6 +6,8 @@
 #include "sms/enemy/EnemyMario.hxx"
 #include "sms/npc/BaseNPC.hxx"
 
+#include "sme/libs/sContainer.hxx"
+
 #include "SME.hxx"
 
 using namespace SME;
@@ -112,16 +114,34 @@ void Patch::Debug::updateDebugCollision(TMario *player) {
   return;
 }
 
+static TRingBuffer<16, TWaterBalloon> sBalloonBuffer;
+TWaterBalloon *sWaterBalloon;
+
 void createWaterBalloonAndThrow(TMario *player) {
+  if (player->mHeldObject)
+    return;
+
   #if 1
-  TWaterBalloon *balloon = new TWaterBalloon("WaterBalloon");
+  if (!sWaterBalloon) {
+    sWaterBalloon = new TWaterBalloon("waterballoon");
+    sWaterBalloon->initAndRegister("waterballoon");
+  } else {
+    sWaterBalloon->kill();
+  }
 
-  //balloon->initAndRegister("WaterBalloon");
-  //balloon->initAndRegister("WoodBarrel");
-  gpMarDirector->mPerformListMovement->push_back(balloon, 1);
-  balloon->awake();
+  sWaterBalloon->mPosition.set(player->mPosition);
+  sWaterBalloon->appear();
 
-  balloon->hold(player);
+  bool received = sWaterBalloon->receiveMessage(player, 4); // 4 = grab
+  if (received) {
+    player->mHeldObject = sWaterBalloon;
+    player->_380 = 2;
+  } else {
+    player->mHeldObject = nullptr;
+  }
+  
+
+  #if 0
   if (player->mState == static_cast<u32>(TMario::State::IDLE)) {
     changePlayerStatus__6TMarioFUlUlb(player, 0x80000387, 0, 0);
   } else if (player->mState == static_cast<u32>(TMario::State::RUNNING)) {
@@ -132,4 +152,11 @@ void createWaterBalloonAndThrow(TMario *player) {
     changePlayerStatus__6TMarioFUlUlb(player, 0x820008AB, 0, 0);
   }
   #endif
+  #endif
 }
+
+static void setEmitPrm() {
+  TWaterBalloon::sEmitInfo = new TWaterEmitInfo("/mario/waterballoon/waterballoon.prm");
+  TParams::finalize();
+}
+SME_PATCH_BL(SME_PORT_REGION(0x802B8DC8, 0, 0, 0), setEmitPrm);

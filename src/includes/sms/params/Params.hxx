@@ -9,15 +9,16 @@
 
 class TParams {
 public:
-  TParams() : _00(0), mBaseParam(nullptr) {}
+  TParams() : mPrmPath(nullptr), mBaseParam(nullptr) {}
   ~TParams() {}
 
-  void finalize();
+  static void finalize();
+  
   void init();
   void load(const char *);
   void load(JSUMemoryInputStream &);
 
-  u32 _00;
+  char *mPrmPath;
   TBaseParam *mBaseParam;
 
   static JKRMemArchive *mArc;
@@ -35,7 +36,7 @@ public:
   T get() const { return mValue; }
   void set(T param) { mValue = param; }
 
-  void load(JSUMemoryInputStream &stream) {
+  void load(JSUMemoryInputStream &stream) override {
     u32 fakeit;
     SME_FROM_GPR(29, fakeit); // Hack to keep r29 from being used..
 

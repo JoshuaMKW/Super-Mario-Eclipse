@@ -1,6 +1,7 @@
 #include "JGeometry.hxx"
 #include "sms/actor/Mario.hxx"
 #include "sms/sound/MSoundSESystem.hxx"
+#include "sms/sound/MSound.hxx"
 
 #include "MTX.h"
 #include "SME.hxx"
@@ -426,6 +427,16 @@ u32 Patch::Collision::updateCollisionContext(TMario *player) {
   return 1;
 }
 
+static void electrifyPlayer(TMario *player) {
+  changePlayerStatus__6TMarioFUlUlb(player, 0x20338, 0, false);
+  if (gpMSound->gateCheck(0x1814)) {
+    MSoundSESystem::MSoundSE::startSoundActor(0x1814, reinterpret_cast<Vec *>(&player->mPosition), 0, nullptr, 0, 4);
+  }
+  if (gpMSound->gateCheck(0x3806)) {
+    MSoundSESystem::MSoundSE::startSoundActor(0x3806, reinterpret_cast<Vec *>(&player->mPosition), 0, nullptr, 0, 4);
+  }
+}
+
 // 0x80250C9C
 // extern -> SME.cpp
 static TBGCheckData *masterGroundCollisionHandler() {
@@ -489,6 +500,8 @@ static TBGCheckData *masterGroundCollisionHandler() {
   case 17095:
     changeNozzleType(player, type);
     break;
+  case 16081:
+    electrifyPlayer(player);
   }
   return floorCol;
 }

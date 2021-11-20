@@ -49,7 +49,7 @@ public:
   iterator mStart;
 };
 
-template <typename _T, typename _A> class TList {
+template <class _T, template<class> class _A> class TList {
   class TNode_ {
     TNode_ *mPrev;
     TNode_ *mNext;
@@ -80,8 +80,8 @@ public:
     TNode_ *prev = iter->prev;
     TNode_ *next = iter->next;
 
-    next.mPrev = prev;
-    prev.mNext = next;
+    next->mPrev = prev;
+    prev->mNext = next;
     delete iter.mCurrent;
 
     mSize -= 1;
@@ -104,8 +104,8 @@ public:
     if (!newNode)
       return mStart;
 
-    current.mNext = newNode;
-    next.mPrev = newNode;
+    current->mNext = newNode;
+    next->mPrev = newNode;
     mSize += 1;
 
     return iterator(newNode);
@@ -139,38 +139,39 @@ public:
   TSingleLinkListNode *mEnd;
 };
 
-template <typename _T, size_t size> class TSingleLinkList {
+template <typename _T, size_t _S> class TSingleLinkList {
 public:
   class iterator {
   public:
-    iterator(TSingleLinkListNode *iterable) : mCurrent(&iterable) {}
-    iterator(TSingleNodeLinkList::iterator iter) : mCurrent(iter.mNodeList) {}
+    iterator(TSingleLinkListNode *node) : mCurrent(node) {}
+    iterator(const iterator &iter) : mCurrent(iter.mCurrent) {}
 
-    TSingleLinkListNode **mCurrent;
+    TSingleLinkListNode *mCurrent;
   };
   size_t mSize;
   TSingleLinkList mNode;
 };
 
 class TList_pointer_void : public TAllocator<void *> {
-  void insert(TList<void *, TAllocator<void *>>::iterator iterator,
+public:
+  void insert(TList<void *, TAllocator>::iterator iterator,
               void **node);
 };
 
 template <typename _T> class TList_pointer : public TList_pointer_void {
   class iterator {
   public:
-    iterator(_T *iterable) : mCurrent(&iterable) {}
-    iterator(TSingleNodeLinkList::iterator iter) : mCurrent(iter.mNodeList) {}
+    iterator(_T *node) : mCurrent(node) {}
+    iterator(const iterator &iter) : mCurrent(iter.mCurrent) {}
 
-    _T **mCurrent;
+    _T *mCurrent;
   };
 
   iterator end() { return iterator(mEnd); }
 
   void insert(TList_pointer<_T>::iterator iterator, _T **node) {
     TList_pointer_void::insert(
-        reinterpret_cast<TList<void *, TAllocator<void *>>::iterator>(iterator),
+        reinterpret_cast<TList<void *, TAllocator>::iterator>(iterator),
         node);
   }
 

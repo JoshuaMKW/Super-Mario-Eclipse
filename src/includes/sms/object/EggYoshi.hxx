@@ -2,7 +2,7 @@
 
 #include "types.h"
 #include "JSU/JSUMemoryStream.hxx"
-#include "sms/actor/MActor.hxx"
+#include "sms/M3DUtil/MActor.hxx"
 #include "sms/actor/HitActor.hxx"
 #include "sms/mapobj/MapObjGeneral.hxx"
 

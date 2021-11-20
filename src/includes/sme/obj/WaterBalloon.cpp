@@ -1,93 +1,128 @@
-#include "WaterBalloon.hxx"
-#include "sms/mapobj/MapObjGeneral.hxx"
 #include "GX.h"
 #include "types.h"
 
-#include "SME.hxx"
+#include "J3D/J3DModel.hxx"
+#include "J3D/J3DModelLoaderDataBase.hxx"
+#include "sms/M3DUtil/MActor.hxx"
+#include "sms/M3DUtil/MActorKeeper.hxx"
+#include "sms/manager/ModelWaterManager.hxx"
+#include "sms/mapobj/MapObjBall.hxx"
+#include "sms/nozzle/Watergun.hxx"
 
-TWaterBalloon::TWaterBalloon(const char *name) : TMapObjGeneral(name) {}
+#include "SME.hxx"
+#include "WaterBalloon.hxx"
+
+TWaterEmitInfo *TWaterBalloon::sEmitInfo = nullptr;
+
+TWaterBalloon::TWaterBalloon(const char *name)
+    : TMapObjBall(name), mIsExplosive(false) {}
+
+void TWaterBalloon::init(TLiveManager *manager) {
+  mLiveManager = manager;
+  mLiveManager->manageObj(this);
+
+  sEmitInfo = new TWaterEmitInfo("/Mario/waterballoon/waterballoon.prm");
+}
+
+void TWaterBalloon::initActorData() {
+  TMapObjBase::initActorData();
+
+  /*
+  MActorAnmData *anmData = new MActorAnmData();
+  anmData->init("/mario/waterballoon", nullptr);
+
+  MActor *actor = new MActor(anmData);
+
+  void *resource =
+  JKRFileLoader::getGlbResource("/mario/waterballoon/waterballoon.bmd");
+  J3DModelData *modelData =
+      J3DModelLoaderDataBase::load(resource, 0);
+
+  J3DModel *model = new J3DModel(modelData, 0, 1);
+  actor->setModel(model, 0);
+
+  mActorData = actor;
+  */
+}
 
 TWaterBalloon::~TWaterBalloon() {}
 
 void TWaterBalloon::perform(u32 flags, JDrama::TGraphics *graphics) {
-  Mtx matrix;
-  PSMTXScale(matrix, mSize.x, mSize.y, mSize.z);
-  PSMTXTrans(matrix, mPosition.x, mPosition.y, mPosition.z);
-
-  GXClearVtxDesc();
-
-  GXSetVtxDesc(GX_VA_POS, GX_INDEX8);
-  GXSetVtxDesc(GX_VA_CLR0, GX_INDEX8);
-
-  GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XYZ, GX_F32, 0);
-  GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_CLR0, GX_CLR_RGBA, GX_RGBA8, 0);
-
-  GXSetCullMode(GX_CULL_BACK);
-  GXSetNumChans(1);
-
-  GXSetChanCtrl(4, 0, 0, 0, 1, 2, 2);
-  GXSetChanCtrl(5, 0, 0, 0, 0, 0, 2);
-
-  GXSetChanMatColor(4, GXColor{.r = 127, .g = 20, .b = 127});
-
-  GXSetNumTexGens(0);
-  GXSetCurrentMtx(0);
-
-  GXLoadPosMtxImm(matrix, 0);
-  GXLoadNrmMtxImm(matrix, 0);
-
-  GXSetNumTevStages(1);
-  GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORDNULL, GX_TEXMAP_NULL, GX_COLOR0);
-
-  GXSetTevOp(GX_TEVSTAGE0, 4);
-
-  GXSetZCompLoc(GX_TRUE);
-  GXSetZMode(GX_TRUE, GX_ZC_LINEAR, GX_TRUE);
-
-  GXSetAlphaCompare(GX_ALPHA_BUMP, 0, 1, GX_ALPHA_BUMP, 0);
-  GXSetBlendMode(GX_BM_BLEND, 1, 0, 5);
-
-  GXDrawSphere(8, 8);
+  TMapObjBall::perform(flags, graphics);
+  if (flags & PERFORM_ON_MOVEMENT) {
+    sEmitInfo->mPos.set(mPosition);
+  }
 }
-
 
 bool TWaterBalloon::receiveMessage(THitActor *actor, u32 message) {
-  return TMapObjGeneral::receiveMessage(actor, message);
+  return TMapObjBall::receiveMessage(actor, message);
 }
 
-void TWaterBalloon::control() { TMapObjGeneral::control(); }
+void TWaterBalloon::control() { TMapObjBall::control(); }
 
-void TWaterBalloon::kill() { TMapObjGeneral::kill(); }
+void TWaterBalloon::kill() { TMapObjBall::kill(); }
 
-void TWaterBalloon::appear() { TMapObjGeneral::appear(); }
+void TWaterBalloon::appear() { TMapObjBall::appear(); }
 
-void TWaterBalloon::touchActor(THitActor *actor) { blast(); }
-
-s32 TWaterBalloon::getLivingTime() const { return -1; }
-s32 TWaterBalloon::getFlushTime() const { return -1; }
-
-void TWaterBalloon::hold(TTakeActor *actor) { TMapObjGeneral::hold(actor); }
-void TWaterBalloon::put() { TMapObjGeneral::put(); }
-
-void TWaterBalloon::thrown() {
-  constexpr f32 YSpeed = 30.0f;
-  constexpr f32 FSpeed = 50.0f;
-  SME_DEBUG_LOG("Thrown, holder = %X\n", mHolder);
-  mSpeed.y = YSpeed;
-  mSpeed.x = -sinf(mRotation.y) * FSpeed;
-  mSpeed.z = cosf(mRotation.y) * FSpeed;
-
-  mHolder = nullptr;
+void TWaterBalloon::touchActor(THitActor *actor) {
+  TMapObjBase::touchActor(actor);
+  blast();
 }
 
-void TWaterBalloon::touchGround(JGeometry::TVec3<f32> *pos) { blast(); }
+s32 TWaterBalloon::getLivingTime() const { return 0x7FFFFFFF; }
+s32 TWaterBalloon::getFlushTime() const { return 0x7FFFFFFF; }
 
-void TWaterBalloon::touchWall(JGeometry::TVec3<f32> *pos, TBGWallCheckRecord *record) { blast(); }
+void TWaterBalloon::hold(TTakeActor *actor) {
+  TMapObjBall::hold(actor);
+  mIsExplosive = true;
+}
+void TWaterBalloon::put() {
+  TMapObjBall::put();
+  mIsExplosive = false;
+}
+
+void TWaterBalloon::thrown() { TMapObjBall::thrown(); }
+
+void TWaterBalloon::touchGround(JGeometry::TVec3<f32> *pos) {
+  if (PSVECMag(reinterpret_cast<Vec *>(&mSpeed)) >= 20.0f || mSpeed.y < -10.0f)
+    blast();
+  else {
+    TMapObjBall::touchGround(pos);
+  }
+}
+
+void TWaterBalloon::touchWall(JGeometry::TVec3<f32> *pos,
+                              TBGWallCheckRecord *record) {
+  blast();
+}
+
+void TWaterBalloon::touchPollution()  {
+  blast();
+}
+
+
+void TWaterBalloon::touchWaterSurface() {
+  blast();
+}
 
 void TWaterBalloon::touchRoof(JGeometry::TVec3<f32> *pos) { blast(); }
 
+void TWaterBalloon::kicked() {
+  blast();
+}
 
 void TWaterBalloon::blast() {
-  SME_DEBUG_LOG("Blasting!\n");
-  kill();
+  TWaterEmitInfo emitInfo = *sEmitInfo;
+
+  JGeometry::TVec3<f32> pos(emitInfo.mPos.get());
+  pos.y += 100.0f;
+
+  emitInfo.mPos.set(pos);
+  emitInfo.mV.set(JGeometry::TVec3<f32>{0.0f, -10.0f, 0.0f});
+  emitInfo.mSize.set(80.0f);
+  emitInfo.mNum.set(1);
+
+  gpModelWaterManager->emitRequest(*sEmitInfo);
+  gpModelWaterManager->emitRequest(emitInfo);
+  makeObjDead();
 }

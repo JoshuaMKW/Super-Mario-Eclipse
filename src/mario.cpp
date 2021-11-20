@@ -1019,19 +1019,22 @@ SME_WRITE_32(SME_PORT_REGION(0x80256CFC, 0, 0, 0), 0xEC01283C);
 SME_WRITE_32(SME_PORT_REGION(0x80256D04, 0, 0, 0), 0xC05E003C);
 SME_WRITE_32(SME_PORT_REGION(0x80256D0C, 0, 0, 0), 0xEC0100BC);
 
-static void dynamicFallDamage(TMario *mario, int dmg, int type, int emitcount,
+static void dynamicFallDamage(TMario *player, int dmg, int type, int emitcount,
                               int tremble) {
 #define floorDamageExec__6TMarioFiiii                                          \
   ((void (*)(TMario *, int, int, int, int))SME_PORT_REGION(0x8024303C, 0, 0, 0))
 
-  dmg *= static_cast<int>((mario->mLastGroundedPos.y - mario->mPosition.y) /
-                          (mario->mDeParams.mDamageFallHeight.get() / 1.4f));
+  Class::TPlayerData *playerData = TGlobals::getPlayerData(player);
+
+  dmg *= static_cast<int>((player->mLastGroundedPos.y - player->mPosition.y) /
+                          (player->mDeParams.mDamageFallHeight.get() / 1.4f));
   if (dmg > 2) {
     type = 0; // shaky
     emitcount = (dmg - 2) * 3;
   }
 
-  floorDamageExec__6TMarioFiiii(mario, dmg, type, emitcount, tremble);
+  if (player->mSpeed.y <= -75.0f * player->mJumpParams.mGravity.get())
+    floorDamageExec__6TMarioFiiii(player, dmg, type, emitcount, tremble);
 
 #undef floorDamageExec__6TMarioFiiii
 }

@@ -1,9 +1,12 @@
 #pragma once
 
+#include "types.h"
+
 #include "JDrama/JDRGraphics.hxx"
 #include "JGeometry.hxx"
 #include "JSU/JSUMemoryStream.hxx"
-#include "sms/actor/MActor.hxx"
+#include "sms/M3DUtil/MActor.hxx"
+#include "sms/M3DUtil/MActorKeeper.hxx"
 #include "sms/actor/RidingInfo.hxx"
 #include "sms/actor/SpineBase.hxx"
 #include "sms/actor/TakeActor.hxx"
@@ -11,8 +14,6 @@
 #include "sms/m3d/LodAnm.hxx"
 #include "sms/manager/LiveManager.hxx"
 #include "sms/sound/MAnmSound.hxx"
-#include "types.h"
-
 
 class TMapCollisionManager;
 
@@ -59,7 +60,7 @@ public:
 
   TLiveManager *mLiveManager; // 0x0070
   MActor *mActorData;         // 0x0074
-  u32 *_78;                   // TMActorKeeper
+  TMActorKeeper *mMActorKeeper;
   u16 mActorIndex;            // _7C
   MAnmSound *mAnmSound;       // _80
   char *mBasName;             // _84

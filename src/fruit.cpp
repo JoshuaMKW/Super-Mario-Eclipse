@@ -11,7 +11,7 @@ bool Patch::Fruit::canFruitDieWater(TResetFruit *fruit) {
     fruit->touchWaterSurface();
     return true;
   } else {
-    fruit->mStateFlags.mHasPhysics = true;
+    fruit->mStateFlags.asFlags.mHasPhysics = true;
     if (gpMSound->gateCheck(14453)) {
       Vec fruitPos;
       fruit->JSGGetTranslation(&fruitPos);

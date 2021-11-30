@@ -8,6 +8,7 @@ import shutil
 import subprocess
 import sys
 import time
+from enum import Enum
 from fnmatch import fnmatch
 from io import BytesIO, StringIO
 from pathlib import Path
@@ -23,13 +24,13 @@ from prmparser import PrmFile
 
 from compiler import Compiler, Define
 
-TMPDIR = Path("tmp-compiler")
+__TMPDIR = Path("tmp-compiler")
 
 
 @atexit.register
 def clean_resources():
-    if TMPDIR.is_dir():
-        shutil.rmtree(TMPDIR)
+    if __TMPDIR.is_dir():
+        shutil.rmtree(__TMPDIR)
 
 
 def wrap_printer(msg: str = "") -> function:
@@ -47,7 +48,7 @@ def wrap_printer(msg: str = "") -> function:
     return decorater_inner
 
 
-class Region:
+class Region(str, Enum):
     US = "US"
     EU = "EU"
     JP = "JP"
@@ -55,7 +56,7 @@ class Region:
     ANY = "ANY"
 
 
-class Patcher:
+class Patcher(str, Enum):
     KAMEK = "KAMEK"
     KURIBO = "KURIBO"
 
@@ -168,11 +169,12 @@ class FileStream(object):
 
 
 class FilePatcher(Compiler):
-    class State:
+    class State(str, Enum):
         DEBUG = "DEBUG"
         RELEASE = "RELEASE"
+        RELEASE_DEB = "RELEASE_DEB"
 
-    class BootType:
+    class BootType(str, Enum):
         DOL = "DOL"
         ISO = "ISO"
         NONE = "NONE"
@@ -212,8 +214,10 @@ class FilePatcher(Compiler):
 
         _defines = []
         if self.is_release():
+            debugInfo = Define(
+                "SME_DEBUG") if self.state == FilePatcher.State.RELEASE_DEB else Define("SME_RELEASE")
             _defines.extend(
-                (Define("SME_MAX_SHINES", f"{self.maxShines}"), Define("SME_RELEASE")))
+                (Define("SME_MAX_SHINES", f"{self.maxShines}"), debugInfo))
         elif self.is_debug():
             _defines.extend(
                 (Define("SME_MAX_SHINES", f"{self.maxShines}"), Define("SME_DEBUG")))
@@ -242,7 +246,7 @@ class FilePatcher(Compiler):
             return self.projectDir / "bin" / "debug" / "any"
 
     def is_release(self) -> bool:
-        return self.state == FilePatcher.State.RELEASE
+        return self.state in {FilePatcher.State.RELEASE, FilePatcher.State.RELEASE_DEB}
 
     def is_debug(self) -> bool:
         return self.state == FilePatcher.State.DEBUG
@@ -581,7 +585,7 @@ def main():
     parser.add_argument("-s", "--startaddr", help="Starting address for the linker and code",
                         default="0x80000000", metavar="ADDR")
     parser.add_argument("-b", "--build", help="Build type; R=Release, D=Debug",
-                        choices=["R", "D"], default="D")
+                        choices=["R", "D", "RD"], default="D")
     parser.add_argument("-c", "--compiler", choices=[
                         Compiler.Compilers.CODEWARRIOR, Compiler.Compilers.CLANG, Compiler.Compilers.GCC],
                         default=Compiler.Compilers.CODEWARRIOR, help="Compiler to build with")
@@ -611,6 +615,8 @@ def main():
 
     if args.build == "D":
         build = FilePatcher.State.DEBUG
+    elif args.build == "RD":
+        build = FilePatcher.State.RELEASE_DEB
     else:
         build = FilePatcher.State.RELEASE
 

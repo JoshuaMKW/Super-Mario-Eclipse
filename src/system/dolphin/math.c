@@ -7,7 +7,7 @@ f64 sqrt(f64 d)
         return d;
 
     const f64 sqrte = __frsqrte(d);
-    return __frsp(d * (-((d * sqrte * sqrte) - 3.0) * (sqrte * 0.5)));
+    return d * (-((d * sqrte * sqrte) - 3.0) * (sqrte * 0.5));
 }
 
 f32 sqrtf(f32 d)
@@ -15,6 +15,6 @@ f32 sqrtf(f32 d)
     if (d <= 0.0)
         return d;
 
-    const f32 sqrte = __frsqrte(d);
+    const f32 sqrte = __frsqrtes(d);
     return d * (-((d * sqrte * sqrte) - 3.0) * (sqrte * 0.5));
 }

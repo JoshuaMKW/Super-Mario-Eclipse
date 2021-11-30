@@ -3,6 +3,8 @@
 #include "MapObjGeneral.hxx"
 #include "JDrama/JDRGraphics.hxx"
 #include "JSU/JSUMemoryStream.hxx"
+#include "sms/graph/GraphWeb.hxx"
+#include "sms/graph/GraphTracer.hxx"
 
 class TRailMapObj : public TMapObjBase {
 public:
@@ -12,7 +14,7 @@ public:
         RESETTING
     };
 
-    TRailMapObj();
+    TRailMapObj(const char *);
     virtual ~TRailMapObj();
 
     virtual void load(JSUMemoryInputStream &) override;
@@ -31,12 +33,11 @@ public:
     void moveToNextNode(f32);
     void resetStep(f32);
 
-    void *mGraphTracer; // TGraphTracer *
+    TGraphTracer *mGraphTracer;
     s32 mDistanceToNext; // ??
     u32 _140; // flags
     f32 _144;
     u8 mRailStatus;
     s16 mContextTimer; // default = 180
     u8 mLastRailStatus; // ?
-    s32 mLeafCount;
 };

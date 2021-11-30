@@ -22,7 +22,7 @@ public:
 	virtual void killByTimer(int);
 	virtual void taken(THitActor *);
 
-    u32 *_148;
+    u32 *_148; // THideObjBase *
     s32 mKillTimer; // _14C
     u32 mStateTimerSet; // ?
 

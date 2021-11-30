@@ -82,20 +82,23 @@ public:
   u8 _E8;
   TMapCollisionManager *mColMgr; // _EC
 
-  struct {
-    u32 _00 : 7;
-    bool mIsSunken : 1;
-    u32 _01 : 1;
-    bool mIsRide : 1;
-    u32 _02 : 1;
-    bool mCanBeTaken : 1;
-    u32 _03 : 2;
-    bool mCanTalk : 1;
-    u32 _04 : 10;
-    bool mHasPhysics : 1;
-    u32 _05 : 1;
-    bool mClipFromScene : 1;
-    u32 _06 : 2;
-    bool mIsObjDead : 1;
+  union {
+    u32 asU32;
+    struct {
+      u32 _00 : 7;
+      bool mIsSunken : 1;
+      u32 _01 : 1;
+      bool mIsRide : 1;
+      u32 _02 : 1;
+      bool mCanBeTaken : 1;
+      u32 _03 : 2;
+      bool mCanTalk : 1;
+      u32 _04 : 10;
+      bool mHasPhysics : 1;
+      u32 _05 : 1;
+      bool mClipFromScene : 1;
+      u32 _06 : 2;
+      bool mIsObjDead : 1;
+    } asFlags;
   } mStateFlags;
 };

@@ -231,6 +231,7 @@ public:
   JGeometry::TVec3<f32> mYoshiWaterSpeed;
   FluddHistory mFluddHistory;
   ParamHistory mDefaultAttrs;
+  TMario::TDirtyParams mDefaultDirtyParams;
 };
 
 } // namespace SME::Class

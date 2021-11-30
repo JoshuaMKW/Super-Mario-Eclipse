@@ -1,6 +1,8 @@
 #include "sms/mapobj/MapObjBall.hxx"
+#include "sms/mapobj/MapObjInit.hxx"
 #include "sms/nozzle/Watergun.hxx"
 #include "types.h"
+
 
 class TWaterBalloon : public TMapObjBall {
 public:
@@ -33,3 +35,5 @@ public:
   bool mIsExplosive;
   static TWaterEmitInfo *sEmitInfo;
 };
+
+extern ObjData waterBalloonData;

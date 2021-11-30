@@ -13,18 +13,19 @@
 #include "CheatHandler.hxx"
 #include "Globals.hxx"
 #include "Player.hxx"
+#include "KeyCode.hxx"
 #include "funcs.hxx"
 #include "stage/FileUtils.hxx"
 
 #include "params/MarioParams.hxx"
 #include "params/StageParams.hxx"
 
+#include "J2D/J2DOrthoGraph.hxx"
+#include "JGeometry.hxx"
 #include "MTX.h"
 #include "OS.h"
 #include "defines.h"
 #include "macros.h"
-#include "J2D/J2DOrthoGraph.hxx"
-#include "JGeometry.hxx"
 #include "sms/SMS.hxx"
 #include "sms/enemy/EnemyMario.hxx"
 #include "sms/game/Conductor.hxx"
@@ -34,7 +35,6 @@
 #include "sms/sound/MSBGM.hxx"
 #include "sms/talk/Talk2D2.hxx"
 #include "types.h"
-
 
 #ifndef KURIBO_NO_TYPES
 #define KURIBO_NO_TYPES
@@ -49,10 +49,8 @@
 #if defined(SME_BUILD_KURIBO)
 #define SME_PATCH_B(source, target) pp::PatchB(source, target)
 #define SME_PATCH_BL(source, target) pp::PatchBL(source, target)
-#define SME_WRITE_8(source, value)                                             \
-  pp::Patch8(source, value)
-#define SME_WRITE_16(source, value)                                            \
-  pp::Patch16(source, value)
+#define SME_WRITE_8(source, value) pp::Patch8(source, value)
+#define SME_WRITE_16(source, value) pp::Patch16(source, value)
 #define SME_WRITE_32(source, value) pp::Patch32(source, value)
 #elif defined(SME_BUILD_KAMEK) || defined(SME_BUILD_KAMEK_INLINE)
 #define SME_PATCH_B(source, target) kmBranch(source, target)

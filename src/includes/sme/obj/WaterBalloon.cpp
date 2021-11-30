@@ -7,6 +7,7 @@
 #include "sms/M3DUtil/MActorKeeper.hxx"
 #include "sms/manager/ModelWaterManager.hxx"
 #include "sms/mapobj/MapObjBall.hxx"
+#include "sms/mapobj/MapObjInit.hxx"
 #include "sms/nozzle/Watergun.hxx"
 
 #include "SME.hxx"
@@ -126,3 +127,59 @@ void TWaterBalloon::blast() {
   gpModelWaterManager->emitRequest(emitInfo);
   makeObjDead();
 }
+
+static hit_data waterBalloon_hit_data{
+    .mAttackRadius = 150.0f, .mAttackHeight = 60.0f, .mReceiveRadius = 60.0f, .mReceiveHeight = 90.0f};
+
+static obj_hit_info waterBalloon_collision_data{._00 = 1,
+                                         .mType = 0xDC000000,
+                                         ._08 = 0,
+                                         .mHitData = &waterBalloon_hit_data};
+
+static sound_data waterBalloon_sound_data{
+    ._00 = 0xFFFFFFFF,
+    ._04 = 0x3801,
+    ._08 = 0xFFFFFFFF,
+    .mUnkSoundID = 0x1807,
+    .mReboundSoundID = 0xFFFFFFFF,
+    ._14 = 0xFFFFFFFF,
+    ._18 = 0xFFFFFFFF,
+    ._1C = 0xFFFFFFFF,
+    ._20 = 0xFFFFFFFF,
+    ._24 = 0xFFFFFFFF,
+};
+
+static sound_info waterBalloon_sound_info{.mLength = 10,
+                                   .mSoundData = &waterBalloon_sound_data};
+
+static ObjPhysicalData waterBalloon_physical_data{.mGravity = 0.3f,
+                                           .mFloorBounceSpeed = 0.3f,
+                                           .mWallBounceSpeed = 0.1f,
+                                           ._0C = 0.1f,
+                                           .mFloorBrakeFactor = 0.9f,
+                                           ._14 = 0.97f,
+                                           .mAirBrakeFactor = 1.0f,
+                                           ._1C = {5.0f, 0.5f, 0.7f, 0.0f},
+                                           .mThrowDistance = 2.0f,
+                                           .mThrowHeight = 15.0f};
+
+static ObjPhysicalInfo waterBalloon_physical_info{
+    ._00 = 13, .mPhysicalData = &waterBalloon_physical_data, ._0C = 2};
+
+ObjData waterBalloonData{
+    .mMdlName = "waterballoon",
+    .mObjectID = 0x40000420,
+    .mLiveManagerName =
+        sLiveManagerName, // const_cast<char *>("木マネージャー")
+    .mObjKey = nullptr,   // const_cast<char *>("waterballoon"),
+    ._10 = 0,
+    .mObjCollisionData = &waterBalloon_collision_data,
+    .mMapCollisionInfo = nullptr,
+    .mSoundInfo = &waterBalloon_sound_info,
+    .mPhysicalInfo = &waterBalloon_physical_info,
+    .mSinkData = nullptr,
+    ._28 = nullptr,
+    .mBckMoveData = nullptr,
+    ._30 = 50.0f,
+    .mUnkFlags = 0x02130100,
+    .mKeyCode = SME::Util::cexp_calcKeyCode("waterballoon")};

@@ -1,7 +1,8 @@
 #pragma once
 
-#include "types.h"
 #include "GX.h"
+#include "types.h"
+
 
 #include "J3D/J3DModel.hxx"
 #include "JSU/JSUMemoryStream.hxx"
@@ -149,16 +150,16 @@ public:
                                        const JGeometry::TVec3<f32> &, f32, f32);
   static bool waterHitPlane(THitActor *);
 
-  char *mRegisterName; // 0x00F4
-  u32 _00;             // 0x00F8
-  u16 mState;          // 0x00FC
-  u16 _01;             // 0x00FE
-  u32 _02;             // 0x0100
-  s32 mStateTimer;     // 0x0104
-  u32 _03;   // 0x0108
+  char *mRegisterName;                    // 0x00F4
+  u32 _00;                                // 0x00F8
+  u16 mState;                             // 0x00FC
+  u16 _01;                                // 0x00FE
+  u16 mSoundIDIndex;                      // 0x0100
+  s32 mStateTimer;                        // 0x0104
+  u32 _03;                                // 0x0108
   JGeometry::TVec3<f32> mInitialPosition; // 0x010C
   JGeometry::TVec3<f32> mInitialRotation; // 0x0118
   u32 _124[3];
-  ObjData *mObjData;   // 0x0130
-  u32 mMapObjID;       // 0x0134
+  ObjData *mObjData; // 0x0130
+  u32 mMapObjID;     // 0x0134
 };

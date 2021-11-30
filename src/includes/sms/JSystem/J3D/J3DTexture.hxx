@@ -14,8 +14,9 @@ public:
 class J3DTexture
 {
 public:
-	u16 _0;
-	u16 _2;
-	u32 _4;
-	u32 *vTable; // _8
+	u16 mImageNum;
+	void *mTexHeader;
+	
+	J3DTexture(u16 imagenum, void *texheader);
+	virtual ~J3DTexture();
 };

@@ -1,7 +1,7 @@
 #include "JGeometry.hxx"
 #include "sms/actor/Mario.hxx"
-#include "sms/sound/MSoundSESystem.hxx"
 #include "sms/sound/MSound.hxx"
+#include "sms/sound/MSoundSESystem.hxx"
 
 #include "MTX.h"
 #include "SME.hxx"
@@ -35,7 +35,7 @@ void Patch::Collision::checkIsGlideBounce(TMario *player) {
 
     playerData->mCollisionFlags.mIsSpinBounce = true;
     changePlayerStatus__6TMarioFUlUlb(
-        player, static_cast<u32>(TMario::State::JUMPSPIN1), 0, 0);
+        player, static_cast<u32>(TMario::State::JUMPSPINR), 0, 0);
   } else
     checkEnforceJump__6TMarioFv(player);
 }
@@ -315,6 +315,87 @@ static void warpToLinkedColPreserve(TMario *player, bool fluid) {
   }
 }
 
+static void elecPlayer(TMario *player, u8 flags) {
+  if (player->mSubState == 0 && player->mState != 0x20338) {
+    player->mHealth -= flags - 1;
+    changePlayerStatus__6TMarioFUlUlb(player, 0x20338, 0, false);
+  }
+  if (gpMSound->gateCheck(0x1814)) {
+    MSoundSESystem::MSoundSE::startSoundActor(
+        0x1814, reinterpret_cast<Vec *>(&player->mPosition), 0, nullptr, 0, 4);
+  }
+  if (gpMSound->gateCheck(0x3806)) {
+    MSoundSESystem::MSoundSE::startSoundActor(
+        0x3806, reinterpret_cast<Vec *>(&player->mPosition), 0, nullptr, 0, 4);
+  }
+}
+
+static void burnPlayer(TMario *player, u8 flags) {
+  /*
+   */
+
+  changePlayerDropping__6TMarioFUlUl(player, 0x20464, 0);
+  decHP__6TMarioFi(player, flags);
+
+  dropObject__6TMarioFv(player);
+  changePlayerStatus__6TMarioFUlUlb(player, 0x208B7, 1, false);
+  player->mSpeed.y += 20.0f;
+  emitAndBindToPosPtr__21TMarioParticleManagerFlPCQ29JGeometry8TVec3_f(
+      *(u32 *)SME_PORT_REGION(0x8040E150, 0, 0, 0), 6,
+      reinterpret_cast<Vec *>(&player->mPosition), 0, nullptr);
+  if (gpMSound->gateCheck(0x1813)) {
+    MSoundSESystem::MSoundSE::startSoundActor(
+        0x1813, reinterpret_cast<Vec *>(&player->mPosition), 0, nullptr, 0, 4);
+  }
+}
+
+static void slipFloor(TMario *player, u8 flags) {
+  const f32 strengthRun = Util::Math::scaleLinearAtAnchor<f32>(
+      static_cast<f32>(flags), 0.001f, 1.0f);
+  const f32 strengthSlide = Min(Util::Math::scaleLinearAtAnchor<f32>(
+                                    static_cast<f32>(flags), 0.001f, 1.0f),
+                                1.00001f);
+
+#define SCALE_PARAM(param, scale) param.set(param.get() * scale)
+  SCALE_PARAM(player->mDirtyParams.mBrakeStartValRun, strengthRun);
+  SCALE_PARAM(player->mDirtyParams.mBrakeStartValSlip, strengthSlide);
+  player->mDirtyParams.mPolSizeFootPrint.set(0.0f);
+  player->mDirtyParams.mPolSizeJump.set(0.0f);
+  player->mDirtyParams.mPolSizeRun.set(0.0f);
+  player->mDirtyParams.mPolSizeSlip.set(0.0f);
+  player->mDirtyParams.mDirtyMax.set(0.0f);
+#undef SCALE_PARAM
+
+  checkGraffitoSlip__6TMarioFv(player);
+}
+
+static void decHealth(TMario *player, u8 flags) {
+  decHP__6TMarioFi(player, flags);
+}
+
+static void incHealth(TMario *player, u8 flags) {
+  incHP__6TMarioFi(player, flags);
+}
+
+// Array of basic action functions bound to collision values
+static void (*sStateCBMap[])(TMario *player, u8 flags){
+    elecPlayer, burnPlayer, slipFloor, decHealth, incHealth};
+
+static void slipperyCatchingSoundCheck(u32 sound, const Vec *pos, u32 unk_1,
+                                       JAISound **out, u32 unk_2, u8 unk_3) {
+  TMario *player;
+  SME_FROM_GPR(31, player);
+
+  if (player->mFloorTriangle->mCollisionType == 16081 ||
+      player->mFloorTriangle->mCollisionType == 17081)
+    sound = 4105;
+
+  MSoundSESystem::MSoundSE::startSoundActor(sound, pos, unk_1, out, unk_2,
+                                            unk_3);
+}
+SME_PATCH_BL(SME_PORT_REGION(0x8025932C, 0, 0, 0), slipperyCatchingSoundCheck);
+SME_WRITE_32(SME_PORT_REGION(0x802596C0, 0, 0, 0), 0x60000000);
+
 #define EXPAND_WARP_SET(base)                                                  \
   (base) : case ((base) + 10) : case ((base) + 20) : case ((base) + 30)
 #define EXPAND_WARP_CATEGORY(base)                                             \
@@ -322,22 +403,30 @@ static void warpToLinkedColPreserve(TMario *player, bool fluid) {
       : case ((base) + 1)                                                      \
       : case ((base) + 2) : case ((base) + 3) : case ((base) + 4)
 
-static inline void resetValuesOnStateChange(TMario *player) {
+static void resetValuesOnStateChange(TMario *player) {
   SME::Class::TPlayerData *playerData = SME::TGlobals::getPlayerData(player);
 
   switch (player->mPrevState) {
-  case static_cast<u32>(TMario::State::JUMPSPIN1):
-    playerData->mCollisionFlags.mIsSpinBounce = false;
   case static_cast<u32>(TMario::State::TRIPLE_J):
     playerData->mCollisionFlags.mIsDisableInput = false;
     player->mController->State.mReadInput = true;
+    break;
+  default:
+    break;
   }
+
+  switch (player->mState) {}
+
+  if ((player->mState != static_cast<u32>(TMario::State::JUMPSPINR) &&
+      player->mState != static_cast<u32>(TMario::State::JUMPSPINL)))
+    SME::TGlobals::getPlayerData(player)->mCollisionFlags.mIsSpinBounce = false;
+
   if (playerData->mCollisionFlags.mIsDisableInput)
     // Patches pausing/map escaping the controller lock
     player->mController->State.mReadInput = false;
 }
 
-static inline void resetValuesOnGroundContact(TMario *player) {
+static void resetValuesOnGroundContact(TMario *player) {
   SME::Class::TPlayerData *playerData = SME::TGlobals::getPlayerData(player);
 
   if ((player->mPrevState & static_cast<u32>(TMario::State::AIRBORN)) != 0 &&
@@ -348,7 +437,7 @@ static inline void resetValuesOnGroundContact(TMario *player) {
   }
 }
 
-static inline void resetValuesOnAirborn(TMario *player) {
+static void resetValuesOnAirborn(TMario *player) {
   SME::Class::TPlayerData *playerData = SME::TGlobals::getPlayerData(player);
 
   if ((player->mPrevState & static_cast<u32>(TMario::State::AIRBORN)) == 0 &&
@@ -358,7 +447,7 @@ static inline void resetValuesOnAirborn(TMario *player) {
   }
 }
 
-static inline void resetValuesOnCollisionChange(TMario *player) {
+static void resetValuesOnCollisionChange(TMario *player) {
   SME::Class::TPlayerData *playerData = SME::TGlobals::getPlayerData(player);
 
   if (!player->mFloorTriangle ||
@@ -378,6 +467,14 @@ static inline void resetValuesOnCollisionChange(TMario *player) {
   case EXPAND_WARP_SET(17042):
     playerData->setColliding(false);
     break;
+  // Callback collision
+  case 16081:
+  case 17081: {
+    u8 index = playerData->mPrevCollisionFloor->mValue4 >> 8;
+    if (sStateCBMap[index] == slipFloor) {
+      player->mDirtyParams = playerData->mDefaultDirtyParams;
+    }
+  }
   default:
     playerData->setColliding(true);
     break;
@@ -425,16 +522,6 @@ u32 Patch::Collision::updateCollisionContext(TMario *player) {
   }
 
   return 1;
-}
-
-static void electrifyPlayer(TMario *player) {
-  changePlayerStatus__6TMarioFUlUlb(player, 0x20338, 0, false);
-  if (gpMSound->gateCheck(0x1814)) {
-    MSoundSESystem::MSoundSE::startSoundActor(0x1814, reinterpret_cast<Vec *>(&player->mPosition), 0, nullptr, 0, 4);
-  }
-  if (gpMSound->gateCheck(0x3806)) {
-    MSoundSESystem::MSoundSE::startSoundActor(0x3806, reinterpret_cast<Vec *>(&player->mPosition), 0, nullptr, 0, 4);
-  }
 }
 
 // 0x80250C9C
@@ -486,6 +573,20 @@ static TBGCheckData *masterGroundCollisionHandler() {
   case 17080:
     checkIsCannonType(player);
     break;
+  case 16081: {
+    u16 value = player->mFloorTriangle->mValue4;
+    u8 index = u8(value >> 8);
+    if (index < sizeof(sStateCBMap))
+      sStateCBMap[index](player, value);
+    break;
+  }
+  case 17081: {
+    u16 value = player->mFloorTriangle->mValue4;
+    u8 index = u8(value >> 8);
+    if (index < sizeof(sStateCBMap))
+      sStateCBMap[index](player, value);
+    break;
+  }
   case 16090:
   case 16091:
   case 16092:
@@ -500,12 +601,11 @@ static TBGCheckData *masterGroundCollisionHandler() {
   case 17095:
     changeNozzleType(player, type);
     break;
-  case 16081:
-    electrifyPlayer(player);
   }
   return floorCol;
 }
-SME_PATCH_BL(SME_PORT_REGION(0x80250C9C, 0, 0, 0), masterGroundCollisionHandler);
+SME_PATCH_BL(SME_PORT_REGION(0x80250C9C, 0, 0, 0),
+             masterGroundCollisionHandler);
 
 // 0x8025059C
 // extern -> SME.cpp
@@ -537,8 +637,7 @@ static u32 masterAllCollisionHandler(TMario *player) {
   }
   return player->mState;
 }
-SME_PATCH_BL(SME_PORT_REGION(0x8025059C, 0, 0, 0),
-             masterAllCollisionHandler);
+SME_PATCH_BL(SME_PORT_REGION(0x8025059C, 0, 0, 0), masterAllCollisionHandler);
 SME_WRITE_32(SME_PORT_REGION(0x802505A0, 0, 0, 0), 0x546004E7);
 
 #undef EXPAND_WARP_SET

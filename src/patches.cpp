@@ -1,17 +1,16 @@
 #include "GX.h"
 #include "OS.h"
 
-#include "sms/GC2D/ConsoleStr.hxx"
 #include "J2D/J2DPrint.hxx"
 #include "JKR/JKRFileLoader.hxx"
+#include "sms/GC2D/ConsoleStr.hxx"
 #include "sms/actor/Mario.hxx"
+#include "sms/mapobj/MapObjNormalLift.hxx"
 #include "sms/mapobj/MapObjTree.hxx"
-
 
 #include "SME.hxx"
 #include "defines.h"
 #include "macros.h"
-
 
 constexpr f32 DrawDistance = 300000.0f * 100.0f;
 
@@ -36,6 +35,17 @@ u32 SME::Patch::Fixes::patchYStorage() {
 
   return 0;
 }
+
+void patchWaterDownWarp(f32 y) {
+  TMario *player;
+  SME_FROM_GPR(31, player);
+
+  if (player->mFloorTriangleWater == player->mFloorTriangle)
+    changePlayerStatus__6TMarioFUlUlb(player, TMario::State::FALL, 0, false);
+  else
+    player->mPosition.y = y;
+}
+SME_PATCH_BL(SME_PORT_REGION(0x80272710, 0, 0, 0), patchWaterDownWarp);
 
 static bool canDiePlane(f32 floorY) {
   TMario *player;
@@ -132,13 +142,17 @@ static f32 sLastFactor = 1.0f;
 static bool cameraQOLFixes(CPolarSubCamera *cam) {
   JSGSetProjectionFar__Q26JDrama7TCameraFf(cam, DrawDistance); // Draw Distance
 
-  const f32 factor = Math::scaleLinearAtAnchor(gpMarioAddress->mForwardSpeed / 100.0f, 0.5f, 1.0f);
-  sLastFactor = Max(sLastFactor - 0.01f, 1.0f);
+  f32 factor = Math::scaleLinearAtAnchor<f32>(
+      gpMarioAddress->mForwardSpeed / 100.0f, 0.5f, 1.0f);
 
-  if (factor > 1.0f && gpMarioAddress->mState == static_cast<u32>(TMario::State::DIVESLIDE)) {
+  factor = Math::lerp<f32>(sLastFactor, factor, 0.01f);
+
+  if (factor > 1.0f &&
+      gpMarioAddress->mState == static_cast<u32>(TMario::State::DIVESLIDE)) {
     sLastFactor = factor;
     reinterpret_cast<f32 *>(cam)[0x48 / 4] *= factor;
   } else {
+    sLastFactor = Math::lerp<f32>(sLastFactor, 1.0f, 0.01f);
     reinterpret_cast<f32 *>(cam)[0x48 / 4] *= sLastFactor;
   }
   return cam->isNormalDeadDemo();
@@ -355,11 +369,15 @@ static bool is100CoinShine(TFlagManager *manager, u32 id) {
 SME_PATCH_BL(SME_PORT_REGION(0x801BED3C, 0, 0, 0), is100CoinShine);
 SME_WRITE_32(SME_PORT_REGION(0x801BED40, 0, 0, 0), 0x2C030001);
 
-static void *loadFromGlobalAndScene(const char *mdl, u32 unk_0, const char *path) {
-  u32 **sdlModel = reinterpret_cast<u32 **>(loadModelData__16TModelDataKeeperFPCcUlPCc(mdl, unk_0, path));
+static void *loadFromGlobalAndScene(const char *mdl, u32 unk_0,
+                                    const char *path) {
+  u32 **sdlModel = reinterpret_cast<u32 **>(
+      loadModelData__16TModelDataKeeperFPCcUlPCc(mdl, unk_0, path));
   if (*sdlModel == nullptr) {
     delete sdlModel;
-    sdlModel = reinterpret_cast<u32 **>(loadModelData__16TModelDataKeeperFPCcUlPCc(mdl, unk_0, "/common/mapobj"));
+    sdlModel =
+        reinterpret_cast<u32 **>(loadModelData__16TModelDataKeeperFPCcUlPCc(
+            mdl, unk_0, "/common/mapobj"));
   }
   return sdlModel;
 }
@@ -385,12 +403,79 @@ void checkInstantReset_RailObj(s16 *mRailObj, u32 *railflags) {
     mRailObj[0x14A / 2] = 180;
   }
 }
-
-SME_PATCH_BL(SME_PORT_REGION(0x801F0B90, 0, 0, 0), checkInstantReset_NormalLift);
+SME_PATCH_BL(SME_PORT_REGION(0x801F0B90, 0, 0, 0),
+             checkInstantReset_NormalLift);
 SME_PATCH_BL(SME_PORT_REGION(0x801F1054, 0, 0, 0), checkInstantReset_RailObj);
 
-// STATIC RESETTER
-void patches_staticResetter() {
-  sIs100ShineSpawned = false;
+void checkResetToNode(TNormalLift *lift) {
+  TGraphWeb *graph = lift->mGraphTracer->mGraph;
+  TRailNode *node;
+  {
+    s32 nodeIdx = lift->mGraphTracer->mPreviousNode;
+    node = reinterpret_cast<TRailNode *>(graph->mNodes[nodeIdx << 2]);
+  }
+  if (node->mFlags & 0x2000) {
+    lift->mPosition.set(
+        graph->getNearestPosOnGraphLink(lift->mInitialPosition));
+    lift->mRotation.set(lift->mInitialRotation);
+    lift->mRailStatus = 0;
+    lift->mContextTimer = 180;
+    lift->mLastRailStatus = 1;
+    {
+      int idx = graph->findNearestNodeIndex(lift->mPosition, 0xFFFFFFFF);
+      lift->mGraphTracer->setTo(idx);
+    }
+    lift->readRailFlag();
+  } else {
+    lift->resetPosition();
+  }
 }
+SME_PATCH_BL(SME_PORT_REGION(0x801EFBDC, 0, 0, 0), checkResetToNode);
+SME_WRITE_32(SME_PORT_REGION(0x801EFBE0, 0, 0, 0), 0x60000000);
+SME_WRITE_32(SME_PORT_REGION(0x801EFBE4, 0, 0, 0), 0x60000000);
+SME_WRITE_32(SME_PORT_REGION(0x801EFBE8, 0, 0, 0), 0x60000000);
+SME_PATCH_BL(SME_PORT_REGION(0x801F13FC, 0, 0, 0), checkResetToNode);
+SME_WRITE_32(SME_PORT_REGION(0x801F1400, 0, 0, 0), 0x60000000);
+SME_WRITE_32(SME_PORT_REGION(0x801F1404, 0, 0, 0), 0x60000000);
+SME_WRITE_32(SME_PORT_REGION(0x801F1408, 0, 0, 0), 0x60000000);
 
+f32 enhanceWaterCheck(f32 x, f32 y, f32 z, TMario *player) {
+  SME_FROM_GPR(29, player);
+
+  const TBGCheckData **tri =
+      const_cast<const TBGCheckData **>(&player->mFloorTriangleWater);
+
+  const TMapCollisionData *mapCol = gpMapCollisionData;
+  {
+    f32 yPos = mapCol->checkGround(x, player->mCeilingAbove - 10.0f, z, 0, tri);
+    if (*tri && (*tri)->mCollisionType > 255 && (*tri)->mCollisionType < 260)
+      return yPos;
+  }
+
+  return mapCol->checkGround(x, y, z, 0, tri);
+}
+SME_PATCH_BL(SME_PORT_REGION(0x8024F12C, 0, 0, 0), enhanceWaterCheck);
+
+u32 clampRotation(TLiveActor *actor) {
+  JGeometry::TVec3<f32> &rot = actor->mRotation;
+
+  auto clampPreserve = [](f32 rotation) {
+    if (rotation > 360.0f)
+      rotation -= 360.0f;
+    else if (rotation < -360.0f)
+      rotation += 360.0f;
+    return rotation;
+  };
+
+  rot.x = clampPreserve(rot.x);
+  rot.y = clampPreserve(rot.y);
+  rot.z = clampPreserve(rot.z);
+
+  return actor->mStateFlags.asU32;
+}
+SME_PATCH_BL(SME_PORT_REGION(0x80217EDC, 0, 0, 0), clampRotation);
+SME_WRITE_32(SME_PORT_REGION(0x80217EE0, 0, 0, 0), 0x70600201);
+
+
+// STATIC RESETTER
+void patches_staticResetter() { sIs100ShineSpawned = false; }

@@ -2,13 +2,16 @@
 
 #include "JDrama/JDRGraphics.hxx"
 #include "sms/mapobj/MapObjBase.hxx"
+#include "sms/mapobj/MapObjInit.hxx"
+#include "types.h"
 
-class TBlowWindObj : public TMapObjBase {
+
+class TBlowWindMapObj : public TMapObjBase {
 public:
   enum class GradientMode { CONSTANT, LINEAR, EXPONENTIAL, INVERSE };
 
-  TBlowWindObj(const char *name);
-  virtual ~TBlowWindObj();
+  TBlowWindMapObj(const char *name);
+  virtual ~TBlowWindMapObj();
 
   virtual void load(JSUMemoryInputStream &) override;
   virtual void perform(u32, JDrama::TGraphics *) override;
@@ -22,3 +25,5 @@ private:
   f32 mStrength;
   GradientMode mMode;
 };
+
+extern ObjData blowWindData;

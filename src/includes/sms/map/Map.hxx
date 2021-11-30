@@ -8,20 +8,20 @@
 #include "sms/collision/MapCollisionData.hxx"
 
 class TMapWarp {
-
 public:
-  u32 _0;
+  class TMapWarpInfo {};
+
+  u32 mCurrentID;
   u32 _4;
-  u32 _8;
+  u32 mPrevID;
   f32 _C; // init'd to 3.0
 
-  class TMapWarpInfo {};
 };
 
 class TMapXlu {
-
 public:
-  u32 _0;
+
+  size_t mJointNum;
   u32 _4;
 };
 

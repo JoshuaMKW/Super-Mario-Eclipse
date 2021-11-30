@@ -3,6 +3,8 @@
 #include "types.h"
 
 constexpr size_t OBJDataTableSize = 360;
+const char sLiveManagerName[]{0x96, 0xD8, 0x83, 0x7D, 0x83, 0x6C, 0x81, 0x5B,
+                              0x83, 0x57, 0x83, 0x83, 0x81, 0x5B, 0x00, 0x00};
 
 struct obj_info {
   u16 _00;
@@ -42,10 +44,10 @@ struct anim_data {
 };
 
 struct hit_data {
-  f32 _00;
-  f32 _04;
-  f32 _08;
-  f32 _0C;
+  f32 mAttackRadius;
+  f32 mAttackHeight;
+  f32 mReceiveRadius;
+  f32 mReceiveHeight;
 };
 
 struct obj_hit_info {
@@ -57,9 +59,9 @@ struct obj_hit_info {
 
 struct map_col_data {
   u16 _00;
-  char *mName;
+  const char *mName;
   u16 _08;
-  char *mName2;
+  const char *mName2;
 };
 
 struct ObjPhysicalData {
@@ -82,10 +84,10 @@ struct ObjPhysicalInfo {
 };
 
 struct ObjData {
-  char *mMdlName;
+  const char *mMdlName;
   u32 mObjectID;
-  char *mLiveManagerName;
-  char *mObjKey;
+  const char *mLiveManagerName;
+  const char *mObjKey;
   u32 _10;
   obj_hit_info *mObjCollisionData;
   obj_info *mMapCollisionInfo;

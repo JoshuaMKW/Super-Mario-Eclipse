@@ -1,15 +1,18 @@
 #pragma once
 
 #include "RailNode.hxx"
+#include "GraphNode.hxx"
+#include "SplineRail.hxx"
 #include "types.h"
 
 class TGraphWeb {
 public:
-  u32 *mNodes;          // 0x0000
+  u32 **mNodes;          // 0x0000
   TRailNode *mRailNode; // 0x0004
   s32 mNodeCount;       // 0x0008
   char *mRailName;      // 0x000C
-  u32 _00[0x8 / 4];     // 0x0010
+  u32 _10;              // 0x0010
+  TSplineRail *mSplineRail;
 
   TGraphWeb(TRailNode *, const char *, int);
   virtual ~TGraphWeb();

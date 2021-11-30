@@ -1,10 +1,10 @@
 #pragma once
 
-#include "MTX.h"
 #include "J3D/J3DDrawBuffer.hxx"
 #include "JDrama/JDRGraphics.hxx"
 #include "JGeometry.hxx"
 #include "JUT/JUTGamePad.hxx"
+#include "MTX.h"
 #include "types.h"
 
 #include "sms/actor/TakeActor.hxx"
@@ -162,7 +162,7 @@ public:
     TParamT<f32> mPumpingRotSpMin; // Pumping rotation speed min
     TParamT<f32> mPumpingRotSpMax; // Pumping rotation speed max
     TParamT<f32> mInvincibleTime;
-    TParamT<f32> mFootPrintTimerMax;
+    TParamT<s16> mFootPrintTimerMax;
     TParamT<f32> mWaterTriggerRate;
     TParamT<f32> mGraffitoNoDmgTime;
     TParamT<f32> mRestMax;
@@ -804,8 +804,8 @@ public:
     STOP = 0x0C00023D,
     SPIN = 0x00000441,
     JUMPSPIN = 0x00000890,
-    JUMPSPIN1 = 0x00000895,
-    JUMPSPIN2 = 0x00000896,
+    JUMPSPINR = 0x00000895,
+    JUMPSPINL = 0x00000896,
     JUMP = 0x02000880,
     SLIP_JUMP = 0x02000885,
     D_JUMP = 0x02000881,
@@ -950,8 +950,8 @@ public:
   JGeometry::TVec3<s16> mAngle; // 0x0094
   JGeometry::TVec3<u16> _9A;
   u16 _A0;
-  JGeometry::TVec3<f32> mSpeed; // 0x00A4
-  f32 mForwardSpeed;            // 0x00B0
+  JGeometry::TVec3<f32> mSpeed;     // 0x00A4
+  f32 mForwardSpeed;                // 0x00B0
   JGeometry::TVec3<f32> mPrevSpeed; //?
   f32 _C0;
   u16 _C4;
@@ -960,15 +960,15 @@ public:
   f32 _D0;
   u8 _D4;
   u8 _D5;
-  TBGCheckData *mWallTriangle;      // 0x00D8
-  TBGCheckData *mRoofTriangle;      // 0x00DC
-  TBGCheckData *mFloorTriangle;     // 0x00E0
-  TBGCheckData *mFloorTriangleCopy; // 0x00E4
-  f32 mCeilingAbove;                // 0x00E8
-  f32 mFloorBelow;                  // 0x00EC
-  f32 mWaterHeight;                 // 0x00F0
+  TBGCheckData *mWallTriangle;       // 0x00D8
+  TBGCheckData *mRoofTriangle;       // 0x00DC
+  TBGCheckData *mFloorTriangle;      // 0x00E0
+  TBGCheckData *mFloorTriangleWater; // 0x00E4
+  f32 mCeilingAbove;                 // 0x00E8
+  f32 mFloorBelow;                   // 0x00EC
+  f32 mWaterHeight;                  // 0x00F0
   u16 _F4;
-  u16 _F6;
+  u16 mLightID;
   u16 _F8;
   u16 _FA;
   u16 _FC;
@@ -1027,12 +1027,12 @@ public:
   u16 _124;
   u16 _126;
   u16 _128;
-  f32 mWaterHealth;    // 0x012C
-  f32 mMaxWaterHealth; // 0x0130
-  u32 _134;            // unknown
-  u32 _138;            // unknown
-  u32 _13C;            // unknown
-  u32 _140;            // unknown
+  f32 mWaterHealth;        // 0x012C
+  f32 mMaxWaterHealth;     // 0x0130
+  u32 _134;                // unknown
+  f32 mGraffitiSlopeAngle; // unknown
+  u16 mDirtyTimeRun;       // unknown
+  u32 _140;                // unknown
   u32 _144;
   u32 _148;
   s16 mInvincibilityFrames;
@@ -1093,7 +1093,7 @@ public:
   f32 _348;
   u16 _34C;
   u16 _34E;
-  u32 _350;
+  u32 mGraffitiState;
   f32 _354;
   f32 _358;
   f32 _35C;

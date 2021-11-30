@@ -25,6 +25,8 @@ TPlayerData::TPlayerData(TMario *player, CPolarSubCamera *camera, bool isMario)
   mFluddHistory.mSecondNozzle = TWaterGun::Hover;
   mFluddHistory.mWaterLevel = 0;
 
+  mDefaultDirtyParams = player->mDirtyParams;
+
   mCollisionFlags.mIsAirborn = false;
   mCollisionFlags.mIsCollisionUsed = false;
   mCollisionFlags.mIsDisableInput = false;

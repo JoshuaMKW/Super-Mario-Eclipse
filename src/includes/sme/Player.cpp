@@ -4,6 +4,7 @@
 #include "JKR/JKRHeap.hxx"
 #include "JKR/JKRMemArchive.hxx"
 #include "sms/SMS.hxx"
+#include "sms/camera/PolarSubCamera.hxx"
 
 #include "Globals.hxx"
 #include "Player.hxx"
@@ -12,7 +13,7 @@
 #include "stage/FileUtils.hxx"
 
 using namespace SME;
-using namespace SME::Util::Math;
+using namespace Util::Math;
 
 static u8 gJ3DBuffer[0x2000];
 static JKRSolidHeap gJ3DHeap(&gJ3DBuffer, sizeof(gJ3DBuffer), nullptr, false);
@@ -85,7 +86,7 @@ bool Util::Mario::swapBinary(Enum::Player id) {
   CharacterHeap->free(gpArcBufferMario);
 #endif
 
-  u32 *marioData = reinterpret_cast<u32 *>(SME::Util::loadArchive(
+  u32 *marioData = reinterpret_cast<u32 *>(Util::loadArchive(
       buffer, CharacterHeap,
       static_cast<JKRDvdRipper::EAllocDirection>(gHeapAllocState)));
 
@@ -128,7 +129,7 @@ static void *t_swapCharacter(void *param) {
     gpApplication.mFader->startWipe(TSMSFader::WipeRequest::FADE_CIRCLE_OUT,
                                     1.0f, 0.0f);
     CharacterHeap->freeAll();
-    marioData = reinterpret_cast<u32 *>(SME::Util::loadArchive(
+    marioData = reinterpret_cast<u32 *>(Util::loadArchive(
         buffer, CharacterHeap,
         static_cast<JKRDvdRipper::EAllocDirection>(gHeapAllocState)));
 
@@ -138,7 +139,7 @@ static void *t_swapCharacter(void *param) {
     }
   } else {
     CharacterHeap->freeAll();
-    marioData = reinterpret_cast<u32 *>(SME::Util::loadArchive(
+    marioData = reinterpret_cast<u32 *>(Util::loadArchive(
         buffer, CharacterHeap,
         static_cast<JKRDvdRipper::EAllocDirection>(gHeapAllocState)));
   }
@@ -170,15 +171,12 @@ static void *t_swapCharacter(void *param) {
     player->JSGGetRotation(&rotation);
 
     // Prevent other threads from interrupting
-    SME_ATOMIC_CODE(
-      JKRHeap *currentHeap = gJ3DHeap.becomeCurrentHeap();
-      gJ3DHeap.freeAll();
+    SME_ATOMIC_CODE(JKRHeap *currentHeap = gJ3DHeap.becomeCurrentHeap();
+                    gJ3DHeap.freeAll();
 
-      player->initValues();
-      player->loadAfter();
+                    player->initValues(); player->loadAfter();
 
-      currentHeap->becomeCurrentHeap();
-    )
+                    currentHeap->becomeCurrentHeap();)
 
     player->mAttributes.mIsPerforming = false;
     player->JSGSetTranslation(position);
@@ -229,20 +227,24 @@ Enum::Player Util::Mario::getPlayerIDFromInput(u32 input) {
   }
 }
 
-Enum::Player Util::Mario::getPlayerIDFromInt(u8 id) { return static_cast<Enum::Player>(id); }
+Enum::Player Util::Mario::getPlayerIDFromInt(u8 id) {
+  return static_cast<Enum::Player>(id);
+}
 
-void Util::Mario::warpToCollisionFace(TMario *player, TBGCheckData *colTriangle, bool isFluid) {
+void Util::Mario::warpToCollisionFace(TMario *player, TBGCheckData *colTriangle,
+                                      bool isFluid) {
   constexpr s32 DisableMovementTime = 80;
   constexpr s32 TeleportTime = 140;
   constexpr s32 EnableMovementTime = 60;
   constexpr f32 WipeKindInDelay = 1.0f;
 
-  if (!player) return;
+  if (!player)
+    return;
 
-  SME::Class::TPlayerData *playerData = SME::TGlobals::getPlayerData(player);
+  Class::TPlayerData *playerData = TGlobals::getPlayerData(player);
 
-  SME::Class::TVectorTriangle vectorTri(
-      colTriangle->mVertexA, colTriangle->mVertexB, colTriangle->mVertexC);
+  Class::TVectorTriangle vectorTri(colTriangle->mVertexA, colTriangle->mVertexB,
+                                   colTriangle->mVertexC);
 
   if (!isFluid) {
     JGeometry::TVec3<f32> playerPos;
@@ -253,7 +255,7 @@ void Util::Mario::warpToCollisionFace(TMario *player, TBGCheckData *colTriangle,
     playerPos.set(vectorTri.center());
 
     player->mFloorTriangle = colTriangle;
-    player->mFloorTriangleCopy = colTriangle;
+    player->mFloorTriangleWater = colTriangle;
     player->mFloorBelow = playerPos.y;
     playerData->mPrevCollisionFloor = colTriangle;
 
@@ -263,7 +265,7 @@ void Util::Mario::warpToCollisionFace(TMario *player, TBGCheckData *colTriangle,
       f32 z = lerp<f32>(cameraPos.z, playerPos.z, 0.9375f);
       cameraPos.set(x, y, z);
     }
-        
+
     player->JSGSetTranslation(reinterpret_cast<Vec &>(playerPos));
     gpCamera->JSGSetViewPosition(reinterpret_cast<Vec &>(cameraPos));
     gpCamera->JSGSetViewTargetPosition(reinterpret_cast<Vec &>(playerPos));
@@ -274,7 +276,7 @@ void Util::Mario::warpToCollisionFace(TMario *player, TBGCheckData *colTriangle,
     gpCamera->JSGGetViewPosition(reinterpret_cast<Vec *>(&cameraPos));
 
     player->mFloorTriangle = colTriangle;
-    player->mFloorTriangleCopy = colTriangle;
+    player->mFloorTriangleWater = colTriangle;
     playerData->mCollisionFlags.mIsFaceUsed = true;
 
     playerPos.set(vectorTri.center());
@@ -306,4 +308,12 @@ void Util::Mario::warpToCollisionFace(TMario *player, TBGCheckData *colTriangle,
     changePlayerStatus__6TMarioFUlUlb(
         player, static_cast<u32>(TMario::State::FALL), 0, 0);
   }
+}
+
+void Util::Mario::rotatePlayerRelativeToCamera(TMario *player,
+                                              CPolarSubCamera *camera, Vec2 dir,
+                                              f32 lerp) {
+  player->mAngle.y =
+      Math::lerp<f32>(player->mAngle.y, camera->mHorizontalAngle +
+      s16(Util::Math::radiansToAngle(atan2f(dir.x, -dir.y)) * 182), lerp);
 }

@@ -2,7 +2,7 @@
 
 #include "RailNode.hxx"
 #include "types.h"
-#include "Mtx.h"
+#include "MTX.h"
 
 #include "JGeometry.hxx"
 

@@ -6,7 +6,7 @@ void TFlagManager::resetGame() { memset(this + 0xE4, 0, 0xD); }
 
 // 0x80294EF4
 // extern -> SMS.cpp
-void Patch::Flag::resetStage(TFlagManager *flagManager) {
+static void resetStage(TFlagManager *flagManager) {
   constexpr size_t mainResetSize =
       (SME_MAX_SHINES - 120) < 0
           ? 0x180
@@ -19,6 +19,7 @@ void Patch::Flag::resetStage(TFlagManager *flagManager) {
                                                                     // 0x18C
   memset(((u8 *)&flagManager->Type1Flag) + 0x11F, 0, 1);
 }
+SME_PATCH_B(SME_PORT_REGION(0x80294EF4, 0, 0, 0), resetStage);
 
 void resetStageFlags(TFlagManager *flagManager) {
   TFlagManager::smInstance->resetStage();

@@ -6,10 +6,11 @@ using namespace SME;
 
 // 0x802B1794
 // extern -> SME.cpp
-TCardBookmarkInfo *Patch::Flag::setFileCompleteBool(TCardManager *cardManager) {
+static TCardBookmarkInfo *setFileCompleteBool(TCardManager *cardManager) {
   TCardBookmarkInfo *bookmarkData = cardManager->getBookmarkInfos_();
   return bookmarkData;
 }
+// SME_PATCH_BL(SME_PORT_REGION(0x802B1794, 0, 0, 0), setFileCompleteBool);
 
 // 0x80164DE4
 void newGamePlus(TFlagManager *flagManager, JSUMemoryInputStream &stream) {

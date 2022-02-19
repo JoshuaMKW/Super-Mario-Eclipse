@@ -121,40 +121,6 @@ SME_PATCH_BL(SME_PORT_REGION(0x8024D3A8, 0, 0, 0),
 SME_PATCH_BL(SME_PORT_REGION(0x8003F8F0, 0, 0, 0),
              Patch::CKit::realTimeCustomAttrsHandler);
 
-// file_flags.cpp
-SME_PATCH_BL(SME_PORT_REGION(0x802B1794, 0, 0, 0),
-             Patch::Flag::setFileCompleteBool);
-
-// flagmanager.cpp
-SME_PATCH_B(SME_PORT_REGION(0x80294EF4, 0, 0, 0), Patch::Flag::resetStage);
-
-// fludd.cpp
-SME_PATCH_B(SME_PORT_REGION(0x80248F14, 0, 0, 0), Patch::Fludd::isPumpOK);
-SME_WRITE_32(SME_PORT_REGION(0x803DCA00, 0, 0, 0),
-             0x00300000 | TMarioAnimeData::FLUDD::FLUDD_ENABLED);
-SME_PATCH_BL(SME_PORT_REGION(0x8014206C, 0, 0, 0),
-             Patch::Fludd::hasWaterCardOpen);
-SME_WRITE_32(SME_PORT_REGION(0x80142070, 0, 0, 0), 0x28030000);
-SME_PATCH_BL(SME_PORT_REGION(0x80283058, 0, 0, 0),
-             Patch::Fludd::canCollectFluddItem);
-SME_PATCH_BL(SME_PORT_REGION(0x800678C4, 0, 0, 0), Patch::Fludd::sprayGoopMap);
-SME_PATCH_BL(SME_PORT_REGION(0x801A3ED0, 0, 0, 0), Patch::Fludd::sprayGoopMap);
-SME_PATCH_BL(SME_PORT_REGION(0x801B42D8, 0, 0, 0), Patch::Fludd::sprayGoopMap);
-SME_PATCH_BL(SME_PORT_REGION(0x8024E710, 0, 0, 0), Patch::Fludd::sprayGoopMap);
-SME_PATCH_BL(SME_PORT_REGION(0x8027F7DC, 0, 0, 0), Patch::Fludd::sprayGoopMap);
-SME_PATCH_BL(SME_PORT_REGION(0x8027F94C, 0, 0, 0), Patch::Fludd::sprayGoopMap);
-SME_PATCH_BL(SME_PORT_REGION(0x800FED3C, 0, 0, 0), Patch::Fludd::canCleanSeals);
-SME_WRITE_32(SME_PORT_REGION(0x800FED40, 0, 0, 0), 0x2C030000);
-SME_PATCH_BL(SME_PORT_REGION(0x8024D53C, 0, 0, 0),
-             Patch::Fludd::bindFluddtojoint);
-SME_PATCH_BL(SME_PORT_REGION(0x8024E548, 0, 0, 0),
-             Patch::Fludd::checkExecWaterGun);
-SME_PATCH_BL(SME_PORT_REGION(0x8026C370, 0, 0, 0),
-             Patch::Fludd::killTriggerNozzle);
-SME_PATCH_BL(SME_PORT_REGION(0x80262580, 0, 0, 0),
-             Patch::Fludd::checkAirNozzle);
-SME_WRITE_32(SME_PORT_REGION(0x80262584, 0, 0, 0), 0x2C030000);
-
 // fruit.cpp
 SME_PATCH_BL(SME_PORT_REGION(0x801E542C, 0, 0, 0),
              Patch::Fruit::canFruitDieWater);

@@ -290,18 +290,9 @@ f32 upWarpPatch(TMario *gpMario, f32 yVelocity)
 
 // 0x80153DE8, 0x80153E1C
 // extern -> SME.cpp
-void Patch::CKit::formatTalkMessage(Talk2D2 *talker, char *msgfield,
-                                    u32 *entrydata) {
-  String fmtMessage(1024);
-
-  const char *basemsg = msgfield + *entrydata + talker->curMsgIndex;
-  const char *newmsg = fmtMessage.data() - (*entrydata + talker->curMsgIndex);
-
-  fmtMessage.assign(basemsg);
-  SME::Util::formatBMG(fmtMessage);
-
-  setupTextBox__8TTalk2D2FPCvP12JMSMesgEntry(talker, newmsg, entrydata);
+static void extendedTagParam() {
 }
+// SME_PATCH_BL(SME_PORT_REGION(0x80150c40, 0, 0, 0), extendedTagParam);
 
 static void maintainYoshi(TYoshi *yoshi) {
   if (yoshi->isGreenYoshi()) {

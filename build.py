@@ -229,6 +229,8 @@ class FilePatcher(Compiler):
         elif self.is_kamek():
             _defines.append(Define("SME_BUILD_KAMEK_INLINE"))
 
+        _defines.append(Define("SME_IGNORE_CONSOLE"))
+
         self.defines = _defines
 
     @property
@@ -292,12 +294,12 @@ class FilePatcher(Compiler):
         with (self.solutionRegionDir / ".config.json").open("r") as f:
             config = json.load(f)
 
-        self._rename_files_from_config(self.solutionAnyDir)
-        self._rename_files_from_config(self.solutionRegionDir)
-        self._delete_files_from_config(self.solutionAnyDir)
-        self._delete_files_from_config(self.solutionRegionDir)
         self._replace_files_from_config(self.solutionAnyDir)
         self._replace_files_from_config(self.solutionRegionDir)
+        self._delete_files_from_config(self.solutionAnyDir)
+        self._delete_files_from_config(self.solutionRegionDir)
+        self._rename_files_from_config(self.solutionAnyDir)
+        self._rename_files_from_config(self.solutionRegionDir)
 
         if self._patch_dol() and self.is_booting():
             for proc in psutil.process_iter():
@@ -402,9 +404,13 @@ class FilePatcher(Compiler):
                 codelen = int.from_bytes(
                     rawData[4:8], "big", signed=False) * 8
 
-                blockstart = 0x80003C00
-                _doldata.seek(blockstart)
-                _doldata.write(rawData[8:])
+                blockstart = 0x80004A00
+                if not _doldata.is_mapped(blockstart):
+                    loaderSection = TextSection(blockstart, rawData[8:])
+                    _doldata.append_section(loaderSection)
+                else:
+                    _doldata.seek(blockstart)
+                    _doldata.write(rawData[8:])
                 _doldata.insert_branch(blockstart, injectaddr)
                 _doldata.insert_branch(
                     injectaddr + 4, blockstart + (codelen - 4))
@@ -472,26 +478,25 @@ class FilePatcher(Compiler):
         with Path(solutionPath / ".config.json").open("r") as f:
             config = json.load(f)
 
-        for path in config["rename"]:
-            rename = config["rename"][path]
+        for f in self.gameDir.rglob("*"):
+            for path in config["rename"]:
+                rename = config["rename"][path]
 
-            absPath = self.gameDir / path
-
-            if absPath.exists() and absPath not in _renamed:
-                print(f"{absPath} -> {self.gameDir / absPath.parent / rename}")
-                absPath.rename(absPath.parent / rename)
-                _renamed.append(absPath)
+                if fnmatch(f, self.gameDir / path):
+                    print(f"{f.relative_to(self.gameDir)} -> {f.parent / rename}")
+                    f.rename(f.parent / rename)
+                    _renamed.append(f)
 
     @wrap_printer("DELETING")
     def _delete_files_from_config(self, solutionPath: Path):
         with Path(solutionPath / ".config.json").open("r") as f:
             config = json.load(f)
 
-        for path in config["delete"]:
-            absPath = self.gameDir / path
-            if absPath.exists():
-                print(f"{absPath} -> DELETED")
-                absPath.unlink()
+        for f in self.gameDir.rglob("*"):
+            for path in config["delete"]:
+                if fnmatch(f, self.gameDir / path):
+                    print(f"{f} -> DELETED")
+                    f.unlink()
 
     def _get_translated_filepath(self, relativePath: Union[str, Path]) -> Path:
         return self.gameDir / relativePath

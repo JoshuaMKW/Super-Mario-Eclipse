@@ -3,11 +3,11 @@
         {
             "name": "Win32",
             "includePath": [
-                "${workspaceFolder}/src/system/dolphin",
-                "${workspaceFolder}/src/system",
-                "${workspaceFolder}/src/includes/sme",
-                "${workspaceFolder}/src/includes",
-                "${workspaceFolder}/src/includes/sms/JSystem"
+                "${workspaceFolder}/include/system",
+                "${workspaceFolder}/include/system/dolphin",
+                "${workspaceFolder}/include/sms/JSystem",
+                "${workspaceFolder}/include/sme",
+                "${workspaceFolder}/include"
             ],
             "defines": [
                 "_DEBUG",
@@ -15,7 +15,7 @@
                 "_UNICODE"
             ],
             "windowsSdkVersion": "10.0.19041.0",
-            "compilerPath": "${workspaceFolder}/compiler/clang/clang.exe",
+            "compilerPath": "${workspaceFolder}/assets/compiler/clang/clang.exe",
             "intelliSenseMode": "clang-x64",
             "cppStandard": "c++20",
             "cStandard": "c17"

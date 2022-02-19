@@ -133,31 +133,6 @@ static void initBinaryNullptrPatch(TSpcBinary *binary) {
 }
 SME_PATCH_BL(SME_PORT_REGION(0x80289098, 0, 0, 0), initBinaryNullptrPatch);
 
-static void scaleDrawDistanceNPC(f32 x, f32 y, f32 near, f32 far) {
-  SetViewFrustumClipCheckPerspective__Fffff(x, y, near, far * 2);
-}
-SME_PATCH_BL(SME_PORT_REGION(0x8020A2A4, 0, 0, 0), scaleDrawDistanceNPC);
-
-static f32 sLastFactor = 1.0f;
-static bool cameraQOLFixes(CPolarSubCamera *cam) {
-  JSGSetProjectionFar__Q26JDrama7TCameraFf(cam, DrawDistance); // Draw Distance
-
-  f32 factor = Math::scaleLinearAtAnchor<f32>(
-      gpMarioAddress->mForwardSpeed / 100.0f, 0.5f, 1.0f);
-
-  factor = Math::lerp<f32>(sLastFactor, factor, 0.01f);
-
-  if (factor > 1.0f &&
-      gpMarioAddress->mState == static_cast<u32>(TMario::State::DIVESLIDE)) {
-    sLastFactor = factor;
-    reinterpret_cast<f32 *>(cam)[0x48 / 4] *= factor;
-  } else {
-    sLastFactor = Math::lerp<f32>(sLastFactor, 1.0f, 0.01f);
-    reinterpret_cast<f32 *>(cam)[0x48 / 4] *= sLastFactor;
-  }
-  return cam->isNormalDeadDemo();
-}
-SME_PATCH_BL(SME_PORT_REGION(0x80023828, 0, 0, 0), cameraQOLFixes);
 
 // READY GO TEXT PATCH FOR THIS BULLSHIT THING DADDY NINTENDO DID
 SME_WRITE_32(SME_PORT_REGION(0x80171C30, 0, 0, 0), 0x2C000005);

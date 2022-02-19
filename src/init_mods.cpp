@@ -1,8 +1,8 @@
-#include "printf.h"
 #include "JDrama/JDRNameRef.hxx"
 #include "JKR/JKRDecomp.hxx"
 #include "JKR/JKRHeap.hxx"
 #include "JKR/JKRMemArchive.hxx"
+#include "printf.h"
 #include "stdlib.h"
 
 #include "SME.hxx"
@@ -27,13 +27,13 @@ void Patch::Init::initCodeProtection() {
   gCodeProtector.activate();
 }
 
+constexpr size_t charactersize = 0x1A0000;
+constexpr size_t globalsize = 0x8000;
+
 // 0x802A750C
 // extern -> SME.cpp
 JKRExpHeap *Patch::Init::createGlobalHeaps(void *newHeap, size_t size,
                                            JKRHeap *rootHeap, bool unk_1) {
-  constexpr size_t charactersize = 0x1C0000;
-  constexpr size_t globalsize = 0x8000;
-
 #ifdef SME_DETACHED_HEAPS
   {
     JKRHeap *rootHeap = JKRHeap::sRootHeap;
@@ -60,12 +60,17 @@ JKRExpHeap *Patch::Init::createGlobalHeaps(void *newHeap, size_t size,
     JKRHeap *systemHeap = JKRHeap::sSystemHeap;
     JKRHeap *currentHeap = JKRHeap::sCurrentHeap;
 
+    SME_EVAL_LOG(charactersize > sizeof(JKRExpHeap));
     if (charactersize > sizeof(JKRExpHeap))
       TGlobals::sCharacterHeap = JKRExpHeap::create(
           charactersize - sizeof(JKRExpHeap), JKRHeap::sRootHeap, false);
     if (globalsize > sizeof(JKRExpHeap))
       TGlobals::sGlobalHeap = JKRExpHeap::create(
           globalsize - sizeof(JKRExpHeap), JKRHeap::sRootHeap, false);
+
+    SME_ASSERT(TGlobals::sCharacterHeap,
+               "Character heap failed to allocate at size %lu\n",
+               charactersize);
 
     TGlobals::sCharacterHeap->alloc(TGlobals::sCharacterHeap->getFreeSize(), 4);
 
@@ -85,12 +90,12 @@ JKRExpHeap *Patch::Init::createGlobalHeaps(void *newHeap, size_t size,
 // extern -> SME.cpp
 s32 Patch::Init::setupMarioDatas(char *filepath) {
   TMarioGamePad *gpGamePad = gpApplication.mGamePad1;
-  #ifdef SME_DEMO
+#ifdef SME_DEMO
   Enum::Player playerID = Enum::Player::MARIO;
-  #else
+#else
   Enum::Player playerID =
       Util::Mario::getPlayerIDFromInput(gpGamePad->mButtons.mInput);
-  #endif
+#endif
 
   TGlobals::sCharacterIDList[0] = playerID;
 
@@ -100,10 +105,14 @@ s32 Patch::Init::setupMarioDatas(char *filepath) {
 
 // 0x802A716C
 // extern -> SME.cpp
-u32 *Patch::Init::initFirstModel(char *path, u32 unk_1, u32 unk_2, u32 unk_3,
-                                 JKRHeap *heap,
+u32 *Patch::Init::initFirstModel(const char *path, u32 unk_1, u32 unk_2,
+                                 u32 unk_3, JKRHeap *heap,
                                  JKRDvdRipper::EAllocDirection direction,
                                  u32 unk_5, u32 unk_6) {
+
+  if (!TGlobals::sCharacterHeap)
+    SME_CONSOLE_LOG("Character heap failed to allocate at size %lu\n",
+                    charactersize);
 #ifndef SME_DETACHED_HEAPS
   TGlobals::sCharacterHeap->freeAll();
 #endif
@@ -124,7 +133,6 @@ static void resetGlobalValues() {
   gYoshiBodyColor[1].set(0xFF, 0x8C, 0x1C, 0xFF);
   gYoshiBodyColor[2].set(0xAA, 0x4C, 0xFF, 0xFF);
   gYoshiBodyColor[3].set(0xFF, 0xA0, 0xBE, 0xFF);
-  *(f32 *)0x80415CA8 = 0.25f; // Mario overall speed
   gAudioVolume = 0.75f;
   gAudioPitch = 1.0f;
   gAudioSpeed = 1.0f;
@@ -160,7 +168,6 @@ TMarDirector *Patch::Init::initFileMods() {
   Enum::Player characterID = Enum::Player::UNKNOWN;
 #endif
 
-
   resetGlobalValues();
   objects_staticResetter();
   patches_staticResetter();
@@ -170,7 +177,6 @@ TMarDirector *Patch::Init::initFileMods() {
 
   TFlagManager::smInstance->setBool(true, 0x1038F); // Yosh
   TFlagManager::smInstance->Type4Flag.mGoldCoinCount = 0;
-
 
 #ifdef CHARACTER_SELECT
   // ...
@@ -497,10 +503,10 @@ JKRMemArchive *Patch::Init::switchHUDOnStageLoad(char *curArchive,
   char buffer[32];
 
   if (gpApplication.mGamePad1->mButtons.mInput &
-      TMarioGamePad::Buttons::DPAD_UP)
+      TMarioGamePad::EButtons::DPAD_UP)
     TFlagManager::smInstance->Type6Flag.CustomFlags.mHUDElement = 1;
   else if (gpApplication.mGamePad1->mButtons.mInput &
-           TMarioGamePad::Buttons::DPAD_DOWN)
+           TMarioGamePad::EButtons::DPAD_DOWN)
     TFlagManager::smInstance->Type6Flag.CustomFlags.mHUDElement = 0;
 
   sprintf(buffer, "/data/game_%d.arc",

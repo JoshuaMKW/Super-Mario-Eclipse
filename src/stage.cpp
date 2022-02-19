@@ -8,7 +8,7 @@ void Patch::Stage::setStageOnExit(TGameSequence *gpSequence, s8 stage,
                                   s8 episode) {
   TMarioGamePad *gpGamePad = gpApplication.mGamePad1;
 
-  if (gpGamePad->mButtons.mInput & TMarioGamePad::Buttons::Z) {
+  if (gpGamePad->mButtons.mInput & TMarioGamePad::EButtons::Z) {
     stage = gpApplication.mCurrentScene.mAreaID;
     episode = -1;
   }
@@ -20,7 +20,7 @@ void Patch::Stage::setStageOnExit(TGameSequence *gpSequence, s8 stage,
 void Patch::Stage::startEpisodeSelect(void *selectMenu) {
   TMarioGamePad *gpGamePad = gpApplication.mGamePad1;
 
-  if (!(gpGamePad->mButtons.mInput & TMarioGamePad::Buttons::Z)) {
+  if (!(gpGamePad->mButtons.mInput & TMarioGamePad::EButtons::Z)) {
     startOpenWindow__11TSelectMenuFv(selectMenu);
   }
 }

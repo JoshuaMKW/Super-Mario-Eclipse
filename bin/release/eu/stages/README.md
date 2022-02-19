@@ -1,1 +1,0 @@
-Insert your stages here (go in `ISO:/data/scene/`)

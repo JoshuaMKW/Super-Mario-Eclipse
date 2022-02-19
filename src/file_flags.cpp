@@ -19,9 +19,9 @@ void newGamePlus(TFlagManager *flagManager, JSUMemoryInputStream &stream) {
     return;
 
   else if (gpMarioAddress->mController->mButtons.mInput &
-               TMarioGamePad::Buttons::R &&
+               TMarioGamePad::EButtons::R &&
            gpMarioAddress->mController->mButtons.mInput &
-               TMarioGamePad::Buttons::L) {
+               TMarioGamePad::EButtons::L) {
     flagManager->Type6Flag.CustomFlags.mIsGamePlus = true;
     // Type 1
     memset(flagManager->Type1Flag.m1Type, 0, 0x77);

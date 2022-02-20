@@ -18,6 +18,7 @@ static void updateClimbContext(TMario *player) {
     return;
   }
 
+  #ifdef SME_BUGFIXES
   bool checkClimbContext = false;
 
   if ((player->mState & static_cast<u32>(TMario::State::AIRBORN)) == 0 &&
@@ -59,7 +60,7 @@ static void updateClimbContext(TMario *player) {
     if (player->mCeilingAbove >= 9999990.0f && (player->mState & 0x200000) != 0)
       player->mActionState |= 0x8000; // patch upwarps
   }
-  return;
+  #endif
 }
 
 /* PATCHES */

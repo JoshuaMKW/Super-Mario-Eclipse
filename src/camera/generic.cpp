@@ -1,5 +1,9 @@
-#include "SME.cpp"
+#include "sms/camera/PolarSubCamera.hxx"
+
+#include "SME.hxx"
 #include "types.h"
+
+using namespace SME;
 
 static void updateSlideFOV(CPolarSubCamera *); // Forward decl
 
@@ -34,8 +38,8 @@ static void modifyCameraRangeToSize(f32 *params, f32 *saveParams) {
   params[0xA8 / 4] = saveParams[0x3B0 / 4];
 
   // Custom code here
-  const SME::Class::TPlayerData *playerParams =
-      SME::TGlobals::getPlayerData(gpMarioAddress);
+  const Class::TPlayerData *playerParams =
+      TGlobals::getPlayerData(gpMarioAddress);
   const f32 scale = playerParams->getParams()->mSizeMultiplier.get();
 
   if (!gpMarioAddress->mYoshi ||
@@ -46,4 +50,4 @@ static void modifyCameraRangeToSize(f32 *params, f32 *saveParams) {
         Util::Math::scaleLinearAtAnchor<f32>(scale, 0.9375f, 1.0f);
   }
 }
-SME_PATCH_BL(SME_PORT_REGION(0x80027548, 0, 0, 0), modifyCameraRangeToSize);
+SME_PATCH_B(SME_PORT_REGION(0x80027548, 0, 0, 0), modifyCameraRangeToSize);

@@ -5,6 +5,8 @@
 
 #include "SME.hxx"
 
+#ifdef SME_FLUDD_GOOP_MOD
+
 static void sprayGoopMap(TPollutionManager *gpPollutionManager, f32 x, f32 y,
                          f32 z, f32 r) {
   const SME::Class::TPlayerData *playerParams =
@@ -39,3 +41,5 @@ static bool canCleanSeals(TModelWaterManager *gpWaterManager) {
 }
 SME_PATCH_BL(SME_PORT_REGION(0x800FED3C, 0, 0, 0), canCleanSeals);
 SME_WRITE_32(SME_PORT_REGION(0x800FED40, 0, 0, 0), 0x2C030000);
+
+#endif

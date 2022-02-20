@@ -10,6 +10,8 @@
 
 using namespace SME;
 
+#ifdef SME_SHADOW_MARIO_HEALTHBAR
+
 // ------------ //
 // Shadow Mario //
 // ------------ //
@@ -35,3 +37,5 @@ static void manageEMarioHealthWrapper(TEnemyMario *eMario, Mtx *posMtx) {
 }
 SME_WRITE_32(SME_PORT_REGION(0x8003FD94, 0, 0, 0), 0x60000000);
 SME_PATCH_BL(SME_PORT_REGION(0x8003FDAC, 0, 0, 0), manageEMarioHealthWrapper);
+
+#endif

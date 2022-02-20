@@ -1,6 +1,8 @@
-#include "common.hxx"
+#include "SME.hxx"
 
 using namespace SME;
+
+#ifdef SME_YOSHI_SAVE_NOZZLE
 
 static bool isYoshiMaintainFluddModel() {
   TMario *player;
@@ -59,3 +61,5 @@ static void restoreNozzles(TMario *player) {
 }
 SME_PATCH_BL(SME_PORT_REGION(0x8024EC18, 0, 0, 0), restoreNozzles);
 SME_WRITE_32(SME_PORT_REGION(0x8024EC2C, 0, 0, 0), 0x60000000);
+
+#endif

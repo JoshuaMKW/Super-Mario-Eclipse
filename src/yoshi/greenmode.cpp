@@ -1,4 +1,8 @@
-#include "common.hxx"
+#include "SME.hxx"
+
+using namespace SME;
+
+#ifdef SME_GREEN_YOSHI
 
 SME_WRITE_32(SME_PORT_REGION(0x8026E068, 0, 0, 0),
              0x2C000001); // Turn green when out of juice
@@ -10,7 +14,7 @@ SME_WRITE_32(SME_PORT_REGION(0x8026EE14, 0, 0, 0),
 // 0x8026EB00, 0x8026EBFC, 0x8026F218
 // extern -> SME.cpp
 static bool isYoshiDie(TMario *player) {
-  return !player->mYoshi->isGreenYoshi();
+  return !Util::Yoshi::isGreenYoshi(player);
 }
 SME_PATCH_BL(SME_PORT_REGION(0x8026EB00, 0, 0, 0), isYoshiDie);
 SME_WRITE_32(SME_PORT_REGION(0x8026EB04, 0, 0, 0), 0x2C030000);
@@ -27,7 +31,7 @@ SME_WRITE_32(SME_PORT_REGION(0x8026F220, 0, 0, 0), 0x41820164);
 // 0x8024F240
 // extern -> SME.cpp
 static void maybeYoshiDrown(TYoshi *yoshi) {
-  if (!yoshi->isGreenYoshi())
+  if (!Util::Yoshi::isGreenYoshi(yoshi))
     disappear__6TYoshiFv(yoshi);
 }
 SME_PATCH_BL(SME_PORT_REGION(0x8024F240, 0, 0, 0), maybeYoshiDrown);
@@ -38,11 +42,11 @@ static bool canMountYoshi() {
   TMario *player;
   SME_FROM_GPR(31, player);
 
-  const TPlayerParams *params =
-      SME::TGlobals::getPlayerData(player)->getParams();
+  const Class::TPlayerParams *params =
+      TGlobals::getPlayerData(player)->getParams();
 
   if (params->mSizeMultiplier.get() *
-          TStageParams::sStageConfig->mPlayerSizeMultiplier.get() >
+          Class::TStageParams::sStageConfig->mPlayerSizeMultiplier.get() >
       1.5f)
     return false;
 
@@ -71,24 +75,24 @@ static void canYoshiSpray(TWaterGun *gpWaterGun) {
   if (!player->mYoshi)
     return;
 
-  if (!player->mYoshi->isGreenYoshiMounted())
+  if (!Util::Yoshi::isGreenYoshiMounted(player->mYoshi))
     emit__9TWaterGunFv(gpWaterGun);
 }
 SME_PATCH_BL(SME_PORT_REGION(0x8024E58C, 0, 0, 0), canYoshiSpray);
 
 static u32 calcYoshiSwimVelocity(TMario *player, u32 arg1) {
-  TPlayerData *playerParams = SME::TGlobals::getPlayerData(player);
+  Class::TPlayerData *playerParams = SME::TGlobals::getPlayerData(player);
   if (!playerParams) {
     return jumpProcess__6TMarioFi(player, arg1);
   }
 
-  if (TStageParams::sStageConfig->mIsYoshiHungry.get())
+  if (Class::TStageParams::sStageConfig->mIsYoshiHungry.get())
     return jumpProcess__6TMarioFi(player, arg1);
 
   if (!player->mYoshi)
     return jumpProcess__6TMarioFi(player, arg1);
 
-  if (!player->mYoshi->isGreenYoshiMounted())
+  if (!Util::Yoshi::isGreenYoshiMounted(player->mYoshi))
     return jumpProcess__6TMarioFi(player, arg1);
 
   if (player->mController->mButtons.mInput & TMarioGamePad::EButtons::A) {
@@ -113,8 +117,8 @@ static u32 isYoshiWaterFlutter() {
   SME_FROM_GPR(29, yoshi);
   SME_FROM_GPR(30, animID);
 
-  if (!TStageParams::sStageConfig->mIsYoshiHungry.get() &&
-      TYoshi::isGreenYoshiAscendingWater(yoshi->mMario))
+  if (!Class::TStageParams::sStageConfig->mIsYoshiHungry.get() &&
+      Util::Yoshi::isGreenYoshiAscendingWater(yoshi->mMario))
     animID = 9;
 
   if ((animID & 0xFFFF) == 24)
@@ -129,10 +133,10 @@ SME_WRITE_32(SME_PORT_REGION(0x80270084, 0, 0, 0), 0x60000000);
 
 // 0x8026FE84 NEEDS ADDI R4, R3, 0
 static u32 isYoshiValidWaterFlutter(s32 anmIdx, u32 unk1, TMario *player) {
-  if (!TStageParams::sStageConfig->mIsYoshiHungry.get())
+  if (!Class::TStageParams::sStageConfig->mIsYoshiHungry.get())
     return player->mState;
 
-  if (TYoshi::isGreenYoshiAscendingWater(player))
+  if (Util::Yoshi::isGreenYoshiAscendingWater(player))
     return (player->mState & 0xFFFFFBFF) |
            static_cast<u32>(TMario::State::AIRBORN);
   else
@@ -141,6 +145,8 @@ static u32 isYoshiValidWaterFlutter(s32 anmIdx, u32 unk1, TMario *player) {
 // SME_PATCH_BL(SME_PORT_REGION(0x8026FE84, 0, 0, 0), isYoshiValidWaterFlutter);
 
 static bool isYoshiValidDrip(TYoshi *yoshi) {
-  return yoshi->isMounted() && !yoshi->isGreenYoshi();
+  return Util::Yoshi::isMounted(yoshi) && !Util::Yoshi::isGreenYoshi(yoshi);
 }
 SME_PATCH_BL(SME_PORT_REGION(0x8024E788, 0, 0, 0), isYoshiValidDrip);
+
+#endif

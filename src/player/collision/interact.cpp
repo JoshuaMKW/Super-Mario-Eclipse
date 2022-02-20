@@ -8,6 +8,8 @@
 #include "collision/WarpCollision.hxx"
 #include "libs/sGeometry.hxx"
 
+#ifdef SME_EXTRA_COLLISION
+
 using namespace SME;
 using namespace SME::Util::Math;
 
@@ -78,7 +80,7 @@ static void incHealth(TMario *player, u8 flags) {
 // Array of basic action functions bound to collision values
 void (*gStateCBMap[])(TMario *player, u8 flags){
     elecPlayer, burnPlayer, slipFloor, decHealth, incHealth};
-constexpr size_t gStateCBMapSize = sizeof(gStateCBMap) / sizeof(void *);
+size_t gStateCBMapSize = sizeof(gStateCBMap) / sizeof(void *);
 
 void checkIsGlideBounce(TMario *player) {
   SME::Class::TPlayerData *playerData = SME::TGlobals::getPlayerData(player);
@@ -202,3 +204,5 @@ void boostPadCol(TMario *player) {
     startVoice__6TMarioFUl(player, static_cast<u32>(TMario::Voice::JUMP));
   }
 }
+
+#endif

@@ -16,6 +16,8 @@ static u32 updateContexts(TMario *player) {
 
     updateCollisionContext(player);
     updateClimbContext(player);
+
+    return 1;
 }
 
 static void addVelocity(TMario *player, f32 velocity) {
@@ -33,7 +35,7 @@ static void addVelocity(TMario *player, f32 velocity) {
             playerData->mMaxAddVelocity * playerData->mSlideSpeedMultiplier);
   }
 }
-SME_PATCH_BL(SME_PORT_REGION(0x802558A4, 0, 0, 0), addVelocity);
+SME_PATCH_B(SME_PORT_REGION(0x802558A4, 0, 0, 0), addVelocity);
 
 static void rescaleHeldObj(Mtx holderMatrix, Mtx destMatrix) {
   TMapObjBase *heldObj;

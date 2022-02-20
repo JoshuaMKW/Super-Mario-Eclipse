@@ -67,8 +67,56 @@
 #define __ppc__
 #endif
 
-#define SME_USE_PS_MATH
+/* CONFIGURATION DEFINES */
+
+#define SME_BUGFIXES
+#define SME_CRASHFIXES
+#define SME_EXCEPTION_HANDLER
+#define SME_SLOT_B_SUPPORT
+#define SME_EXTENDED_RENDER_DISTANCE
+
 // #define SME_DEMO
+#define SME_MIRROR_SUNSHINE
+#define SME_MULTIPLAYER
+#define SME_WIDESCREEN
+#define SME_VARIABLE_FPS
+
+#define SME_EXTRA_SHINES
+#define SME_EXTRA_OBJECTS
+#define SME_EXTRA_COLLISION
+
+// #define SME_VANILLA_MOVESET
+
+#ifndef SME_VANILLA_MOVESET
+#define SME_LONG_JUMP
+#define SME_MULTI_JUMP
+#define SME_HOVER_BURST
+#define SME_HOVER_SLIDE
+#define SME_ROCKET_DIVE
+#else
+#undef SME_LONG_JUMP
+#undef SME_MULTI_JUMP
+#undef SME_HOVER_BURST
+#undef SME_HOVER_SLIDE
+#undef SME_ROCKET_DIVE
+#endif
+#define SME_DYNAMIC_FALL_DAMAGE
+#define SME_NO_DOWNWARP
+
+#define SME_GRAB_NPCS
+
+#define SME_SHADOW_MARIO_HEALTHBAR
+
+#define SME_FLUDD_GOOP_MOD
+
+#define SME_GREEN_YOSHI
+#define SME_YOSHI_SAVE_NOZZLES
+#define SME_YOSHI_EGG_FREE
+
+#define SME_UNDERWATER_FRUIT
+
+
+#define SME_USE_PS_MATH
 
 #define SME_MODULE_NAME "Eclipse"
 #define SME_AUTHOR_NAME "JoshuaMK"
@@ -107,6 +155,18 @@ bool isOptionMap();
 
 } // namespace SMS
 
+namespace Yoshi {
+
+bool isMounted(TYoshi *yoshi);
+bool isMounted(TMario *mario);
+bool isGreenYoshi(TYoshi *yoshi);
+bool isGreenYoshi(TMario *mario);
+bool isGreenYoshiMounted(TYoshi *yoshi);
+bool isGreenYoshiMounted(TMario *mario);
+bool isGreenYoshiAscendingWater(TMario *mario);
+
+} // namespace Yoshi
+
 } // namespace Util
 
 namespace Patch {
@@ -116,13 +176,6 @@ namespace Camera {
 void modifyCameraRangeToSize(f32 *params, f32 *saveParams);
 
 }
-
-namespace Card {
-
-s32 mountCard(TCardManager *cardManager, bool r4);
-s32 probeCard(TCardManager *cardManager);
-
-} // namespace Card
 
 namespace Cheat {
 

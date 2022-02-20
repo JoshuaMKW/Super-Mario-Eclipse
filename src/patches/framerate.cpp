@@ -1,5 +1,8 @@
 #include "types.h"
 #include "SME.hxx"
+#include "Globals.hxx"
+
+#ifdef SME_VARIABLE_FPS
 
 static f32 setBoidSpeed(f32 thing) {
     return sqrt__Q29JGeometry8TUtil_f(thing) * (30.0f / SME::TGlobals::getFrameRate());
@@ -15,3 +18,5 @@ static void requestFadeTimeScaled(TSMSFader *fader, TSMSFader::WipeRequest *requ
     fader->requestWipe(request);
 }
 SME_PATCH_BL(SME_PORT_REGION(0x8013FE84, 0, 0, 0), requestFadeTimeScaled);
+
+#endif

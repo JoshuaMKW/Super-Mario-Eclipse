@@ -3,6 +3,8 @@
 
 using namespace SME;
 
+#ifdef SME_SLOT_B_SUPPORT
+
 /*** Memory File Buffer ***/
 #define MAXFILEBUFFER (1024 * 2048) /*** 2MB Buffer ***/
 
@@ -59,3 +61,5 @@ static s32 probeCard(TCardManager *cardManager) {
   return ret;
 }
 SME_PATCH_BL(SME_PORT_REGION(0x80163C40, 0, 0, 0), probeCard);
+
+#endif

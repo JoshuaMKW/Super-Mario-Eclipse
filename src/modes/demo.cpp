@@ -75,4 +75,8 @@ SME_WRITE_32(SME_PORT_REGION(0x801E7960, 0, 0, 0), 0x38600001);
 // Bell Tower 2
 SME_WRITE_32(SME_PORT_REGION(0x801E793C, 0, 0, 0), 0x38600001);
 
+#else
+
+void demoHandler(TMario *player) {}
+
 #endif

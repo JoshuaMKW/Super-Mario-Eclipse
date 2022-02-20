@@ -1,6 +1,8 @@
-#include "common.hxx"
+#include "SME.hxx"
 
 using namespace SME;
+
+#ifdef SME_YOSHI_EGG_FREE
 
 static bool isYoshiEggNeedFruit(THitActor *gpFruit) {
   if (!Class::TStageParams::sStageConfig->mIsEggFree.get())
@@ -42,12 +44,12 @@ SME_WRITE_32(SME_PORT_REGION(0x801BC8D0, 0, 0, 0), 0x48000134);
 #define EGG_CARD_EXCLAIM 11.0f
 
 static void initFreeEggCard(J3DFrameCtrl *frameCtrl) {
-  if (!TStageParams::sStageConfig->mIsEggFree.get())
+  if (!Class::TStageParams::sStageConfig->mIsEggFree.get())
     return;
 
   frameCtrl->mCurFrame = EGG_CARD_EXCLAIM;
 }
-SME_PATCH_BL(SME_PORT_REGION(0x801BC128, 0, 0, 0), initFreeEggCard);
+SME_PATCH_B(SME_PORT_REGION(0x801BC128, 0, 0, 0), initFreeEggCard);
 
 static u32 checkFreeEggCard(J3DFrameCtrl *frameCtrl) {
   if (!Class::TStageParams::sStageConfig->mIsEggFree.get())
@@ -69,3 +71,5 @@ SME_PATCH_BL(SME_PORT_REGION(0x801BC6B8, 0, 0, 0), updateFreeEggCard);
 SME_WRITE_32(SME_PORT_REGION(0x801BC6BC, 0, 0, 0), 0xB07F00FC);
 
 #undef EGG_CARD_EXCLAIM
+
+#endif

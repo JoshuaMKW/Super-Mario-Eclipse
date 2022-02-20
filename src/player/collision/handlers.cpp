@@ -8,38 +8,6 @@
 #include "collision/WarpCollision.hxx"
 #include "libs/sGeometry.hxx"
 
-using namespace SME;
-using namespace SME::Util::Math;
-
-// Array of basic action functions bound to collision values
-extern void (*gStateCBMap[])(TMario *player, u8 flags);
-extern size_t gStateCBMapSize;
-
-// Collision functions
-extern void checkIsCannonType(TMario *);
-extern void boostPadCol(TMario *);
-extern void setGravityCol(TMario *);
-extern void antiGravityCol(TMario *);
-extern void warpToLinkedCol(TMario *, Enum::WarpKind, bool);
-extern void warpToLinkedColPreserve(TMario *, bool);
-extern void changeNozzleType(TMario *, u16);
-extern void checkRestoreHealth(TMario *);
-
-static void slipperyCatchingSoundCheck(u32 sound, const Vec *pos, u32 unk_1,
-                                       JAISound **out, u32 unk_2, u8 unk_3) {
-  TMario *player;
-  SME_FROM_GPR(31, player);
-
-  if (player->mFloorTriangle->mCollisionType == 16081 ||
-      player->mFloorTriangle->mCollisionType == 17081)
-    sound = 4105;
-
-  MSoundSESystem::MSoundSE::startSoundActor(sound, pos, unk_1, out, unk_2,
-                                            unk_3);
-}
-SME_PATCH_BL(SME_PORT_REGION(0x8025932C, 0, 0, 0), slipperyCatchingSoundCheck);
-SME_WRITE_32(SME_PORT_REGION(0x802596C0, 0, 0, 0), 0x60000000);
-
 /* Collision State Resetters */
 
 #define EXPAND_WARP_SET(base)                                                  \
@@ -126,6 +94,40 @@ static void resetValuesOnCollisionChange(TMario *player) {
     break;
   }
 }
+
+#ifdef SME_EXTRA_COLLISION
+
+using namespace SME;
+using namespace SME::Util::Math;
+
+// Array of basic action functions bound to collision values
+extern void (*gStateCBMap[])(TMario *player, u8 flags);
+extern size_t gStateCBMapSize;
+
+// Collision functions
+extern void checkIsCannonType(TMario *);
+extern void boostPadCol(TMario *);
+extern void setGravityCol(TMario *);
+extern void antiGravityCol(TMario *);
+extern void warpToLinkedCol(TMario *, Enum::WarpKind, bool);
+extern void warpToLinkedColPreserve(TMario *, bool);
+extern void changeNozzleType(TMario *, u16);
+extern void checkRestoreHealth(TMario *);
+
+static void slipperyCatchingSoundCheck(u32 sound, const Vec *pos, u32 unk_1,
+                                       JAISound **out, u32 unk_2, u8 unk_3) {
+  TMario *player;
+  SME_FROM_GPR(31, player);
+
+  if (player->mFloorTriangle->mCollisionType == 16081 ||
+      player->mFloorTriangle->mCollisionType == 17081)
+    sound = 4105;
+
+  MSoundSESystem::MSoundSE::startSoundActor(sound, pos, unk_1, out, unk_2,
+                                            unk_3);
+}
+SME_PATCH_BL(SME_PORT_REGION(0x8025932C, 0, 0, 0), slipperyCatchingSoundCheck);
+SME_WRITE_32(SME_PORT_REGION(0x802596C0, 0, 0, 0), 0x60000000);
 
 /* Master Handlers */
 
@@ -251,6 +253,8 @@ SME_WRITE_32(SME_PORT_REGION(0x802505A0, 0, 0, 0), 0x546004E7);
 
 #undef EXPAND_WARP_SET
 #undef EXPAND_WARP_CATEGORY
+
+#endif
 
 // extern -> generic.cpp
 void updateCollisionContext(TMario *player) {

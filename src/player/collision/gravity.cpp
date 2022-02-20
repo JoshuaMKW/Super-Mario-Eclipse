@@ -8,6 +8,8 @@
 #include "collision/WarpCollision.hxx"
 #include "libs/sGeometry.hxx"
 
+#ifdef SME_EXTRA_COLLISION
+
 using namespace SME;
 using namespace SME::Util::Math;
 
@@ -37,3 +39,5 @@ void antiGravityCol(TMario *player) {
   if (player->mState == static_cast<u32>(TMario::State::FALL))
     player->mSubStateTimer = 0;
 }
+
+#endif

@@ -3,6 +3,8 @@
 #include "sms/actor/Mario.hxx"
 #include "SME.hxx"
 
+#ifdef SME_MULTI_JUMP
+
 using namespace SME;
 
 extern f32 calcJumpPower(TMario *player, f32 factor, f32 base, f32 jumpPower);
@@ -69,3 +71,5 @@ static void manageCustomJumps(TMario *player) {
   stateMachine__6TMarioFv(player);
 }
 SME_PATCH_BL(SME_PORT_REGION(0x8024E02C, 0, 0, 0), manageCustomJumps);
+
+#endif

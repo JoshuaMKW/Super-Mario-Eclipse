@@ -2,6 +2,8 @@
 
 using namespace SME;
 
+#ifdef SME_EXTRA_SHINES
+
 void TFlagManager::resetGame() { memset(this + 0xE4, 0, 0xD); }
 
 // 0x80294EF4
@@ -25,3 +27,5 @@ void resetStageFlags(TFlagManager *flagManager) {
   TFlagManager::smInstance->resetStage();
 }
 // kmBranch(0x80294EF4, &resetStageFlags);
+
+#endif

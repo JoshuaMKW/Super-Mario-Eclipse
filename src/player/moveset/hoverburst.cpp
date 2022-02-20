@@ -5,6 +5,8 @@
 
 #include "SME.hxx"
 
+#ifdef SME_HOVER_BURST
+
 using namespace SME;
 
 static bool sIsTriggerNozzleDead = false;
@@ -88,3 +90,5 @@ void checkSpamHover(TNozzleTrigger *nozzle, u32 r4, TWaterEmitInfo *emitInfo) {
   sIsTriggerNozzleDead = true;
   return;
 }
+
+#endif

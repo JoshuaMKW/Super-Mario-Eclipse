@@ -25,6 +25,8 @@ f32 calcJumpPower(TMario *player, f32 factor, f32 base, f32 jumpPower) {
   return Max(base, (base * factor) + jumpPower);
 }
 
+#ifdef SME_LONG_JUMP
+
 static void setJumpOrLongJump(TMario *player, u32 state, u32 unk_0) {
   constexpr u32 LongJumpSpecifier = TMarioGamePad::EButtons::Z;
   constexpr f32 LongJumpMinSpeed = 10.0f;
@@ -132,3 +134,5 @@ SME_PATCH_BL(SME_PORT_REGION(0x80256618, 0, 0, 0),
              preserveRegisterCheckQuickFall);
 SME_WRITE_32(SME_PORT_REGION(0x8025661C, 0, 0, 0), 0x2C030000);
 SME_WRITE_32(SME_PORT_REGION(0x80256620, 0, 0, 0), 0x41820024);
+
+#endif

@@ -2,6 +2,7 @@
 #include "sms/sound/MSBGM.hxx"
 
 #include "SME.hxx"
+#include "Globals.hxx"
 
 using namespace SME;
 using namespace SME::Class;

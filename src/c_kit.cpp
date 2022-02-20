@@ -7,6 +7,7 @@
 #include "string.h"
 
 #include "SME.hxx"
+#include "Globals.hxx"
 
 using namespace SME;
 using namespace SME::Class;
@@ -295,7 +296,7 @@ static void extendedTagParam() {
 // SME_PATCH_BL(SME_PORT_REGION(0x80150c40, 0, 0, 0), extendedTagParam);
 
 static void maintainYoshi(TYoshi *yoshi) {
-  if (yoshi->isGreenYoshi()) {
+  if (Util::Yoshi::isGreenYoshi(yoshi)) {
     *(f32 *)0x80415F4C = 480.0f; // tounge
     *(f32 *)0x80415F68 = 16384.0f;
   } else {

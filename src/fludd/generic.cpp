@@ -7,6 +7,7 @@
 
 using namespace SME;
 
+#ifdef SME_HOVER_SLIDE
 static bool isPumpOK(TMarioAnimeData *animeData) {
   return (animeData->mFluddEnabled != TMarioAnimeData::FLUDD::FLUDD_DISABLED &&
           TGlobals::getPlayerData(gpMarioAddress)->mCurJump <= 1);
@@ -14,6 +15,7 @@ static bool isPumpOK(TMarioAnimeData *animeData) {
 SME_PATCH_B(SME_PORT_REGION(0x80248F14, 0, 0, 0), isPumpOK);
 SME_WRITE_32(SME_PORT_REGION(0x803DCA00, 0, 0, 0), // Allow dive spray
              0x00300000 | TMarioAnimeData::FLUDD::FLUDD_ENABLED);
+#endif
 
 static TWaterGun *bindFluddtojoint() {
   TMario *player;
@@ -71,7 +73,7 @@ static bool canCollectFluddItem_() {
   }
   return isOnYoshi || !TGlobals::getPlayerData(player)->getCanUseFludd();
 }
-SME_PATCH_BL(SME_PORT_REGION(0x801BBD48, 0, 0, 0), canCollectFluddItem);
+SME_PATCH_BL(SME_PORT_REGION(0x801BBD48, 0, 0, 0), canCollectFluddItem_);
 
 static void resetNozzleBuzzer(TMapObjGeneral *obj) {
   if (obj->mNumObjs <= 0) {
@@ -81,6 +83,7 @@ static void resetNozzleBuzzer(TMapObjGeneral *obj) {
 }
 SME_PATCH_BL(SME_PORT_REGION(0x801BBBF8, 0, 0, 0), resetNozzleBuzzer);
 
+#ifdef SME_ROCKET_DIVE
 static void checkRocketNozzleDiveBlast(TNozzleTrigger *nozzle, u32 r4,
                                        TWaterEmitInfo *emitInfo) {
   TMario *player = nozzle->mFludd->mMario;
@@ -91,6 +94,10 @@ static void checkRocketNozzleDiveBlast(TNozzleTrigger *nozzle, u32 r4,
   nozzle->mForwardSpeedFactor =
       player->mState != static_cast<u32>(TMario::State::DIVE) ? 0.0f : 1.0f;
 }
+#else
+static void checkRocketNozzleDiveBlast(TNozzleTrigger *nozzle, u32 r4,
+                                       TWaterEmitInfo *emitInfo) {}
+#endif
 
 // Fludd mods hook
 void fluddEmitModWrapper(TNozzleTrigger *nozzle, u32 r4,

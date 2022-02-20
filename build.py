@@ -203,11 +203,11 @@ class FilePatcher(Compiler):
         print(self._get_matching_filepath(
             self.solutionRegionDir / "main.dol"))
 
-        super().__init__(Path("compiler"),
+        super().__init__(Path("assets/compiler"),
                          compiler=compiler,
                          dest=self._get_matching_filepath(
                              self.solutionRegionDir / "main.dol"),
-                         linker=Path(f"linker/{self.region}.map"),
+                         linker=Path(f"assets/linker/{self.region}.map"),
                          patcher=patcher,
                          dump=False,
                          startaddr=startAddr)
@@ -236,16 +236,16 @@ class FilePatcher(Compiler):
     @property
     def solutionRegionDir(self) -> Path:
         if self.is_release():
-            return self.projectDir / "bin" / "release" / self.region.lower()
+            return self.projectDir / "assets/bin/release" / self.region.lower()
         elif self.is_debug():
-            return self.projectDir / "bin" / "debug" / self.region.lower()
+            return self.projectDir / "assets/bin/debug" / self.region.lower()
 
     @property
     def solutionAnyDir(self) -> Path:
         if self.is_release():
-            return self.projectDir / "bin" / "release" / "any"
+            return self.projectDir / "assets/bin/release/any"
         elif self.is_debug():
-            return self.projectDir / "bin" / "debug" / "any"
+            return self.projectDir / "assets/bin/debug/any"
 
     def is_release(self) -> bool:
         return self.state in {FilePatcher.State.RELEASE, FilePatcher.State.RELEASE_DEB}
@@ -395,7 +395,7 @@ class FilePatcher(Compiler):
             self._create_signatures(_doldata, "Super Mario Eclipse\0")
 
             if self.is_kuribo():
-                tmpbin = Path("bin", f"kuriboloader-{self.region.lower()}.bin")
+                tmpbin = Path("assets/bin", f"kuriboloader-{self.region.lower()}.bin")
 
                 data = BytesIO(tmpbin.read_bytes())
                 rawData = data.getvalue()

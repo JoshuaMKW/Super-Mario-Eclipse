@@ -10,6 +10,8 @@
 
 using namespace SME;
 
+#ifdef SME_GRAB_NPCS
+
 /* NPC CARRY CODE */
 
 // 0x8029A87C
@@ -125,6 +127,8 @@ static u32 scaleNPCThrowHeight(u32 _r3, f32 z, f32 y) {
 SME_WRITE_32(SME_PORT_REGION(0x8021462C, 0, 0, 0), 0xEC0B0032);
 SME_WRITE_32(SME_PORT_REGION(0x80214634, 0, 0, 0), 0xEC2B0072);
 SME_PATCH_BL(SME_PORT_REGION(0x8021463C, 0, 0, 0), scaleNPCThrowHeight);
+
+#endif
 
 // 0x80213314
 static SME_PURE_ASM void scaleNPCTalkRadius() {

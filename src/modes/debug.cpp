@@ -1,12 +1,12 @@
 #include "MTX.h"
 #include "types.h"
 
-#include "sme/obj/WaterBalloon.hxx"
+#include "obj/WaterBalloon.hxx"
 #include "sms/actor/Mario.hxx"
 #include "sms/enemy/EnemyMario.hxx"
 #include "sms/npc/BaseNPC.hxx"
 
-#include "sme/libs/sContainer.hxx"
+#include "libs/sContainer.hxx"
 
 #include "SME.hxx"
 
@@ -62,7 +62,7 @@ static void *handleDebugCheat(void *GCLogoDir) {
   gDebugHandler.advanceInput();
   return GCLogoDir;
 }
-SME_PATCH_BL(SME_PORT_REGION(0x80295B6C, 0, 0, 0), handleDebugCheat);
+SME_PATCH_B(SME_PORT_REGION(0x80295B6C, 0, 0, 0), handleDebugCheat);
 
 /* DEBUG MODS */
 

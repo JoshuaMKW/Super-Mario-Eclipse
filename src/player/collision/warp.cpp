@@ -8,6 +8,8 @@
 #include "collision/WarpCollision.hxx"
 #include "libs/sGeometry.hxx"
 
+#ifdef SME_EXTRA_COLLISION
+
 using namespace SME;
 
 /* extern to handlers.cpp */
@@ -168,3 +170,5 @@ void warpToLinkedColPreserve(TMario *player, bool fluid) {
          !fluid);
   }
 }
+
+#endif

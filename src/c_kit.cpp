@@ -1,235 +1,228 @@
 #include "CARD.h"
-#include "string.h"
 #include "printf.h"
-#include "sms/JSystem/J2D/J2DOrthoGraph.hxx"
-#include "sms/JSystem/J2D/J2DTextBox.hxx"
+#include "J2D/J2DOrthoGraph.hxx"
+#include "J2D/J2DTextBox.hxx"
+#include "J3D/J3DVertex.hxx"
 #include "sms/talk/Talk2D2.hxx"
+#include "string.h"
 
 #include "SME.hxx"
+#include "Globals.hxx"
 
 using namespace SME;
+using namespace SME::Class;
 
 extern J2DTextBox gDebugTextBox;
 
-bool inXYZMode;
-
-/*
-static void xyzModifierMario()
-{   
-    #ifndef SME_DEBUG
-        if (!SME::Class::TCheatHandler::sDebugHandler.isActive())
-            return;
-    #endif
-
-    if (!gpMarioAddress)
-        return;
-
-    if ((void *)gpMarioAddress->mController < (void *)0x80000000 || (u32 *)gpMarioAddress->mController >= (void *)0x81800000)
-        return;
-
-    if (gpMarioAddress->mController->mButtons.mFrameInput & TMarioGamePad::Buttons::DPAD_RIGHT && !inXYZMode)
-    {
-        inXYZMode = true;
-    }
-    else if (gpMarioAddress->mController->mButtons.mFrameInput & TMarioGamePad::Buttons::DPAD_RIGHT && inXYZMode)
-    {
-        gpMarioAddress->mState = TMario::State::IDLE;
-        inXYZMode = false;
-    }
-
-    if (inXYZMode)
-    {
-        gpMarioAddress->mState = TMario::State::IDLE | TMario::State::CUTSCENE;
-        f32 speedMultiplier = lerp<f32>(1, 2, gpMarioAddress->mController->mButtons.mAnalogR);
-        gpMarioAddress->mPosition.x += ((gpMarioAddress->mController->mControlStick.mStickX * 83) * speedMultiplier);
-        gpMarioAddress->mPosition.z -= ((gpMarioAddress->mController->mControlStick.mStickY * 83) * speedMultiplier);
-
-        if (gpMarioAddress->mController->mButtons.mInput & TMarioGamePad::Buttons::DPAD_DOWN)
-        {
-            gpMarioAddress->mPosition.y -= (83 * speedMultiplier);
-        }
-        else if (gpMarioAddress->mController->mButtons.mInput & TMarioGamePad::Buttons::DPAD_UP)
-        {
-            gpMarioAddress->mPosition.y += (83 * speedMultiplier);
-        }
-    }
-    return;
-}
-*/
-
 // this is ran once
 // extern -> SME.cpp
-void Patch::CKit::onSetup(TMarDirector* director)
-{
-    gDebugTextBox = J2DTextBox(gpSystemFont->mFont, "Debug Mode");
+void Patch::CKit::onSetup(TMarDirector *director) {
+  gDebugTextBox = J2DTextBox(gpSystemFont->mFont, "Debug Mode");
 
-	// run replaced call
-	director->setupObjects();
+  // run replaced call
+  director->setupObjects();
 }
+
+extern void demoHandler(TMario *player);
+extern void createWaterBalloonAndThrow(TMario *player);
 
 // this is ran every frame
 // extern -> SME.cpp
-s32 Patch::CKit::onUpdate(TMarDirector* director)
-{
-    //xyzModifierMario();
-    //Patch::Cheat::drawCheatText(); //currently bugged
+s32 Patch::CKit::onUpdate(void *director) { // movie director
+  u32 func;
+  SME_FROM_GPR(12, func);
 
-    // run replaced call
-	return director->direct();
+  if (!gpMarioAddress)
+    return ((s32(*)(void *))func)(director);
+
+  if ((u32)gpMarioAddress->mController < 0x80000000 ||
+      (u32)gpMarioAddress->mController >= (0x81800000 - sizeof(TMarioGamePad)))
+    return ((s32(*)(void *))func)(director);
+
+  if (!gpMarDirector) {
+    return ((s32(*)(void *))func)(director);
+  }
+
+  if (gpMarDirector->mCurState == 0xA)
+    return ((s32(*)(void *))func)(director);
+
+  Debug::xyzModifierMario(gpMarioAddress);
+  Debug::updateDebugCollision(gpMarioAddress);
+  demoHandler(gpMarioAddress);
+
+  if (!gpMarioAddress->mAttributes.mHasFludd &&
+      (gpMarioAddress->mController->mButtons.mFrameInput & TMarioGamePad::R))
+    createWaterBalloonAndThrow(gpMarioAddress);
+  // Patch::Cheat::drawCheatText(); //currently bugged
+
+  // ===== FRAME RATE ===== //
+  const f32 frameRate = SME::TGlobals::isVariableFrameRate()
+                            ? SME::TGlobals::getFrameRate()
+                            : SME::TGlobals::getFrameRate();
+  *(f32 *)SME_PORT_REGION(0x804167B8, 0, 0, 0) = 0.5f * (frameRate / 30.0f);
+  *(f32 *)SME_PORT_REGION(0x80414904, 0, 0, 0) = 0.01f * (frameRate / 30.0f);
+  gpApplication.mDisplay->mRetraceCount = frameRate > 30.0f ? 1 : 2;
+  // ====================== //
+
+  TMarioGamePad *controller = gpApplication.mGamePad1;
+  if ((controller->mButtons.mInput & 0x260) == 0x260) { // L + R + B + D-PAD UP
+    // SME::Util::Mario::switchCharacter(gpMarioAddress,
+    //                                  SME::Util::Mario::getPlayerIDFromInput(
+    //                                      controller->mButtons.mInput & 0xF),
+    //                                  true);
+  }
+  // run replaced call
+  return ((s32(*)(void *))func)(director);
 }
 
 // this is ran when drawing is needed
 // extern -> SME.cpp
-void Patch::CKit::onDraw2D(J2DOrthoGraph *graph)
-{
-	// run replaced call
-	graph->setup2D();
+void Patch::CKit::onDraw2D(J2DOrthoGraph *graph) {
+  // run replaced call
+  graph->setup2D();
 }
 
 // 0x802A8B58
 // extern -> SME.cpp
-bool Util::SMS::isExMap()
-{
-    if (SME::Class::TSMEFile::sStageConfig.FileHeader.mMAGIC == SME::Class::TSMEFile::MAGIC)
-        return SME::Class::TSMEFile::sStageConfig.GlobalFlags.StageType.mIsExMap;
-    else
-        return (gpApplication.mCurrentScene.mAreaID >= TGameSequence::DOLPICEX0 &&
-                gpApplication.mCurrentScene.mAreaID <= TGameSequence::COROEX6);
+bool Util::SMS::isExMap() {
+  if (TStageParams::sStageConfig->isCustomConfig())
+    return TStageParams::sStageConfig->mIsExStage.get();
+  else
+    return (gpApplication.mCurrentScene.mAreaID >= TGameSequence::DOLPICEX0 &&
+            gpApplication.mCurrentScene.mAreaID <= TGameSequence::COROEX6);
 }
 
 // 0x802A8B30
 // extern -> SME.cpp
-bool Util::SMS::isMultiplayerMap()
-{
-    if (SME::Class::TSMEFile::sStageConfig.FileHeader.mMAGIC == SME::Class::TSMEFile::MAGIC)
-        return SME::Class::TSMEFile::sStageConfig.GlobalFlags.StageType.mIsMultiPlayerMap;
-    else
-        return (gpMarDirector->mAreaID == TGameSequence::TEST10 && gpMarDirector->mEpisodeID == 0);
+bool Util::SMS::isMultiplayerMap() {
+  if (TStageParams::sStageConfig->isCustomConfig())
+    return TStageParams::sStageConfig->mIsMultiplayerStage.get();
+  else
+    return (gpMarDirector->mAreaID == TGameSequence::TEST10 &&
+            gpMarDirector->mEpisodeID == 0);
 }
 
 // 0x802A8AFC
 // extern -> SME.cpp
-bool Util::SMS::isDivingMap()
-{
-    if (SME::Class::TSMEFile::sStageConfig.FileHeader.mMAGIC == SME::Class::TSMEFile::MAGIC)
-        return SME::Class::TSMEFile::sStageConfig.GlobalFlags.StageType.mIsDivingMap;
-    else
-        return (gpMarDirector->mAreaID == TGameSequence::MAREBOSS ||
-                gpMarDirector->mAreaID == TGameSequence::MAREEX0 ||
-                gpMarDirector->mAreaID == TGameSequence::MAREUNDERSEA);
+bool Util::SMS::isDivingMap() {
+  if (TStageParams::sStageConfig->isCustomConfig())
+    return TStageParams::sStageConfig->mIsDivingStage.get();
+  else
+    return (gpMarDirector->mAreaID == TGameSequence::MAREBOSS ||
+            gpMarDirector->mAreaID == TGameSequence::MAREEX0 ||
+            gpMarDirector->mAreaID == TGameSequence::MAREUNDERSEA);
 }
 
 // 0x802A8AE0
 // extern -> SME.cpp
-bool Util::SMS::isOptionMap()
-{
-    if (SME::Class::TSMEFile::sStageConfig.FileHeader.mMAGIC == SME::Class::TSMEFile::MAGIC)
-        return SME::Class::TSMEFile::sStageConfig.GlobalFlags.StageType.mIsOptionMap;
-    else
-        return (gpMarDirector->mAreaID == 15);
+bool Util::SMS::isOptionMap() {
+  if (TStageParams::sStageConfig->isCustomConfig())
+    return TStageParams::sStageConfig->mIsOptionStage.get();
+  else
+    return (gpMarDirector->mAreaID == 15);
 }
 
 // 0x8027C6A4
 // extern -> SME.cpp
-bool Patch::CKit::manageLightSize()
-{
-    if (SME::Class::TSMEFile::sStageConfig.FileHeader.mMAGIC != SME::Class::TSMEFile::MAGIC ||
-        !SME::Class::TSMEFile::sStageConfig.GlobalFlags.mIsShineShadow)
-        return (gpMarDirector->mAreaID == 1);
+bool Patch::CKit::manageLightSize() {
+  if (!TStageParams::sStageConfig->isCustomConfig())
+    return (gpMarDirector->mAreaID == 1);
 
-    s32 &CurrentShineCount = TFlagManager::smInstance->Type4Flag.mShineCount;
-    s32 &PrevShineCount = SME::TGlobals::sGlobals.mLightData.mPrevShineCount;
-    switch (SME::TGlobals::sGlobals.mLightData.mLightType)
-    {
-    case SME::Enum::LightContext::STATIC: {
-        if (SME::Class::TSMEFile::sStageConfig.Light.mDarkLevel != 255)
-            gpModelWaterManager->mDarkLevel = SME::Class::TSMEFile::sStageConfig.Light.mDarkLevel;
-        else if (CurrentShineCount < SME_MAX_SHINES)
-            gpModelWaterManager->mDarkLevel = SME::Util::Math::lerp<u8>(30, 190,
-                                                       static_cast<f32>(CurrentShineCount) /
-                                                           static_cast<f32>(SME_MAX_SHINES));
-        else
-        {
-            if (gpModelWaterManager->mDarkLevel < 255)
-                gpModelWaterManager->mDarkLevel += 1;
-            else
-                SME::TGlobals::sGlobals.mLightData.mLightType = SME::Enum::LightContext::DISABLED;
-        }
+  Class::TLightContext &LightContext = SME::TGlobals::sLightData;
 
-        gShineShadowPos = SME::TGlobals::sGlobals.mLightData.mShineShadowCoordinates;
-
-        f32 sigOfs = 300.0f;
-        f32 sigStrength = CurrentShineCount >= PrevShineCount ? 0.04f : -0.04f;
-
-        if (!SME::TGlobals::sGlobals.mLightData.mSizeMorphing &&
-            CurrentShineCount == PrevShineCount)
-            break;
-
-        if (CurrentShineCount > PrevShineCount)
-        {
-            SME::TGlobals::sGlobals.mLightData.mPrevSize = gpModelWaterManager->mSize;
-            SME::TGlobals::sGlobals.mLightData.mNextSize = gpModelWaterManager->mSize;
-
-            for (u32 i = 0; i < (CurrentShineCount - PrevShineCount); ++i)
-                SME::TGlobals::sGlobals.mLightData.mNextSize += (10000.0f / SME_MAX_SHINES) + (PrevShineCount + i) * 2.0f;
-
-            SME::TGlobals::sGlobals.mLightData.mSizeMorphing = true;
-            SME::TGlobals::sGlobals.mLightData.mStepContext = 0.0f;
-        }
-        else if (CurrentShineCount < PrevShineCount)
-        {
-            SME::TGlobals::sGlobals.mLightData.mPrevSize = gpModelWaterManager->mSize;
-            SME::TGlobals::sGlobals.mLightData.mNextSize = gpModelWaterManager->mSize;
-
-            for (u32 i = 0; i < (PrevShineCount - CurrentShineCount); ++i)
-                SME::TGlobals::sGlobals.mLightData.mNextSize -= (10000.0f / SME_MAX_SHINES) + (PrevShineCount - i) * 2.0f;
-
-            SME::TGlobals::sGlobals.mLightData.mSizeMorphing = true;
-            SME::TGlobals::sGlobals.mLightData.mStepContext = 0.0f;
-        }
-
-        f32 cur = SME::Util::Math::sigmoidCurve(SME::TGlobals::sGlobals.mLightData.mStepContext, SME::TGlobals::sGlobals.mLightData.mPrevSize,
-                               SME::TGlobals::sGlobals.mLightData.mNextSize, sigOfs, sigStrength);
-
-        if (gpModelWaterManager->mSize > 70000.0f)
-        {
-            gpModelWaterManager->mSize = 70000.0f;
-            SME::TGlobals::sGlobals.mLightData.mSizeMorphing = false;
-        }
-        else if (gpModelWaterManager->mSize < 0.0f)
-        {
-            gpModelWaterManager->mSize = 0.0f;
-            SME::TGlobals::sGlobals.mLightData.mSizeMorphing = false;
-        }
-        else if (cur != SME::TGlobals::sGlobals.mLightData.mNextSize && cur != SME::TGlobals::sGlobals.mLightData.mPrevSize)
-        {
-            gpModelWaterManager->mSize = cur;
-            gpModelWaterManager->mSphereStep = cur / 2.0f;
-            SME::TGlobals::sGlobals.mLightData.mStepContext += 1.0f;
-        }
-        else
-        {
-            gpModelWaterManager->mSize = cur;
-            gpModelWaterManager->mSphereStep = cur / 2.0f;
-            PrevShineCount = CurrentShineCount;
-            SME::TGlobals::sGlobals.mLightData.mSizeMorphing = false;
-        }
-        break;
+  s32 &CurrentShineCount = TFlagManager::smInstance->Type4Flag.mShineCount;
+  s32 &PrevShineCount = LightContext.mPrevShineCount;
+  switch (LightContext.mLightType) {
+  case TLightContext::ActiveType::STATIC: {
+    if (TStageParams::sStageConfig->mLightDarkLevel.get() != 255)
+      gpModelWaterManager->mDarkLevel =
+          TStageParams::sStageConfig->mLightDarkLevel.get();
+    else if (CurrentShineCount >= SME_MAX_SHINES) {
+      if (gpModelWaterManager->mDarkLevel < 255)
+        gpModelWaterManager->mDarkLevel += 1;
+      else
+        LightContext.mLightType = TLightContext::ActiveType::DISABLED;
     }
-    case SME::Enum::LightContext::FOLLOWPLAYER: {
-        gpModelWaterManager->mDarkLevel = SME::Class::TSMEFile::sStageConfig.Light.mDarkLevel;
-        gShineShadowPos.x = gpMarioPos->x + SME::TGlobals::sGlobals.mLightData.mShineShadowCoordinates.x;
-        gShineShadowPos.y = gpMarioPos->y + SME::TGlobals::sGlobals.mLightData.mShineShadowCoordinates.y;
-        gShineShadowPos.z = gpMarioPos->z + SME::TGlobals::sGlobals.mLightData.mShineShadowCoordinates.z;
+
+    gShineShadowPos = LightContext.mShineShadowCoordinates;
+
+    const f32 sigOfs = 300.0f;
+    const f32 sigStrength = 0.04f;
+
+    if (!LightContext.mSizeMorphing) {
+      if (CurrentShineCount != PrevShineCount) {
+        LightContext.mPrevSize = gpModelWaterManager->mSize;
+        LightContext.mNextSize =
+            LightContext.mShineShadowBase +
+            powf(((1350.0f / SME_MAX_SHINES) * CurrentShineCount), 1.5f);
+        LightContext.mPrevDarkness = gpModelWaterManager->mDarkLevel;
+        LightContext.mNextDarkness =
+            Util::Math::lerp<u8>(TGlobals::getMinDarkness(), 190,
+                                 static_cast<f32>(CurrentShineCount) /
+                                     static_cast<f32>(SME_MAX_SHINES));
+
+        LightContext.mSizeMorphing = true;
+        LightContext.mStepContext = 0.0f;
+      } else {
         break;
+      }
     }
-    default:
-        break;
+
+    const f32 cur = SME::Util::Math::sigmoidCurve(
+        LightContext.mStepContext, LightContext.mPrevSize,
+        LightContext.mNextSize, sigOfs, sigStrength);
+
+    if (TStageParams::sStageConfig->mLightDarkLevel.get() == 255)
+      gpModelWaterManager->mDarkLevel =
+          static_cast<u8>(SME::Util::Math::sigmoidCurve(
+              LightContext.mStepContext,
+              static_cast<f32>(LightContext.mPrevDarkness),
+              static_cast<f32>(LightContext.mNextDarkness), sigOfs,
+              sigStrength));
+
+    constexpr f32 deadZone = 1.0f;
+    constexpr f32 minSize = 0.0f;
+    constexpr f32 maxSize = 80000.0f;
+
+    f32 &NextSize = LightContext.mNextSize;
+    f32 &PrevSize = LightContext.mPrevSize;
+
+    const bool isFinished = NextSize >= PrevSize ? cur >= (NextSize - deadZone)
+                                                 : cur <= (NextSize + deadZone);
+    if (gpModelWaterManager->mSize > maxSize) {
+      gpModelWaterManager->mSize = maxSize;
+      LightContext.mSizeMorphing = false;
+    } else if (gpModelWaterManager->mSize < minSize) {
+      gpModelWaterManager->mSize = minSize;
+      LightContext.mSizeMorphing = false;
+    } else if (!isFinished) {
+      gpModelWaterManager->mSize = cur;
+      gpModelWaterManager->mSphereStep = cur / 2.0f;
+      LightContext.mStepContext += 1.0f;
+    } else {
+      gpModelWaterManager->mSize = cur;
+      gpModelWaterManager->mSphereStep = cur / 2.0f;
+      PrevShineCount = CurrentShineCount;
+      LightContext.mSizeMorphing = false;
     }
-    return SME::TGlobals::sGlobals.mLightData.mLightType != SME::Enum::LightContext::DISABLED && gpMarDirector->mAreaID != TGameSequence::OPTION;
+    break;
+  }
+  case TLightContext::ActiveType::FOLLOWPLAYER: {
+    gpModelWaterManager->mDarkLevel =
+        TStageParams::sStageConfig->mLightDarkLevel.get();
+    gShineShadowPos.x = gpMarioPos->x + LightContext.mShineShadowCoordinates.x;
+    gShineShadowPos.y = gpMarioPos->y + LightContext.mShineShadowCoordinates.y;
+    gShineShadowPos.z = gpMarioPos->z + LightContext.mShineShadowCoordinates.z;
+    break;
+  }
+  default:
+    break;
+  }
+  return LightContext.mLightType != TLightContext::ActiveType::DISABLED &&
+         gpMarDirector->mAreaID != TGameSequence::OPTION;
 }
 
-//0x802571F0
+// 0x802571F0
 /*
 f32 velocityCoordinatePatches(f32 floorCoordinateY)
 {
@@ -257,7 +250,7 @@ mtctr r4
 bctrl
 lwz r0, 0x000C (sp)
 */
-//0x80004A6C
+// 0x80004A6C
 /*
 f32 downWarpPatch(TMario *gpMario, f32 yVelocity)
 {
@@ -298,37 +291,57 @@ f32 upWarpPatch(TMario *gpMario, f32 yVelocity)
 
 // 0x80153DE8, 0x80153E1C
 // extern -> SME.cpp
-void Patch::CKit::formatTalkMessage(Talk2D2 *talker, char *msgfield, u32 *entrydata)
-{
-    String fmtMessage(1024);
-
-    const char *basemsg = msgfield + *entrydata + talker->curMsgIndex;
-    const char *newmsg = fmtMessage.data() - (*entrydata + talker->curMsgIndex);
-
-    fmtMessage.assign(basemsg);
-    SME::Util::formatBMG(fmtMessage);
-
-    setupTextBox__8TTalk2D2FPCvP12JMSMesgEntry(talker, newmsg, entrydata);
+static void extendedTagParam() {
 }
+// SME_PATCH_BL(SME_PORT_REGION(0x80150c40, 0, 0, 0), extendedTagParam);
 
-static void maintainYoshi(TYoshi *yoshi)
-{
-    if (yoshi->isGreenYoshi())
-    {
-        *(f32 *)0x80415F4C = 480.0f; //tounge
-        *(f32 *)0x80415F68 = 16384.0f;
-    }
-    else
-    {
-        *(f32 *)0x80415F4C = 300.0f;
-        *(f32 *)0x80415F68 = 10000.0f;
-    }
+static void maintainYoshi(TYoshi *yoshi) {
+  if (Util::Yoshi::isGreenYoshi(yoshi)) {
+    *(f32 *)0x80415F4C = 480.0f; // tounge
+    *(f32 *)0x80415F68 = 16384.0f;
+  } else {
+    *(f32 *)0x80415F4C = 300.0f;
+    *(f32 *)0x80415F68 = 10000.0f;
+  }
 }
 
 // 0x8024D3A8
+// 0x8003F8F0
 // extern -> SME.cpp
-void Patch::CKit::realTimeCustomAttrsHandler(TMario *player)
-{
+void Patch::CKit::realTimeCustomAttrsHandler(TMario *player) {
+  if (player->mYoshi)
     maintainYoshi(player->mYoshi);
-    setPositions__6TMarioFv(player);
+
+  Class::TPlayerData *playerParams = TGlobals::getPlayerData(player);
+  Class::TStageParams *stageParams = Class::TStageParams::sStageConfig;
+
+  const Class::TPlayerParams *params = playerParams->getParams();
+  const f32 sizeMultiplier =
+      params->mSizeMultiplier.get() * stageParams->mPlayerSizeMultiplier.get();
+  const f32 speedMultiplier = params->mSpeedMultiplier.get();
+
+  playerParams->scalePlayerAttrs(sizeMultiplier);
+
+#define SCALE_PARAM(param, scale) param.set(param.get() * scale)
+
+  switch (playerParams->getPlayerID()) {
+  case Enum::Player::MARIO:
+  case Enum::Player::LUIGI:
+  case Enum::Player::IL_PIANTISSIMO:
+  case Enum::Player::SHADOW_MARIO:
+    break;
+  case Enum::Player::DRY_BONES:
+    SCALE_PARAM(player->mRunParams.mMotBlendRunSp, 100.0f);
+    SCALE_PARAM(player->mSwimParams.mWaitBouyancy, -1.0f);
+    SCALE_PARAM(player->mSwimParams.mMoveBouyancy, 0.0f);
+    SCALE_PARAM(player->mSwimParams.mPaddleDown, 2.0f);
+    SCALE_PARAM(player->mSwimParams.mPaddleSpeedUp, 0.5f);
+    break;
+  default:
+    break;
+  }
+
+#undef SCALE_PARAM
+
+  setPositions__6TMarioFv(player);
 }

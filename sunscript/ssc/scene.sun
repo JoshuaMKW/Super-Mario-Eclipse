@@ -1,0 +1,98 @@
+﻿/* ================================================= *\
+ * scene.sun
+ *
+ * ssc standard include utility
+ * 2015-2016 arookas
+\* ================================================= */
+
+builtin setNextStage(num, b);
+
+builtin getAddressFromViewObjName(name);
+builtin getNameRefHandle(name);
+builtin getNameRefName(handle);
+
+builtin getNPCType(npc);
+
+builtin setTransScale(name, tx, ty, tz, sx, sy, sz);
+
+// cubes
+builtin isInsideCube(cube);
+builtin isInsideFastCube(a, b);
+
+// appear
+builtin appear8RedCoinsAndTimer();
+builtin appearMushroom1up(a);
+
+// dummy
+builtin connectDummyNpc(a);
+builtin onTalkToDummyNpc();
+
+// nerves
+builtin checkCurNerve4Npc(a, b);
+builtin checkLastestNerve4Npc(a, b);
+builtin pushNerve4LiveActor(a, b);
+
+// crates
+builtin checkWoodBox(a, b);
+builtin refreshWoodBox(box);
+builtin killWoodBox(a, b);
+
+// distance checks
+builtin isNearActors(actor, distance, ...); // variadic requires at least one
+builtin isNearSameActors(a, b, c);
+
+// shine
+builtin appearShine(a, b);
+builtin appearShineForWoodBox(a);
+builtin appearShineFromKageMario(a, b, c);
+builtin appearShineFromNpc(shine, npc, cam);
+builtin appearShineFromNPCWithoutDemo(shine, npc);
+builtin killShine(handle);
+
+// NPC
+builtin setCollision(actor, collision);
+
+builtin setFlagNPCCanTaken(npc, flag);
+builtin setFlagNPCDead(npc, flag);
+builtin setFlagNPCDontTalk(npc, flag);
+builtin setFlagNPCDontThrow(npc, flag);
+builtin isOnLiveActorFlag(actor, flag);
+
+builtin setHide4LiveActor(actor, hide);
+builtin setDead4LiveActor(actor, dead);
+
+builtin setNpcBalloonMessage(a, b, c);
+builtin setNpcTalkForbidCount(a, b);
+
+builtin npcDanceOffHappyOn(npc);
+builtin npcDanceOn(npc);
+
+builtin isNpcSinkBottom(npc);
+
+// mario
+builtin setMarioWaiting();
+builtin startMarioTalking();
+builtin warpMario(x, y, z, d);
+builtin warpFrontToMario(a);
+builtin onNeutralMarioKey();
+
+
+// piantissimo
+builtin startMonteman(a);
+builtin monteManReachFlag();
+
+// shadow mario
+builtin startEMarioDisappear(emario);
+builtin startEMarioGateDrawing(emario);
+builtin startEMarioRunAway(emario);
+
+builtin isEMarioDownWaitingToTalk(emario);
+builtin isEMarioReachedToGoal(emario);
+
+// misc
+builtin isWaterMelonIsReached(melon);
+builtin killMushroom1up(handle);
+builtin checkMonteClear(a);
+builtin raiseBuilding(a);
+builtin startOpenModelGate(a);
+builtin maniCoinDown();

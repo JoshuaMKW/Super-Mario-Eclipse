@@ -17,21 +17,22 @@
 #define _SmeFunc "(unknown)"
 #endif
 
+#define SME_ERROR(msg, ...)                                                    \
+  char errmsg[256];                                                            \
+  sprintf(errmsg, "[SME] %s: %s", (_SmeFunc), (msg));                          \
+  OSPanic(__FILE__, __LINE__, errmsg, ##__VA_ARGS__);                          \
+  __OSUnhandledException(6, OSGetCurrentContext(), 0);
+
 #define SME_ASSERT(expr, msg, ...)                                             \
   if (!(expr)) {                                                               \
-    char errmsg[256];                                                          \
-    sprintf(errmsg, "[SME] %s: %s", (_SmeFunc), (msg));                        \
-    OSPanic(__FILE__, __LINE__, errmsg, ##__VA_ARGS__);                        \
-    __OSUnhandledException(6, OSGetCurrentContext(), 0);                       \
+    SME_ERROR(msg, ##__VA_ARGS__);                                             \
   }
 
 #if defined(SME_DEBUG) && !defined(SME_RELEASE)
 #define SME_DEBUG_ASSERT(expr, msg, ...) SME_ASSERT(expr, msg, ##__VA_ARGS__)
 #else
-#define SME_DEBUG_ASSERT(expr, msg, ...) if (SME::TGlobals::isDebugMode()) { SME_ASSERT(expr, msg, ##__VA_ARGS__) }
+#define SME_DEBUG_ASSERT(expr, msg, ...)                                       \
+  if (SME::TGlobals::isDebugMode()) {                                          \
+    SME_ASSERT(expr, msg, ##__VA_ARGS__);                                      \
+  }
 #endif
-
-#define SME_ERROR(msg, ...)                                                    \
-  char errmsg[256];                                                            \
-  sprintf(errmsg, "[SME] %s: %s", (_SmeFunc), (msg));                          \
-  OSPanic(__FILE__, __LINE__, errmsg, ##__VA_ARGS__);

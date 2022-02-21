@@ -10,7 +10,7 @@
 
 using namespace SME;
 
-#ifdef SME_GRAB_NPCS
+#if SME_GRAB_NPCS
 
 /* NPC CARRY CODE */
 

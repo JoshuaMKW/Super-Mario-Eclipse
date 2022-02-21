@@ -2,7 +2,7 @@
 
 #include "SME.hxx"
 
-#ifdef SME_EXTRA_OBJECTS
+#if SME_EXTRA_OBJECTS
 static void *loadFromGlobalAndScene(const char *mdl, u32 unk_0,
                                     const char *path) {
   u32 **sdlModel = reinterpret_cast<u32 **>(
@@ -30,7 +30,7 @@ SME_WRITE_32(SME_PORT_REGION(0x80014F9C, 0, 0, 0), 0x60000000);
 
 /* -- PATCHES -- */
 
-#ifdef SME_BUGFIXES
+#if SME_BUGFIXES
 // Restore Chao Seed
 SME_WRITE_32(SME_PORT_REGION(0x802FD1A0, 0, 0, 0), 0x808D8C70);
 
@@ -44,7 +44,7 @@ SME_WRITE_32(SME_PORT_REGION(0x801410E4, 0, 0, 0), 0x60000000);
 // Sunscript logging restoration
 SME_WRITE_32(SME_PORT_REGION(0x8003DB3C, 0, 0, 0), 0x48306B08);
 
-#ifdef SME_EXCEPTION_HANDLER
+#if SME_EXCEPTION_HANDLER
 // Show Exception Handler
 SME_WRITE_32(SME_PORT_REGION(0x8029D0BC, 0, 0, 0), 0x60000000);
 
@@ -71,7 +71,7 @@ SME_WRITE_32(SME_PORT_REGION(0x8024BC10, 0, 0, 0), 0x48000068);
 SME_WRITE_32(SME_PORT_REGION(0x8029961C, 0, 0, 0), 0x38840077);
 
 // Map on D Pad down
-#ifndef SME_DEMO
+#if !SME_DEMO
 SME_WRITE_32(SME_PORT_REGION(0x8017A830, 0, 0, 0), 0x5400077B);
 SME_WRITE_32(SME_PORT_REGION(0x80297A60, 0, 0, 0), 0x5400077B);
 #else

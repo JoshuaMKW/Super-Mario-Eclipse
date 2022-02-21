@@ -57,6 +57,9 @@ void Patch::Shine::manageShineVanish(JGeometry::TVec3<f32> *marioPos) {
     shine->JSGSetTranslation(reinterpret_cast<Vec &>(*marioPos));
   }
 }
+SME_PATCH_BL(SME_PORT_REGION(0x801BD664, 0, 0, 0),
+             Patch::Shine::manageShineVanish);
+SME_WRITE_32(SME_PORT_REGION(0x801BD668, 0, 0, 0), 0x48000568);
 
 // 0x802413E0
 void Patch::Shine::isKillEnemiesShine(TConductor *gpConductor,
@@ -70,6 +73,8 @@ void Patch::Shine::isKillEnemiesShine(TConductor *gpConductor,
     killEnemiesWithin__10TConductorFRCQ29JGeometry8TVec3_f(
         gpConductor, playerCoordinates, range);
 }
+SME_PATCH_BL(SME_PORT_REGION(0x802413E0, 0, 0, 0),
+             Patch::Shine::isKillEnemiesShine);
 
 static void restoreMario(TMarDirector *marDirector, u32 curState) {
   TShine *shine = marDirector->mCollectedShine;
@@ -107,15 +112,7 @@ void Patch::Shine::checkBootOut(TMarDirector *marDirector, u8 curState) {
   restoreMario(marDirector, curState);
   marDirector->currentStateFinalize(curState);
 }
-
-// 0x80293B10
-u32 Patch::Shine::extendShineIDLogic(TFlagManager *flagManager, u32 flagID) {
-  if ((flagID & 0xFFFF) > 0x77)
-    flagID += (0x60040 - 0x78);
-  if (flagID > 0x60334)
-    flagID = 0;
-  return flagManager->getFlag(flagID);
-}
+SME_PATCH_BL(SME_PORT_REGION(0x802995BC, 0, 0, 0), Patch::Shine::checkBootOut);
 
 // 0x801BCC98
 void Patch::Shine::shineObjectStringMod(JSUInputStream *stream, u8 *dst,
@@ -133,71 +130,8 @@ void Patch::Shine::shineObjectStringMod(JSUInputStream *stream, u8 *dst,
   }
   stream->read(dst, size);
 }
-
-void Patch::Shine::shineFlagSetter(TFlagManager *flagManager, u32 flag,
-                                   s32 val) {
-  if (flag < 0x60400) {
-    flag &= 0xFFFF;
-    if (flag < 0x40)
-      ((u32 *)&flagManager->Type6Flag)[flag] = val;
-    else {
-      flag -= 0x40;
-
-      const u32 mask = (flag & 7);
-      u8 *flagField = &((u8 *)(&flagManager->Type6Flag) + 0x100)[flag >> 3];
-
-      *flagField &= 1 << mask;
-      *flagField |= (val & 1) << mask;
-    }
-  }
-}
-
-u32 Patch::Shine::shineFlagGetter(TFlagManager *flagManager, u32 flag) {
-  if (flag < 0x60400) {
-    flag &= 0xFFFF;
-    if (flag < 0x40)
-      return ((u32 *)&flagManager->Type6Flag)[flag];
-    else {
-      flag -= 0x40;
-      
-      const u32 mask = (flag & 7);
-      u8 *flagField = &((u8 *)(&flagManager->Type6Flag) + 0x100)[flag >> 3];
-
-      return (*flagField >> mask) & 1;
-    }
-  }
-  return false;
-}
-
-// 0x802946D4
-u32 Patch::Shine::shineSetClamper(TFlagManager *flagManager, u32 flag) {
-  flag &= 0x7FFFF;
-  if (flag >= 0x10078)
-    flag -= 0x10000;
-
-  return flag;
-}
-
-// 0x8029474C
-u32 Patch::Shine::shineGetClamper(TFlagManager *flagManager, u32 flag) {
-  flag &= 0x7FFFF;
-  if (flag >= 0x10078)
-    flag -= 0x10000;
-
-  return flagManager->getFlag(flag);
-}
-
-// 0x80294334
-void Patch::Shine::extendFlagManagerLoad(JSUMemoryInputStream &stream) {
-  stream.read(((u8 *)TFlagManager::smInstance + 0x1F4), 0x8C);
-  stream.skip(0x120);
-}
-
-// 0x802939B8
-void Patch::Shine::extendFlagManagerSave(JSUMemoryOutputStream &stream) {
-  stream.write(((u8 *)TFlagManager::smInstance + 0x1F4), 0x8C);
-  stream.skip(0x120, 0);
-}
+SME_PATCH_BL(SME_PORT_REGION(0x801BCC98, 0, 0, 0),
+             Patch::Shine::shineObjectStringMod);
 
 // 0x80297BD8
 void Patch::Shine::thinkSetBootFlag(TShineFader *shineFader, u32 unk_1,
@@ -216,11 +150,13 @@ void Patch::Shine::thinkSetBootFlag(TShineFader *shineFader, u32 unk_1,
     gpMarDirector->mGameState |= TMarDirector::State::WARP_OUT;
   }
 }
+SME_PATCH_BL(SME_PORT_REGION(0x80297BD8, 0, 0, 0),
+             Patch::Shine::thinkSetBootFlag);
 
 // 0x80297C84
 void thinkSetNextSequence(TGameSequence *sequence, u8 area, u8 episode, JDrama::TFlagT<u16> flag) {
   if (!(gpMarDirector->mCollectedShine->mType & 0x10)) {
-    #ifdef SME_DEMO
+    #if SME_DEMO
     area = 1;
     episode = 5;
     #endif
@@ -235,6 +171,8 @@ u32 Patch::Shine::loadAfterMaskState() {
 
   return shine->mType & 0xF;
 }
+SME_PATCH_BL(SME_PORT_REGION(0x801BCD20, 0, 0, 0),
+             Patch::Shine::loadAfterMaskState);
 
 // 0x801BCEEC
 void Patch::Shine::setKillState() {
@@ -243,6 +181,7 @@ void Patch::Shine::setKillState() {
 
   shine->mType = (shine->mType & 0x10) | 1;
 }
+SME_PATCH_BL(SME_PORT_REGION(0x801BCEEC, 0, 0, 0), Patch::Shine::setKillState);
 
 SME_PURE_ASM void Patch::Shine::thinkCloseCamera() {
   asm volatile("lbz       0, 0x190 (4)        \n\t"
@@ -254,6 +193,9 @@ SME_PURE_ASM void Patch::Shine::thinkCloseCamera() {
                ".Ltmp0:                       \n\t"
                "blr                           \n\t");
 }
+SME_PATCH_BL(SME_PORT_REGION(0x8029A590, 0, 0, 0),
+             Patch::Shine::thinkCloseCamera);
+SME_WRITE_32(SME_PORT_REGION(0x8029A594, 0, 0, 0), 0x28000000);
 
 SME_PURE_ASM void Patch::Shine::animationFreezeCheck() {
   asm volatile("lbz       0, 0x64(26)         \n\t"
@@ -280,6 +222,12 @@ SME_PURE_ASM void Patch::Shine::animationFreezeCheck() {
                ".loc_0x3C:                    \n\t"
                "blr                           \n\t");
 }
+SME_PATCH_BL(SME_PORT_REGION(0x802999D8, 0, 0, 0),
+             Patch::Shine::animationFreezeCheck);
+SME_WRITE_32(SME_PORT_REGION(0x802999DC, 0, 0, 0), 0x48000034);
 
 // Remove auto disable sound
 SME_WRITE_32(SME_PORT_REGION(0x800169B0, 0, 0, 0), 0x60000000);
+
+
+SME_WRITE_32(SME_PORT_REGION(0x80297BE8, 0, 0, 0), 0x60848200);

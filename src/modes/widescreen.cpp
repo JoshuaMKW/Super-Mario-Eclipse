@@ -10,7 +10,7 @@
 #include "sms/GC2D/SelectMenu.hxx"
 #include "sms/manager/SelectShineManager.hxx"
 
-#ifdef SME_WIDESCREEN
+#if SME_WIDESCREEN
 
 static f32 getScreenTransX() {
   return (SME::TGlobals::getScreenToFullScreenRatio() - 1.0f) * 600.0f;

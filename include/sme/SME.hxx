@@ -46,6 +46,17 @@
 
 #include "common_sdk.h"
 
+#define SME_MODULE_NAME "Eclipse"
+#define SME_AUTHOR_NAME "JoshuaMK"
+
+#if defined(SME_DEBUG) && !defined(SME_RELEASE)
+#define SME_VERSION_TAG                                                        \
+  "(DEBUG) " SME_VERSION "[" SME_STRINGIZE(SME_MAX_SHINES) " Shines]"
+#else
+#define SME_VERSION_TAG                                                        \
+  "(RELEASE) " SME_VERSION "[" SME_STRINGIZE(SME_MAX_SHINES) " Shines]"
+#endif
+
 #if defined(SME_BUILD_KURIBO)
 #define SME_PATCH_B(source, target) pp::PatchB(source, target)
 #define SME_PATCH_BL(source, target) pp::PatchBL(source, target)
@@ -69,64 +80,137 @@
 
 /* CONFIGURATION DEFINES */
 
-#define SME_BUGFIXES
-#define SME_CRASHFIXES
-#define SME_EXCEPTION_HANDLER
-#define SME_SLOT_B_SUPPORT
-#define SME_EXTENDED_RENDER_DISTANCE
 
-// #define SME_DEMO
-#define SME_MIRROR_SUNSHINE
-#define SME_MULTIPLAYER
-#define SME_WIDESCREEN
-#define SME_VARIABLE_FPS
+#ifndef SME_BUGFIXES
+#define SME_BUGFIXES 1
+#endif
 
-#define SME_EXTRA_SHINES
-#define SME_EXTRA_OBJECTS
-#define SME_EXTRA_COLLISION
+#ifndef SME_CRASHFIXES
+#define SME_CRASHFIXES 1
+#endif
 
-// #define SME_VANILLA_MOVESET
+#ifndef SME_EXCEPTION_HANDLER
+#define SME_EXCEPTION_HANDLER 1
+#endif
+
+#ifndef SME_PROTECT_MEM
+#define SME_PROTECT_MEM 0
+#endif
+
+#ifndef SME_SLOT_B_SUPPORT
+#define SME_SLOT_B_SUPPORT 1
+#endif
+
+#ifndef SME_EXTENDED_RENDER_DISTANCE
+#define SME_EXTENDED_RENDER_DISTANCE 1
+#endif
+
+#ifndef SME_DEMO
+#define SME_DEMO 1
+#endif
+
+#ifndef SME_MIRROR_SUNSHINE
+#define SME_MIRROR_SUNSHINE 1
+#endif
+
+#ifndef SME_MULTIPLAYER
+#define SME_MULTIPLAYER 1
+#endif
+
+#ifndef SME_WIDESCREEN
+#define SME_WIDESCREEN 1
+#endif
+
+#ifndef SME_VARIABLE_FPS
+#define SME_VARIABLE_FPS 1
+#endif
+ 
+#ifndef SME_EXTRA_SHINES
+#define SME_EXTRA_SHINES 1
+#endif
+
+#ifndef SME_EXTRA_OBJECTS
+#define SME_EXTRA_OBJECTS 1
+#endif
+
+#ifndef SME_EXTRA_COLLISION
+#define SME_EXTRA_COLLISION 1
+#endif
 
 #ifndef SME_VANILLA_MOVESET
-#define SME_LONG_JUMP
-#define SME_MULTI_JUMP
-#define SME_HOVER_BURST
-#define SME_HOVER_SLIDE
-#define SME_ROCKET_DIVE
-#else
-#undef SME_LONG_JUMP
-#undef SME_MULTI_JUMP
-#undef SME_HOVER_BURST
-#undef SME_HOVER_SLIDE
-#undef SME_ROCKET_DIVE
+#define SME_VANILLA_MOVESET 0
 #endif
-#define SME_DYNAMIC_FALL_DAMAGE
-#define SME_NO_DOWNWARP
 
-#define SME_GRAB_NPCS
+#if !SME_VANILLA_MOVESET
 
-#define SME_SHADOW_MARIO_HEALTHBAR
+#ifndef SME_LONG_JUMP
+#define SME_LONG_JUMP 1
+#endif
 
-#define SME_FLUDD_GOOP_MOD
+#ifndef SME_MULTI_JUMP
+#define SME_MULTI_JUMP 1
+#endif
 
-#define SME_GREEN_YOSHI
-#define SME_YOSHI_SAVE_NOZZLES
-#define SME_YOSHI_EGG_FREE
+#ifndef SME_HOVER_BURST
+#define SME_HOVER_BURST 1
+#endif
 
-#define SME_UNDERWATER_FRUIT
+#ifndef SME_HOVER_SLIDE
+#define SME_HOVER_SLIDE 1
+#endif
 
+#ifndef SME_ROCKET_DIVE
+#define SME_ROCKET_DIVE 1
+#endif
 
-#define SME_USE_PS_MATH
-
-#define SME_MODULE_NAME "Eclipse"
-#define SME_AUTHOR_NAME "JoshuaMK"
-
-#if defined(SME_DEBUG) && !defined(SME_RELEASE)
-#define SME_VERSION_TAG                                                        \
-  "(DEBUG) " SME_VERSION "[" SME_STRINGIZE(SME_MAX_SHINES) " Shines]"
 #else
-#define SME_VERSION_TAG                                                        \
-  "(RELEASE) " SME_VERSION "[" SME_STRINGIZE(SME_MAX_SHINES) " Shines]"
+
+#define SME_LONG_JUMP 0
+#define SME_MULTI_JUMP 0
+#define SME_HOVER_BURST 0
+#define SME_HOVER_SLIDE 0
+#define SME_ROCKET_DIVE 0
+
+#endif
+
+#ifndef SME_DYNAMIC_FALL_DAMAGE
+#define SME_DYNAMIC_FALL_DAMAGE 1
+#endif
+
+#ifndef SME_NO_DOWNWARP
+#define SME_NO_DOWNWARP 1
+#endif
+
+#ifndef SME_GRAB_NPCS
+#define SME_GRAB_NPCS 1
+#endif
+
+#ifndef SME_SHADOW_MARIO_HEALTHBAR
+#define SME_SHADOW_MARIO_HEALTHBAR 1
+#endif
+
+#ifndef SME_FLUDD_GOOP_MOD
+#define SME_FLUDD_GOOP_MOD 1
+#endif
+
+#ifndef SME_GREEN_YOSHI
+#define SME_GREEN_YOSHI 1
+#endif
+
+#ifndef SME_YOSHI_SAVE_NOZZLES
+#define SME_YOSHI_SAVE_NOZZLES 1
+#endif
+
+#ifndef SME_YOSHI_EGG_FREE
+#define SME_YOSHI_EGG_FREE 1
+#endif
+
+#ifndef SME_UNDERWATER_FRUIT
+#define SME_UNDERWATER_FRUIT 1
+#endif
+
+#ifndef SME_USE_PS_MATH
+#define SME_USE_PS_MATH 1
 #endif
 
 // init_mods.cpp

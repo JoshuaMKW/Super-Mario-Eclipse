@@ -4,7 +4,7 @@
 using namespace SME;
 using namespace SME::Class;
 
-#ifdef SME_DEMO
+#if SME_DEMO
 
 static constexpr u32 SwapColType = 16420;
 static constexpr u32 DemoStage = 0x205;

@@ -4,7 +4,7 @@
 
 using namespace SME;
 
-#ifdef SME_UNDERWATER_FRUIT
+#if SME_UNDERWATER_FRUIT
 
 // 0x801E542C
 // extern -> SME.cpp

@@ -5,7 +5,7 @@
 
 #include "SME.hxx"
 
-#ifdef SME_FLUDD_GOOP_MOD
+#if SME_FLUDD_GOOP_MOD
 
 static void sprayGoopMap(TPollutionManager *gpPollutionManager, f32 x, f32 y,
                          f32 z, f32 r) {

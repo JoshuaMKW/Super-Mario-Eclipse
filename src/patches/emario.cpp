@@ -10,7 +10,7 @@
 
 using namespace SME;
 
-#ifdef SME_SHADOW_MARIO_HEALTHBAR
+#if SME_SHADOW_MARIO_HEALTHBAR
 
 // ------------ //
 // Shadow Mario //

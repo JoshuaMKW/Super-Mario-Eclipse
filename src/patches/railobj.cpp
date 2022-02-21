@@ -7,7 +7,7 @@
 #include "defines.h"
 #include "macros.h"
 
-#ifdef SME_EXTRA_OBJECTS
+#if SME_EXTRA_OBJECTS
 
 void checkInstantReset_NormalLift(u32 *railflags) {
   s16 *mRailObj;

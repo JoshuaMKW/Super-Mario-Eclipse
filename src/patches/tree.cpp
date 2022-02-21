@@ -5,7 +5,7 @@
 
 #include "SME.hxx"
 
-#ifdef SME_EXTRA_OBJECTS
+#if SME_EXTRA_OBJECTS
 
 // make tree leaf count dynamic, based on number of leaf col files
 static TMapObjTree *getLeafCount(TMapObjTree *tree) {

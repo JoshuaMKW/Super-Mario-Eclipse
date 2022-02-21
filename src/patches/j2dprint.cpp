@@ -9,7 +9,7 @@
 #include "defines.h"
 #include "macros.h"
 
-#ifdef SME_BUGFIXES
+#if SME_BUGFIXES
 
 #if 0
 static u8 sLineBuffer[sizeof(String) * 64];

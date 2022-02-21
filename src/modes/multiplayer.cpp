@@ -3,9 +3,22 @@
 
 #include "SME.hxx"
 
-#ifdef SME_MULTIPLAYER
-
 using namespace SME::Patch;
+
+static TMario *makeMarios() {
+  for (int i = 1; i < SME_MAX_PLAYERS; i++) {
+    TMario *player = new TMario();
+    player->mController = &gpApplication.mGamePad1[i];
+    SME::TGlobals::setPlayerByIndex(i, player);
+  }
+  TMario *p1 =
+      reinterpret_cast<TMario *>(SME::Util::Memory::malloc(sizeof(TMario), 4));
+  SME::TGlobals::setPlayerByIndex(0, p1);
+  return p1;
+}
+SME_PATCH_BL(SME_PORT_REGION(0x8029D7E8, 0, 0, 0), makeMarios);
+
+#if SME_MULTIPLAYER
 
 /*
 NOTES
@@ -53,9 +66,9 @@ static constexpr float sViewPortData[] = {
 
 // When injecting at the mflr of a function prologue in a recursive
 // implementation, this can be used
-extern "C" void avoidRecurseCall(u32 addr, ...);
+SME_EXTERN_C void avoidRecurseCall(u32 addr, ...);
 
-void Multiplayer::draw3DOverhaul(J3DDrawBuffer *drawBuffer) {
+static void draw3DOverhaul(J3DDrawBuffer *drawBuffer) {
   const u8 activePlayers = SME::TGlobals::getActivePlayers();
 
   for (u32 i = 0; i < activePlayers; i++) {
@@ -67,22 +80,10 @@ void Multiplayer::draw3DOverhaul(J3DDrawBuffer *drawBuffer) {
     drawBuffer->draw();
   }
 }
+SME_PATCH_B(SME_PORT_REGION(0x802EFAB4, 0, 0, 0), draw3DOverhaul);
 
-// 8029d7e8
-TMario *Multiplayer::makeMarios() {
-  for (int i = 1; i < SME_MAX_PLAYERS; i++) {
-    TMario *player = new TMario();
-    player->mController = &gpApplication.mGamePad1[i];
-    SME::TGlobals::setPlayerByIndex(i, player);
-  }
-  TMario *p1 =
-      reinterpret_cast<TMario *>(SME::Util::Memory::malloc(sizeof(TMario), 4));
-  SME::TGlobals::setPlayerByIndex(0, p1);
-  return p1;
-}
-
-void Multiplayer::loadMarioTrickyOverhaul(TMario *player,
-                                          JSUMemoryInputStream *stream) {
+static void loadMarioTrickyOverhaul(TMario *player,
+                                    JSUMemoryInputStream *stream) {
   // We preserve the stream's position for each iteration
   const s32 pos = stream->getPosition();
   for (u32 i = 0; i < SME_MAX_PLAYERS; i++) {
@@ -94,10 +95,11 @@ void Multiplayer::loadMarioTrickyOverhaul(TMario *player,
   }
   gpMarioAddress = player;
 }
+SME_PATCH_B(SME_PORT_REGION(0x80276BD0, 0, 0, 0), loadMarioTrickyOverhaul);
 
 // I manually update each mario here
-void Multiplayer::performMarioTrickyOverhaul(TMario *player,
-                                             JSUMemoryInputStream *stream) {
+static void performMarioTrickyOverhaul(TMario *player,
+                                       JSUMemoryInputStream *stream) {
   for (u32 i = 0; i < SME::TGlobals::getActivePlayers(); i++) {
     gpMarioAddress = SME::TGlobals::getPlayerByIndex(i);
     SMS_SetMarioAccessParams__Fv();
@@ -106,11 +108,12 @@ void Multiplayer::performMarioTrickyOverhaul(TMario *player,
   }
   gpMarioAddress = player;
 }
+SME_PATCH_B(SME_PORT_REGION(0x8024D2A8, 0, 0, 0), performMarioTrickyOverhaul);
 
 // extern -> SME.cpp
 // When the game changes the player's state (in)active, is required to make
 // active players visible and alive
-void Multiplayer::setMarioOverhaul(TMarDirector *director) {
+static void setMarioOverhaul(TMarDirector *director) {
   for (u32 i = 0; i < SME::TGlobals::getActivePlayers(); i++) {
     gpMarioAddress = SME::TGlobals::getPlayerByIndex(i);
     SMS_SetMarioAccessParams__Fv();
@@ -118,5 +121,8 @@ void Multiplayer::setMarioOverhaul(TMarDirector *director) {
   }
   gpMarioAddress = SME::TGlobals::getPlayerByIndex(0);
 }
+SME_PATCH_BL(SME_PORT_REGION(0x802983F8, 0, 0, 0), setMarioOverhaul);
+SME_PATCH_BL(SME_PORT_REGION(0x80298428, 0, 0, 0), setMarioOverhaul);
+SME_PATCH_BL(SME_PORT_REGION(0x802984D8, 0, 0, 0), setMarioOverhaul);
 
 #endif

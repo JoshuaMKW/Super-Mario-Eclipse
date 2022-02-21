@@ -5,7 +5,7 @@
 
 #include "SME.hxx"
 
-#ifdef SME_HOVER_BURST
+#if SME_HOVER_BURST
 
 using namespace SME;
 

@@ -102,7 +102,7 @@ SME_WRITE_32(SME_PORT_REGION(0x8024CD24, 0, 0, 0), 0xEC0B007A);
 SME_PATCH_BL(SME_PORT_REGION(0x8024CC2C, 0, 0, 0), checkJumpSpeedMulti);
 SME_WRITE_32(SME_PORT_REGION(0x8024CC30, 0, 0, 0), 0x57C5043E);
 
-#ifdef SME_DYNAMIC_FALL_DAMAGE
+#if SME_DYNAMIC_FALL_DAMAGE
 
 static void dynamicFallDamage(TMario *player, int dmg, int type, int emitcount,
                               int tremble) {

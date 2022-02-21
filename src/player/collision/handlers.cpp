@@ -8,6 +8,8 @@
 #include "collision/WarpCollision.hxx"
 #include "libs/sGeometry.hxx"
 
+using namespace SME;
+
 /* Collision State Resetters */
 
 #define EXPAND_WARP_SET(base)                                                  \
@@ -18,7 +20,7 @@
       : case ((base) + 2) : case ((base) + 3) : case ((base) + 4)
 
 static void resetValuesOnStateChange(TMario *player) {
-  SME::Class::TPlayerData *playerData = SME::TGlobals::getPlayerData(player);
+  Class::TPlayerData *playerData = TGlobals::getPlayerData(player);
 
   switch (player->mPrevState) {
   case static_cast<u32>(TMario::State::TRIPLE_J):
@@ -33,7 +35,7 @@ static void resetValuesOnStateChange(TMario *player) {
 
   if ((player->mState != static_cast<u32>(TMario::State::JUMPSPINR) &&
        player->mState != static_cast<u32>(TMario::State::JUMPSPINL)))
-    SME::TGlobals::getPlayerData(player)->mCollisionFlags.mIsSpinBounce = false;
+    TGlobals::getPlayerData(player)->mCollisionFlags.mIsSpinBounce = false;
 
   if (playerData->mCollisionFlags.mIsDisableInput)
     // Patches pausing/map escaping the controller lock
@@ -41,7 +43,7 @@ static void resetValuesOnStateChange(TMario *player) {
 }
 
 static void resetValuesOnGroundContact(TMario *player) {
-  SME::Class::TPlayerData *playerData = SME::TGlobals::getPlayerData(player);
+  Class::TPlayerData *playerData = TGlobals::getPlayerData(player);
 
   if ((player->mPrevState & static_cast<u32>(TMario::State::AIRBORN)) != 0 &&
       (player->mState & static_cast<u32>(TMario::State::AIRBORN)) == 0 &&
@@ -52,7 +54,7 @@ static void resetValuesOnGroundContact(TMario *player) {
 }
 
 static void resetValuesOnAirborn(TMario *player) {
-  SME::Class::TPlayerData *playerData = SME::TGlobals::getPlayerData(player);
+  Class::TPlayerData *playerData = TGlobals::getPlayerData(player);
 
   if ((player->mPrevState & static_cast<u32>(TMario::State::AIRBORN)) == 0 &&
       (player->mState & static_cast<u32>(TMario::State::AIRBORN)) != 0 &&
@@ -62,7 +64,7 @@ static void resetValuesOnAirborn(TMario *player) {
 }
 
 static void resetValuesOnCollisionChange(TMario *player) {
-  SME::Class::TPlayerData *playerData = SME::TGlobals::getPlayerData(player);
+  Class::TPlayerData *playerData = TGlobals::getPlayerData(player);
 
   if (!player->mFloorTriangle ||
       (player->mFloorTriangle == playerData->mPrevCollisionFloor))
@@ -95,10 +97,10 @@ static void resetValuesOnCollisionChange(TMario *player) {
   }
 }
 
-#ifdef SME_EXTRA_COLLISION
+#if SME_EXTRA_COLLISION
 
 using namespace SME;
-using namespace SME::Util::Math;
+using namespace Util::Math;
 
 // Array of basic action functions bound to collision values
 extern void (*gStateCBMap[])(TMario *player, u8 flags);
@@ -260,7 +262,7 @@ SME_WRITE_32(SME_PORT_REGION(0x802505A0, 0, 0, 0), 0x546004E7);
 void updateCollisionContext(TMario *player) {
   constexpr s16 CrushTimeToDie = 0;
 
-  SME::Class::TPlayerData *playerData = SME::TGlobals::getPlayerData(player);
+  Class::TPlayerData *playerData = TGlobals::getPlayerData(player);
 
   resetValuesOnStateChange(player);
   resetValuesOnGroundContact(player);

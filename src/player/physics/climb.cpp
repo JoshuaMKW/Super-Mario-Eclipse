@@ -18,7 +18,7 @@ static void updateClimbContext(TMario *player) {
     return;
   }
 
-  #ifdef SME_BUGFIXES
+  #if SME_BUGFIXES
   bool checkClimbContext = false;
 
   if ((player->mState & static_cast<u32>(TMario::State::AIRBORN)) == 0 &&

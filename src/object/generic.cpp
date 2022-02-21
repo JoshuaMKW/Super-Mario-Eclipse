@@ -9,7 +9,7 @@
 
 #include "SME.hxx"
 
-#ifdef SME_EXTRA_OBJECTS
+#if SME_EXTRA_OBJECTS
 
 // ---------------------------------------- //
 

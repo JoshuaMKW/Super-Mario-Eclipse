@@ -3,7 +3,7 @@
 
 #include "SME.hxx"
 
-#ifdef SME_GREEN_YOSHI
+#if SME_GREEN_YOSHI
 
 static void fixYoshiJuiceDecrement() {
   TYoshi *yoshi;

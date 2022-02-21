@@ -2,7 +2,7 @@
 
 using namespace SME;
 
-#ifdef SME_GREEN_YOSHI
+#if SME_GREEN_YOSHI
 
 SME_WRITE_32(SME_PORT_REGION(0x8026E068, 0, 0, 0),
              0x2C000001); // Turn green when out of juice

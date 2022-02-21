@@ -2,7 +2,7 @@
 #include "SME.hxx"
 #include "Globals.hxx"
 
-#ifdef SME_VARIABLE_FPS
+#if SME_VARIABLE_FPS
 
 static f32 setBoidSpeed(f32 thing) {
     return sqrt__Q29JGeometry8TUtil_f(thing) * (30.0f / SME::TGlobals::getFrameRate());

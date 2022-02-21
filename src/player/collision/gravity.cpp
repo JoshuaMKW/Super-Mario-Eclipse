@@ -8,7 +8,7 @@
 #include "collision/WarpCollision.hxx"
 #include "libs/sGeometry.hxx"
 
-#ifdef SME_EXTRA_COLLISION
+#if SME_EXTRA_COLLISION
 
 using namespace SME;
 using namespace SME::Util::Math;

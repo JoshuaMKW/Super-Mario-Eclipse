@@ -527,7 +527,7 @@ bool Music::isValidBGM(u32 id) {
   case BGM_RICCO & 0xFF:
   case BGM_SHILENA & 0xFF:
   case BGM_SKY_AND_SEA & 0xFF:
-#ifdef SME_DEMO
+#if SME_DEMO
   case BGM_CHUBOSS & 0xFF:
   case BGM_CHUBOSS2 & 0xFF:
 #endif

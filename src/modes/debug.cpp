@@ -43,7 +43,7 @@ static void drawCheatText() {
   if (!gDebugTextBox.getStringPtr())
     return;
 
-#ifndef SME_DEBUG
+#if !SME_DEBUG
     if (*gDebugTextBox.getStringPtr() != '\0' && gDebugHandler.isActive())
 #else
     if (*gDebugTextBox.getStringPtr() != '\0')

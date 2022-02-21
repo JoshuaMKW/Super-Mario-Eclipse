@@ -11,7 +11,7 @@
 //    Created by JoshuaMK 2022   //
 // ----------------------------- //
 
-#ifdef SME_MIRROR_SUNSHINE
+#if SME_MIRROR_SUNSHINE
 
 #if 1
 static float _xyz[3] = {-1.0, 1.0, 1.0};

@@ -3,7 +3,7 @@
 #include "sms/actor/Mario.hxx"
 #include "SME.hxx"
 
-#ifdef SME_MULTI_JUMP
+#if SME_MULTI_JUMP
 
 using namespace SME;
 

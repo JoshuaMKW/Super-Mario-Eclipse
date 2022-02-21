@@ -2,7 +2,7 @@
 
 using namespace SME;
 
-#ifdef SME_YOSHI_EGG_FREE
+#if SME_YOSHI_EGG_FREE
 
 static bool isYoshiEggNeedFruit(THitActor *gpFruit) {
   if (!Class::TStageParams::sStageConfig->mIsEggFree.get())

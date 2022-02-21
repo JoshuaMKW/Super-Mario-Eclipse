@@ -3,8 +3,6 @@
 
 using namespace SME;
 
-#define SME_DEMO
-
 String &Util::formatBMG(String &msg) {
     char buffer[32];
 
@@ -28,7 +26,7 @@ String &Util::formatBMG(String &msg) {
     msg.replaceAll("%btime%", SME::Util::Time::buildTime());
     msg.replaceAll("%bdate%", SME::Util::Time::buildDate());
     msg.replaceAll("%cardslot%", gpCardManager->mChannel == CARD_SLOTA ? "A" : "B");
-    #ifdef SME_DEMO
+    #if SME_DEMO
     msg.replaceAll("%c", gpCardManager->mChannel == CARD_SLOTA ? "A" : "B");
     #endif
 
@@ -61,7 +59,7 @@ char *Util::formatBMGRaw(char *dst, const char *src, size_t len)
     msg.replaceAll("%bdate%", SME::Util::Time::buildDate());
     msg.replaceAll("%btime%", SME::Util::Time::buildTime());
     msg.replaceAll("%cardslot%", gpCardManager->mChannel == CARD_SLOTA ? "A" : "B");
-    #ifdef SME_DEMO
+    #if SME_DEMO
     msg.replaceAll("%c", gpCardManager->mChannel == CARD_SLOTA ? "A" : "B");
     #endif
 

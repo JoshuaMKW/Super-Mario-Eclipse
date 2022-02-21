@@ -12,7 +12,7 @@
 #include "defines.h"
 #include "macros.h"
 
-#ifdef SME_EXTENDED_RENDER_DISTANCE
+#if SME_EXTENDED_RENDER_DISTANCE
 
 constexpr f32 DrawDistanceMultiplier = 100.0f;
 constexpr f32 DrawDistance = 300000.0f * DrawDistanceMultiplier;

@@ -2,7 +2,7 @@
 
 using namespace SME;
 
-#ifdef SME_EXTRA_SHINES
+#if SME_EXTRA_SHINES
 
 void TFlagManager::resetGame() { memset(this + 0xE4, 0, 0xD); }
 

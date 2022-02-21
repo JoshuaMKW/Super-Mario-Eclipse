@@ -27,6 +27,21 @@ using namespace SME;
 
 extern void makeExtendedObjDataTable();
 
+
+Memory::Protection::MemoryMap gCodeProtector;
+
+static void initCodeProtection() {
+  OSInit();
+
+  #if SME_PROTECT_MEM
+  gCodeProtector.setIndex(2);
+  gCodeProtector.setStart(0x80003800);
+  gCodeProtector.setEnd(0x80373000);
+  gCodeProtector.setPermission(Memory::Protection::READ);
+  gCodeProtector.activate();
+  #endif
+}
+
 static void initMod() {
   SME_DEBUG_LOG(
       "Codeblocker - Creating OSAlarm at %p; Calls %p every %0.4f seconds\n",
@@ -41,7 +56,7 @@ static void initMod() {
   SME_DEBUG_LOG("Registered checkUserCodes at 0x%X\n", &SME::Util::Security::checkUserCodes);
 
   makeExtendedObjDataTable();
-  // Patch::Init::initCodeProtection();
+  initCodeProtection();
 }
 
 static void destroyMod() {
@@ -125,8 +140,6 @@ SME_PATCH_BL(SME_PORT_REGION(0x8003F8F0, 0, 0, 0),
 SME_PATCH_BL(SME_PORT_REGION(0x802A7140, 0, 0, 0),
              Patch::Init::setupMarioDatas);
 
-SME_PATCH_BL(SME_PORT_REGION(0x802A750C, 0, 0, 0),
-             Patch::Init::createGlobalHeaps);
 SME_PATCH_BL(SME_PORT_REGION(0x802A716C, 0, 0, 0), Patch::Init::initFirstModel);
 SME_PATCH_BL(SME_PORT_REGION(0x802998B4, 0, 0, 0), Patch::Init::initFileMods);
 SME_PATCH_B(SME_PORT_REGION(0x80280180, 0, 0, 0), Patch::Init::initShineShadow);
@@ -140,77 +153,3 @@ SME_PATCH_B(SME_PORT_REGION(0x8029CCB0, 0, 0, 0), Patch::Init::initCardColors);
 SME_PATCH_BL(SME_PORT_REGION(0x802B8B20, 0, 0, 0),
              Patch::Init::initCollisionWarpLinks);
 SME_PATCH_BL(SME_PORT_REGION(0x802B57E4, 0, 0, 0), Patch::Init::createUIHeap);
-
-// multiplayer.cpp
-// SME_PATCH_B(SME_PORT_REGION(0x802EFAB4, 0, 0, 0),
-// Patch::Multiplayer::draw3DOverhaul);
-SME_PATCH_BL(SME_PORT_REGION(0x8029D7E8, 0, 0, 0),
-             Patch::Multiplayer::makeMarios);
-// SME_PATCH_B(SME_PORT_REGION(0x80276BD0, 0, 0, 0),
-// Patch::Multiplayer::loadMarioTrickyOverhaul);
-// SME_PATCH_B(SME_PORT_REGION(0x8024D2A8, 0, 0, 0),
-// Patch::Multiplayer::performMarioTrickyOverhaul);
-// SME_PATCH_BL(SME_PORT_REGION(0x802983F8, 0, 0, 0),
-// Patch::Multiplayer::setMarioOverhaul);
-// SME_PATCH_BL(SME_PORT_REGION(0x80298428, 0, 0, 0),
-// Patch::Multiplayer::setMarioOverhaul);
-// SME_PATCH_BL(SME_PORT_REGION(0x802984D8, 0, 0, 0),
-// Patch::Multiplayer::setMarioOverhaul);
-
-// shine.cpp
-SME_PATCH_BL(SME_PORT_REGION(0x801BD664, 0, 0, 0),
-             Patch::Shine::manageShineVanish);
-SME_WRITE_32(SME_PORT_REGION(0x801BD668, 0, 0, 0), 0x48000568);
-SME_PATCH_BL(SME_PORT_REGION(0x802413E0, 0, 0, 0),
-             Patch::Shine::isKillEnemiesShine);
-SME_PATCH_BL(SME_PORT_REGION(0x802995BC, 0, 0, 0), Patch::Shine::checkBootOut);
-SME_WRITE_32(SME_PORT_REGION(0x80297BE8, 0, 0, 0), 0x60848200);
-SME_PATCH_BL(SME_PORT_REGION(0x80293B10, 0, 0, 0),
-             Patch::Shine::extendShineIDLogic);
-SME_PATCH_BL(SME_PORT_REGION(0x801BCC98, 0, 0, 0),
-             Patch::Shine::shineObjectStringMod);
-SME_WRITE_32(SME_PORT_REGION(0x803DEE50, 0, 0, 0),
-             Patch::Shine::shineFlagSetter);
-SME_WRITE_32(SME_PORT_REGION(0x803DEE7C, 0, 0, 0),
-             Patch::Shine::shineFlagGetter);
-SME_PATCH_BL(SME_PORT_REGION(0x802946D4, 0, 0, 0),
-             Patch::Shine::shineSetClamper);
-SME_WRITE_32(SME_PORT_REGION(0x80294744, 0, 0, 0), 0x60000000);
-SME_PATCH_BL(SME_PORT_REGION(0x8029474C, 0, 0, 0),
-             Patch::Shine::shineGetClamper);
-/*Shine casts, fix light*/
-SME_WRITE_32(SME_PORT_REGION(0x80412548, 0, 0, 0), f32(SME_MAX_SHINES));
-SME_WRITE_32(SME_PORT_REGION(0x80293AF8, 0, 0, 0), 0x3BFF03E7);
-SME_WRITE_32(SME_PORT_REGION(0x802946B8, 0, 0, 0), 0x280003E7);
-SME_WRITE_32(SME_PORT_REGION(0x8017BE78, 0, 0, 0), 0x5464037E);
-SME_WRITE_32(SME_PORT_REGION(0x8017BEF4, 0, 0, 0), 0x5464037E);
-SME_WRITE_32(SME_PORT_REGION(0x8017BF34, 0, 0, 0), 0x5464037E);
-SME_WRITE_32(SME_PORT_REGION(0x801BCE30, 0, 0, 0), 0x5404037E);
-SME_WRITE_32(SME_PORT_REGION(0x801FF850, 0, 0, 0), 0x5404037E);
-SME_WRITE_32(SME_PORT_REGION(0x802946B4, 0, 0, 0), 0x5480043E);
-SME_WRITE_32(SME_PORT_REGION(0x80294730, 0, 0, 0), 0x5480043E);
-SME_WRITE_32(SME_PORT_REGION(0x80294734, 0, 0, 0), 0x280003E7);
-SME_WRITE_32(SME_PORT_REGION(0x80297BA0, 0, 0, 0), 0x5404037E);
-SME_PATCH_BL(SME_PORT_REGION(0x80294334, 0, 0, 0),
-             Patch::Shine::extendFlagManagerLoad);
-SME_WRITE_32(SME_PORT_REGION(0x80294338, 0, 0, 0), 0x48000010);
-SME_PATCH_BL(SME_PORT_REGION(0x802939B8, 0, 0, 0),
-             Patch::Shine::extendFlagManagerSave);
-SME_WRITE_32(SME_PORT_REGION(0x802939BC, 0, 0, 0), 0x48000014);
-SME_PATCH_BL(SME_PORT_REGION(0x80297BD8, 0, 0, 0),
-             Patch::Shine::thinkSetBootFlag);
-SME_PATCH_BL(SME_PORT_REGION(0x801BCD20, 0, 0, 0),
-             Patch::Shine::loadAfterMaskState);
-SME_WRITE_32(SME_PORT_REGION(0x801BCD24, 0, 0, 0), 0x28030002);
-SME_WRITE_32(SME_PORT_REGION(0x801BCD40, 0, 0, 0), 0x28030001);
-SME_PATCH_BL(SME_PORT_REGION(0x801BCEEC, 0, 0, 0), Patch::Shine::setKillState);
-SME_PATCH_BL(SME_PORT_REGION(0x8029A590, 0, 0, 0),
-             Patch::Shine::thinkCloseCamera);
-SME_WRITE_32(SME_PORT_REGION(0x8029A594, 0, 0, 0), 0x28000000);
-SME_PATCH_BL(SME_PORT_REGION(0x802999D8, 0, 0, 0),
-             Patch::Shine::animationFreezeCheck);
-SME_WRITE_32(SME_PORT_REGION(0x802999DC, 0, 0, 0), 0x48000034);
-// Make Shines glow more
-SME_WRITE_32(SME_PORT_REGION(0x803C9190, 0, 0, 0), 0x3F19999A);
-
-// stage.cpp

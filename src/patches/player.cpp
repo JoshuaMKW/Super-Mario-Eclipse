@@ -12,7 +12,7 @@
 #include "defines.h"
 #include "macros.h"
 
-#ifdef SME_BUGFIXES
+#if SME_BUGFIXES
 
 static u32 patchYStorage() {
   TMario *player;

@@ -2,7 +2,7 @@
 
 #include "SME.hxx"
 
-#ifdef SME_BUGFIXES
+#if SME_BUGFIXES
 
 static bool sIs100ShineSpawned = false;
 static bool is100CoinShine(TFlagManager *manager, u32 id) {

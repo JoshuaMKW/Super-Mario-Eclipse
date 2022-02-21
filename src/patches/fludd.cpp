@@ -12,7 +12,7 @@
 #include "defines.h"
 #include "macros.h"
 
-#ifdef SME_BUGFIXES
+#if SME_BUGFIXES
 
 static SME_PURE_ASM bool makeWaterHitCheckForDeath(TBGCheckData *col) {
   // clang-format off

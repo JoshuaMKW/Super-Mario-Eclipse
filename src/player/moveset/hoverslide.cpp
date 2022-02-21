@@ -5,7 +5,7 @@
 
 #include "SME.hxx"
 
-#ifdef SME_HOVER_SLIDE
+#if SME_HOVER_SLIDE
 
 using namespace SME;
 

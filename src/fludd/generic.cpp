@@ -7,7 +7,7 @@
 
 using namespace SME;
 
-#ifdef SME_HOVER_SLIDE
+#if SME_HOVER_SLIDE
 static bool isPumpOK(TMarioAnimeData *animeData) {
   return (animeData->mFluddEnabled != TMarioAnimeData::FLUDD::FLUDD_DISABLED &&
           TGlobals::getPlayerData(gpMarioAddress)->mCurJump <= 1);
@@ -83,7 +83,7 @@ static void resetNozzleBuzzer(TMapObjGeneral *obj) {
 }
 SME_PATCH_BL(SME_PORT_REGION(0x801BBBF8, 0, 0, 0), resetNozzleBuzzer);
 
-#ifdef SME_ROCKET_DIVE
+#if SME_ROCKET_DIVE
 static void checkRocketNozzleDiveBlast(TNozzleTrigger *nozzle, u32 r4,
                                        TWaterEmitInfo *emitInfo) {
   TMario *player = nozzle->mFludd->mMario;

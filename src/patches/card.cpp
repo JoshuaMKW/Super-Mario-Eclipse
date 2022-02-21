@@ -3,7 +3,7 @@
 
 using namespace SME;
 
-#ifdef SME_SLOT_B_SUPPORT
+#if SME_SLOT_B_SUPPORT
 
 /*** Memory File Buffer ***/
 #define MAXFILEBUFFER (1024 * 2048) /*** 2MB Buffer ***/

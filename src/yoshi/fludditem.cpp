@@ -2,7 +2,7 @@
 
 using namespace SME;
 
-#ifdef SME_YOSHI_SAVE_NOZZLE
+#if SME_YOSHI_SAVE_NOZZLE
 
 static bool isYoshiMaintainFluddModel() {
   TMario *player;

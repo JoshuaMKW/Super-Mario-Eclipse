@@ -135,21 +135,3 @@ SME_PATCH_BL(SME_PORT_REGION(0x8024D3A8, 0, 0, 0),
              Patch::CKit::realTimeCustomAttrsHandler);
 SME_PATCH_BL(SME_PORT_REGION(0x8003F8F0, 0, 0, 0),
              Patch::CKit::realTimeCustomAttrsHandler);
-
-// init_mods.cpp
-SME_PATCH_BL(SME_PORT_REGION(0x802A7140, 0, 0, 0),
-             Patch::Init::setupMarioDatas);
-
-SME_PATCH_BL(SME_PORT_REGION(0x802A716C, 0, 0, 0), Patch::Init::initFirstModel);
-SME_PATCH_BL(SME_PORT_REGION(0x802998B4, 0, 0, 0), Patch::Init::initFileMods);
-SME_PATCH_B(SME_PORT_REGION(0x80280180, 0, 0, 0), Patch::Init::initShineShadow);
-SME_PATCH_BL(SME_PORT_REGION(0x802B7A4C, 0, 0, 0), Patch::Init::initSoundBank);
-SME_WRITE_32(SME_PORT_REGION(0x80276C90, 0, 0, 0), 0x60000000);
-SME_PATCH_BL(SME_PORT_REGION(0x80276C94, 0, 0, 0), Patch::Init::fromMarioInit);
-SME_PATCH_BL(SME_PORT_REGION(0x800397DC, 0, 0, 0),
-             Patch::Init::fromShadowMarioInit);
-SME_PATCH_BL(SME_PORT_REGION(0x80271580, 0, 0, 0), Patch::Init::initYoshi);
-SME_PATCH_B(SME_PORT_REGION(0x8029CCB0, 0, 0, 0), Patch::Init::initCardColors);
-SME_PATCH_BL(SME_PORT_REGION(0x802B8B20, 0, 0, 0),
-             Patch::Init::initCollisionWarpLinks);
-SME_PATCH_BL(SME_PORT_REGION(0x802B57E4, 0, 0, 0), Patch::Init::createUIHeap);

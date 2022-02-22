@@ -69,7 +69,7 @@ bool Util::Mario::swapBinary(Enum::Player id) {
   }
 
   char buffer[32];
-  sprintf(buffer, "/data/chr%hhu.szs", id);
+  snprintf(buffer, 32, "/data/chr%hhu.szs", id);
 
   if (DVDConvertPathToEntrynum(buffer) < 0) {
     return false;
@@ -112,7 +112,7 @@ static void *t_swapCharacter(void *param) {
   gSwapSuccessful = false;
 
   char buffer[32];
-  sprintf(buffer, "/data/chr%hhu.szs", gTargetCharacterID);
+  snprintf(buffer, 32, "/data/chr%hhu.szs", gTargetCharacterID);
 
   // Player doesn't exist
   if (DVDConvertPathToEntrynum(buffer) < 0) {

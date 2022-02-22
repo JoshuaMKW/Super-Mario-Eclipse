@@ -12,7 +12,7 @@ using namespace Util;
 using namespace Class;
 
 // 0x80280180
-void Patch::Init::initShineShadow() {
+static void initShineShadow() {
   TStageParams *config = TStageParams::sStageConfig;
   if (config->mLightType.get() == TLightContext::ActiveType::DISABLED)
     return;
@@ -59,7 +59,7 @@ void Patch::Init::initShineShadow() {
     LightContext.mLightType = TLightContext::ActiveType::DISABLED;
   }
 }
-
+SME_PATCH_B(SME_PORT_REGION(0x80280180, 0, 0, 0), initShineShadow);
 
 /*This works by taking the target id and matching it to the
 / ID of the first entry to have the same home ID as the target.
@@ -88,7 +88,7 @@ static void parseWarpLinks(TMapCollisionData *col, TWarpCollisionList *links,
 }
 
 // 0x802B8B20
-u32 Patch::Init::initCollisionWarpLinks(const char *name) {
+static u32 initCollisionWarpLinks(const char *name) {
   TWarpCollisionList *warpDataArray = new TWarpCollisionList(2048);
   TWarpCollisionList *warpDataPreserveArray = new TWarpCollisionList(1);
   TGlobals::sWarpColArray = warpDataArray;
@@ -100,3 +100,4 @@ u32 Patch::Init::initCollisionWarpLinks(const char *name) {
 
   return JDrama::TNameRef::calcKeyCode(name);
 }
+SME_PATCH_BL(SME_PORT_REGION(0x802B8B20, 0, 0, 0), initCollisionWarpLinks);

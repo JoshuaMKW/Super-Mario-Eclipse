@@ -452,9 +452,9 @@ bool AudioStreamer::AudioPacket::exec(DVDFileInfo *handle) {
     return false;
 
   if (mIdentifier.as_u32 & 0x80000000)
-    sprintf(buffer, "/AudioRes/Streams/Music/%s.adp", mIdentifier.as_string);
+    snprintf(buffer, 64, "/AudioRes/Streams/Music/%s.adp", mIdentifier.as_string);
   else
-    sprintf(buffer, "/AudioRes/Streams/Music/%lu.adp", mIdentifier.as_u32);
+    snprintf(buffer, 64, "/AudioRes/Streams/Music/%lu.adp", mIdentifier.as_u32);
 
   if (!DVDOpen(buffer, handle))
     return false;

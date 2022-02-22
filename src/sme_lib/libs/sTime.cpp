@@ -59,7 +59,7 @@ u8 Util::Time::year() {
 
 char *Util::Time::calendarToDate(OSCalendarTime &calendar) {
   char *date = static_cast<char *>(SME::Util::Memory::calloc(16, 4));
-  sprintf(date, "%lu/%lu/%lu", calendar.mon + 1, calendar.mday, calendar.year);
+  snprintf(date, 32, "%lu/%lu/%lu", calendar.mon + 1, calendar.mday, calendar.year);
   return date;
 }
 
@@ -67,13 +67,13 @@ char *Util::Time::calendarToTime(OSCalendarTime &calendar) {
   char *time = static_cast<char *>(SME::Util::Memory::calloc(16, 4));
 
   if (calendar.hour == 0)
-    sprintf(time, "%lu:%02lu AM", calendar.hour + 12, calendar.min);
+    snprintf(time, 32, "%lu:%02lu AM", calendar.hour + 12, calendar.min);
   else if (calendar.hour < 12)
-    sprintf(time, "%lu:%02lu AM", calendar.hour % 13, calendar.min);
+    snprintf(time, 32, "%lu:%02lu AM", calendar.hour % 13, calendar.min);
   else if (calendar.hour == 12)
-    sprintf(time, "%lu:%02lu PM", calendar.hour, calendar.min);
+    snprintf(time, 32, "%lu:%02lu PM", calendar.hour, calendar.min);
   else
-    sprintf(time, "%lu:%02lu PM", (calendar.hour + 1) % 13, calendar.min);
+    snprintf(time, 32, "%lu:%02lu PM", (calendar.hour + 1) % 13, calendar.min);
 
   return time;
 }

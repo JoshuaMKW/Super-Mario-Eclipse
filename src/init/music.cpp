@@ -16,7 +16,7 @@ static u8 gOldAreaID = 0;
 static u8 gOldEpisodeID = 0;
 
 // 0x802B7A4C
-void Patch::Init::initSoundBank(u8 areaID, u8 episodeID) {
+static void initSoundBank(u8 areaID, u8 episodeID) {
   /*TStageParams *config = TStageParams::sStageConfig;
 
   gOldAreaID = areaID;
@@ -27,3 +27,4 @@ void Patch::Init::initSoundBank(u8 areaID, u8 episodeID) {
   }*/
   setMSoundEnterStage__10MSMainProcFUcUc(areaID, episodeID);
 }
+SME_PATCH_BL(SME_PORT_REGION(0x802B7A4C, 0, 0, 0), initSoundBank);

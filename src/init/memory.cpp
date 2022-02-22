@@ -21,6 +21,7 @@ constexpr size_t globalsize = 0x8000;
 // extern -> SME.cpp
 static JKRExpHeap *createGlobalHeaps(void *newHeap, size_t size,
                                      JKRHeap *rootHeap, bool unk_1) {
+  SME_LOG("test\n");
 #ifdef SME_DETACHED_HEAPS
   {
     JKRHeap *rootHeap = JKRHeap::sRootHeap;
@@ -43,10 +44,13 @@ static JKRExpHeap *createGlobalHeaps(void *newHeap, size_t size,
     JKRHeap::sRootHeap = rootHeap;
   }
 #else
+  SME_LOG("test 3\n");
   {
     JKRHeap *systemHeap = JKRHeap::sSystemHeap;
     JKRHeap *currentHeap = JKRHeap::sCurrentHeap;
 
+    // OSReport("isDebugMode = %s\n", SME::TGlobals::isDebugMode() ? "TRUE" :
+    // "FALSE");
     SME_EVAL_LOG(charactersize > sizeof(JKRExpHeap));
     if (charactersize > sizeof(JKRExpHeap))
       TGlobals::sCharacterHeap = JKRExpHeap::create(
@@ -76,7 +80,7 @@ SME_PATCH_BL(SME_PORT_REGION(0x802A750C, 0, 0, 0), createGlobalHeaps);
 
 // 0x802A7140
 // extern -> SME.cpp
-s32 Patch::Init::setupMarioDatas(char *filepath) {
+static s32 setupMarioDatas(char *filepath) {
   TMarioGamePad *gpGamePad = gpApplication.mGamePad1;
 #if SME_DEMO
   Enum::Player playerID = Enum::Player::MARIO;
@@ -87,21 +91,19 @@ s32 Patch::Init::setupMarioDatas(char *filepath) {
 
   TGlobals::sCharacterIDList[0] = playerID;
 
-  sprintf(filepath, "/data/chr%d.szs", static_cast<u8>(playerID));
+  snprintf(filepath, 32, "/data/chr%d.szs", static_cast<u8>(playerID));
   return DVDConvertPathToEntrynum(filepath);
 }
+SME_PATCH_BL(SME_PORT_REGION(0x802A7140, 0, 0, 0), setupMarioDatas);
 
 // 0x802A716C
 // extern -> SME.cpp
-u32 *Patch::Init::initFirstModel(const char *path, u32 unk_1, u32 unk_2,
-                                 u32 unk_3, JKRHeap *heap,
-                                 JKRDvdRipper::EAllocDirection direction,
-                                 u32 unk_5, u32 unk_6) {
-
+static u32 *initFirstModel(const char *path, u32 unk_1, u32 unk_2, u32 unk_3,
+                    JKRHeap *heap, JKRDvdRipper::EAllocDirection direction,
+                    u32 unk_5, u32 unk_6) {
+  SME_LOG("Instruction at 0x802A750C = %X\n", *(u32 *)0x802A750C);
   if (!TGlobals::sCharacterHeap) {
-    SME_LOG("Character heap failed to allocate at size %lu\n", charactersize);
-    SME_CONSOLE_LOG("Character heap failed to allocate at size %lu\n",
-                    charactersize);
+    SME_LOG("Shouldn't reach here, character heap is nullptr?\n");
   }
 #ifndef SME_DETACHED_HEAPS
   TGlobals::sCharacterHeap->freeAll();
@@ -113,8 +115,7 @@ u32 *Patch::Init::initFirstModel(const char *path, u32 unk_1, u32 unk_2,
 #endif
   return archive;
 }
-
-
+SME_PATCH_BL(SME_PORT_REGION(0x802A716C, 0, 0, 0), initFirstModel);
 
 static void resetGlobalValues() {
   gModelWaterManagerWaterColor.set(0x3C, 0x46, 0x78, 0x14); // Water rgba
@@ -136,7 +137,7 @@ extern void patches_staticResetter();
 extern void objects_staticResetter();
 
 // 0x802998B4
-TMarDirector *Patch::Init::initFileMods() {
+static TMarDirector *initFileMods() {
   TMarDirector *director;
   SME_FROM_GPR(26, director);
 
@@ -182,3 +183,4 @@ TMarDirector *Patch::Init::initFileMods() {
 
   return director;
 }
+SME_PATCH_BL(SME_PORT_REGION(0x802998B4, 0, 0, 0), initFileMods);

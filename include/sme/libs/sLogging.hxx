@@ -9,14 +9,14 @@
 #define SME_LOG(msg, ...)                                                      \
   {                                                                            \
     char errmsg[256];                                                          \
-    sprintf(errmsg, "[SME] %s", (msg));                                        \
+    snprintf(errmsg, 256, "[SME] %s: %s", __FILE__, (msg));                    \
     OSReport(errmsg, ##__VA_ARGS__);                                           \
   }
-  
+
 #define SME_FUNCTION_LOG(msg, ...)                                             \
   {                                                                            \
     char errmsg[256];                                                          \
-    sprintf(errmsg, "[SME] %s %s", SME_FUNC_SIG, (msg));                       \
+    snprintf(errmsg, 256, "[SME] %s: %s %s", __FILE__, SME_FUNC_SIG, (msg));   \
     OSReport(errmsg, ##__VA_ARGS__);                                           \
   }
 
@@ -35,6 +35,6 @@
   }
 
 #define SME_EVAL_LOG(eval)                                                     \
- if (SME::TGlobals::isDebugMode()) {                                           \
-  SME_LOG(SME_STRINGIZE(eval) " = %d\n", eval);                                \
- }                                                                             \
+  if (SME::TGlobals::isDebugMode()) {                                          \
+    SME_LOG(SME_STRINGIZE(eval) " = %d\n", eval);                              \
+  }\

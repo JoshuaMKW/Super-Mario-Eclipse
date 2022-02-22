@@ -14,7 +14,7 @@ using namespace Util;
 using namespace Class;
 
 // 0x8029CCB0
-void Patch::Init::initCardColors() {
+static void initCardColors() {
   TStageParams *config = TStageParams::sStageConfig;
 
   if (!config->isCustomConfig())
@@ -47,25 +47,27 @@ void Patch::Init::initCardColors() {
         Math::lerp<u8>(0, waterColor.a, 1.1875f);
   }
 }
+SME_PATCH_B(SME_PORT_REGION(0x8029CCB0, 0, 0, 0), initCardColors);
 
 // 0x802B57E4
-void Patch::Init::createUIHeap(u32 size, s32 alignment) {
+static void createUIHeap(u32 size, s32 alignment) {
   gpMarDirector->mGame6Data = (u32 *)Memory::malloc(size, alignment);
 }
+// SME_PATCH_BL(SME_PORT_REGION(0x802B57E4, 0, 0, 0), createUIHeap);
 
 // 0x802A72A4
-u32 Patch::Init::initHUDElements(char *filepath) {
-  char buffer[32];
+static u32 initHUDElements(char *filepath) {
+  char buffer[64];
   s32 entrynum;
 
-  sprintf(buffer, filepath,
-          TFlagManager::smInstance->Type6Flag.CustomFlags.mHUDElement);
+  snprintf(buffer, 64, filepath,
+           TFlagManager::smInstance->Type6Flag.CustomFlags.mHUDElement);
   entrynum = DVDConvertPathToEntrynum(buffer);
 
   if (entrynum < 0)
-    sprintf(filepath, filepath, 0);
+    snprintf(filepath, 64, filepath, 0);
   else
-    strcpy(filepath, buffer);
+    strncpy(filepath, buffer, 64);
 
   return DVDConvertPathToEntrynum(filepath);
 }
@@ -80,7 +82,7 @@ static JKRMemArchive *switchArchive(char *curArchive, void *newArchive) {
 }
 
 // 0x80172440
-JKRMemArchive *Patch::Init::switchHUDOnStageLoad(char *curArchive,
+static JKRMemArchive *switchHUDOnStageLoad(char *curArchive,
                                                  u32 *gameUI) {
   char buffer[32];
 
@@ -91,10 +93,10 @@ JKRMemArchive *Patch::Init::switchHUDOnStageLoad(char *curArchive,
            TMarioGamePad::EButtons::DPAD_DOWN)
     TFlagManager::smInstance->Type6Flag.CustomFlags.mHUDElement = 0;
 
-  sprintf(buffer, "/data/game_%d.arc",
-          TFlagManager::smInstance->Type6Flag.CustomFlags
-              .mHUDElement);              //"/data/game_%d.arc"
-  strcpy(strstr(buffer, ".arc"), ".szs"); //".arc", ".szs"
+  snprintf(buffer, 32, "/data/game_%d.arc",
+           TFlagManager::smInstance->Type6Flag.CustomFlags
+               .mHUDElement);                 //"/data/game_%d.arc"
+  strncpy(strstr(buffer, ".arc"), ".szs", 5); //".arc", ".szs"
 
   if (DVDConvertPathToEntrynum(buffer) >= 0) {
     Memory::free(gpMarDirector->mGame6Data);
@@ -108,7 +110,7 @@ JKRMemArchive *Patch::Init::switchHUDOnStageLoad(char *curArchive,
 // kmCall(0x80172440, &switchHUDOnStageLoad);
 
 // 0x802B57E4
-JKRHeap *Patch::Init::useCustomHUDHeap(u32 size, s32 alignment) {
+static JKRHeap *useCustomHUDHeap(u32 size, s32 alignment) {
   return nullptr; // TGlobals::sGame6Heap;
 }
 // kmCall(0x802B57E4, &useCustomHUDHeap);

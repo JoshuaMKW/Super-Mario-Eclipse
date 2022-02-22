@@ -105,22 +105,25 @@ static void initMario(TMario *player, bool isMario) {
 }
 
 // 0x80276C94
-TMario *Patch::Init::fromMarioInit(TMario *player) {
+static TMario *fromMarioInit(TMario *player) {
   player->initValues();
   initMario(player, true);
   return player;
 }
+SME_WRITE_32(SME_PORT_REGION(0x80276C90, 0, 0, 0), 0x60000000);
+SME_PATCH_BL(SME_PORT_REGION(0x80276C94, 0, 0, 0), fromMarioInit);
 
 // 0x800397DC
-bool Patch::Init::fromShadowMarioInit() {
+static bool fromShadowMarioInit() {
   TMario *player;
   asm volatile("lwz %0, 0x150 (31)" : "=r"(player));
   initMario(player, false);
   return SMS_isMultiPlayerMap__Fv();
 }
+SME_PATCH_BL(SME_PORT_REGION(0x800397DC, 0, 0, 0), fromShadowMarioInit);
 
 // 0x80271580
-void Patch::Init::initYoshi(MAnmSound *anmSound, void *r4, u32 r5, f32 f1) {
+static void initYoshi(MAnmSound *anmSound, void *r4, u32 r5, f32 f1) {
   initAnmSound__9MAnmSoundFPvUlf(anmSound, r4, r5, f1);
 
   TYoshi *yoshi;
@@ -144,3 +147,4 @@ void Patch::Init::initYoshi(MAnmSound *anmSound, void *r4, u32 r5, f32 f1) {
   yoshi->mFlutterAcceleration = config->mYoshiFlutterAcceleration.get();
   yoshi->mMaxFlutterTimer = config->mYoshiMaxFlutterTimer.get();
 }
+SME_PATCH_BL(SME_PORT_REGION(0x80271580, 0, 0, 0), initYoshi);

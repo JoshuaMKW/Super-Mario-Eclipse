@@ -98,6 +98,7 @@ u32 *Patch::Init::initFirstModel(const char *path, u32 unk_1, u32 unk_2,
                                  JKRDvdRipper::EAllocDirection direction,
                                  u32 unk_5, u32 unk_6) {
 
+  SME_LOG("Instruction at 0x802A750C = %X\n", *(u32 *)0x802A750C);
   if (!TGlobals::sCharacterHeap) {
     SME_LOG("Character heap failed to allocate at size %lu\n", charactersize);
     SME_CONSOLE_LOG("Character heap failed to allocate at size %lu\n",

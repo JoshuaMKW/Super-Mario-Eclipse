@@ -99,8 +99,10 @@ SME_PATCH_BL(SME_PORT_REGION(0x802A7140, 0, 0, 0), setupMarioDatas);
 // 0x802A716C
 // extern -> SME.cpp
 static u32 *initFirstModel(const char *path, u32 unk_1, u32 unk_2, u32 unk_3,
-                    JKRHeap *heap, JKRDvdRipper::EAllocDirection direction,
-                    u32 unk_5, u32 unk_6) {
+                           JKRHeap *heap,
+                           JKRDvdRipper::EAllocDirection direction, u32 unk_5,
+                           u32 unk_6) {
+
   SME_LOG("Instruction at 0x802A750C = %X\n", *(u32 *)0x802A750C);
   if (!TGlobals::sCharacterHeap) {
     SME_LOG("Shouldn't reach here, character heap is nullptr?\n");

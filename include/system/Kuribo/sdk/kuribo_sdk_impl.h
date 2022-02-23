@@ -157,8 +157,10 @@ static inline void __kuribo_on_detach() {
   } /* End function*/
 
 #ifndef _WIN32
+#define dcbf(_val) asm volatile("dcbf 0, %0" : : "r"(_val))
 #define icbi(_val) asm volatile("icbi 0, %0" : : "r"(_val))
 #else
+#define dcbf
 #define icbi
 #endif // _WIN32
 static inline void __kuribo_multipatch_write(u32* addr, u32 value, u32* save,
@@ -173,7 +175,10 @@ static inline void __kuribo_multipatch_write(u32* addr, u32 value, u32* save,
   } else {
     return;
   }
+  dcbf(addr);
+  asm("sync");
   icbi(addr);
+  asm("isync");
 }
 
 static inline void __kuribo_multipatch_b(u32* addr, u32 value, u32* save,

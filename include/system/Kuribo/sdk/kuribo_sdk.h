@@ -180,7 +180,10 @@ inline void EnablePatch(Patch& patch) {
 
   patch.mSave = *addr;
   *addr = patch.mVal;
+  dcbf(addr);
+  asm("sync");
   icbi(addr);
+  asm("isync");
 
   patch.mApplied = true;
 }
@@ -192,7 +195,10 @@ inline void DisablePatch(Patch& patch) {
   u32* addr = (u32*)patch.mAddr;
 
   *addr = patch.mSave;
+  dcbf(addr);
+  asm("sync");
   icbi(patch.mAddr);
+  asm("isync");
   patch.mSave = 0xCCCCCCCC;
 
   patch.mApplied = false;

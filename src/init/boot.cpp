@@ -31,8 +31,6 @@ extern void makeExtendedObjDataTable();
 Memory::Protection::MemoryMap gCodeProtector;
 
 static void initCodeProtection() {
-  OSInit();
-
   #if SME_PROTECT_MEM
   gCodeProtector.setIndex(2);
   gCodeProtector.setStart(0x80003800);
@@ -61,10 +59,10 @@ static void initMod() {
 
 static void destroyMod() {
   SME_DEBUG_LOG("-- Destroying Module --\n");
-#if defined(SME_DEBUG) && !defined(SME_RELEASE)
-  OSStopStopwatch(&gctStopwatch);
-#endif
-  OSCancelAlarm(&gctAlarm);
+// #if defined(SME_DEBUG) && !defined(SME_RELEASE)
+//   OSStopStopwatch(&gctStopwatch);
+// #endif
+//   OSCancelAlarm(&gctAlarm);
 }
 
 #if defined(SME_BUILD_KURIBO) && !defined(SME_BUILD_KAMEK) &&                  \

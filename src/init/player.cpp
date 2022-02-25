@@ -106,7 +106,9 @@ static void initMario(TMario *player, bool isMario) {
 
 // 0x80276C94
 static TMario *fromMarioInit(TMario *player) {
+  SME_DEBUG_LOG("Initializing player values...\n");
   player->initValues();
+  SME_DEBUG_LOG("Initializing Mario...\n");
   initMario(player, true);
   return player;
 }

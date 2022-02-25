@@ -57,5 +57,8 @@ log.txt
 #compiler
 compiler/
 
+#logs
+*.log
+
 #Kuribo
 !tools/KuriboConverter/*

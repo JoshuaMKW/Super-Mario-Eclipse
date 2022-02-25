@@ -17,14 +17,15 @@ extern J2DTextBox gDebugTextBox;
 // this is ran once
 // extern -> SME.cpp
 void Patch::CKit::onSetup(TMarDirector *director) {
-  gDebugTextBox = J2DTextBox(gpSystemFont->mFont, "Debug Mode");
+  // gDebugTextBox = J2DTextBox(gpSystemFont->mFont, "Debug Mode");
 
   // run replaced call
+  SME_DEBUG_LOG("Initializing Objects...\n");
   director->setupObjects();
+  SME_DEBUG_LOG("Initializing Objects... DONE!\n");
 }
 
 extern void demoHandler(TMario *player);
-extern void createWaterBalloonAndThrow(TMario *player);
 
 // this is ran every frame
 // extern -> SME.cpp
@@ -49,11 +50,6 @@ s32 Patch::CKit::onUpdate(void *director) { // movie director
   Debug::xyzModifierMario(gpMarioAddress);
   Debug::updateDebugCollision(gpMarioAddress);
   demoHandler(gpMarioAddress);
-
-  if (!gpMarioAddress->mAttributes.mHasFludd &&
-      (gpMarioAddress->mController->mButtons.mFrameInput & TMarioGamePad::R))
-    createWaterBalloonAndThrow(gpMarioAddress);
-  // Patch::Cheat::drawCheatText(); //currently bugged
 
   // ===== FRAME RATE ===== //
   const f32 frameRate = SME::TGlobals::isVariableFrameRate()

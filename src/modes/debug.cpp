@@ -34,23 +34,23 @@ static void debugModeNotify(Class::TCheatHandler *) {
   TGlobals::setDebugMode(true);
   SME_DEBUG_LOG("Debug mode activated!\n");
 
-  if (!TGlobals::isDebugMode())
-    gDebugTextBox.mIsVisible = true;
+  // if (!TGlobals::isDebugMode())
+  //   gDebugTextBox.mIsVisible = true;
 }
 
 // extern runtime_mods.cpp
 static void drawCheatText() {
-  if (!gDebugTextBox.getStringPtr())
-    return;
+//   if (!gDebugTextBox.getStringPtr())
+//     return;
 
-#if !SME_DEBUG
-    if (*gDebugTextBox.getStringPtr() != '\0' && gDebugHandler.isActive())
-#else
-    if (*gDebugTextBox.getStringPtr() != '\0')
-#endif
-    {
-      gDebugTextBox.draw(250, 24);
-    }
+// #if !SME_DEBUG
+//     if (*gDebugTextBox.getStringPtr() != '\0' && gDebugHandler.isActive())
+// #else
+//     if (*gDebugTextBox.getStringPtr() != '\0')
+// #endif
+//     {
+//       gDebugTextBox.draw(250, 24);
+//     }
 }
 
 static void *handleDebugCheat(void *GCLogoDir) {
@@ -168,47 +168,6 @@ void Patch::Debug::updateDebugCollision(TMario *player) {
   }
 
   return;
-}
-
-static TRingBuffer<16, TWaterBalloon> sBalloonBuffer;
-TWaterBalloon *sWaterBalloon;
-
-void createWaterBalloonAndThrow(TMario *player) {
-  if (player->mHeldObject)
-    return;
-
-  #if 1
-  if (!sWaterBalloon) {
-    sWaterBalloon = new TWaterBalloon("waterballoon");
-    sWaterBalloon->initAndRegister("waterballoon");
-  } else {
-    sWaterBalloon->kill();
-  }
-
-  sWaterBalloon->mPosition.set(player->mPosition);
-  sWaterBalloon->appear();
-
-  bool received = sWaterBalloon->receiveMessage(player, 4); // 4 = grab
-  if (received) {
-    player->mHeldObject = sWaterBalloon;
-    player->_380 = 2;
-  } else {
-    player->mHeldObject = nullptr;
-  }
-  
-
-  #if 1
-  if (player->mState == static_cast<u32>(TMario::State::IDLE)) {
-    changePlayerStatus__6TMarioFUlUlb(player, 0x80000588, 0, 0); // 0x80000387
-  } else if (player->mState == static_cast<u32>(TMario::State::RUNNING)) {
-    changePlayerStatus__6TMarioFUlUlb(player, 0x80000588, 0, 0);
-  } else if (player->mState == static_cast<u32>(TMario::State::JUMP) ||
-             player->mState == static_cast<u32>(TMario::State::D_JUMP) ||
-             player->mState == static_cast<u32>(TMario::State::FALL)) {
-    changePlayerStatus__6TMarioFUlUlb(player, 0x820008AB, 0, 0);
-  }
-  #endif
-  #endif
 }
 
 static void setEmitPrm() {

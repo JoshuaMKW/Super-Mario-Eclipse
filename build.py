@@ -30,7 +30,7 @@ __TMPDIR = Path("tmp-compiler")
 @atexit.register
 def clean_resources():
     if __TMPDIR.is_dir():
-        shutil.rmtree(__TMPDIR)
+        pass#    shutil.rmtree(__TMPDIR)
 
 
 def wrap_printer(msg: str = "") -> function:
@@ -645,7 +645,7 @@ def main():
             "-fno-exceptions", "-fno-rtti", "-fno-unwind-tables", "-ffast-math",
             "-flto", "-nodefaultlibs", "-nostdlib", "-fno-use-init-array",
             "-fno-use-cxa-atexit", "-fno-c++-static-destructors", "-fno-function-sections",
-            "-fno-data-sections", "-fuse-ld=lld", "-fpermissive", "-Werror", f"-fmacro-prefix-map={Path.cwd()}=.",
+            "-fno-data-sections", "-fuse-ld=lld", "-fpermissive", "-Werror",# f"-fmacro-prefix-map={Path.cwd()}=.",
             f"-O{args.optimize_level}", "-r", "-v"
         ]
         patcher.cOptions = [

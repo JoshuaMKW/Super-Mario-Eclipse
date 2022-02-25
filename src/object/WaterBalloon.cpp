@@ -16,13 +16,12 @@
 TWaterEmitInfo *TWaterBalloon::sEmitInfo = nullptr;
 
 TWaterBalloon::TWaterBalloon(const char *name)
-    : TMapObjBall(name), mIsExplosive(false) {}
+    : TMapObjBall(name), mIsExplosive(false) {
+}
 
 void TWaterBalloon::init(TLiveManager *manager) {
   mLiveManager = manager;
   mLiveManager->manageObj(this);
-
-  sEmitInfo = new TWaterEmitInfo("/Mario/waterballoon/waterballoon.prm");
 }
 
 void TWaterBalloon::initActorData() {
@@ -51,7 +50,6 @@ TWaterBalloon::~TWaterBalloon() {}
 void TWaterBalloon::perform(u32 flags, JDrama::TGraphics *graphics) {
   TMapObjBall::perform(flags, graphics);
   if (flags & PERFORM_ON_MOVEMENT) {
-    sEmitInfo->mPos.set(mPosition);
   }
 }
 
@@ -119,13 +117,15 @@ void TWaterBalloon::kicked() {
 void TWaterBalloon::blast() {
   TWaterEmitInfo emitInfo = *sEmitInfo;
 
-  JGeometry::TVec3<f32> pos(emitInfo.mPos.get());
+  JGeometry::TVec3<f32> pos(mPosition);
   pos.y += 100.0f;
 
   emitInfo.mPos.set(pos);
   emitInfo.mV.set(JGeometry::TVec3<f32>{0.0f, -10.0f, 0.0f});
   emitInfo.mSize.set(80.0f);
   emitInfo.mNum.set(1);
+
+  sEmitInfo->mPos.set(mPosition);
 
   gpModelWaterManager->emitRequest(*sEmitInfo);
   gpModelWaterManager->emitRequest(emitInfo);

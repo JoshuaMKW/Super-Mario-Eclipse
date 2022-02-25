@@ -4,10 +4,12 @@
 #include "mem.h"
 #include "types.h"
 
-#include "funcs.hxx"
 #include "JGeometry.hxx"
 #include "JSU/JSUMemoryStream.hxx"
 #include "JUT/JUTColor.hxx"
+#include "funcs.hxx"
+#include "libs/sContainer.hxx"
+#include "obj/WaterBalloon.hxx"
 #include "sms/actor/Mario.hxx"
 #include "sms/camera/PolarSubCamera.hxx"
 
@@ -187,7 +189,9 @@ public:
   void setCanUseFludd(bool enable) { mCanUseFludd = enable; }
   void setPlayer(TMario *player);
   void setPlayerID(SME::Enum::Player id) { mPlayerID = id; }
-  void setColliding(bool colliding) { mCollisionFlags.mIsColliding = colliding; }
+  void setColliding(bool colliding) {
+    mCollisionFlags.mIsColliding = colliding;
+  }
 
   bool canUseNozzle(TWaterGun::NozzleType nozzle) const;
   const char *getPlayerName() const;
@@ -232,6 +236,7 @@ public:
   FluddHistory mFluddHistory;
   ParamHistory mDefaultAttrs;
   TMario::TDirtyParams mDefaultDirtyParams;
+  TRingBuffer<TWaterBalloon> mBalloons;
 };
 
 } // namespace SME::Class

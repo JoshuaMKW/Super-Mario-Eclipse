@@ -6,6 +6,7 @@
 #include "libs/sMath.hxx"
 #include "libs/sMemory.hxx"
 #include "params/MarioParams.hxx"
+#include "obj/WaterBalloon.hxx"
 
 #include "JSU/JSUMemoryStream.hxx"
 #include "sms/actor/Mario.hxx"
@@ -42,6 +43,12 @@ TPlayerData::TPlayerData(TMario *player, CPolarSubCamera *camera, bool isMario)
   }
 
   mCanUseFludd = mParams->mCanUseFludd.get();
+
+  for (int i = 0; i < mBalloons.capacity(); ++i) {
+    TWaterBalloon *balloon = new TWaterBalloon("waterballoon");
+    balloon->initAndRegister("waterballoon");
+    mBalloons.push(balloon);
+  }
 
   if (mParams->mPlayerHasGlasses.get() && player->mCap)
     reinterpret_cast<u16 *>(player->mCap)[2] |= 0b100;

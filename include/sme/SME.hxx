@@ -110,11 +110,11 @@
 #endif
 
 #ifndef SME_MIRROR_SUNSHINE
-#define SME_MIRROR_SUNSHINE 1
+#define SME_MIRROR_SUNSHINE 0
 #endif
 
 #ifndef SME_MULTIPLAYER
-#define SME_MULTIPLAYER 1
+#define SME_MULTIPLAYER 0
 #endif
 
 #ifndef SME_WIDESCREEN

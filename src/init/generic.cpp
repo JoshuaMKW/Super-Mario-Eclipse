@@ -89,6 +89,7 @@ static void parseWarpLinks(TMapCollisionData *col, TWarpCollisionList *links,
 
 // 0x802B8B20
 static u32 initCollisionWarpLinks(const char *name) {
+  SME_DEBUG_LOG("Initializing warp collision data...\n");
   TWarpCollisionList *warpDataArray = new TWarpCollisionList(2048);
   TWarpCollisionList *warpDataPreserveArray = new TWarpCollisionList(1);
   TGlobals::sWarpColArray = warpDataArray;

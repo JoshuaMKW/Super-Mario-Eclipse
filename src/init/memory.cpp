@@ -103,7 +103,6 @@ static u32 *initFirstModel(const char *path, u32 unk_1, u32 unk_2, u32 unk_3,
                            JKRDvdRipper::EAllocDirection direction, u32 unk_5,
                            u32 unk_6) {
 
-  SME_LOG("Instruction at 0x802A750C = %X\n", *(u32 *)0x802A750C);
   if (!TGlobals::sCharacterHeap) {
     SME_LOG("Shouldn't reach here, character heap is nullptr?\n");
   }
@@ -166,8 +165,14 @@ static TMarDirector *initFileMods() {
   resetGlobalValues();
   objects_staticResetter();
   patches_staticResetter();
+  
+  SME_DEBUG_LOG("Clearing player params...\n");
   TGlobals::clearAllPlayerParams();
+
+  SME_DEBUG_LOG("Reseting stage params...\n");
   TStageParams::sStageConfig->reset();
+
+  SME_DEBUG_LOG("Loading stage specific params...\n");
   TStageParams::sStageConfig->load(Util::getStageName(&gpApplication));
 
   TFlagManager::smInstance->setBool(true, 0x1038F); // Yosh
@@ -180,7 +185,10 @@ static TMarDirector *initFileMods() {
 #endif
   gInXYZMode = false;
 
+  SME_DEBUG_LOG("Hot swapping character model data...\n");
   Util::Mario::swapBinary(characterID);
+
+  SME_DEBUG_LOG("Loading character specific params...\n");
   Util::Mario::loadParams();
 
   return director;

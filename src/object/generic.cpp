@@ -28,8 +28,6 @@ static u16 *sObjLoadAddrTable[LoadAddrTableSize][2]{
 
 static ObjData *sObjDataTableNew[OBJDataTableSize + OBJNewCount];
 
-extern TWaterBalloon *sWaterBalloon;
-
 // extern -> SME.cpp
 void makeExtendedObjDataTable() {
   memcpy(sObjDataTableNew, sObjDataTable,
@@ -66,6 +64,6 @@ static JDrama::TNameRef *makeExtendedMapObjFromRef(TMarNameRefGen *nameGen,
 }
 SME_PATCH_BL(SME_PORT_REGION(0x8029E120, 0, 0, 0), makeExtendedMapObjFromRef);
 
-void objects_staticResetter() { sWaterBalloon = nullptr; }
+void objects_staticResetter() { }
 
 #endif

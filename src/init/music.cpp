@@ -25,6 +25,8 @@ static void initSoundBank(u8 areaID, u8 episodeID) {
     areaID = config->mMusicAreaID.get();
     episodeID = config->mMusicEpisodeID.get();
   }*/
+  SME_DEBUG_LOG("Initializing the sound bank...\n");
   setMSoundEnterStage__10MSMainProcFUcUc(areaID, episodeID);
+  SME_DEBUG_LOG("Initializing the sound bank... DONE!\n");
 }
 SME_PATCH_BL(SME_PORT_REGION(0x802B7A4C, 0, 0, 0), initSoundBank);

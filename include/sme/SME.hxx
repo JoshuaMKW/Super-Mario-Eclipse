@@ -163,6 +163,10 @@
 #define SME_ROCKET_DIVE 1
 #endif
 
+#ifndef SME_WATERBALLOONS
+#define SME_WATERBALLOONS 1
+#endif
+
 #else
 
 #define SME_LONG_JUMP 0

@@ -1,18 +1,21 @@
 #include "obj/WaterBalloon.hxx"
-#include "libs/sContainer.hxx"
 #include "Player.hxx"
+#include "libs/sContainer.hxx"
 
-#include "sms/actor/Mario.hxx"
+
 #include "SME.hxx"
+#include "sms/actor/Mario.hxx"
+
 
 using namespace SME;
 
-TRingBuffer<TWaterBalloon> *sWaterBalloons[4] = {
-    nullptr, nullptr, nullptr, nullptr
-};
+#if SME_WATERBALLOONS
+static TRingBuffer<TWaterBalloon> *sWaterBalloons[4] = {nullptr, nullptr,
+                                                        nullptr, nullptr};
 
 void initWaterBalloons() {
-  TRingBuffer<TWaterBalloon> *balloons = new TRingBuffer<TWaterBalloon>(16, false);
+  TRingBuffer<TWaterBalloon> *balloons =
+      new TRingBuffer<TWaterBalloon>(16, false);
   sWaterBalloons[0] = balloons;
   for (int i = 0; i < balloons->capacity(); ++i) {
     TWaterBalloon *balloon = new TWaterBalloon("waterballoon");
@@ -56,3 +59,9 @@ static void createWaterBalloonAndThrow(TMario *player) {
   }
 }
 SME_PATCH_BL(SME_PORT_REGION(0x8024E2A0, 0, 0, 0), createWaterBalloonAndThrow);
+
+#else
+
+void initWaterBalloons() {}
+
+#endif

@@ -6,8 +6,6 @@
 #include "sms/enemy/EnemyMario.hxx"
 #include "sms/npc/BaseNPC.hxx"
 
-#include "libs/sContainer.hxx"
-
 #include "SME.hxx"
 
 using namespace SME;

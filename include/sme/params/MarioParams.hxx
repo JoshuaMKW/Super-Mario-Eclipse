@@ -8,8 +8,6 @@
 #include "JSU/JSUMemoryStream.hxx"
 #include "JUT/JUTColor.hxx"
 #include "funcs.hxx"
-#include "libs/sContainer.hxx"
-#include "obj/WaterBalloon.hxx"
 #include "sms/actor/Mario.hxx"
 #include "sms/camera/PolarSubCamera.hxx"
 
@@ -236,7 +234,7 @@ public:
   FluddHistory mFluddHistory;
   ParamHistory mDefaultAttrs;
   TMario::TDirtyParams mDefaultDirtyParams;
-  TRingBuffer<TWaterBalloon> mBalloons;
+  // TRingBuffer<TWaterBalloon> mBalloons;
 };
 
 } // namespace SME::Class

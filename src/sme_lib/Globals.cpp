@@ -70,6 +70,18 @@ Class::TPlayerData *TGlobals::getPlayerData(TMario *player) {
   return nullptr;
 }
 
+u8 TGlobals::getIDFromPlayer(TMario *player) {
+  TMario *p;
+  for (u32 i = 0; i < SME_MAX_PLAYERS; ++i) {
+    p = TGlobals::sPlayers[i];
+    if (!p)
+      continue;
+    else if (p == player)
+      return i;
+  }
+  return -1;
+}
+
 void TGlobals::setPlayerByIndex(u8 index, TMario *player) {
   SME_DEBUG_ASSERT(index < SME_MAX_PLAYERS, "Invalid player index provided");
   TGlobals::sPlayers[index] = player;

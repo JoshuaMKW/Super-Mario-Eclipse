@@ -21,6 +21,7 @@ struct TGlobals {
   static SME_NO_INLINE TMario *getPlayerByIndex(u8 index);
   static SME_NO_INLINE SME::Class::TPlayerData *getPlayerData(u8 id);
   static SME_NO_INLINE SME::Class::TPlayerData *getPlayerData(TMario *player);
+  static u8 getIDFromPlayer(TMario *player);
 
   static SME_NO_INLINE void setPlayerByIndex(u8 index, TMario *player);
 

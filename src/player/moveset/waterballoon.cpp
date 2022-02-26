@@ -7,6 +7,20 @@
 
 using namespace SME;
 
+TRingBuffer<TWaterBalloon> *sWaterBalloons[4] = {
+    nullptr, nullptr, nullptr, nullptr
+};
+
+void initWaterBalloons() {
+  TRingBuffer<TWaterBalloon> *balloons = new TRingBuffer<TWaterBalloon>(16, false);
+  sWaterBalloons[0] = balloons;
+  for (int i = 0; i < balloons->capacity(); ++i) {
+    TWaterBalloon *balloon = new TWaterBalloon("waterballoon");
+    balloon->initAndRegister("waterballoon");
+    balloons->push(balloon);
+  }
+}
+
 static void createWaterBalloonAndThrow(TMario *player) {
   gunExec__6TMarioFv(player);
 
@@ -17,9 +31,9 @@ static void createWaterBalloonAndThrow(TMario *player) {
     return;
 
   Class::TPlayerData *playerData = TGlobals::getPlayerData(player);
-  TRingBuffer<TWaterBalloon> &balloons = playerData->mBalloons;
+  TRingBuffer<TWaterBalloon> &balloons = *sWaterBalloons[0];
 
-  TWaterBalloon *waterBalloon = reinterpret_cast<TWaterBalloon *>(balloons.next());
+  TWaterBalloon *waterBalloon = sWaterBalloons[0]->next();
   waterBalloon->mPosition.set(player->mPosition);
   waterBalloon->appear();
 

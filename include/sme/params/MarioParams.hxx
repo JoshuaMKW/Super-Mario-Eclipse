@@ -10,6 +10,8 @@
 #include "funcs.hxx"
 #include "sms/actor/Mario.hxx"
 #include "sms/camera/PolarSubCamera.hxx"
+#include "obj/WaterBalloon.hxx"
+#include "libs/sContainer.hxx"
 
 #include "Player.hxx"
 
@@ -234,7 +236,7 @@ public:
   FluddHistory mFluddHistory;
   ParamHistory mDefaultAttrs;
   TMario::TDirtyParams mDefaultDirtyParams;
-  // TRingBuffer<TWaterBalloon> mBalloons;
+  TRingBuffer<TWaterBalloon> mBalloons;
 };
 
 } // namespace SME::Class

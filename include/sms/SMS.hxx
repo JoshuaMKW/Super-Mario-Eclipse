@@ -17,6 +17,7 @@
 #include "sms/game/GCConsole2.hxx"
 #include "sms/game/MarDirector.hxx"
 #include "sms/game/Strategy.hxx"
+#include "sms/game/Conductor.hxx"
 #include "sms/manager/FlagManager.hxx"
 #include "sms/manager/PollutionManager.hxx"
 #include "sms/manager/RumbleManager.hxx"
@@ -46,6 +47,7 @@ extern RumbleMgr *gpPad1RumbleMgr;
 extern RumbleMgr *gpPad2RumbleMgr;
 extern RumbleMgr *gpPad3RumbleMgr;
 extern RumbleMgr *gpPad4RumbleMgr;
+extern TConductor *gpConductor;
 extern TStrategy *gpStrategy;
 extern TMario *gpMarioOriginal;
 extern TMario *gpMarioAddress;

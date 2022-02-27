@@ -16,8 +16,7 @@
 TWaterEmitInfo *TWaterBalloon::sEmitInfo = nullptr;
 
 TWaterBalloon::TWaterBalloon(const char *name)
-    : TMapObjBall(name), mIsExplosive(false) {
-}
+    : TMapObjBall(name), mIsExplosive(false) {}
 
 void TWaterBalloon::init(TLiveManager *manager) {
   mLiveManager = manager;
@@ -95,14 +94,9 @@ void TWaterBalloon::touchWall(JGeometry::TVec3<f32> *pos,
   blast();
 }
 
-void TWaterBalloon::touchPollution()  {
-  blast();
-}
+void TWaterBalloon::touchPollution() { blast(); }
 
-
-void TWaterBalloon::touchWaterSurface() {
-  blast();
-}
+void TWaterBalloon::touchWaterSurface() { blast(); }
 
 void TWaterBalloon::touchWater(THitActor *actor) {
   TMapObjBall::touchWater(actor);
@@ -110,9 +104,7 @@ void TWaterBalloon::touchWater(THitActor *actor) {
 
 void TWaterBalloon::touchRoof(JGeometry::TVec3<f32> *pos) { blast(); }
 
-void TWaterBalloon::kicked() {
-  blast();
-}
+void TWaterBalloon::kicked() { blast(); }
 
 void TWaterBalloon::blast() {
   TWaterEmitInfo emitInfo = *sEmitInfo;
@@ -132,13 +124,16 @@ void TWaterBalloon::blast() {
   makeObjDead();
 }
 
-static hit_data waterBalloon_hit_data{
-    .mAttackRadius = 60.0f, .mAttackHeight = 60.0f, .mReceiveRadius = 60.0f, .mReceiveHeight = 60.0f};
+static hit_data waterBalloon_hit_data{.mAttackRadius = 60.0f,
+                                      .mAttackHeight = 60.0f,
+                                      .mReceiveRadius = 60.0f,
+                                      .mReceiveHeight = 60.0f};
 
 static obj_hit_info waterBalloon_collision_data{._00 = 1,
-                                         .mType = 0xDC000000,
-                                         ._08 = 0,
-                                         .mHitData = &waterBalloon_hit_data};
+                                                .mType = 0xDC000000,
+                                                ._08 = 0,
+                                                .mHitData =
+                                                    &waterBalloon_hit_data};
 
 static sound_data waterBalloon_sound_data{
     ._00 = 0xFFFFFFFF,
@@ -153,28 +148,29 @@ static sound_data waterBalloon_sound_data{
     ._24 = 0xFFFFFFFF,
 };
 
-static sound_info waterBalloon_sound_info{.mLength = 10,
-                                   .mSoundData = &waterBalloon_sound_data};
+static sound_info waterBalloon_sound_info{
+    .mLength = 10, .mSoundData = &waterBalloon_sound_data};
 
-static ObjPhysicalData waterBalloon_physical_data{.mGravity = 0.3f,
-                                           .mFloorBounceSpeed = 0.3f,
-                                           .mWallBounceSpeed = 0.1f,
-                                           ._0C = 0.1f,
-                                           .mFloorBrakeFactor = 0.9f,
-                                           ._14 = 0.97f,
-                                           .mAirBrakeFactor = 1.0f,
-                                           ._1C = {5.0f, 0.5f, 0.7f, 0.0f},
-                                           .mThrowDistance = 2.8f,
-                                           .mThrowHeight = 16.0f};
+static ObjPhysicalData waterBalloon_physical_data{
+    .mGravity = 0.3f,
+    .mFloorBounceSpeed = 0.3f,
+    .mWallBounceSpeed = 0.1f,
+    ._0C = 0.1f,
+    .mFloorBrakeFactor = 0.9f,
+    ._14 = 0.97f,
+    .mAirBrakeFactor = 1.0f,
+    ._1C = {5.0f, 0.5f, 0.7f, 0.0f},
+    .mThrowDistance = 2.8f,
+    .mThrowHeight = 16.0f};
 
 static ObjPhysicalInfo waterBalloon_physical_info{
     ._00 = 13, .mPhysicalData = &waterBalloon_physical_data, ._0C = 2};
 
 ObjData waterBalloonData{
     .mMdlName = "waterballoon",
-    .mObjectID = 0x80000FFF,
+    .mObjectID = 0x80000FFF/*0x80000FFF*/,
     .mLiveManagerName =
-        sLiveManagerName, // const_cast<char *>("木マネージャー")
+        gLiveManagerName, // const_cast<char *>("木マネージャー")
     .mObjKey = nullptr,   // const_cast<char *>("waterballoon"),
     ._10 = 0,
     .mObjCollisionData = &waterBalloon_collision_data,
@@ -185,5 +181,5 @@ ObjData waterBalloonData{
     ._28 = nullptr,
     .mBckMoveData = nullptr,
     ._30 = 50.0f,
-    .mUnkFlags = 0x02130100,
+    .mUnkFlags = 0x170100/*0x02130100*/,
     .mKeyCode = SME::Util::cexp_calcKeyCode("waterballoon")};

@@ -146,7 +146,7 @@ ObjData tornadoData{
     .mMdlName = "tornado",
     .mObjectID = 0x80000400,
     .mLiveManagerName =
-        sLiveManagerName, // const_cast<char *>("木マネージャー")
+        gLiveManagerName, // const_cast<char *>("木マネージャー")
     .mObjKey = nullptr,   // const_cast<char *>("waterballoon"),
     ._10 = 0,
     .mObjCollisionData = &tornado_collision_data,

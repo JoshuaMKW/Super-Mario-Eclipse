@@ -46,14 +46,12 @@ TPlayerData::TPlayerData(TMario *player, CPolarSubCamera *camera, bool isMario)
 
   mCanUseFludd = mParams->mCanUseFludd.get();
 
-  for (int i = 0; i < mBalloons.capacity(); ++i) {
-    TWaterBalloon *balloon = new TWaterBalloon("waterballoon");
-    // gpConductor->registerAloneActor(balloon);
-    balloon->initAndRegister("waterballoon");
-    mBalloons.push(balloon);
-  }
-
-  // initWaterBalloons();
+  // for (int i = 0; i < mBalloons.capacity(); ++i) {
+  //   TWaterBalloon *balloon = new TWaterBalloon("waterballoon");
+  //   // gpConductor->registerAloneActor(balloon);
+  //   balloon->initAndRegister("waterballoon");
+  //   mBalloons.push(balloon);
+  // }
 
   if (mParams->mPlayerHasGlasses.get() && player->mCap)
     reinterpret_cast<u16 *>(player->mCap)[2] |= 0b100;

@@ -75,11 +75,12 @@ struct ObjPhysicalData {
   f32 mGravity;
   f32 mFloorBounceSpeed;
   f32 mWallBounceSpeed;
-  f32 _0C;
+  f32 mRotationStopFactor; //?
   f32 mFloorBrakeFactor;
-  f32 _14;
+  f32 mRollBrakeFactor; //?
   f32 mAirBrakeFactor;
-  f32 _1C[0x10 / 4];
+  f32 mRollBrakeFactor2;
+  f32 _20[0xC / 4];
   f32 mThrowDistance;
   f32 mThrowHeight;
 };
@@ -95,7 +96,7 @@ struct ObjData {
   u32 mObjectID;
   const char *mLiveManagerName;
   const char *mObjKey;
-  u32 _10;
+  void *mAnimInfo;
   obj_hit_info *mObjCollisionData;
   obj_info *mMapCollisionInfo;
   sound_info *mSoundInfo;

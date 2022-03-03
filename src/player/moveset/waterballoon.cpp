@@ -2,28 +2,12 @@
 #include "Player.hxx"
 #include "libs/sContainer.hxx"
 
-
 #include "SME.hxx"
 #include "sms/actor/Mario.hxx"
-
 
 using namespace SME;
 
 #if SME_WATERBALLOONS
-static TRingBuffer<TWaterBalloon> *sWaterBalloons[4] = {nullptr, nullptr,
-                                                        nullptr, nullptr};
-
-void initWaterBalloons() {
-  TRingBuffer<TWaterBalloon> *balloons =
-      new TRingBuffer<TWaterBalloon>(16, false);
-  sWaterBalloons[0] = balloons;
-  for (int i = 0; i < balloons->capacity(); ++i) {
-    TWaterBalloon *balloon = new TWaterBalloon("waterballoon");
-    gpConductor->registerAloneActor(balloon);
-    //balloon->initAndRegister("waterballoon");
-    balloons->push(balloon);
-  }
-}
 
 static void createWaterBalloonAndThrow(TMario *player) {
   gunExec__6TMarioFv(player);
@@ -50,17 +34,35 @@ static void createWaterBalloonAndThrow(TMario *player) {
     return;
   }
 
-//   if (player->mState == static_cast<u32>(TMario::State::IDLE)) {
-//     changePlayerStatus__6TMarioFUlUlb(player, 0x80000588, 0, 1); // 0x80000387
-//   } else if (player->mState == static_cast<u32>(TMario::State::RUNNING)) {
-//     changePlayerStatus__6TMarioFUlUlb(player, 0x80000588, 0, 1);
-//   } else if (player->mState == static_cast<u32>(TMario::State::JUMP) ||
-//              player->mState == static_cast<u32>(TMario::State::D_JUMP) ||
-//              player->mState == static_cast<u32>(TMario::State::FALL)) {
-//     changePlayerStatus__6TMarioFUlUlb(player, 0x820008AB, 0, 1);
-//   }
+  //   if (player->mState == static_cast<u32>(TMario::State::IDLE)) {
+  //     changePlayerStatus__6TMarioFUlUlb(player, 0x80000588, 0, 1); //
+  //     0x80000387
+  //   } else if (player->mState == static_cast<u32>(TMario::State::RUNNING)) {
+  //     changePlayerStatus__6TMarioFUlUlb(player, 0x80000588, 0, 1);
+  //   } else if (player->mState == static_cast<u32>(TMario::State::JUMP) ||
+  //              player->mState == static_cast<u32>(TMario::State::D_JUMP) ||
+  //              player->mState == static_cast<u32>(TMario::State::FALL)) {
+  //     changePlayerStatus__6TMarioFUlUlb(player, 0x820008AB, 0, 1);
+  //   }
 }
 SME_PATCH_BL(SME_PORT_REGION(0x8024E2A0, 0, 0, 0), createWaterBalloonAndThrow);
+
+static void initConductor(TConductor *conductor) {
+  conductor->init();
+  for (int i = 0; i < TGlobals::getMaxPlayers(); ++i) {
+    Class::TPlayerData *pd = TGlobals::getPlayerData(i);
+    if (!pd)
+      continue;
+
+    for (int i = 0; i < pd->mBalloons.capacity(); ++i) {
+      TWaterBalloon *balloon = new TWaterBalloon("waterballoon");
+      // gpConductor->registerAloneActor(balloon);
+      balloon->initAndRegister("waterballoon");
+      pd->mBalloons.push(balloon);
+    }
+  }
+}
+SME_PATCH_BL(SME_PORT_REGION(0x802B8E0C, 0, 0, 0), initConductor);
 
 #else
 

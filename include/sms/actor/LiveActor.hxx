@@ -97,7 +97,7 @@ public:
       bool mHasPhysics : 1;
       u32 _05 : 1;
       bool mClipFromScene : 1;
-      u32 _06 : 2;
+      u32 _06 : 3;
       bool mIsObjDead : 1;
     } asFlags;
   } mStateFlags;

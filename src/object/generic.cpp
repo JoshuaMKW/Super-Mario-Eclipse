@@ -35,7 +35,8 @@ void makeExtendedObjDataTable() {
   sObjDataTableNew[OBJDataTableSize - 1] = &waterBalloonData;
   sObjDataTableNew[OBJDataTableSize] = &blowWindData;
   sObjDataTableNew[OBJDataTableSize + 1] = &tornadoData;
-  sObjDataTableNew[OBJDataTableSize + (OBJNewCount - 1)] = sObjDataTable[OBJDataTableSize - 1];
+  sObjDataTableNew[OBJDataTableSize + (OBJNewCount - 1)] =
+      sObjDataTable[OBJDataTableSize - 1];
   {
     u32 addr = reinterpret_cast<u32>(&sObjDataTableNew);
     u16 lo = addr;
@@ -47,13 +48,13 @@ void makeExtendedObjDataTable() {
   }
 }
 
-#define GENERATE_OBJ(klass, objname, name) \
-  if (strcmp(name, objname) == 0) {        \
-    return new klass(name);                \
+#define GENERATE_OBJ(klass, objname, name)                                     \
+  if (strcmp(name, objname) == 0) {                                            \
+    return new klass(name);                                                    \
   }
 
 static JDrama::TNameRef *makeExtendedMapObjFromRef(TMarNameRefGen *nameGen,
-                                            const char *name) {
+                                                   const char *name) {
   JDrama::TNameRef *obj = nameGen->getNameRef_MapObj(name);
   if (obj)
     return obj;
@@ -64,6 +65,49 @@ static JDrama::TNameRef *makeExtendedMapObjFromRef(TMarNameRefGen *nameGen,
 }
 SME_PATCH_BL(SME_PORT_REGION(0x8029E120, 0, 0, 0), makeExtendedMapObjFromRef);
 
-void objects_staticResetter() { }
+static THitActor **objectInteractionHandler() {
+  TMario *player;
+  int objIndex;
+  SME_FROM_GPR(31, player);
+  SME_FROM_GPR(29, objIndex);
+
+  THitActor *obj = player->mCollidingObjs[objIndex >> 2];
+  // keepDistance__6TMarioFRC9THitActorf(player, obj, 0.0f);
+
+  switch (obj->mObjectID) {
+  case 0x40000FFF:
+    TWaterBalloon *balloon = reinterpret_cast<TWaterBalloon *>(obj);
+    if (canTake__6TMarioFP9THitActor(player, balloon) && !balloon->mStateFlags.asFlags.mIsObjDead) {
+      player->mGrabTarget = balloon;
+      changePlayerStatus__6TMarioFUlUlb(player, 899, 0, 0);
+    }
+    break;
+  }
+  return player->mCollidingObjs;
+}
+SME_PATCH_BL(SME_PORT_REGION(0x80281510, 0, 0, 0), objectInteractionHandler);
+
+static THitActor *objGrabHandler() {
+    TMario *player;
+    SME_FROM_GPR(31, player);
+
+    THitActor *obj = player->mHeldObject;
+    if (!obj)
+        return obj;
+
+    switch(obj->mObjectID) {
+    case 0x40000FFF:
+        TWaterBalloon *balloon = reinterpret_cast<TWaterBalloon *>(obj);
+        if (balloon->mStateFlags.asU32 & 1)
+            player->mHeldObject = nullptr;
+        break;
+    }
+
+    return obj;
+}
+SME_PATCH_BL(SME_PORT_REGION(0x80262400, 0, 0, 0), objGrabHandler);
+SME_WRITE_32(SME_PORT_REGION(0x80262404, 0, 0, 0), 0x2C030000);
+
+void objects_staticResetter() {}
 
 #endif

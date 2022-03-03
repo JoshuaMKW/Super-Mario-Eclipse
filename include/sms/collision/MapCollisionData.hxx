@@ -21,8 +21,8 @@ public:
     f32 checkGroundList(f32 x, f32 y, f32 z, u8 ignoreFlags, const TBGCheckList *, const TBGCheckData **);
     f32 checkRoof(f32 x, f32 y, f32 z, u8, const TBGCheckData **) const;
     f32 checkRoofList(f32 x, f32 y, f32 z, u8, const TBGCheckList *, const TBGCheckData **);
-    void checkWallList(const TBGCheckList *, const void *); //TBGWallCheckRecord
-    void checkWalls(void *) const; //TBGWallCheckRecord
+    void checkWallList(const TBGCheckList *, const TBGWallCheckRecord *);
+    void checkWalls(TBGWallCheckRecord *) const;
     u16 getEntryID();
     bool getGridArea(const TBGCheckData *, int, int *, int *, int *, int *);
     void init(JSUMemoryInputStream &);

@@ -58,8 +58,8 @@ public:
   virtual void checkRoofCollision(JGeometry::TVec3<f32> *);
   virtual void touchRoof(JGeometry::TVec3<f32> *);
 
-  u32 _01; // 0x0138
-  u32 _02; // 0x013C
+  TBGCheckData *mWallTouching; // 0x0138
+  TBGCheckData *mRoofTouching; // 0x013C
   f32 _03; // 0x0140
   f32 _04; // 0x0144
 };

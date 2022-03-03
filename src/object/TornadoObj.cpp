@@ -131,11 +131,12 @@ static sound_info tornado_sound_info{.mLength = 10,
 static ObjPhysicalData tornado_physical_data{.mGravity = 0.0f,
                                              .mFloorBounceSpeed = 0.0f,
                                              .mWallBounceSpeed = 0.0f,
-                                             ._0C = 0.0f,
+                                             .mRotationStopFactor = 0.0f,
                                              .mFloorBrakeFactor = 0.0f,
-                                             ._14 = 0.0f,
+                                             .mRollBrakeFactor = 0.0f,
                                              .mAirBrakeFactor = 1.0f,
-                                             ._1C = {5.0f, 0.5f, 0.7f, 0.0f},
+                                             .mRollBrakeFactor2 = 5.0f,
+                                             ._20 = {0.5f, 0.7f, 0.0f},
                                              .mThrowDistance = 2.0f,
                                              .mThrowHeight = 15.0f};
 
@@ -148,7 +149,7 @@ ObjData tornadoData{
     .mLiveManagerName =
         gLiveManagerName, // const_cast<char *>("木マネージャー")
     .mObjKey = nullptr,   // const_cast<char *>("waterballoon"),
-    ._10 = 0,
+    .mAnimInfo = nullptr,
     .mObjCollisionData = &tornado_collision_data,
     .mMapCollisionInfo = nullptr,
     .mSoundInfo = &tornado_sound_info,

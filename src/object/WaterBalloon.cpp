@@ -17,6 +17,7 @@
 #include "obj/WaterBalloon.hxx"
 
 TWaterEmitInfo *TWaterBalloon::sEmitInfo = nullptr;
+constexpr f32 MaxSpeed = 30.0f;
 
 TWaterBalloon::TWaterBalloon(const char *name)
     : TMapObjBall(name), mIsPopped(false) {}
@@ -60,7 +61,15 @@ bool TWaterBalloon::receiveMessage(THitActor *actor, u32 message) {
   return TMapObjBall::receiveMessage(actor, message);
 }
 
-void TWaterBalloon::control() { TMapObjBall::control(); }
+void TWaterBalloon::control() {
+  TMapObjBall::control();
+  if (mForwardSpeed > MaxSpeed) {
+    JGeometry::TVec3<f32> dir;
+    getReflectionDir(*mFloorBelow->getNormal(), dir);
+
+    blast(dir);
+  }
+}
 
 void TWaterBalloon::kill() { TMapObjBall::kill(); }
 
@@ -87,10 +96,10 @@ void TWaterBalloon::touchActor(THitActor *actor) {
   if (player->mState == 0x820008AB)
     return; // Throwing
 
-  if (mForwardSpeed >= 20.0f || mSpeed.y < -10.0f) {
+  if (mForwardSpeed >= MaxSpeed) {
     blast({0.0f, 1.0f, 0.0f});
     return;
-  } else if (PSVECMag(reinterpret_cast<Vec *>(&player->mSpeed)) >= 30.0f) {
+  } else if (PSVECMag(reinterpret_cast<Vec *>(&player->mSpeed)) >= MaxSpeed) {
     blast({0.0f, 1.0f, 0.0f});
     return;
   }
@@ -118,7 +127,7 @@ void TWaterBalloon::touchGround(JGeometry::TVec3<f32> *pos) {
     return;
   }
 
-  if (!(mForwardSpeed >= 30.0f || mSpeed.y < -10.0f)) {
+  if (!(mForwardSpeed >= MaxSpeed || mSpeed.y < -10.0f)) {
     TMapObjBall::touchGround(pos);
     return;
   }
@@ -152,7 +161,7 @@ void TWaterBalloon::touchWaterSurface() {
 }
 
 void TWaterBalloon::touchWater(THitActor *actor) {
-  TMapObjBase::touchWater(actor);
+  TMapObjBall::touchWater(actor);
 }
 
 void TWaterBalloon::touchRoof(JGeometry::TVec3<f32> *pos) {

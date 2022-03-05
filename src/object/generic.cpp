@@ -77,7 +77,7 @@ static THitActor **objectInteractionHandler() {
   switch (obj->mObjectID) {
   case 0x40000FFF:
     TWaterBalloon *balloon = reinterpret_cast<TWaterBalloon *>(obj);
-    if (canTake__6TMarioFP9THitActor(player, balloon) && !balloon->mStateFlags.asFlags.mIsObjDead) {
+    if (canTake__6TMarioFP9THitActor(player, balloon) && !(balloon->mStateFlags.asU32 & 1)) {
       player->mGrabTarget = balloon;
       changePlayerStatus__6TMarioFUlUlb(player, 899, 0, 0);
     }

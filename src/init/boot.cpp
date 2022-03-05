@@ -1,5 +1,6 @@
-#include "SME.hxx"
 #include "OS.h"
+#include "SME.hxx"
+
 
 #include "Kernel.hxx"
 #include "macros.h"
@@ -27,18 +28,30 @@ using namespace SME;
 
 extern void makeExtendedObjDataTable();
 
-
 Memory::Protection::MemoryMap gCodeProtector;
 
 static void initCodeProtection() {
-  #if SME_PROTECT_MEM
+#if SME_PROTECT_MEM
   gCodeProtector.setIndex(2);
   gCodeProtector.setStart(0x80003800);
   gCodeProtector.setEnd(0x80373000);
   gCodeProtector.setPermission(Memory::Protection::READ);
   gCodeProtector.activate();
-  #endif
+#endif
 }
+
+#if SME_VARIABLE_FPS
+static OSAlarm sFPSAlarm;
+
+static void initVariableFPS() {
+  extern void updateFPSAsync(OSAlarm *, OSContext *);
+  OSCreateAlarm(&sFPSAlarm);
+  OSSetPeriodicAlarm(&sFPSAlarm, OSGetTime(), OSMillisecondsToTicks(1),
+                     &updateFPSAsync);
+}
+#else
+static void initVariableFPS() {}
+#endif
 
 static void initMod() {
   SME_DEBUG_LOG(
@@ -51,18 +64,20 @@ static void initMod() {
   OSSetPeriodicAlarm(
       &gctAlarm, OSGetTime(), OSMillisecondsToTicks(1),
       reinterpret_cast<OSAlarmHandler>(&SME::Util::Security::checkUserCodes));
-  SME_DEBUG_LOG("Registered checkUserCodes at 0x%X\n", &SME::Util::Security::checkUserCodes);
+  SME_DEBUG_LOG("Registered checkUserCodes at 0x%X\n",
+                &SME::Util::Security::checkUserCodes);
 
   makeExtendedObjDataTable();
   initCodeProtection();
+  initVariableFPS();
 }
 
 static void destroyMod() {
   SME_DEBUG_LOG("-- Destroying Module --\n");
-// #if defined(SME_DEBUG) && !defined(SME_RELEASE)
-//   OSStopStopwatch(&gctStopwatch);
-// #endif
-//   OSCancelAlarm(&gctAlarm);
+  // #if defined(SME_DEBUG) && !defined(SME_RELEASE)
+  //   OSStopStopwatch(&gctStopwatch);
+  // #endif
+  //   OSCancelAlarm(&gctAlarm);
 }
 
 #if defined(SME_BUILD_KURIBO) && !defined(SME_BUILD_KAMEK) &&                  \

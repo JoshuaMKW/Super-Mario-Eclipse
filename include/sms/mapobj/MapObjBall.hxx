@@ -45,8 +45,7 @@ public:
   f32 _170;
   f32 _174;
   f32 mKickedVSpeed;
-  f32 _178;
-  f32 _17C;
+  f32 mSprayPushSpeed;
   f32 _180;
   f32 _184;
   f32 _188;

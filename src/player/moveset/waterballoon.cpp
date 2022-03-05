@@ -12,6 +12,12 @@ using namespace SME;
 static void createWaterBalloonAndThrow(TMario *player) {
   gunExec__6TMarioFv(player);
 
+  if (gpMarDirector->mCurState != 4)
+    return;
+
+  if (player->mState == 0x200009 || player->mState == static_cast<u32>(TMario::State::SHINE_C))
+    return;
+
   if (player->mHeldObject || player->mAttributes.mHasFludd)
     return;
 
@@ -58,6 +64,8 @@ static void initConductor(TConductor *conductor) {
       TWaterBalloon *balloon = new TWaterBalloon("waterballoon");
       // gpConductor->registerAloneActor(balloon);
       balloon->initAndRegister("waterballoon");
+      balloon->mSprayPushSpeed = 0.1f;
+      balloon->mAdditionalHeldHeight = 24.0f;
       pd->mBalloons.push(balloon);
     }
   }

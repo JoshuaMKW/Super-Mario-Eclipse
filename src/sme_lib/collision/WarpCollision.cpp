@@ -21,8 +21,11 @@ static f32 GetSqrDistBetweenColTriangles(TBGCheckData *a, TBGCheckData *b) {
   TVectorTriangle triA(a->mVertexA, a->mVertexB, a->mVertexC);
   TVectorTriangle triB(b->mVertexA, b->mVertexB, b->mVertexC);
 
-  JGeometry::TVec3<f32> thisCenter = triA.center();
-  JGeometry::TVec3<f32> targetCenter = triB.center();
+  JGeometry::TVec3<f32> thisCenter;
+  JGeometry::TVec3<f32> targetCenter;
+  
+  triA.center(thisCenter);
+  triB.center(targetCenter);
 
   return PSVECSquareDistance(reinterpret_cast<Vec *>(&thisCenter),
                              reinterpret_cast<Vec *>(&targetCenter));
@@ -272,8 +275,11 @@ TBGCheckData *TWarpCollisionList::getNearestTarget(TBGCheckData *colTriangle) {
       targetVector.b = mColList[matchedIndices[i]].mColTriangle->mVertexB;
       targetVector.c = mColList[matchedIndices[i]].mColTriangle->mVertexC;
 
-      JGeometry::TVec3<f32> thisCenter = colVector.center();
-      JGeometry::TVec3<f32> targetCenter = targetVector.center();
+    JGeometry::TVec3<f32> thisCenter;
+    JGeometry::TVec3<f32> targetCenter;
+    
+    colVector.center(thisCenter);
+    targetVector.center(targetCenter);
 
       f32 sqrDist = PSVECSquareDistance(reinterpret_cast<Vec *>(&thisCenter),
                                         reinterpret_cast<Vec *>(&targetCenter));
@@ -308,8 +314,11 @@ TBGCheckData *TWarpCollisionList::getNearestTarget(TBGCheckData *colTriangle) {
       targetVector.b = mColList[matchedIndices[i]].mColTriangle->mVertexB;
       targetVector.c = mColList[matchedIndices[i]].mColTriangle->mVertexC;
 
-      JGeometry::TVec3<f32> thisCenter = colVector.center();
-      JGeometry::TVec3<f32> targetCenter = targetVector.center();
+      JGeometry::TVec3<f32> thisCenter;
+      JGeometry::TVec3<f32> targetCenter;
+      
+      colVector.center(thisCenter);
+      targetVector.center(targetCenter);
 
       f32 sqrDist = PSVECSquareDistance(reinterpret_cast<Vec *>(&thisCenter),
                                         reinterpret_cast<Vec *>(&targetCenter));

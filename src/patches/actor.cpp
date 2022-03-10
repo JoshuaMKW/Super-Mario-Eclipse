@@ -4,9 +4,7 @@
 
 #if defined(SME_BUGFIXES) || defined(SME_CRASHFIXES)
 
-// extern -> SME.cpp
-// 0x802320E0
-SME_PURE_ASM void shadowCrashPatch() {
+static SME_PURE_ASM void shadowCrashPatch() {
   asm volatile("cmpwi       4, 0            \n\t"
                "li          0, 0            \n\t"
                "beqlr-                      \n\t"
@@ -15,7 +13,7 @@ SME_PURE_ASM void shadowCrashPatch() {
 }
 SME_PATCH_BL(SME_PORT_REGION(0x802320E0, 0X8022A034, 0, 0), shadowCrashPatch);
 
-u32 clampRotation(TLiveActor *actor) {
+static u32 clampRotation(TLiveActor *actor) {
   JGeometry::TVec3<f32> &rot = actor->mRotation;
 
   auto clampPreserve = [](f32 rotation) {

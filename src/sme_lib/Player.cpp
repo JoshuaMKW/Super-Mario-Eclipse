@@ -252,7 +252,7 @@ void Util::Mario::warpToCollisionFace(TMario *player, TBGCheckData *colTriangle,
     player->JSGGetTranslation(reinterpret_cast<Vec *>(&playerPos));
     gpCamera->JSGGetViewPosition(reinterpret_cast<Vec *>(&cameraPos));
 
-    playerPos.set(vectorTri.center());
+    vectorTri.center(playerPos);
 
     player->mFloorTriangle = colTriangle;
     player->mFloorTriangleWater = colTriangle;
@@ -279,7 +279,7 @@ void Util::Mario::warpToCollisionFace(TMario *player, TBGCheckData *colTriangle,
     player->mFloorTriangleWater = colTriangle;
     playerData->mCollisionFlags.mIsFaceUsed = true;
 
-    playerPos.set(vectorTri.center());
+    vectorTri.center(playerPos);
 
     {
       f32 x = lerp<f32>(cameraPos.x, playerPos.x, 0.9375f);
@@ -311,9 +311,11 @@ void Util::Mario::warpToCollisionFace(TMario *player, TBGCheckData *colTriangle,
 }
 
 void Util::Mario::rotatePlayerRelativeToCamera(TMario *player,
-                                              CPolarSubCamera *camera, Vec2 dir,
-                                              f32 lerp) {
-  player->mAngle.y =
-      Math::lerp<f32>(player->mAngle.y, camera->mHorizontalAngle +
-      s16(Util::Math::radiansToAngle(atan2f(dir.x, -dir.y)) * 182), lerp);
+                                               CPolarSubCamera *camera,
+                                               Vec2 dir, f32 lerp) {
+  player->mAngle.y = Math::lerp<f32>(
+      player->mAngle.y,
+      camera->mHorizontalAngle +
+          s16(Util::Math::radiansToAngle(atan2f(dir.x, -dir.y)) * 182),
+      lerp);
 }

@@ -3,14 +3,12 @@
 #include "types.h"
 
 constexpr size_t OBJDataTableSize = 360;
-const char sLiveManagerName[]{0x96, 0xD8, 0x83, 0x7D, 0x83, 0x6C, 0x81, 0x5B,
+const char gLiveManagerName[]{0x96, 0xD8, 0x83, 0x7D, 0x83, 0x6C, 0x81, 0x5B,
                               0x83, 0x57, 0x83, 0x83, 0x81, 0x5B, 0x00, 0x00};
+const char gUnkManagerName[]{0x93, 0x47, 0x83, 0x4F, 0x83, 0x8B,
+                             0x81, 0x5B, 0x83, 0x76, 0x00, 0x00};
 
-enum MapColType {
-  MAP_STATIC,
-  MAP_MOVE,
-  MAP_WARP
-};
+enum MapColType { MAP_STATIC, MAP_MOVE, MAP_WARP };
 
 struct obj_info {
   u16 _00;
@@ -77,11 +75,12 @@ struct ObjPhysicalData {
   f32 mGravity;
   f32 mFloorBounceSpeed;
   f32 mWallBounceSpeed;
-  f32 _0C;
+  f32 mRotationStopFactor; //?
   f32 mFloorBrakeFactor;
-  f32 _14;
+  f32 mRollBrakeFactor; //?
   f32 mAirBrakeFactor;
-  f32 _1C[0x10 / 4];
+  f32 mRollBrakeFactor2;
+  f32 _20[0xC / 4];
   f32 mThrowDistance;
   f32 mThrowHeight;
 };
@@ -97,7 +96,7 @@ struct ObjData {
   u32 mObjectID;
   const char *mLiveManagerName;
   const char *mObjKey;
-  u32 _10;
+  void *mAnimInfo;
   obj_hit_info *mObjCollisionData;
   obj_info *mMapCollisionInfo;
   sound_info *mSoundInfo;

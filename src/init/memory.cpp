@@ -144,7 +144,7 @@ static TMarDirector *initFileMods() {
 
   TMarioGamePad *gpGamePad = gpApplication.mGamePad1;
 
-#if defined(SME_DEMO)
+#if SME_DEMO
   Enum::Player characterID = TGlobals::sCharacterIDList[0];
   if (gIsSwappingWarp) {
     if (isMario) {
@@ -155,7 +155,7 @@ static TMarDirector *initFileMods() {
     isMario = !isMario;
     gIsSwappingWarp = false;
   }
-#elif defined(SME_DEBUG)
+#elif SME_DEBUG
   Enum::Player characterID =
       Util::Mario::getPlayerIDFromInput(gpGamePad->mButtons.mInput);
 #else
@@ -165,7 +165,7 @@ static TMarDirector *initFileMods() {
   resetGlobalValues();
   objects_staticResetter();
   patches_staticResetter();
-  
+
   SME_DEBUG_LOG("Clearing player params...\n");
   TGlobals::clearAllPlayerParams();
 

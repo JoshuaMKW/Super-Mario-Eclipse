@@ -73,6 +73,6 @@ static void normalizeHoverSlopeSpeed(f32 floorPos) {
                                                         lookAtRatio, 1.0f),
                               0.0f, 1.0f));
 }
-SME_PATCH_BL(SME_PORT_REGION(0x802568F0, 0x8024E67C, 0, 0), normalizeHoverSlopeSpeed);
+// SME_PATCH_BL(SME_PORT_REGION(0x802568F0, 0x8024E67C, 0, 0), normalizeHoverSlopeSpeed);
 
 #endif

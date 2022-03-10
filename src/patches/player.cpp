@@ -14,6 +14,8 @@
 
 #if SME_BUGFIXES
 
+using namespace SME::Util::Math;
+
 static u32 patchYStorage() {
   TMario *player;
   SME_FROM_GPR(31, player);
@@ -34,5 +36,22 @@ static void patchRideMovementUpWarp(Mtx out, Vec *ride, Vec *pos) {
   }
 }
 // SME_PATCH_BL(SME_PORT_REGION(0x80250514, 0, 0, 0), patchRideMovementUpWarp);
+
+static void patchRoofCollisionSpeed(TMario *player, f32 _speed) {
+  TBGCheckData *roof = player->mRoofTriangle;
+  if (!roof) {
+    setPlayerVelocity__6TMarioFf(player, _speed);
+    return;
+  }
+
+  JGeometry::TVec3<f32> down(0.0f, -1.0f, 0.0f);
+
+  JGeometry::TVec3<f32> nroofvec;
+  Vector3::normalized(*roof->getNormal(), nroofvec);
+
+  const f32 ratio = Vector3::angleBetween(nroofvec, down);
+  setPlayerVelocity__6TMarioFf(player, lerp(_speed, player->mForwardSpeed, ratio));
+}
+SME_PATCH_BL(SME_PORT_REGION(0x802569bc, 0, 0, 0), patchRoofCollisionSpeed);
 
 #endif

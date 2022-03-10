@@ -5,7 +5,6 @@
 #include "sms/nozzle/Watergun.hxx"
 #include "types.h"
 
-
 class TWaterBalloon : public TMapObjBall {
 public:
   TWaterBalloon(const char *name);
@@ -33,10 +32,15 @@ public:
   virtual void kicked() override;
 
   void initActorData();
-  void blast();
+  void blast(JGeometry::TVec3<f32> blastSpd);
 
-  bool mIsExplosive;
+  bool mIsPopped;
+  f32 mForwardSpeed;
+
   static TWaterEmitInfo *sEmitInfo;
+
+private:
+  void getReflectionDir(const JGeometry::TVec3<f32> &, JGeometry::TVec3<f32> &) const;
 };
 
 extern ObjData waterBalloonData;

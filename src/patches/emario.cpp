@@ -29,8 +29,6 @@ static JUtility::TColor getEMarioHealthBarRGBA(TEnemyMario *eMario) {
   return color;
 }
 
-// extern -> SME.cpp
-// 0x8003FDAC
 static void manageEMarioHealthWrapper(TEnemyMario *eMario, Mtx *posMtx) {
   *(JUtility::TColor *)0x8040FA90 = getEMarioHealthBarRGBA(eMario);
   drawHPMeter__11TEnemyMarioFPA4_f(eMario, posMtx);
@@ -39,3 +37,7 @@ SME_WRITE_32(SME_PORT_REGION(0x8003FD94, 0x8003FBE4, 0, 0), 0x60000000);
 SME_PATCH_BL(SME_PORT_REGION(0x8003FDAC, 0x8003FBFC, 0, 0), manageEMarioHealthWrapper);
 
 #endif
+
+// Upsize Shadow Mario's hitbox to be the same as Mario
+SME_WRITE_32(SME_PORT_REGION(0x8040FAA4, 0, 0, 0), 0x42A00000);
+SME_WRITE_32(SME_PORT_REGION(0x8040FAA8, 0, 0, 0), 0x42480000);

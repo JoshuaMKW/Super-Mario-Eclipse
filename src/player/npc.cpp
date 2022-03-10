@@ -76,58 +76,58 @@ SME_PATCH_BL(SME_PORT_REGION(0x80207430, 0x801FF314, 0, 0), canCarryNPC);
 SME_WRITE_32(SME_PORT_REGION(0x80207434, 0x801FF318, 0, 0), 0x2C030000);
 
 
-// extern -> SME.cpp
-// 0x802145F0
-static TMario *scaleNPCThrowLength(TMario *player, float *params) {
-  f32 _f11;
-  SME_FROM_FPR(11, _f11);
+// // extern -> SME.cpp
+// // 0x802145F0
+// static TMario *scaleNPCThrowLength(TMario *player, float *params) {
+//   f32 _f11;
+//   SME_FROM_FPR(11, _f11);
 
-  _f11 = params[0x1D0 / 4];
-  Class::TPlayerData *playerData = TGlobals::getPlayerData(player);
+//   _f11 = params[0x1D0 / 4];
+//   Class::TPlayerData *playerData = TGlobals::getPlayerData(player);
 
-  if (playerData->isMario())
-    _f11 *= playerData->getParams()->mThrowPowerMultiplier.get() *
-            Util::Math::scaleLinearAtAnchor<f32>(
-                playerData->getParams()->mSizeMultiplier.get(), 0.5f, 1.0f);
+//   if (playerData->isMario())
+//     _f11 *= playerData->getParams()->mThrowPowerMultiplier.get() *
+//             Util::Math::scaleLinearAtAnchor<f32>(
+//                 playerData->getParams()->mSizeMultiplier.get(), 0.5f, 1.0f);
 
-  if (player->mState == static_cast<u32>(TMario::State::NPC_THROW) ||
-      player->mState == static_cast<u32>(TMario::State::NPC_JUMPTHROW)) {
-    _f11 *= 4.0f;
-  }
+//   if (player->mState == static_cast<u32>(TMario::State::NPC_THROW) ||
+//       player->mState == static_cast<u32>(TMario::State::NPC_JUMPTHROW)) {
+//     _f11 *= 4.0f;
+//   }
 
-  SME_TO_FPR(11, _f11);
-  return player;
-}
-SME_PATCH_BL(SME_PORT_REGION(0x802145F0, 0x8020C4D4, 0, 0), scaleNPCThrowLength);
-SME_WRITE_32(SME_PORT_REGION(0x802145F4, 0x8020C4D8, 0, 0), 0xC002E5E0);
-SME_WRITE_32(SME_PORT_REGION(0x802145F8, 0x8020C4DC, 0, 0), 0xC0230034);
+//   SME_TO_FPR(11, _f11);
+//   return player;
+// }
+// SME_PATCH_BL(SME_PORT_REGION(0x802145F0, 0x8020C4D4, 0, 0), scaleNPCThrowLength);
+// SME_WRITE_32(SME_PORT_REGION(0x802145F4, 0x8020C4D8, 0, 0), 0xC002E5E0);
+// SME_WRITE_32(SME_PORT_REGION(0x802145F8, 0x8020C4DC, 0, 0), 0xC0230034);
 
-// extern -> SME.cpp
-// 0x8021463C
-static u32 scaleNPCThrowHeight(u32 _r3, f32 z, f32 y) {
-  TBaseNPC *npc;
-  SME_FROM_GPR(31, npc);
+// // extern -> SME.cpp
+// // 0x8021463C
+// static u32 scaleNPCThrowHeight(u32 _r3, f32 z, f32 y) {
+//   TBaseNPC *npc;
+//   SME_FROM_GPR(31, npc);
 
-  TMario *player = (TMario *)npc->mPrevHolder;
-  Class::TPlayerData *playerData = TGlobals::getPlayerData(player);
+//   TMario *player = (TMario *)npc->mPrevHolder;
+//   Class::TPlayerData *playerData = TGlobals::getPlayerData(player);
 
-  if (playerData->isMario())
-    y *= playerData->getParams()->mThrowPowerMultiplier.get() *
-         Util::Math::scaleLinearAtAnchor<f32>(
-             playerData->getParams()->mSizeMultiplier.get(), 0.5f, 1.0f);
+//   if (playerData->isMario())
+//     y *= playerData->getParams()->mThrowPowerMultiplier.get() *
+//          Util::Math::scaleLinearAtAnchor<f32>(
+//              playerData->getParams()->mSizeMultiplier.get(), 0.5f, 1.0f);
 
-  if (player->mState == static_cast<u32>(TMario::State::NPC_THROW) ||
-      player->mState == static_cast<u32>(TMario::State::NPC_JUMPTHROW))
-    y *= 4.0f;
+//   if (player->mState == static_cast<u32>(TMario::State::NPC_THROW) ||
+//       player->mState == static_cast<u32>(TMario::State::NPC_JUMPTHROW))
+//     y *= 4.0f;
 
-  npc->mSpeed.y = y;
-  npc->mSpeed.z = z;
+//   npc->mSpeed.y = y;
+//   npc->mSpeed.z = z;
 
-  return _r3;
-}
-SME_WRITE_32(SME_PORT_REGION(0x8021462C, 0x8020C510, 0, 0), 0xEC0B0032);
-SME_WRITE_32(SME_PORT_REGION(0x80214634, 0x8020C518, 0, 0), 0xEC2B0072);
-SME_PATCH_BL(SME_PORT_REGION(0x8021463C, 0x8020C520, 0, 0), scaleNPCThrowHeight);
+//   return _r3;
+// }
+// SME_WRITE_32(SME_PORT_REGION(0x8021462C, 0x8020C510, 0, 0), 0xEC0B0032);
+// SME_WRITE_32(SME_PORT_REGION(0x80214634, 0x8020C518, 0, 0), 0xEC2B0072);
+// SME_PATCH_BL(SME_PORT_REGION(0x8021463C, 0x8020C520, 0, 0), scaleNPCThrowHeight);
 
 #endif
 

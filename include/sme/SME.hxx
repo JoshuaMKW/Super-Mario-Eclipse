@@ -106,7 +106,7 @@
 #endif
 
 #ifndef SME_DEMO
-#define SME_DEMO 1
+#define SME_DEMO 0
 #endif
 
 #ifndef SME_MIRROR_SUNSHINE

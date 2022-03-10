@@ -54,9 +54,9 @@ ObjData blowWindData{
     .mMdlName = "blowwind",
     .mObjectID = 0x40000421,
     .mLiveManagerName =
-        sLiveManagerName, // const_cast<char *>("木マネージャー")
+        gLiveManagerName, // const_cast<char *>("木マネージャー")
     .mObjKey = nullptr,   // const_cast<char *>("blowwind"),
-    ._10 = 0,
+    .mAnimInfo = nullptr,
     .mObjCollisionData = nullptr,
     .mMapCollisionInfo = nullptr,
     .mSoundInfo = nullptr,

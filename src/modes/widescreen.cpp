@@ -189,8 +189,8 @@ static void scalePauseMenuMask(J2DScreen *screen, int x, int y,
   SME_FROM_GPR(31, tPauseMenu);
 
   J2DPane *pane = reinterpret_cast<J2DPane *>(tPauseMenu[0x18 / 4]);
-  pane->mRect.mX1 -= getScreenTransX();
-  pane->mRect.mX2 += getScreenTransX();
+  pane->mRect.mX1 = -getScreenTransX();
+  pane->mRect.mX2 = 600 + getScreenTransX();
 
   screen->draw(x, y, context);
 }

@@ -21,7 +21,7 @@ TPlayerData::TPlayerData(TMario *player, CPolarSubCamera *camera, bool isMario)
       mPlayerID(SME::Enum::Player::MARIO), mCurJump(0), mIsLongJumping(false), mIsClimbTired(false),
       mPrevCollisionType(0), mCollisionTimer(0), mClimbTiredTimer(0),
       mSlideSpeedMultiplier(1.0f), mMaxAddVelocity(150.0f), mYoshiWaterSpeed(0.0f, 0.0f, 0.0f),
-      mDefaultAttrs(player) {
+      mDefaultAttrs(player), mBalloons(50, false) {
 
   mParams = new TPlayerParams();
 
@@ -48,11 +48,10 @@ TPlayerData::TPlayerData(TMario *player, CPolarSubCamera *camera, bool isMario)
 
   // for (int i = 0; i < mBalloons.capacity(); ++i) {
   //   TWaterBalloon *balloon = new TWaterBalloon("waterballoon");
+  //   // gpConductor->registerAloneActor(balloon);
   //   balloon->initAndRegister("waterballoon");
   //   mBalloons.push(balloon);
   // }
-
-  initWaterBalloons();
 
   if (mParams->mPlayerHasGlasses.get() && player->mCap)
     reinterpret_cast<u16 *>(player->mCap)[2] |= 0b100;

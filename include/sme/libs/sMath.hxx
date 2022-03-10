@@ -2,8 +2,8 @@
 
 #pragma once
 
-#include "macros.h"
 #include "JGeometry.hxx"
+#include "macros.h"
 #include "types.h"
 
 namespace SME::Util::Math {
@@ -44,115 +44,28 @@ extern f64 sigmoidCurve(f64 x, f64 f, f64 r, f64 c, f64 b);
 
 namespace Vector3 {
 
-inline f32 magnitude(const JGeometry::TVec3<f32> &vec) {
-#if defined(SME_USE_PS_MATH)
-  return PSVECMag(reinterpret_cast<const Vec *>(&vec));
-#else
-  return sqrtf(vec.x * vec.x + vec.y * vec.y + vec.z * vec.z);
-#endif
-}
+f32 magnitude(const JGeometry::TVec3<f32> &vec);
+f32 magnitude(const Vec &vec);
 
-inline f32 magnitude(const Vec &vec) {
-#if defined(SME_USE_PS_MATH)
-  return PSVECMag(&vec);
-#else
-  return sqrtf(vec.x * vec.x + vec.y * vec.y + vec.z * vec.z);
-#endif
-}
+f32 getNormalAngle(const JGeometry::TVec3<f32> &vec);
+f32 getNormalAngle(const Vec &vec);
 
-inline f32 getNormalAngle(const JGeometry::TVec3<f32> &vec) {
-  return Math::radiansToAngle(atan2f(vec.x, vec.z));
-}
+void normalized(const JGeometry::TVec3<f32> &vec, JGeometry::TVec3<f32> &out);
+void normalized(const Vec &vec, Vec &out);
 
-inline f32 getNormalAngle(const Vec &vec) {
-  return Math::radiansToAngle(atan2f(vec.x, vec.z));
-}
+f32 dot(const JGeometry::TVec3<f32> &a, const JGeometry::TVec3<f32> &b);
+f32 dot(const Vec &a, const Vec &b);
 
-inline JGeometry::TVec3<f32> normalized(const JGeometry::TVec3<f32> &vec) {
-#if defined(SME_USE_PS_MATH)
-  JGeometry::TVec3<f32> out;
-  PSVECNormalize(reinterpret_cast<Vec *>(&out),
-                 reinterpret_cast<const Vec *>(&vec));
-  return out;
-#else
-  const f32 mag = magnitude(vec);
-  return JGeometry::TVec3<f32>(vec.x / mag, vec.y / mag, vec.z / mag);
-#endif
-}
+void cross(const JGeometry::TVec3<f32> &a, const JGeometry::TVec3<f32> &b,
+           JGeometry::TVec3<f32> &out);
+void cross(const Vec &a, const Vec &b, Vec &out);
 
-inline Vec normalized(const Vec &vec) {
-#if defined(SME_USE_PS_MATH)
-  JGeometry::TVec3<T> out;
-  PSVECNormalize(reinterpret_cast<Vec *>(&out),
-                 reinterpret_cast<const Vec *>(&vec));
-  return out;
-#else
-  const f32 mag = magnitude(vec);
-  return Vec{vec.x / mag, vec.y / mag, vec.z / mag};
-#endif
-}
+f32 lookAtRatio(const JGeometry::TVec3<f32> &a, const JGeometry::TVec3<f32> &b);
+f32 lookAtRatio(const Vec &a, const Vec &b);
 
-inline f32 dot(const JGeometry::TVec3<f32> &a, const JGeometry::TVec3<f32> &b) {
-#if defined(SME_USE_PS_MATH)
-  return PSVECCrossProduct(reinterpret_cast<const Vec *>(&a),
-                           reinterpret_cast<const Vec *>(&b));
-#else
-  return a.x * b.x + a.y * b.y + a.z * b.z;
-#endif
-}
-
-inline f32 dot(const Vec &a, const Vec &b) {
-#if defined(SME_USE_PS_MATH)
-  return PSVECDotProduct(&a, &b);
-#else
-  return a.x * b.x + a.y * b.y + a.z * b.z;
-#endif
-}
-
-inline JGeometry::TVec3<f32> cross(const JGeometry::TVec3<f32> &a,
-                                   const JGeometry::TVec3<f32> &b) {
-#if defined(SME_USE_PS_MATH)
-  Vec ret;
-  PSVECCrossProduct(reinterpret_cast<const Vec *>(&a),
-                    reinterpret_cast<const Vec *>(&b), &ret);
-  return ret;
-#else
-  return JGeometry::TVec3<f32>(a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z,
-                               a.x * b.y - a.y * b.x);
-#endif
-}
-
-inline Vec cross(const Vec &a, const Vec &b) {
-#if defined(SME_USE_PS_MATH)
-  Vec ret;
-  PSVECCrossProduct(&a, &b, &ret);
-  return ret;
-#else
-  return Vec{a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z,
-             a.x * b.y - a.y * b.x};
-#endif
-}
-
-inline f32 lookAtRatio(const JGeometry::TVec3<f32> &a,
-                       const JGeometry::TVec3<f32> &b) {
-  f32 angle = atan2f(b.z, -b.x) - atan2f(a.z, a.x);
-  if (angle > M_PI) {
-    angle -= 2 * M_PI;
-  } else if (angle <= -M_PI) {
-    angle += 2 * M_PI;
-  }
-  return fabsf(angle) / M_PI;
-}
-
-inline f32 lookAtRatio(const Vec &a, const Vec &b) {
-  f32 angle = atan2f(b.z, -b.x) - atan2f(a.z, a.x);
-  if (angle > M_PI) {
-    angle -= 2 * M_PI;
-  } else if (angle <= -M_PI) {
-    angle += 2 * M_PI;
-  }
-  return fabsf(angle) / M_PI;
-}
+f32 angleBetween(const JGeometry::TVec3<f32> &a,
+                 const JGeometry::TVec3<f32> &b);
+f32 angleBetween(const Vec &a, const Vec &b);
 
 } // namespace Vector3
 

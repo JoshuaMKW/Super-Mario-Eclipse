@@ -117,7 +117,7 @@ static void captureTextboxDrawMtx(Mtx44 mtx, u8 index) {
   PSMTXCopy(mtx, sDrawMtx);
   GXLoadPosMtxImm(mtx, index);
 }
-SME_PATCH_BL(SME_PORT_REGION(0x802d0bf8, 0, 0, 0), captureTextboxDrawMtx);
+SME_PATCH_BL(SME_PORT_REGION(0x802d0bf8, 0x802C8DA0, 0, 0), captureTextboxDrawMtx);
 
 static void maybePrintChar(JUTFont *font, f32 x, f32 y, f32 w, f32 h, int ascii,
                            bool unk_1) {
@@ -131,7 +131,7 @@ static void maybePrintChar(JUTFont *font, f32 x, f32 y, f32 w, f32 h, int ascii,
   if (absX + fontWidth > -offset && absX < SME::TGlobals::getScreenWidth())
     font->drawChar_scale(x, y, w, h, ascii, unk_1);
 }
-SME_PATCH_BL(SME_PORT_REGION(0x802cec2c, 0, 0, 0), maybePrintChar);
+SME_PATCH_BL(SME_PORT_REGION(0x802CEC2C, 0x802C6DD4, 0, 0), maybePrintChar);
 
 static OSStopwatch stopwatch;
 static bool sInitialized = false;

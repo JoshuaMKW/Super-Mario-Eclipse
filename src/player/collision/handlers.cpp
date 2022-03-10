@@ -128,8 +128,8 @@ static void slipperyCatchingSoundCheck(u32 sound, const Vec *pos, u32 unk_1,
   MSoundSESystem::MSoundSE::startSoundActor(sound, pos, unk_1, out, unk_2,
                                             unk_3);
 }
-SME_PATCH_BL(SME_PORT_REGION(0x8025932C, 0, 0, 0), slipperyCatchingSoundCheck);
-SME_WRITE_32(SME_PORT_REGION(0x802596C0, 0, 0, 0), 0x60000000);
+SME_PATCH_BL(SME_PORT_REGION(0x8025932C, 0x802510B8, 0, 0), slipperyCatchingSoundCheck);
+SME_WRITE_32(SME_PORT_REGION(0x802596C0, 0x8025144C, 0, 0), 0x60000000);
 
 /* Master Handlers */
 
@@ -219,8 +219,7 @@ static TBGCheckData *masterGroundCollisionHandler() {
   }
   return floorCol;
 }
-SME_PATCH_BL(SME_PORT_REGION(0x80250C9C, 0, 0, 0),
-             masterGroundCollisionHandler);
+SME_PATCH_BL(SME_PORT_REGION(0x80250C9C, 0x80248328, 0, 0),             masterGroundCollisionHandler);
 
 static u32 masterAllCollisionHandler(TMario *player) {
   u16 type = player->mFloorTriangle->mCollisionType & 0x7FFF;
@@ -250,8 +249,8 @@ static u32 masterAllCollisionHandler(TMario *player) {
   }
   return player->mState;
 }
-SME_PATCH_BL(SME_PORT_REGION(0x8025059C, 0, 0, 0), masterAllCollisionHandler);
-SME_WRITE_32(SME_PORT_REGION(0x802505A0, 0, 0, 0), 0x546004E7);
+SME_PATCH_BL(SME_PORT_REGION(0x8025059C, 0x80248328, 0, 0), masterAllCollisionHandler);
+SME_WRITE_32(SME_PORT_REGION(0x802505A0, 0x8024832C, 0, 0), 0x546004E7);
 
 #undef EXPAND_WARP_SET
 #undef EXPAND_WARP_CATEGORY
@@ -278,7 +277,7 @@ void updateCollisionContext(TMario *player) {
   }
 
   const f32 marioCollisionHeight =
-      *(f32 *)SME_PORT_REGION(0x80415CC4, 0, 0, 0) *
+      *(f32 *)SME_PORT_REGION(0x80415CC4, 0x8040D21C, 0, 0) *
       playerData->getParams()->mSizeMultiplier.get();
 
   Vec playerPos;

@@ -60,7 +60,7 @@ static void *handleDebugCheat(void *GCLogoDir) {
   gDebugHandler.advanceInput();
   return GCLogoDir;
 }
-SME_PATCH_B(SME_PORT_REGION(0x80295B6C, 0, 0, 0), handleDebugCheat);
+SME_PATCH_B(SME_PORT_REGION(0x80295B6C, 0x8028DA04, 0, 0), handleDebugCheat);
 
 /* DEBUG MODS */
 
@@ -72,7 +72,7 @@ static void isLevelSelectAvailable() {
     context = TGlobals::isDebugMode() ? 9 : 4;
   gpApplication.mContext = context;
 }
-SME_PATCH_BL(SME_PORT_REGION(0x802A6794, 0, 0, 0), isLevelSelectAvailable);
+SME_PATCH_BL(SME_PORT_REGION(0x802A6794, 0x8029E6EC, 0, 0), isLevelSelectAvailable);
 
 
 bool gInXYZMode = false;
@@ -172,13 +172,13 @@ static void setEmitPrm() {
   TWaterBalloon::sEmitInfo = new TWaterEmitInfo("/mario/waterballoon/waterballoon.prm");
   TParams::finalize();
 }
-SME_PATCH_BL(SME_PORT_REGION(0x802B8DC8, 0, 0, 0), setEmitPrm);
+SME_PATCH_BL(SME_PORT_REGION(0x802B8DC8, 0x802B0D98, 0, 0), setEmitPrm);
 
 static u32 preventDebuggingDeath(TMario *player) {
   extern bool gInXYZMode;
   return gInXYZMode ? 0x224E0 : player->mState; // Spoof non dying value
 };
-SME_PATCH_BL(SME_PORT_REGION(0x80243110, 0, 0, 0), preventDebuggingDeath);
+SME_PATCH_BL(SME_PORT_REGION(0x80243110, 0x8023AE9C, 0, 0), preventDebuggingDeath);
 
 static void preventDebuggingInteraction(TMario *player, JDrama::TGraphics *graphics) {
   extern bool gInXYZMode;
@@ -190,4 +190,4 @@ static void preventDebuggingInteraction(TMario *player, JDrama::TGraphics *graph
     player->mState = static_cast<u32>(TMario::State::IDLE);
   }
 }
-SME_PATCH_BL(SME_PORT_REGION(0x8024D3A0, 0, 0, 0), preventDebuggingInteraction);
+SME_PATCH_BL(SME_PORT_REGION(0x8024D3A0, 0x8024512C, 0, 0), preventDebuggingInteraction);

@@ -29,4 +29,4 @@ static void initSoundBank(u8 areaID, u8 episodeID) {
   setMSoundEnterStage__10MSMainProcFUcUc(areaID, episodeID);
   SME_DEBUG_LOG("Initializing the sound bank... DONE!\n");
 }
-SME_PATCH_BL(SME_PORT_REGION(0x802B7A4C, 0, 0, 0), initSoundBank);
+SME_PATCH_BL(SME_PORT_REGION(0x802B7A4C, 0x802AFA1C, 0, 0), initSoundBank);

@@ -35,7 +35,7 @@ static void addVelocity(TMario *player, f32 velocity) {
             playerData->mMaxAddVelocity * playerData->mSlideSpeedMultiplier);
   }
 }
-SME_PATCH_B(SME_PORT_REGION(0x802558A4, 0, 0, 0), addVelocity);
+SME_PATCH_B(SME_PORT_REGION(0x802558A4, 0x8024D630, 0, 0), addVelocity);
 
 static void rescaleHeldObj(Mtx holderMatrix, Mtx destMatrix) {
   TMapObjBase *heldObj;
@@ -48,4 +48,4 @@ static void rescaleHeldObj(Mtx holderMatrix, Mtx destMatrix) {
   PSMTXScaleApply(destMatrix, destMatrix, 1 / holderSize.x, 1 / holderSize.y,
                   1 / holderSize.z);
 }
-SME_PATCH_BL(SME_PORT_REGION(0x801E4118, 0, 0, 0), rescaleHeldObj);
+SME_PATCH_BL(SME_PORT_REGION(0x801E4118, 0x801DBFF0, 0, 0), rescaleHeldObj);

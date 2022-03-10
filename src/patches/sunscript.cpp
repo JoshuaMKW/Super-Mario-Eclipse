@@ -18,6 +18,6 @@ static void initBinaryNullptrPatch(TSpcBinary *binary) {
   if (binary)
     binary->init();
 }
-SME_PATCH_BL(SME_PORT_REGION(0x80289098, 0, 0, 0), initBinaryNullptrPatch);
+SME_PATCH_BL(SME_PORT_REGION(0x80289098, 0x80280E24, 0, 0), initBinaryNullptrPatch);
 
 #endif

@@ -59,7 +59,7 @@ static void initShineShadow() {
     LightContext.mLightType = TLightContext::ActiveType::DISABLED;
   }
 }
-SME_PATCH_B(SME_PORT_REGION(0x80280180, 0, 0, 0), initShineShadow);
+SME_PATCH_B(SME_PORT_REGION(0x80280180,  0x80277F0C, 0, 0), initShineShadow);
 
 /*This works by taking the target id and matching it to the
 / ID of the first entry to have the same home ID as the target.
@@ -101,4 +101,4 @@ static u32 initCollisionWarpLinks(const char *name) {
 
   return JDrama::TNameRef::calcKeyCode(name);
 }
-SME_PATCH_BL(SME_PORT_REGION(0x802B8B20, 0, 0, 0), initCollisionWarpLinks);
+SME_PATCH_BL(SME_PORT_REGION(0x802B8B20, 0x802B0AF0, 0, 0), initCollisionWarpLinks);

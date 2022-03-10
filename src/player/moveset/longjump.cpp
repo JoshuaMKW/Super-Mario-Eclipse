@@ -50,7 +50,7 @@ static void setJumpOrLongJump(TMario *player, u32 state, u32 unk_0) {
 
   setStatusToJumping__6TMarioFUlUl(player, state, unk_0);
 }
-SME_PATCH_BL(SME_PORT_REGION(0x802541BC, 0, 0, 0), setJumpOrLongJump);
+SME_PATCH_BL(SME_PORT_REGION(0x802541BC, 0x8024BF48, 0, 0), setJumpOrLongJump);
 
 static void processJumpOrLongJumpAnim(TMario *player, int state, int anim,
                                       int unk_0) {
@@ -62,7 +62,7 @@ static void processJumpOrLongJumpAnim(TMario *player, int state, int anim,
 
   jumpingBasic__6TMarioFiii(player, state, anim, unk_0);
 }
-SME_PATCH_BL(SME_PORT_REGION(0x80249554, 0, 0, 0), processJumpOrLongJumpAnim);
+SME_PATCH_BL(SME_PORT_REGION(0x80249554, 0x802412E0, 0, 0), processJumpOrLongJumpAnim);
 
 static void processJumpOrLongJump() {
   TMario *player;
@@ -88,18 +88,18 @@ static void processJumpOrLongJump() {
   player->mPrevState = player->mState;
   player->mState = static_cast<u32>(TMario::State::JUMP);
 }
-SME_PATCH_BL(SME_PORT_REGION(0x80254534, 0, 0, 0), processJumpOrLongJump);
-SME_WRITE_32(SME_PORT_REGION(0x80254538, 0, 0, 0), 0x60000000);
-SME_WRITE_32(SME_PORT_REGION(0x8025453C, 0, 0, 0), 0x60000000);
-SME_WRITE_32(SME_PORT_REGION(0x80254540, 0, 0, 0), 0x60000000);
-SME_WRITE_32(SME_PORT_REGION(0x80254544, 0, 0, 0), 0x60000000);
+SME_PATCH_BL(SME_PORT_REGION(0x80254534, 0x8024c2c0, 0, 0), processJumpOrLongJump);
+SME_WRITE_32(SME_PORT_REGION(0x80254538, 0x8024c2c4, 0, 0), 0x60000000);
+SME_WRITE_32(SME_PORT_REGION(0x8025453C, 0x8024c2c8, 0, 0), 0x60000000);
+SME_WRITE_32(SME_PORT_REGION(0x80254540, 0x8024c2cc, 0, 0), 0x60000000);
+SME_WRITE_32(SME_PORT_REGION(0x80254544, 0x8024c2d0, 0, 0), 0x60000000);
 
 static bool checkDivingWhenLongJumping(TMario *player) {
   Class::TPlayerData *playerData = TGlobals::getPlayerData(player);
 
   return onYoshi__6TMarioCFv(player) || playerData->mIsLongJumping;
 }
-SME_PATCH_BL(SME_PORT_REGION(0x8024C394, 0, 0, 0), checkDivingWhenLongJumping);
+SME_PATCH_BL(SME_PORT_REGION(0x8024C394, 0x80244120, 0, 0), checkDivingWhenLongJumping);
 
 static bool checkRotatingWhenLongJumping(TMario *player, int *unk_0) {
   Class::TPlayerData *playerData = TGlobals::getPlayerData(player);
@@ -107,8 +107,7 @@ static bool checkRotatingWhenLongJumping(TMario *player, int *unk_0) {
   return checkStickRotate__6TMarioFPi(player, unk_0) &&
          !playerData->mIsLongJumping;
 }
-SME_PATCH_BL(SME_PORT_REGION(0x8024C3F8, 0, 0, 0),
-             checkRotatingWhenLongJumping);
+SME_PATCH_BL(SME_PORT_REGION(0x8024C3F8, 0x80244184, 0, 0),             checkRotatingWhenLongJumping);
 
 static bool checkQuickFallWhenLongJumping() {
   TMario *player;
@@ -119,9 +118,8 @@ static bool checkQuickFallWhenLongJumping() {
   return ((player->mActionState & 0x80) != 0) || playerData->mIsLongJumping ||
          playerData->mCollisionFlags.mIsSpinBounce;
 }
-SME_PATCH_BL(SME_PORT_REGION(0x802565D4, 0, 0, 0),
-             checkQuickFallWhenLongJumping);
-SME_WRITE_32(SME_PORT_REGION(0x802565D8, 0, 0, 0), 0x2C030000);
+SME_PATCH_BL(SME_PORT_REGION(0x802565D4, 0x8024E360, 0, 0),             checkQuickFallWhenLongJumping);
+SME_WRITE_32(SME_PORT_REGION(0x802565D8, 0x8024E364, 0, 0), 0x2C030000);
 
 static bool preserveRegisterCheckQuickFall() {
   TMario *player;
@@ -130,9 +128,8 @@ static bool preserveRegisterCheckQuickFall() {
   return player->mState == static_cast<u32>(TMario::State::JUMPSPINR) ||
          player->mState == static_cast<u32>(TMario::State::JUMPSPINL);
 }
-SME_PATCH_BL(SME_PORT_REGION(0x80256618, 0, 0, 0),
-             preserveRegisterCheckQuickFall);
-SME_WRITE_32(SME_PORT_REGION(0x8025661C, 0, 0, 0), 0x2C030000);
-SME_WRITE_32(SME_PORT_REGION(0x80256620, 0, 0, 0), 0x41820024);
+SME_PATCH_BL(SME_PORT_REGION(0x80256618, 0x8024E3A4, 0, 0),             preserveRegisterCheckQuickFall);
+SME_WRITE_32(SME_PORT_REGION(0x8025661C, 0x8024E3A8, 0, 0), 0x2C030000);
+SME_WRITE_32(SME_PORT_REGION(0x80256620, 0x8024E3AC, 0, 0), 0x41820024);
 
 #endif

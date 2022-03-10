@@ -39,7 +39,7 @@ static void burnPlayer(TMario *player, u8 flags) {
   changePlayerStatus__6TMarioFUlUlb(player, 0x208B7, 1, false);
   player->mSpeed.y += 20.0f;
   emitAndBindToPosPtr__21TMarioParticleManagerFlPCQ29JGeometry8TVec3_f(
-      *(u32 *)SME_PORT_REGION(0x8040E150, 0, 0, 0), 6,
+      *(u32 *)SME_PORT_REGION(0x8040E150, 0x80405818, 0, 0), 6,
       reinterpret_cast<Vec *>(&player->mPosition), 0, nullptr);
   if (gpMSound->gateCheck(0x1813)) {
     MSoundSESystem::MSoundSE::startSoundActor(
@@ -100,8 +100,8 @@ void checkIsGlideBounce(TMario *player) {
   } else
     checkEnforceJump__6TMarioFv(player);
 }
-SME_PATCH_BL(SME_PORT_REGION(0x80258334, 0, 0, 0), checkIsGlideBounce);
-SME_PATCH_BL(SME_PORT_REGION(0x80264CFC, 0, 0, 0), checkIsGlideBounce);
+SME_PATCH_BL(SME_PORT_REGION(0x80258334, 0x802500C0, 0, 0), checkIsGlideBounce);
+SME_PATCH_BL(SME_PORT_REGION(0x80264CFC, 0x8025CA88, 0, 0), checkIsGlideBounce);
 
 u16 checkIsRestoreTypeNoFallDamage(TBGCheckData *floor) {
   if ((floor->mCollisionType & 0x7FFF) == 16010 ||
@@ -110,8 +110,7 @@ u16 checkIsRestoreTypeNoFallDamage(TBGCheckData *floor) {
   else
     return floor->mCollisionType;
 }
-SME_PATCH_BL(SME_PORT_REGION(0x8024C558, 0, 0, 0),
-             checkIsRestoreTypeNoFallDamage);
+SME_PATCH_BL(SME_PORT_REGION(0x8024C558, 0x802442E4, 0, 0),             checkIsRestoreTypeNoFallDamage);
 
 void checkRestoreHealth(TMario *player) {
   SME::Class::TPlayerData *playerData = SME::TGlobals::getPlayerData(player);

@@ -37,7 +37,7 @@ static u32 carryOrTalkNPC(TBaseNPC *npc) {
   npc->mStateFlags.asFlags.mCanBeTaken = oldTake;
   return ret;
 }
-SME_PATCH_BL(SME_PORT_REGION(0x8029A87C, 0, 0, 0), carryOrTalkNPC);
+SME_PATCH_BL(SME_PORT_REGION(0x8029A87C, 0x80292758, 0, 0), carryOrTalkNPC);
 
 // 0x802815F0
 static bool canGrabAtNPC() {
@@ -54,8 +54,8 @@ static bool canGrabAtNPC() {
           gpMarioAddress->mState != static_cast<u32>(TMario::State::IDLE)) ||
          npc->mStateFlags.asFlags.mCanBeTaken;
 }
-SME_PATCH_BL(SME_PORT_REGION(0x802815F0, 0, 0, 0), canGrabAtNPC);
-SME_WRITE_32(SME_PORT_REGION(0x802815F4, 0, 0, 0), 0x2C030000);
+SME_PATCH_BL(SME_PORT_REGION(0x802815F0, 0x8027937C, 0, 0), canGrabAtNPC);
+SME_WRITE_32(SME_PORT_REGION(0x802815F4, 0x80279380, 0, 0), 0x2C030000);
 
 // 0x80207430
 static bool canCarryNPC() {
@@ -72,8 +72,9 @@ static bool canCarryNPC() {
           gpMarioAddress->mState != static_cast<u32>(TMario::State::IDLE)) ||
          npc->mStateFlags.asFlags.mCanBeTaken;
 }
-SME_PATCH_BL(SME_PORT_REGION(0x80207430, 0, 0, 0), canCarryNPC);
-SME_WRITE_32(SME_PORT_REGION(0x80207434, 0, 0, 0), 0x2C030000);
+SME_PATCH_BL(SME_PORT_REGION(0x80207430, 0x801FF314, 0, 0), canCarryNPC);
+SME_WRITE_32(SME_PORT_REGION(0x80207434, 0x801FF318, 0, 0), 0x2C030000);
+
 
 // extern -> SME.cpp
 // 0x802145F0
@@ -97,9 +98,9 @@ static TMario *scaleNPCThrowLength(TMario *player, float *params) {
   SME_TO_FPR(11, _f11);
   return player;
 }
-SME_PATCH_BL(SME_PORT_REGION(0x802145F0, 0, 0, 0), scaleNPCThrowLength);
-SME_WRITE_32(SME_PORT_REGION(0x802145F4, 0, 0, 0), 0xC002E5E0);
-SME_WRITE_32(SME_PORT_REGION(0x802145F8, 0, 0, 0), 0xC0230034);
+SME_PATCH_BL(SME_PORT_REGION(0x802145F0, 0x8020C4D4, 0, 0), scaleNPCThrowLength);
+SME_WRITE_32(SME_PORT_REGION(0x802145F4, 0x8020C4D8, 0, 0), 0xC002E5E0);
+SME_WRITE_32(SME_PORT_REGION(0x802145F8, 0x8020C4DC, 0, 0), 0xC0230034);
 
 // extern -> SME.cpp
 // 0x8021463C
@@ -124,9 +125,9 @@ static u32 scaleNPCThrowHeight(u32 _r3, f32 z, f32 y) {
 
   return _r3;
 }
-SME_WRITE_32(SME_PORT_REGION(0x8021462C, 0, 0, 0), 0xEC0B0032);
-SME_WRITE_32(SME_PORT_REGION(0x80214634, 0, 0, 0), 0xEC2B0072);
-SME_PATCH_BL(SME_PORT_REGION(0x8021463C, 0, 0, 0), scaleNPCThrowHeight);
+SME_WRITE_32(SME_PORT_REGION(0x8021462C, 0x8020C510, 0, 0), 0xEC0B0032);
+SME_WRITE_32(SME_PORT_REGION(0x80214634, 0x8020C518, 0, 0), 0xEC2B0072);
+SME_PATCH_BL(SME_PORT_REGION(0x8021463C, 0x8020C520, 0, 0), scaleNPCThrowHeight);
 
 #endif
 
@@ -140,4 +141,4 @@ static SME_PURE_ASM void scaleNPCTalkRadius() {
                "lwz 3, mPtrSaveNormal__8TBaseNPC@l (3)  \n\t"
                "blr                                     \n\t");
 }
-SME_PATCH_BL(SME_PORT_REGION(0x80213314, 0, 0, 0), scaleNPCTalkRadius);
+SME_PATCH_BL(SME_PORT_REGION(0x80213314, 0x8020B1FC, 0, 0), scaleNPCTalkRadius);

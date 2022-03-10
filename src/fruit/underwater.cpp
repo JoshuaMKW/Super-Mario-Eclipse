@@ -24,9 +24,9 @@ static bool canFruitDieWater(TResetFruit *fruit) {
   }
   return false;
 }
-SME_PATCH_BL(SME_PORT_REGION(0x801E542C, 0, 0, 0), canFruitDieWater);
-SME_WRITE_32(SME_PORT_REGION(0x801E5430, 0, 0, 0), 0x2C030000);
-SME_WRITE_32(SME_PORT_REGION(0x801E5434, 0, 0, 0), 0x41820140);
+SME_PATCH_BL(SME_PORT_REGION(0x801E542C, 0x801DD304, 0, 0), canFruitDieWater);
+SME_WRITE_32(SME_PORT_REGION(0x801E5430, 0x801DD308, 0, 0), 0x2C030000);
+SME_WRITE_32(SME_PORT_REGION(0x801E5434, 0x801DD30C, 0, 0), 0x41820140);
 
 // 0x8023F964
 // extern -> SME.cpp
@@ -42,7 +42,7 @@ static f32 chooseGrabDistancing(M3UModelMario *model) {
     return 11.0f;
   }
 }
-SME_PATCH_BL(SME_PORT_REGION(0x8023F964, 0, 0, 0), chooseGrabDistancing);
+SME_PATCH_BL(SME_PORT_REGION(0x8023F964, 0x802376F0, 0, 0), chooseGrabDistancing);
 
 // 0x8023F9DC
 // extern -> SME.cpp
@@ -50,6 +50,6 @@ static bool isGrabWaitOver(TMario *player) {
   return isLast1AnimeFrame__6TMarioFv(player) |
          (player->mPrevState & static_cast<u32>(TMario::State::WATERBORN));
 }
-SME_PATCH_BL(SME_PORT_REGION(0x8023F9DC, 0, 0, 0), isGrabWaitOver);
+SME_PATCH_BL(SME_PORT_REGION(0x8023F9DC, 0x80237768, 0, 0), isGrabWaitOver);
 
 #endif

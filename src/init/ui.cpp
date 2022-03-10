@@ -47,13 +47,13 @@ static void initCardColors() {
         Math::lerp<u8>(0, waterColor.a, 1.1875f);
   }
 }
-SME_PATCH_B(SME_PORT_REGION(0x8029CCB0, 0, 0, 0), initCardColors);
+SME_PATCH_B(SME_PORT_REGION(0x8029CCB0,  0x80294B8C, 0, 0), initCardColors);
 
 // 0x802B57E4
 static void createUIHeap(u32 size, s32 alignment) {
   gpMarDirector->mGame6Data = (u32 *)Memory::malloc(size, alignment);
 }
-// SME_PATCH_BL(SME_PORT_REGION(0x802B57E4, 0, 0, 0), createUIHeap);
+// SME_PATCH_BL(SME_PORT_REGION(0x802B57E4, 0x802AD768, 0, 0), createUIHeap);
 
 // 0x802A72A4
 static u32 initHUDElements(char *filepath) {

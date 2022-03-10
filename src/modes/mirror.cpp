@@ -82,8 +82,7 @@ static Mtx *getLightPerspectiveForEffectMtx(Mtx *dst, f32 x, f32 y, f32 n,
   PSMTXScaleApply(*dst, *dst, INV_SCALE);
   return dst;
 }
-SME_PATCH_BL(SME_PORT_REGION(0x8022ba9c, 0, 0, 0),
-             getLightPerspectiveForEffectMtx);
+SME_PATCH_BL(SME_PORT_REGION(0x8022ba9c, 0, 0, 0),             getLightPerspectiveForEffectMtx);
 
 static Mtx *invertReflections(Mtx srcA, Mtx srcB, Mtx *dst) {
   PSMTXScaleApply(srcB, srcB, INV_SCALE);

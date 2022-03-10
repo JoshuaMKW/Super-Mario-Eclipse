@@ -22,7 +22,7 @@ static s16 captureSunData() {
 
   return SMSGetAnmFrameRate__Fv();
 }
-SME_PATCH_BL(SME_PORT_REGION(0x8002F440, 0, 0, 0), captureSunData);
+SME_PATCH_BL(SME_PORT_REGION(0x8002F440, 0x8002F4F8, 0, 0), captureSunData);
 
 static bool sunFollowCameraAndScaleLightness(TCameraMarioData *cam) {
   TSunModel *sun;
@@ -47,8 +47,8 @@ static bool sunFollowCameraAndScaleLightness(TCameraMarioData *cam) {
 
   return cam->isMarioIndoor();
 }
-SME_PATCH_BL(SME_PORT_REGION(0x8002EB34, 0, 0, 0),
-             sunFollowCameraAndScaleLightness);
+SME_PATCH_BL(SME_PORT_REGION(0x8002EB34, 0x8002EBEC, 0, 0),
+                  sunFollowCameraAndScaleLightness);
 
 static f32 scaleFlareToLightness(f32 a, f32 b, f32 c) {
   return CLBEaseOutInbetween_f(
@@ -59,7 +59,7 @@ static f32 scaleFlareToLightness(f32 a, f32 b, f32 c) {
           : 255.0f,
       c);
 }
-SME_PATCH_BL(SME_PORT_REGION(0x8002D358, 0, 0, 0), scaleFlareToLightness);
+SME_PATCH_BL(SME_PORT_REGION(0x8002D358, 0x8002D410, 0, 0), scaleFlareToLightness);
 
 static bool scaleGlowToLightness(f32 a, f32 b, f32 c) {
   TLensGlow *glow;
@@ -73,4 +73,4 @@ static bool scaleGlowToLightness(f32 a, f32 b, f32 c) {
 
   return CLBLinearInbetween_f(a * factor, b * factor, c);
 }
-SME_PATCH_BL(SME_PORT_REGION(0x8002DB60, 0, 0, 0), scaleGlowToLightness);
+SME_PATCH_BL(SME_PORT_REGION(0x8002DB60, 0x8002DC18, 0, 0), scaleGlowToLightness);

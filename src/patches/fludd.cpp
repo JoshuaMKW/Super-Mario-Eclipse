@@ -26,8 +26,8 @@ static SME_PURE_ASM bool makeWaterHitCheckForDeath(TBGCheckData *col) {
       "lis 12, 0x8018           \n\t"
       "ori 12, 12, 0xC36C       \n\t",
 
-      "lis 12, 0           \n\t"
-      "ori 12, 12, 0       \n\t",
+      "lis 12, 0x8018           \n\t"
+      "ori 12, 12, 0x4bf4       \n\t",
 
       "lis 12, 0           \n\t"
       "ori 12, 12, 0       \n\t",
@@ -40,7 +40,7 @@ static SME_PURE_ASM bool makeWaterHitCheckForDeath(TBGCheckData *col) {
   );
   // clang-format on
 }
-SME_PATCH_B(SME_PORT_REGION(0x8018C368, 0, 0, 0), makeWaterHitCheckForDeath);
+SME_PATCH_B(SME_PORT_REGION(0x8018C368, 0x80184BF0, 0, 0), makeWaterHitCheckForDeath);
 
 static void normalizeHoverSlopeSpeed(f32 floorPos) {
   TMario *player;
@@ -73,6 +73,6 @@ static void normalizeHoverSlopeSpeed(f32 floorPos) {
                                                         lookAtRatio, 1.0f),
                               0.0f, 1.0f));
 }
-SME_PATCH_BL(SME_PORT_REGION(0x802568F0, 0, 0, 0), normalizeHoverSlopeSpeed);
+SME_PATCH_BL(SME_PORT_REGION(0x802568F0, 0x8024E67C, 0, 0), normalizeHoverSlopeSpeed);
 
 #endif

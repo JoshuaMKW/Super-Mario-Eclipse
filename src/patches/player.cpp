@@ -23,7 +23,7 @@ static u32 patchYStorage() {
 
   return 0;
 }
-SME_PATCH_BL(SME_PORT_REGION(0x802571F0, 0, 0, 0), patchYStorage);
+SME_PATCH_BL(SME_PORT_REGION(0x802571F0, 0x8024EF7C, 0, 0), patchYStorage);
 
 static void patchRideMovementUpWarp(Mtx out, Vec *ride, Vec *pos) {
   TMario *player;

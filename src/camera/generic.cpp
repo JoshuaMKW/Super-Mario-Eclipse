@@ -11,7 +11,7 @@ static bool updateContexts(CPolarSubCamera *cam) {
   updateSlideFOV(cam);
   return cam->isNormalDeadDemo();
 }
-SME_PATCH_BL(SME_PORT_REGION(0x80023598, 0, 0, 0), updateContexts);
+SME_PATCH_BL(SME_PORT_REGION(0x80023598, 0x80023650, 0, 0), updateContexts);
 
 /* CONTEXTS */
 
@@ -50,4 +50,4 @@ static void modifyCameraRangeToSize(f32 *params, f32 *saveParams) {
         Util::Math::scaleLinearAtAnchor<f32>(scale, 0.9375f, 1.0f);
   }
 }
-SME_PATCH_B(SME_PORT_REGION(0x80027548, 0, 0, 0), modifyCameraRangeToSize);
+SME_PATCH_B(SME_PORT_REGION(0x80027548, 0x80027600, 0, 0), modifyCameraRangeToSize);

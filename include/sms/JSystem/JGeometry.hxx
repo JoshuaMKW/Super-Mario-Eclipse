@@ -22,7 +22,13 @@ template <typename T> struct TVec3 {
 
   template <typename TY> TVec3(TY, TY, TY);
 
-  TVec3 &operator=(const TVec3 &);
+  //Because PAL is missing this operator
+  TVec3 &operator=(const TVec3 & other){
+      this->x = other.x;
+      this->y = other.y;
+      this->z = other.z;
+      return *this;
+  };
   TVec3 &operator*=(const TVec3 &);
   TVec3 &operator-=(const TVec3 &);
 

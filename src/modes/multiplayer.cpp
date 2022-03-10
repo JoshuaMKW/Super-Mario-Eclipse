@@ -16,7 +16,7 @@ static TMario *makeMarios() {
   SME::TGlobals::setPlayerByIndex(0, p1);
   return p1;
 }
-SME_PATCH_BL(SME_PORT_REGION(0x8029D7E8, 0, 0, 0), makeMarios);
+SME_PATCH_BL(SME_PORT_REGION(0x8029D7E8, 0x802956C4, 0, 0), makeMarios);
 
 #if SME_MULTIPLAYER
 

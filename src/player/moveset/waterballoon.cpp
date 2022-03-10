@@ -58,8 +58,7 @@ static void createWaterBalloonAndThrow(TMario *player) {
     changePlayerStatus__6TMarioFUlUlb(player, 0x820008AB, 0, 0);
   }
 }
-SME_PATCH_BL(SME_PORT_REGION(0x8024E2A0, 0, 0, 0), createWaterBalloonAndThrow);
-
+SME_PATCH_BL(SME_PORT_REGION(0x8024E2A0, 0x8024602C, 0, 0), createWaterBalloonAndThrow);
 #else
 
 void initWaterBalloons() {}

@@ -23,7 +23,7 @@ static void updaterLoop() {
   AudioStreamer *streamer = AudioStreamer::getInstance();
   streamer->update_();
 }
-SME_PATCH_BL(SME_PORT_REGION(0x80316034, 0, 0, 0), updaterLoop);
+SME_PATCH_BL(SME_PORT_REGION(0x80316034, 0x8030E1C4, 0, 0), updaterLoop);
 
 static void *mainLoop(void *param) {
   AudioStreamer *streamer = reinterpret_cast<AudioStreamer *>(param);

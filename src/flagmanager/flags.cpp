@@ -21,7 +21,7 @@ static void resetStage(TFlagManager *flagManager) {
                                                                     // 0x18C
   memset(((u8 *)&flagManager->Type1Flag) + 0x11F, 0, 1);
 }
-SME_PATCH_B(SME_PORT_REGION(0x80294EF4, 0, 0, 0), resetStage);
+SME_PATCH_B(SME_PORT_REGION(0x80294EF4, 0x8028CD0C, 0, 0), resetStage);
 
 void resetStageFlags(TFlagManager *flagManager) {
   TFlagManager::smInstance->resetStage();

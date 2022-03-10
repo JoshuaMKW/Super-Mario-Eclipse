@@ -78,9 +78,9 @@ static f32 getTreeClimbMinFall() {
 
   return 100.0f * size.y;
 }
-SME_PATCH_BL(SME_PORT_REGION(0x80261C3C, 0, 0, 0), getTreeClimbMinFall);
-SME_WRITE_32(SME_PORT_REGION(0x80261C40, 0, 0, 0), 0xC05F038C);
-SME_WRITE_32(SME_PORT_REGION(0x80261C44, 0, 0, 0), 0xFC020040);
+SME_PATCH_BL(SME_PORT_REGION(0x80261C3C, 0x802599C8, 0, 0), getTreeClimbMinFall);
+SME_WRITE_32(SME_PORT_REGION(0x80261C40, 0x802599CC, 0, 0), 0xC05F038C);
+SME_WRITE_32(SME_PORT_REGION(0x80261C44, 0x802599D0, 0, 0), 0xFC020040);
 
 // extern -> SME.cpp
 // 0x802619CC
@@ -106,8 +106,8 @@ static SME_PURE_ASM void getTreeClimbMaxFall() {
                "mtlr 0                   \n\t"
                "blr                      \n\t");
 }
-SME_PATCH_BL(SME_PORT_REGION(0x802619CC, 0, 0, 0), getTreeClimbMaxFall);
-SME_WRITE_32(SME_PORT_REGION(0x802619D0, 0, 0, 0), 0x60000000);
+SME_PATCH_BL(SME_PORT_REGION(0x802619CC, 0x8025975C, 0, 0), getTreeClimbMaxFall);
+SME_WRITE_32(SME_PORT_REGION(0x802619D0, 0x80259760, 0, 0), 0x60000000);
 
 // extern -> SME.cpp
 // 0x80261CF4
@@ -136,9 +136,9 @@ static SME_PURE_ASM void scaleTreeSlideSpeed() {
                "mtlr 0                      \n\t"
                "blr                         \n\t");
 }
-SME_PATCH_BL(SME_PORT_REGION(0x80261CF4, 0, 0, 0), scaleTreeSlideSpeed);
-SME_WRITE_32(SME_PORT_REGION(0x80261CF8, 0, 0, 0), 0x2C030000);
-SME_WRITE_32(SME_PORT_REGION(0x80261CFC, 0, 0, 0), 0x41820070);
+SME_PATCH_BL(SME_PORT_REGION(0x80261CF4, 0x80259A80, 0, 0), scaleTreeSlideSpeed);
+SME_WRITE_32(SME_PORT_REGION(0x80261CF8, 0x80259A84, 0, 0), 0x2C030000);
+SME_WRITE_32(SME_PORT_REGION(0x80261CFC, 0x80259A88, 0, 0), 0x41820070);
 
 /* GLOBAL CLIMB CODE */
 
@@ -159,30 +159,30 @@ void getClimbingAnimSpd(TMario *player, TMario::Animation anim, f32 speed) {
 
 static SME_PURE_ASM void scaleRoofClimbHeight(f32 yCoord, f32 speed) {
   asm volatile("lfs 0, " SME_STRINGIZE(SME_PORT_REGION(
-      -0xDE0, 0, 0, 0)) "(2)        \n\t"
+      -0xDE0, -0xf68, 0, 0)) "(2)        \n\t"
                         "lfs 3, 0x28(31)                                \n\t"
                         "fmuls 0, 0, 3                                  \n\t"
                         "blr                                            \n\t");
 }
-SME_PATCH_BL(SME_PORT_REGION(0x8025D66C, 0, 0, 0), scaleRoofClimbHeight);
+SME_PATCH_BL(SME_PORT_REGION(0x8025D66C, 0x802553F8, 0, 0), scaleRoofClimbHeight);
 
 static SME_PURE_ASM void scaleRoofSquashedHeight() {
   asm volatile("lfs 3, " SME_STRINGIZE(SME_PORT_REGION(
-      -0xDE0, 0, 0, 0)) "(2)        \n\t"
+      -0xDE0, -0xf68, 0, 0)) "(2)        \n\t"
                         "lfs 5, 0x28(30)                                \n\t"
                         "fmuls 3, 5, 3                                  \n\t"
                         "blr                                            \n\t");
 }
-SME_PATCH_BL(SME_PORT_REGION(0x802617EC, 0, 0, 0), scaleRoofSquashedHeight);
+SME_PATCH_BL(SME_PORT_REGION(0x802617EC, 0x80259578, 0, 0), scaleRoofSquashedHeight);
 
 static SME_PURE_ASM void scaleRoofMoveDiff() {
   asm volatile("lfs 0, " SME_STRINGIZE(SME_PORT_REGION(
-      -0xD7C, 0, 0, 0)) "(2)        \n\t"
+      -0xD7C, -0xf04, 0, 0)) "(2)        \n\t"
                         "lfs 10, 0x28(30)                                \n\t"
                         "fmuls 0, 0, 10                                  \n\t"
                         "blr                                             \n\t");
 }
-SME_PATCH_BL(SME_PORT_REGION(0x80261824, 0, 0, 0), scaleRoofMoveDiff);
+SME_PATCH_BL(SME_PORT_REGION(0x80261824, 0x802595B0, 0, 0), scaleRoofMoveDiff);
 
 static void scaleHangSpeed(TMario *player) {
   Class::TPlayerData *playerData = TGlobals::getPlayerData(player);
@@ -212,13 +212,13 @@ static bool canHangOnRoof(TBGCheckData *roof /*, u16 colType*/) {
 
   return colType == 266;
 }
-SME_WRITE_32(SME_PORT_REGION(0x802617C0, 0, 0, 0), 0xA0830000);
-SME_PATCH_BL(SME_PORT_REGION(0x802617C4, 0, 0, 0), canHangOnRoof);
-SME_WRITE_32(SME_PORT_REGION(0x802617C8, 0, 0, 0), 0x60000000);
-SME_WRITE_32(SME_PORT_REGION(0x802617CC, 0, 0, 0), 0x60000000);
-SME_WRITE_32(SME_PORT_REGION(0x802617D0, 0, 0, 0), 0x60000000);
-SME_WRITE_32(SME_PORT_REGION(0x802617D4, 0, 0, 0), 0x60000000);
-SME_WRITE_32(SME_PORT_REGION(0x802617D8, 0, 0, 0), 0x2C030000);
+SME_WRITE_32(SME_PORT_REGION(0x802617C0, 0x8025954C, 0, 0), 0xA0830000);
+SME_PATCH_BL(SME_PORT_REGION(0x802617C4, 0x80259550, 0, 0), canHangOnRoof);
+SME_WRITE_32(SME_PORT_REGION(0x802617C8, 0x80259554, 0, 0), 0x60000000);
+SME_WRITE_32(SME_PORT_REGION(0x802617CC, 0x80259558, 0, 0), 0x60000000);
+SME_WRITE_32(SME_PORT_REGION(0x802617D0, 0x8025955C, 0, 0), 0x60000000);
+SME_WRITE_32(SME_PORT_REGION(0x802617D4, 0x80259560, 0, 0), 0x60000000);
+SME_WRITE_32(SME_PORT_REGION(0x802617D8, 0x80259564, 0, 0), 0x2C030000);
 
 /* WALL CLIMB CODE */
 

@@ -70,6 +70,6 @@ static void manageCustomJumps(TMario *player) {
   }
   stateMachine__6TMarioFv(player);
 }
-SME_PATCH_BL(SME_PORT_REGION(0x8024E02C, 0, 0, 0), manageCustomJumps);
+SME_PATCH_BL(SME_PORT_REGION(0x8024E02C, 0x80245DB8, 0, 0), manageCustomJumps);
 
 #endif

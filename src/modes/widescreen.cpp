@@ -19,36 +19,31 @@ static f32 getScreenTransX() {
 static f32 getScreenWidthTranslated() {
   return SME::TGlobals::getScreenWidth() + getScreenTransX();
 }
-SME_PATCH_BL(SME_PORT_REGION(0x802A3E78, 0, 0, 0), getScreenWidthTranslated);
-SME_WRITE_32(SME_PORT_REGION(0x802A3E7C, 0, 0, 0), 0xD03C0038);
+SME_PATCH_BL(SME_PORT_REGION(0x802A3E78, 0x8029BD54, 0, 0), getScreenWidthTranslated);
+SME_WRITE_32(SME_PORT_REGION(0x802A3E7C, 0x8029BD58, 0, 0), 0xD03C0038);
 
 static f32 getNegScreenTransX() { return -getScreenTransX(); }
-SME_PATCH_BL(SME_PORT_REGION(0x80176AA4, 0, 0, 0), getNegScreenTransX);
-SME_WRITE_32(SME_PORT_REGION(0x80176AA8, 0, 0, 0), 0xD03B0030);
-SME_PATCH_BL(SME_PORT_REGION(0x8029B974, 0, 0, 0), getNegScreenTransX);
-SME_WRITE_32(SME_PORT_REGION(0x8029B978, 0, 0, 0), 0xD0350030);
-SME_PATCH_BL(SME_PORT_REGION(0x80176C40, 0, 0, 0), getNegScreenTransX);
-SME_WRITE_32(SME_PORT_REGION(0x80176C44, 0, 0, 0), 0xD03B0030);
-SME_PATCH_BL(SME_PORT_REGION(0x80176FF4, 0, 0, 0), getNegScreenTransX);
-SME_WRITE_32(SME_PORT_REGION(0x80176FF8, 0, 0, 0), 0xD03B0030);
-SME_PATCH_BL(SME_PORT_REGION(0x80177198, 0, 0, 0), getNegScreenTransX);
-SME_WRITE_32(SME_PORT_REGION(0x8017719c, 0, 0, 0), 0xD03B0030);
+SME_PATCH_BL(SME_PORT_REGION(0x80176AA4, 0x8016CA6C, 0, 0), getNegScreenTransX);
+SME_WRITE_32(SME_PORT_REGION(0x80176AA8, 0x8016CA70, 0, 0), 0xD03B0030);
+SME_PATCH_BL(SME_PORT_REGION(0x8029B974, 0x80293850, 0, 0), getNegScreenTransX);
+SME_WRITE_32(SME_PORT_REGION(0x8029B978, 0x80293854, 0, 0), 0xD0350030);
+SME_PATCH_BL(SME_PORT_REGION(0x80176C40, 0x8016CC00, 0, 0), getNegScreenTransX);
+SME_WRITE_32(SME_PORT_REGION(0x80176C44, 0x8016CC04, 0, 0), 0xD03B0030);
+SME_PATCH_BL(SME_PORT_REGION(0x80176FF4, 0x8016D160, 0, 0), getNegScreenTransX);
+SME_WRITE_32(SME_PORT_REGION(0x80176FF8, 0x8016D164, 0, 0), 0xD03B0030);
+SME_PATCH_BL(SME_PORT_REGION(0x80177198, 0x8016CFBC, 0, 0), getNegScreenTransX);
+SME_WRITE_32(SME_PORT_REGION(0x8017719c, 0x8016CFC0, 0, 0), 0xD03B0030);
 
-SME_PATCH_BL(SME_PORT_REGION(0x80176AB4, 0, 0, 0),
-             SME::TGlobals::getScreenWidth);
-SME_WRITE_32(SME_PORT_REGION(0x80176AB8, 0, 0, 0), 0xD03B0038);
-SME_PATCH_BL(SME_PORT_REGION(0x8029B984, 0, 0, 0),
-             SME::TGlobals::getScreenWidth);
-SME_WRITE_32(SME_PORT_REGION(0x8029B988, 0, 0, 0), 0xD0350038);
-SME_PATCH_BL(SME_PORT_REGION(0x80176C50, 0, 0, 0),
-             SME::TGlobals::getScreenWidth);
-SME_WRITE_32(SME_PORT_REGION(0x80176C54, 0, 0, 0), 0xD03B0038);
-SME_PATCH_BL(SME_PORT_REGION(0x80177004, 0, 0, 0),
-             SME::TGlobals::getScreenWidth);
-SME_WRITE_32(SME_PORT_REGION(0x80177008, 0, 0, 0), 0xD03B0038);
-SME_PATCH_BL(SME_PORT_REGION(0x801771A8, 0, 0, 0),
-             SME::TGlobals::getScreenWidth);
-SME_WRITE_32(SME_PORT_REGION(0x801771AC, 0, 0, 0), 0xD03B0038);
+SME_PATCH_BL(SME_PORT_REGION(0x80176AB4, 0x8016CA7C, 0, 0),             SME::TGlobals::getScreenWidth);
+SME_WRITE_32(SME_PORT_REGION(0x80176AB8, 0x8016CA80, 0, 0), 0xD03B0038);
+SME_PATCH_BL(SME_PORT_REGION(0x8029B984, 0x80293860, 0, 0),             SME::TGlobals::getScreenWidth);
+SME_WRITE_32(SME_PORT_REGION(0x8029B988, 0x80293864, 0, 0), 0xD0350038);
+SME_PATCH_BL(SME_PORT_REGION(0x80176C50, 0x8016CC10, 0, 0),             SME::TGlobals::getScreenWidth);
+SME_WRITE_32(SME_PORT_REGION(0x80176C54, 0x8016CC14, 0, 0), 0xD03B0038);
+SME_PATCH_BL(SME_PORT_REGION(0x80177004, 0x8016D170, 0, 0),             SME::TGlobals::getScreenWidth);
+SME_WRITE_32(SME_PORT_REGION(0x80177008, 0x8016D174, 0, 0), 0xD03B0038);
+SME_PATCH_BL(SME_PORT_REGION(0x801771A8, 0x8016CFCC, 0, 0),             SME::TGlobals::getScreenWidth);
+SME_WRITE_32(SME_PORT_REGION(0x801771AC, 0x8016CFD0, 0, 0), 0xD03B0038);
 
 static f32 getScreenXRatio2() {
   const f32 ratio = SME::TGlobals::getScreenToFullScreenRatio();
@@ -60,18 +55,18 @@ static f32 getShineSelectXRatio() { return getScreenXRatio2() * 1.33333337307; }
 static f32 getCameraXRatio() { return getScreenXRatio2() * 0.913461446762f; }
 
 // Shine Select Model Rot Width
-SME_PATCH_BL(SME_PORT_REGION(0x80176E58, 0, 0, 0), getShineSelectXRatio);
-SME_WRITE_32(SME_PORT_REGION(0x80176E5C, 0, 0, 0), 0xD03B004C);
+SME_PATCH_BL(SME_PORT_REGION(0x80176E58, 0x8016CE20, 0, 0), getShineSelectXRatio);
+SME_WRITE_32(SME_PORT_REGION(0x80176E5C, 0x8016CE24, 0, 0), 0xD03B004C);
 
 // Camera Width
-SME_WRITE_32(SME_PORT_REGION(0x802B8B6C, 0, 0, 0), 0x90010AE4);
-SME_PATCH_BL(SME_PORT_REGION(0x802B8B70, 0, 0, 0), getCameraXRatio);
-SME_WRITE_32(SME_PORT_REGION(0x802B8B74, 0, 0, 0), 0xC842FFF0);
-SME_WRITE_32(SME_PORT_REGION(0x802B8B78, 0, 0, 0), 0x3C80803E);
-SME_WRITE_32(SME_PORT_REGION(0x802B8B7C, 0, 0, 0), 0x3C60803E);
-SME_WRITE_32(SME_PORT_REGION(0x802B8B88, 0, 0, 0), 0xC8010AE0);
-SME_WRITE_32(SME_PORT_REGION(0x802B8B94, 0, 0, 0), 0xEC001028);
-SME_WRITE_32(SME_PORT_REGION(0x802B8B9C, 0, 0, 0), 0xEC010032);
+SME_WRITE_32(SME_PORT_REGION(0x802B8B6C, 0x802B0B3C, 0, 0), 0x90010AE4);
+SME_PATCH_BL(SME_PORT_REGION(0x802B8B70, 0x802B0B40, 0, 0), getCameraXRatio);
+SME_WRITE_32(SME_PORT_REGION(0x802B8B74, 0x802B0B44, 0, 0), SME_PORT_REGION(0xC842FFF0, 0xC842FE70, 0, 0));
+SME_WRITE_32(SME_PORT_REGION(0x802B8B78, 0x802B0B48, 0, 0), 0x3C80803E);
+SME_WRITE_32(SME_PORT_REGION(0x802B8B7C, 0x802B0B4C, 0, 0), 0x3C60803E);
+SME_WRITE_32(SME_PORT_REGION(0x802B8B88, 0x802B0B58, 0, 0), 0xC8010AE0);
+SME_WRITE_32(SME_PORT_REGION(0x802B8B94, 0x802B0B64, 0, 0), 0xEC001028);
+SME_WRITE_32(SME_PORT_REGION(0x802B8B9C, 0x802B0B6C, 0, 0), 0xEC010032);
 
 #if 1
 
@@ -83,7 +78,7 @@ static void scaleNintendoIntro(JUTRect *rect, int x1, int y1, int x2, int y2) {
 
   rect->set(x1, y1, x2, y2);
 }
-SME_PATCH_BL(SME_PORT_REGION(0x80296078, 0, 0, 0), scaleNintendoIntro);
+SME_PATCH_BL(SME_PORT_REGION(0x80296078, 0x8028DF10, 0, 0), scaleNintendoIntro);
 
 static void scaleGCConsoleExPane140(TExPane *pane) {
   TGCConsole2 *console;
@@ -93,7 +88,7 @@ static void scaleGCConsoleExPane140(TExPane *pane) {
 
   reinterpret_cast<TExPane **>(console)[0x140 / 4] = pane;
 }
-SME_PATCH_BL(SME_PORT_REGION(0x8014EF74, 0, 0, 0), scaleGCConsoleExPane140);
+SME_PATCH_BL(SME_PORT_REGION(0x8014EF74, 0x80143C04, 0, 0), scaleGCConsoleExPane140);
 
 static void scaleGCConsoleExPane108(TExPane *pane) {
   TGCConsole2 *console;
@@ -103,7 +98,7 @@ static void scaleGCConsoleExPane108(TExPane *pane) {
 
   reinterpret_cast<TExPane **>(console)[0x108 / 4] = pane;
 }
-SME_PATCH_BL(SME_PORT_REGION(0x8014EE24, 0, 0, 0), scaleGCConsoleExPane108);
+SME_PATCH_BL(SME_PORT_REGION(0x8014EE24, 0x80143AB4, 0, 0), scaleGCConsoleExPane108);
 
 static void scaleGCConsoleExPane160(TExPane *pane) {
   TGCConsole2 *console;
@@ -113,7 +108,7 @@ static void scaleGCConsoleExPane160(TExPane *pane) {
 
   reinterpret_cast<TExPane **>(console)[0x160 / 4] = pane;
 }
-SME_PATCH_BL(SME_PORT_REGION(0x8014F09C, 0, 0, 0), scaleGCConsoleExPane160);
+SME_PATCH_BL(SME_PORT_REGION(0x8014F09C, 0x80143D2C, 0, 0), scaleGCConsoleExPane160);
 
 static void scaleGCConsoleExPane2F8(TExPane *pane) {
   TGCConsole2 *console;
@@ -123,7 +118,7 @@ static void scaleGCConsoleExPane2F8(TExPane *pane) {
 
   reinterpret_cast<TExPane **>(console)[0x2F8 / 4] = pane;
 }
-SME_PATCH_BL(SME_PORT_REGION(0x8014F308, 0, 0, 0), scaleGCConsoleExPane2F8);
+SME_PATCH_BL(SME_PORT_REGION(0x8014F308, 0x80143F98, 0, 0), scaleGCConsoleExPane2F8);
 
 static void scaleGCConsoleExPane400(TExPane *pane) {
   TGCConsole2 *console;
@@ -133,7 +128,7 @@ static void scaleGCConsoleExPane400(TExPane *pane) {
 
   reinterpret_cast<TExPane **>(console)[0x400 / 4] = pane;
 }
-SME_PATCH_BL(SME_PORT_REGION(0x8014F70C, 0, 0, 0), scaleGCConsoleExPane400);
+SME_PATCH_BL(SME_PORT_REGION(0x8014F70C, 0x8014439C, 0, 0), scaleGCConsoleExPane400);
 
 static void scaleGCConsoleExPane42C(TExPane *pane) {
   TGCConsole2 *console;
@@ -143,7 +138,7 @@ static void scaleGCConsoleExPane42C(TExPane *pane) {
 
   reinterpret_cast<TExPane **>(console)[0x42C / 4] = pane;
 }
-SME_PATCH_BL(SME_PORT_REGION(0x8014F830, 0, 0, 0), scaleGCConsoleExPane42C);
+SME_PATCH_BL(SME_PORT_REGION(0x8014F830, 0x801444C0, 0, 0), scaleGCConsoleExPane42C);
 
 static void scaleGCConsoleExPane450(TExPane *pane) {
   TGCConsole2 *console;
@@ -153,20 +148,19 @@ static void scaleGCConsoleExPane450(TExPane *pane) {
 
   reinterpret_cast<TExPane **>(console)[0x450 / 4] = pane;
 }
-SME_PATCH_BL(SME_PORT_REGION(0x8014F93C, 0, 0, 0), scaleGCConsoleExPane450);
+SME_PATCH_BL(SME_PORT_REGION(0x8014F93C, 0x801445CC, 0, 0), scaleGCConsoleExPane450);
 
 static void scaleGCConsoleLoadAfter2F8(JUTRect *dst, const JUTRect &ref) {
   dst->copy(ref);
   dst->mX1 += getScreenTransX();
 }
-SME_PATCH_BL(SME_PORT_REGION(0x8014D8E8, 0, 0, 0), scaleGCConsoleLoadAfter2F8);
+SME_PATCH_BL(SME_PORT_REGION(0x8014D8E8, 0x80142578, 0, 0), scaleGCConsoleLoadAfter2F8);
 
 static void scaleGCConsoleLoadAfter550Add(JUTRect *src, int x, int y) {
   x += getScreenTransX();
   src->add(x, y);
 }
-SME_PATCH_BL(SME_PORT_REGION(0x8014E7E0, 0, 0, 0),
-             scaleGCConsoleLoadAfter550Add);
+SME_PATCH_BL(SME_PORT_REGION(0x8014E7E0, 0x80143470, 0, 0),             scaleGCConsoleLoadAfter550Add);
 
 static void setRecursivePanePos(JSUInputStream *stream, u16 *dst, size_t len) {
   stream->read(dst, len);
@@ -177,7 +171,7 @@ static void setRecursivePanePos(JSUInputStream *stream, u16 *dst, size_t len) {
     *dst += getScreenTransX();
   }
 }
-SME_PATCH_BL(SME_PORT_REGION(0x802CB320, 0, 0, 0), setRecursivePanePos);
+SME_PATCH_BL(SME_PORT_REGION(0x802CB320, 0x802C33B4, 0, 0), setRecursivePanePos);
 
 static void scaleGCConsoleExPane1C4(TExPane *pane) {
   TGCConsole2 *console;
@@ -187,7 +181,7 @@ static void scaleGCConsoleExPane1C4(TExPane *pane) {
 
   reinterpret_cast<TExPane **>(console)[0x1C4 / 4] = pane;
 }
-SME_PATCH_BL(SME_PORT_REGION(0x8014F114, 0, 0, 0), scaleGCConsoleExPane1C4);
+SME_PATCH_BL(SME_PORT_REGION(0x8014F114, 0x80143DA4, 0, 0), scaleGCConsoleExPane1C4);
 
 static void scalePauseMenuMask(J2DScreen *screen, int x, int y,
                                J2DGrafContext *context) {
@@ -200,7 +194,7 @@ static void scalePauseMenuMask(J2DScreen *screen, int x, int y,
 
   screen->draw(x, y, context);
 }
-SME_PATCH_BL(SME_PORT_REGION(0x8015600C, 0, 0, 0), scalePauseMenuMask);
+SME_PATCH_BL(SME_PORT_REGION(0x8015600C, 0x8014B028, 0, 0), scalePauseMenuMask);
 
 static void scaleSelectMenuMask(TSelectMenu *menu) {
   TExPane *pane;
@@ -217,7 +211,7 @@ static void scaleSelectMenuMask(TSelectMenu *menu) {
 
   startMove__11TSelectMenuFv(menu);
 }
-SME_PATCH_BL(SME_PORT_REGION(0x80175F50, 0, 0, 0), scaleSelectMenuMask);
+SME_PATCH_BL(SME_PORT_REGION(0x80175F50, 0x8016BEF4, 0, 0), scaleSelectMenuMask);
 
 static void scaleSelectMenuGrad(u32 type, u32 idx, u32 count) {
   TSelectGrad *grad;
@@ -241,11 +235,11 @@ static void scaleSelectMenuGrad(u32 type, u32 idx, u32 count) {
   GXPosition3f32(-getScreenTransX(), 464.0f, -100.0f);
   GXColor3u8(yColorR, yColorG, yColorB);
 }
-SME_PATCH_BL(SME_PORT_REGION(0x80175868, 0, 0, 0), scaleSelectMenuGrad);
-SME_WRITE_32(SME_PORT_REGION(0x8017586C, 0, 0, 0), 0x48000090);
+SME_PATCH_BL(SME_PORT_REGION(0x80175868, 0x8016B80C, 0, 0), scaleSelectMenuGrad);
+SME_WRITE_32(SME_PORT_REGION(0x8017586C, 0x8016B810, 0, 0), 0x48000090);
 
 static u32 fixShootingStarsNoDelete() {
-  u32 *emitterManager4D2 = *(u32 **)SME_PORT_REGION(0x8040E1E4, 0, 0, 0);
+  u32 *emitterManager4D2 = *(u32 **)SME_PORT_REGION(0x8040E1E4, 0x804058BC, 0, 0);
   TConsoleStr *consoleStr;
   SME_FROM_GPR(31, consoleStr);
 
@@ -257,8 +251,8 @@ static u32 fixShootingStarsNoDelete() {
 
   return 0;
 }
-SME_PATCH_BL(SME_PORT_REGION(0x80171314, 0, 0, 0), fixShootingStarsNoDelete);
-SME_WRITE_32(SME_PORT_REGION(0x80171318, 0, 0, 0), 0x809F0028);
+SME_PATCH_BL(SME_PORT_REGION(0x80171314, 0x800FAC3C, 0, 0), fixShootingStarsNoDelete);
+SME_WRITE_32(SME_PORT_REGION(0x80171318, 0x800FAC40, 0, 0), 0x809F0028);
 
 static void fixShootingStarsWideScreen(TBoundPane *pane, u32 size,
                                        JUTPoint &begin, JUTPoint &mid,
@@ -270,9 +264,9 @@ static void fixShootingStarsWideScreen(TBoundPane *pane, u32 size,
 
   pane->setPanePosition(size, begin, mid, end);
 }
-SME_PATCH_BL(SME_PORT_REGION(0x80170EFC, 0, 0, 0), fixShootingStarsWideScreen);
-SME_PATCH_BL(SME_PORT_REGION(0x80170F34, 0, 0, 0), fixShootingStarsWideScreen);
-SME_PATCH_BL(SME_PORT_REGION(0x80170F6C, 0, 0, 0), fixShootingStarsWideScreen);
+SME_PATCH_BL(SME_PORT_REGION(0x80170EFC, 0x80166D08, 0, 0), fixShootingStarsWideScreen);
+SME_PATCH_BL(SME_PORT_REGION(0x80170F34, 0x80166D54, 0, 0), fixShootingStarsWideScreen);
+SME_PATCH_BL(SME_PORT_REGION(0x80170F6C, 0x80166DA0, 0, 0), fixShootingStarsWideScreen);
 
 static void fixDemoMasksWideScreen_InitStaticGoPanes(TConsoleStr *consoleStr) {
   loadAfter__Q26JDrama8TNameRefFv(consoleStr);
@@ -297,7 +291,7 @@ static void fixDemoMasksWideScreen_InitStaticGoPanes(TConsoleStr *consoleStr) {
 
   consoleStr->mDemoMaskExPanes[1]->mRect.copy(*rect);
 }
-SME_PATCH_BL(SME_PORT_REGION(0x801723F0, 0, 0, 0),
+SME_PATCH_BL(SME_PORT_REGION(0x801723F0, 0x801681E0, 0, 0),
              fixDemoMasksWideScreen_InitStaticGoPanes);
 
 static JUTRect sGuideBorderRects[2];
@@ -341,7 +335,7 @@ static void fixGuideWideScreenOpen(TSMSFader *fader, u32 type, f32 time,
 
   consoleStr->mDemoMaskExPanes[1]->mRect.copy(*rect);
 }
-SME_PATCH_BL(SME_PORT_REGION(0x8017940C, 0, 0, 0), fixGuideWideScreenOpen);
+SME_PATCH_BL(SME_PORT_REGION(0x8017940C, 0x8016F2B4, 0, 0), fixGuideWideScreenOpen);
 
 static void fixGuideWideScreenClose(TSMSFader *fader, u32 type, f32 time,
                                     f32 delay) {
@@ -361,7 +355,7 @@ static void fixGuideWideScreenClose(TSMSFader *fader, u32 type, f32 time,
   *rect = sGuideBorderRects[1];
   *pane = sGuideBorderPanes[1];
 }
-SME_PATCH_BL(SME_PORT_REGION(0x80179880, 0, 0, 0), fixGuideWideScreenClose);
+SME_PATCH_BL(SME_PORT_REGION(0x80179880, 0x8016F738, 0, 0), fixGuideWideScreenClose);
 
 static void renderGuideWideScreenFix(J2DScreen *screen, int x, int y,
                                      J2DGrafContext *context) {
@@ -370,7 +364,7 @@ static void renderGuideWideScreenFix(J2DScreen *screen, int x, int y,
 
   screen->draw(x, y, context);
 }
-SME_PATCH_BL(SME_PORT_REGION(0x80179390, 0, 0, 0), renderGuideWideScreenFix);
+SME_PATCH_BL(SME_PORT_REGION(0x80179390, 0x8016F238, 0, 0), renderGuideWideScreenFix);
 
 static void scaleGuideMap(TGuide *guide) {
   resetObjects__6TGuideFv(guide);
@@ -381,7 +375,7 @@ static void scaleGuideMap(TGuide *guide) {
           ->mChildrenList.mFirst->mItemPtr);
   pane->mRect.mX2 = 600.0f;
 }
-SME_PATCH_BL(SME_PORT_REGION(0x8017CB64, 0, 0, 0), scaleGuideMap);
+SME_PATCH_BL(SME_PORT_REGION(0x8017CB64, 0x80172B94, 0, 0), scaleGuideMap);
 
 // -- DEBS -- //
 
@@ -420,7 +414,7 @@ static void fixDEBSWideScreenText(s32 x1, s32 y1, s32 width, s32 height) {
 
   GXSetScissor(x1 + (195.0f * sDEBSToTimerRatio), y1, width - (195.0f * sDEBSToTimerRatio), height);
 }
-SME_PATCH_BL(SME_PORT_REGION(0x80143FDC, 0, 0, 0), fixDEBSWideScreenText);
+SME_PATCH_BL(SME_PORT_REGION(0x80143FDC, 0x80138CAC, 0, 0), fixDEBSWideScreenText);
 
 static void fixDEBSWideScreenPanel(TGCConsole2 *console) {
   const f32 ratio = SME::TGlobals::getScreenToFullScreenRatio();
@@ -450,7 +444,7 @@ static void fixDeathScreenRatio(u32 *cardsave, TMarioGamePad *gamepad) {
   pane->mRect.mX1 -= offset;
   pane->mRect.mX2 += offset;
 }
-SME_PATCH_BL(SME_PORT_REGION(0x80163468, 0, 0, 0), fixDeathScreenRatio);
+SME_PATCH_BL(SME_PORT_REGION(0x80163468, 0x801584B4, 0, 0), fixDeathScreenRatio);
 
 static void fixYoshiFruitText(TGCConsole2 *console) {
   const f32 ratio = SME::TGlobals::getScreenToFullScreenRatio();
@@ -494,7 +488,7 @@ static void loadAfterGCConsolePatches(TGCConsole2 *console) {
   if (timg)
     marioName->changeTexture(timg, 0);
 }
-SME_PATCH_BL(SME_PORT_REGION(0x8014D8A4, 0, 0, 0), loadAfterGCConsolePatches);
+SME_PATCH_BL(SME_PORT_REGION(0x8014D8A4, 0x80142534, 0, 0), loadAfterGCConsolePatches);
 
 static void patchSMSFaderInOut(JDrama::TRect *rect, JUtility::TColor color) {
   rect->mX1 -= 1;
@@ -503,7 +497,7 @@ static void patchSMSFaderInOut(JDrama::TRect *rect, JUtility::TColor color) {
   GXSetViewport(rect->mX1, rect->mY1, rect->mX2, rect->mY2, 0.0f, 1.0f);
   fill_rect__9(rect, color);
 }
-// SME_PATCH_BL(SME_PORT_REGION(0x8013FDAC, 0, 0, 0), patchSMSFaderInOut);
+SME_PATCH_BL(SME_PORT_REGION(0x8013FDAC, 0x80134928, 0, 0), patchSMSFaderInOut);
 
 static void patchLevelSelectPosition(J2DScreen *screen, int x, int y,
                                      J2DGrafContext *context) {
@@ -511,7 +505,7 @@ static void patchLevelSelectPosition(J2DScreen *screen, int x, int y,
       ->mRect.move(getScreenTransX(), 0);
   screen->draw(x, y, context);
 }
-SME_PATCH_BL(SME_PORT_REGION(0x8013F430, 0, 0, 0), patchLevelSelectPosition);
+SME_PATCH_BL(SME_PORT_REGION(0x8013F430, 0x80133FAC, 0, 0), patchLevelSelectPosition);
 
 static SME_PURE_ASM void patchGXScissor() {
   // clang-format off
@@ -519,11 +513,16 @@ static SME_PURE_ASM void patchGXScissor() {
     asm volatile (
         SME_PORT_REGION (
             "lwz       7, -0x72F8(13)   \n\t",
-            "lwz       7, -0x72F8(13)   \n\t",
+            "lwz       7, -0x7338(13)   \n\t",
             "lwz       7, -0x72F8(13)   \n\t",
             "lwz       7, -0x72F8(13)   \n\t"
         )
-        "lwz       0, 0x1E8(7)        \n\t"
+        SME_PORT_REGION (
+            "lwz       0, 0x1E8(7)    \n\t",
+            "lwz       0, 0x156(7)    \n\t",
+            "lwz       0, 0x1E8(7)    \n\t",
+            "lwz       0, 0x1E8(7)    \n\t"
+        )
         "rlwinm    12,0,4,18,27       \n\t"
         "cmpwi     3, 0               \n\t"
         "beq-      .gx_loc_0x40       \n\t"
@@ -546,14 +545,14 @@ static SME_PURE_ASM void patchGXScissor() {
     );
   // clang-format on
 }
-SME_PATCH_B(SME_PORT_REGION(0x80363138, 0, 0, 0), patchGXScissor);
+SME_PATCH_B(SME_PORT_REGION(0x80363138, 0x8035b358, 0, 0), patchGXScissor);
 
 static void scaleUnderWaterMask(Mtx mtx, f32 x, f32 y, f32 z) {
   CPolarSubCamera *camera = gpCamera;
   x *= (reinterpret_cast<f32 *>(camera)[0x48 / 4] / 50.0f);
   PSMTXScale(mtx, x, y, z);
 }
-SME_PATCH_BL(SME_PORT_REGION(0x801ea96c, 0, 0, 0), scaleUnderWaterMask);
+SME_PATCH_BL(SME_PORT_REGION(0x801ea96c, 0x801E2844, 0, 0), scaleUnderWaterMask);
 
 #endif
 

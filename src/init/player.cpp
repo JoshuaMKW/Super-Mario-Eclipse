@@ -61,7 +61,7 @@ static void initFludd(TMario *player, TPlayerData *params) {
 static void initFluddInLoadAfter(TWaterGun *fludd) {
   fludd->mNozzleList[4]->mDamageLoss = 250;
 }
-SME_PATCH_B(SME_PORT_REGION(0x8026A3B8, 0, 0, 0), initFluddInLoadAfter);
+SME_PATCH_B(SME_PORT_REGION(0x8026A3B8, 0x80262144, 0, 0), initFluddInLoadAfter);
 
 static void initMario(TMario *player, bool isMario) {
   TStageParams *config = TStageParams::sStageConfig;
@@ -112,8 +112,8 @@ static TMario *fromMarioInit(TMario *player) {
   initMario(player, true);
   return player;
 }
-SME_WRITE_32(SME_PORT_REGION(0x80276C90, 0, 0, 0), 0x60000000);
-SME_PATCH_BL(SME_PORT_REGION(0x80276C94, 0, 0, 0), fromMarioInit);
+SME_WRITE_32(SME_PORT_REGION(0x80276C90, 0x8026EA1C, 0, 0), 0x60000000);
+SME_PATCH_BL(SME_PORT_REGION(0x80276C94, 0x8026EA20, 0, 0), fromMarioInit);
 
 // 0x800397DC
 static bool fromShadowMarioInit() {
@@ -122,7 +122,7 @@ static bool fromShadowMarioInit() {
   initMario(player, false);
   return SMS_isMultiPlayerMap__Fv();
 }
-SME_PATCH_BL(SME_PORT_REGION(0x800397DC, 0, 0, 0), fromShadowMarioInit);
+SME_PATCH_BL(SME_PORT_REGION(0x800397DC, 0x80039894, 0, 0), fromShadowMarioInit);
 
 // 0x80271580
 static void initYoshi(MAnmSound *anmSound, void *r4, u32 r5, f32 f1) {
@@ -149,4 +149,4 @@ static void initYoshi(MAnmSound *anmSound, void *r4, u32 r5, f32 f1) {
   yoshi->mFlutterAcceleration = config->mYoshiFlutterAcceleration.get();
   yoshi->mMaxFlutterTimer = config->mYoshiMaxFlutterTimer.get();
 }
-SME_PATCH_BL(SME_PORT_REGION(0x80271580, 0, 0, 0), initYoshi);
+SME_PATCH_BL(SME_PORT_REGION(0x80271580, 0x8026930C, 0, 0), initYoshi);

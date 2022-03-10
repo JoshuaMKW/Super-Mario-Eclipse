@@ -57,6 +57,6 @@ static void initCustomFunctions(TSpcBinary *spcBinary, const char *symbol,
   BIND_SYMBOL(spcBinary, "getStreamLooping", Spc::getStreamLooping);
   BIND_SYMBOL(spcBinary, "setStreamLooping", Spc::setStreamLooping);
 }
-SME_PATCH_BL(SME_PORT_REGION(0x80219380, 0, 0, 0), initCustomFunctions);
-SME_PATCH_BL(SME_PORT_REGION(0x80289920, 0, 0, 0), initCustomFunctions);
+SME_PATCH_BL(SME_PORT_REGION(0x80219380, 0x802112D4, 0, 0), initCustomFunctions);
+SME_PATCH_BL(SME_PORT_REGION(0x80289920, 0x802816AC, 0, 0), initCustomFunctions);
 #undef BIND_SYMBOL

@@ -22,7 +22,7 @@ static void checkExecWaterGun(TWaterGun *fludd) {
   if (!sIsTriggerNozzleDead)
     emit__9TWaterGunFv(fludd);
 }
-SME_PATCH_BL(SME_PORT_REGION(0x8024E548, 0, 0, 0), checkExecWaterGun);
+SME_PATCH_BL(SME_PORT_REGION(0x8024E548, 0x802462D4, 0, 0), checkExecWaterGun);
 
 static void killTriggerNozzle() {
   TNozzleTrigger *nozzle;
@@ -34,7 +34,7 @@ static void killTriggerNozzle() {
       nozzle->mFludd->mCurrentNozzle == TWaterGun::NozzleType::Turbo)
     sIsTriggerNozzleDead = true;
 }
-SME_PATCH_BL(SME_PORT_REGION(0x8026C370, 0, 0, 0), killTriggerNozzle);
+SME_PATCH_BL(SME_PORT_REGION(0x8026C370, 0x802640FC, 0, 0), killTriggerNozzle);
 
 // 0x80262580
 // extern -> SME.cpp
@@ -53,8 +53,8 @@ static bool checkAirNozzle() {
   return (!(player->mState & static_cast<u32>(TMario::State::AIRBORN)) ||
           !sIsTriggerNozzleDead);
 }
-SME_PATCH_BL(SME_PORT_REGION(0x80262580, 0, 0, 0), checkAirNozzle);
-SME_WRITE_32(SME_PORT_REGION(0x80262584, 0, 0, 0), 0x2C030000);
+SME_PATCH_BL(SME_PORT_REGION(0x80262580, 0x8025A30C, 0, 0), checkAirNozzle);
+SME_WRITE_32(SME_PORT_REGION(0x80262584, 0x8025A310, 0, 0), 0x2C030000);
 
 // extern -> fludd/generic.cpp
 void checkSpamHover(TNozzleTrigger *nozzle, u32 r4, TWaterEmitInfo *emitInfo) {

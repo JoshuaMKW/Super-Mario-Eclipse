@@ -76,7 +76,7 @@ static JKRExpHeap *createGlobalHeaps(void *newHeap, size_t size,
 #endif
   return gameHeap;
 }
-SME_PATCH_BL(SME_PORT_REGION(0x802A750C, 0, 0, 0), createGlobalHeaps);
+SME_PATCH_BL(SME_PORT_REGION(0x802A750C, 0x8029F588, 0, 0), createGlobalHeaps);
 
 // 0x802A7140
 // extern -> SME.cpp
@@ -94,7 +94,7 @@ static s32 setupMarioDatas(char *filepath) {
   snprintf(filepath, 32, "/data/chr%d.szs", static_cast<u8>(playerID));
   return DVDConvertPathToEntrynum(filepath);
 }
-SME_PATCH_BL(SME_PORT_REGION(0x802A7140, 0, 0, 0), setupMarioDatas);
+SME_PATCH_BL(SME_PORT_REGION(0x802A7140, 0x8029F02C, 0, 0), setupMarioDatas);
 
 // 0x802A716C
 // extern -> SME.cpp
@@ -116,7 +116,7 @@ static u32 *initFirstModel(const char *path, u32 unk_1, u32 unk_2, u32 unk_3,
 #endif
   return archive;
 }
-SME_PATCH_BL(SME_PORT_REGION(0x802A716C, 0, 0, 0), initFirstModel);
+SME_PATCH_BL(SME_PORT_REGION(0x802A716C, 0x8029F058, 0, 0), initFirstModel);
 
 static void resetGlobalValues() {
   gModelWaterManagerWaterColor.set(0x3C, 0x46, 0x78, 0x14); // Water rgba
@@ -193,4 +193,4 @@ static TMarDirector *initFileMods() {
 
   return director;
 }
-SME_PATCH_BL(SME_PORT_REGION(0x802998B4, 0, 0, 0), initFileMods);
+SME_PATCH_BL(SME_PORT_REGION(0x802998B4, 0x8029174C, 0, 0), initFileMods);

@@ -50,7 +50,7 @@ static s32 mountCard(TCardManager *cardManager, bool r4) {
 
   return ret;
 }
-SME_PATCH_BL(SME_PORT_REGION(0x802B20F8, 0, 0, 0), mountCard);
+SME_PATCH_BL(SME_PORT_REGION(0x802B20F8, 0x802AA008, 0, 0), mountCard);
 
 static s32 probeCard(TCardManager *cardManager) {
   s32 ret = cardManager->probe();
@@ -60,6 +60,6 @@ static s32 probeCard(TCardManager *cardManager) {
   }
   return ret;
 }
-SME_PATCH_BL(SME_PORT_REGION(0x80163C40, 0, 0, 0), probeCard);
+SME_PATCH_BL(SME_PORT_REGION(0x80163C40, 0x80158BF0, 0, 0), probeCard);
 
 #endif

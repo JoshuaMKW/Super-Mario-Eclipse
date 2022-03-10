@@ -23,7 +23,7 @@ static void patchWaterDownWarp(f32 y) {
   else
     player->mPosition.y = y;
 }
-SME_PATCH_BL(SME_PORT_REGION(0x80272710, 0, 0, 0), patchWaterDownWarp);
+SME_PATCH_BL(SME_PORT_REGION(0x80272710, 0x8026A49C, 0, 0), patchWaterDownWarp);
 
 static bool canDiePlane(f32 floorY) {
   TMario *player;
@@ -34,9 +34,9 @@ static bool canDiePlane(f32 floorY) {
 
   return (floorY > playerPos.y) && !player->mAttributes.mIsGameOver;
 }
-SME_PATCH_BL(SME_PORT_REGION(0x8024FB54, 0, 0, 0), canDiePlane);
-SME_WRITE_32(SME_PORT_REGION(0x8024FB58, 0, 0, 0), 0x2C030000);
-SME_WRITE_32(SME_PORT_REGION(0x8024FB5C, 0, 0, 0), 0x41820084);
+SME_PATCH_BL(SME_PORT_REGION(0x8024FB54, 0x802478E4, 0, 0), canDiePlane);
+SME_WRITE_32(SME_PORT_REGION(0x8024FB58, 0x802478E8, 0, 0), 0x2C030000);
+SME_WRITE_32(SME_PORT_REGION(0x8024FB5C, 0x802478EC, 0, 0), 0x41820084);
 
 static f32 enhanceWaterCheck(f32 x, f32 y, f32 z, TMario *player) {
   SME_FROM_GPR(29, player);
@@ -53,6 +53,6 @@ static f32 enhanceWaterCheck(f32 x, f32 y, f32 z, TMario *player) {
 
   return mapCol->checkGround(x, y, z, 0, tri);
 }
-SME_PATCH_BL(SME_PORT_REGION(0x8024F12C, 0, 0, 0), enhanceWaterCheck);
+SME_PATCH_BL(SME_PORT_REGION(0x8024F12C, 0x80246EB8, 0, 0), enhanceWaterCheck);
 
 #endif

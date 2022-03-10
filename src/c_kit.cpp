@@ -55,8 +55,8 @@ s32 Patch::CKit::onUpdate(void *director) { // movie director
   const f32 frameRate = SME::TGlobals::isVariableFrameRate()
                             ? SME::TGlobals::getFrameRate()
                             : SME::TGlobals::getFrameRate();
-  *(f32 *)SME_PORT_REGION(0x804167B8, 0, 0, 0) = 0.5f * (frameRate / 30.0f);
-  *(f32 *)SME_PORT_REGION(0x80414904, 0, 0, 0) = 0.01f * (frameRate / 30.0f);
+  *(f32 *)SME_PORT_REGION(0x804167B8, 0x8040DD10, 0, 0) = 0.5f * (frameRate / 30.0f);
+  *(f32 *)SME_PORT_REGION(0x80414904, 0x8040BE54, 0, 0) = 0.01f * (frameRate / 30.0f);
   gpApplication.mDisplay->mRetraceCount = frameRate > 30.0f ? 1 : 2;
   // ====================== //
 
@@ -293,11 +293,11 @@ static void extendedTagParam() {
 
 static void maintainYoshi(TYoshi *yoshi) {
   if (Util::Yoshi::isGreenYoshi(yoshi)) {
-    *(f32 *)0x80415F4C = 480.0f; // tounge
-    *(f32 *)0x80415F68 = 16384.0f;
+    *(f32 *)SME_PORT_REGION(0x80415F4C, 0x8040D4A4, 0, 0) = 480.0f; // tounge
+    *(f32 *)SME_PORT_REGION(0x80415F68, 0x8040D4A8, 0, 0) = 16384.0f;
   } else {
-    *(f32 *)0x80415F4C = 300.0f;
-    *(f32 *)0x80415F68 = 10000.0f;
+    *(f32 *)SME_PORT_REGION(0x80415F4C, 0x8040D4A4, 0, 0) = 300.0f;
+    *(f32 *)SME_PORT_REGION(0x80415F68, 0x8040D4A8, 0, 0) = 10000.0f;
   }
 }
 

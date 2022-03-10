@@ -38,19 +38,19 @@ const char *Util::getStageName(TApplication *gpApplication) {
 
 void *Util::loadArchive(const char *path, JKRHeap *heap,
                         JKRDvdRipper::EAllocDirection allocDirection) {
-  SME_DEBUG_LOG("Loading \"%s\" into memory...\n", path);
+  SME_LOG("Loading \"%s\" into memory...\n", path);
   if (DVDConvertPathToEntrynum(path) >= 0) {
     u32 *file = static_cast<u32 *>(JKRDvdRipper::loadToMainRAM(
         path, nullptr, JKRExpandSwitch::EXPAND, 0, heap, allocDirection, 0, nullptr));
 
     if (file) {
-      SME_DEBUG_LOG("Success! Location = %X, Size = %X\n", file, file[1]);
+      SME_LOG("Success! Location = %X, Size = %X\n", file, file[1]);
     } else {
-      SME_DEBUG_LOG("Failed! Could not allocate memory\n");
+      SME_LOG("Failed! Could not allocate memory\n");
     }
     return file;
   } else {
-    SME_DEBUG_LOG("Failed! \"%s\" was not found\n");
+    SME_LOG("Failed! \"%s\" was not found\n");
     return nullptr;
   }
 }

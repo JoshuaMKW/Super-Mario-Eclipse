@@ -55,6 +55,7 @@ struct TGlobals {
   static f32 getFrameRate() { return sFrameRate; }
   static f32 getScreenToFullScreenRatio() { return sScreenWidth / 600.0f; }
   static u8 getMinDarkness() { return sMinDarkness; }
+  static Enum::UIKind getUIKind() { return sUIKind; }
 
   static void setDebugMode(bool active) { sIsDebugMode = active; }
   static void setScreenWidth(f32 width) { sScreenWidth = width; }
@@ -62,6 +63,7 @@ struct TGlobals {
   static void setVariableFrameRate(bool active) { sIsVariableFrameRate = active; }
   static void setMirrorMode(bool mirror) { sIsMirrorMode = mirror; }
   static void setMinDarkness(u8 val) { sMinDarkness = val; }
+  static void setUIKind(Enum::UIKind kind) { sUIKind = kind; }
 
   static Class::TLightContext sLightData;
 
@@ -86,6 +88,7 @@ struct TGlobals {
   static u8 sActivePlayers;
   static u8 sMaxPlayers;
   static Enum::Player sCharacterIDList[SME_MAX_PLAYERS];
+  static Enum::UIKind sUIKind;
   static f32 sScreenWidth;
   static f32 sFrameRate;
   static bool sIsVariableFrameRate;

@@ -17,6 +17,7 @@ static u32 _sLastOfs = 0;
 static u8 _sLastVol = 0xFF;
 static bool _startPaused = false;
 
+#if SME_CUSTOM_MUSIC
 static void updaterLoop() {
   main__Q28JASystem10HardStreamFv();
 
@@ -57,6 +58,17 @@ static void *mainLoop(void *param) {
     }
   }
 }
+#else
+static void *mainLoop(void *param) {
+  AudioStreamer *streamer = reinterpret_cast<AudioStreamer *>(param);
+  AudioStreamer::AudioCommand command;
+  OSMessage msg;
+
+  while (true) {
+    OSReceiveMessage(&streamer->mMessageQueue, &msg, OS_MESSAGE_BLOCK);
+  }
+}
+#endif
 
 static void volumeAlarm(OSAlarm *alarm, OSContext *context) {
   AudioStreamer *streamer = AudioStreamer::getInstance();
@@ -95,6 +107,7 @@ static DVDCommandBlock sAudioCmdBlock;
 
 static AudioStreamer::AudioCommand sAudioCommand =
     AudioStreamer::AudioCommand::NONE;
+
 AudioStreamer AudioStreamer::sInstance =
     AudioStreamer(mainLoop, 18, &sAudioFInfo, &sAudioCmdBlock);
 

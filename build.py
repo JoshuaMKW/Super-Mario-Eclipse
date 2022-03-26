@@ -5,6 +5,7 @@ import atexit
 from concurrent.futures import ThreadPoolExecutor
 import functools
 import json
+import logging
 from multiprocessing.pool import ThreadPool
 import os
 import shutil
@@ -25,59 +26,35 @@ from dolreader.section import TextSection
 from pyisotools.bnrparser import BNR
 from pyisotools.iso import GamecubeISO
 
-from compiler import AllocationMap, BuildKind, CompilerFactory, CompilerKind, Define, KernelKind
+from compiler import AllocationMap, BuildKind, CompilerFactory, CompilerKind, Define, KernelKind, Region
 from prmparser import PrmFile
 
-__TMPDIR = Path("tmp-compiler")
+TMPDIR = Path("tmp-compiler")
 
 
 @atexit.register
 def clean_resources():
-    if __TMPDIR.is_dir():
+    if TMPDIR.is_dir():
         pass  # shutil.rmtree(__TMPDIR)
 
 
-def wrap_printer(msg: str = "") -> function:
-    def decorater_inner(func):
-        @functools.wraps(func)
-        def wrapper(*args, **kwargs):
-            print("")
-            if len(msg.strip()) > 0:
-                print(f"====== {msg} ======".center(128))
-            print("-"*128)
-            value = func(*args, **kwargs)
-            print("-"*128)
-            return value
-        return wrapper
-    return decorater_inner
+class BootType(str, Enum):
+    DOL = "DOL"
+    ISO = "ISO"
+    NONE = "NONE"
 
 
-class Region(str, Enum):
-    US = "US"
-    EU = "EU"
-    JP = "JP"
-    KR = "KR"
-    ANY = "ANY"
+class IndentedFormatter(logging.Formatter):
+    IndentionWidth = 4
 
-
-class FileStream(object):
-    def __init__(self, path: str, stream: IO):
-        self.path = path
-        self.stream = stream
-
-    def __del__(self) -> None:
-        if not self.stream.closed:
-            self.stream.close()
+    def format(self, record):
+        """Format a record with added indentation."""
+        indent = " " * self.IndentionWidth
+        head, *trailing = super().format(record).splitlines(True)
+        return head + ''.join(indent + line for line in trailing)
 
 
 class FilePatcher:
-    class BootType(str, Enum):
-        DOL = "DOL"
-        ISO = "ISO"
-        NONE = "NONE"
-
-    MainAllocationMap = AllocationMap()
-
     def __init__(
         self,
         compiler: CompilerKind,
@@ -88,7 +65,9 @@ class FilePatcher:
         region: Region = Region.US,
         bootfrom: BootType = BootType.DOL,
         startAddr: int = 0x80000000,
-        shines: int = 120
+        optimize: str = "-O2",
+        shines: int = 120,
+        logger: Optional[logging.Logger] = None
     ):
 
         if isinstance(startAddr, str):
@@ -103,20 +82,27 @@ class FilePatcher:
 
         self._fileTables = {}
         self._init_tables()
-
-        print(
-            self._get_matching_filepath(
-                self.solutionRegionDir / "main.dol"
-            )
-        )
+        
+        if logger is None:
+            logger = logging.Logger("Default-Logger")
 
         self.compiler = CompilerFactory.create(
             patcher,
             compiler,
             startAddr,
+            optimize,
             buildKind,
-            region
+            region,
+            logger
         )
+
+    @property
+    def logger(self) -> logging.Logger:
+        return self.compiler.logger
+
+    @logger.setter
+    def logger(self, logger: logging.Logger):
+        self.compiler.logger = logger
 
     @property
     def solutionRegionDir(self) -> Path:
@@ -133,19 +119,19 @@ class FilePatcher:
             return self.projectDir / "assets/bin/debug/any"
 
     def is_release(self) -> bool:
-        return self.buildKind in {BuildKind.RELEASE, BuildKind.RELEASE_DEBUG}
+        return self.compiler.is_release()
 
     def is_debug(self) -> bool:
-        return self.buildKind == BuildKind.DEBUG
+        return self.compiler.is_debug()
 
     def is_booting(self) -> bool:
-        return self.bootType != FilePatcher.BootType.NONE
+        return self.bootType != BootType.NONE
 
     def is_iso_boot(self) -> bool:
-        return self.bootType == FilePatcher.BootType.ISO
+        return self.bootType == BootType.ISO
 
     def is_dol_boot(self) -> bool:
-        return self.bootType == FilePatcher.BootType.DOL
+        return self.bootType == BootType.DOL
 
     def is_ignored(self, path: Path) -> bool:
         with Path(self.solutionRegionDir / ".config.json").open("r") as f:
@@ -226,28 +212,25 @@ class FilePatcher:
             dolphin = Path(config["dolphinpath"])
 
             if self.is_dol_boot():
-                print(f"\nAttempting to boot Dolphin by DOL at {dolphin}...\n")
+                self.logger.info("Attempting to boot Dolphin by DOL at %s...", dolphin)
                 subprocess.Popen(
-                    f"\"{dolphin}\" -e \"{self.dest}\" " + " ".join(options), shell=True)
+                    f"\"{dolphin}\" -e \"{self.gameDir / 'sys/main.dol'}\" " + " ".join(options), shell=True)
             elif self.is_iso_boot():
-                print(f"\nAttempting to boot Dolphin by ISO at {dolphin}...\n")
                 isoPath = self._build_iso(config)
+                self.logger.info("Attempting to boot Dolphin by ISO at %s...", dolphin)
                 subprocess.Popen(
                     f"\"{dolphin}\" -e \"{isoPath}\" " + " ".join(options), shell=True)
 
-    @wrap_printer("ISO BUILDING")
     def _build_iso(self, config: dict) -> Path:
         isoPath = Path(config["buildpath"])
 
-        print(f"{self.gameDir} -> {isoPath}")
+        self.logger.info("%s -> %s", self.gameDir, isoPath)
 
         iso = GamecubeISO.from_root(self.gameDir, True)
         iso.build(isoPath, preCalc=False)
 
-        print("-"*128)
         return isoPath
 
-    @wrap_printer("DOL PATCHING")
     def _patch_dol(self) -> bool:
         srcDolPath = self.solutionRegionDir / "system/main.dol"
         destDolPath = self.gameDir / "sys/main.dol"
@@ -256,9 +239,9 @@ class FilePatcher:
 
         if srcDolPath.exists():
             if self.is_release():
-                print(f"Generating {self.maxShines} shines RELEASE build")
+                self.logger.info("Generating %d shines RELEASE build", self.maxShines)
             elif self.is_debug():
-                print(f"Generating {self.maxShines} shines DEBUG build")
+                self.logger.info("Generating %d shines DEBUG build", self.maxShines)
 
             with srcDolPath.open("rb") as dol:
                 _dolData = DolFile(dol)
@@ -269,6 +252,7 @@ class FilePatcher:
                 # executor.map(lambda f: os.rename(*f), [(str(m), str(modulesDest / m.name)) for m in modules])
                 for m in modules:
                     os.unlink(modulesDest / m.name)
+                    self.logger.info("Moving module %s to %s", m.name, modulesDest / m.name)
                     m.rename(modulesDest / m.name)
 
                 self._create_signatures(_dolData, "Super Mario Eclipse\0")
@@ -306,8 +290,8 @@ class FilePatcher:
             return True
         return False
 
-    @wrap_printer("REPLACING | COPYING")
     def _replace_files_from_config(self, solutionPath: Path):
+        REPLACE_LOG = ""
         with Path(solutionPath / ".config.json").open("r") as f:
             config = json.load(f)
 
@@ -326,7 +310,7 @@ class FilePatcher:
 
             if destPath is None:
                 if f.is_file() and self.is_ignored(f.relative_to(solutionPath)):
-                    print(f"{relativePath} -> No destination found")
+                    REPLACE_LOG += f"{relativePath} -> No destination found\n"
                 continue
 
             if not destPath.parent.exists():
@@ -349,10 +333,13 @@ class FilePatcher:
             else:
                 destPath.write_bytes(f.read_bytes())
 
-            print(f"{relativePath} -> {destPath}")
+            REPLACE_LOG += f"{relativePath} -> {destPath}\n"
 
-    @wrap_printer("RENAMING")
+        if REPLACE_LOG.strip() != "":
+            self.logger.info(REPLACE_LOG.strip())
+
     def _rename_files_from_config(self, solutionPath: Path):
+        RENAME_LOG = ""
         _renamed = []
 
         with Path(solutionPath / ".config.json").open("r") as f:
@@ -363,20 +350,26 @@ class FilePatcher:
                 rename = config["rename"][path]
 
                 if fnmatch(f, self.gameDir / path):
-                    print(f"{f.relative_to(self.gameDir)} -> {f.parent / rename}")
+                    RENAME_LOG += f"{f.relative_to(self.gameDir)} -> {f.parent / rename}\n"
                     f.rename(f.parent / rename)
                     _renamed.append(f)
 
-    @wrap_printer("DELETING")
+        if RENAME_LOG.strip() != "":
+            self.logger.info(RENAME_LOG.strip())
+
     def _delete_files_from_config(self, solutionPath: Path):
+        DELETE_LOG = ""
         with Path(solutionPath / ".config.json").open("r") as f:
             config = json.load(f)
 
         for f in self.gameDir.rglob("*"):
             for path in config["delete"]:
                 if fnmatch(f, self.gameDir / path):
-                    print(f"{f} -> DELETED")
+                    DELETE_LOG += f"{f} -> DELETED\n"
                     f.unlink()
+
+        if DELETE_LOG.strip() != "":
+            self.logger.info(DELETE_LOG.strip())
 
     def _get_translated_filepath(self, relativePath: Union[str, Path]) -> Path:
         return self.gameDir / relativePath
@@ -423,7 +416,6 @@ class FilePatcher:
         return None
 
     def _compile_bnr_to_game(self, path: Path):
-        print(path)
         if not path.exists():
             return
 
@@ -436,23 +428,6 @@ class FilePatcher:
                 section.data.seek(offset)
                 section.data.write(name.encode(encoding))
 
-    def _alloc_from_heap(self, dol: DolFile, size: int):
-        size = (size + 31) & -32
-
-        for packet in _ALLOC_LO_INFO.group(self.region):
-            dol.seek(packet.address)
-            for instr in packet.instructions:
-                dol.write_uint32(
-                    dol.tell(), instr.as_translated(self.startaddr + size))
-
-        for packet in _ALLOC_HI_INFO.group(self.region):
-            return
-            dol.seek(packet.address)
-            for instr in packet.instructions:
-                dol.write_uint32(
-                    dol.tell(), instr.as_translated(0x211000))
-
-
 def main():
     parser = argparse.ArgumentParser(
         "SMS-Patcher", description="C++ Patcher for SMS NTSC-U, using Kamek by Treeki")
@@ -461,7 +436,7 @@ def main():
     parser.add_argument("-p", "--projectfolder",
                         help="project folder used to patch game", metavar="PATH")
     parser.add_argument("-s", "--startaddr", help="Starting address for the linker and code",
-                        default=0x80000000, type=lambda x: int(x, 0), metavar="ADDR")
+                        default="0x80000000", type=lambda x: int(x, 0), metavar="ADDR")
     parser.add_argument("-b", "--build", help="Build type; R=Release, D=Debug",
                         choices=["R", "D", "RD"], default="D")
     parser.add_argument("-c", "--compiler", choices=[
@@ -474,7 +449,7 @@ def main():
     parser.add_argument("-P", "--patcher", help="Game patcher",
                         choices=[KernelKind.KAMEK, KernelKind.KURIBO], default=KernelKind.KAMEK)
     parser.add_argument("--boot", help="What to boot from",
-                        choices=[FilePatcher.BootType.DOL, FilePatcher.BootType.ISO, FilePatcher.BootType.NONE], default=FilePatcher.BootType.NONE)
+                        choices=[BootType.DOL, BootType.ISO, BootType.NONE], default=BootType.NONE)
     parser.add_argument(
         "--shines", help="Max shines allowed", type=int, default=120)
     parser.add_argument("--out", help="File to output to")
@@ -499,9 +474,17 @@ def main():
         build = BuildKind.RELEASE
 
     if args.out:
-        out = FileStream(args.out, open(args.out, "w"))
+        logger = logging.Logger(args.out.split(".")[0].upper())
+        logFormatter = IndentedFormatter(
+            fmt="%(name)s [%(funcName)s] | %(asctime)s | %(levelname)s:\n%(message)s\n",
+            datefmt="%m-%d-%Y %H:%M:%S"
+        )
+        fhandle = logging.FileHandler(args.out)
+        fhandle.setFormatter(logFormatter)
+        logger.addHandler(fhandle)
+        fhandle.stream.write(f"== {logger.name} - NEW SESSION ==\n\n")
     else:
-        out = None
+        logger = None
 
     patcher = FilePatcher(
         CompilerKind(args.compiler),
@@ -510,18 +493,13 @@ def main():
         args.gamefolder,
         args.projectfolder,
         args.region,
-        FilePatcher.BootType(args.boot),
+        BootType(args.boot),
         args.startaddr,
-        args.shines
+        f"-O{args.optimize_level}",
+        args.shines,
+        logger
     )
-
-    sys.stdout = out.stream
-    sys.stderr = out.stream
-
     patcher.patch_game()
-
-    sys.stdout = sys.__stdout__
-    sys.stderr = sys.__stderr__
 
 
 if __name__ == "__main__":

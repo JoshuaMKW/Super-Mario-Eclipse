@@ -6,6 +6,7 @@ import atexit
 from enum import Enum, IntEnum
 import sys
 import time
+from turtle import end_fill
 from pathos.multiprocessing import ProcessPool, ThreadPool
 import json
 import os
@@ -32,7 +33,7 @@ COMPILER_PATH = Path("assets/compiler")
 @atexit.register
 def clean_resources():
     if TMPDIR.is_dir():
-        shutil.rmtree(TMPDIR)
+        ...# shutil.rmtree(TMPDIR)
 
 
 def _get_bit_alignment(num: int, limit: int = 64) -> int:
@@ -40,6 +41,31 @@ def _get_bit_alignment(num: int, limit: int = 64) -> int:
         if (num >> i) & 1 == 1:
             return i
     return -1
+
+
+def _get_clang_errors(stream: TextIO) -> List[str]:
+    _old = stream.tell()
+    stream.seek(0, 2)
+    end = stream.tell()
+    stream.seek(_old, 0)
+
+    errors = []
+    while stream.tell() < end:
+        currentLine = stream.readline()
+        if "error:" not in currentLine:
+            continue
+        error = [currentLine]
+        print(currentLine)
+        while stream.tell() < end:
+            futureLine = stream.readline()
+            error.append(futureLine)
+            if "error generated." in futureLine or "errors generated." in futureLine:
+                print(error)
+                errors.append("".join(error))
+                break
+    stream.seek(_old, 0)
+    return errors
+
 
 
 class Region(str, Enum):
@@ -306,7 +332,7 @@ class Module:
         If a linker is set, it will link them together into a single object
         as the first item in the returned list
         """
-        logger.info("[%s] Compiling into object...\n", self.name)
+        logger.info("[%s] Compiling into object...", self.name)
 
         tmpStream = open("tmpstream_.log", "w+")
         tmpObject = "tmp.o"
@@ -341,7 +367,7 @@ class Module:
         else:
             raise ValueError(f"Unknown compiler kind \"{self.compilerKind}\"")
 
-        runningTasks: List[subprocess.Popen] = []
+        runningTasks: List[Popen] = []
         for obj in self.objects:
             obj = obj.resolve()
             if obj.is_file():
@@ -368,9 +394,8 @@ class Module:
         TMP_C = TMPDIR / f"c_obj.o"
         TMP_ASM = TMPDIR / f"s_obj.o"
         if len(cppObjects) > 0:
-            print(" ".join([str(cppCompilerPath), *cppObjects, *self.includes,
-                            *self.defines, *cppOptions, "-o", str(TMP_CPP)]))
-            print(tmpStream, file=sys.__stdout__)
+            # print(" ".join([str(cppCompilerPath), *cppObjects, *self.includes,
+            #                 *self.defines, *cppOptions, "-o", str(TMP_CPP)]))
             runningTasks.append(
                 self.__compile_objects(
                     str(TMP_CPP),
@@ -419,7 +444,8 @@ class Module:
         for obj in linkObjects:
             if not obj.is_file():
                 logger.warning(
-                    "[%s] Failed to compile into %s\n", self.name, obj.name)
+                    "[%s] Failed to compile into %s", self.name, obj.name
+                )
 
         if len(linkObjects) != 0 and linkerPath.is_file():
             subprocess.run([str(linkerPath), *linkObjects, *linkOptions, "-o", tmpObject], stdout=tmpStream, stderr=tmpStream,
@@ -427,9 +453,9 @@ class Module:
             linkObjects = [tmpObject]
 
         tmpStream.seek(0)
-        logger.info("[%s] %s", self.name, tmpStream.read())
+        self.__report_errors(_get_clang_errors(tmpStream), logger)
         tmpStream.close()
-        os.unlink("tmpstream_.log")
+        # os.unlink("tmpstream_.log")
         return linkObjects
 
     def __compile_objects(
@@ -459,6 +485,10 @@ class Module:
             stdout=stdout,
             stderr=stderr
         )
+
+    def __report_errors(self, errors: List[str], logger: logging.Logger):
+        if len(errors) > 0:
+            logger.error("\n".join(errors).rstrip())
 
 
 class _Compiler(ABC):
@@ -545,7 +575,7 @@ class _Compiler(ABC):
 
     @property
     def includes(self) -> List[str]:
-        self.__includes
+        return self.__includes
 
     @includes.setter
     def includes(self, incs: List[str]):
@@ -742,9 +772,8 @@ class KuriboClangCompiler(_KuriboCompiler):
         elif self.is_kamek():
             _defines.append(Define("SME_BUILD_KAMEK_INLINE").to_cli_command())
 
-        print(_defines, file=sys.__stdout__)
         module = Module(
-            "SME",
+            name="SME",
             defines=_defines,
             includes=self.includes,
             cppOptions=self.cxxOptions,
@@ -854,7 +883,7 @@ class KuriboCodeWarriorCompiler(_KuriboCompiler):
                 kxeModules.append(module)
 
         size = sum([kxe.stat().st_size for kxe in kxeModules])
-        _alloc_from_heap(
+        self._alloc_from_heap(
             dol, (self._kernelPath.stat().st_size + 31) & -32)
 
         return kxeModules
@@ -927,7 +956,7 @@ class KuriboGCCCompiler(_KuriboCompiler):
                 kxeModules.append(module)
 
         size = sum([kxe.stat().st_size for kxe in kxeModules])
-        _alloc_from_heap(
+        self._alloc_from_heap(
             dol, (self._kernelPath.stat().st_size + 31) & -32)
 
         return kxeModules
@@ -939,7 +968,7 @@ class CompilerFactory:
         kernel: KernelKind,
         compiler: CompilerKind,
         startAddress: int = 0x80000000,
-        optimize: Optional[str] = "-O1",
+        optimize: str = "-O1",
         debugLevel: BuildKind = BuildKind.DEBUG,
         region: Region = Region.US,
         logger: Optional[logging.Logger] = None

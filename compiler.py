@@ -55,17 +55,14 @@ def _get_clang_errors(stream: TextIO) -> List[str]:
         if "error:" not in currentLine:
             continue
         error = [currentLine]
-        print(currentLine)
         while stream.tell() < end:
             futureLine = stream.readline()
             error.append(futureLine)
             if "error generated." in futureLine or "errors generated." in futureLine:
-                print(error)
                 errors.append("".join(error))
                 break
     stream.seek(_old, 0)
     return errors
-
 
 
 class Region(str, Enum):
@@ -380,16 +377,6 @@ class Module:
             else:
                 logger.info("[%s] %s is not a file", self.name, obj)
 
-            # elif obj.is_dir():
-            #     for f in obj.rglob("*"):
-            #         f = f.resolve()
-            #         if f.suffix in (".cpp", ".cxx", ".c++"):
-            #             cppObjects.append(str(f))
-            #         elif f.suffix == ".c":
-            #             cObjects.append(str(f))
-            #         elif f.suffix == ".s":
-            #             sObjects.append(str(f))
-
         TMP_CPP = TMPDIR / f"cpp_obj.o"
         TMP_C = TMPDIR / f"c_obj.o"
         TMP_ASM = TMPDIR / f"s_obj.o"
@@ -453,9 +440,16 @@ class Module:
             linkObjects = [tmpObject]
 
         tmpStream.seek(0)
-        self.__report_errors(_get_clang_errors(tmpStream), logger)
+        if self.compilerKind == CompilerKind.CODEWARRIOR:
+            errors = []
+        elif self.compilerKind == CompilerKind.CLANG:
+            errors = _get_clang_errors(tmpStream)
+        elif self.compilerKind == CompilerKind.GCC:
+            errors = []
         tmpStream.close()
-        # os.unlink("tmpstream_.log")
+        os.unlink("tmpstream_.log")
+
+        self.__report_errors(errors, logger)
         return linkObjects
 
     def __compile_objects(
@@ -807,9 +801,15 @@ class KuriboClangCompiler(_KuriboCompiler):
         while any([task[0].poll() is None for task in runningTasks]):
             time.sleep(0.1)
 
+        kxeErrors = ""
         for task, module in runningTasks:
             if task.returncode == 0:
                 kxeModules.append(module)
+            else:
+                kxeErrors += f"Kuribo module \"{module.name}\" failed to compile!\n"
+
+        if kxeErrors.strip() != "":
+            self.logger.error(kxeErrors.strip())
 
         size = sum([kxe.stat().st_size for kxe in kxeModules])
         self._alloc_from_heap(
@@ -1152,7 +1152,7 @@ def main():
     ]
 
     worker.run(args.src, args.dolfile)
-    worker.logger.log("Built Successfully")
+    worker.logger.info("Built Successfully")
 
 if __name__ == "__main__":
     main()

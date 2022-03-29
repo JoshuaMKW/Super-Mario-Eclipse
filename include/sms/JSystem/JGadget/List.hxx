@@ -49,11 +49,11 @@ public:
   iterator mStart;
 };
 
-template <class _T, template<class> class _A> class TList {
-  class TNode_ {
+template <class _T, template <class> class _A> class TList {
+  struct TNode_ {
     TNode_ *mPrev;
     TNode_ *mNext;
-    void *mItem;
+    _T mItem;
   };
 
 public:
@@ -65,10 +65,14 @@ public:
     bool operator==(iterator &rhs) const { return mCurrent == rhs.mCurrent; }
     bool operator!=(iterator &rhs) const { return mCurrent != rhs.mCurrent; }
     TNode_ *operator->() const { return mCurrent; }
+    iterator operator++() { return iterator(mCurrent->mNext); }
+    iterator operator--() { return iterator(mCurrent->mPrev); }
+    iterator operator*() { return iterator(mCurrent); }
 
     TNode_ *mCurrent;
   };
 
+  TList() : _00(0), mSize(0), mStart(nullptr) {}
   TList(_A<_T> *allocator) { _00 = allocator->_00; }
 
   TNode_ *CreateNode_(TNode_ *prev, TNode_ *next, void **item);
@@ -96,11 +100,11 @@ public:
     return iterator(iter);
   }
 
-  iterator insert(iterator iter, const _T *&node) {
+  iterator insert(iterator iter, const _T &node) {
     TNode_ *current = iter.mCurrent;
     TNode_ *next = current->mNext;
 
-    TNode_ *newNode = CreateNode_(iter.mCurrent, iter.mCurrent, &node);
+    TNode_ *newNode = CreateNode_(iter.mCurrent, iter.mCurrent, reinterpret_cast<void **>(&node));
     if (!newNode)
       return mStart;
 
@@ -154,8 +158,7 @@ public:
 
 class TList_pointer_void : public TAllocator<void *> {
 public:
-  void insert(TList<void *, TAllocator>::iterator iterator,
-              void **node);
+  void insert(TList<void *, TAllocator>::iterator iterator, void **node);
 };
 
 template <typename _T> class TList_pointer : public TList_pointer_void {
@@ -171,8 +174,7 @@ template <typename _T> class TList_pointer : public TList_pointer_void {
 
   void insert(TList_pointer<_T>::iterator iterator, _T **node) {
     TList_pointer_void::insert(
-        reinterpret_cast<TList<void *, TAllocator>::iterator>(iterator),
-        node);
+        reinterpret_cast<TList<void *, TAllocator>::iterator>(iterator), node);
   }
 
   size_t mSize;

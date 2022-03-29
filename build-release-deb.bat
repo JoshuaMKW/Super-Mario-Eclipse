@@ -1,4 +1,4 @@
-python build.py "C:\Users\Kyler-Josh\3D Objects\Dolphin\Dolphin-Games\Super Mario Eclipse ROOT\root" -r US -s 80427800 -b RD --shines 300
-python build.py "C:\Users\Kyler-Josh\3D Objects\Dolphin\Dolphin-Games\Super Mario Eclipse ROOT\root" -r EU -s 80427800 -b RD --shines 300
-python build.py "C:\Users\Kyler-Josh\3D Objects\Dolphin\Dolphin-Games\Super Mario Eclipse ROOT\root" -r JP -s 80427800 -b RD --shines 300
-python build.py "C:\Users\Kyler-Josh\3D Objects\Dolphin\Dolphin-Games\Super Mario Eclipse ROOT\root" -r KR -s 80427800 -b RD --shines 300
+python build.py "C:\Users\Kyler-Josh\3D Objects\Dolphin\Dolphin-Games\Super Mario Eclipse ROOT\root" -r US -c CLANG -o 3 -P KURIBO -s 0x80427800 -b RD --shines 300 --boot NONE --out "sme_release-us.log"
+@REM python build.py "C:\Users\Kyler-Josh\3D Objects\Dolphin\Dolphin-Games\Super Mario Eclipse ROOT\root" -r EU -c CLANG -o 3 -P KURIBO -s 0x80427800 -b RD --shines 300 --boot NONE --out "sme_release-eu.log"
+@REM python build.py "C:\Users\Kyler-Josh\3D Objects\Dolphin\Dolphin-Games\Super Mario Eclipse ROOT\root" -r JP -c CLANG -o 3 -P KURIBO -s 0x80427800 -b RD --shines 300 --boot NONE --out "sme_release-jp.log"
+@REM python build.py "C:\Users\Kyler-Josh\3D Objects\Dolphin\Dolphin-Games\Super Mario Eclipse ROOT\root" -r KR -c CLANG -o 3 -P KURIBO -s 0x80427800 -b RD --shines 300 --boot NONE --out "sme_release-kr.log"

@@ -4,6 +4,8 @@
 #include "SME.hxx"
 #include "Globals.hxx"
 
+#if SME_CUSTOM_MUSIC
+
 using namespace SME;
 using namespace SME::Class;
 
@@ -225,3 +227,5 @@ static void stopMusicOnGameOver(u32 musicID) {
   MSBgm::startBGM(musicID);
 }
 SME_PATCH_BL(SME_PORT_REGION(0x802988B0, 0, 0, 0), stopMusicOnGameOver);
+
+#endif

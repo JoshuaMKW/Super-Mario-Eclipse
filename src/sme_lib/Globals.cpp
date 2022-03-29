@@ -35,6 +35,7 @@ u8 TGlobals::sMaxPlayers = SME_MAX_PLAYERS;
 Enum::Player TGlobals::sCharacterIDList[] = {
     Enum::Player::MARIO, Enum::Player::UNKNOWN, Enum::Player::UNKNOWN,
     Enum::Player::UNKNOWN};
+Enum::UIKind TGlobals::sUIKind = Enum::UIKind::DEFAULT;
 f32 TGlobals::sScreenWidth = 700.0f;
 f32 TGlobals::sFrameRate = 60.0f;
 bool TGlobals::sIsVariableFrameRate = true;

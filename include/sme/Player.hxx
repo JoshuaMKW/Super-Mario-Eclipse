@@ -13,6 +13,13 @@ enum class Player : u8 {
   UNKNOWN = 0xFF
 };
 
+enum class UIKind : u8 {
+  DEFAULT,
+  E3,
+  SPACEWORLD,
+  UNKNOWN = 0xFF
+};
+
 enum class WarpKind : u8 { SPARKLES, WIPE, INSTANT };
 } // namespace SME::Enum
 

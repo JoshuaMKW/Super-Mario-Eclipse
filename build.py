@@ -165,17 +165,15 @@ class FilePatcher:
         with (self.solutionRegionDir / ".config.json").open("r") as f:
             config = json.load(f)
 
-        with ThreadPool() as pp:
-            proc = pp.apply_async(self._patch_dol)
-
-            self._replace_files_from_config(self.solutionAnyDir)
-            self._replace_files_from_config(self.solutionRegionDir)
-            self._delete_files_from_config(self.solutionAnyDir)
-            self._delete_files_from_config(self.solutionRegionDir)
-            self._rename_files_from_config(self.solutionAnyDir)
-            self._rename_files_from_config(self.solutionRegionDir)
-
-            patched = proc.get()
+        performance = time.perf_counter()
+        self._replace_files_from_config(self.solutionAnyDir)
+        self._replace_files_from_config(self.solutionRegionDir)
+        self._delete_files_from_config(self.solutionAnyDir)
+        self._delete_files_from_config(self.solutionRegionDir)
+        self._rename_files_from_config(self.solutionAnyDir)
+        self._rename_files_from_config(self.solutionRegionDir)
+        patched = self._patch_dol()
+        self.logger.info("Built successfully; Time taken: %f", time.perf_counter() - performance)
 
         if patched and self.is_booting():
             for proc in psutil.process_iter():
@@ -247,45 +245,42 @@ class FilePatcher:
                 _dolData = DolFile(dol)
 
             modules = self.compiler.run(Path("src"), _dolData)
-            with ThreadPoolExecutor() as executor:
-                # Rename all modules to be in the Kuribo! folder
-                # executor.map(lambda f: os.rename(*f), [(str(m), str(modulesDest / m.name)) for m in modules])
-                for m in modules:
-                    os.unlink(modulesDest / m.name)
-                    self.logger.info("Moving module %s to %s", m.name, modulesDest / m.name)
-                    m.rename(modulesDest / m.name)
+            for m in modules:
+                os.unlink(modulesDest / m.name)
+                self.logger.info("Moving module %s to %s", m.name, modulesDest / m.name)
+                m.rename(modulesDest / m.name)
 
-                self._create_signatures(_dolData, "Super Mario Eclipse\0")
+            self._create_signatures(_dolData, "Super Mario Eclipse\0")
 
-                if self.compiler.is_kuribo():
-                    tmpbin = Path(
-                        "assets/bin", f"kuriboloader-{self.region.lower()}.bin")
+            if self.compiler.is_kuribo():
+                tmpbin = Path(
+                    "assets/bin", f"kuriboloader-{self.region.lower()}.bin")
 
-                    data = BytesIO(tmpbin.read_bytes())
-                    rawData = data.getvalue()
-                    injectaddr = (int.from_bytes(rawData[
-                        :4], "big", signed=False) & 0x1FFFFFC) | 0x80000000
-                    codelen = int.from_bytes(
-                        rawData[4:8], "big", signed=False) * 8
+                data = BytesIO(tmpbin.read_bytes())
+                rawData = data.getvalue()
+                injectaddr = (int.from_bytes(rawData[
+                    :4], "big", signed=False) & 0x1FFFFFC) | 0x80000000
+                codelen = int.from_bytes(
+                    rawData[4:8], "big", signed=False) * 8
 
-                    blockstart = 0x80004A00
-                    if not _dolData.is_mapped(blockstart):
-                        loaderSection = TextSection(blockstart, rawData[8:])
-                        _dolData.append_section(loaderSection)
-                    else:
-                        _dolData.seek(blockstart)
-                        _dolData.write(rawData[8:])
-                    _dolData.insert_branch(blockstart, injectaddr)
-                    _dolData.insert_branch(
-                        injectaddr + 4, blockstart + (codelen - 4))
+                blockstart = 0x80004A00
+                if not _dolData.is_mapped(blockstart):
+                    loaderSection = TextSection(blockstart, rawData[8:])
+                    _dolData.append_section(loaderSection)
+                else:
+                    _dolData.seek(blockstart)
+                    _dolData.write(rawData[8:])
+                _dolData.insert_branch(blockstart, injectaddr)
+                _dolData.insert_branch(
+                    injectaddr + 4, blockstart + (codelen - 4))
 
-                _dolData.write_uint32(self.by_region(
-                    0x802A73F0, 0, 0, 0), 0x60000000)
-                _dolData.write_uint32(self.by_region(
-                    0x802A7404, 0, 0, 0), 0x60000000)
+            _dolData.write_uint32(self.by_region(
+                0x802A73F0, 0, 0, 0), 0x60000000)
+            _dolData.write_uint32(self.by_region(
+                0x802A7404, 0, 0, 0), 0x60000000)
 
-                with destDolPath.open("wb") as dest:
-                    _dolData.save(dest)
+            with destDolPath.open("wb") as dest:
+                _dolData.save(dest)
 
             return True
         return False

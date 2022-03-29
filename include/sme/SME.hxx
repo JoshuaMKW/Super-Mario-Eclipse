@@ -124,6 +124,10 @@
 #ifndef SME_VARIABLE_FPS
 #define SME_VARIABLE_FPS 1
 #endif
+
+#ifndef SME_CUSTOM_MUSIC
+#define SME_CUSTOM_MUSIC 0
+#endif
  
 #ifndef SME_EXTRA_SHINES
 #define SME_EXTRA_SHINES 1

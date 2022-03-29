@@ -35,7 +35,7 @@ static void patchRideMovementUpWarp(Mtx out, Vec *ride, Vec *pos) {
     PSMTXMultVec(out, ride, pos);
   }
 }
-// SME_PATCH_BL(SME_PORT_REGION(0x80250514, 0, 0, 0), patchRideMovementUpWarp);
+SME_PATCH_BL(SME_PORT_REGION(0x80250514, 0, 0, 0), patchRideMovementUpWarp);
 
 static void patchRoofCollisionSpeed(TMario *player, f32 _speed) {
   TBGCheckData *roof = player->mRoofTriangle;

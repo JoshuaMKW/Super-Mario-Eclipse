@@ -2,8 +2,12 @@ from __future__ import annotations
 
 import argparse
 import atexit
+from concurrent.futures import ThreadPoolExecutor
 import functools
 import json
+import logging
+from multiprocessing.pool import ThreadPool
+import os
 import shutil
 import subprocess
 import sys
@@ -13,6 +17,7 @@ from fnmatch import fnmatch
 from io import BytesIO, StringIO
 from pathlib import Path
 from typing import IO, Any, Dict, Generator, List, Optional, Union
+from pathos.multiprocessing import ProcessPool
 
 import oead
 import psutil
@@ -20,218 +25,84 @@ from dolreader.dol import DolFile
 from dolreader.section import TextSection
 from pyisotools.bnrparser import BNR
 from pyisotools.iso import GamecubeISO
+
+from compiler import AllocationMap, BuildKind, CompilerFactory, CompilerKind, Define, KernelKind, Region
 from prmparser import PrmFile
 
-from compiler import Compiler, Define
-
-__TMPDIR = Path("tmp-compiler")
+TMPDIR = Path("tmp-compiler")
 
 
 @atexit.register
 def clean_resources():
-    if __TMPDIR.is_dir():
-        pass#    shutil.rmtree(__TMPDIR)
+    if TMPDIR.is_dir():
+        pass  # shutil.rmtree(__TMPDIR)
 
 
-def wrap_printer(msg: str = "") -> function:
-    def decorater_inner(func):
-        @functools.wraps(func)
-        def wrapper(*args, **kwargs):
-            print("")
-            if len(msg.strip()) > 0:
-                print(f"====== {msg} ======".center(128))
-            print("-"*128)
-            value = func(*args, **kwargs)
-            print("-"*128)
-            return value
-        return wrapper
-    return decorater_inner
+class BootType(str, Enum):
+    DOL = "DOL"
+    ISO = "ISO"
+    NONE = "NONE"
 
 
-class Region(str, Enum):
-    US = "US"
-    EU = "EU"
-    JP = "JP"
-    KR = "KR"
-    ANY = "ANY"
+class IndentedFormatter(logging.Formatter):
+    IndentionWidth = 4
+
+    def format(self, record):
+        """Format a record with added indentation."""
+        indent = " " * self.IndentionWidth
+        head, *trailing = super().format(record).splitlines(True)
+        return head + ''.join(indent + line for line in trailing)
 
 
-class Patcher(str, Enum):
-    KAMEK = "KAMEK"
-    KURIBO = "KURIBO"
-
-
-class AllocationMap(object):
-    class RelocationType:
-        HI = 0
-        LO = 1
-        NONE = -1
-
-    class InstructionInfo(object):
-        def __init__(self, value: int, relocationType: AllocationMap.RelocationType, relmask: int = 0xFFFF):
-            self.value = value
-            self.reltype = relocationType
-            self._relmask = relmask
-
-        def __str__(self) -> str:
-            return f"0x{self.value:08X} (Mask ({self.reltype}): 0x{self._relmask:08X})"
-
-        def is_rel_hi(self) -> bool:
-            return self.reltype == AllocationMap.RelocationType.HI
-
-        def is_rel_lo(self) -> bool:
-            return self.reltype == AllocationMap.RelocationType.LO
-
-        def is_rel_none(self) -> bool:
-            return self.reltype == AllocationMap.RelocationType.NONE
-
-        def as_translated(self, offset) -> int:
-            if self.is_rel_none():
-                return self.value
-
-            offset <<= _get_bit_alignment(self._relmask)
-            if self.is_rel_hi():
-                offset = (offset >> 16) & 0xFFFF
-            elif self.is_rel_lo():
-                offset &= 0xFFFF
-            return self.value + (offset & self._relmask)
-
-        @staticmethod
-        def translate(value: int, offset: int, relocationType: AllocationMap.RelocationType, relmask: int = 0xFFFF):
-            instr = AllocationMap.InstructionInfo(
-                value, relocationType, relmask)
-            return instr.as_translated(offset)
-
-    class AllocationPacket(object):
-        def __init__(self, address: int, baseInstrs: List[AllocationMap.InstructionInfo]):
-            self._address = address
-            self._baseInstrs = baseInstrs
-
-        @property
-        def instructions(self) -> Generator[AllocationMap.InstructionInfo]:
-            for instr in self._baseInstrs:
-                yield instr
-
-        @property
-        def address(self) -> int:
-            return self._address
-
-    def __init__(self, template: Optional[Dict[Region, List[AllocationMap.AllocationPacket]]] = None):
-        if template:
-            self._template = template
-        else:
-            self._template = {
-                Region.US: [],
-                Region.EU: [],
-                Region.JP: [],
-                Region.KR: []
-            }
-
-    def group(self, region: Region) -> List[AllocationMap.AllocationPacket]:
-        return self._template[region]
-
-
-_ALLOC_LO_INFO = AllocationMap({
-    Region.US: (AllocationMap.AllocationPacket(0x80341E74, [AllocationMap.InstructionInfo(0x3C600000, AllocationMap.RelocationType.HI), AllocationMap.InstructionInfo(0x60630000, AllocationMap.RelocationType.LO)]),
-                AllocationMap.AllocationPacket(0x80341EAC, [AllocationMap.InstructionInfo(0x3C600000, AllocationMap.RelocationType.HI), AllocationMap.InstructionInfo(0x60630000, AllocationMap.RelocationType.LO)])),
-    Region.EU: (AllocationMap.AllocationPacket(0x80339ff4, [AllocationMap.InstructionInfo(0x3C600000, AllocationMap.RelocationType.HI), AllocationMap.InstructionInfo(0x60630000, AllocationMap.RelocationType.LO)]),
-                (AllocationMap.AllocationPacket(0x8033a02c, [AllocationMap.InstructionInfo(0x3C600000, AllocationMap.RelocationType.HI), AllocationMap.InstructionInfo(0x60630000, AllocationMap.RelocationType.LO)]))),
-    Region.JP: (AllocationMap.AllocationPacket(0x80341E74, [AllocationMap.InstructionInfo(0x3C600000, AllocationMap.RelocationType.HI), AllocationMap.InstructionInfo(0x60630000, AllocationMap.RelocationType.LO)]),
-                AllocationMap.AllocationPacket(0x80341EAC, [AllocationMap.InstructionInfo(0x3C600000, AllocationMap.RelocationType.HI), AllocationMap.InstructionInfo(0x60630000, AllocationMap.RelocationType.LO)])),
-    Region.KR: (AllocationMap.AllocationPacket(0x80341E74, [AllocationMap.InstructionInfo(0x3C600000, AllocationMap.RelocationType.HI), AllocationMap.InstructionInfo(0x60630000, AllocationMap.RelocationType.LO)]),
-                AllocationMap.AllocationPacket(0x80341EAC, [AllocationMap.InstructionInfo(0x3C600000, AllocationMap.RelocationType.HI), AllocationMap.InstructionInfo(0x60630000, AllocationMap.RelocationType.LO)])),
-})
-
-_ALLOC_HI_INFO = AllocationMap({
-    Region.US: (AllocationMap.AllocationPacket(0x80341EC8, [AllocationMap.InstructionInfo(0x3C000000, AllocationMap.RelocationType.HI),
-                                                            AllocationMap.InstructionInfo(
-                                                                0x60000000, AllocationMap.RelocationType.LO),
-                                                            AllocationMap.InstructionInfo(
-                                                                0x7C601850, AllocationMap.RelocationType.NONE),
-                                                            AllocationMap.InstructionInfo(
-                                                                0x3C808000, AllocationMap.RelocationType.NONE),
-                                                            AllocationMap.InstructionInfo(0x90640034, AllocationMap.RelocationType.NONE)]),),
-    Region.EU: (AllocationMap.AllocationPacket(0x80341ED0, [AllocationMap.InstructionInfo(0x3C600000, AllocationMap.RelocationType.HI), AllocationMap.InstructionInfo(0x60630000, AllocationMap.RelocationType.LO)]),),
-    Region.JP: (AllocationMap.AllocationPacket(0x80341ED0, [AllocationMap.InstructionInfo(0x3C600000, AllocationMap.RelocationType.HI), AllocationMap.InstructionInfo(0x60630000, AllocationMap.RelocationType.LO)]),),
-    Region.KR: (AllocationMap.AllocationPacket(0x80341ED0, [AllocationMap.InstructionInfo(
-        0x3C600000, AllocationMap.RelocationType.HI), AllocationMap.InstructionInfo(0x60630000, AllocationMap.RelocationType.LO)]),)
-})
-
-
-class FileStream(object):
-    def __init__(self, path: str, stream: IO):
-        self.path = path
-        self.stream = stream
-
-    def __del__(self) -> None:
-        if not self.stream.closed:
-            self.stream.close()
-
-
-class FilePatcher(Compiler):
-    class State(str, Enum):
-        DEBUG = "DEBUG"
-        RELEASE = "RELEASE"
-        RELEASE_DEB = "RELEASE_DEB"
-
-    class BootType(str, Enum):
-        DOL = "DOL"
-        ISO = "ISO"
-        NONE = "NONE"
-
-    MainAllocationMap = AllocationMap()
-
-    def __init__(self, build: State, gameDir: str, projectDir: str = Path.cwd(),
-                 region: Region = Region.US, compiler: Compiler.Compilers = Compiler.Compilers.CODEWARRIOR,
-                 patcher: Patcher = Patcher.KAMEK, bootfrom: BootType = BootType.DOL,
-                 startAddr: int = 0x80000000, shines: int = 120, fout: Optional[FileStream] = None):
+class FilePatcher:
+    def __init__(
+        self,
+        compiler: CompilerKind,
+        patcher: KernelKind,
+        buildKind: BuildKind,
+        gameDir: str,
+        projectDir: str = Path.cwd(),
+        region: Region = Region.US,
+        bootfrom: BootType = BootType.DOL,
+        startAddr: int = 0x80000000,
+        optimize: str = "-O2",
+        shines: int = 120,
+        logger: Optional[logging.Logger] = None
+    ):
 
         if isinstance(startAddr, str):
             startAddr = int(startAddr, 16)
 
         self.projectDir = Path(projectDir)
         self.gameDir = Path(gameDir)
-        self.state = build
+        self.buildKind = buildKind
         self.maxShines = shines
         self.bootType = bootfrom
         self.region = region
-        self._fout = fout
+
         self._fileTables = {}
-
         self._init_tables()
+        
+        if logger is None:
+            logger = logging.Logger("Default-Logger")
 
-        print(self._get_matching_filepath(
-            self.solutionRegionDir / "main.dol"))
+        self.compiler = CompilerFactory.create(
+            patcher,
+            compiler,
+            startAddr,
+            optimize,
+            buildKind,
+            region,
+            logger
+        )
 
-        super().__init__(Path("assets/compiler"),
-                         compiler=compiler,
-                         dest=self._get_matching_filepath(
-                             self.solutionRegionDir / "main.dol"),
-                         linker=Path(f"assets/linker/{self.region}.map"),
-                         patcher=patcher,
-                         dump=False,
-                         startaddr=startAddr)
+    @property
+    def logger(self) -> logging.Logger:
+        return self.compiler.logger
 
-        _defines = []
-        if self.is_release():
-            debugInfo = Define(
-                "SME_DEBUG") if self.state == FilePatcher.State.RELEASE_DEB else Define("SME_RELEASE")
-            _defines.extend(
-                (Define("SME_MAX_SHINES", f"{self.maxShines}"), debugInfo))
-        elif self.is_debug():
-            _defines.extend(
-                (Define("SME_MAX_SHINES", f"{self.maxShines}"), Define("SME_DEBUG")))
-        else:
-            raise ValueError(f"Unknown patcher state {self.state}")
-
-        if self.is_kuribo():
-            _defines.append(Define("SME_BUILD_KURIBO"))
-        elif self.is_kamek():
-            _defines.append(Define("SME_BUILD_KAMEK_INLINE"))
-
-        _defines.append(Define("SME_IGNORE_CONSOLE"))
-
-        self.defines = _defines
+    @logger.setter
+    def logger(self, logger: logging.Logger):
+        self.compiler.logger = logger
 
     @property
     def solutionRegionDir(self) -> Path:
@@ -248,19 +119,19 @@ class FilePatcher(Compiler):
             return self.projectDir / "assets/bin/debug/any"
 
     def is_release(self) -> bool:
-        return self.state in {FilePatcher.State.RELEASE, FilePatcher.State.RELEASE_DEB}
+        return self.compiler.is_release()
 
     def is_debug(self) -> bool:
-        return self.state == FilePatcher.State.DEBUG
+        return self.compiler.is_debug()
 
     def is_booting(self) -> bool:
-        return self.bootType != FilePatcher.BootType.NONE
+        return self.bootType != BootType.NONE
 
     def is_iso_boot(self) -> bool:
-        return self.bootType == FilePatcher.BootType.ISO
+        return self.bootType == BootType.ISO
 
     def is_dol_boot(self) -> bool:
-        return self.bootType == FilePatcher.BootType.DOL
+        return self.bootType == BootType.DOL
 
     def is_ignored(self, path: Path) -> bool:
         with Path(self.solutionRegionDir / ".config.json").open("r") as f:
@@ -294,14 +165,17 @@ class FilePatcher(Compiler):
         with (self.solutionRegionDir / ".config.json").open("r") as f:
             config = json.load(f)
 
+        performance = time.perf_counter()
         self._replace_files_from_config(self.solutionAnyDir)
         self._replace_files_from_config(self.solutionRegionDir)
         self._delete_files_from_config(self.solutionAnyDir)
         self._delete_files_from_config(self.solutionRegionDir)
         self._rename_files_from_config(self.solutionAnyDir)
         self._rename_files_from_config(self.solutionRegionDir)
+        patched = self._patch_dol()
+        self.logger.info("Built successfully; Time taken: %f", time.perf_counter() - performance)
 
-        if self._patch_dol() and self.is_booting():
+        if patched and self.is_booting():
             for proc in psutil.process_iter():
                 if proc.name() == "Dolphin.exe":
                     proc.kill()
@@ -336,66 +210,51 @@ class FilePatcher(Compiler):
             dolphin = Path(config["dolphinpath"])
 
             if self.is_dol_boot():
-                print(f"\nAttempting to boot Dolphin by DOL at {dolphin}...\n")
+                self.logger.info("Attempting to boot Dolphin by DOL at %s...", dolphin)
                 subprocess.Popen(
-                    f"\"{dolphin}\" -e \"{self.dest}\" " + " ".join(options), shell=True)
+                    f"\"{dolphin}\" -e \"{self.gameDir / 'sys/main.dol'}\" " + " ".join(options), shell=True)
             elif self.is_iso_boot():
-                print(f"\nAttempting to boot Dolphin by ISO at {dolphin}...\n")
                 isoPath = self._build_iso(config)
+                self.logger.info("Attempting to boot Dolphin by ISO at %s...", dolphin)
                 subprocess.Popen(
                     f"\"{dolphin}\" -e \"{isoPath}\" " + " ".join(options), shell=True)
 
     def _build_iso(self, config: dict) -> Path:
-        print("")
-        print("====== ISO BUILDING ======".center(128))
-        print("-"*128)
-
         isoPath = Path(config["buildpath"])
 
-        print(f"{self.dest.parent.parent} -> {isoPath}")
+        self.logger.info("%s -> %s", self.gameDir, isoPath)
 
-        iso = GamecubeISO.from_root(self.dest.parent.parent, True)
+        iso = GamecubeISO.from_root(self.gameDir, True)
         iso.build(isoPath, preCalc=False)
 
-        print("-"*128)
         return isoPath
 
-    @wrap_printer("DOL PATCHING")
     def _patch_dol(self) -> bool:
-        dolPath = self.solutionRegionDir / "system/main.dol"
-        kernelPath = self.solutionRegionDir / "kuribo/KuriboKernel.bin"
+        srcDolPath = self.solutionRegionDir / "system/main.dol"
+        destDolPath = self.gameDir / "sys/main.dol"
         modulesDest = self.gameDir / \
-            ("files/Kuribo!/Mods/" if self.is_kuribo() else "files/")
+            ("files/Kuribo!/Mods/" if self.compiler.is_kuribo() else "files/")
 
-        if dolPath.exists():
+        if srcDolPath.exists():
             if self.is_release():
-                print(f"Generating {self.maxShines} shines RELEASE build")
+                self.logger.info("Generating %d shines RELEASE build", self.maxShines)
             elif self.is_debug():
-                print(f"Generating {self.maxShines} shines DEBUG build")
+                self.logger.info("Generating %d shines DEBUG build", self.maxShines)
 
-            modules = self.run(Path("src"), dolPath, fout=self._fout.stream)
-            _doldata = DolFile(BytesIO(self.dest.read_bytes()))
+            with srcDolPath.open("rb") as dol:
+                _dolData = DolFile(dol)
 
-            if isinstance(modules, list):
-                size = 0
-                for m in modules:
-                    m.rename(modulesDest / m.name)
-                    size += m.stat().st_size
-                self._alloc_from_heap(
-                    _doldata, (kernelPath.stat().st_size + 31) & -32)
-            elif isinstance(modules, Path):
-                renamed = (modulesDest /
-                           modules.name).with_name("SME").with_suffix(".kxe" if self.is_kuribo() else ".kmk")
-                renamed.parent.mkdir(parents=True, exist_ok=True)
-                renamed.unlink(missing_ok=True)
-                modules.rename(renamed)
-                self._alloc_from_heap(
-                    _doldata, (kernelPath.stat().st_size + 31) & -32)
+            modules = self.compiler.run(Path("src"), _dolData)
+            for m in modules:
+                os.unlink(modulesDest / m.name)
+                self.logger.info("Moving module %s to %s", m.name, modulesDest / m.name)
+                m.rename(modulesDest / m.name)
 
-            self._create_signatures(_doldata, "Super Mario Eclipse\0")
+            self._create_signatures(_dolData, "Super Mario Eclipse\0")
 
-            if self.is_kuribo():
-                tmpbin = Path("assets/bin", f"kuriboloader-{self.region.lower()}.bin")
+            if self.compiler.is_kuribo():
+                tmpbin = Path(
+                    "assets/bin", f"kuriboloader-{self.region.lower()}.bin")
 
                 data = BytesIO(tmpbin.read_bytes())
                 rawData = data.getvalue()
@@ -405,27 +264,29 @@ class FilePatcher(Compiler):
                     rawData[4:8], "big", signed=False) * 8
 
                 blockstart = 0x80004A00
-                if not _doldata.is_mapped(blockstart):
+                if not _dolData.is_mapped(blockstart):
                     loaderSection = TextSection(blockstart, rawData[8:])
-                    _doldata.append_section(loaderSection)
+                    _dolData.append_section(loaderSection)
                 else:
-                    _doldata.seek(blockstart)
-                    _doldata.write(rawData[8:])
-                _doldata.insert_branch(blockstart, injectaddr)
-                _doldata.insert_branch(
+                    _dolData.seek(blockstart)
+                    _dolData.write(rawData[8:])
+                _dolData.insert_branch(blockstart, injectaddr)
+                _dolData.insert_branch(
                     injectaddr + 4, blockstart + (codelen - 4))
 
-            _doldata.write_uint32(self.by_region(0x802A73F0, 0x8029f46c, 0, 0), 0x60000000)
-            _doldata.write_uint32(self.by_region(0x802A7404, 0x8029f480, 0, 0), 0x60000000)
+            _dolData.write_uint32(self.by_region(
+                0x802A73F0, 0, 0, 0), 0x60000000)
+            _dolData.write_uint32(self.by_region(
+                0x802A7404, 0, 0, 0), 0x60000000)
 
-            with self.dest.open("wb") as dest:
-                _doldata.save(dest)
+            with destDolPath.open("wb") as dest:
+                _dolData.save(dest)
 
             return True
         return False
 
-    @wrap_printer("REPLACING | COPYING")
     def _replace_files_from_config(self, solutionPath: Path):
+        REPLACE_LOG = ""
         with Path(solutionPath / ".config.json").open("r") as f:
             config = json.load(f)
 
@@ -444,7 +305,7 @@ class FilePatcher(Compiler):
 
             if destPath is None:
                 if f.is_file() and self.is_ignored(f.relative_to(solutionPath)):
-                    print(f"{relativePath} -> No destination found")
+                    REPLACE_LOG += f"{relativePath} -> No destination found\n"
                 continue
 
             if not destPath.parent.exists():
@@ -467,10 +328,13 @@ class FilePatcher(Compiler):
             else:
                 destPath.write_bytes(f.read_bytes())
 
-            print(f"{relativePath} -> {destPath}")
+            REPLACE_LOG += f"{relativePath} -> {destPath}\n"
 
-    @wrap_printer("RENAMING")
+        if REPLACE_LOG.strip() != "":
+            self.logger.info(REPLACE_LOG.strip())
+
     def _rename_files_from_config(self, solutionPath: Path):
+        RENAME_LOG = ""
         _renamed = []
 
         with Path(solutionPath / ".config.json").open("r") as f:
@@ -481,20 +345,26 @@ class FilePatcher(Compiler):
                 rename = config["rename"][path]
 
                 if fnmatch(f, self.gameDir / path):
-                    print(f"{f.relative_to(self.gameDir)} -> {f.parent / rename}")
+                    RENAME_LOG += f"{f.relative_to(self.gameDir)} -> {f.parent / rename}\n"
                     f.rename(f.parent / rename)
                     _renamed.append(f)
 
-    @wrap_printer("DELETING")
+        if RENAME_LOG.strip() != "":
+            self.logger.info(RENAME_LOG.strip())
+
     def _delete_files_from_config(self, solutionPath: Path):
+        DELETE_LOG = ""
         with Path(solutionPath / ".config.json").open("r") as f:
             config = json.load(f)
 
         for f in self.gameDir.rglob("*"):
             for path in config["delete"]:
                 if fnmatch(f, self.gameDir / path):
-                    print(f"{f} -> DELETED")
+                    DELETE_LOG += f"{f} -> DELETED\n"
                     f.unlink()
+
+        if DELETE_LOG.strip() != "":
+            self.logger.info(DELETE_LOG.strip())
 
     def _get_translated_filepath(self, relativePath: Union[str, Path]) -> Path:
         return self.gameDir / relativePath
@@ -541,7 +411,6 @@ class FilePatcher(Compiler):
         return None
 
     def _compile_bnr_to_game(self, path: Path):
-        print(path)
         if not path.exists():
             return
 
@@ -554,30 +423,6 @@ class FilePatcher(Compiler):
                 section.data.seek(offset)
                 section.data.write(name.encode(encoding))
 
-    def _alloc_from_heap(self, dol: DolFile, size: int):
-        size = (size + 31) & -32
-
-        for packet in _ALLOC_LO_INFO.group(self.region):
-            dol.seek(packet.address)
-            for instr in packet.instructions:
-                dol.write_uint32(
-                    dol.tell(), instr.as_translated(self.startaddr + size))
-
-        for packet in _ALLOC_HI_INFO.group(self.region):
-            return
-            dol.seek(packet.address)
-            for instr in packet.instructions:
-                dol.write_uint32(
-                    dol.tell(), instr.as_translated(0x211000))
-
-
-def _get_bit_alignment(num: int) -> int:
-    for i in range(1000):
-        if (num >> i) & 1 == 1:
-            return i
-    return -1
-
-
 def main():
     parser = argparse.ArgumentParser(
         "SMS-Patcher", description="C++ Patcher for SMS NTSC-U, using Kamek by Treeki")
@@ -586,20 +431,20 @@ def main():
     parser.add_argument("-p", "--projectfolder",
                         help="project folder used to patch game", metavar="PATH")
     parser.add_argument("-s", "--startaddr", help="Starting address for the linker and code",
-                        default="0x80000000", metavar="ADDR")
+                        default="0x80000000", type=lambda x: int(x, 0), metavar="ADDR")
     parser.add_argument("-b", "--build", help="Build type; R=Release, D=Debug",
                         choices=["R", "D", "RD"], default="D")
     parser.add_argument("-c", "--compiler", choices=[
-                        Compiler.Compilers.CODEWARRIOR, Compiler.Compilers.CLANG, Compiler.Compilers.GCC],
-                        default=Compiler.Compilers.CODEWARRIOR, help="Compiler to build with")
+                        CompilerKind.CODEWARRIOR, CompilerKind.CLANG, CompilerKind.GCC],
+                        default=CompilerKind.CODEWARRIOR, help="Compiler to build with")
     parser.add_argument("-o", "--optimize-level", help="Optimization strength",
                         default="2")
     parser.add_argument("-r", "--region", help="Game region",
                         choices=[Region.US, Region.EU, Region.JP, Region.KR], default=Region.US)
     parser.add_argument("-P", "--patcher", help="Game patcher",
-                        choices=[Patcher.KAMEK, Patcher.KURIBO], default=Patcher.KAMEK)
+                        choices=[KernelKind.KAMEK, KernelKind.KURIBO], default=KernelKind.KAMEK)
     parser.add_argument("--boot", help="What to boot from",
-                        choices=["DOL", "ISO", "NONE"], default="NONE")
+                        choices=[BootType.DOL, BootType.ISO, BootType.NONE], default=BootType.NONE)
     parser.add_argument(
         "--shines", help="Max shines allowed", type=int, default=120)
     parser.add_argument("--out", help="File to output to")
@@ -617,85 +462,39 @@ def main():
         args.startaddr = 0x80000000
 
     if args.build == "D":
-        build = FilePatcher.State.DEBUG
+        build = BuildKind.DEBUG
     elif args.build == "RD":
-        build = FilePatcher.State.RELEASE_DEB
+        build = BuildKind.RELEASE_DEBUG
     else:
-        build = FilePatcher.State.RELEASE
+        build = BuildKind.RELEASE
 
     if args.out:
-        out = FileStream(args.out, open(args.out, "w"))
+        logger = logging.Logger(args.out.split(".")[0].upper())
+        logFormatter = IndentedFormatter(
+            fmt="%(name)s [%(funcName)s] | %(asctime)s | %(levelname)s:\n%(message)s\n",
+            datefmt="%m-%d-%Y %H:%M:%S"
+        )
+        fhandle = logging.FileHandler(args.out)
+        fhandle.setFormatter(logFormatter)
+        logger.addHandler(fhandle)
+        fhandle.stream.write(f"== {logger.name} - NEW SESSION ==\n\n")
     else:
-        out = None
+        logger = None
 
-    patcher = FilePatcher(build, args.gamefolder, args.projectfolder, args.region, args.compiler, args.patcher,
-                          args.boot, args.startaddr, args.shines, out)
-
-    if patcher.is_codewarrior():
-        patcher.cxxOptions = [
-            "-Cpp_exceptions off", "-gccinc", "-gccext on", "-enum int",
-            "-RTTI off" "-fp fmadd", "-use_lmw_stmw on", f"-O{args.optimize_level}",
-            "-c", "-rostr", "-sdata 0", "-sdata2 0"
-        ]
-    elif patcher.is_clang():
-        patcher.cxxOptions = [
-            "--target=powerpc-gekko-ibm-kuribo-eabi", "-fdeclspec", "-std=gnu++17",
-            "-fno-exceptions", "-fno-rtti", "-fno-unwind-tables", "-ffast-math",
-            "-flto", "-nodefaultlibs", "-nostdlib", "-fno-use-init-array",
-            "-fno-use-cxa-atexit", "-fno-c++-static-destructors", "-fno-function-sections",
-            "-fno-data-sections", "-fuse-ld=lld", "-fpermissive", "-Werror",# f"-fmacro-prefix-map={Path.cwd()}=.",
-            f"-O{args.optimize_level}", "-r", "-v"
-        ]
-        patcher.cOptions = [
-            "--target=powerpc-gekko-ibm-kuribo-eabi", "-fdeclspec", "-fno-exceptions",
-            "-fno-rtti", "-fno-unwind-tables", "-ffast-math", "-fdeclspec",
-            "-flto", "-nodefaultlibs", "-nostdlib", "-fno-use-init-array",
-            "-fno-use-cxa-atexit", "-fno-c++-static-destructors", "-fno-function-sections",
-            "-fno-data-sections", "-fuse-ld=lld", "-fpermissive", "-Werror",
-            f"-O{args.optimize_level}", "-r", "-v"
-        ]
-        patcher.sOptions = [
-            "--target=powerpc-gekko-ibm-kuribo-eabi", "-fdeclspec", "-fno-exceptions",
-            "-fno-rtti", "-fno-unwind-tables", "-flto", "-nodefaultlibs", "-nostdlib",
-            "-fno-use-init-array", "-fno-use-cxa-atexit", "-fno-c++-static-destructors",
-            "-fno-function-sections", "-fno-data-sections", "-fuse-ld=lld", "-Werror",
-            "-r", "-v"
-        ]
-        patcher.linkOptions = [
-            "--target=powerpc-gekko-ibm-kuribo-eabi", "-fdeclspec", "-std=gnu++17",
-            "-fno-exceptions", "-fno-rtti", "-fno-unwind-tables", "-ffast-math",
-            "-flto", "-nodefaultlibs", "-nostdlib", "-fno-use-init-array",
-            "-fno-use-cxa-atexit", "-fno-c++-static-destructors", "-fno-function-sections",
-            "-fno-data-sections", "-fuse-ld=lld", "-fpermissive", "-Werror",
-            f"-O{args.optimize_level}", "-r", "-v"]
-    elif patcher.is_gcc():
-        patcher.cxxOptions = [
-            "-nodefaultlibs", "-nostdlib", "-std=gnu++20",
-            "-fno-exceptions", "-fno-rtti", "-ffast-math",
-            "-fpermissive", "-Wall", f"-O{args.optimize_level}", "-r"
-        ]
-        patcher.cOptions = [
-            "-nodefaultlibs", "-nostdlib", "-fno-exceptions",
-            "-fno-rtti", "-ffast-math", "-fpermissive",
-            "-Wall", f"-O{args.optimize_level}", "-r"
-        ]
-        patcher.sOptions = [
-            "-nodefaultlibs", "-nostdlib", "-fno-exceptions",
-            "-fno-rtti", "-Wall", f"-O{args.optimize_level}", "-r"
-        ]
-        patcher.linkOptions = [
-            "-nodefaultlibs", "-nostdlib", "-std=gnu++20",
-            "-fno-exceptions", "-fno-rtti", "-ffast-math",
-            "-fpermissive", "-Wall", f"-O{args.optimize_level}", "-r"
-        ]
-
-    sys.stdout = out.stream
-    sys.stderr = out.stream
-
+    patcher = FilePatcher(
+        CompilerKind(args.compiler),
+        KernelKind(args.patcher),
+        build,
+        args.gamefolder,
+        args.projectfolder,
+        args.region,
+        BootType(args.boot),
+        args.startaddr,
+        f"-O{args.optimize_level}",
+        args.shines,
+        logger
+    )
     patcher.patch_game()
-
-    sys.stdout = sys.__stdout__
-    sys.stderr = sys.__stderr__
 
 
 if __name__ == "__main__":

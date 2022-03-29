@@ -11,6 +11,8 @@ using namespace SME;
 using namespace Util;
 using namespace Class;
 
+#if SME_CUSTOM_MUSIC
+
 // for future intro sound patch
 static u8 gOldAreaID = 0;
 static u8 gOldEpisodeID = 0;
@@ -30,3 +32,5 @@ static void initSoundBank(u8 areaID, u8 episodeID) {
   SME_DEBUG_LOG("Initializing the sound bank... DONE!\n");
 }
 SME_PATCH_BL(SME_PORT_REGION(0x802B7A4C, 0x802AFA1C, 0, 0), initSoundBank);
+
+#endif

@@ -19,7 +19,7 @@ import logging
 from io import BytesIO, StringIO
 from pathlib import Path
 from typing import Dict, Iterable, List, Optional, TextIO, Tuple, Union
-from subprocess import Popen
+from subprocess import DEVNULL, Popen
 
 from dolreader.dol import DolFile
 from dolreader.section import TextSection
@@ -792,7 +792,9 @@ class KuriboClangCompiler(_KuriboCompiler):
                             str(kxefile),
                             str(self.linker.resolve())
                         ],
-                        text=True
+                        text=True,
+                        stdout=DEVNULL,
+                        stderr=DEVNULL
                     ),
                     kxefile
                 )

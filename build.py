@@ -23,6 +23,7 @@ import oead
 import psutil
 from dolreader.dol import DolFile
 from dolreader.section import TextSection
+from psutil import Process
 from pyisotools.bnrparser import BNR
 from pyisotools.iso import GamecubeISO
 
@@ -165,7 +166,8 @@ class FilePatcher:
         with (self.solutionRegionDir / ".config.json").open("r") as f:
             config = json.load(f)
 
-        performance = time.perf_counter()
+        perfStart = time.perf_counter()
+
         self._replace_files_from_config(self.solutionAnyDir)
         self._replace_files_from_config(self.solutionRegionDir)
         self._delete_files_from_config(self.solutionAnyDir)
@@ -173,14 +175,31 @@ class FilePatcher:
         self._rename_files_from_config(self.solutionAnyDir)
         self._rename_files_from_config(self.solutionRegionDir)
         patched = self._patch_dol()
-        self.logger.info("Built successfully; Time taken: %f", time.perf_counter() - performance)
+
+        performance = time.perf_counter() - perfStart
+
+        if patched:
+            self.logger.info("Compiled successfully; Time taken: %f", performance)
+            print(f"Compiled successfully; Time taken: {performance}")
+        else:
+            self.logger.error("Compilation unsuccessful. See errors above ^")
+            print(f"Compilation unsuccessful. Check {self.logger.name}.log for more info")
+
 
         if patched and self.is_booting():
+            dolphinProcesses: List[Process] = []
+            dolphinProcessNames = {
+                "Dolphin.exe",
+                "DolphinQt2.exe",
+                "DolphinWx.exe"
+            }
             for proc in psutil.process_iter():
-                if proc.name() == "Dolphin.exe":
+                if proc.name() in dolphinProcessNames:
+                    print(f"Killing alive Dolphin process [pid: {proc.pid}]")
                     proc.kill()
-                    while proc.is_running():
-                        time.sleep(0.01)
+
+            while any([p.is_running() for p in dolphinProcesses]):
+                time.sleep(0.1)
 
             if self.is_release():
                 options = ("-C Dolphin.General.DebugModeEnabled=True",
@@ -211,11 +230,17 @@ class FilePatcher:
 
             if self.is_dol_boot():
                 self.logger.info("Attempting to boot Dolphin by DOL at %s...", dolphin)
+                print("Booting Dolphin...")
                 subprocess.Popen(
                     f"\"{dolphin}\" -e \"{self.gameDir / 'sys/main.dol'}\" " + " ".join(options), shell=True)
             elif self.is_iso_boot():
-                isoPath = self._build_iso(config)
                 self.logger.info("Attempting to boot Dolphin by ISO at %s...", dolphin)
+                isoPath = self._build_iso(config)
+                if isoPath.exists():
+                    self.logger.info("ISO built successfully")
+                else:
+                    self.logger.error("ISO failed to build")
+                print("Booting Dolphin...")
                 subprocess.Popen(
                     f"\"{dolphin}\" -e \"{isoPath}\" " + " ".join(options), shell=True)
 
@@ -246,9 +271,10 @@ class FilePatcher:
 
             modules = self.compiler.run(Path("src"), _dolData)
             for m in modules:
-                os.unlink(modulesDest / m.name)
-                self.logger.info("Moving module %s to %s", m.name, modulesDest / m.name)
-                m.rename(modulesDest / m.name)
+                dest = modulesDest / m.name
+                self.logger.info("Moving module %s to %s", m.name, dest)
+                os.unlink(dest)
+                m.rename(dest)
 
             self._create_signatures(_dolData, "Super Mario Eclipse\0")
 
@@ -448,6 +474,7 @@ def main():
     parser.add_argument(
         "--shines", help="Max shines allowed", type=int, default=120)
     parser.add_argument("--out", help="File to output to")
+    parser.add_argument("-v", "--verbose", help="Makes the output explicit", action='store_true')
 
     args = parser.parse_args()
 
@@ -477,7 +504,20 @@ def main():
         fhandle = logging.FileHandler(args.out)
         fhandle.setFormatter(logFormatter)
         logger.addHandler(fhandle)
+        if args.verbose:
+            cHandle = logging.StreamHandler(sys.stdout)
+            cHandle.setFormatter(logFormatter)
+            logger.addHandler(cHandle)
         fhandle.stream.write(f"== {logger.name} - NEW SESSION ==\n\n")
+    elif args.verbose:
+        logger = logging.Logger(args.out.split(".")[0].upper())
+        logFormatter = IndentedFormatter(
+            fmt="%(name)s [%(funcName)s] | %(asctime)s | %(levelname)s:\n%(message)s\n",
+            datefmt="%m-%d-%Y %H:%M:%S"
+        )
+        cHandle = logging.StreamHandler(sys.stdout)
+        cHandle.setFormatter(logFormatter)
+        logger.addHandler(cHandle)
     else:
         logger = None
 

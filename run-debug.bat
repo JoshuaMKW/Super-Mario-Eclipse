@@ -1,1 +1,0 @@
-python build.py "C:\Users\Kyler-Josh\3D Objects\Dolphin\Dolphin-Games\Super Mario Eclipse ROOT\root" -r US -c CLANG -o 0 -P KURIBO -s 80427800 -b D --shines 300 --boot ISO --out "sme_debug.log"

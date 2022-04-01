@@ -26,6 +26,26 @@ static void mirrorMode(Mtx mtx, u32 perspective) {
 }
 SME_PATCH_BL(SME_PORT_REGION(0x800233a4, 0, 0, 0), mirrorMode);
 
+static void mirrorMtxLoadBathwater(Mtx mtx, u32 mtxidx) {
+  PSMTXScaleApply(mtx, mtx, INV_SCALE);
+  GXLoadPosMtxImm(mtx, mtxidx);
+}
+SME_PATCH_BL(SME_PORT_REGION(0x801AD51C, 0, 0, 0), mirrorMtxLoadBathwater);
+
+Mtx sBathWaterMtx;
+static SME_PURE_ASM void _selfMtx() {
+  asm volatile (
+    "lis 17, sBathWaterMtx@h      \n\t"
+    "ori 17, 17, sBathWaterMtx@l  \n\t"
+    "blr                          \n\t"
+  );
+}
+static void mirrorCameraMtxBathwater() {
+  PSMTXScaleApply(gpCamera->mCamMtx, sBathWaterMtx, INV_SCALE);
+  _selfMtx();
+}
+SME_PATCH_BL(SME_PORT_REGION(0x801AC96C, 0, 0, 0), mirrorCameraMtxBathwater);
+
 static u32 mirrorCulling(void *factory, u32 mode) {
   u32 cullMode = newCullMode__18J3DMaterialFactoryCFi(factory, mode);
 
@@ -82,7 +102,8 @@ static Mtx *getLightPerspectiveForEffectMtx(Mtx *dst, f32 x, f32 y, f32 n,
   PSMTXScaleApply(*dst, *dst, INV_SCALE);
   return dst;
 }
-SME_PATCH_BL(SME_PORT_REGION(0x8022ba9c, 0, 0, 0),             getLightPerspectiveForEffectMtx);
+SME_PATCH_BL(SME_PORT_REGION(0x8022ba9c, 0, 0, 0),
+             getLightPerspectiveForEffectMtx);
 
 static Mtx *invertReflections(Mtx srcA, Mtx srcB, Mtx *dst) {
   PSMTXScaleApply(srcB, srcB, INV_SCALE);
@@ -131,9 +152,10 @@ SME_PATCH_BL(SME_PORT_REGION(0x802c8e54, 0, 0, 0), invertMarioControl);
 
 SME_WRITE_32(SME_PORT_REGION(0x800DF008, 0, 0, 0), 0x38600001);
 SME_WRITE_32(SME_PORT_REGION(0x800DF04C, 0, 0, 0), 0x38600002);
+SME_WRITE_32(SME_PORT_REGION(0x8010FFF8, 0, 0, 0), 0x38600002);
+SME_WRITE_32(SME_PORT_REGION(0x80110064, 0, 0, 0), 0x38600001);
 SME_WRITE_32(SME_PORT_REGION(0x80199324, 0, 0, 0), 0x38600001);
 SME_WRITE_32(SME_PORT_REGION(0x801A01F8, 0, 0, 0), 0x38600002);
-SME_WRITE_32(SME_PORT_REGION(0x801AC178, 0, 0, 0), 0x38600001);
 SME_WRITE_32(SME_PORT_REGION(0x801AD534, 0, 0, 0), 0x38600001);
 SME_WRITE_32(SME_PORT_REGION(0x801AE6B0, 0, 0, 0), 0x38600001);
 SME_WRITE_32(SME_PORT_REGION(0x801D9340, 0, 0, 0), 0x38600001);

@@ -72,6 +72,16 @@ class Region(str, Enum):
     KR = "KR"
     ANY = "ANY"
 
+    def as_define(self) -> Define:
+        if self == Region.US:
+            return Define("NTSCU")
+        elif self == Region.EU:
+            return Define("PAL")
+        elif self == Region.JP:
+            return Define("NTSCJ")
+        elif self == Region.KR:
+            return Define("NTSCK")
+
 
 class CompilerKind(str, Enum):
     CLANG = "CLANG"
@@ -582,7 +592,7 @@ class _Compiler(ABC):
 
     @property
     def defines(self) -> List[str]:
-        return self.__defines
+        return [*self.__defines, self.region.as_define().to_cli_command()]
 
     @defines.setter
     def defines(self, defs: List[Define]):

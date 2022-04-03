@@ -527,7 +527,7 @@ def main():
         build,
         args.gamefolder,
         args.projectfolder,
-        args.region,
+        Region(args.region),
         BootType(args.boot),
         args.startaddr,
         f"-O{args.optimize_level}",

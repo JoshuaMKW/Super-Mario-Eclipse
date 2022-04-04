@@ -33,7 +33,7 @@ COMPILER_PATH = Path("assets/compiler")
 @atexit.register
 def clean_resources():
     if TMPDIR.is_dir():
-        ...# shutil.rmtree(TMPDIR)
+        ...  # shutil.rmtree(TMPDIR)
 
 
 def _get_bit_alignment(num: int, limit: int = 64) -> int:
@@ -93,11 +93,25 @@ class KernelKind(str, Enum):
     KAMEK = "KAMEK"
     KURIBO = "KURIBO"
 
+    def as_define(self) -> Define:
+        if self == KernelKind.KURIBO:
+            return Define("SME_BUILD_KURIBO")
+        elif self == KernelKind.KAMEK:
+            return Define("SME_BUILD_KAMEK")
+
 
 class BuildKind(IntEnum):
     RELEASE = 0
     RELEASE_DEBUG = 1
     DEBUG = 2
+
+    def as_define(self) -> Define:
+        if self == BuildKind.RELEASE:
+            return Define("SME_RELEASE")
+        elif self == BuildKind.RELEASE_DEBUG:
+            return Define("SME_DEBUG")
+        elif self == BuildKind.DEBUG:
+            return Define("SME_DEBUG")
 
 
 class AllocationMap(object):
@@ -350,7 +364,7 @@ class Module:
         linkObjects = [
             lib for lib in Path("lib/").iterdir() if lib.suffix == ".a"
         ]
-        
+
         cppOptions = [str(opt) for opt in self.cppOptions]
         cOptions = [str(opt) for opt in self.cOptions]
         sOptions = [str(opt) for opt in self.sOptions]
@@ -391,8 +405,6 @@ class Module:
         TMP_C = TMPDIR / f"c_obj.o"
         TMP_ASM = TMPDIR / f"s_obj.o"
         if len(cppObjects) > 0:
-            # print(" ".join([str(cppCompilerPath), *cppObjects, *self.includes,
-            #                 *self.defines, *cppOptions, "-o", str(TMP_CPP)]))
             runningTasks.append(
                 self.__compile_objects(
                     str(TMP_CPP),
@@ -592,7 +604,13 @@ class _Compiler(ABC):
 
     @property
     def defines(self) -> List[str]:
-        return [*self.__defines, self.region.as_define().to_cli_command()]
+        kernel = KernelKind.KURIBO if self.is_kuribo() else KernelKind.KAMEK
+        return [
+            *self.__defines,
+            self.region.as_define().to_cli_command(),
+            self.buildKind.as_define().to_cli_command(),
+            kernel.as_define().to_cli_command()
+        ]
 
     @defines.setter
     def defines(self, defs: List[Define]):
@@ -762,23 +780,9 @@ class KuriboClangCompiler(_KuriboCompiler):
         return False
 
     def run(self, src: Union[str, Path], dol: DolFile) -> List[Path]:
-        _defines = self.defines
-
-        if self.buildKind == BuildKind.DEBUG:
-            _defines.append(Define("SME_DEBUG").to_cli_command())
-        elif self.buildKind == BuildKind.RELEASE_DEBUG:
-            _defines.append(Define("SME_RELEASE").to_cli_command())
-        elif self.buildKind == BuildKind.RELEASE:
-            _defines.append(Define("SME_RELEASE").to_cli_command())
-
-        if self.is_kuribo():
-            _defines.append(Define("SME_BUILD_KURIBO").to_cli_command())
-        elif self.is_kamek():
-            _defines.append(Define("SME_BUILD_KAMEK_INLINE").to_cli_command())
-
         module = Module(
             name="SME",
-            defines=_defines,
+            defines=self.defines,
             includes=self.includes,
             cppOptions=self.cxxOptions,
             cOptions=self.cOptions,
@@ -841,20 +845,6 @@ class KuriboCodeWarriorCompiler(_KuriboCompiler):
         return False
 
     def run(self, src: Union[str, Path], dol: DolFile) -> List[Path]:
-        defines = self.defines
-
-        if self.buildKind == BuildKind.DEBUG:
-            defines.append(Define("SME_DEBUG"))
-        elif self.buildKind == BuildKind.RELEASE_DEBUG:
-            defines.append(Define("SME_RELEASE"))
-        elif self.buildKind == BuildKind.RELEASE:
-            defines.append(Define("SME_RELEASE"))
-
-        if self.is_kuribo():
-            defines.append(Define("SME_BUILD_KURIBO"))
-        elif self.is_kamek():
-            defines.append(Define("SME_BUILD_KAMEK_INLINE"))
-
         module = Module(
             "SME-KuriboCodeWarrior",
             defines=self.defines,
@@ -912,22 +902,6 @@ class KuriboGCCCompiler(_KuriboCompiler):
         return True
 
     def run(self, src: Union[str, Path], dol: DolFile) -> List[Path]:
-        defines = self.defines
-
-        if self.buildKind == BuildKind.DEBUG:
-            defines.append(Define("SME_DEBUG"))
-        elif self.buildKind == BuildKind.RELEASE_DEBUG:
-            defines.append(Define("SME_RELEASE"))
-        elif self.buildKind == BuildKind.RELEASE:
-            defines.append(Define("SME_RELEASE"))
-
-        if self.is_kuribo():
-            defines.append(Define("SME_BUILD_KURIBO"))
-        elif self.is_kamek():
-            defines.append(Define("SME_BUILD_KAMEK_INLINE"))
-
-        self.defines
-
         module = Module(
             "SME-KuriboGCC",
             defines=self.defines,
@@ -1165,6 +1139,7 @@ def main():
 
     worker.run(args.src, args.dolfile)
     worker.logger.info("Built Successfully")
+
 
 if __name__ == "__main__":
     main()

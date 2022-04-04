@@ -27,7 +27,7 @@ from psutil import Process
 from pyisotools.bnrparser import BNR
 from pyisotools.iso import GamecubeISO
 
-from compiler import AllocationMap, BuildKind, CompilerFactory, CompilerKind, Define, KernelKind, Region
+from compiler import BuildKind, CompilerFactory, CompilerKind, KernelKind, Region
 from prmparser import PrmFile
 
 TMPDIR = Path("tmp-compiler")
@@ -58,6 +58,7 @@ class IndentedFormatter(logging.Formatter):
 class FilePatcher:
     def __init__(
         self,
+        *,
         compiler: CompilerKind,
         patcher: KernelKind,
         buildKind: BuildKind,
@@ -76,7 +77,6 @@ class FilePatcher:
 
         self.projectDir = Path(projectDir)
         self.gameDir = Path(gameDir)
-        self.buildKind = buildKind
         self.maxShines = shines
         self.bootType = bootfrom
         self.region = region
@@ -522,17 +522,17 @@ def main():
         logger = None
 
     patcher = FilePatcher(
-        CompilerKind(args.compiler),
-        KernelKind(args.patcher),
-        build,
-        args.gamefolder,
-        args.projectfolder,
-        Region(args.region),
-        BootType(args.boot),
-        args.startaddr,
-        f"-O{args.optimize_level}",
-        args.shines,
-        logger
+        compiler=CompilerKind(args.compiler),
+        patcher=KernelKind(args.patcher),
+        buildKind=BuildKind(build),
+        gameDir=args.gamefolder,
+        projectDir=args.projectfolder,
+        region=Region(args.region),
+        bootfrom=BootType(args.boot),
+        startAddr=args.startaddr,
+        optimize=f"-O{args.optimize_level}",
+        shines=args.shines,
+        logger=logger
     )
     patcher.patch_game()
 

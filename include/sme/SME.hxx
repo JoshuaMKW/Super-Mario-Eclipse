@@ -118,7 +118,7 @@
 #endif
 
 #ifndef SME_WIDESCREEN
-#define SME_WIDESCREEN 0
+#define SME_WIDESCREEN 1
 #endif
 
 #ifndef SME_VARIABLE_FPS

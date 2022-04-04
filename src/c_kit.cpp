@@ -1,13 +1,15 @@
 #include "CARD.h"
-#include "printf.h"
 #include "J2D/J2DOrthoGraph.hxx"
 #include "J2D/J2DTextBox.hxx"
 #include "J3D/J3DVertex.hxx"
+#include "printf.h"
 #include "sms/talk/Talk2D2.hxx"
 #include "string.h"
 
-#include "SME.hxx"
+
 #include "Globals.hxx"
+#include "SME.hxx"
+
 
 using namespace SME;
 using namespace SME::Class;
@@ -278,8 +280,7 @@ f32 upWarpPatch(TMario *gpMario, f32 yVelocity)
 
 // 0x80153DE8, 0x80153E1C
 // extern -> SME.cpp
-static void extendedTagParam() {
-}
+static void extendedTagParam() {}
 // SME_PATCH_BL(SME_PORT_REGION(0x80150c40, 0, 0, 0), extendedTagParam);
 
 static void maintainYoshi(TYoshi *yoshi) {
@@ -291,6 +292,8 @@ static void maintainYoshi(TYoshi *yoshi) {
     *(f32 *)SME_PORT_REGION(0x80415F68, 0x8040D4A8, 0, 0) = 10000.0f;
   }
 }
+
+extern void blazePlayer(TMario *player);
 
 // 0x8024D3A8
 // 0x8003F8F0
@@ -326,6 +329,13 @@ void Patch::CKit::realTimeCustomAttrsHandler(TMario *player) {
     break;
   default:
     break;
+  }
+
+  if (playerParams->mIsOnFire) {
+    if (player->mAttributes.mIsShallowWater || player->mAttributes.mIsWater)
+      Util::Mario::extinguishPlayer(player);
+    else
+      blazePlayer(player);
   }
 
 #undef SCALE_PARAM

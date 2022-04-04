@@ -18,9 +18,11 @@
 #include "sms/game/MarDirector.hxx"
 #include "sms/game/Strategy.hxx"
 #include "sms/game/Conductor.hxx"
+#include "sms/manager/EffectObjManager.hxx"
 #include "sms/manager/FlagManager.hxx"
 #include "sms/manager/PollutionManager.hxx"
 #include "sms/manager/RumbleManager.hxx"
+#include "sms/manager/MarioParticleManager.hxx"
 #include "sms/manager/ModelWaterManager.hxx"
 #include "sms/map/Map.hxx"
 #include "sms/option/CardLoad.hxx"
@@ -48,11 +50,13 @@ extern RumbleMgr *gpPad2RumbleMgr;
 extern RumbleMgr *gpPad3RumbleMgr;
 extern RumbleMgr *gpPad4RumbleMgr;
 extern TConductor *gpConductor;
+extern TEffectObjManager *gpEffectObjManager;
 extern TStrategy *gpStrategy;
 extern TMario *gpMarioOriginal;
 extern TMario *gpMarioAddress;
 extern JGeometry::TVec3<f32> *gpMarioPos;
 extern TModelWaterManager *gpModelWaterManager;
+extern TMarioParticleManager *gpMarioParticleManager;
 extern TMarDirector *gpMarDirector;
 extern MSound *gpMSound;
 extern TCardManager *gpCardManager;

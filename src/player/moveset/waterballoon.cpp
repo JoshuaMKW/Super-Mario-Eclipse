@@ -24,6 +24,11 @@ static void createWaterBalloonAndThrow(TMario *player) {
   if (!(player->mController->mButtons.mFrameInput & TMarioGamePad::R))
     return;
 
+  if (!TGlobals::getPlayerData(player)->mIsOnFire)
+    Util::Mario::setFireToPlayer(player);
+  else
+    Util::Mario::extinguishPlayer(player);
+
   Class::TPlayerData *playerData = TGlobals::getPlayerData(player);
   TRingBuffer<TWaterBalloon> &balloons = playerData->mBalloons;
 

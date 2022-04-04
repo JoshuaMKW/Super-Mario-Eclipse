@@ -14,9 +14,9 @@ public:
   TObjManager(char const *);
   virtual ~TObjManager();
 
-  virtual void load(JSUMemoryInputStream &);
-  virtual TObjManager *searchF(u16, const char *);
-  virtual void perform(u32, JDrama::TGraphics *);
+  virtual void load(JSUMemoryInputStream &) override;
+  virtual TObjManager *searchF(u16, const char *) override;
+  virtual void perform(u32, JDrama::TGraphics *) override;
   virtual void createModelData();
   virtual void createAnmData();
 

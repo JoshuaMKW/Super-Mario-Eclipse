@@ -237,6 +237,8 @@ public:
   ParamHistory mDefaultAttrs;
   TMario::TDirtyParams mDefaultDirtyParams;
   TRingBuffer<TWaterBalloon> mBalloons;
+  bool mIsOnFire;
+  s16 mFireTimer;
 };
 
 } // namespace SME::Class

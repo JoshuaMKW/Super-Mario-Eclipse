@@ -36,23 +36,23 @@ public:
 
   void changeModel(s16 index) const;
   f32 checkGround(f32 x, f32 y, f32 z, TBGCheckData **out) const;
-  f32 checkGround(const JGeometry::TVec3<f32> &pos, TBGCheckData **out) const;
+  f32 checkGround(const TVec3f &pos, TBGCheckData **out) const;
   f32 checkGroundExactY(f32 x, f32 y, f32 z, TBGCheckData **out) const;
   f32 checkGroundIgnoreWaterSurface(f32 x, f32 y, f32 z,
                                     TBGCheckData **out) const;
-  f32 checkGroundIgnoreWaterSurface(const JGeometry::TVec3<f32> &pos,
+  f32 checkGroundIgnoreWaterSurface(const TVec3f &pos,
                                     TBGCheckData **out) const;
   f32 checkGroundIgnoreWaterThrough(f32 x, f32 y, f32 z,
                                     TBGCheckData **out) const;
   f32 checkRoof(f32 x, f32 y, f32 z, TBGCheckData **out) const;
-  f32 checkRoof(const JGeometry::TVec3<f32> &pos, TBGCheckData **out) const;
+  f32 checkRoof(const TVec3f &pos, TBGCheckData **out) const;
   f32 checkRoofIgnoreWaterThrough(f32 x, f32 y, f32 z,
                                   TBGCheckData **out) const;
   void draw(u32, JDrama::TGraphics *) const;
   TBGCheckData *getIllegalCheckData();
-  TBGCheckData *intersectLine(const JGeometry::TVec3<f32> &a,
-                              const JGeometry::TVec3<f32> &b, bool,
-                              JGeometry::TVec3<f32> *);
+  TBGCheckData *intersectLine(const TVec3f &a,
+                              const TVec3f &b, bool,
+                              TVec3f *);
   bool isInArea(f32 x, f32 z) const;
   bool isTouchedOneWall(f32, f32, f32, f32) const;
   bool isTouchedOneWallAndMoveXZ(f32 *, f32, f32 *, f32) const;

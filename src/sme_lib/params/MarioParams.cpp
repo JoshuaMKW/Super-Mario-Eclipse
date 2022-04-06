@@ -62,7 +62,7 @@ TPlayerData::TPlayerData(TMario *player, CPolarSubCamera *camera, bool isMario)
 void TPlayerData::scalePlayerAttrs(f32 scale) {
   scale = Max(scale, 0.0f);
 
-  JGeometry::TVec3<f32> size(1.0f, 1.0f, 1.0f);
+  TVec3f size(1.0f, 1.0f, 1.0f);
   size.scale(scale);
 
   mPlayer->JSGSetScaling(reinterpret_cast<Vec &>(size));

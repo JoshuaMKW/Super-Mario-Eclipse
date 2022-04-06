@@ -9,21 +9,21 @@ namespace SME::Class {
 
 class TVectorTriangle {
 public:
-  JGeometry::TVec3<f32> a;
-  JGeometry::TVec3<f32> b;
-  JGeometry::TVec3<f32> c;
+  TVec3f a;
+  TVec3f b;
+  TVec3f c;
 
   TVectorTriangle() = default;
-  TVectorTriangle(const JGeometry::TVec3<f32> &a,
-                  const JGeometry::TVec3<f32> &b,
-                  const JGeometry::TVec3<f32> &c);
+  TVectorTriangle(const TVec3f &a,
+                  const TVec3f &b,
+                  const TVec3f &c);
 
-  void center(JGeometry::TVec3<f32> &out);
-  void normal(bool normalize, JGeometry::TVec3<f32> &out);
+  void center(TVec3f &out);
+  void normal(bool normalize, TVec3f &out);
   f32 yPosAtXZ(f32 x, f32 z);
 
-  static f32 bearingAngleY(const JGeometry::TVec3<f32> &a,
-                           const JGeometry::TVec3<f32> &b);
+  static f32 bearingAngleY(const TVec3f &a,
+                           const TVec3f &b);
 };
 
 } // namespace SME::Class

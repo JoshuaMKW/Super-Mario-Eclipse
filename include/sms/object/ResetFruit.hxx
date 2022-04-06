@@ -30,7 +30,7 @@ public:
   virtual void waitingToAppear() override;
   virtual void hold(TTakeActor *) override;
   virtual void thrown() override;
-  virtual void checkGroundCollision(JGeometry::TVec3<f32> *) override;
+  virtual void checkGroundCollision(TVec3f *) override;
   virtual void touchWaterSurface() override;
   virtual void touchPollution() override;
   virtual void kicked() override;

@@ -44,27 +44,27 @@ extern f64 sigmoidCurve(f64 x, f64 f, f64 r, f64 c, f64 b);
 
 namespace Vector3 {
 
-f32 magnitude(const JGeometry::TVec3<f32> &vec);
+f32 magnitude(const TVec3f &vec);
 f32 magnitude(const Vec &vec);
 
-f32 getNormalAngle(const JGeometry::TVec3<f32> &vec);
+f32 getNormalAngle(const TVec3f &vec);
 f32 getNormalAngle(const Vec &vec);
 
-void normalized(const JGeometry::TVec3<f32> &vec, JGeometry::TVec3<f32> &out);
+void normalized(const TVec3f &vec, TVec3f &out);
 void normalized(const Vec &vec, Vec &out);
 
-f32 dot(const JGeometry::TVec3<f32> &a, const JGeometry::TVec3<f32> &b);
+f32 dot(const TVec3f &a, const TVec3f &b);
 f32 dot(const Vec &a, const Vec &b);
 
-void cross(const JGeometry::TVec3<f32> &a, const JGeometry::TVec3<f32> &b,
-           JGeometry::TVec3<f32> &out);
+void cross(const TVec3f &a, const TVec3f &b,
+           TVec3f &out);
 void cross(const Vec &a, const Vec &b, Vec &out);
 
-f32 lookAtRatio(const JGeometry::TVec3<f32> &a, const JGeometry::TVec3<f32> &b);
+f32 lookAtRatio(const TVec3f &a, const TVec3f &b);
 f32 lookAtRatio(const Vec &a, const Vec &b);
 
-f32 angleBetween(const JGeometry::TVec3<f32> &a,
-                 const JGeometry::TVec3<f32> &b);
+f32 angleBetween(const TVec3f &a,
+                 const TVec3f &b);
 f32 angleBetween(const Vec &a, const Vec &b);
 
 } // namespace Vector3

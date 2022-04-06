@@ -46,8 +46,8 @@ public:
   virtual void JSGSetViewTargetPosition(const Vec &targetPos);
 
 private:
-  JGeometry::TVec3<f32> mUpVector;  // 30
-  JGeometry::TVec3<f32> mTargetPos; // 3C
+  TVec3f mUpVector;  // 30
+  TVec3f mTargetPos; // 3C
   f32 mProjectionFovy;              // 48
   f32 mProjectionAspect;            // 4C
 };

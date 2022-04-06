@@ -247,8 +247,8 @@ void Util::Mario::warpToCollisionFace(TMario *player, TBGCheckData *colTriangle,
                                    colTriangle->mVertexC);
 
   if (!isFluid) {
-    JGeometry::TVec3<f32> playerPos;
-    JGeometry::TVec3<f32> cameraPos;
+    TVec3f playerPos;
+    TVec3f cameraPos;
     player->JSGGetTranslation(reinterpret_cast<Vec *>(&playerPos));
     gpCamera->JSGGetViewPosition(reinterpret_cast<Vec *>(&cameraPos));
 
@@ -270,8 +270,8 @@ void Util::Mario::warpToCollisionFace(TMario *player, TBGCheckData *colTriangle,
     gpCamera->JSGSetViewPosition(reinterpret_cast<Vec &>(cameraPos));
     gpCamera->JSGSetViewTargetPosition(reinterpret_cast<Vec &>(playerPos));
   } else {
-    JGeometry::TVec3<f32> playerPos;
-    JGeometry::TVec3<f32> cameraPos;
+    TVec3f playerPos;
+    TVec3f cameraPos;
     player->JSGGetTranslation(reinterpret_cast<Vec *>(&playerPos));
     gpCamera->JSGGetViewPosition(reinterpret_cast<Vec *>(&cameraPos));
 
@@ -288,7 +288,7 @@ void Util::Mario::warpToCollisionFace(TMario *player, TBGCheckData *colTriangle,
       cameraPos.set(x, y, z);
     }
 
-    JGeometry::TVec3<f32> *colNormal = colTriangle->getNormal();
+    TVec3f *colNormal = colTriangle->getNormal();
 
     const f32 magnitude = PSVECMag(reinterpret_cast<Vec *>(&player->mSpeed));
 
@@ -298,7 +298,7 @@ void Util::Mario::warpToCollisionFace(TMario *player, TBGCheckData *colTriangle,
                                              magnitude * colNormal->z);
     player->mSpeed.y = magnitude * colNormal->y;
 
-    playerPos.add(JGeometry::TVec3<f32>{
+    playerPos.add(TVec3f{
         40.0f * colNormal->x, 40.0f * colNormal->y, 40.0f * colNormal->z});
 
     player->JSGSetTranslation(reinterpret_cast<Vec &>(playerPos));

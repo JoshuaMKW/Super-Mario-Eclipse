@@ -5,9 +5,9 @@ using namespace SME::Util;
 
 void Spc::vectorTranslate(TSpcInterp *interp, u32 argc) {
   interp->verifyArgNum(2, &argc);
-  JGeometry::TVec3<f32> *other = reinterpret_cast<JGeometry::TVec3<f32> *>(
+  TVec3f *other = reinterpret_cast<TVec3f *>(
       Spc::Stack::popItem(interp).mValue);
-  JGeometry::TVec3<f32> *self = reinterpret_cast<JGeometry::TVec3<f32> *>(
+  TVec3f *self = reinterpret_cast<TVec3f *>(
       Spc::Stack::popItem(interp).mValue);
   self->add(*other);
 }
@@ -17,7 +17,7 @@ void Spc::vectorTranslatef(TSpcInterp *interp, u32 argc) {
   f32 z = static_cast<f32>(Spc::Stack::popItem(interp).mValue);
   f32 y = static_cast<f32>(Spc::Stack::popItem(interp).mValue);
   f32 x = static_cast<f32>(Spc::Stack::popItem(interp).mValue);
-  JGeometry::TVec3<f32> *self = reinterpret_cast<JGeometry::TVec3<f32> *>(
+  TVec3f *self = reinterpret_cast<TVec3f *>(
       Spc::Stack::popItem(interp).mValue);
 
   self->x += x;
@@ -28,7 +28,7 @@ void Spc::vectorTranslatef(TSpcInterp *interp, u32 argc) {
 void Spc::vectorScalef(TSpcInterp *interp, u32 argc) {
   interp->verifyArgNum(2, &argc);
   f32 scale = static_cast<f32>(Spc::Stack::popItem(interp).mValue);
-  JGeometry::TVec3<f32> *self = reinterpret_cast<JGeometry::TVec3<f32> *>(
+  TVec3f *self = reinterpret_cast<TVec3f *>(
       Spc::Stack::popItem(interp).mValue);
   self->scale(scale);
 }

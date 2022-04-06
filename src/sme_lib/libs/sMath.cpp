@@ -13,7 +13,7 @@ f64 SME_NO_INLINE Math::sigmoidCurve(f64 x, f64 f, f64 r, f64 c, f64 b) {
   return f + ((r - f) / (1.0f + expf((b * -1.0f) * (x - c))));
 }
 
-f32 Math::Vector3::magnitude(const JGeometry::TVec3<f32> &vec) {
+f32 Math::Vector3::magnitude(const TVec3f &vec) {
 #if SME_USE_PS_MATH
   return PSVECMag(reinterpret_cast<const Vec *>(&vec));
 #else
@@ -29,7 +29,7 @@ f32 Math::Vector3::magnitude(const Vec &vec) {
 #endif
 }
 
-f32 Math::Vector3::getNormalAngle(const JGeometry::TVec3<f32> &vec) {
+f32 Math::Vector3::getNormalAngle(const TVec3f &vec) {
   return Math::radiansToAngle(atan2f(vec.x, vec.z));
 }
 
@@ -37,8 +37,8 @@ f32 Math::Vector3::getNormalAngle(const Vec &vec) {
   return Math::radiansToAngle(atan2f(vec.x, vec.z));
 }
 
-void Math::Vector3::normalized(const JGeometry::TVec3<f32> &vec,
-                                      JGeometry::TVec3<f32> &out) {
+void Math::Vector3::normalized(const TVec3f &vec,
+                                      TVec3f &out) {
 #if SME_USE_PS_MATH
   PSVECNormalize(reinterpret_cast<const Vec *>(&vec),
                  reinterpret_cast<Vec *>(&out));
@@ -58,8 +58,8 @@ void Math::Vector3::normalized(const Vec &vec, Vec &out) {
 #endif
 }
 
-f32 Math::Vector3::dot(const JGeometry::TVec3<f32> &a,
-                              const JGeometry::TVec3<f32> &b) {
+f32 Math::Vector3::dot(const TVec3f &a,
+                              const TVec3f &b) {
 #if SME_USE_PS_MATH
   return PSVECDotProduct(reinterpret_cast<const Vec *>(&a),
                          reinterpret_cast<const Vec *>(&b));
@@ -76,9 +76,9 @@ f32 Math::Vector3::dot(const Vec &a, const Vec &b) {
 #endif
 }
 
-void Math::Vector3::cross(const JGeometry::TVec3<f32> &a,
-                                 const JGeometry::TVec3<f32> &b,
-                                 JGeometry::TVec3<f32> &out) {
+void Math::Vector3::cross(const TVec3f &a,
+                                 const TVec3f &b,
+                                 TVec3f &out) {
 #if SME_USE_PS_MATH
   PSVECCrossProduct(reinterpret_cast<const Vec *>(&a),
                     reinterpret_cast<const Vec *>(&b),
@@ -100,8 +100,8 @@ void Math::Vector3::cross(const Vec &a, const Vec &b, Vec &out) {
 #endif
 }
 
-f32 Math::Vector3::lookAtRatio(const JGeometry::TVec3<f32> &a,
-                                      const JGeometry::TVec3<f32> &b) {
+f32 Math::Vector3::lookAtRatio(const TVec3f &a,
+                                      const TVec3f &b) {
   f32 angle = atan2f(b.z, -b.x) - atan2f(a.z, a.x);
   if (angle > M_PI) {
     angle -= 2 * M_PI;
@@ -121,8 +121,8 @@ f32 Math::Vector3::lookAtRatio(const Vec &a, const Vec &b) {
   return fabsf(angle) / M_PI;
 }
 
-f32 Math::Vector3::angleBetween(const JGeometry::TVec3<f32> &a,
-                                       const JGeometry::TVec3<f32> &b) {
+f32 Math::Vector3::angleBetween(const TVec3f &a,
+                                       const TVec3f &b) {
   return dot(a, b) / (magnitude(a) * magnitude(b));
 }
 

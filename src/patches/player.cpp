@@ -44,9 +44,9 @@ static void patchRoofCollisionSpeed(TMario *player, f32 _speed) {
     return;
   }
 
-  JGeometry::TVec3<f32> down(0.0f, -1.0f, 0.0f);
+  TVec3f down(0.0f, -1.0f, 0.0f);
 
-  JGeometry::TVec3<f32> nroofvec;
+  TVec3f nroofvec;
   Vector3::normalized(*roof->getNormal(), nroofvec);
 
   const f32 ratio = Vector3::angleBetween(nroofvec, down);

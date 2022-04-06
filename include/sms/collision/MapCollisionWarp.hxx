@@ -14,7 +14,7 @@ public:
     void init(const s8, u16, const TLiveActor *);
     void remove();
     void setUp();
-    void setUpTrans(const JGeometry::TVec3<f32> &);
+    void setUpTrans(const TVec3f &);
 
     u16 _60;
     TLiveActor *mActor; //0x0064

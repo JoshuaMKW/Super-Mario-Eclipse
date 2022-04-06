@@ -30,7 +30,7 @@
 
 
 extern JUtility::TColor gYoshiBodyColor[4];
-extern JGeometry::TVec3<f32> gShineShadowPos;
+extern TVec3f gShineShadowPos;
 extern TMarioAnimeData gMarioAnimeData[336];
 extern JUtility::TColor gModelWaterManagerWaterColor;
 extern JUtility::TColor gYoshiJuiceColor[3];
@@ -54,7 +54,7 @@ extern TEffectObjManager *gpEffectObjManager;
 extern TStrategy *gpStrategy;
 extern TMario *gpMarioOriginal;
 extern TMario *gpMarioAddress;
-extern JGeometry::TVec3<f32> *gpMarioPos;
+extern TVec3f *gpMarioPos;
 extern TModelWaterManager *gpModelWaterManager;
 extern TMarioParticleManager *gpMarioParticleManager;
 extern TMarDirector *gpMarDirector;

@@ -15,9 +15,9 @@ struct TWaterEmitInfo : public TParams {
   TParamT<s32> mNum;
   TParamT<s16> mAlive;
   TParamT<s16> mAttack;
-  TParamT<JGeometry::TVec3<f32>> mDir;
-  TParamT<JGeometry::TVec3<f32>> mPos;
-  TParamT<JGeometry::TVec3<f32>> mV;
+  TParamT<TVec3f> mDir;
+  TParamT<TVec3f> mPos;
+  TParamT<TVec3f> mV;
   TParamT<f32> mDirTremble;
   TParamT<f32> mPow;
   TParamT<f32> mPowTremble;
@@ -54,7 +54,7 @@ public:
   bool mIsEmitWater;                     // 0x1C86
   u8 _13;                                // 0x1C87
   u32 _14[0x8 / 4];                      // 0x1C88
-  JGeometry::TVec3<f32> mGeometry[10];   // 0x1C90
+  TVec3f mGeometry[10];   // 0x1C90
   u32 _15;                               // 0x1D08
   TWaterEmitInfo *mEmitInfo;             // 0x1D0C
   u32 _16;                               // 0x1D10

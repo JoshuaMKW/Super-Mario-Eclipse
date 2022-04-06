@@ -15,7 +15,7 @@ struct TLightContext {
         mLightType(ActiveType::DISABLED),
         mSizeMorphing(false) {}
 
-  JGeometry::TVec3<f32> mShineShadowCoordinates;
+  TVec3f mShineShadowCoordinates;
   s32 mPrevShineCount;
   f32 mPrevSize;
   f32 mNextSize;

@@ -22,17 +22,17 @@ public:
   virtual void hold(TTakeActor *) override;
   virtual void put() override;
   virtual void thrown() override;
-  virtual void touchGround(JGeometry::TVec3<f32> *) override;
-  virtual void touchWall(JGeometry::TVec3<f32> *,
+  virtual void touchGround(TVec3f *) override;
+  virtual void touchWall(TVec3f *,
                          TBGWallCheckRecord *) override;
-  virtual void touchRoof(JGeometry::TVec3<f32> *) override;
+  virtual void touchRoof(TVec3f *) override;
   virtual void touchPollution() override;
   virtual void touchWaterSurface() override;
   virtual void touchWater(THitActor *) override;
   virtual void kicked() override;
 
   void initActorData();
-  void blast(JGeometry::TVec3<f32> blastSpd);
+  void blast(TVec3f blastSpd);
 
   bool mIsPopped;
   f32 mForwardSpeed;
@@ -40,7 +40,7 @@ public:
   static TWaterEmitInfo *sEmitInfo;
 
 private:
-  void getReflectionDir(const JGeometry::TVec3<f32> &, JGeometry::TVec3<f32> &) const;
+  void getReflectionDir(const TVec3f &, TVec3f &) const;
 };
 
 extern ObjData waterBalloonData;

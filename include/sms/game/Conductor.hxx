@@ -55,11 +55,11 @@ public:
   void init();
   void initGraphGroup();
   bool isBossDefeated();
-  void killEnemiesWithin(const JGeometry::TVec3<f32> &pos, f32 radius);
-  void makeEnemyAppear(const JGeometry::TVec3<f32> &pos, const char *name, int,
+  void killEnemiesWithin(const TVec3f &pos, f32 radius);
+  void makeEnemyAppear(const TVec3f &pos, const char *name, int,
                        int);
   void makeGraphGroup(void *);
-  void makeOneEnemyAppear(const JGeometry::TVec3<f32> &pos, const char *name,
+  void makeOneEnemyAppear(const TVec3f &pos, const char *name,
                           int);
   void registerAloneActor(TLiveActor *actor);
   void registerAreaCylinderManager(void * /*TAreaCylinderManager*/);

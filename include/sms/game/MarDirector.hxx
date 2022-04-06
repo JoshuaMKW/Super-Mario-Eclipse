@@ -46,7 +46,7 @@ public:
   void changeState();
   void fireStreamingMovie(s8);
   void fireEndDemoCamera();
-  void fireStartDemoCamera(char const *, JGeometry::TVec3<f32> const *, u32,
+  void fireStartDemoCamera(char const *, TVec3f const *, u32,
                            f32, bool, u32 (*)(u32, u32), u32, JDrama::TActor *,
                            JDrama::TFlagT<s16>);
   void setNextStage(u16 stageID, JDrama::TActor *);

@@ -94,7 +94,7 @@ public:
 	u32 _8;
 	u32 _C;
 	u32 _10;
-	JGeometry::TVec3<f32> mScale;
+	TVec3f mScale;
 	Mtx _20;
 	u32 _50;
 	u32 _54;

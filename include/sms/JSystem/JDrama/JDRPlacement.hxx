@@ -16,7 +16,7 @@ public:
 
   virtual void load(JSUMemoryInputStream &);
 
-  JGeometry::TVec3<f32> mPosition;
+  TVec3f mPosition;
   TFlagT<u16> mPlacementFlags;
 };
 

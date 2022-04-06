@@ -25,7 +25,7 @@ static void initShineShadow() {
     LightContext.mShineShadowBase = config->mLightSize.get();
     LightContext.mPrevShineCount = CurrentShineCount;
     {
-      JGeometry::TVec3<f32> coordinates(config->mLightPosX.get(),
+      TVec3f coordinates(config->mLightPosX.get(),
                                         config->mLightPosY.get(),
                                         config->mLightPosZ.get());
       LightContext.mShineShadowCoordinates = coordinates;

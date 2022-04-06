@@ -10,14 +10,14 @@ public:
   TBGCheckData();
 
   f32 getActiveJumpPower() const;
-  JGeometry::TVec3<f32> *getNormal() const;
+  TVec3f *getNormal() const;
   s32 getPlaneType();
   bool isIllegalData() const;
   bool isMarioThrough() const;
   bool isWaterSlip() const;
   bool isWaterSurface() const;
-  void setVertex(const JGeometry::TVec3<f32> &a, const JGeometry::TVec3<f32> &b,
-                 const JGeometry::TVec3<f32> &c);
+  void setVertex(const TVec3f &a, const TVec3f &b,
+                 const TVec3f &c);
 
   u16 mCollisionType;             // 0x0000
   s16 mValue4;                    // 0x0002
@@ -25,10 +25,10 @@ public:
   u8 mTerrainType;                // 0x0006 | Sound ID
   f32 mMinHeight;                 // 0x0008
   f32 mMaxHeight;                 // 0x000C
-  JGeometry::TVec3<f32> mVertexA; // 0x0010
-  JGeometry::TVec3<f32> mVertexB; // 0x001C
-  JGeometry::TVec3<f32> mVertexC; // 0x0028
-  JGeometry::TVec3<f32> mNormal;  // 0x0034
+  TVec3f mVertexA; // 0x0010
+  TVec3f mVertexB; // 0x001C
+  TVec3f mVertexC; // 0x0028
+  TVec3f mNormal;  // 0x0034
   f32 _40;
   TLiveActor *mOwner; // 0x0044
 };

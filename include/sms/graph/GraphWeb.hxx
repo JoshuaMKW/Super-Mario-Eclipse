@@ -20,19 +20,19 @@ public:
   void calcGraphDirection(int);
   void filterRailNode(u32, const TRailNode *, const TRailNode *,
                       TRailNode *) const;
-  int findNearestNodeIndex(const JGeometry::TVec3<f32> &, u32) const;
-  int findNearestVisibleIndex(const JGeometry::TVec3<f32> &, f32, f32, f32,
+  int findNearestNodeIndex(const TVec3f &, u32) const;
+  int findNearestVisibleIndex(const TVec3f &, f32, f32, f32,
                               u32) const;
-  int getAimToDirNextIndex(int, int, const JGeometry::TVec3<f32> &,
-                           const JGeometry::TVec3<f32> &, u32) const;
-  s16 getEscapeDirLimited(int, int, const JGeometry::TVec3<f32> &,
-                          const JGeometry::TVec3<f32> &, f32, u32) const;
-  int getEscapeFromMarioIndex(int, int, const JGeometry::TVec3<f32> &,
+  int getAimToDirNextIndex(int, int, const TVec3f &,
+                           const TVec3f &, u32) const;
+  s16 getEscapeDirLimited(int, int, const TVec3f &,
+                          const TVec3f &, f32, u32) const;
+  int getEscapeFromMarioIndex(int, int, const TVec3f &,
                               u32) const;
-  Vec getNearestPosOnGraphLink(const JGeometry::TVec3<f32> &) const;
+  Vec getNearestPosOnGraphLink(const TVec3f &) const;
   int getNeighborNodeIndexByFlag(int, int, u32) const;
-  s16 getRandomButDirLimited(int, int, const JGeometry::TVec3<f32> &,
-                             const JGeometry::TVec3<f32> &, f32, u32) const;
+  s16 getRandomButDirLimited(int, int, const TVec3f &,
+                             const TVec3f &, f32, u32) const;
   int getRandomNextIndex(int, int, u32) const;
   int getShortestNextIndex(int, int, u32) const;
   Vec indexToPoint(int) const;

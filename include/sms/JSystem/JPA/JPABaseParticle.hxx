@@ -10,7 +10,7 @@ public:
   virtual void drawParticleCallBack();
 
   void calcGlobalPosition();
-  void getCurrentPosition(JGeometry::TVec3<f32> &);
+  void getCurrentPosition(TVec3f &);
   void incTimer();
   void initGlobalPosition();
 };

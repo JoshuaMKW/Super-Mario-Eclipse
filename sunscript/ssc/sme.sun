@@ -25,12 +25,12 @@ builtin vectorNormalize(vector);
 builtin setActorPosToOther(actor, other);
 builtin setActorRotToOther(actor, other);
 
-// return: JGeometry::TVec3<f32> *
+// return: TVec3f *
 builtin getActorPos(actor);
 
 builtin setActorPos(actor, vec3f);
 
-// return: JGeometry::TVec3<f32> *
+// return: TVec3f *
 builtin getActorRot(actor);
 
 builtin setActorRot(actor, vec3f);

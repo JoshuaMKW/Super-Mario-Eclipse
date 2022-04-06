@@ -10,7 +10,7 @@ public:
 
   virtual Mtx44 *getTakingMtx() = 0;
   virtual void ensureTakeSituation();
-  virtual u32 moveRequest(const JGeometry::TVec3<f32> &destPosition);
+  virtual u32 moveRequest(const TVec3f &destPosition);
   virtual f32 getRadiusAtY(f32) const;
 
   bool isTaken() const;

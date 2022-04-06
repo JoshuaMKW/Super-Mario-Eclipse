@@ -14,8 +14,8 @@ public:
     void initCheckData(s16, u16, const TLiveActor *);
     bool isSetUp() const;
     void moveMtx(float (*) [4]);
-    void moveSRT(const JGeometry::TVec3<f32> &, const JGeometry::TVec3<f32> &, const JGeometry::TVec3<f32> &);
-    void moveTrans(const JGeometry::TVec3<f32> &);
+    void moveSRT(const TVec3f &, const TVec3f &, const TVec3f &);
+    void moveTrans(const TVec3f &);
     void remove();
     void setAllActor(const TLiveActor *);
     void setAllBGType(u16);
@@ -23,10 +23,10 @@ public:
     void setCheckData(const f32 *, const s16 *, TBGCheckData *, int);
     void setMtx(float (*) [4]);
     void setUp();
-    void setUpTrans(const JGeometry::TVec3<f32> &);
-    void setVertexData(u32, const JGeometry::TVec3<f32> &, const JGeometry::TVec3<f32> &, const JGeometry::TVec3<f32> &);
+    void setUpTrans(const TVec3f &);
+    void setVertexData(u32, const TVec3f &, const TVec3f &, const TVec3f &);
     void update();
-    void updateTrans(const JGeometry::TVec3<f32> &);
+    void updateTrans(const TVec3f &);
 
     u32 *vTable;
     u32 *_4;
@@ -36,7 +36,7 @@ public:
     u32 mGroupCount; // _18
     u32 *mGroups;    // _1C
     Mtx _20;
-    JGeometry::TVec3<f32> _50;
+    TVec3f _50;
     u16 _5C;
     u16 _5E; // padding
 };

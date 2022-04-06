@@ -924,7 +924,7 @@ public:
   virtual void perform(u32, JDrama::TGraphics *) override;
   virtual bool receiveMessage(THitActor *receiver, u32 msg) override;
   virtual Mtx44 *getTakingMtx() override;
-  virtual u32 moveRequest(const JGeometry::TVec3<f32> &destPosition) override;
+  virtual u32 moveRequest(const TVec3f &destPosition) override;
   virtual void initValues();
   virtual void checkReturn();
   virtual void checkController();
@@ -948,12 +948,12 @@ public:
   f32 mBaseAcceleration;        // 0x008C
   u16 mAccelerationDirection;   // 0x0090
   u16 _92;                      // padding?
-  JGeometry::TVec3<s16> mAngle; // 0x0094
+  TVec3s mAngle; // 0x0094
   JGeometry::TVec3<u16> _9A;
   u16 _A0;
-  JGeometry::TVec3<f32> mSpeed;     // 0x00A4
+  TVec3f mSpeed;     // 0x00A4
   f32 mForwardSpeed;                // 0x00B0
-  JGeometry::TVec3<f32> mPrevSpeed; //?
+  TVec3f mPrevSpeed; //?
   f32 _C0;
   u16 _C4;
   f32 _C8;
@@ -1070,11 +1070,11 @@ public:
   Mtx _1F0;
   Mtx _220;
   Mtx _250;
-  JGeometry::TVec3<f32> mLastPosition; //?       0x0280
-  JGeometry::TVec3<f32> mLastRotation; //?       0x028C
+  TVec3f mLastPosition; //?       0x0280
+  TVec3f mLastRotation; //?       0x028C
   u32 mInitialWater;                   // 0x0298
-  JGeometry::TVec3<f32> mLastPos;
-  JGeometry::TVec3<f32> mLastGroundedPos; // 0x02A8
+  TVec3f mLastPos;
+  TVec3f mLastGroundedPos; // 0x02A8
   u32 _2B4;
   u16 _2B8;
   u16 mOBTimer; // 0x02BA

@@ -405,9 +405,9 @@ void setMarioOverhaul(TMarDirector *director);
 
 namespace Shine {
 
-void manageShineVanish(JGeometry::TVec3<f32> *marioPos);
+void manageShineVanish(TVec3f *marioPos);
 void isKillEnemiesShine(TConductor *gpConductor,
-                        JGeometry::TVec3<f32> *playerCoordinates, f32 range);
+                        TVec3f *playerCoordinates, f32 range);
 void checkBootOut(TMarDirector *gpMarDirector, u8 curState);
 u32 extendShineIDLogic(TFlagManager *flagManager, u32 flagID);
 void shineObjectStringMod(JSUInputStream *stream, u8 *dst, u32 size);

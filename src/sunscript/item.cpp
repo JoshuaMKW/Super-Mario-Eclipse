@@ -16,11 +16,11 @@ void Spc::spawnObjByID(TSpcInterp *interp, u32 argc) {
   }
 
   if (argc == 4) {
-    JGeometry::TVec3<f32> pos = *reinterpret_cast<JGeometry::TVec3<f32> *>(
+    TVec3f pos = *reinterpret_cast<TVec3f *>(
         Stack::popItem(interp).mValue);
-    JGeometry::TVec3<f32> rot = *reinterpret_cast<JGeometry::TVec3<f32> *>(
+    TVec3f rot = *reinterpret_cast<TVec3f *>(
         Stack::popItem(interp).mValue);
-    JGeometry::TVec3<f32> spd = *reinterpret_cast<JGeometry::TVec3<f32> *>(
+    TVec3f spd = *reinterpret_cast<TVec3f *>(
         Stack::popItem(interp).mValue);
     obj->JSGSetTranslation(reinterpret_cast<Vec &>(pos));
     obj->JSGSetRotation(reinterpret_cast<Vec &>(rot));

@@ -61,7 +61,7 @@ public:
   } GlobalFlags;
 
   struct {
-    JGeometry::TVec3<f32> mCoordinates; // 0x0020
+    TVec3f mCoordinates; // 0x0020
     f32 mSize;                          // 0x002C
     f32 mStep;                          // 0x0030
     JUtility::TColor mColor;            // 0x0034

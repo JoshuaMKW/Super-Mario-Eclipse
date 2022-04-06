@@ -6,14 +6,14 @@
 
 using namespace SME;
 
-static JGeometry::TVec3<f32> sSunBasePos(0.0f, 0.0f, 0.0f);
+static TVec3f sSunBasePos(0.0f, 0.0f, 0.0f);
 static u8 sSunBaseBlindStrength = 0;
 
 static s16 captureSunData() {
   TSunModel *sun;
   SME_FROM_GPR(30, sun);
 
-  JGeometry::TVec3<f32> spos;
+  TVec3f spos;
 
   JSGGetTranslation__Q26JDrama6TActorCFP3Vec(sun,
                                              reinterpret_cast<Vec *>(&spos));
@@ -28,8 +28,8 @@ static bool sunFollowCameraAndScaleLightness(TCameraMarioData *cam) {
   TSunModel *sun;
   SME_FROM_GPR(29, sun);
 
-  JGeometry::TVec3<f32> spos(sSunBasePos);
-  JGeometry::TVec3<f32> cpos;
+  TVec3f spos(sSunBasePos);
+  TVec3f cpos;
 
   JSGGetViewPosition__Q26JDrama13TLookAtCameraCFP3Vec(
       gpCamera, reinterpret_cast<Vec *>(&cpos));

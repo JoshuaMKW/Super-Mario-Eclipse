@@ -22,13 +22,13 @@ public:
     void doParticle();
     void drawEmitterCallback();
     f32 getAspect();
-    void getEmitterGlobalTranslation(JGeometry::TVec3<f32> &);
+    void getEmitterGlobalTranslation(TVec3f &);
     f32 getFovy();
     void loadBaseEmitterBlock(JPABaseParticle * /*JPADataBlock **/);
     void setGlobalRTMatrix(Mtx);
     void setGlobalSRTMatrix(Mtx);
 
     u32 _00[0x164 / 4];
-    JGeometry::TVec3<f32> mSize;
+    TVec3f mSize;
     u32 _180[0xA0 / 4];
 };

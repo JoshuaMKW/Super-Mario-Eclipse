@@ -232,7 +232,7 @@ public:
     s16 mCrushedTimer;
   } mCollisionFlags;
 
-  JGeometry::TVec3<f32> mYoshiWaterSpeed;
+  TVec3f mYoshiWaterSpeed;
   FluddHistory mFluddHistory;
   ParamHistory mDefaultAttrs;
   TMario::TDirtyParams mDefaultDirtyParams;

@@ -174,7 +174,7 @@ SME_PATCH_BL(SME_PORT_REGION(0x8024FB0C, 0x80247898, 0, 0), stopMusicOnManholeEx
 
 // 0x802981A8
 static void stopMusicBeforeShineCamera(CPolarSubCamera *cam, const char *demo,
-                                       const JGeometry::TVec3<f32> *pos,
+                                       const TVec3f *pos,
                                        s32 unk_0, f32 unk_1, bool unk_2) {
   cam->startDemoCamera(demo, pos, unk_0, unk_1, unk_2);
 

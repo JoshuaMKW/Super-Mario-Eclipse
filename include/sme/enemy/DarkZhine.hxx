@@ -64,7 +64,7 @@ struct TZhineParams : public TParams {
 class TDarkZhine : public TSpineEnemy {
   enum PoundingState { INACTIVE, DROPPING, SHOCKING, GROUNDROLL, RISING };
 
-  JGeometry::TVec3<f32> mBoundingPoint;
+  TVec3f mBoundingPoint;
   PoundingState mPoundingStatus;
   JDrama::TActor *mTarget;
   s16 mPoundingTimer;
@@ -98,7 +98,7 @@ public:
   bool isPounding() const { return mIsPounding; }
   bool isGooping() const { return mIsGooping; }
   bool isShocking() const { return mIsShocking; }
-  bool isTargetInRangeToHome(const JGeometry::TVec3<f32> &home, f32 r);
+  bool isTargetInRangeToHome(f32 range) const;
 
   PoundingState advanceDropAttack(TPollutionManager *gpPollution,
                                   TMario *player);

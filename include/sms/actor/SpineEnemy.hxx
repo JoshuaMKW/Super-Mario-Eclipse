@@ -17,11 +17,11 @@ public:
   virtual void init(TLiveManager *) override;
   virtual void calcRootMatrix() override;
   virtual void reset();
-  virtual void resetToPosition(const JGeometry::TVec3<f32> &);
-  virtual void resetSRTV(const JGeometry::TVec3<f32> &,
-                         const JGeometry::TVec3<f32> &,
-                         const JGeometry::TVec3<f32> &,
-                         const JGeometry::TVec3<f32> &);
+  virtual void resetToPosition(const TVec3f &);
+  virtual void resetSRTV(const TVec3f &,
+                         const TVec3f &,
+                         const TVec3f &,
+                         const TVec3f &);
   virtual u32 getSaveParam() const;
   virtual f32 getPhaseShift() const;
   virtual bool isReachedToGoal() const;

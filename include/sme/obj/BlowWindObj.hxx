@@ -19,7 +19,7 @@ public:
   GradientMode getGradientMode() { return mMode; }
   void setGradientMode(GradientMode mode) { mMode = mode; }
 
-  void lookAt(const JGeometry::TVec3<f32> &position);
+  void lookAt(const TVec3f &position);
 
 private:
   f32 mStrength;

@@ -8,6 +8,6 @@ public:
     TCameraMapTool(const TCameraMapTool &);
     virtual ~TCameraMapTool();
 
-    void calcPosAndAt(JGeometry::TVec3<f32> *, JGeometry::TVec3<f32> *) const;
+    void calcPosAndAt(TVec3f *, TVec3f *) const;
     void load(JSUMemoryInputStream &);
 };

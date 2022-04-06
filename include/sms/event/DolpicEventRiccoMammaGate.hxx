@@ -28,7 +28,7 @@ class TDolpicEventRiccoMammaGate : public TMapEvent
     u32 _3C;
     u32 _40;
     u32 _44;
-    JGeometry::TVec3<f32> mEventPosition; // _48
-    JGeometry::TVec3<f32> _54;
+    TVec3f mEventPosition; // _48
+    TVec3f _54;
     f32 _60;
 };

@@ -179,7 +179,7 @@ public:
   void setBtpFromIndex(int);
   void setFrameRate(f32, int);
   void setJointCallback(int, int (*)(J3DNode *, int));
-  void setLightData(const TBGCheckData *, const JGeometry::TVec3<f32> &);
+  void setLightData(const TBGCheckData *, const TVec3f &);
   void setLightID(s16);
   void setLightType(int);
   void setModel(J3DModel *, u32);

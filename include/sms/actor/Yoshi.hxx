@@ -24,7 +24,7 @@ public:
   s32 mCurJuice;                      // 0x000C
   TMario *mMario;                     // 0x0010
   u32 _02[0xC / 4];                   // 0x0014
-  JGeometry::TVec3<f32> mCoordinates; // 0x0020
+  TVec3f mCoordinates; // 0x0020
   u32 _03[0x8 / 4];                   // 0x002C
   MActor *mAnimationTable;            // 0x0034
   u32 _04[0x4C / 4];                  // 0x0038

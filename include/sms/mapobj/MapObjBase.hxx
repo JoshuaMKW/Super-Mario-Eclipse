@@ -31,9 +31,9 @@ public:
   virtual void appear();
   virtual void makeObjAppeared();
   virtual void makeObjDead();
-  virtual void changeObjSRT(const JGeometry::TVec3<f32> &,
-                            const JGeometry::TVec3<f32> &,
-                            const JGeometry::TVec3<f32> &);
+  virtual void changeObjSRT(const TVec3f &,
+                            const TVec3f &,
+                            const TVec3f &);
   virtual void changeObjMtx(Mtx44);
   virtual void updateObjMtx();
   virtual void setUpCurrentMapCollision();
@@ -61,30 +61,30 @@ public:
   void awake();
   void calcMap();
   void calcReflectingVelocity(const TBGCheckData *, f32,
-                              JGeometry::TVec3<f32> *) const;
+                              TVec3f *) const;
   void checkOnManhole();
   void concatOnlyRotFromLeft(Mtx44, Mtx44, Mtx44);
   void concatOnlyRotFromRight(Mtx44, Mtx44, Mtx44);
-  void emitAndBindScale(s32, u8, const JGeometry::TVec3<f32> *,
-                        const JGeometry::TVec3<f32> &) const;
-  void emitAndRotateScale(s32, u8, const JGeometry::TVec3<f32> *) const;
-  void emitAndScale(s32, u8, const JGeometry::TVec3<f32> *) const;
-  void emitAndScale(s32, u8, const JGeometry::TVec3<f32> *,
-                    const JGeometry::TVec3<f32> &) const;
-  void emitAndSRT(s32, u8, const JGeometry::TVec3<f32> *,
-                  const JGeometry::TVec3<f32> &, const JGeometry::TVec3<f32> &);
+  void emitAndBindScale(s32, u8, const TVec3f *,
+                        const TVec3f &) const;
+  void emitAndRotateScale(s32, u8, const TVec3f *) const;
+  void emitAndScale(s32, u8, const TVec3f *) const;
+  void emitAndScale(s32, u8, const TVec3f *,
+                    const TVec3f &) const;
+  void emitAndSRT(s32, u8, const TVec3f *,
+                  const TVec3f &, const TVec3f &);
   void emitColumnWater();
   void *getBuildingJoint(int);
   void *getBuildingJointObj(int);
-  f32 getDistance(const JGeometry::TVec3<f32> &) const;
-  f32 getDistanceXZ(const JGeometry::TVec3<f32> &) const;
-  Vec *getNormalVecFromTarget(f32, f32, f32, JGeometry::TVec3<f32> *) const;
-  Vec *getNormalVecFromTargetXZ(f32, f32, JGeometry::TVec3<f32> *) const;
+  f32 getDistance(const TVec3f &) const;
+  f32 getDistanceXZ(const TVec3f &) const;
+  Vec *getNormalVecFromTarget(f32, f32, f32, TVec3f *) const;
+  Vec *getNormalVecFromTargetXZ(f32, f32, TVec3f *) const;
   f32 getObjCollisionHeightOffset() const;
-  f32 getRotYFromAxisX(const JGeometry::TVec3<f32> &) const;
-  f32 getRotYFromAxisZ(const JGeometry::TVec3<f32> &) const;
-  JGeometry::TVec3<f32> *getVerticalVecToTargetXZ(f32, f32,
-                                                  JGeometry::TVec3<f32> *);
+  f32 getRotYFromAxisX(const TVec3f &) const;
+  f32 getRotYFromAxisZ(const TVec3f &) const;
+  TVec3f *getVerticalVecToTargetXZ(f32, f32,
+                                                  TVec3f *);
   bool hasAnim(u16) const;
   bool hasModelOrAnimData(u16) const;
   void initActorData();
@@ -94,11 +94,11 @@ public:
   void initModelData();
   void initObjCollisionData();
   void initUnique();
-  void makeObjMtxRotByAxis(const JGeometry::TVec3<f32> &, f32, Mtx44) const;
+  void makeObjMtxRotByAxis(const TVec3f &, f32, Mtx44) const;
   void makeRootMtxRotX(Mtx44);
   void makeRootMtxRotY(Mtx44);
   void makeRootMtxRotZ(Mtx44);
-  void makeVecToLocalZ(f32, JGeometry::TVec3<f32> *);
+  void makeVecToLocalZ(f32, TVec3f *);
   bool marioHeadAttack() const;
   bool marioHipAttack() const;
   bool marioIsOn() const;
@@ -114,7 +114,7 @@ public:
   void startControlAnim(u16);
   void startSound(u16);
   void throwObjToFront(TMapObjBase *, f32, f32) const;
-  void throwObjToFrontFromPoint(TMapObjBase *, const JGeometry::TVec3<f32> &,
+  void throwObjToFrontFromPoint(TMapObjBase *, const TVec3f &,
                                 f32, f32) const;
   void updateRootMtxTrans();
 
@@ -134,20 +134,20 @@ public:
   static void loadHideObjInfo(JSUMemoryInputStream &, s32 *, f32 *, f32 *,
                               s32 *);
   static void makeLowerStr(const char *, char *);
-  static void makeMtxRotByAxis(const JGeometry::TVec3<f32> &, f32, Mtx44);
+  static void makeMtxRotByAxis(const TVec3f &, f32, Mtx44);
   static bool marioIsOn(const TLiveActor *);
   static void moveJoint(J3DJoint *, f32, f32, f32);
   static void *newAndInitBuildingCollisionMove(int, TLiveActor *);
   static void *newAndInitBuildingCollisionWarp(int, TLiveActor *);
-  static void rotateVecByAxisY(JGeometry::TVec3<f32>, f32);
+  static void rotateVecByAxisY(TVec3f, f32);
   static void setJointScaleY(J3DJoint *, f32);
   static void setJointTransX(J3DJoint *, f32);
   static void setJointTransY(J3DJoint *, f32);
   static void setJointTransZ(J3DJoint *, f32);
   static void startAllAnim(MActor *, const char *);
   static void throwObjFromPointWithRot(TMapObjBase *,
-                                       const JGeometry::TVec3<f32> &,
-                                       const JGeometry::TVec3<f32> &, f32, f32);
+                                       const TVec3f &,
+                                       const TVec3f &, f32, f32);
   static bool waterHitPlane(THitActor *);
 
   char *mRegisterName;                    // 0x00F4
@@ -157,8 +157,8 @@ public:
   u16 mSoundIDIndex;                      // 0x0100
   s32 mStateTimer;                        // 0x0104
   u32 _03;                                // 0x0108
-  JGeometry::TVec3<f32> mInitialPosition; // 0x010C
-  JGeometry::TVec3<f32> mInitialRotation; // 0x0118
+  TVec3f mInitialPosition; // 0x010C
+  TVec3f mInitialRotation; // 0x0118
   u32 _124[3];
   ObjData *mObjData; // 0x0130
   u32 mMapObjID;     // 0x0134

@@ -33,7 +33,7 @@ class TMapEventSink : public TMapEvent
     u32 _44;
     u32 _48;
     u32 _4C;
-    JGeometry::TVec3<f32>* _50; // array of something, count is this + 0x20
+    TVec3f* _50; // array of something, count is this + 0x20
     void* _54;
     void* _58;
     void* _5C;

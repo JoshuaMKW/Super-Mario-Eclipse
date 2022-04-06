@@ -7,15 +7,15 @@
 class TSelectShine {
 public:
   TSelectShine(J3DModelData *data, J3DAnmColor *acolor, void *emitterManager,
-               JGeometry::TVec3<f32> &pos, s16 unk1, u8 unk2, f32 unk3,
+               TVec3f &pos, s16 unk1, u8 unk2, f32 unk3,
                f32 unk4, f32 unk5);
   virtual ~TSelectShine();
   virtual void move();
 
   J3DModel *mModel;
   void *mBowEffects;
-  JGeometry::TVec3<f32> mOffsetPosition;
-  JGeometry::TVec3<f32> mOffsetPosition2;
+  TVec3f mOffsetPosition;
+  TVec3f mOffsetPosition2;
   u32 mFlags;
   f32 mRiseOffset;
   f32 mRiseMaxOffset;

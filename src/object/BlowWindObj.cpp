@@ -43,8 +43,8 @@ void TBlowWindMapObj::perform(u32 flags, JDrama::TGraphics *graphics) {
     quat.z = mRotation.z;
     quat.w = 1.0f;
 
-    JGeometry::TVec3<f32> offset;
-    quat.rotate(JGeometry::TVec3<f32>{0.0f, 0.0f, 1.0f}, offset);
+    TVec3f offset;
+    quat.rotate(TVec3f{0.0f, 0.0f, 1.0f}, offset);
 
     actor->mPosition.add(offset);
   }

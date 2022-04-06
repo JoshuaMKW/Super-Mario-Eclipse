@@ -18,7 +18,7 @@ public:
   virtual void perform(u32, JDrama::TGraphics *) override;
 
   void addMoveCameraAndMario(const Vec &pos);
-  void addMultiPlayer(const JGeometry::TVec3<f32> *, f32, f32);
+  void addMultiPlayer(const TVec3f *, f32, f32);
   s32 calcAngleXFromXRotRatio_() const;
   s32 calcDistFromXRotRatio_() const;
   void calcFinalPosAndAt_();
@@ -58,12 +58,12 @@ public:
   s16 getCameraInbetweenFrame_(int);
   s16 getFinalAngleZ() const;
   void *getNoticeActor_();
-  JGeometry::TVec3<f32> *getNozzleTopPos_(JGeometry::TVec3<f32> *) const;
+  TVec3f *getNozzleTopPos_(TVec3f *) const;
   s16 getOffsetAngleX() const;
   s16 getOffsetAngleY() const;
   s32 getRestDemoFrames() const;
   Mtx *getToroccoMtx_() const;
-  JGeometry::TVec3<f32> getUsualLookat() const;
+  TVec3f getUsualLookat() const;
   bool isChangeToBossGesoCamera_() const;
   bool isChangeToCancanCamera_() const;
   bool isChangeToParallelCameraByMoveBG_() const;
@@ -99,13 +99,13 @@ public:
   void makeMtxForTalk(const TBaseNPC *);
   void offMoveApproach_();
   void onMoveApproach_();
-  void removeMultiPlayer(const JGeometry::TVec3<f32> *);
+  void removeMultiPlayer(const TVec3f *);
   void rotateX_ByStickY_(f32);
   void rotateY_ByStickX_(f32);
   void setNoticeInfo();
   void setUpFromLButtonCamera_();
   void setUpToLButtonCamera_(int);
-  void startDemoCamera(const char *, const JGeometry::TVec3<f32> *, s32, f32,
+  void startDemoCamera(const char *, const TVec3f *, s32, f32,
                        bool);
   void startGateDemoCamera(const JDrama::TActor *);
   void updateDemoCamera_(bool);

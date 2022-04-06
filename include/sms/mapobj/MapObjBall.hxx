@@ -19,12 +19,12 @@ public:
   virtual s32 getLivingTime() const override;
   virtual void hold(TTakeActor *) override;
   virtual void put() override;
-  virtual void touchGround(JGeometry::TVec3<f32> *) override;
-  virtual void checkWallCollision(JGeometry::TVec3<f32> *) override;
-  virtual void touchWall(JGeometry::TVec3<f32> *,
+  virtual void touchGround(TVec3f *) override;
+  virtual void checkWallCollision(TVec3f *) override;
+  virtual void touchWall(TVec3f *,
                          TBGWallCheckRecord *) override;
-  virtual void touchRoof(JGeometry::TVec3<f32> *) override;
-  virtual void rebound(JGeometry::TVec3<f32> *);
+  virtual void touchRoof(TVec3f *) override;
+  virtual void rebound(TVec3f *);
   virtual void touchWaterSurface();
   virtual void touchPollution();
   virtual void kicked();

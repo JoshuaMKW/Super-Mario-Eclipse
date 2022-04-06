@@ -7,5 +7,5 @@
 struct TRidingInfo
 {
     THitActor *mHitActor; // _0
-    JGeometry::TVec3<f32> mActorRidingPos; // _4
+    TVec3f mActorRidingPos; // _4
 };

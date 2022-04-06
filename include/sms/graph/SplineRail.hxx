@@ -11,7 +11,7 @@ class TSplineRail {
 public:
     TSplineRail(TGraphWeb *);
 
-    void getPosAndRot(f32, JGeometry::TVec3<f32> posOut, JGeometry::TVec3<f32> rotOut);
+    void getPosAndRot(f32, TVec3f posOut, TVec3f rotOut);
 };
 
 class TSplinePath {

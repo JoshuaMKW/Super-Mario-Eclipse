@@ -11,7 +11,7 @@ class TBGPolDrop : JDrama::TActor {
 public:
   enum DropStatus { DEAD, ALIVE, HIT };
 
-  JGeometry::TVec3<f32> mVelocity; // 0x0044
+  TVec3f mVelocity; // 0x0044
   u32 _06[0x8 / 4];                // 0x0050
   u32 mStatus;                     // 0x0058
 };

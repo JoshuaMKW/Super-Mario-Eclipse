@@ -17,9 +17,9 @@ public:
   void makeObjAppeared(u32);
   
   static u32 getActorTypeByEventID(u32);
-  static TMapObjBase *newAndRegisterObj(const char *, const JGeometry::TVec3<f32> &,
-                                 const JGeometry::TVec3<f32> &,
-                                 const JGeometry::TVec3<f32> &);
+  static TMapObjBase *newAndRegisterObj(const char *, const TVec3f &,
+                                 const TVec3f &,
+                                 const TVec3f &);
   static TMapObjBase *newAndRegisterObjByEventID(u32, const char *);
 
   f32 _38;

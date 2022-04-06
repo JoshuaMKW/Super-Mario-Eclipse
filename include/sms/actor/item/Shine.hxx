@@ -36,7 +36,7 @@ public:
   JPABaseEmitter *mKiraEffect; // 0x019C | Sparkles
   JPABaseEmitter *mBowEffect; // 0x01A0 | Light bow
   u32 _1A4;
-  JGeometry::TVec3<f32> mGlowSize; // 0x01A8
+  TVec3f mGlowSize; // 0x01A8
   bool mIsAlreadyObtained;           // 0x01B4
   u32 _1B8[0x40 / 4];               // 0x01B8
 

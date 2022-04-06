@@ -22,8 +22,8 @@ public:
   virtual void JSGGetRotation(Vec *) const override;
   virtual void JSGSetRotation(const Vec &) override;
 
-  JGeometry::TVec3<f32> mSize;     // 24
-  JGeometry::TVec3<f32> mRotation; // 30
+  TVec3f mSize;     // 24
+  TVec3f mRotation; // 30
 private:
   u32 _02[0x8 / 4]; // 3C
 };

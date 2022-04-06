@@ -11,15 +11,15 @@ using namespace SME::Class;
 // 0x801BD664
 // extern -> SME.cpp
 static bool sIsShineShrinking = false;
-void Patch::Shine::manageShineVanish(JGeometry::TVec3<f32> *marioPos) {
+void Patch::Shine::manageShineVanish(TVec3f *marioPos) {
   TShine *shine;
   SME_FROM_GPR(30, shine);
 
-  const JGeometry::TVec3<f32> step(0.007f, 0.007f, 0.007f);
+  const TVec3f step(0.007f, 0.007f, 0.007f);
 
-  JGeometry::TVec3<f32> size;
-  JGeometry::TVec3<f32> rotation;
-  JGeometry::TVec3<f32> position;
+  TVec3f size;
+  TVec3f rotation;
+  TVec3f position;
 
   shine->JSGGetScaling(reinterpret_cast<Vec *>(&size));
   shine->JSGGetRotation(reinterpret_cast<Vec *>(&rotation));
@@ -62,7 +62,7 @@ SME_WRITE_32(SME_PORT_REGION(0x801BD668, 0x801B5520, 0, 0), 0x48000568);
 
 // 0x802413E0
 void Patch::Shine::isKillEnemiesShine(TConductor *gpConductor,
-                                      JGeometry::TVec3<f32> *playerCoordinates,
+                                      TVec3f *playerCoordinates,
                                       f32 range) {
   TMario *player;
   SME_FROM_GPR(31, player);

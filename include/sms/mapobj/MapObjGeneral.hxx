@@ -29,7 +29,7 @@ public:
   virtual void touchWater(THitActor *) override;
   virtual s32 getLivingTime() const;
   virtual s32 getFlushTime() const;
-  virtual bool isPollutedGround(const JGeometry::TVec3<f32> &) const;
+  virtual bool isPollutedGround(const TVec3f &) const;
   virtual void work();
   virtual void appearing();
   virtual void appeared();
@@ -51,12 +51,12 @@ public:
   virtual void makeObjRecovered();
   virtual void receiveMessageFromPlayer();
   virtual void calcVelocity();
-  virtual void checkGroundCollision(JGeometry::TVec3<f32> *);
-  virtual void touchGround(JGeometry::TVec3<f32> *);
-  virtual void checkWallCollision(JGeometry::TVec3<f32> *);
-  virtual void touchWall(JGeometry::TVec3<f32> *, TBGWallCheckRecord *);
-  virtual void checkRoofCollision(JGeometry::TVec3<f32> *);
-  virtual void touchRoof(JGeometry::TVec3<f32> *);
+  virtual void checkGroundCollision(TVec3f *);
+  virtual void touchGround(TVec3f *);
+  virtual void checkWallCollision(TVec3f *);
+  virtual void touchWall(TVec3f *, TBGWallCheckRecord *);
+  virtual void checkRoofCollision(TVec3f *);
+  virtual void touchRoof(TVec3f *);
 
   TBGCheckData *mWallTouching; // 0x0138
   TBGCheckData *mRoofTouching; // 0x013C

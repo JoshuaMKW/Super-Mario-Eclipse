@@ -64,7 +64,7 @@ bool TWaterBalloon::receiveMessage(THitActor *actor, u32 message) {
 void TWaterBalloon::control() {
   TMapObjBall::control();
   if (mForwardSpeed > MaxSpeed) {
-    JGeometry::TVec3<f32> dir;
+    TVec3f dir;
     getReflectionDir(*mFloorBelow->getNormal(), dir);
 
     blast(dir);
@@ -107,7 +107,7 @@ void TWaterBalloon::touchActor(THitActor *actor) {
   const f32 pangle = static_cast<f32>(player->mAngle.y / 182);
   const f32 speed = player->mForwardSpeed + 5.0f;
 
-  JGeometry::TVec3<f32> dir(0.0f, 0.0f, 0.0f);
+  TVec3f dir(0.0f, 0.0f, 0.0f);
   dir.x = sinf(Math::angleToRadians(pangle));
   dir.z = cosf(Math::angleToRadians(pangle));
   dir.scale(speed);
@@ -121,7 +121,7 @@ void TWaterBalloon::touchActor(THitActor *actor) {
   }
 }
 
-void TWaterBalloon::touchGround(JGeometry::TVec3<f32> *pos) {
+void TWaterBalloon::touchGround(TVec3f *pos) {
   if (mFloorBelow->mCollisionType == 2048) {
     TMapObjBall::touchGround(pos);
     return;
@@ -132,29 +132,29 @@ void TWaterBalloon::touchGround(JGeometry::TVec3<f32> *pos) {
     return;
   }
 
-  JGeometry::TVec3<f32> dir;
+  TVec3f dir;
   getReflectionDir(*mFloorBelow->getNormal(), dir);
 
   blast(dir);
 }
 
-void TWaterBalloon::touchWall(JGeometry::TVec3<f32> *pos,
+void TWaterBalloon::touchWall(TVec3f *pos,
                               TBGWallCheckRecord *record) {
-  JGeometry::TVec3<f32> dir;
+  TVec3f dir;
   getReflectionDir(*mWallTouching->getNormal(), dir);
 
   blast(dir);
 }
 
 void TWaterBalloon::touchPollution() {
-  JGeometry::TVec3<f32> dir;
+  TVec3f dir;
   getReflectionDir(*mFloorBelow->getNormal(), dir);
 
   blast(dir);
 }
 
 void TWaterBalloon::touchWaterSurface() {
-  JGeometry::TVec3<f32> dir;
+  TVec3f dir;
   getReflectionDir({0.0f, 1.0f, 0.0f}, dir);
 
   blast(dir);
@@ -164,8 +164,8 @@ void TWaterBalloon::touchWater(THitActor *actor) {
   TMapObjBall::touchWater(actor);
 }
 
-void TWaterBalloon::touchRoof(JGeometry::TVec3<f32> *pos) {
-  JGeometry::TVec3<f32> dir;
+void TWaterBalloon::touchRoof(TVec3f *pos) {
+  TVec3f dir;
   getReflectionDir(*mRoofTouching->getNormal(), dir);
 
   blast(dir);
@@ -173,16 +173,16 @@ void TWaterBalloon::touchRoof(JGeometry::TVec3<f32> *pos) {
 
 void TWaterBalloon::kicked() { TMapObjBall::kicked(); }
 
-void TWaterBalloon::blast(JGeometry::TVec3<f32> blastSpd) {
+void TWaterBalloon::blast(TVec3f blastSpd) {
   if (mHolder && mHolder->mObjectID == 0x80000001)
     receiveMessage(mHolder, 7); // Drop from Mario
 
   TWaterEmitInfo emitInfo = *sEmitInfo;
 
-  JGeometry::TVec3<f32> pos(mPosition);
+  TVec3f pos(mPosition);
   pos.y += 100.0f;
 
-  JGeometry::TVec3<f32> vel(blastSpd);
+  TVec3f vel(blastSpd);
   PSVECNormalize(reinterpret_cast<Vec *>(&vel), reinterpret_cast<Vec *>(&vel));
   vel.scale(7.0f + PSVECMag(reinterpret_cast<Vec *>(&blastSpd)) * 0.1f);
 
@@ -215,12 +215,12 @@ void TWaterBalloon::blast(JGeometry::TVec3<f32> blastSpd) {
 }
 
 void TWaterBalloon::getReflectionDir(
-    const JGeometry::TVec3<f32> &reflectionNormal,
-    JGeometry::TVec3<f32> &out) const {
+    const TVec3f &reflectionNormal,
+    TVec3f &out) const {
   f32 dot2 =
       2 * PSVECDotProduct(reinterpret_cast<const Vec *>(&mSpeed),
                           reinterpret_cast<const Vec *>(&reflectionNormal));
-  JGeometry::TVec3<f32> rvec(0.0f, 0.0f, 0.0f);
+  TVec3f rvec(0.0f, 0.0f, 0.0f);
   rvec.scale(dot2, reflectionNormal);
   out.sub(mSpeed, rvec);
 }

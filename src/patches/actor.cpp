@@ -14,7 +14,7 @@ static SME_PURE_ASM void shadowCrashPatch() {
 SME_PATCH_BL(SME_PORT_REGION(0x802320E0, 0X8022A034, 0, 0), shadowCrashPatch);
 
 static u32 clampRotation(TLiveActor *actor) {
-  JGeometry::TVec3<f32> &rot = actor->mRotation;
+  TVec3f &rot = actor->mRotation;
 
   auto clampPreserve = [](f32 rotation) {
     if (rotation > 360.0f)

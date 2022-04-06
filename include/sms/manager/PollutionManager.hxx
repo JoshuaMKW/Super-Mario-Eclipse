@@ -2,6 +2,4 @@
 
 #include "types.h"
 
-class TPollutionManager
-{
-};
+class TPollutionManager {};

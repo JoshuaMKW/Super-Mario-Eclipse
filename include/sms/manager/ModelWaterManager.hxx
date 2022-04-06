@@ -18,13 +18,13 @@ public:
   virtual void loadAfter() override;
 
   void askDoWaterHitCheck();
-  void askHitWaterParticleOnGround(const JGeometry::TVec3<f32> &);
+  void askHitWaterParticleOnGround(const TVec3f &);
   void calcDrawVtx(Mtx44);
   void calcVMAll(Mtx44);
-  void calcVMMtxGround(Mtx44, f32, const JGeometry::TVec3<f32> &,
-                       const JGeometry::TVec3<f32> &, Mtx44);
-  void calcVMMtxWall(Mtx44, f32, const JGeometry::TVec3<f32> &,
-                     const JGeometry::TVec3<f32> &, Mtx44);
+  void calcVMMtxGround(Mtx44, f32, const TVec3f &,
+                       const TVec3f &, Mtx44);
+  void calcVMMtxWall(Mtx44, f32, const TVec3f &,
+                     const TVec3f &, Mtx44);
   void calcWorldMinMax();
   void drawMirror(Mtx44);
   void drawRefracAndSpec() const;
@@ -36,7 +36,7 @@ public:
   void garbageCollect();
   void makeEmit(const TWaterEmitInfo &info);
   void move();
-  void wind(const JGeometry::TVec3<f32> &);
+  void wind(const TVec3f &);
 
   s16 mMaxEmit;        // 0x0010
   s16 mEmitCount;      // 0x0012

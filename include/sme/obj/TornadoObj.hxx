@@ -42,7 +42,7 @@ public:
 private:
   f32 mBlowStrength;
   bool mHasFinalPush;
-  JGeometry::TVec3<f32> mTrueRotation;
+  TVec3f mTrueRotation;
 };
 
 extern ObjData tornadoData;

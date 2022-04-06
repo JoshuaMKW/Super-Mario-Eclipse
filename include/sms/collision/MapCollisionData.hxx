@@ -27,7 +27,7 @@ public:
     bool getGridArea(const TBGCheckData *, int, int *, int *, int *, int *);
     void init(JSUMemoryInputStream &);
     void initMoveCollision();
-    u32 intersectLine(const JGeometry::TVec3<f32> &, const JGeometry::TVec3<f32> &, bool, JGeometry::TVec3<f32> *) const;
+    u32 intersectLine(const TVec3f &, const TVec3f &, bool, TVec3f *) const;
     bool polygonIsInGrid(f32, f32, f32, f32, TBGCheckData *);
     void removeCheckListData(u16, s32);
     void updateCheckListNode(s32, s32, s32);

@@ -16,8 +16,8 @@ public:
     void init(u32, u16, s16, const TLiveActor *);
     void move();
     void moveMtx(float (*) [4]);
-    void moveSRT(const JGeometry::TVec3<f32> &, const JGeometry::TVec3<f32> &, const JGeometry::TVec3<f32> &);
-    void moveTrans(const JGeometry::TVec3<f32> &);
+    void moveSRT(const TVec3f &, const TVec3f &, const TVec3f &);
+    void moveTrans(const TVec3f &);
     void setList();
 
     u32 _00;

@@ -51,8 +51,8 @@ public:
   void setCurAnmSound();
   void setAnmSound(const char *);
   void initAnmSound();
-  void getJointTransByIndex(int, JGeometry::TVec3<f32> *) const;
-  void calcVelocityToJumpToY(const JGeometry::TVec3<f32> &, f32, f32) const;
+  void getJointTransByIndex(int, TVec3f *) const;
+  void calcVelocityToJumpToY(const TVec3f &, f32, f32) const;
   void initLodAnm(const TLodAnmIndex *, int, f32);
   J3DModel *getModel() const;
   void calcRideMomentum();
@@ -67,9 +67,9 @@ public:
   u32 *_88;
   TSpineBase<TLiveActor> *mSpineBase;        // 0x008C
   u32 _90;                                   // 0x0090
-  JGeometry::TVec3<f32> mPositionalVelocity; // 0x0094
-  JGeometry::TVec3<f32> mRotationalVelocity; // 0x00A0
-  JGeometry::TVec3<f32> mSpeed;              // 0x00AC
+  TVec3f mPositionalVelocity; // 0x0094
+  TVec3f mRotationalVelocity; // 0x00A0
+  TVec3f mSpeed;              // 0x00AC
   f32 mShadowRadius;                         // 0x00B8
   f32 mMaxSpeed;                             // 0x00BC
   f32 _C0;                                   // 0x00C0

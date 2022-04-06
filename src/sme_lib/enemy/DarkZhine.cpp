@@ -1,9 +1,9 @@
-#ifdef ZHINE_BOSS
 
 #include "enemy/DarkZhine.hxx"
 
 #include "SME.hxx"
 
+#if SME_ZHINE_BOSS
 /*
 VTABLE
 
@@ -14,74 +14,15 @@ VTABLE
 .long 0x80337220, 0x80337228, 0x8033722C, 0x80337230
 .long 0x*/
 
-TDarkZhine::TDarkZhine(const char *name, bool hardMode) : TBossGesso(name)
+TDarkZhine::TDarkZhine(const char *name)
 {
-    ZhineFile *gessoZhineFile = (ZhineFile *)getResource__10JKRArchiveFPCc(getVolume__13JKRFileLoaderFPCc("scene"), "/zhine/config.bin");
-    this->mHardMode = hardMode;
-
-    *(u32 *)0x803B2A94 = reinterpret_cast<u32>(&TDarkZhine::cleanFromSpineBase);  //Replace eye damage vtable entry
-    if (this->mHardMode)
-    {
-        this->setBoundingPoint(gessoZhineFile->ZhineBinData.mBoundingPoint);
-        this->setBoundingRadius(gessoZhineFile->ZhineBinData.mBoundingAreaRadius);
-        this->setShockRadius(2000.0f);
-        this->setStampRadius(1000.0f);
-        this->setMarioDistance(2000.0f);
-        this->setSpeedMultiplier(1.2f);
-        this->setAccelerationRate(0.1f);
-        this->setMaxSpeed(20.0f);
-        this->setFramesToCleanOnce(4);
-        this->setPoundingTimer(300);
-        this->setShockingTimer(120);
-        this->setRollingTimer(300);
-        this->setGoopingTimer(0);
-        this->setPoundingTimerMax(300);
-        this->setShockingTimerMax(120);
-        this->setRollingTimerMax(300);
-        this->setGoopingTimerMax(0);
-        this->setRisingRate(1.4f);
-        this->setMaxPoundingHeight(800.0f);
-
-        *(f32 *)0x8041014C = gessoZhineFile->ZhineBinData.mBoundingAreaRadius;
-        *(f32 *)0x80410150 *= 1.2f;
-    }
-    else
-    {
-        this->setBoundingPoint(gessoZhineFile->ZhineBinData.mBoundingPoint);
-        this->setBoundingRadius(gessoZhineFile->ZhineBinData.mBoundingAreaRadius);
-        this->setShockRadius(2000.0f);
-        this->setStampRadius(1000.0f);
-        this->setMarioDistance(2000.0f);
-        this->setSpeedMultiplier(1.0f);
-        this->setAccelerationRate(0.1f);
-        this->setMaxSpeed(18.0f);
-        this->setFramesToCleanOnce(3);
-        this->setPoundingTimer(300);
-        this->setShockingTimer(120);
-        this->setRollingTimer(300);
-        this->setGoopingTimer(0);
-        this->setPoundingTimerMax(300);
-        this->setShockingTimerMax(120);
-        this->setRollingTimerMax(300);
-        this->setGoopingTimerMax(0);
-        this->setRisingRate(1.4f);
-        this->setMaxPoundingHeight(800.0f);
-
-        *(f32 *)0x8041014C = gessoZhineFile->ZhineBinData.mBoundingAreaRadius;
-        *(f32 *)0x80410150 *= 1.0f;
-    }
-    this->mGoopLevel = 0xFF;
-    SME_DEBUG_LOG("Created Zhine boss at %p; Hard mode = %s", this, this->mHardMode ? "True" : "False");
 }
 
 TDarkZhine::~TDarkZhine()
 {
-    *(u32 *)0x803B2A94 = 0x80074E54; //restore eye damage vtable entry
-    *(f32 *)0x8041014C = 800.0f;
-    *(f32 *)0x80410150 = 3000.0f;
 }
 
-f32 TDarkZhine::getAngleToTarget()
+f32 TDarkZhine::getAngleToTarget() const
 {
     JGeometry::TVec3<f32> zhineCoordinates = this->mPosition;
 

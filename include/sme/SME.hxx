@@ -171,6 +171,10 @@
 #define SME_WATERBALLOONS 1
 #endif
 
+#ifndef SME_ZHINE_BOSS
+#define SME_ZHINE_BOSS 1
+#endif
+
 #else
 
 #define SME_LONG_JUMP 0

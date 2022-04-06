@@ -838,6 +838,7 @@ public:
     HOVER = 0x0000088B,
     STUCK = 0x0002033C,
     TALKING = 0x10001308,
+    TURNING_MID = 0x00000443,
     TURNING = 0x00000444,
     YOSHI_ESC = 0x0000089C,
     SHINE_C = 0x00001302, // Collected Shine Sprite

@@ -9,9 +9,22 @@
 #include "SME.hxx"
 
 using namespace SME;
+using namespace SME::Class;
+
+static void climbSometimes(TMario *player) {
+  TPlayerData *playerData = TGlobals::getPlayerData(player);
+  const bool isMarioClimb = isMarioClimb__16TCameraMarioDataCFUl(player->mState);
+  if (playerData->mIsOnFire) {
+    if (isMarioClimb)
+      changePlayerStatus__6TMarioFUlUlb(player, TMario::State::FALL, 0, false);
+    return;
+  }
+  barProcess__6TMarioFv(player);
+}
+// SME_PATCH_BL(SME_PORT_REGION(0x8025D354, 0, 0, 0), climbSometimes);
 
 static void updateClimbContext(TMario *player) {
-  Class::TPlayerData *playerData = TGlobals::getPlayerData(player);
+  TPlayerData *playerData = TGlobals::getPlayerData(player);
 
   if (!playerData->isMario()) {
     playerData->mIsClimbTired = false;
@@ -143,7 +156,7 @@ SME_WRITE_32(SME_PORT_REGION(0x80261CFC, 0x80259A88, 0, 0), 0x41820070);
 /* GLOBAL CLIMB CODE */
 
 void getClimbingAnimSpd(TMario *player, TMario::Animation anim, f32 speed) {
-  Class::TPlayerData *playerData = TGlobals::getPlayerData(player);
+  TPlayerData *playerData = TGlobals::getPlayerData(player);
   if (playerData->mIsClimbTired)
     speed = 6.0f;
 
@@ -185,7 +198,7 @@ static SME_PURE_ASM void scaleRoofMoveDiff() {
 SME_PATCH_BL(SME_PORT_REGION(0x80261824, 0x802595B0, 0, 0), scaleRoofMoveDiff);
 
 static void scaleHangSpeed(TMario *player) {
-  Class::TPlayerData *playerData = TGlobals::getPlayerData(player);
+  TPlayerData *playerData = TGlobals::getPlayerData(player);
   player->mForwardSpeed += 1.0f;
 
   if (playerData->isMario())
@@ -205,7 +218,7 @@ static bool canHangOnRoof(TBGCheckData *roof /*, u16 colType*/) {
   u16 colType;
   SME_FROM_GPR(4, colType);
 
-  Class::TPlayerData *playerData = TGlobals::getPlayerData(player);
+  TPlayerData *playerData = TGlobals::getPlayerData(player);
 
   if (playerData->isMario() && playerData->getParams()->mCanClimbWalls.get())
     return true;
@@ -245,7 +258,7 @@ static f32 scaleClimbSpeed(f32 speed) {
   SME_FROM_FPR(3, _f3);
   SME_FROM_FPR(7, _f7);
 
-  Class::TPlayerData *playerData =
+  TPlayerData *playerData =
       TGlobals::getPlayerData(player);
 
   f32 scale = 0.015625f;
@@ -287,7 +300,7 @@ static bool canJumpClingWall(TBGCheckData *wall, u16 colType) {
   if (colType == 266)
     return true;
 
-  Class::TPlayerData *playerData =
+  TPlayerData *playerData =
       TGlobals::getPlayerData(player);
 
   if (playerData->isMario() &&
@@ -312,7 +325,7 @@ static bool canUnkActionWall(TBGCheckData *wall, u16 colType) {
   if (colType == 266)
     return true;
 
-  Class::TPlayerData *playerData =
+  TPlayerData *playerData =
       TGlobals::getPlayerData(player);
 
   if (playerData->isMario() &&
@@ -337,7 +350,7 @@ static bool canRunClingWall(TBGCheckData *wall, u16 colType) {
   if (colType == 266)
     return true;
 
-  Class::TPlayerData *playerData =
+  TPlayerData *playerData =
       TGlobals::getPlayerData(player);
 
   if (playerData->isMario() &&
@@ -366,7 +379,7 @@ static bool canMoveOnWall1(u16 colType) {
   if (colType == 266)
     return true;
 
-  Class::TPlayerData *playerData =
+  TPlayerData *playerData =
       TGlobals::getPlayerData(player);
 
   if (playerData->isMario() &&
@@ -390,7 +403,7 @@ static bool canMoveOnWall2(TBGCheckData *wall, u16 colType) {
   if (colType == 266)
     return true;
 
-  Class::TPlayerData *playerData =
+  TPlayerData *playerData =
       TGlobals::getPlayerData(player);
 
   if (playerData->isMario() &&

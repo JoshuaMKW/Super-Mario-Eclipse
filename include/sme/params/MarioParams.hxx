@@ -239,6 +239,7 @@ public:
   TRingBuffer<TWaterBalloon> mBalloons;
   bool mIsOnFire;
   s16 mFireTimer;
+  s16 mFireTimerMax;
 };
 
 } // namespace SME::Class

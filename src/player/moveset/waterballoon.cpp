@@ -24,11 +24,6 @@ static void createWaterBalloonAndThrow(TMario *player) {
   if (!(player->mController->mButtons.mFrameInput & TMarioGamePad::R))
     return;
 
-  if (!TGlobals::getPlayerData(player)->mIsOnFire)
-    Util::Mario::setFireToPlayer(player);
-  else
-    Util::Mario::extinguishPlayer(player);
-
   Class::TPlayerData *playerData = TGlobals::getPlayerData(player);
   TRingBuffer<TWaterBalloon> &balloons = playerData->mBalloons;
 
@@ -45,16 +40,18 @@ static void createWaterBalloonAndThrow(TMario *player) {
     return;
   }
 
-  //   if (player->mState == static_cast<u32>(TMario::State::IDLE)) {
-  //     changePlayerStatus__6TMarioFUlUlb(player, 0x80000588, 0, 1); //
-  //     0x80000387
-  //   } else if (player->mState == static_cast<u32>(TMario::State::RUNNING)) {
-  //     changePlayerStatus__6TMarioFUlUlb(player, 0x80000588, 0, 1);
-  //   } else if (player->mState == static_cast<u32>(TMario::State::JUMP) ||
-  //              player->mState == static_cast<u32>(TMario::State::D_JUMP) ||
-  //              player->mState == static_cast<u32>(TMario::State::FALL)) {
-  //     changePlayerStatus__6TMarioFUlUlb(player, 0x820008AB, 0, 1);
-  //   }
+  #if 0
+    if (player->mState == static_cast<u32>(TMario::State::IDLE)) {
+      changePlayerStatus__6TMarioFUlUlb(player, 0x80000588, 0, 1); //
+      0x80000387
+    } else if (player->mState == static_cast<u32>(TMario::State::RUNNING)) {
+      changePlayerStatus__6TMarioFUlUlb(player, 0x80000588, 0, 1);
+    } else if (player->mState == static_cast<u32>(TMario::State::JUMP) ||
+               player->mState == static_cast<u32>(TMario::State::D_JUMP) ||
+               player->mState == static_cast<u32>(TMario::State::FALL)) {
+      changePlayerStatus__6TMarioFUlUlb(player, 0x820008AB, 0, 1);
+    }
+  #endif
 }
 SME_PATCH_BL(SME_PORT_REGION(0x8024E2A0, 0x8024602C, 0, 0), createWaterBalloonAndThrow);
 

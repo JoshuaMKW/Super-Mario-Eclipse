@@ -21,7 +21,7 @@ TPlayerData::TPlayerData(TMario *player, CPolarSubCamera *camera, bool isMario)
       mPlayerID(SME::Enum::Player::MARIO), mCurJump(0), mIsLongJumping(false), mIsClimbTired(false),
       mPrevCollisionType(0), mCollisionTimer(0), mClimbTiredTimer(0),
       mSlideSpeedMultiplier(1.0f), mMaxAddVelocity(150.0f), mYoshiWaterSpeed(0.0f, 0.0f, 0.0f),
-      mDefaultAttrs(player), mBalloons(50, false) {
+      mDefaultAttrs(player), mBalloons(50, false), mIsOnFire(false), mFireTimer(0), mFireTimerMax(0) {
 
   mParams = new TPlayerParams();
 

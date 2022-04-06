@@ -35,6 +35,6 @@ void warpToCollisionFace(TMario *player, TBGCheckData *colTriangle,
 void rotatePlayerRelativeToCamera(TMario *player, CPolarSubCamera *other,
                                  Vec2 dir, f32 lerp);
 void setFireToPlayer(TMario *player);
-void extinguishPlayer(TMario *player);
+void extinguishPlayer(TMario *player, bool died);
 
 } // namespace SME::Util::Mario

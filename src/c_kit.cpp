@@ -6,10 +6,8 @@
 #include "sms/talk/Talk2D2.hxx"
 #include "string.h"
 
-
 #include "Globals.hxx"
 #include "SME.hxx"
-
 
 using namespace SME;
 using namespace SME::Class;
@@ -331,9 +329,24 @@ void Patch::CKit::realTimeCustomAttrsHandler(TMario *player) {
     break;
   }
 
+  SME_EVAL_LOG(playerParams->mIsOnFire);
   if (playerParams->mIsOnFire) {
+    SCALE_PARAM(player->mDeParams.mRunningMax, 1.4f);
+    SCALE_PARAM(player->mDeParams.mDashMax, 1.4f);
+    SCALE_PARAM(player->mDeParams.mClashSpeed, 1.4f);
+    SCALE_PARAM(player->mJumpParams.mJumpSpeedAccelControl, 1.4f);
+    SCALE_PARAM(player->mJumpParams.mFenceSpeed, 1.4f);
+    SCALE_PARAM(player->mRunParams.mMaxSpeed, 1.4f);
+    SCALE_PARAM(player->mRunParams.mAddBase, 1.4f);
+    SCALE_PARAM(player->mRunParams.mDecBrake, 1.05f);
+    SCALE_PARAM(player->mRunParams.mRunAnmSpeedBase, 1.4f);
+    SCALE_PARAM(player->mHangFenceParams.mMoveSp, 1.4f);
+    SCALE_PARAM(player->mHangFenceParams.mDescentSp, 1.4f);
+    SCALE_PARAM(player->mDirtyParams.mSlipRunSp, 1.4f);
+    SCALE_PARAM(player->mDirtyParams.mSlipCatchSp, 1.4f);
+
     if (player->mAttributes.mIsShallowWater || player->mAttributes.mIsWater)
-      Util::Mario::extinguishPlayer(player);
+      Util::Mario::extinguishPlayer(player, false);
     else
       blazePlayer(player);
   }

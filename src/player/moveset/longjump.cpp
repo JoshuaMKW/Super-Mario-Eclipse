@@ -14,7 +14,7 @@ f32 calcJumpPower(TMario *player, f32 factor, f32 base, f32 jumpPower) {
       params->mSizeMultiplier.get() *
           Class::TStageParams::sStageConfig->mPlayerSizeMultiplier.get(),
       0.5f, 1.0f);
-  if (player->mState & static_cast<u32>(TMario::State::AIRBORN)) {
+  if (player->mState & static_cast<u32>(TMario::STATE_AIRBORN)) {
     f32 multiplier = params->mMultiJumpMultiplier.get();
     for (u32 i = 1; i < playerData->mCurJump; ++i) {
       multiplier *= multiplier;
@@ -35,8 +35,8 @@ static void setJumpOrLongJump(TMario *player, u32 state, u32 unk_0) {
   TMarioGamePad::CButton &buttons = player->mController->mButtons;
 
   const bool isValidState =
-      !(player->mState & static_cast<u32>(TMario::State::AIRBORN)) &&
-      !(player->mState & static_cast<u32>(TMario::State::WATERBORN));
+      !(player->mState & static_cast<u32>(TMario::STATE_AIRBORN)) &&
+      !(player->mState & static_cast<u32>(TMario::STATE_WATERBORN));
 
   playerData->mIsLongJumping = false;
   if ((buttons.mInput & LongJumpSpecifier) == LongJumpSpecifier &&
@@ -45,7 +45,7 @@ static void setJumpOrLongJump(TMario *player, u32 state, u32 unk_0) {
     playerData->mIsLongJumping = !player->mAttributes.mHasFludd &&
                                  playerData->isMario() &&
                                  (player->mActionState & 0x8) == 0;
-    state = static_cast<u32>(TMario::State::JUMP);
+    state = static_cast<u32>(TMario::STATE_JUMP);
   }
 
   setStatusToJumping__6TMarioFUlUl(player, state, unk_0);
@@ -79,14 +79,14 @@ static void processJumpOrLongJump() {
     return;
   }
 
-  startVoice__6TMarioFUl(player, TMario::Voice::TRIPLE_JUMP);
+  startVoice__6TMarioFUl(player, TMario::VOICE_TRIPLE_JUMP);
 
   player->mSpeed.y +=
       LongJumpSpeedUp * playerData->getParams()->mBaseJumpMultiplier.get();
   player->mForwardSpeed +=
       LongJumpSpeedForward * playerData->getParams()->mSpeedMultiplier.get();
   player->mPrevState = player->mState;
-  player->mState = static_cast<u32>(TMario::State::JUMP);
+  player->mState = static_cast<u32>(TMario::STATE_JUMP);
 }
 SME_PATCH_BL(SME_PORT_REGION(0x80254534, 0x8024c2c0, 0, 0), processJumpOrLongJump);
 SME_WRITE_32(SME_PORT_REGION(0x80254538, 0x8024c2c4, 0, 0), 0x60000000);
@@ -125,8 +125,8 @@ static bool preserveRegisterCheckQuickFall() {
   TMario *player;
   SME_FROM_GPR(31, player);
 
-  return player->mState == static_cast<u32>(TMario::State::JUMPSPINR) ||
-         player->mState == static_cast<u32>(TMario::State::JUMPSPINL);
+  return player->mState == static_cast<u32>(TMario::STATE_JUMPSPINR) ||
+         player->mState == static_cast<u32>(TMario::STATE_JUMPSPINL);
 }
 SME_PATCH_BL(SME_PORT_REGION(0x80256618, 0x8024E3A4, 0, 0),             preserveRegisterCheckQuickFall);
 SME_WRITE_32(SME_PORT_REGION(0x8025661C, 0x8024E3A8, 0, 0), 0x2C030000);

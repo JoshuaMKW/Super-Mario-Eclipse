@@ -23,7 +23,7 @@ static void updateSlideFOV(CPolarSubCamera *cam) {
   factor = Math::lerp<f32>(sLastFactor, factor, 0.01f);
 
   if (factor > 1.0f &&
-      gpMarioAddress->mState == static_cast<u32>(TMario::State::DIVESLIDE)) {
+      gpMarioAddress->mState == static_cast<u32>(TMario::STATE_DIVESLIDE)) {
     sLastFactor = factor;
     reinterpret_cast<f32 *>(cam)[0x48 / 4] *= factor;
   } else {

@@ -50,10 +50,10 @@ static bool canMountYoshi() {
       1.5f)
     return false;
 
-  if (player->mState & static_cast<u32>(TMario::State::WATERBORN))
+  if (player->mState & static_cast<u32>(TMario::STATE_WATERBORN))
     return params->mCanRideYoshi.get();
   else
-    return ((player->mState & static_cast<u32>(TMario::State::AIRBORN)) &&
+    return ((player->mState & static_cast<u32>(TMario::STATE_AIRBORN)) &&
             params->mCanRideYoshi.get());
 }
 SME_PATCH_BL(SME_PORT_REGION(0x802810F8, 0x80278E84, 0, 0), canMountYoshi);
@@ -138,7 +138,7 @@ static u32 isYoshiValidWaterFlutter(s32 anmIdx, u32 unk1, TMario *player) {
 
   if (Util::Yoshi::isGreenYoshiAscendingWater(player))
     return (player->mState & 0xFFFFFBFF) |
-           static_cast<u32>(TMario::State::AIRBORN);
+           static_cast<u32>(TMario::STATE_AIRBORN);
   else
     return player->mState;
 }

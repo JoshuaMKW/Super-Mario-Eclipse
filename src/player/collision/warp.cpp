@@ -85,7 +85,7 @@ SME_NO_INLINE void warpToLinkedCol(TMario *player, Enum::WarpKind kind,
           playerData->mCollisionFlags.mIsWarpUsed = true;
           playerData->mCollisionTimer = 0;
           startSoundActor__6TMarioFUl(player,
-                                      static_cast<u32>(TMario::Voice::JUMP));
+                                      static_cast<u32>(TMario::VOICE_JUMP));
         } else if (playerData->mCollisionTimer >=
                    DisableMovementTime - timeCut) {
           if (!playerData->mCollisionFlags.mIsDisableInput) {
@@ -128,7 +128,7 @@ SME_NO_INLINE void warpToLinkedCol(TMario *player, Enum::WarpKind kind,
               !sIsWiping) {
             gpApplication.mFader->startWipe(
                 TSMSFader::WipeRequest::FADE_SPIRAL_OUT, 1.0f, 0.0f);
-            MSoundSESystem::MSoundSE::startSoundSystemSE(0x4859, 0, nullptr, 0);
+            MSoundSE::startSoundSystemSE(0x4859, 0, nullptr, 0);
             sIsWiping = true;
           }
         }

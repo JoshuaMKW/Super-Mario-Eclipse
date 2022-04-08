@@ -187,7 +187,7 @@ static void preventDebuggingInteraction(TMario *player, JDrama::TGraphics *graph
   else {
     player->mForwardSpeed = 0.0f;
     player->mSpeed = {0.0f, 0.0f, 0.0f};
-    player->mState = static_cast<u32>(TMario::State::IDLE);
+    player->mState = static_cast<u32>(TMario::STATE_IDLE);
   }
 }
 SME_PATCH_BL(SME_PORT_REGION(0x8024D3A0, 0x8024512C, 0, 0), preventDebuggingInteraction);

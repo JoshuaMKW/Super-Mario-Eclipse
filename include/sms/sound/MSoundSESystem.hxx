@@ -21,3 +21,5 @@ public:
   static void construct();
 };
 }; // namespace MSoundSESystem
+
+using namespace MSoundSESystem;

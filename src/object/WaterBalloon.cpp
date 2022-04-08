@@ -116,7 +116,7 @@ void TWaterBalloon::touchActor(THitActor *actor) {
   mSpeed.add(dir);
 
   if (gpMSound->gateCheck(0x1807)) {
-    MSoundSESystem::MSoundSE::startSoundActor(
+    MSoundSE::startSoundActor(
         0x1807, reinterpret_cast<Vec *>(&mPosition), 0, nullptr, 0, 4);
   }
 }
@@ -206,7 +206,7 @@ void TWaterBalloon::blast(TVec3f blastSpd) {
 
 
   if (gpMSound->gateCheck(0x28B8)) {
-    MSoundSESystem::MSoundSE::startSoundActor(
+    MSoundSE::startSoundActor(
         0x28B8, reinterpret_cast<Vec *>(&mPosition), 0, nullptr, 0, 4);
   }
 

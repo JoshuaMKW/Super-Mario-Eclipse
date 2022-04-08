@@ -215,7 +215,7 @@ f32 velocityCoordinatePatches(f32 floorCoordinateY)
 {
     TMario *gpMario = (TMario *)*(u32 *)TMarioInstance;
 
-    if (gpMario->mState != TMario::State::IDLE)
+    if (gpMario->mState != TMario::STATE_IDLE)
     { //Y storage
         gpMario->mSpeed.y = 0;
     }

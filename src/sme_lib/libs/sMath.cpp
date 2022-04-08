@@ -37,8 +37,7 @@ f32 Math::Vector3::getNormalAngle(const Vec &vec) {
   return Math::radiansToAngle(atan2f(vec.x, vec.z));
 }
 
-void Math::Vector3::normalized(const TVec3f &vec,
-                                      TVec3f &out) {
+void Math::Vector3::normalized(const TVec3f &vec, TVec3f &out) {
 #if SME_USE_PS_MATH
   PSVECNormalize(reinterpret_cast<const Vec *>(&vec),
                  reinterpret_cast<Vec *>(&out));
@@ -58,8 +57,7 @@ void Math::Vector3::normalized(const Vec &vec, Vec &out) {
 #endif
 }
 
-f32 Math::Vector3::dot(const TVec3f &a,
-                              const TVec3f &b) {
+f32 Math::Vector3::dot(const TVec3f &a, const TVec3f &b) {
 #if SME_USE_PS_MATH
   return PSVECDotProduct(reinterpret_cast<const Vec *>(&a),
                          reinterpret_cast<const Vec *>(&b));
@@ -76,9 +74,7 @@ f32 Math::Vector3::dot(const Vec &a, const Vec &b) {
 #endif
 }
 
-void Math::Vector3::cross(const TVec3f &a,
-                                 const TVec3f &b,
-                                 TVec3f &out) {
+void Math::Vector3::cross(const TVec3f &a, const TVec3f &b, TVec3f &out) {
 #if SME_USE_PS_MATH
   PSVECCrossProduct(reinterpret_cast<const Vec *>(&a),
                     reinterpret_cast<const Vec *>(&b),
@@ -100,8 +96,12 @@ void Math::Vector3::cross(const Vec &a, const Vec &b, Vec &out) {
 #endif
 }
 
-f32 Math::Vector3::lookAtRatio(const TVec3f &a,
-                                      const TVec3f &b) {
+f32 Math::Vector3::getYAngleTo(const TVec3f &a, const TVec3f &b) {
+  TVec3f diff(a - b);
+  return Math::radiansToAngle(atan2f(diff.z, diff.x));
+}
+
+f32 Math::Vector3::lookAtRatio(const TVec3f &a, const TVec3f &b) {
   f32 angle = atan2f(b.z, -b.x) - atan2f(a.z, a.x);
   if (angle > M_PI) {
     angle -= 2 * M_PI;
@@ -121,8 +121,7 @@ f32 Math::Vector3::lookAtRatio(const Vec &a, const Vec &b) {
   return fabsf(angle) / M_PI;
 }
 
-f32 Math::Vector3::angleBetween(const TVec3f &a,
-                                       const TVec3f &b) {
+f32 Math::Vector3::angleBetween(const TVec3f &a, const TVec3f &b) {
   return dot(a, b) / (magnitude(a) * magnitude(b));
 }
 

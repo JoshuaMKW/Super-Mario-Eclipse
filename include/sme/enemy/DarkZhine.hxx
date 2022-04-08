@@ -31,6 +31,7 @@ struct TZhineParams : public TParams {
         CONSTRUCT_PARAM(mAccelerationRate, 0.98f),
         CONSTRUCT_PARAM(mShockRadius, 2000.0f),
         CONSTRUCT_PARAM(mMaxSpeed, 60.0f),
+        CONSTRUCT_PARAM(mTurnRate, 5.0f),
         CONSTRUCT_PARAM(mStampRadius, 1000.0f),
         CONSTRUCT_PARAM(mFramesToCleanOnce, 3),
         CONSTRUCT_PARAM(mPoundingTimerMax, 300),
@@ -50,6 +51,7 @@ struct TZhineParams : public TParams {
   TParamRT<f32> mAccelerationRate;
   TParamRT<f32> mShockRadius;
   TParamRT<f32> mMaxSpeed;
+  TParamRT<f32> mTurnRate;
   TParamRT<f32> mStampRadius;
   TParamRT<s16> mFramesToCleanOnce;
   TParamRT<s16> mPoundingTimerMax;
@@ -62,22 +64,7 @@ struct TZhineParams : public TParams {
 };
 
 class TDarkZhine : public TSpineEnemy {
-  enum PoundingState { INACTIVE, DROPPING, SHOCKING, GROUNDROLL, RISING };
-
-  TVec3f mBoundingPoint;
-  PoundingState mPoundingStatus;
-  JDrama::TActor *mTarget;
-  s16 mPoundingTimer;
-  s16 mGoopingTimer;
-  s16 mShockingTimer;
-  s16 mRollingTimer;
-  s16 mStatusTimer;
-  s16 mCleaningTimer;
-  bool mIsFollowMario;
-  bool mIsPounding;
-  bool mIsGooping;
-  bool mIsShocking;
-  TZhineParams mParams;
+  enum ActionState { IDLE, FLYING, TELEPORTING, DROPPING, SHOCKING, GROUNDROLL, RISING };
 
 public:
   TDarkZhine(const char *);
@@ -98,16 +85,29 @@ public:
   bool isPounding() const { return mIsPounding; }
   bool isGooping() const { return mIsGooping; }
   bool isShocking() const { return mIsShocking; }
-  bool isTargetInRangeToHome(f32 range) const;
+  bool isInRange(const TVec3f &pos, f32 range) const;
 
-  PoundingState advanceDropAttack(TPollutionManager *gpPollution,
-                                  TMario *player);
-  void advanceGoopDroplet();
-  void advanceRollMovement(TPollutionManager *gpPollution);
-  void canUtilizeTentacles(u32 *TBGTentacle, u32 *unk1, u32 *JDramaGraphics,
-                           TDarkZhine *thisZhine);
-  static u32 cleanFromSpineBase(u32 *gpNerveBGEye,
-                                TSpineBase<TLiveActor> *gpSpineBase);
+  bool advanceDropAttack();
+  bool advanceGoopDroplet();
+  bool advanceRollAttack();
+  bool advanceFlying();
+  bool advanceRising();
+  void sleep();
+
+private:
+  TVec3f mBoundingPoint;
+  f32 mForwardSpeed;
+  ActionState mActionState;
+  TMario *mTarget;
+  TRingBuffer<TBGPolDrop> mPolDrops;
+  s16 mStatusTimer;
+  s16 mCleaningTimer;
+  f32 mGoopCoverage;
+  bool mIsFollowMario;
+  bool mIsPounding;
+  bool mIsGooping;
+  bool mIsShocking;
+  TZhineParams mParams;
 };
 
 #endif

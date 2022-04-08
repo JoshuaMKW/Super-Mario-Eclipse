@@ -34,7 +34,7 @@ void extinguishPlayer(TMario *player, bool died) {
   TPlayerData *params = TGlobals::getPlayerData(player);
 
   if (params->mIsOnFire && !died)
-    MSoundSESystem::MSoundSE::startSoundActor(
+    MSoundSE::startSoundActor(
         0x28C5, reinterpret_cast<Vec *>(&player->mPosition), 0, nullptr, 0, 0);
 
   params->mIsOnFire = false;
@@ -77,12 +77,12 @@ void blazePlayer(TMario *player) {
     startVoice__6TMarioFUl(player, 0x7849);
   }
 
-  if (!(player->mState & static_cast<u32>(TMario::State::AIRBORN))) {
+  if (!(player->mState & static_cast<u32>(TMario::STATE_AIRBORN))) {
     switch (static_cast<TMario::State>(player->mState)) {
-    case TMario::State::TURNING_MID:
+    case TMario::STATE_TURNING_MID:
       break;
-    case TMario::State::IDLE:
-      changePlayerStatus__6TMarioFUlUlb(player, TMario::State::RUNNING, 0, false);
+    case TMario::STATE_IDLE:
+      changePlayerStatus__6TMarioFUlUlb(player, TMario::STATE_RUNNING, 0, false);
     default:
       setPlayerVelocity__6TMarioFf(player, 50.0f * player->mSize.z);
       player->mActionState = 1;

@@ -23,7 +23,7 @@ static void resetValuesOnStateChange(TMario *player) {
   Class::TPlayerData *playerData = TGlobals::getPlayerData(player);
 
   switch (player->mPrevState) {
-  case static_cast<u32>(TMario::State::TRIPLE_J):
+  case static_cast<u32>(TMario::STATE_TRIPLE_J):
     playerData->mCollisionFlags.mIsDisableInput = false;
     player->mController->State.mReadInput = true;
     break;
@@ -33,8 +33,8 @@ static void resetValuesOnStateChange(TMario *player) {
 
   switch (player->mState) {}
 
-  if ((player->mState != static_cast<u32>(TMario::State::JUMPSPINR) &&
-       player->mState != static_cast<u32>(TMario::State::JUMPSPINL)))
+  if ((player->mState != static_cast<u32>(TMario::STATE_JUMPSPINR) &&
+       player->mState != static_cast<u32>(TMario::STATE_JUMPSPINL)))
     TGlobals::getPlayerData(player)->mCollisionFlags.mIsSpinBounce = false;
 
   if (playerData->mCollisionFlags.mIsDisableInput)
@@ -45,8 +45,8 @@ static void resetValuesOnStateChange(TMario *player) {
 static void resetValuesOnGroundContact(TMario *player) {
   Class::TPlayerData *playerData = TGlobals::getPlayerData(player);
 
-  if ((player->mPrevState & static_cast<u32>(TMario::State::AIRBORN)) != 0 &&
-      (player->mState & static_cast<u32>(TMario::State::AIRBORN)) == 0 &&
+  if ((player->mPrevState & static_cast<u32>(TMario::STATE_AIRBORN)) != 0 &&
+      (player->mState & static_cast<u32>(TMario::STATE_AIRBORN)) == 0 &&
       playerData->mCollisionFlags.mIsAirborn) {
     playerData->mCollisionFlags.mIsAirborn = false;
     playerData->mCollisionFlags.mIsDisableInput = false;
@@ -56,8 +56,8 @@ static void resetValuesOnGroundContact(TMario *player) {
 static void resetValuesOnAirborn(TMario *player) {
   Class::TPlayerData *playerData = TGlobals::getPlayerData(player);
 
-  if ((player->mPrevState & static_cast<u32>(TMario::State::AIRBORN)) == 0 &&
-      (player->mState & static_cast<u32>(TMario::State::AIRBORN)) != 0 &&
+  if ((player->mPrevState & static_cast<u32>(TMario::STATE_AIRBORN)) == 0 &&
+      (player->mState & static_cast<u32>(TMario::STATE_AIRBORN)) != 0 &&
       !playerData->mCollisionFlags.mIsAirborn) {
     playerData->mCollisionFlags.mIsAirborn = true;
   }
@@ -125,7 +125,7 @@ static void slipperyCatchingSoundCheck(u32 sound, const Vec *pos, u32 unk_1,
       player->mFloorTriangle->mCollisionType == 17081)
     sound = 4105;
 
-  MSoundSESystem::MSoundSE::startSoundActor(sound, pos, unk_1, out, unk_2,
+  MSoundSE::startSoundActor(sound, pos, unk_1, out, unk_2,
                                             unk_3);
 }
 SME_PATCH_BL(SME_PORT_REGION(0x8025932C, 0x802510B8, 0, 0), slipperyCatchingSoundCheck);
@@ -290,8 +290,8 @@ void updateCollisionContext(TMario *player) {
 
   if (!player->mAttributes.mIsGameOver) {
     if (roofHeight - player->mFloorBelow < (marioCollisionHeight - 40.0f) &&
-        !(player->mState & static_cast<u32>(TMario::State::AIRBORN)) &&
-        player->mState != static_cast<u32>(TMario::State::HANG) &&
+        !(player->mState & static_cast<u32>(TMario::STATE_AIRBORN)) &&
+        player->mState != static_cast<u32>(TMario::STATE_HANG) &&
         !isUnderWater__6TMarioCFv(player)) {
       playerData->mCollisionFlags.mCrushedTimer += 1;
     } else {

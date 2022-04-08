@@ -25,7 +25,7 @@ static u32 carryOrTalkNPC(TBaseNPC *npc) {
   if ((*(u32 *)(&npc->mStateFlags.asFlags) & 0x840007) != 0)
     return 0;
 
-  if (gpMarioAddress->mState == static_cast<u32>(TMario::State::IDLE))
+  if (gpMarioAddress->mState == static_cast<u32>(TMario::STATE_IDLE))
     return 0;
 
   bool oldTake = npc->mStateFlags.asFlags.mCanBeTaken;
@@ -51,7 +51,7 @@ static bool canGrabAtNPC() {
     return npc->mStateFlags.asFlags.mCanBeTaken;
 
   return (playerData->getParams()->mCanHoldNPCs.get() &&
-          gpMarioAddress->mState != static_cast<u32>(TMario::State::IDLE)) ||
+          gpMarioAddress->mState != static_cast<u32>(TMario::STATE_IDLE)) ||
          npc->mStateFlags.asFlags.mCanBeTaken;
 }
 SME_PATCH_BL(SME_PORT_REGION(0x802815F0, 0x8027937C, 0, 0), canGrabAtNPC);
@@ -69,7 +69,7 @@ static bool canCarryNPC() {
     return npc->mStateFlags.asFlags.mCanBeTaken;
 
   return (playerData->getParams()->mCanHoldNPCs.get() &&
-          gpMarioAddress->mState != static_cast<u32>(TMario::State::IDLE)) ||
+          gpMarioAddress->mState != static_cast<u32>(TMario::STATE_IDLE)) ||
          npc->mStateFlags.asFlags.mCanBeTaken;
 }
 SME_PATCH_BL(SME_PORT_REGION(0x80207430, 0x801FF314, 0, 0), canCarryNPC);
@@ -90,8 +90,8 @@ SME_WRITE_32(SME_PORT_REGION(0x80207434, 0x801FF318, 0, 0), 0x2C030000);
 //             Util::Math::scaleLinearAtAnchor<f32>(
 //                 playerData->getParams()->mSizeMultiplier.get(), 0.5f, 1.0f);
 
-//   if (player->mState == static_cast<u32>(TMario::State::NPC_THROW) ||
-//       player->mState == static_cast<u32>(TMario::State::NPC_JUMPTHROW)) {
+//   if (player->mState == static_cast<u32>(TMario::STATE_NPC_THROW) ||
+//       player->mState == static_cast<u32>(TMario::STATE_NPC_JUMPTHROW)) {
 //     _f11 *= 4.0f;
 //   }
 
@@ -116,8 +116,8 @@ SME_WRITE_32(SME_PORT_REGION(0x80207434, 0x801FF318, 0, 0), 0x2C030000);
 //          Util::Math::scaleLinearAtAnchor<f32>(
 //              playerData->getParams()->mSizeMultiplier.get(), 0.5f, 1.0f);
 
-//   if (player->mState == static_cast<u32>(TMario::State::NPC_THROW) ||
-//       player->mState == static_cast<u32>(TMario::State::NPC_JUMPTHROW))
+//   if (player->mState == static_cast<u32>(TMario::STATE_NPC_THROW) ||
+//       player->mState == static_cast<u32>(TMario::STATE_NPC_JUMPTHROW))
 //     y *= 4.0f;
 
 //   npc->mSpeed.y = y;

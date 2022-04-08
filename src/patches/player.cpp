@@ -20,7 +20,7 @@ static u32 patchYStorage() {
   TMario *player;
   SME_FROM_GPR(31, player);
 
-  if (player->mState != static_cast<u32>(TMario::State::IDLE))
+  if (player->mState != static_cast<u32>(TMario::STATE_IDLE))
     player->mSpeed.y = 0.0f;
 
   return 0;
@@ -31,7 +31,7 @@ static void patchRideMovementUpWarp(Mtx out, Vec *ride, Vec *pos) {
   TMario *player;
   SME_FROM_GPR(30, player);
 
-  if (!(player->mState & static_cast<u32>(TMario::State::AIRBORN))) {
+  if (!(player->mState & static_cast<u32>(TMario::STATE_AIRBORN))) {
     PSMTXMultVec(out, ride, pos);
   }
 }

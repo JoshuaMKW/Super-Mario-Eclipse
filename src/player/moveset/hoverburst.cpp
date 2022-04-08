@@ -43,14 +43,14 @@ static bool checkAirNozzle() {
   SME_FROM_GPR(31, player);
 
   sIsTriggerNozzleDead &=
-      (player->mState & static_cast<u32>(TMario::State::AIRBORN)) != 0;
+      (player->mState & static_cast<u32>(TMario::STATE_AIRBORN)) != 0;
 
   if (player->mFludd->mCurrentNozzle == TWaterGun::Spray ||
       player->mFludd->mCurrentNozzle == TWaterGun::Yoshi ||
       player->mFludd->mCurrentNozzle == TWaterGun::Underwater)
-    return player->mState != static_cast<u32>(TMario::State::HOVER_F);
+    return player->mState != static_cast<u32>(TMario::STATE_HOVER_F);
 
-  return (!(player->mState & static_cast<u32>(TMario::State::AIRBORN)) ||
+  return (!(player->mState & static_cast<u32>(TMario::STATE_AIRBORN)) ||
           !sIsTriggerNozzleDead);
 }
 SME_PATCH_BL(SME_PORT_REGION(0x80262580, 0x8025A30C, 0, 0), checkAirNozzle);

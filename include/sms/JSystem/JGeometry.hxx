@@ -55,21 +55,13 @@ template <typename T> struct TVec3 {
   }
 };
 
-template<>
-struct TVec3<f32> {
+template <> struct TVec3<f32> {
   f32 x;
   f32 y;
   f32 z;
 
-  TVec3();
-  TVec3(f32 x1, f32 y1, f32 z1){
-      x = x1;
-      y = y1;
-      z = z1;
-  }
-
-  // operator Vec() const { return (Vec)x; }
-  // operator const Vec() const { return (const Vec)x; }
+  operator Vec() const { return *(Vec *)&x; }
+  operator const Vec() const { return *(const Vec *)&x; }
   operator Vec *() const { return (Vec *)&x; }
   operator const Vec *() const { return (const Vec *)&x; }
 
@@ -83,18 +75,20 @@ struct TVec3<f32> {
   void set(const Vec &);
 
   template <typename TY> void set(TY, TY, TY);
-
   template <typename TY> void set(const TVec3<TY> &);
 
   void setLength(const TVec3 &, f32);
   void setMax(const TVec3 &);
   void setMin(const TVec3 &);
   void sub(const TVec3 &);
-  void sub(const TVec3 &first, const TVec3 &second) {
-    x = first.x - second.x;
-    y = first.y - second.y;
-    z = first.z - second.z;
-  }
+  void sub(const TVec3 &, const TVec3 &);
+
+  static inline TVec3 &up() { return {0.0f, 1.0f, 0.0f}; }
+  static inline TVec3 &down() { return {0.0f, -1.0f, 0.0f}; }
+  static inline TVec3 &forward() { return {0.0f, 0.0f, 1.0f}; }
+  static inline TVec3 &backward() { return {0.0f, 0.0f, -1.0f}; }
+  static inline TVec3 &right() { return {1.0f, 0.0f, 0.0f}; }
+  static inline TVec3 &left() { return {-1.0f, 0.0f, -0.0f}; }
 };
 
 template <typename T> struct TVec4 {

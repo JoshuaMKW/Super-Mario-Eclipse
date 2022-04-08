@@ -5,15 +5,21 @@
 #include "sms/actor/SpineEnemy.hxx"
 #include "types.h"
 
-
 class TBGPolDrop : JDrama::TActor {
-
 public:
-  enum DropStatus { DEAD, ALIVE, HIT };
+  enum DropStatus : int { DEAD, ALIVE, HIT };
 
-  TVec3f mVelocity; // 0x0044
-  u32 _06[0x8 / 4];                // 0x0050
-  u32 mStatus;                     // 0x0058
+  TBGPolDrop(const char *);
+  virtual ~TBGPolDrop();
+
+  virtual void perform(u32, JDrama::TGraphics *) override;
+
+  void launch(const TVec3f &pos, const TVec3f &vel);
+  void move();
+
+  TVec3f mVelocity;   // 0x0044
+  u32 _06[0x8 / 4];   // 0x0050
+  DropStatus mStatus; // 0x0058
 };
 
 class TBossGesso : public TSpineEnemy {

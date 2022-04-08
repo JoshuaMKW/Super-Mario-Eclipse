@@ -12,9 +12,9 @@ public:
   virtual ~THitActor();
 
   virtual void perform(u32, JDrama::TGraphics *) override;
-  virtual bool receiveMessage(THitActor *receiver, u32 msg);
+  virtual bool receiveMessage(THitActor *sender, u32 msg);
 
-  void initHitActor(u32, u16 collisionArrayCap, int collisionFlags,
+  void initHitActor(u32 actorID, u16 collisionArrayCap, int collisionFlags,
                     f32 attackRadius, f32 attackHeight, f32 receiveRadius,
                     f32 receiveHeight);
   void calcEntryRadius();

@@ -48,7 +48,7 @@ static void normalizeHoverSlopeSpeed(f32 floorPos) {
 
   player->mPosition.y = floorPos;
 
-  if (!(player->mState == static_cast<u32>(TMario::State::HOVER)))
+  if (!(player->mState == static_cast<u32>(TMario::STATE_HOVER)))
     return;
 
   const f32 playerRotY = f32(player->mAngle.y) / 182.0f;

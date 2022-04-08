@@ -79,11 +79,11 @@ bool TTornadoMapObj::blowUp(TMario *actor) {
       (actor->mPosition.y - startBlowHeight) / (mAttackHeight * 1.5f);
 
   if ((actor->mState & 0x800000) == 0 &&
-      actor->mState != static_cast<u32>(TMario::State::DIVEJUMP) &&
-      actor->mState != static_cast<u32>(TMario::State::HOVER) &&
+      actor->mState != static_cast<u32>(TMario::STATE_DIVEJUMP) &&
+      actor->mState != static_cast<u32>(TMario::STATE_HOVER) &&
       mBlowStrength >= 0.5f) {
     playerData->mCollisionFlags.mIsSpinBounce = true;
-    actor->mState = static_cast<u32>(TMario::State::JUMPSPINL);
+    actor->mState = static_cast<u32>(TMario::STATE_JUMPSPINL);
   }
 
   f32 factor;

@@ -15,7 +15,7 @@ static void createWaterBalloonAndThrow(TMario *player) {
   if (gpMarDirector->mCurState != 4)
     return;
 
-  if (player->mState == 0x200009 || player->mState == static_cast<u32>(TMario::State::SHINE_C))
+  if (player->mState == 0x200009 || player->mState == static_cast<u32>(TMario::STATE_SHINE_C))
     return;
 
   if (player->mHeldObject || player->mAttributes.mHasFludd)
@@ -41,14 +41,14 @@ static void createWaterBalloonAndThrow(TMario *player) {
   }
 
   #if 0
-    if (player->mState == static_cast<u32>(TMario::State::IDLE)) {
+    if (player->mState == static_cast<u32>(TMario::STATE_IDLE)) {
       changePlayerStatus__6TMarioFUlUlb(player, 0x80000588, 0, 1); //
       0x80000387
-    } else if (player->mState == static_cast<u32>(TMario::State::RUNNING)) {
+    } else if (player->mState == static_cast<u32>(TMario::STATE_RUNNING)) {
       changePlayerStatus__6TMarioFUlUlb(player, 0x80000588, 0, 1);
-    } else if (player->mState == static_cast<u32>(TMario::State::JUMP) ||
-               player->mState == static_cast<u32>(TMario::State::D_JUMP) ||
-               player->mState == static_cast<u32>(TMario::State::FALL)) {
+    } else if (player->mState == static_cast<u32>(TMario::STATE_JUMP) ||
+               player->mState == static_cast<u32>(TMario::STATE_D_JUMP) ||
+               player->mState == static_cast<u32>(TMario::STATE_FALL)) {
       changePlayerStatus__6TMarioFUlUlb(player, 0x820008AB, 0, 1);
     }
   #endif

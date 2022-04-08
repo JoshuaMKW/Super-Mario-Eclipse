@@ -17,32 +17,32 @@ static void manageCustomJumps(TMario *player) {
   const s32 jumpsLeft =
       (playerData->getParams()->mMaxJumps.get() - playerData->mCurJump);
 
-  if ((player->mState & static_cast<u32>(TMario::State::AIRBORN)) == false ||
+  if ((player->mState & static_cast<u32>(TMario::STATE_AIRBORN)) == false ||
       (player->mState & 0x800000) ||
       player->mYoshi->mState == TYoshi::MOUNTED ||
-      player->mState == static_cast<u32>(TMario::State::SLIP_JUMP) ||
-      player->mState == static_cast<u32>(TMario::State::THROWN) ||
+      player->mState == static_cast<u32>(TMario::STATE_SLIP_JUMP) ||
+      player->mState == static_cast<u32>(TMario::STATE_THROWN) ||
       player->mAttributes.mIsGameOver) {
     playerData->mCurJump = 1;
   } else if ((player->mController->mButtons.mFrameInput &
               TMarioGamePad::EButtons::A) &&
              jumpsLeft > 0 &&
-             player->mState != static_cast<u32>(TMario::State::WALLSLIDE) &&
-             player->mState != static_cast<u32>(TMario::State::F_KNCK_H)) {
+             player->mState != static_cast<u32>(TMario::STATE_WALLSLIDE) &&
+             player->mState != static_cast<u32>(TMario::STATE_F_KNCK_H)) {
     u32 state = player->mState;
     u32 voiceID = 0;
     u32 animID = 0;
 
     if (jumpsLeft == 1) {
-      state = static_cast<u32>(TMario::State::TRIPLE_J);
+      state = static_cast<u32>(TMario::STATE_TRIPLE_J);
       voiceID = 0x78B6;
       animID = 0x6F;
     } else if (jumpsLeft % 2) {
-      state = static_cast<u32>(TMario::State::JUMP);
+      state = static_cast<u32>(TMario::STATE_JUMP);
       voiceID = 0x78B1;
       animID = 0x4D;
     } else {
-      state = static_cast<u32>(TMario::State::D_JUMP);
+      state = static_cast<u32>(TMario::STATE_D_JUMP);
       voiceID = 0x78B6;
       animID = 0x50;
     }

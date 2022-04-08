@@ -60,6 +60,8 @@ void cross(const TVec3f &a, const TVec3f &b,
            TVec3f &out);
 void cross(const Vec &a, const Vec &b, Vec &out);
 
+f32 getYAngleTo(const TVec3f &a, const TVec3f &b);
+
 f32 lookAtRatio(const TVec3f &a, const TVec3f &b);
 f32 lookAtRatio(const Vec &a, const Vec &b);
 

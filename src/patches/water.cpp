@@ -19,7 +19,7 @@ static void patchWaterDownWarp(f32 y) {
   SME_FROM_GPR(31, player);
 
   if (player->mFloorTriangleWater == player->mFloorTriangle)
-    changePlayerStatus__6TMarioFUlUlb(player, TMario::State::FALL, 0, false);
+    changePlayerStatus__6TMarioFUlUlb(player, TMario::STATE_FALL, 0, false);
   else
     player->mPosition.y = y;
 }

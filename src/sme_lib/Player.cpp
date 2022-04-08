@@ -306,7 +306,7 @@ void Util::Mario::warpToCollisionFace(TMario *player, TBGCheckData *colTriangle,
     gpCamera->JSGSetViewTargetPosition(reinterpret_cast<Vec &>(playerPos));
 
     changePlayerStatus__6TMarioFUlUlb(
-        player, static_cast<u32>(TMario::State::FALL), 0, 0);
+        player, static_cast<u32>(TMario::STATE_FALL), 0, 0);
   }
 }
 

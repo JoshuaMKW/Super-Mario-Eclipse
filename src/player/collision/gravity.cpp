@@ -30,13 +30,13 @@ void antiGravityCol(TMario *player) {
     return;
 
   player->mSpeed.y = 10.0f;
-  if ((player->mState & static_cast<u32>(TMario::State::AIRBORN)) == false) {
+  if ((player->mState & static_cast<u32>(TMario::STATE_AIRBORN)) == false) {
     position.y += 1.0f;
     player->JSGSetTranslation(position);
     changePlayerStatus__6TMarioFUlUlb(
-        player, static_cast<u32>(TMario::State::FALL), 0, 0);
+        player, static_cast<u32>(TMario::STATE_FALL), 0, 0);
   }
-  if (player->mState == static_cast<u32>(TMario::State::FALL))
+  if (player->mState == static_cast<u32>(TMario::STATE_FALL))
     player->mSubStateTimer = 0;
 }
 

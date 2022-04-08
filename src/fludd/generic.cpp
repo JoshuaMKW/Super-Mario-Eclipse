@@ -72,7 +72,7 @@ static bool canCollectFluddItem_()
   {
     if (gpMSound->gateCheck(0x483E) && sNozzleBuzzCounter < 0)
     {
-      MSoundSESystem::MSoundSE::startSoundSystemSE(0x483E, 0, nullptr, 0);
+      MSoundSE::startSoundSystemSE(0x483E, 0, nullptr, 0);
       sNozzleBuzzCounter = 120;
     }
     else
@@ -104,7 +104,7 @@ static void checkRocketNozzleDiveBlast(TNozzleTrigger *nozzle, u32 r4,
     return;
 
   nozzle->mForwardSpeedFactor =
-      player->mState != static_cast<u32>(TMario::State::DIVE) ? 0.0f : 1.0f;
+      player->mState != static_cast<u32>(TMario::STATE_DIVE) ? 0.0f : 1.0f;
 }
 #else
 static void checkRocketNozzleDiveBlast(TNozzleTrigger *nozzle, u32 r4,

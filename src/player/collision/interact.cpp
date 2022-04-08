@@ -19,11 +19,11 @@ static void elecPlayer(TMario *player, u8 flags) {
     changePlayerStatus__6TMarioFUlUlb(player, 0x20338, 0, false);
   }
   if (gpMSound->gateCheck(0x1814)) {
-    MSoundSESystem::MSoundSE::startSoundActor(
+    MSoundSE::startSoundActor(
         0x1814, reinterpret_cast<Vec *>(&player->mPosition), 0, nullptr, 0, 4);
   }
   if (gpMSound->gateCheck(0x3806)) {
-    MSoundSESystem::MSoundSE::startSoundActor(
+    MSoundSE::startSoundActor(
         0x3806, reinterpret_cast<Vec *>(&player->mPosition), 0, nullptr, 0, 4);
   }
 }
@@ -42,7 +42,7 @@ static void burnPlayer(TMario *player, u8 flags) {
       *(u32 *)SME_PORT_REGION(0x8040E150, 0x80405818, 0, 0), 6,
       reinterpret_cast<Vec *>(&player->mPosition), 0, nullptr);
   if (gpMSound->gateCheck(0x1813)) {
-    MSoundSESystem::MSoundSE::startSoundActor(
+    MSoundSE::startSoundActor(
         0x1813, reinterpret_cast<Vec *>(&player->mPosition), 0, nullptr, 0, 4);
   }
 }
@@ -96,7 +96,7 @@ void checkIsGlideBounce(TMario *player) {
 
     playerData->mCollisionFlags.mIsSpinBounce = true;
     changePlayerStatus__6TMarioFUlUlb(
-        player, static_cast<u32>(TMario::State::JUMPSPINR), 0, 0);
+        player, static_cast<u32>(TMario::STATE_JUMPSPINR), 0, 0);
   } else
     checkEnforceJump__6TMarioFv(player);
 }
@@ -133,11 +133,11 @@ void checkIsCannonType(TMario *player) {
   if ((player->mFloorTriangle->mCollisionType & 0x7FFF) == 16080 ||
       (player->mFloorTriangle->mCollisionType & 0x7FFF) == 17080) {
     changePlayerStatus__6TMarioFUlUlb(
-        player, static_cast<u32>(TMario::State::TRIPLE_J), 0, 0);
+        player, static_cast<u32>(TMario::STATE_TRIPLE_J), 0, 0);
     emitParticle__6TMarioFis(
-        player, static_cast<u32>(TMario::Effect::GROUND_SHARP_SHOCK));
+        player, static_cast<u32>(TMario::EFFECT_GROUND_SHARP_SHOCK));
     emitParticle__6TMarioFis(
-        player, static_cast<u32>(TMario::Effect::GROUND_SMOKE_PLUME));
+        player, static_cast<u32>(TMario::EFFECT_GROUND_SMOKE_PLUME));
     player->mForwardSpeed = (u8)(player->mFloorTriangle->mValue4 >> 8);
 
     {
@@ -193,14 +193,14 @@ void boostPadCol(TMario *player) {
   player->mPrevSpeed.scale(scale);
 
   u32 targetState =
-      (player->mState == static_cast<u32>(TMario::State::DIVESLIDE) ||
-       player->mState == static_cast<u32>(TMario::State::GOOPSLIDE))
+      (player->mState == static_cast<u32>(TMario::STATE_DIVESLIDE) ||
+       player->mState == static_cast<u32>(TMario::STATE_GOOPSLIDE))
           ? player->mState
-          : static_cast<u32>(TMario::State::RUNNING);
-  if (player->mState == static_cast<u32>(TMario::State::IDLE) ||
+          : static_cast<u32>(TMario::STATE_RUNNING);
+  if (player->mState == static_cast<u32>(TMario::STATE_IDLE) ||
       !playerData->mCollisionFlags.mIsFaceUsed) {
     changePlayerStatus__6TMarioFUlUlb(player, targetState, 0, 0);
-    startVoice__6TMarioFUl(player, static_cast<u32>(TMario::Voice::JUMP));
+    startVoice__6TMarioFUl(player, static_cast<u32>(TMario::VOICE_JUMP));
   }
 }
 

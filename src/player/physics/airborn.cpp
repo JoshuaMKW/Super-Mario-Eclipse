@@ -17,8 +17,8 @@ static void doProcessJumpState(TMario *player) {
   const f32 stickMagnitude = controller->mControlStick.mLengthFromNeutral;
 
 #if 1
-  if (player->mState != static_cast<u32>(TMario::State::JUMPSPINR) &&
-      player->mState != static_cast<u32>(TMario::State::JUMPSPINL))
+  if (player->mState != static_cast<u32>(TMario::STATE_JUMPSPINR) &&
+      player->mState != static_cast<u32>(TMario::STATE_JUMPSPINL))
     playerData->mCollisionFlags.mIsSpinBounce = false;
 
   if (playerData->mCollisionFlags.mIsSpinBounce) {

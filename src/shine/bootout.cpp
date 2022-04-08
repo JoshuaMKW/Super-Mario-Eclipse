@@ -36,7 +36,7 @@ void Patch::Shine::manageShineVanish(TVec3f *marioPos) {
     // shine->mActorData->mBckInfo->setAnmFromIndex(-1, nullptr);
     shine->kill();
   } else if (gpMarioAddress->mState !=
-             static_cast<u32>(TMario::State::SHINE_C)) {
+             static_cast<u32>(TMario::STATE_SHINE_C)) {
     if (!sIsShineShrinking) {
       shine->mGlowSize.set(1.0f, 1.0f, 1.0f);
 
@@ -85,7 +85,7 @@ static void restoreMario(TMarDirector *marDirector, u32 curState) {
 
   if (curState != TMarDirector::Status::NORMAL ||
       marDirector->mCurState != TMarDirector::Status::SAVE_CARD ||
-      gpMarioAddress->mState != static_cast<u32>(TMario::State::SHINE_C))
+      gpMarioAddress->mState != static_cast<u32>(TMario::STATE_SHINE_C))
     return;
 
   if (curSaveCard[0x2E9] != 1) {
@@ -93,7 +93,7 @@ static void restoreMario(TMarDirector *marDirector, u32 curState) {
         (gpMarioAddress->mPrevState & 0x20D0) == 0x20D0)
       gpMarioAddress->mState = gpMarioAddress->mPrevState;
     else
-      gpMarioAddress->mState = static_cast<u32>(TMario::State::IDLE);
+      gpMarioAddress->mState = static_cast<u32>(TMario::STATE_IDLE);
 
     gpCamera->endDemoCamera();
     marDirector->mCollectedShine = nullptr;

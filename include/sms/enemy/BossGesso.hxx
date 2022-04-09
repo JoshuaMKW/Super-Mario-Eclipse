@@ -30,6 +30,12 @@ public:
   TBossGesso(const char *);
   ~TBossGesso();
 
+  virtual void init(TLiveManager *) override;
+  virtual void perform(u32, JDrama::TGraphics *) override;
+  virtual bool receiveMessage(THitActor *, u32) override;
+  virtual void moveObject() override;
+  virtual const char **getBasNameTable() const override;
+
   bool beakHeld() const;
   void calcRootMatrix();
   void changeAllTentacleState(int);
@@ -40,14 +46,9 @@ public:
   void doAttackSkipRope();
   void doAttackUnison();
   void gotTentacleDamage();
-  void *getBasNameTable() const;
-  void init(TLiveManager *);
   bool is2ndFightNow() const;
   void launchPolDrop();
   f32 lenFromToeToMario();
-  void moveObject();
-  void perform(u32, JDrama::TGraphics *);
-  bool receiveMessage(THitActor *, u32);
   void rumblePad(int, const JGeometry::TVec3<float> &);
   void showMessage(u32);
   void stopIfRoll();

@@ -26,12 +26,25 @@ public:
   virtual f32 getPhaseShift() const;
   virtual bool isReachedToGoal() const;
 
+  void calcEnemyRootMatrix();
+  f32 calcMinimumTurnRadius(f32, f32) const;
+  f32 calcTurnSpeedToReach(f32, f32) const;
+  bool checkCurAnmEnd(int) const;
   void doShortCut();
-  void walkToCurPathNode(f32, f32, f32);
-  void turnToCurPathNode(f32);
-  void zigzagToCurPathNode(f32, f32, f32, f32);
-
   f32 getCurAnmFrameNo(int) const;
+  void goToDirectedNextGraphNode(const TVec3f &);
+  void goToDirLimitedNextGraphNode(f32);
+  void goToExclusiveNextGraphNode();
+  void goToRandomEscapeGraphNode();
+  void goToRandomNextGraphNode();
+  void goToShortestNextGraphNode();
+  bool isInSight(const TVec3f &, f32, f32, f32) const;
+  void jumpToNextGraphNode();
+  void setGoalPathFromGraph();
+  void turnToCurPathNode(f32);
+  void updateSquareToMario();
+  void walkToCurPathNode(f32, f32, f32);
+  void zigzagToCurPathNode(f32, f32, f32, f32);
 
   u32 _F4;
   f32 _F8;

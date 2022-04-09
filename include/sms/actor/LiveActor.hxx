@@ -44,7 +44,7 @@ public:
   virtual bool hasMapCollision() const;
   virtual void getFocalPoint() const;
   virtual void updateAnmSound();
-  virtual void *getBasNameTable() const;
+  virtual const char **getBasNameTable() const;
 
   MActor *getMActor() const;
   void stopAnmSound();

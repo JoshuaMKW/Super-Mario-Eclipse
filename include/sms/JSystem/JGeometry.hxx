@@ -60,6 +60,10 @@ template <> struct TVec3<f32> {
   f32 y;
   f32 z;
 
+  TVec3();
+  TVec3(const TVec3 &);
+  TVec3(f32, f32, f32);
+
   operator Vec() const { return *(Vec *)&x; }
   operator const Vec() const { return *(const Vec *)&x; }
   operator Vec *() const { return (Vec *)&x; }

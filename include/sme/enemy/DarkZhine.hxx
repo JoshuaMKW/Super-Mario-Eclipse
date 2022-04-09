@@ -77,7 +77,7 @@ public:
   virtual void control() override;
   virtual void bind() override;
   virtual void moveObject() override;
-  virtual void *getBasNameTable() const;
+  virtual const char **getBasNameTable() const;
 
   f32 getAngleToTarget() const;
 
@@ -87,20 +87,22 @@ public:
   bool isShocking() const { return mIsShocking; }
   bool isInRange(const TVec3f &pos, f32 range) const;
 
+private:
   bool advanceDropAttack();
   bool advanceGoopDroplet();
   bool advanceRollAttack();
   bool advanceFlying();
   bool advanceRising();
   void sleep();
+  bool warpToPoint(const TVec3f &point);
 
-private:
   TVec3f mBoundingPoint;
   f32 mForwardSpeed;
   ActionState mActionState;
   TMario *mTarget;
   TRingBuffer<TBGPolDrop> mPolDrops;
   s16 mStatusTimer;
+  s16 mWarpingTimer;
   s16 mCleaningTimer;
   f32 mGoopCoverage;
   bool mIsFollowMario;

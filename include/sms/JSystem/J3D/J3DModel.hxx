@@ -94,8 +94,8 @@ public:
 	u32 _8;
 	u32 _C;
 	u32 _10;
-	TVec3f mScale;
-	Mtx _20;
+	TVec3f mBaseScale;
+	Mtx mBaseMtx;
 	u32 _50;
 	u32 _54;
 	Mtx44 *mJointArray;

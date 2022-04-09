@@ -19,12 +19,18 @@ VTABLE
 .long 0x80337220, 0x80337228, 0x8033722C, 0x80337230
 .long 0x*/
 
+static const char *zhine_bastable[]{
+    "/scene/zhine/bas/zhine_fly.bas", "/scene/zhine/bas/zhine_teleport.bas",
+    "/scene/zhine/bas/zhine_spin.bas", "/scene/zhine/bas/zhine_pound.bas"};
+
 TDarkZhine::TDarkZhine(const char *name)
     : TSpineEnemy(name), mActionState(TDarkZhine::RISING), mTarget(nullptr),
       mPolDrops(4, false), mIsFollowMario(false), mIsPounding(false),
       mIsGooping(false), mIsShocking(false), mParams("/Zhine/Zhine.prm") {}
 
 TDarkZhine::~TDarkZhine() {}
+
+const char **TDarkZhine::getBasNameTable() const { return zhine_bastable; }
 
 void TDarkZhine::load(JSUMemoryInputStream &stream) {
   TSpineEnemy::load(stream);
@@ -85,7 +91,8 @@ bool TDarkZhine::advanceRollAttack() {
 bool TDarkZhine::advanceDropAttack() {
   if (mActionState == TDarkZhine::DROPPING) {
     if (belongToGround() && mPosition.y < mGroundY + 1.0f) {
-      gpPollution->stamp(1, mPosition.x, mPosition.y, mPosition.z, mParams.mStampRadius.get());
+      gpPollution->stamp(1, mPosition.x, mPosition.y, mPosition.z,
+                         mParams.mStampRadius.get());
       mGoopCoverage += 0.1f;
       mGravity = 1.0f;
       mActionState = TDarkZhine::SHOCKING;
@@ -145,23 +152,38 @@ bool TDarkZhine::advanceFlying() {
 }
 
 bool TDarkZhine::advanceRising() {
-  if (mStatusTimer < mParams.mRollingTimerMax.get()) {
-    gpPollution->stamp(1, mPosition.x, mPosition.y, mPosition.z, 400.0f);
-    mForwardSpeed += 1.0f;
-    mForwardSpeed *= 0.98f;
-    mStatusTimer += 1;
-  } else {
-    mForwardSpeed *= 0.98f;
-    if (mForwardSpeed < __FLT_EPSILON__) {
-      mActionState = TDarkZhine::RISING;
-      mStatusTimer = 0;
-      return true;
-    }
+  if (checkCurAnmEnd(0)) {
+    TVec3f target(mTarget->mPosition.x, mTarget->mFloorBelow + 800.0f,
+                  mTarget->mPosition.z);
+    warpToPoint(target);
   }
   return false;
 }
 
-void TDarkZhine::control() {
+bool TDarkZhine::warpToPoint(const TVec3f &point) {
+  constexpr u32 FlashEffectID = 161;
+  constexpr u32 ShockEffectID = 162;
+  constexpr u32 FlashSfxID = 10387;
+
+  if (mWarpingTimer == 0) {
+    gpMarioParticleManager->emit(
+        FlashEffectID, &mPosition, 1, nullptr);
+    mSize.set(0.0f, 0.0f, 0.0f);
+    JAISound *sound = MSoundSE::startSoundActor(FlashSfxID, mPosition, 0, nullptr, 0, 4);
+    sound->setTempoProportion(2.0f, 20);
+  } else if (mWarpingTimer > 20) {
+    mPosition.set(point);
+    mSize.set(1.0f, 1.0f, 1.0f);
+    gpMarioParticleManager->emit(
+        FlashEffectID, &mPosition, 1, nullptr);
+    mWarpingTimer = 0;
+    return true;
+  }
+  mWarpingTimer += 1;
+  return false;
+}
+
+void TDarkZhine::moveObject() {
   bool advanced = false;
   switch (mActionState) {
   case TDarkZhine::DROPPING: {
@@ -178,21 +200,21 @@ void TDarkZhine::control() {
   case TDarkZhine::SHOCKING: {
     advanced = advanceDropAttack();
     if (advanced) {
-      mActorData->setBckFromIndex(2);
+      // mActorData->setBckFromIndex(2);
     }
     break;
   }
   case TDarkZhine::GROUNDROLL: {
     advanced = advanceRollAttack();
     if (advanced) {
-      mActorData->setBckFromIndex(1);
+      // mActorData->setBckFromIndex(1);
     }
     break;
   }
   case TDarkZhine::RISING: {
     advanced = advanceRising();
     if (advanced) {
-      mActorData->setBckFromIndex(0);
+      // mActorData->setBckFromIndex(0);
     }
     break;
   }
@@ -219,6 +241,10 @@ void TDarkZhine::control() {
     TMario *player = reinterpret_cast<TMario *>(actor);
     player->receiveMessage(this, 15);
   }
+}
+
+void TDarkZhine::perform(u32 flags, JDrama::TGraphics *graphics) {
+  TSpineEnemy::perform(flags, graphics);
 }
 
 #endif

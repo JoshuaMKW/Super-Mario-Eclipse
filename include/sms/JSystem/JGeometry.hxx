@@ -2,6 +2,7 @@
 
 #include "MTX.h"
 #include "math.h"
+#include "equivtype.hxx"
 
 namespace JGeometry {
 
@@ -24,6 +25,15 @@ template <typename T> struct TVec3 {
   TVec3(const TVec3 &);
   template <typename TY> TVec3(TY, TY, TY);
 
+  operator Vec *() const {
+    static_assert(is_equal_type<T, f32>());
+    return (Vec *)&x;
+  }
+  operator const Vec *() const {
+    static_assert(is_equal_type<T, f32>());
+    return (const Vec *)&x;
+  }
+
   // Because PAL is missing this operator
   TVec3 &operator=(const TVec3 &other) {
     this->x = other.x;
@@ -34,40 +44,29 @@ template <typename T> struct TVec3 {
   TVec3 &operator*=(const TVec3 &);
   TVec3 &operator-=(const TVec3 &);
 
-  TVec3 &operator+(const TVec3 &other) {
-    x += other.x;
-    y += other.y;
-    z += other.z;
-    return *this;
+  TVec3 operator+(const TVec3 &other) {
+    return {x + other.x, y + other.y, z + other.z};
   }
 
-  TVec3 &operator-(const TVec3 &other) {
-    x -= other.x;
-    y -= other.y;
-    z -= other.z;
-    return *this;
+  TVec3 operator-(const TVec3 &other) {
+    return {x - other.x, y - other.y, z - other.z};
   }
 
   void set(const TVec3 &other) {
-    x - other.x;
+    x = other.x;
     y = other.y;
     z = other.z;
   }
-};
-
-template <> struct TVec3<f32> {
-  f32 x;
-  f32 y;
-  f32 z;
-
-  TVec3();
-  TVec3(const TVec3 &);
-  TVec3(f32, f32, f32);
-
-  operator Vec() const { return *(Vec *)&x; }
-  operator const Vec() const { return *(const Vec *)&x; }
-  operator Vec *() const { return (Vec *)&x; }
-  operator const Vec *() const { return (const Vec *)&x; }
+  void set(const Vec &other) {
+    x = other.x;
+    y = other.y;
+    z = other.z;
+  }
+  void set(f32 _x, f32 _y, f32 _z) {
+    x = _x;
+    y = _y;
+    z = _z;
+  }
 
   void add(const TVec3 &);
   void div(f32);
@@ -76,10 +75,6 @@ template <> struct TVec3<f32> {
   void scale(f32);
   void scale(f32, const TVec3 &);
   void scaleAdd(f32, const TVec3 &, const TVec3 &);
-  void set(const Vec &);
-
-  template <typename TY> void set(TY, TY, TY);
-  template <typename TY> void set(const TVec3<TY> &);
 
   void setLength(const TVec3 &, f32);
   void setMax(const TVec3 &);
@@ -87,12 +82,24 @@ template <> struct TVec3<f32> {
   void sub(const TVec3 &);
   void sub(const TVec3 &, const TVec3 &);
 
-  static inline TVec3 &up() { return {0.0f, 1.0f, 0.0f}; }
-  static inline TVec3 &down() { return {0.0f, -1.0f, 0.0f}; }
-  static inline TVec3 &forward() { return {0.0f, 0.0f, 1.0f}; }
-  static inline TVec3 &backward() { return {0.0f, 0.0f, -1.0f}; }
-  static inline TVec3 &right() { return {1.0f, 0.0f, 0.0f}; }
-  static inline TVec3 &left() { return {-1.0f, 0.0f, -0.0f}; }
+  static inline TVec3 up() {
+    return TVec3<T>(static_cast<T>(0), static_cast<T>(1), static_cast<T>(0));
+  }
+  static inline TVec3 down() {
+    return TVec3<T>(static_cast<T>(0), static_cast<T>(-1), static_cast<T>(0));
+  }
+  static inline TVec3 forward() {
+    return TVec3<T>(static_cast<T>(0), static_cast<T>(0), static_cast<T>(1));
+  }
+  static inline TVec3 backward() {
+    return TVec3<T>(static_cast<T>(0), static_cast<T>(0), static_cast<T>(-1));
+  }
+  static inline TVec3 right() {
+    return TVec3<T>(static_cast<T>(1), static_cast<T>(0), static_cast<T>(0));
+  }
+  static inline TVec3 left() {
+    return TVec3<T>(static_cast<T>(-1), static_cast<T>(0), static_cast<T>(-1));
+  }
 };
 
 template <typename T> struct TVec4 {

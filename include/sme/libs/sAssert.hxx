@@ -3,6 +3,7 @@
 #include "OS.h"
 #include "PPCArch.h"
 #include "printf.h"
+#include "equivtype.hxx"
 
 #include "Globals.hxx"
 
@@ -36,3 +37,5 @@
     SME_ASSERT(expr, msg, ##__VA_ARGS__);                                      \
   }
 #endif
+
+#define SME_ASSERT_SAME_TYPE(T1, T2, emsg) static_assert(is_equal_type<T1, T2>(), emsg)

@@ -19,7 +19,6 @@ public:
   static JAISound *startSoundActorWithInfo(u32, const Vec *, Vec *, f32, u32, u32,
                                       JAISound **, u32, u8);
   static JAISound *startSoundNpcActor(u32, const Vec *, u32, JAISound **, u32, u8);
-  static bool checkSoundArea(u32, const Vec &);
   static JAISound *startSoundSystemSE(u32 sfx, u32, JAISound **, u32);
 };
 }; // namespace MSoundSESystem

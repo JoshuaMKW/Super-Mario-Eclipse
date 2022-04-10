@@ -77,7 +77,7 @@ public:
   virtual void control() override;
   virtual void bind() override;
   virtual void moveObject() override;
-  virtual const char **getBasNameTable() const;
+  virtual const char **getBasNameTable() const override;
 
   f32 getAngleToTarget() const;
 

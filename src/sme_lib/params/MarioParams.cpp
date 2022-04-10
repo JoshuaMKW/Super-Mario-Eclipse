@@ -66,7 +66,7 @@ void TPlayerData::scalePlayerAttrs(f32 scale) {
   size.scale(scale);
 
   mPlayer->JSGSetScaling(reinterpret_cast<Vec &>(size));
-  mPlayer->mModelData->mModel->mBaseScale.set(size);
+  mPlayer->mModelData->mModel->mBaseScale = size;
 
   mDefaultAttrs.applyHistoryTo(const_cast<TMario *>(getPlayer()));
 

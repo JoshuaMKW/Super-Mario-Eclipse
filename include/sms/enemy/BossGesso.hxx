@@ -34,10 +34,10 @@ public:
   virtual void perform(u32, JDrama::TGraphics *) override;
   virtual bool receiveMessage(THitActor *, u32) override;
   virtual void moveObject() override;
+  virtual void calcRootMatrix() override;
   virtual const char **getBasNameTable() const override;
 
   bool beakHeld() const;
-  void calcRootMatrix();
   void changeAllTentacleState(int);
   void changeAttackMode(int);
   void doAttackDouble();

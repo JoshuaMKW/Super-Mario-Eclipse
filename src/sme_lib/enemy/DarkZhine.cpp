@@ -241,6 +241,23 @@ void TDarkZhine::moveObject() {
     TMario *player = reinterpret_cast<TMario *>(actor);
     player->receiveMessage(this, 15);
   }
+
+  bool targetWithin = false;
+
+  for (u32 i = 0; i < TGlobals::getMaxPlayers(); ++i) {
+    TMario *player = TGlobals::getPlayerByIndex(i);
+    if (!player)
+      continue;
+    
+    if (!(PSVECDistance(mBoundingPoint, player->mPosition) > mParams.mBoundingAreaRadius.get())) {
+      targetWithin = true;
+      break;
+    }
+  }
+
+  if (advanced && !targetWithin) {
+    TDarkZhine::mActionState = TDarkZhine::IDLE;
+  }
 }
 
 void TDarkZhine::perform(u32 flags, JDrama::TGraphics *graphics) {

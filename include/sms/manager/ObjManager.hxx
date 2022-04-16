@@ -8,7 +8,11 @@
 #include "types.h"
 
 
-class TModelDataLoadEntry{};
+class TModelDataLoadEntry{
+  const char *mModelPath;
+  u32 mModelFlags;
+  u32 _0C;
+};
 
 /* Size -- 0x34 */
 class TObjManager : public JDrama::TViewObj {
@@ -23,12 +27,15 @@ public:
   virtual void createAnmData();
   virtual void createModelDataArray(const TModelDataLoadEntry *);
 
-  void manageObj(THitActor *);
+  void createModelDataArrayBase(const TModelDataLoadEntry *, const char *);
+  MActorAnmData *getMActorAnmData();
+  void *getModelDataKeeper();
+  void manageObj(THitActor *obj);
 
   s32 mMaxObjs; // _10
   u32 _14;      // I think this is obj number
   u32 *_18;
-  TObjChara *_1C;
+  TObjChara *mObjChara;
   u32 _20;
   u32 _24;
   u32 _28;

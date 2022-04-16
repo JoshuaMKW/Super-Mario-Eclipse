@@ -32,7 +32,7 @@ public:
   void *getModelDataKeeper();
   void manageObj(THitActor *obj);
 
-  s32 mMaxObjs; // _10
+  size_t mMaxObjs; // _10
   u32 _14;      // I think this is obj number
   u32 *_18;
   TObjChara *mObjChara;

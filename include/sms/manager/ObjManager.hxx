@@ -8,7 +8,7 @@
 #include "types.h"
 
 
-class TModelDataLoadEntry{
+struct TModelDataLoadEntry {
   const char *mModelPath;
   u32 mModelFlags;
   u32 _0C;

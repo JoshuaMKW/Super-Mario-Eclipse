@@ -2,36 +2,24 @@
 
 #include "JGeometry.hxx"
 #include "sms/enemy/BossGesso.hxx"
+#include "sms/manager/EnemyManager.hxx"
 
 #include "SME.hxx"
 #include "types.h"
 
-
 #if SME_ZHINE_BOSS
 
-/*
-VTABLE
-
-.long 0x00000000, 0x00000000, 0x8007BC50, 0x80007D70
-.long 0x8003C39C, 0x802FA6F4, 0x802FA6F8, 0x802FA6FC
-.long 0x80075C44* 0x00000000, 0x00000000, 0x8007C2C0
-.long 0x803370C0, 0x8033720C, 0x80037214, 0x8033721C
-.long 0x80337220, 0x80337228, 0x8033722C, 0x80337230
-.long 0x*/
-
-struct TZhineParams : public TParams {
+struct TBossDarkZhineParams : public TParams {
 #define CONSTRUCT_PARAM(name, val)                                             \
   name(this, val, JDrama::TNameRef::calcKeyCode(SME_STRINGIZE(name)),          \
        SME_STRINGIZE(name))
 
-  TZhineParams(const char *prm)
-      : TParams(), CONSTRUCT_PARAM(mBoundingAreaRadius, 1000.0f),
-        CONSTRUCT_PARAM(mDistanceFromMario, 2000.0f),
+  TBossDarkZhineParams(const char *prm)
+      : TParams(), CONSTRUCT_PARAM(mDistanceFromMario, 2000.0f),
         CONSTRUCT_PARAM(mSpeedMultiplier, 1.0f),
         CONSTRUCT_PARAM(mAccelerationRate, 0.98f),
         CONSTRUCT_PARAM(mShockRadius, 2000.0f),
-        CONSTRUCT_PARAM(mMaxSpeed, 60.0f),
-        CONSTRUCT_PARAM(mTurnRate, 5.0f),
+        CONSTRUCT_PARAM(mMaxSpeed, 60.0f), CONSTRUCT_PARAM(mTurnRate, 5.0f),
         CONSTRUCT_PARAM(mStampRadius, 1000.0f),
         CONSTRUCT_PARAM(mFramesToCleanOnce, 3),
         CONSTRUCT_PARAM(mPoundingTimerMax, 300),
@@ -44,8 +32,6 @@ struct TZhineParams : public TParams {
   }
 
 #undef CONSTRUCT_PARAM
-
-  TParamRT<f32> mBoundingAreaRadius;
   TParamRT<f32> mDistanceFromMario;
   TParamRT<f32> mSpeedMultiplier;
   TParamRT<f32> mAccelerationRate;
@@ -63,19 +49,38 @@ struct TZhineParams : public TParams {
   TParamRT<f32> mMaxPoundingHeight;
 };
 
-class TDarkZhine : public TSpineEnemy {
-  enum ActionState { IDLE, FLYING, TELEPORTING, DROPPING, SHOCKING, GROUNDROLL, RISING };
+class TBossDarkZhineManager : public TEnemyManager {
+public:
+  TBossDarkZhineManager(const char *);
+  virtual ~TBossDarkZhineManager();
+  
+  virtual void load(JSUMemoryInputStream &) override;
+  virtual void createModelData() override;
+
+  void initJParticle();
+};
+
+class TBossDarkZhine : public TSpineEnemy {
+  enum ActionState {
+    IDLE,
+    FLYING,
+    TELEPORTING,
+    DROPPING,
+    SHOCKING,
+    GROUNDROLL,
+    RISING
+  };
 
 public:
-  TDarkZhine(const char *);
-  virtual ~TDarkZhine();
+  TBossDarkZhine(const char *);
+  virtual ~TBossDarkZhine();
 
   virtual void load(JSUMemoryInputStream &) override;
   virtual void perform(u32, JDrama::TGraphics *) override;
   virtual bool receiveMessage(THitActor *, u32) override;
   virtual void init(TLiveManager *) override;
+  virtual void reset() override;
   virtual void control() override;
-  virtual void bind() override;
   virtual void moveObject() override;
   virtual const char **getBasNameTable() const override;
 
@@ -97,6 +102,7 @@ private:
   bool warpToPoint(const TVec3f &point);
 
   TVec3f mBoundingPoint;
+  f32 mBoundingAreaRadius;
   f32 mForwardSpeed;
   ActionState mActionState;
   TMario *mTarget;
@@ -109,7 +115,6 @@ private:
   bool mIsPounding;
   bool mIsGooping;
   bool mIsShocking;
-  TZhineParams mParams;
 };
 
 #endif

@@ -60,9 +60,7 @@ public:
   u32 _01[0x10 / 4];          // 0x0170
   TBGPolDrop *mPollutionDrop; // 0x0180
   u32 _02[0xC / 4];           // 0x0184
-  u16 _03;                    // 0x0190
-  u8 _04;                     // 0x0192
-  u8 mGoopLevel;              // 0x0193
+  J3DGXColor mGoopColor;
   u16 mAttackCount;           // 0x0194
   u16 _05;                    // 0x0196
   u32 _06[0x18 / 4];          // 0x0198

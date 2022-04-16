@@ -8,7 +8,7 @@ class TLiveActor;
 
 class TLiveManager : public TObjManager {
 public:
-  TLiveManager(char const *);
+  TLiveManager(const char *);
   virtual ~TLiveManager();
 
   virtual void load(JSUMemoryInputStream &);

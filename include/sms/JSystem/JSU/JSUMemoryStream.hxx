@@ -41,3 +41,5 @@ private:
   size_t mLength; // _C
   s32 mPosition;  // _10
 };
+
+#define JSU_READ_PARAM(param, stream) stream.read(&param, sizeof(typeof(param))) 

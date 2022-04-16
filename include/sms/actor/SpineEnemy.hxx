@@ -22,7 +22,7 @@ public:
                          const TVec3f &,
                          const TVec3f &,
                          const TVec3f &);
-  virtual u32 getSaveParam() const;
+  virtual TParams *getSaveParam() const;
   virtual f32 getPhaseShift() const;
   virtual bool isReachedToGoal() const;
 

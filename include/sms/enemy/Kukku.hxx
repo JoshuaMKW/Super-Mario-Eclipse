@@ -3,7 +3,7 @@
 class TKukkuBall : public THitActor
 {
 public:
-    TKukkuBall(char const *name) : THitActor(name) { unk1 = 1, unk2 = 0; };
+    TKukkuBall(const char *name) : THitActor(name) { unk1 = 1, unk2 = 0; };
     virtual ~TKukkuBall();
     virtual void init();
     virtual void perform(u32, JDrama::TGraphics *) override;

@@ -104,7 +104,7 @@ public:
 class TFireyPeteyManager : public TBossPakkunManager
 {
 public:
-    TFireyPeteyManager(char const *,int);
+    TFireyPeteyManager(const char *,int);
     virtual ~TFireyPeteyManager(){};
 
     virtual void load(JSUMemoryInputStream &);

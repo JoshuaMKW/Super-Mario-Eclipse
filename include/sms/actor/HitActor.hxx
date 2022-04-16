@@ -8,7 +8,7 @@
 
 class THitActor : public JDrama::TActor {
 public:
-  THitActor(char const *name);
+  THitActor(const char *name);
   virtual ~THitActor();
 
   virtual void perform(u32, JDrama::TGraphics *) override;

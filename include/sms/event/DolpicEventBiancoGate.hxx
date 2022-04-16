@@ -5,7 +5,7 @@
 class TDolpicEventBiancoGate : public TMapEventSink
 {
     public:
-    TDolpicEventBiancoGate(char const *);
+    TDolpicEventBiancoGate(const char *);
     virtual ~TDolpicEventBiancoGate();
 
     virtual void loadAfter();

@@ -15,7 +15,7 @@ class TSharedMActorSet {
 
 class TEnemyManager : public TLiveManager {
 public:
-  TEnemyManager(char const *);
+  TEnemyManager(const char *);
   virtual ~TEnemyManager();
 
   virtual void load(JSUMemoryInputStream &);

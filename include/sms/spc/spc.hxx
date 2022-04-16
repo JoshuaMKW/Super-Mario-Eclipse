@@ -3,7 +3,7 @@
 #include "sms/event/EventWatcher.hxx"
 #include "sms/spc/SpcTypedInterp.hxx"
 
-void SpcTrace(char const *, ...);
+void SpcTrace(const char *, ...);
 
 void evStartMontemanFanfare(TSpcTypedInterp<TEventWatcher> *, u32);
 void evStartMontemanBGM(TSpcTypedInterp<TEventWatcher> *, u32);

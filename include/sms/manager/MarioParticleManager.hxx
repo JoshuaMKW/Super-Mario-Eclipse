@@ -15,7 +15,7 @@ class TMarioParticleManager : public JDrama::TViewObj {
 public:
   struct TInfo {};
 
-  TMarioParticleManager(char const *);
+  TMarioParticleManager(const char *);
   virtual ~TMarioParticleManager();
 
   virtual void perform(u32, JDrama::TGraphics *) override;

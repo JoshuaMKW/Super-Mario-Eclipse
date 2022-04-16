@@ -472,7 +472,7 @@ TFireyPetey::~TFireyPetey()
 }
 
 //// Manager code
-TFireyPeteyManager::TFireyPeteyManager(char const *name, int isDemo) : TBossPakkunManager(name, isDemo)
+TFireyPeteyManager::TFireyPeteyManager(const char *name, int isDemo) : TBossPakkunManager(name, isDemo)
 {
 }
 

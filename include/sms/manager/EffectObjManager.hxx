@@ -14,7 +14,7 @@
 /* Size -- 0x34 */
 class TEffectObjManager : public JDrama::TViewObj {
 public:
-  TEffectObjManager(char const *);
+  TEffectObjManager(const char *);
   virtual ~TEffectObjManager();
 
   virtual void load(JSUMemoryInputStream &) override;

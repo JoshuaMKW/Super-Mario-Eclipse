@@ -6,7 +6,7 @@
 class TItem : public TMapObjGeneral
 {
 public:
-    TItem(char const *);
+    TItem(const char *);
 	virtual ~TItem();
 	
 	virtual void load(JSUMemoryInputStream &) override;

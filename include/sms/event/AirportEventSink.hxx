@@ -5,7 +5,7 @@
 class TAirportEventSink : public TMapEventSinkInPollutionReset
 {
     public:
-    TAirportEventSink(char const *);
+    TAirportEventSink(const char *);
     virtual ~TAirportEventSink();
 
     virtual void loadAfter();

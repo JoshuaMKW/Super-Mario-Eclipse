@@ -17,7 +17,7 @@ class TModelDataLoadEntry{
 /* Size -- 0x34 */
 class TObjManager : public JDrama::TViewObj {
 public:
-  TObjManager(char const *);
+  TObjManager(const char *);
   virtual ~TObjManager();
 
   virtual void load(JSUMemoryInputStream &) override;

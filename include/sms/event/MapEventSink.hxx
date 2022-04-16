@@ -5,7 +5,7 @@
 class TMapEventSink : public TMapEvent
 {
     public:
-    TMapEventSink(char const *);
+    TMapEventSink(const char *);
     virtual ~TMapEventSink();
 
     virtual void load(JSUMemoryInputStream &stream);

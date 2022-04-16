@@ -5,7 +5,7 @@
 class TMapEvent : public TEventWatcher
 {
     public:
-    TMapEvent(char const *);
+    TMapEvent(const char *);
     virtual ~TMapEvent();
 
     virtual void load(JSUMemoryInputStream &stream);

@@ -119,7 +119,7 @@ public:
 class TBossPakkunManager : public TEnemyManager
 {
 public:
-    TBossPakkunManager(char const *,int isDemoMode);
+    TBossPakkunManager(const char *,int isDemoMode);
     virtual ~TBossPakkunManager();
 
     virtual void load(JSUMemoryInputStream &);

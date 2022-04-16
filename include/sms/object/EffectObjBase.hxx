@@ -4,7 +4,7 @@
 
 class TEffectObjBase : public THitActor {
 public:
-  TEffectObjBase(char const *);
+  TEffectObjBase(const char *);
   virtual ~TEffectObjBase();
 
   virtual void load(JSUMemoryInputStream &) override;

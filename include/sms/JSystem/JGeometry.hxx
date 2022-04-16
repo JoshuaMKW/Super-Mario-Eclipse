@@ -61,8 +61,15 @@ struct TVec3<f32> {
   f32 y;
   f32 z;
 
-  operator Vec() const { return (Vec)x; }
-  operator const Vec() const { return (const Vec)x; }
+  TVec3();
+  TVec3(f32 x1, f32 y1, f32 z1){
+      x = x1;
+      y = y1;
+      z = z1;
+  }
+
+  // operator Vec() const { return (Vec)x; }
+  // operator const Vec() const { return (const Vec)x; }
   operator Vec *() const { return (Vec *)&x; }
   operator const Vec *() const { return (const Vec *)&x; }
 
@@ -83,7 +90,11 @@ struct TVec3<f32> {
   void setMax(const TVec3 &);
   void setMin(const TVec3 &);
   void sub(const TVec3 &);
-  void sub(const TVec3 &, const TVec3 &);
+  void sub(const TVec3 &first, const TVec3 &second) {
+    x = first.x - second.x;
+    y = first.y - second.y;
+    z = first.z - second.z;
+  }
 };
 
 template <typename T> struct TVec4 {

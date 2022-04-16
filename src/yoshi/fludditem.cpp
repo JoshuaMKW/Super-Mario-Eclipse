@@ -19,8 +19,8 @@ static bool isYoshiMaintainFluddModel() {
   else
     return player->mAttributes.mHasFludd;
 }
-SME_PATCH_BL(SME_PORT_REGION(0x8024D68C, 0, 0, 0), isYoshiMaintainFluddModel);
-SME_WRITE_32(SME_PORT_REGION(0x8024D690, 0, 0, 0), 0x2C030000);
+SME_PATCH_BL(SME_PORT_REGION(0x8024D68C, 0x80245418, 0, 0), isYoshiMaintainFluddModel);
+SME_WRITE_32(SME_PORT_REGION(0x8024D690, 0x8024541c, 0, 0), 0x2C030000);
 
 static void saveNozzles(TYoshi *yoshi) {
   TMario *player = yoshi->mMario;
@@ -37,7 +37,7 @@ static void saveNozzles(TYoshi *yoshi) {
   playerParams->mFluddHistory.mHadFludd = player->mAttributes.mHasFludd;
   ride__6TYoshiFv(yoshi);
 }
-SME_PATCH_BL(SME_PORT_REGION(0x8028121C, 0, 0, 0), saveNozzles);
+SME_PATCH_BL(SME_PORT_REGION(0x8028121C, 0x80278FA8, 0, 0), saveNozzles);
 
 static void restoreNozzles(TMario *player) {
   Class::TPlayerData *playerParams = TGlobals::getPlayerData(player);
@@ -59,7 +59,7 @@ static void restoreNozzles(TMario *player) {
       factor;
   player->mAttributes.mHasFludd = playerParams->mFluddHistory.mHadFludd;
 }
-SME_PATCH_BL(SME_PORT_REGION(0x8024EC18, 0, 0, 0), restoreNozzles);
-SME_WRITE_32(SME_PORT_REGION(0x8024EC2C, 0, 0, 0), 0x60000000);
+SME_PATCH_BL(SME_PORT_REGION(0x8024EC18, 0x802469A4, 0, 0), restoreNozzles);
+SME_WRITE_32(SME_PORT_REGION(0x8024EC2C, 0x802469A8, 0, 0), 0x60000000);
 
 #endif

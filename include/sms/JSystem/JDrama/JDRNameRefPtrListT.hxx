@@ -9,7 +9,7 @@
 namespace JDrama {
 
 template <typename T, typename U>
-class TNameRefPtrListT : public TNameRef, public TList_pointer_void {
+class TNameRefPtrListT : public TNameRef, public JGadget::TList_pointer_void {
 public:
   virtual ~TNameRefPtrListT();
 

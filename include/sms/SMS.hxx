@@ -60,6 +60,7 @@ extern TMarioParticleManager *gpMarioParticleManager;
 extern TMarDirector *gpMarDirector;
 extern MSound *gpMSound;
 extern TCardManager *gpCardManager;
+extern void *gpResourceManager;
 extern JUTResFont *gpSystemFont;
 extern JUTResFont *gpRomFont;
 extern void *gpArcBufferMario;

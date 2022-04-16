@@ -72,7 +72,7 @@ static void initConductor(TConductor *conductor) {
     }
   }
 }
-SME_PATCH_BL(SME_PORT_REGION(0x802B8E0C, 0, 0, 0), initConductor);
+SME_PATCH_BL(SME_PORT_REGION(0x802B8E0C, 0x802B0DDC, 0, 0), initConductor);
 
 #else
 

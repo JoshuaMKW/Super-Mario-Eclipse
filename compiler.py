@@ -205,14 +205,14 @@ _ALLOC_LO_INFO = __Map({
     ),
     Region.EU: (
         __Map.AllocationPacket(
-            0x80341E74,
+            0x80339FF4,
             [
                 __Map.InstructionInfo(0x3C600000, __Map.RelocationKind.HI),
                 __Map.InstructionInfo(0x60630000, __Map.RelocationKind.LO)
             ]
         ),
         __Map.AllocationPacket(
-            0x80341EAC,
+            0x8033A02C,
             [
                 __Map.InstructionInfo(0x3C600000, __Map.RelocationKind.HI),
                 __Map.InstructionInfo(0x60630000, __Map.RelocationKind.LO)
@@ -268,7 +268,7 @@ _ALLOC_HI_INFO = __Map({
     ),
     Region.EU: (
         __Map.AllocationPacket(
-            0x80341ED0,
+            0x8033A048,
             [
                 __Map.InstructionInfo(0x3C600000, __Map.RelocationKind.HI),
                 __Map.InstructionInfo(0x60630000, __Map.RelocationKind.LO)

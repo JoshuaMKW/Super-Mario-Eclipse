@@ -301,9 +301,9 @@ class FilePatcher:
                     injectaddr + 4, blockstart + (codelen - 4))
 
             _dolData.write_uint32(self.by_region(
-                0x802A73F0, 0, 0, 0), 0x60000000)
+                0x802A73F0, 0x8029F46C, 0, 0), 0x60000000)
             _dolData.write_uint32(self.by_region(
-                0x802A7404, 0, 0, 0), 0x60000000)
+                0x802A7404, 0x8029F480, 0, 0), 0x60000000)
 
             with destDolPath.open("wb") as dest:
                 _dolData.save(dest)

@@ -16,7 +16,7 @@ public:
   virtual void clipActors(JDrama::TGraphics *);
   virtual void setFlagOutOfCube();
   virtual void createSpcBinary();
-  virtual bool hasMapCollsion() const;
+  virtual bool hasMapCollision() const;
 
   void clipActorsAux(JDrama::TGraphics *, f32, f32);
   void getActorByFlag(u32 flag) const;

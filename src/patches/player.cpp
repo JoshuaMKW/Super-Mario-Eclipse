@@ -35,7 +35,7 @@ static void patchRideMovementUpWarp(Mtx out, Vec *ride, Vec *pos) {
     PSMTXMultVec(out, ride, pos);
   }
 }
-SME_PATCH_BL(SME_PORT_REGION(0x80250514, 0, 0, 0), patchRideMovementUpWarp);
+SME_PATCH_BL(SME_PORT_REGION(0x80250514, 0x802482A0, 0, 0), patchRideMovementUpWarp);
 
 static void patchRoofCollisionSpeed(TMario *player, f32 _speed) {
   TBGCheckData *roof = player->mRoofTriangle;
@@ -52,6 +52,6 @@ static void patchRoofCollisionSpeed(TMario *player, f32 _speed) {
   const f32 ratio = Vector3::angleBetween(nroofvec, down);
   setPlayerVelocity__6TMarioFf(player, lerp(_speed, player->mForwardSpeed, ratio));
 }
-SME_PATCH_BL(SME_PORT_REGION(0x802569bc, 0, 0, 0), patchRoofCollisionSpeed);
+SME_PATCH_BL(SME_PORT_REGION(0x802569bc, 0x8024E748, 0, 0), patchRoofCollisionSpeed);
 
 #endif

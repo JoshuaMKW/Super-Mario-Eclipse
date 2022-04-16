@@ -21,4 +21,4 @@ void manageE3HealthMeter(J2DScreen *screen, int x, int y,
   }
   screen->draw(x, y, context);
 }
-SME_PATCH_BL(SME_PORT_REGION(0x80143F50, 0, 0, 0), manageE3HealthMeter);
+SME_PATCH_BL(SME_PORT_REGION(0x80143F50, 0x80138B8C, 0, 0), manageE3HealthMeter);

@@ -8,6 +8,8 @@
 #include "types.h"
 
 
+class TModelDataLoadEntry{};
+
 /* Size -- 0x34 */
 class TObjManager : public JDrama::TViewObj {
 public:
@@ -19,6 +21,7 @@ public:
   virtual void perform(u32, JDrama::TGraphics *) override;
   virtual void createModelData();
   virtual void createAnmData();
+  virtual void createModelDataArray(const TModelDataLoadEntry *);
 
   void manageObj(THitActor *);
 

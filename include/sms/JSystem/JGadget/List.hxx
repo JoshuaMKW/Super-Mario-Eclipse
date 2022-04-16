@@ -173,6 +173,16 @@ public:
 };
 
 template <typename _T> class TList_pointer : public TList_pointer_void {
+
+  
+  class TNode_ {
+    public:
+      TNode_ *mPrev;
+      TNode_ *mNext;
+      void *mItem;
+  };
+
+  public:
   class iterator {
   public:
     iterator(_T *node) : mCurrent(node) {}
@@ -181,16 +191,13 @@ template <typename _T> class TList_pointer : public TList_pointer_void {
     _T *mCurrent;
   };
 
-  iterator end() { return iterator(mEnd); }
+  iterator end();
 
-  void insert(TList_pointer<_T>::iterator iterator, _T **node) {
-    TList_pointer_void::insert(
-        reinterpret_cast<TList<void *, TAllocator>::iterator>(iterator), node);
-  }
+  iterator insert(TList_pointer<_T>::iterator iterator, _T const &node);
 
   size_t mSize;
-  TSingleLinkListNode *mStart;
-  TSingleLinkListNode *mEnd;
+  TNode_ *mStart;
+  TNode_ *mEnd;
 };
 
 } // namespace JGadget

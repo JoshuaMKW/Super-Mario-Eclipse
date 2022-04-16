@@ -291,8 +291,8 @@ static void fixDemoMasksWideScreen_InitStaticGoPanes(TConsoleStr *consoleStr) {
 
   consoleStr->mDemoMaskExPanes[1]->mRect.copy(*rect);
 }
-SME_PATCH_BL(SME_PORT_REGION(0x801723F0, 0x801681E0, 0, 0),
-             fixDemoMasksWideScreen_InitStaticGoPanes);
+// SME_PATCH_BL(SME_PORT_REGION(0x801723F0, 0x801681E0, 0, 0),
+//              fixDemoMasksWideScreen_InitStaticGoPanes);
 
 static JUTRect sGuideBorderRects[2];
 static J2DPane sGuideBorderPanes[2];

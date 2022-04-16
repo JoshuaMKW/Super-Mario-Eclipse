@@ -151,7 +151,8 @@ public:
   bool checkAnmFileExist(const char *, int);
   bool checkBckPass(f32);
   bool checkCurAnm(const char *, int);
-  bool checkCurAnmFromIndex(int, int);
+  bool checkCurAnmFromIndex(int,int);
+  bool checkCurBckFromIndex(int);
   bool curAnmEndsNext(int, char *);
   void entry();
   void entryIn();

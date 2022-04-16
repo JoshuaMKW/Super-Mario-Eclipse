@@ -100,4 +100,4 @@ static void flameMario(TEffectObjBase *fire, u32 message) {
   TMario *player = reinterpret_cast<TMario *>(fire->mCollidingObjs[marioIdx]);
   Util::Mario::setFireToPlayer(player);
 }
-SME_PATCH_BL(SME_PORT_REGION(0x80038148, 0, 0, 0), flameMario);
+SME_PATCH_BL(SME_PORT_REGION(0x80038148, 0x80038200, 0, 0), flameMario);

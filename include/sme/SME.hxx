@@ -106,7 +106,7 @@
 #endif
 
 #ifndef SME_DEMO
-#define SME_DEMO 0
+#define SME_DEMO 1
 #endif
 
 #ifndef SME_MIRROR_SUNSHINE
@@ -122,7 +122,7 @@
 #endif
 
 #ifndef SME_VARIABLE_FPS
-#define SME_VARIABLE_FPS 1
+#define SME_VARIABLE_FPS 0
 #endif
 
 #ifndef SME_CUSTOM_MUSIC

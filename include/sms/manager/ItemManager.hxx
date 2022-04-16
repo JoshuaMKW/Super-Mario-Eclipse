@@ -11,7 +11,7 @@ public:
   virtual void load(JSUMemoryInputStream &) override;
   virtual void loadAfter() override;
   virtual void perform(u32, JDrama::TGraphics *) override;
-  virtual bool hasMapCollsion() const override;
+  virtual bool hasMapCollision() const override;
 
   void makeShineAppearWithDemo(const char *, const char *, f32, f32, f32);
   void makeShineAppearWithDemoOffset(const char *, const char *, f32, f32, f32);

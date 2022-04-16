@@ -52,6 +52,11 @@ void TBossDarkZhine::load(JSUMemoryInputStream &stream) {
   JSU_READ_PARAM(mGoopCoverage, stream);
 }
 
+void TBossDarkZhine::loadAfter() {
+  mBoundingPoint = mPosition;
+  mTarget = gpMarioAddress;
+}
+
 void TBossDarkZhine::init(TLiveManager *manager) {
   mLiveManager = manager;
   manager->manageActor(this);
@@ -61,8 +66,6 @@ void TBossDarkZhine::init(TLiveManager *manager) {
 
   mActorData->calc();
   mActorData->setLightType(1);
-
-  mBoundingPoint = mPosition;
 
   initHitActor(0x8000105, 5, 0x81000000, 60.0f, 60.0f, 60.0f, 60.0f);
   initAnmSound();
@@ -76,7 +79,7 @@ void TBossDarkZhine::init(TLiveManager *manager) {
   J3DModel *model = mActorData->mModel;
   if (!model->mSkinDeform) {
     J3DSkinDeform *skinDeform = new J3DSkinDeform();
-    model->setSkinDeform(skinDeform, J3DDeformAttachFlag::UNK_1);
+    model->setSkinDeform(skinDeform, J3DDeformAttachFlag::DEFORM_UNK_1);
   }
 
   mStateFlags.asU32 &= ~0x100;
@@ -108,7 +111,7 @@ void TBossDarkZhine::reset() {
 
 bool TBossDarkZhine::receiveMessage(THitActor *actor, u32 message) {
   if (message == 15) {
-    mGoopCoverage -= 0.01f;
+    addGoopCoverage(-0.01);
   }
   return true;
 }
@@ -125,7 +128,7 @@ bool TBossDarkZhine::isInRange(const TVec3f &pos, f32 r) const {
 bool TBossDarkZhine::advanceRollAttack() {
   auto params = reinterpret_cast<TBossDarkZhineParams *>(getSaveParam());
 
-  if (mStatusTimer < params->mRollingTimerMax.get()) {
+  if (mStatusTimer < params->mSLRollingTimerMax.get()) {
     gpPollution->stamp(1, mPosition.x, mPosition.y, mPosition.z, 400.0f);
     mForwardSpeed += 1.0f;
     mForwardSpeed *= 0.98f;
@@ -133,13 +136,14 @@ bool TBossDarkZhine::advanceRollAttack() {
   } else {
     mForwardSpeed *= 0.98f;
     if (mForwardSpeed < __FLT_EPSILON__) {
-      mActionState = TBossDarkZhine::RISING;
+      mForwardSpeed = 0.0f;
       mStatusTimer = 0;
+      mActionState = TBossDarkZhine::RISING;
       return true;
     }
   }
   gpPollution->stamp(1, mPosition.x, mPosition.y, mPosition.z, 60.0f);
-  mGoopCoverage += 0.001f;
+  addGoopCoverage(0.001f);
   return false;
 }
 
@@ -147,22 +151,22 @@ bool TBossDarkZhine::advanceDropAttack() {
   auto params = reinterpret_cast<TBossDarkZhineParams *>(getSaveParam());
 
   if (mActionState == TBossDarkZhine::DROPPING) {
-    if (belongToGround() && mPosition.y < mGroundY + 1.0f) {
+    if (mPosition.y < mGroundY + 1.0f) {
       gpPollution->stamp(1, mPosition.x, mPosition.y, mPosition.z,
-                         params->mStampRadius.get());
-      mGoopCoverage += 0.1f;
+                         params->mSLStampRadius.get());
+      addGoopCoverage(0.1f);
       mGravity = 1.0f;
       mActionState = TBossDarkZhine::SHOCKING;
       mStatusTimer = 0;
       return true;
     } else {
-      mGravity = 1.0f * params->mSpeedMultiplier.get();
+      mGravity = 1.0f * params->mSLSpeedMultiplier.get();
       mSpeed.x = 0.0f;
       mSpeed.z = 0.0f;
       return false;
     }
   } else if (mActionState == TBossDarkZhine::SHOCKING) {
-    if (mStatusTimer < params->mShockingTimerMax.get()) {
+    if (mStatusTimer < params->mSLShockingTimerMax.get()) {
       for (u32 i = 0; i < TGlobals::getMaxPlayers(); ++i) {
         TMario *player = TGlobals::getPlayerByIndex(i);
 
@@ -171,32 +175,48 @@ bool TBossDarkZhine::advanceDropAttack() {
             (player->mState != TMario::STATE_KNCK_LND &&
              player->mState != 0x4045C);
 
-        if (isInRange(player->mPosition, params->mShockRadius.get()) &&
+        if (isInRange(player->mPosition, params->mSLShockRadius.get()) &&
             isPlayerStateReady) {
-          decHP__6TMarioFi(player, 1);
-          changePlayerStatus__6TMarioFUlUlb(player, TMario::STATE_KNCK_LND, 0,
-                                            0);
+          if (player->mState != TMario::STATE_KNCK_LND) {
+            decHP__6TMarioFi(player, 1);
+            changePlayerStatus__6TMarioFUlUlb(player, TMario::STATE_KNCK_LND, 0,
+                                              0);
+          }
         }
       }
+      mStatusTimer += 1;
+    } else {
+      mGravity = 1.0f * params->mSLSpeedMultiplier.get();
+      mSpeed.x = 0.0f;
+      mSpeed.z = 0.0f;
+      mForwardSpeed = 0.0f;
+      mStatusTimer = 0;
+      mActionState = TBossDarkZhine::GROUNDROLL;
+      return true;
     }
   }
   return false;
 }
 
 bool TBossDarkZhine::advanceFlying() {
-  constexpr s32 FlyingTimer = 500;
+  constexpr s32 FlyingTimer = 1000;
+
+  auto params = reinterpret_cast<TBossDarkZhineParams *>(getSaveParam());
 
   if (mStatusTimer < FlyingTimer) {
-    if (mStatusTimer % 150) {
-      // teleport
+    if (mStatusTimer % 300 == 0 || mWarpingTimer != 0) {
+      TVec3f target(mTarget->mPosition.x, mTarget->mFloorBelow + params->mSLMaxPoundingHeight.get(),
+                    mTarget->mPosition.z);
+      warpToPoint(target);
     }
     mRotation.y +=
         Math::Vector3::getYAngleTo(mPosition, mTarget->mPosition) * 0.1f;
-    if (mStatusTimer % 20) {
+    if (mStatusTimer % 70 == 0) {
       const TVec3f vel(mSpeed.x, mSpeed.y / 2, mSpeed.z);
       TBGPolDrop *polDrop = mPolDrops.next();
       polDrop->launch(mPosition, vel);
     }
+    mStatusTimer += 1;
   } else {
     mForwardSpeed *= 0.98f;
     if (mForwardSpeed < __FLT_EPSILON__) {
@@ -211,10 +231,15 @@ bool TBossDarkZhine::advanceFlying() {
 }
 
 bool TBossDarkZhine::advanceRising() {
+  auto params = reinterpret_cast<TBossDarkZhineParams *>(getSaveParam());
   if (checkCurAnmEnd(0)) {
-    TVec3f target(mTarget->mPosition.x, mTarget->mFloorBelow + 800.0f,
+    TVec3f target(mTarget->mPosition.x, mTarget->mFloorBelow + params->mSLMaxPoundingHeight.get(),
                   mTarget->mPosition.z);
-    warpToPoint(target);
+    bool advanced = warpToPoint(target);
+    if (advanced) {
+      mActionState = TBossDarkZhine::FLYING;
+    }
+    return advanced;
   }
   return false;
 }
@@ -224,8 +249,10 @@ bool TBossDarkZhine::warpToPoint(const TVec3f &point) {
   constexpr u32 ShockEffectID = 162;
   constexpr u32 FlashSfxID = 10387;
 
+  mGravity = 0.0f;
+
   if (mWarpingTimer == 0) {
-    gpMarioParticleManager->emit(FlashEffectID, &mPosition, 1, nullptr);
+    // gpMarioParticleManager->emit(FlashEffectID, &mPosition, 1, nullptr);
     mSize.set(0.0f, 0.0f, 0.0f);
     JAISound *sound =
         MSoundSE::startSoundActor(FlashSfxID, mPosition, 0, nullptr, 0, 4);
@@ -233,7 +260,7 @@ bool TBossDarkZhine::warpToPoint(const TVec3f &point) {
   } else if (mWarpingTimer > 20) {
     mPosition.set(point);
     mSize.set(1.0f, 1.0f, 1.0f);
-    gpMarioParticleManager->emit(FlashEffectID, &mPosition, 1, nullptr);
+    // gpMarioParticleManager->emit(FlashEffectID, &mPosition, 1, nullptr);
     mWarpingTimer = 0;
     return true;
   }
@@ -251,9 +278,15 @@ void TBossDarkZhine::sleep() {
   mGravity = 0.0f;
 }
 
+void TBossDarkZhine::addGoopCoverage(f32 amount) {
+  mGoopCoverage = Max(Min(mGoopCoverage + amount, 1.0f), 0.0f);
+}
+
 void TBossDarkZhine::control() { TSpineEnemy::control(); }
 
 void TBossDarkZhine::moveObject() {
+  TSpineEnemy::moveObject();
+
   auto params = reinterpret_cast<TBossDarkZhineParams *>(getSaveParam());
 
   bool advanced = false;
@@ -264,7 +297,7 @@ void TBossDarkZhine::moveObject() {
       gpCameraShake->startShake(EnumCamShakeMode::UnknownShake27, 1.0f);
       gpPad1RumbleMgr->start(8, mPosition);
       gpPollution->stamp(1, mPosition.x, mGroundY, mPosition.z,
-                         params->mStampRadius.get());
+                         params->mSLStampRadius.get());
       MSoundSE::startSoundActor(6158, mPosition, 0, 0, 0, 4);
     }
     break;
@@ -330,7 +363,7 @@ void TBossDarkZhine::moveObject() {
 
   if (advanced && !targetWithin) {
     mActionState = TBossDarkZhine::IDLE;
-  } else if (!targetWithin && mActionState == TBossDarkZhine::IDLE) {
+  } else if (targetWithin && mActionState == TBossDarkZhine::IDLE) {
     mActionState = TBossDarkZhine::RISING;
   }
 }

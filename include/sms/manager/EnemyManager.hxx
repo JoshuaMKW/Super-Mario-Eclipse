@@ -34,7 +34,7 @@ public:
   TSpineEnemy *getDeadEnemy();
   TSpineEnemy *getFarOutEnemy();
   TSpineEnemy *getNearestEnemy(const TVec3f &pos);
-  TParams *getSaveParam() const;
+  TSpineEnemyParams *getSaveParam() const;
   TSharedMActorSet *getSharedMActorSet(int);
   void killChildren();
   void killChildrenWithin(const TVec3f &pos, f32 radius);
@@ -42,7 +42,7 @@ public:
   void setSharedFlags();
   void updateAnmSoundShared();
   
-  TParams *mEnemyParams; // 0
+  TSpineEnemyParams *mEnemyParams; // 0
   f32 _3C; // 1.0f
   u32 _40; // 0
   u32 _44; // 0

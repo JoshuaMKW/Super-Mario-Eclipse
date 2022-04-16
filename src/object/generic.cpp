@@ -1,14 +1,15 @@
 #include "types.h"
 
 #include "JDrama/JDRNameRef.hxx"
+#include "enemy/FireyPetey.hxx"
 #include "obj/BlowWindObj.hxx"
 #include "obj/TornadoObj.hxx"
 #include "obj/WaterBalloon.hxx"
-#include "enemy/FireyPetey.hxx"
 #include "sms/game/MarNameRefGen.hxx"
 #include "sms/mapobj/MapObjInit.hxx"
 
 #include "SME.hxx"
+#include "enemy/DarkZhine.hxx"
 
 #if SME_EXTRA_OBJECTS
 
@@ -30,8 +31,7 @@ static u16 *sObjLoadAddrTable[LoadAddrTableSize][2]{
 static ObjData *sObjDataTableNew[OBJDataTableSize + OBJNewCount];
 
 // extern -> SME.cpp
-void makeExtendedObjDataTable()
-{
+void makeExtendedObjDataTable() {
   memcpy(sObjDataTableNew, sObjDataTable,
          sizeof(u32) * OBJDataTableSize - 1); // last entry is default null
   sObjDataTableNew[OBJDataTableSize - 1] = &waterBalloonData;
@@ -43,23 +43,20 @@ void makeExtendedObjDataTable()
     u32 addr = reinterpret_cast<u32>(&sObjDataTableNew);
     u16 lo = addr;
     u16 hi = (addr >> 16) + (lo >> 15);
-    for (u32 i = 0; i < LoadAddrTableSize; ++i)
-    {
+    for (u32 i = 0; i < LoadAddrTableSize; ++i) {
       Memory::PPC::write<u16>(sObjLoadAddrTable[i][0], hi);
       Memory::PPC::write<u16>(sObjLoadAddrTable[i][1], lo);
     }
   }
 }
 
-#define GENERATE_OBJ(klass, objname, name) \
-  if (strcmp(name, objname) == 0)          \
-  {                                        \
-    return new klass(name);                \
+#define GENERATE_OBJ(klass, objname, name, ...)                                \
+  if (strcmp(name, objname) == 0) {                                            \
+    return new klass(name, ##__VA_ARGS__);                                     \
   }
 
 static JDrama::TNameRef *makeExtendedMapObjFromRef(TMarNameRefGen *nameGen,
-                                                   const char *name)
-{
+                                                   const char *name) {
   JDrama::TNameRef *obj = nameGen->getNameRef_MapObj(name);
   if (obj)
     return obj;
@@ -68,28 +65,39 @@ static JDrama::TNameRef *makeExtendedMapObjFromRef(TMarNameRefGen *nameGen,
 
   return nullptr;
 }
-SME_PATCH_BL(SME_PORT_REGION(0x8029E120, 0x80295FFC, 0, 0), makeExtendedMapObjFromRef);
+SME_PATCH_BL(SME_PORT_REGION(0x8029E120, 0x80295FFC, 0, 0),
+             makeExtendedMapObjFromRef);
 
-static JDrama::TNameRef *makeExtendedBossFromRef(TMarNameRefGen *nameGen,
-                                                 const char *name)
-{
+static JDrama::TNameRef *makeExtendedBossEnemyFromRef(TMarNameRefGen *nameGen,
+                                                      const char *name) {
   JDrama::TNameRef *obj = nameGen->getNameRef_BossEnemy(name);
   if (obj)
     return obj;
 
+  GENERATE_OBJ(TBossDarkZhine, "BossZhine", name)
   GENERATE_OBJ(TFireyPetey, "FireyPetey", name);
-
-  if (strcmp(name, "FireyPeteyManager") == 0)
-  {
-    return new TFireyPeteyManager("BossPakkunManager",0);
-  }
 
   return nullptr;
 }
-SME_PATCH_BL(SME_PORT_REGION(0x8029D2F4, 0x802951D0, 0, 0), makeExtendedBossFromRef);
+SME_PATCH_BL(SME_PORT_REGION(0x8029D2F4, 0x802951D0, 0, 0),
+             makeExtendedBossEnemyFromRef);
 
-static THitActor **objectInteractionHandler()
-{
+static JDrama::TNameRef *makeExtendedGenericFromRef(TMarNameRefGen *nameGen,
+                                                    const char *name) {
+  JDrama::TNameRef *obj = reinterpret_cast<JDrama::TNameRef *>(
+      getNameRef__Q26JDrama11TNameRefGenCFPCc(nameGen, name));
+  if (obj)
+    return obj;
+
+  GENERATE_OBJ(TBossDarkZhineManager, "BossZhineManager", name);
+  GENERATE_OBJ(TFireyPeteyManager, "FireyPeteyManager", "BossPakkunManager", 0);
+
+  return nullptr;
+}
+SME_PATCH_BL(SME_PORT_REGION(0x8029EDD8, 0, 0, 0),
+             makeExtendedGenericFromRef);
+
+static THitActor **objectInteractionHandler() {
   TMario *player;
   int objIndex;
   SME_FROM_GPR(31, player);
@@ -98,12 +106,11 @@ static THitActor **objectInteractionHandler()
   THitActor *obj = player->mCollidingObjs[objIndex >> 2];
   // keepDistance__6TMarioFRC9THitActorf(player, obj, 0.0f);
 
-  switch (obj->mObjectID)
-  {
+  switch (obj->mObjectID) {
   case 0x40000FFF:
     TWaterBalloon *balloon = reinterpret_cast<TWaterBalloon *>(obj);
-    if (canTake__6TMarioFP9THitActor(player, balloon) && !(balloon->mStateFlags.asU32 & 1))
-    {
+    if (canTake__6TMarioFP9THitActor(player, balloon) &&
+        !(balloon->mStateFlags.asU32 & 1)) {
       player->mGrabTarget = balloon;
       changePlayerStatus__6TMarioFUlUlb(player, 899, 0, 0);
     }
@@ -111,10 +118,10 @@ static THitActor **objectInteractionHandler()
   }
   return player->mCollidingObjs;
 }
-SME_PATCH_BL(SME_PORT_REGION(0x80281510, 0x8027929C, 0, 0), objectInteractionHandler);
+SME_PATCH_BL(SME_PORT_REGION(0x80281510, 0x8027929C, 0, 0),
+             objectInteractionHandler);
 
-static THitActor *objGrabHandler()
-{
+static THitActor *objGrabHandler() {
   TMario *player;
   SME_FROM_GPR(31, player);
 
@@ -122,8 +129,7 @@ static THitActor *objGrabHandler()
   if (!obj)
     return obj;
 
-  switch (obj->mObjectID)
-  {
+  switch (obj->mObjectID) {
   case 0x40000FFF:
     TWaterBalloon *balloon = reinterpret_cast<TWaterBalloon *>(obj);
     if (balloon->mStateFlags.asU32 & 1)

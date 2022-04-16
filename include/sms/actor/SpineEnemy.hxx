@@ -5,6 +5,33 @@
 #include "sms/params/Params.hxx"
 #include "types.h"
 
+struct TSpineEnemyParams : TParams {
+#define CONSTRUCT_PARAM(name, val)                                             \
+  name(this, val, JDrama::TNameRef::calcKeyCode(SME_STRINGIZE(name)),          \
+       SME_STRINGIZE(name))
+
+  TSpineEnemyParams(const char *prm)
+      : TParams(prm), CONSTRUCT_PARAM(mSLHeadHeight, 120.0f),
+        CONSTRUCT_PARAM(mSLBodyRadius, 30.0f),
+        CONSTRUCT_PARAM(mSLWallRadius, 50.0f),
+        CONSTRUCT_PARAM(mSLClipRadius, 300.0f),
+        CONSTRUCT_PARAM(mSLFarClip, 10000.0f),
+        CONSTRUCT_PARAM(mSLHitPointMax, 1),
+        CONSTRUCT_PARAM(mSLInstanceNum, 100),
+        CONSTRUCT_PARAM(mSLActiveEnemyNum, 10) {
+    load(prm);
+  }
+
+#undef CONSTRUCT_PARAM
+  TParamRT<f32> mSLHeadHeight;
+  TParamRT<f32> mSLBodyRadius;
+  TParamRT<f32> mSLWallRadius;
+  TParamRT<f32> mSLClipRadius;
+  TParamRT<f32> mSLFarClip;
+  TParamRT<u8> mSLHitPointMax;
+  TParamRT<u8> mSLInstanceNum;
+  TParamRT<u8> mSLActiveEnemyNum;
+};
 
 class TSpineEnemy : public TLiveActor {
 
@@ -19,11 +46,9 @@ public:
   virtual void calcRootMatrix() override;
   virtual void reset();
   virtual void resetToPosition(const TVec3f &);
-  virtual void resetSRTV(const TVec3f &,
-                         const TVec3f &,
-                         const TVec3f &,
+  virtual void resetSRTV(const TVec3f &, const TVec3f &, const TVec3f &,
                          const TVec3f &);
-  virtual TParams *getSaveParam() const;
+  virtual TSpineEnemyParams *getSaveParam() const;
   virtual f32 getPhaseShift() const;
   virtual bool isReachedToGoal() const;
 

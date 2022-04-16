@@ -10,6 +10,7 @@
 class TParams {
 public:
   TParams() : mPrmPath(nullptr), mBaseParam(nullptr) {}
+  TParams(const char *prm) : mPrmPath(prm), mBaseParam(nullptr) {}
   ~TParams() {}
 
   static void finalize();
@@ -18,7 +19,7 @@ public:
   void load(const char *);
   void load(JSUMemoryInputStream &);
 
-  char *mPrmPath;
+  const char *mPrmPath;
   TBaseParam *mBaseParam;
 
   static JKRMemArchive *mArc;

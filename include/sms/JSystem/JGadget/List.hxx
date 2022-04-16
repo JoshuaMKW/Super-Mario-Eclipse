@@ -56,6 +56,17 @@ template <class _T, template <class> class _A> class TList {
     _T mItem;
   };
 
+  TNode_ *CreateNode_(TNode_ *prev, TNode_ *next, const _T &item) {
+    TNode_ *node = new TNode_();
+    if (!node)
+      return nullptr;
+    node->mPrev = prev;
+    node->mNext = next;
+    if (item)
+      node->mItem = item;
+    return node;
+  }
+  
 public:
   class iterator {
   public:
@@ -75,16 +86,6 @@ public:
   TList() : _00(0), mSize(0), mStart(nullptr) {}
   TList(_A<_T> *allocator) { _00 = allocator->_00; }
 
-  TNode_ *CreateNode_(TNode_ *prev, TNode_ *next, const _T &item) {
-    TNode_ *node = new TNode_();
-    if (!node)
-      return nullptr;
-    node->mPrev = prev;
-    node->mNext = next;
-    if (item)
-      node->mItem = item;
-    return node;
-  }
 
   iterator begin() { return iterator(mStart.mCurrent); }
   iterator end() { return mStart; }
@@ -113,8 +114,7 @@ public:
     TNode_ *current = iter.mCurrent;
     TNode_ *next = current->mNext;
 
-    TNode_ *newNode = CreateNode_(iter.mCurrent, iter.mCurrent,
-                                  node);// reinterpret_cast<void *const *>(&node));
+    TNode_ *newNode = CreateNode_(iter.mCurrent, iter.mCurrent, node);
     if (!newNode)
       return mStart;
 
@@ -169,20 +169,19 @@ public:
 using void_item = void *;
 class TList_pointer_void : public TAllocator<void_item> {
 public:
-  void insert(TList<void_item, TAllocator>::iterator iterator, const void_item &node);
+  void insert(TList<void_item, TAllocator>::iterator iterator,
+              const void_item &node);
 };
 
 template <typename _T> class TList_pointer : public TList_pointer_void {
-
-  
   class TNode_ {
-    public:
-      TNode_ *mPrev;
-      TNode_ *mNext;
-      void *mItem;
+  public:
+    TNode_ *mPrev;
+    TNode_ *mNext;
+    void *mItem;
   };
 
-  public:
+public:
   class iterator {
   public:
     iterator(_T *node) : mCurrent(node) {}

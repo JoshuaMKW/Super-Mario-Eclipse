@@ -6,8 +6,8 @@ class J3DModel;
 class J3DModelData;
 
 enum J3DDeformAttachFlag {
-	UNK_0,
-	UNK_1
+	DEFORM_UNK_0,
+	DEFORM_UNK_1
 };
 
 class J3DSkinDeform {

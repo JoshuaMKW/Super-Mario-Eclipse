@@ -329,7 +329,6 @@ void Patch::CKit::realTimeCustomAttrsHandler(TMario *player) {
     break;
   }
 
-  SME_EVAL_LOG(playerParams->mIsOnFire);
   if (playerParams->mIsOnFire) {
     SCALE_PARAM(player->mDeParams.mRunningMax, 1.4f);
     SCALE_PARAM(player->mDeParams.mDashMax, 1.4f);

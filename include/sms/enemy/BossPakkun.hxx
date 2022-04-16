@@ -23,7 +23,7 @@ public:
     virtual void init(TLiveManager *) override;
     virtual void setGroundCollision() override;
     virtual void kill() override;
-    virtual void *getBasNameTable() const override;
+    virtual const char **getBasNameTable() const override;
 
     void changeBck(int);
     void launchPolDrop();

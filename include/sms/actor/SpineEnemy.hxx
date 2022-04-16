@@ -2,6 +2,7 @@
 
 #include "sms/actor/LiveActor.hxx"
 #include "sms/graph/GraphTracer.hxx"
+#include "sms/params/Params.hxx"
 #include "types.h"
 
 

@@ -3,6 +3,7 @@
 #include "JDrama/JDRGraphics.hxx"
 #include "sms/manager/ObjManager.hxx"
 #include "sms/spc/SpcBinary.hxx"
+#include "sms/params/Params.hxx"
 #include "LiveManager.hxx"
 
 class TLiveActor;

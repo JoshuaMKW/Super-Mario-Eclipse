@@ -60,7 +60,7 @@ public:
 
   TLiveManager *mLiveManager; // 0x0070
   MActor *mActorData;         // 0x0074
-  TMActorKeeper *mMActorKeeper;
+  TMActorKeeper *mActorKeeper;
   u16 mActorIndex;            // _7C
   MAnmSound *mAnmSound;       // _80
   char *mBasName;             // _84

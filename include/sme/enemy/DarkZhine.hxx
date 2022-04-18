@@ -95,15 +95,16 @@ public:
   bool isInRange(const TVec3f &pos, f32 range) const;
 
 private:
-  void sleep();
-  bool warpToPoint(const TVec3f &point);
-  void addGoopCoverage(f32 amount);
   bool advanceDropAttack();
   bool advanceGoopDroplet();
   bool advanceRollAttack();
   bool advanceFlying();
   bool advanceRising();
 
+  void sleep();
+  bool warpToPoint(const TVec3f &point);
+  void addGoopCoverage(f32 amount);
+  void updateGoopKColor();
 
 
   TVec3f mBoundingPoint;

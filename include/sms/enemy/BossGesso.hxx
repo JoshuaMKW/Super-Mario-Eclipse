@@ -18,7 +18,8 @@ public:
   void move();
 
   TVec3f mVelocity;   // 0x0044
-  u32 _06[0x8 / 4];   // 0x0050
+  MActor *mActor; // 0x0050
+  MActor *mActorWhite; // 0x0054
   DropStatus mStatus; // 0x0058
 };
 

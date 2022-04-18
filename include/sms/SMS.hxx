@@ -6,7 +6,7 @@
 #include "JUT/JUTColor.hxx"
 #include "JUT/JUTConsole.hxx"
 #include "JUT/JUTResFont.hxx"
-
+#include "JPA/JPAResourceManager.hxx"
 
 #include "sms/actor/Mario.hxx"
 #include "sms/camera/CameraMarioData.hxx"
@@ -60,7 +60,7 @@ extern TMarioParticleManager *gpMarioParticleManager;
 extern TMarDirector *gpMarDirector;
 extern MSound *gpMSound;
 extern TCardManager *gpCardManager;
-extern void *gpResourceManager;
+extern JPAResourceManager *gpResourceManager;
 extern JUTResFont *gpSystemFont;
 extern JUTResFont *gpRomFont;
 extern void *gpArcBufferMario;

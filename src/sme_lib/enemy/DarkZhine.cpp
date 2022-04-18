@@ -34,11 +34,12 @@ void TBossDarkZhineManager::createModelData() {
 }
 
 void TBossDarkZhineManager::initJParticle() {
-  // gpResourceManager->load("/scene/zhine/jpa/ms_boge_wash.jpa", 0x13B);
+  gpResourceManager->load("/scene/zhine/jpa/ms_zhine_osen.jpa", 0x13A);
+  gpResourceManager->load("/scene/zhine/jpa/ms_zhine_wash.jpa", 0x13B);
 }
 
 TBossDarkZhine::TBossDarkZhine(const char *name)
-    : TSpineEnemy(name), mActionState(TBossDarkZhine::RISING), mTarget(nullptr),
+    : TSpineEnemy(name), mActionState(TBossDarkZhine::IDLE), mTarget(nullptr),
       mPolDrops(4, false), mIsFollowMario(false), mIsPounding(false),
       mIsGooping(false), mIsShocking(false) {}
 
@@ -61,19 +62,22 @@ void TBossDarkZhine::init(TLiveManager *manager) {
   mLiveManager = manager;
   manager->manageActor(this);
 
-  mMActorKeeper = new TMActorKeeper(manager, 15);
-  mActorData = mMActorKeeper->createMActor("zhine_body.bmd", 0);
+  mActorKeeper = new TMActorKeeper(manager, 15);
+  mActorData = mActorKeeper->createMActor("zhine_body.bmd", 0);
 
   mActorData->calc();
   mActorData->setLightType(1);
 
-  initHitActor(0x8000105, 5, 0x81000000, 60.0f, 60.0f, 60.0f, 60.0f);
+  initHitActor(0x8000001, 5, 0x81000000, 60.0f, 60.0f, 60.0f, 60.0f);
   initAnmSound();
 
   mObjectType |= 1;
 
   for (u32 i = 0; i < mPolDrops.capacity(); ++i) {
-    mPolDrops.push(new TBGPolDrop("<TBGPolDrop>"));
+    TBGPolDrop *polDrop = new TBGPolDrop("<TBGPolDrop>");
+    polDrop->mActor = mActorKeeper->createMActor("zhine_osenball.bmd", 0);
+    polDrop->mActorWhite = mActorKeeper->createMActor("zhine_osenball_white.bmd", 0);
+    mPolDrops.push(polDrop);
   }
 
   J3DModel *model = mActorData->mModel;
@@ -86,12 +90,7 @@ void TBossDarkZhine::init(TLiveManager *manager) {
   mActorData->offMakeDL();
   mStateFlags.asU32 |= 8;
 
-  J3DModelData *modelData = mActorData->mModel->mModelData;
-  {
-    J3DGXColor goopColor{0, 0, 0, static_cast<u8>(mGoopCoverage * 255)};
-    modelData->mStages[0]->mTevBlock->setTevKColor(
-        0, goopColor); // Lerp the goop tev stage
-  }
+  updateGoopKColor();
 
   ResTIMG *timg = reinterpret_cast<ResTIMG *>(
       JKRFileLoader::getGlbResource("/scene/map/pollution/H_ma_rak.bti"));
@@ -112,6 +111,7 @@ void TBossDarkZhine::reset() {
 bool TBossDarkZhine::receiveMessage(THitActor *actor, u32 message) {
   if (message == 15) {
     addGoopCoverage(-0.01);
+    gpMarioParticleManager->emitAndBindToPosPtr(0x13B, &actor->mPosition, 1, nullptr);
   }
   return true;
 }
@@ -166,7 +166,7 @@ bool TBossDarkZhine::advanceDropAttack() {
       return false;
     }
   } else if (mActionState == TBossDarkZhine::SHOCKING) {
-    if (mStatusTimer < params->mSLShockingTimerMax.get()) {
+    if (mStatusTimer < 80) {
       for (u32 i = 0; i < TGlobals::getMaxPlayers(); ++i) {
         TMario *player = TGlobals::getPlayerByIndex(i);
 
@@ -184,6 +184,8 @@ bool TBossDarkZhine::advanceDropAttack() {
           }
         }
       }
+      mStatusTimer += 1;
+    } else if (mStatusTimer < params->mSLShockingTimerMax.get()) {
       mStatusTimer += 1;
     } else {
       mGravity = 1.0f * params->mSLSpeedMultiplier.get();
@@ -205,7 +207,8 @@ bool TBossDarkZhine::advanceFlying() {
 
   if (mStatusTimer < FlyingTimer) {
     if (mStatusTimer % 300 == 0 || mWarpingTimer != 0) {
-      TVec3f target(mTarget->mPosition.x, mTarget->mFloorBelow + params->mSLMaxPoundingHeight.get(),
+      TVec3f target(mTarget->mPosition.x,
+                    mTarget->mFloorBelow + params->mSLMaxPoundingHeight.get(),
                     mTarget->mPosition.z);
       warpToPoint(target);
     }
@@ -233,7 +236,8 @@ bool TBossDarkZhine::advanceFlying() {
 bool TBossDarkZhine::advanceRising() {
   auto params = reinterpret_cast<TBossDarkZhineParams *>(getSaveParam());
   if (checkCurAnmEnd(0)) {
-    TVec3f target(mTarget->mPosition.x, mTarget->mFloorBelow + params->mSLMaxPoundingHeight.get(),
+    TVec3f target(mTarget->mPosition.x,
+                  mTarget->mFloorBelow + params->mSLMaxPoundingHeight.get(),
                   mTarget->mPosition.z);
     bool advanced = warpToPoint(target);
     if (advanced) {
@@ -280,6 +284,15 @@ void TBossDarkZhine::sleep() {
 
 void TBossDarkZhine::addGoopCoverage(f32 amount) {
   mGoopCoverage = Max(Min(mGoopCoverage + amount, 1.0f), 0.0f);
+}
+
+void TBossDarkZhine::updateGoopKColor() {
+  J3DModelData *modelData = mActorData->mModel->mModelData;
+  {
+    J3DGXColor goopColor{0, 0, 0, static_cast<u8>(mGoopCoverage * 255)};
+    modelData->mStages[0]->mTevBlock->setTevKColor(
+        0, goopColor); // Lerp the goop tev stage
+  }
 }
 
 void TBossDarkZhine::control() { TSpineEnemy::control(); }
@@ -369,13 +382,10 @@ void TBossDarkZhine::moveObject() {
 }
 
 void TBossDarkZhine::perform(u32 flags, JDrama::TGraphics *graphics) {
-  J3DModelData *modelData = mActorData->mModel->mModelData;
-  {
-    J3DGXColor goopColor{0, 0, 0, static_cast<u8>(mGoopCoverage * 255)};
-    modelData->mStages[0]->mTevBlock->setTevKColor(
-        0, goopColor); // Lerp the goop tev stage
+  updateGoopKColor();
+  for (u32 i = 0; i < mPolDrops.capacity(); ++i) {
+    mPolDrops.at(i, true)->perform(flags, graphics);
   }
-
   TSpineEnemy::perform(flags, graphics);
 }
 

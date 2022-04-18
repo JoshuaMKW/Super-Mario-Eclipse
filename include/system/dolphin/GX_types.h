@@ -299,17 +299,19 @@ typedef enum _GXChannelID {
  * @{
  */
 
-#define GX_TF_I4 0x0
-#define GX_TF_I8 0x1
-#define GX_TF_IA4 0x2
-#define GX_TF_IA8 0x3
-#define GX_TF_RGB565 0x4
-#define GX_TF_RGB5A3 0x5
-#define GX_TF_RGBA8 0x6
-#define GX_TF_CI4 0x8
-#define GX_TF_CI8 0x9
-#define GX_TF_CI14 0xa
-#define GX_TF_CMPR 0xE /*!< Compressed */
+typedef enum _GXTexFmt {
+  GX_TF_I4,
+  GX_TF_I8,
+  GX_TF_IA4,
+  GX_TF_IA8,
+  GX_TF_RGB565,
+  GX_TF_RGB5A3,
+  GX_TF_RGBA8,
+  GX_TF_CI4 = 0x8,
+  GX_TF_CI8 = 0x9,
+  GX_TF_CI14 = 0xA,
+  GX_TF_CMPR = 0xE
+} GXTexFmt;
 
 #define GX_TL_IA8 0x00
 #define GX_TL_RGB565 0x01
@@ -356,18 +358,20 @@ typedef enum _GXChannelID {
 
 /*! @} */
 
-/* gx tlut size */
-#define GX_TLUT_16 1 // number of 16 entry blocks.
-#define GX_TLUT_32 2
-#define GX_TLUT_64 4
-#define GX_TLUT_128 8
-#define GX_TLUT_256 16
-#define GX_TLUT_512 32
-#define GX_TLUT_1K 64
-#define GX_TLUT_2K 128
-#define GX_TLUT_4K 256
-#define GX_TLUT_8K 512
-#define GX_TLUT_16K 1024
+/* gx tlut format */
+typedef enum _GXTlutFmt {
+  GX_TLUT_16 = 1, // number of 16 entry blocks.
+  GX_TLUT_32 = 2,
+  GX_TLUT_64 = 4,
+  GX_TLUT_128 = 8,
+  GX_TLUT_256 = 16,
+  GX_TLUT_512 = 32,
+  GX_TLUT_1K = 64,
+  GX_TLUT_2K = 128,
+  GX_TLUT_4K = 256,
+  GX_TLUT_8K = 512,
+  GX_TLUT_16K = 1024,
+} GXTlutFmt;
 
 /*! \addtogroup ztexop Z Texture operator
  * @{
@@ -1250,26 +1254,29 @@ typedef enum _GXTevKColorID {
  * 16b per entry. Used for configuring texture memory in GXInit().
  * @{
  */
-#define GX_TLUT0 0
-#define GX_TLUT1 1
-#define GX_TLUT2 2
-#define GX_TLUT3 3
-#define GX_TLUT4 4
-#define GX_TLUT5 5
-#define GX_TLUT6 6
-#define GX_TLUT7 7
-#define GX_TLUT8 8
-#define GX_TLUT9 9
-#define GX_TLUT10 10
-#define GX_TLUT11 11
-#define GX_TLUT12 12
-#define GX_TLUT13 13
-#define GX_TLUT14 14
-#define GX_TLUT15 15
-#define GX_BIGTLUT0 16
-#define GX_BIGTLUT1 17
-#define GX_BIGTLUT2 18
-#define GX_BIGTLUT3 19
+
+typedef enum _GXTlut {
+  GX_TLUT0,
+  GX_TLUT1,
+  GX_TLUT2,
+  GX_TLUT3,
+  GX_TLUT4,
+  GX_TLUT5,
+  GX_TLUT6,
+  GX_TLUT7,
+  GX_TLUT8,
+  GX_TLUT9,
+  GX_TLUT10,
+  GX_TLUT11,
+  GX_TLUT12,
+  GX_TLUT13,
+  GX_TLUT14,
+  GX_TLUT15,
+  GX_BIGTLUT0,
+  GX_BIGTLUT1,
+  GX_BIGTLUT2,
+  GX_BIGTLUT3
+} GXTlut;
 /*! @} */
 
 #define GX_MAX_VTXDESC GX_VA_MAXATTR

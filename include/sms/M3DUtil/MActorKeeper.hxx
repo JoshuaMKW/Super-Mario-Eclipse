@@ -23,7 +23,7 @@ public:
     u16 _04;
     u16 _06;
     u32 *_08;
-    MActorAnmData *_0C;
+    MActorAnmData *mAnmData;
     u16 *_10;
     u32 _14;
 };

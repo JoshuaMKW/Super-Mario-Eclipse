@@ -1,6 +1,7 @@
 #pragma once
 
 #include "types.h"
+#include "JGeometry.hxx"
 #ifdef NTSCU
 #define __fill_mem ((int(*)(...))0x80003130)
 #define TRK_memcpy ((int(*)(...))0x80003244)
@@ -24,7 +25,7 @@
 #define calcBoids__11TBoidLeaderFv ((int(*)(...))0x80005F60)
 #define sqrt__Q29JGeometry8TUtil_f ((int(*)(...))0x800067E8)
 #define dot__Q29JGeometry8TVec3_f ((int(*)(...))0x80006820)
-#define MsWrap_f ((int(*)(...))0x80006848)
+#define MsWrap_f ((f32(*)(f32, f32, f32))0x80006848)
 #define div__Q29JGeometry8TVec3_f ((int(*)(...))0x80006890)
 #define __ct__11TBoidLeaderFiPCc ((int(*)(...))0x800068C0)
 #define __dt__9TPathNodeFv ((int(*)(...))0x80006A2C)
@@ -1578,7 +1579,7 @@
 #define calcRootMatrix__10TBossGessoFv ((int(*)(...))0x80076610)
 #define reset__10TBossGessoFv ((int(*)(...))0x800767D8)
 #define moveObject__10TBossGessoFv ((int(*)(...))0x800768A0)
-#define MsGetRotFromZaxisY__FRCQ29JGeometry8TVec3_f ((int(*)(...))0x80076FA4)
+#define MsGetRotFromZaxisY__FRCQ29JGeometry8TVec3_f ((f32(*)(TVec3f &))0x80076FA4)
 #define SMS_GetMarioPos__Fv ((int(*)(...))0x8007706C)
 #define doAttackShoot__10TBossGessoFv ((int(*)(...))0x80077074)
 #define doAttackUnison__10TBossGessoFv ((int(*)(...))0x80077280)

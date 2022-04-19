@@ -87,7 +87,7 @@ void TWaterBalloon::put() { TMapObjBall::put(); }
 void TWaterBalloon::thrown() { TMapObjBall::thrown(); }
 
 void TWaterBalloon::touchActor(THitActor *actor) {
-  if (actor->mObjectID != 0x80000001) { // Not Mario
+  if (actor->mObjectID != OBJECT_ID_MARIO) { // Not Mario
     blast({0.0f, 1.0f, 0.0f});
     return;
   }
@@ -174,7 +174,7 @@ void TWaterBalloon::touchRoof(TVec3f *pos) {
 void TWaterBalloon::kicked() { TMapObjBall::kicked(); }
 
 void TWaterBalloon::blast(TVec3f blastSpd) {
-  if (mHolder && mHolder->mObjectID == 0x80000001)
+  if (mHolder && mHolder->mObjectID == OBJECT_ID_MARIO)
     receiveMessage(mHolder, 7); // Drop from Mario
 
   TWaterEmitInfo emitInfo = *sEmitInfo;

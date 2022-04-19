@@ -1,9 +1,10 @@
 #pragma once
 
 #include "JGeometry.hxx"
-#include "sms/enemy/BossGesso.hxx"
 #include "sms/actor/SpineEnemy.hxx"
+#include "sms/enemy/BossGesso.hxx"
 #include "sms/manager/EnemyManager.hxx"
+
 
 #include "SME.hxx"
 #include "types.h"
@@ -27,7 +28,8 @@ struct TBossDarkZhineParams : public TSpineEnemyParams {
         CONSTRUCT_PARAM(mSLGoopingTimerMax, 0),
         CONSTRUCT_PARAM(mSLShockingTimerMax, 120),
         CONSTRUCT_PARAM(mSLRollingTimerMax, 300),
-        CONSTRUCT_PARAM(mSLHardMode, false), CONSTRUCT_PARAM(mSLRisingRate, 1.4f),
+        CONSTRUCT_PARAM(mSLHardMode, false),
+        CONSTRUCT_PARAM(mSLRisingRate, 1.4f),
         CONSTRUCT_PARAM(mSLMaxPoundingHeight, 800.0f) {
     load(prm);
   }
@@ -50,11 +52,39 @@ struct TBossDarkZhineParams : public TSpineEnemyParams {
   TParamRT<f32> mSLMaxPoundingHeight;
 };
 
+class TNerveBZRoll : public TNerveBase<TLiveActor> {
+public:
+  TNerveBZRoll(){};
+  virtual ~TNerveBZRoll();
+  virtual bool execute(TSpineBase<TLiveActor> *spine) const;
+};
+
+class TNerveBZSleep : public TNerveBase<TLiveActor> {
+public:
+  TNerveBZSleep(){};
+  virtual ~TNerveBZSleep();
+  virtual bool execute(TSpineBase<TLiveActor> *spine) const;
+};
+
+class TNerveBZFly : public TNerveBase<TLiveActor> {
+public:
+  TNerveBZFly(){};
+  virtual ~TNerveBZFly();
+  virtual bool execute(TSpineBase<TLiveActor> *spine) const;
+};
+
+class TNerveBZPound : public TNerveBase<TLiveActor> {
+public:
+  TNerveBZPound(){};
+  virtual ~TNerveBZPound();
+  virtual bool execute(TSpineBase<TLiveActor> *spine) const;
+};
+
 class TBossDarkZhineManager : public TEnemyManager {
 public:
   TBossDarkZhineManager(const char *);
   virtual ~TBossDarkZhineManager();
-  
+
   virtual void load(JSUMemoryInputStream &) override;
   virtual void createModelData() override;
 
@@ -86,8 +116,6 @@ public:
   virtual void moveObject() override;
   virtual const char **getBasNameTable() const override;
 
-  f32 getAngleToTarget() const;
-
   bool isFollowMario() const { return mIsFollowMario; }
   bool isPounding() const { return mIsPounding; }
   bool isGooping() const { return mIsGooping; }
@@ -106,13 +134,16 @@ private:
   void addGoopCoverage(f32 amount);
   void updateGoopKColor();
 
-
   TVec3f mBoundingPoint;
   f32 mBoundingAreaRadius;
   f32 mForwardSpeed;
   ActionState mActionState;
   TMario *mTarget;
   TRingBuffer<TBGPolDrop> mPolDrops;
+  JPABaseEmitter *mPromiEffect; // Light Flare
+  JPABaseEmitter *mSenkoEffect; // Light rays
+  JPABaseEmitter *mKiraEffect;  // Sparkles
+  JPABaseEmitter *mBowEffect;   // Light bow
   s16 mStatusTimer;
   s16 mWarpingTimer;
   s16 mCleaningTimer;

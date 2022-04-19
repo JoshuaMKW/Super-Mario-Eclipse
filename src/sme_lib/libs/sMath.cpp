@@ -99,7 +99,7 @@ void Math::Vector3::cross(const Vec &a, const Vec &b, Vec &out) {
 f32 Math::Vector3::getYAngleTo(const TVec3f &a, const TVec3f &b) {
   TVec3f diff = a;
   diff.sub(b);
-  return Math::radiansToAngle(atan2f(diff.z, diff.x));
+  return MsGetRotFromZaxisY__FRCQ29JGeometry8TVec3_f(diff);
 }
 
 f32 Math::Vector3::lookAtRatio(const TVec3f &a, const TVec3f &b) {

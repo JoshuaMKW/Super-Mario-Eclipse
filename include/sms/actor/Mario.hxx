@@ -20,6 +20,8 @@
 #define MESSAGE_MARIO_TOSS 7
 #define MESSAGE_MARIO_BURN 10
 
+#define OBJECT_ID_MARIO 0x80000001
+
 class TMario;
 
 class TDrawSyncCallback {

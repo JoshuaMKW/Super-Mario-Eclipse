@@ -68,7 +68,7 @@ void TBossDarkZhine::init(TLiveManager *manager) {
   mActorData->calc();
   mActorData->setLightType(1);
 
-  initHitActor(0x8000001, 5, 0x81000000, 60.0f, 60.0f, 60.0f, 60.0f);
+  initHitActor(0x8000001, 5, 0x81000000, 360.0f, 360.0f, 360.0f, 360.0f);
   initAnmSound();
 
   mObjectType |= 1;
@@ -76,7 +76,8 @@ void TBossDarkZhine::init(TLiveManager *manager) {
   for (u32 i = 0; i < mPolDrops.capacity(); ++i) {
     TBGPolDrop *polDrop = new TBGPolDrop("<TBGPolDrop>");
     polDrop->mActor = mActorKeeper->createMActor("zhine_osenball.bmd", 0);
-    polDrop->mActorWhite = mActorKeeper->createMActor("zhine_osenball_white.bmd", 0);
+    polDrop->mActorWhite =
+        mActorKeeper->createMActor("zhine_osenball_white.bmd", 0);
     mPolDrops.push(polDrop);
   }
 
@@ -99,6 +100,8 @@ void TBossDarkZhine::init(TLiveManager *manager) {
     SMS_ChangeTextureAll__FP12J3DModelDataPCcRC7ResTIMG(
         mActorData->mModel->mModelData, "H_ma_rak_dummy", timg);
   }
+
+  mSize.set(0.3f, 0.3f, 0.3f);
 }
 
 void TBossDarkZhine::reset() {
@@ -111,14 +114,10 @@ void TBossDarkZhine::reset() {
 bool TBossDarkZhine::receiveMessage(THitActor *actor, u32 message) {
   if (message == 15) {
     addGoopCoverage(-0.01);
-    gpMarioParticleManager->emitAndBindToPosPtr(0x13B, &actor->mPosition, 1, nullptr);
+    gpMarioParticleManager->emitAndBindToPosPtr(0x13B, &actor->mPosition, 1,
+                                                nullptr);
   }
   return true;
-}
-
-f32 TBossDarkZhine::getAngleToTarget() const {
-  return atan2f(mTarget->mPosition.x - mPosition.x,
-                mTarget->mPosition.z - mPosition.z);
 }
 
 bool TBossDarkZhine::isInRange(const TVec3f &pos, f32 r) const {
@@ -130,11 +129,16 @@ bool TBossDarkZhine::advanceRollAttack() {
 
   if (mStatusTimer < params->mSLRollingTimerMax.get()) {
     gpPollution->stamp(1, mPosition.x, mPosition.y, mPosition.z, 400.0f);
+    mRotation.y +=
+        (MsWrap_f(Math::Vector3::getYAngleTo(mTarget->mPosition, mPosition),
+                  mRotation.y - 180.0f, mRotation.y + 180.0f) -
+         mRotation.y) *
+        0.02f;
     mForwardSpeed += 1.0f;
-    mForwardSpeed *= 0.98f;
+    mForwardSpeed *= params->mSLAccelerationRate.get();
     mStatusTimer += 1;
   } else {
-    mForwardSpeed *= 0.98f;
+    mForwardSpeed *= params->mSLAccelerationRate.get();
     if (mForwardSpeed < __FLT_EPSILON__) {
       mForwardSpeed = 0.0f;
       mStatusTimer = 0;
@@ -142,6 +146,18 @@ bool TBossDarkZhine::advanceRollAttack() {
       return true;
     }
   }
+
+  const f32 yDiff = mPosition.y - mGroundY;
+  if (yDiff < 30.0f) {
+    mPosition.y = mGroundY;
+    return false;
+  } else if (yDiff > 200.0f) {
+    mForwardSpeed = 0.0f;
+    mStatusTimer = 0;
+    mActionState = TBossDarkZhine::RISING;
+    return true;
+  }
+
   gpPollution->stamp(1, mPosition.x, mPosition.y, mPosition.z, 60.0f);
   addGoopCoverage(0.001f);
   return false;
@@ -155,6 +171,10 @@ bool TBossDarkZhine::advanceDropAttack() {
       gpPollution->stamp(1, mPosition.x, mPosition.y, mPosition.z,
                          params->mSLStampRadius.get());
       addGoopCoverage(0.1f);
+      gpMarioParticleManager->emitAndBindToPosPtr(67, &mPosition, 0, nullptr);
+      gpMarioParticleManager->emitAndBindToPosPtr(68, &mPosition, 0, nullptr);
+      gpMarioParticleManager->emitAndBindToPosPtr(69, &mPosition, 0, nullptr);
+      gpMarioParticleManager->emitAndBindToPosPtr(70, &mPosition, 0, nullptr);
       mGravity = 1.0f;
       mActionState = TBossDarkZhine::SHOCKING;
       mStatusTimer = 0;
@@ -173,7 +193,7 @@ bool TBossDarkZhine::advanceDropAttack() {
         const bool isPlayerStateReady =
             !(player->mState & TMario::STATE_AIRBORN) &&
             (player->mState != TMario::STATE_KNCK_LND &&
-             player->mState != 0x4045C);
+             player->mPrevState != TMario::STATE_KNCK_LND);
 
         if (isInRange(player->mPosition, params->mSLShockRadius.get()) &&
             isPlayerStateReady) {
@@ -206,14 +226,17 @@ bool TBossDarkZhine::advanceFlying() {
   auto params = reinterpret_cast<TBossDarkZhineParams *>(getSaveParam());
 
   if (mStatusTimer < FlyingTimer) {
-    if (mStatusTimer % 300 == 0 || mWarpingTimer != 0) {
+    if (mStatusTimer % 400 == 0 || mWarpingTimer != 0) {
       TVec3f target(mTarget->mPosition.x,
                     mTarget->mFloorBelow + params->mSLMaxPoundingHeight.get(),
                     mTarget->mPosition.z);
       warpToPoint(target);
     }
     mRotation.y +=
-        Math::Vector3::getYAngleTo(mPosition, mTarget->mPosition) * 0.1f;
+        (MsWrap_f(Math::Vector3::getYAngleTo(mTarget->mPosition, mPosition),
+                  mRotation.y - 180.0f, mRotation.y + 180.0f) -
+         mRotation.y) *
+        0.05f;
     if (mStatusTimer % 70 == 0) {
       const TVec3f vel(mSpeed.x, mSpeed.y / 2, mSpeed.z);
       TBGPolDrop *polDrop = mPolDrops.next();
@@ -230,11 +253,14 @@ bool TBossDarkZhine::advanceFlying() {
     }
   }
   mGravity = 0.0f;
+  mSpeed.y = 0.0f;
   return false;
 }
 
 bool TBossDarkZhine::advanceRising() {
   auto params = reinterpret_cast<TBossDarkZhineParams *>(getSaveParam());
+
+  mGravity = 0.0f;
   if (checkCurAnmEnd(0)) {
     TVec3f target(mTarget->mPosition.x,
                   mTarget->mFloorBelow + params->mSLMaxPoundingHeight.get(),
@@ -249,22 +275,18 @@ bool TBossDarkZhine::advanceRising() {
 }
 
 bool TBossDarkZhine::warpToPoint(const TVec3f &point) {
-  constexpr u32 FlashEffectID = 161;
-  constexpr u32 ShockEffectID = 162;
   constexpr u32 FlashSfxID = 10387;
 
   mGravity = 0.0f;
 
   if (mWarpingTimer == 0) {
-    // gpMarioParticleManager->emit(FlashEffectID, &mPosition, 1, nullptr);
     mSize.set(0.0f, 0.0f, 0.0f);
     JAISound *sound =
         MSoundSE::startSoundActor(FlashSfxID, mPosition, 0, nullptr, 0, 4);
-    sound->setTempoProportion(2.0f, 20);
+    sound->setTempoProportion(5.0f, 20);
   } else if (mWarpingTimer > 20) {
     mPosition.set(point);
-    mSize.set(1.0f, 1.0f, 1.0f);
-    // gpMarioParticleManager->emit(FlashEffectID, &mPosition, 1, nullptr);
+    mSize.set(0.3f, 0.3f, 0.3f);
     mWarpingTimer = 0;
     return true;
   }
@@ -295,7 +317,40 @@ void TBossDarkZhine::updateGoopKColor() {
   }
 }
 
-void TBossDarkZhine::control() { TSpineEnemy::control(); }
+void TBossDarkZhine::control() {
+  if (mWarpingTimer > 0) {
+    // mPromiEffect = gpMarioParticleManager->emitAndBindToMtxPtr(
+    //     296, mActorData->mModel->mBaseMtx, 1, nullptr);
+    // mBowEffect = gpMarioParticleManager->emitAndBindToMtxPtr(
+    //     295, mActorData->mModel->mBaseMtx, 1, nullptr);
+    mKiraEffect = gpMarioParticleManager->emitAndBindToMtxPtr(
+        297, mActorData->mModel->mBaseMtx, 1, nullptr);
+    // mSenkoEffect = gpMarioParticleManager->emitAndBindToMtxPtr(
+    //     298, mActorData->mModel->mBaseMtx, 1, nullptr);
+    // mPromiEffect->mSize2.set(4.0f, 4.0f, 4.0f);
+    // mBowEffect->mSize2.set(4.0f, 4.0f, 4.0f);
+    mKiraEffect->mSize2.set(12.0f, 12.0f, 12.0f);
+    // mSenkoEffect->mSize2.set(4.0f, 4.0f, 4.0f);
+  } else {
+    // if (mPromiEffect) {
+    //   mPromiEffect->deleteAllParticle();
+    //   mPromiEffect = nullptr;
+    // }
+    // if (mKiraEffect) {
+    //   mKiraEffect->deleteAllParticle();
+    //   mKiraEffect = nullptr;
+    // }
+    // if (mBowEffect) {
+    //   mBowEffect->deleteAllParticle();
+    //   mBowEffect = nullptr;
+    // }
+    // if (mSenkoEffect) {
+    //   mSenkoEffect->deleteAllParticle();
+    //   mSenkoEffect = nullptr;
+    // }
+  }
+  TSpineEnemy::control();
+}
 
 void TBossDarkZhine::moveObject() {
   TSpineEnemy::moveObject();
@@ -353,7 +408,7 @@ void TBossDarkZhine::moveObject() {
 
   for (u32 i = 0; i < mNumObjs; ++i) {
     THitActor *actor = mCollidingObjs[i];
-    if (actor->mObjectID != 0x80000001)
+    if (actor->mObjectID != OBJECT_ID_MARIO)
       continue;
 
     TMario *player = reinterpret_cast<TMario *>(actor);
@@ -384,7 +439,7 @@ void TBossDarkZhine::moveObject() {
 void TBossDarkZhine::perform(u32 flags, JDrama::TGraphics *graphics) {
   updateGoopKColor();
   for (u32 i = 0; i < mPolDrops.capacity(); ++i) {
-    mPolDrops.at(i, true)->perform(flags, graphics);
+    // mPolDrops.at(i, true)->perform(flags, graphics);
   }
   TSpineEnemy::perform(flags, graphics);
 }

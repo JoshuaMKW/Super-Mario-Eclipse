@@ -28,7 +28,11 @@ public:
     void setGlobalRTMatrix(Mtx);
     void setGlobalSRTMatrix(Mtx);
 
-    u32 _00[0x164 / 4];
-    TVec3f mSize;
+    u32 _00[0x154 / 4];
+    TVec3f mSize1;
+    u32 _160;
+    TVec3f mSize2;
+    u32 _170;
+    TVec3f mSize3;
     u32 _180[0xA0 / 4];
 };

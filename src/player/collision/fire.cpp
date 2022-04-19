@@ -50,17 +50,17 @@ void blazePlayer(TMario *player) {
 
   JPABaseEmitter *emitterFire = gpMarioParticleManager->emitAndBindToPosPtr(
       0x135, &player->mPosition, 1, player);
-  emitterFire->mSize.set(player->mSize.x * fireScale, player->mSize.y * fireScale,
+  emitterFire->mSize2.set(player->mSize.x * fireScale, player->mSize.y * fireScale,
                          player->mSize.z * fireScale);
 
   JPABaseEmitter *emitterSmoke = gpMarioParticleManager->emitAndBindToPosPtr(
       0x136, &player->mPosition, 1, player);
-  emitterSmoke->mSize.set(player->mSize.x * fireScale, player->mSize.y * fireScale,
+  emitterSmoke->mSize2.set(player->mSize.x * fireScale, player->mSize.y * fireScale,
                           player->mSize.z * fireScale);
 
   JPABaseEmitter *emitterEmber = gpMarioParticleManager->emitAndBindToPosPtr(
       0x137, &player->mPosition, 1, player);
-  emitterEmber->mSize.set(player->mSize.x * fireScale, player->mSize.y * fireScale,
+  emitterEmber->mSize2.set(player->mSize.x * fireScale, player->mSize.y * fireScale,
                           player->mSize.z * fireScale);
 
 

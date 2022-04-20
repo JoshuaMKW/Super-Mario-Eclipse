@@ -157,6 +157,8 @@ void TBossDarkZhineManager::initJParticle() {
 
 #pragma endregion Manager
 
+#pragma region DarkZhine
+
 TBossDarkZhine::TBossDarkZhine(const char *name)
     : TSpineEnemy(name), mActionState(TBossDarkZhine::IDLE), mTarget(nullptr),
       mPolDrops(4, false), mIsFollowMario(false), mIsPounding(false),
@@ -165,6 +167,8 @@ TBossDarkZhine::TBossDarkZhine(const char *name)
 TBossDarkZhine::~TBossDarkZhine() {}
 
 const char **TBossDarkZhine::getBasNameTable() const { return zhine_bastable; }
+
+#pragma region Init
 
 void TBossDarkZhine::load(JSUMemoryInputStream &stream) {
   TSpineEnemy::load(stream);
@@ -231,14 +235,7 @@ void TBossDarkZhine::reset() {
   mActorData->mModel->calc();
 }
 
-bool TBossDarkZhine::receiveMessage(THitActor *actor, u32 message) {
-  if (message == 15) {
-    addGoopCoverage(-0.01);
-    gpMarioParticleManager->emitAndBindToPosPtr(0x13B, &actor->mPosition, 1,
-                                                nullptr);
-  }
-  return true;
-}
+#pragma endregion Init
 
 TMario *TBossDarkZhine::getClosestPlayer() const {
   TMario *closest;
@@ -260,6 +257,8 @@ TMario *TBossDarkZhine::getClosestPlayer() const {
 bool TBossDarkZhine::isInRange(const TVec3f &pos, f32 r) const {
   return PSVECDistance(mBoundingPoint, pos) < r;
 }
+
+#pragma region Actions
 
 bool TBossDarkZhine::advanceRollAttack(s32 frame) {
   auto params = reinterpret_cast<TBossDarkZhineParams *>(getSaveParam());
@@ -431,6 +430,8 @@ void TBossDarkZhine::sleep() {
   mGravity = 0.0f;
 }
 
+#pragma endregion Actions
+
 void TBossDarkZhine::addGoopCoverage(f32 amount) {
   mGoopCoverage = Max(Min(mGoopCoverage + amount, 1.0f), 0.0f);
 }
@@ -442,6 +443,17 @@ void TBossDarkZhine::updateGoopKColor() {
     modelData->mStages[0]->mTevBlock->setTevKColor(
         0, goopColor); // Lerp the goop tev stage
   }
+}
+
+#pragma region Perform
+
+bool TBossDarkZhine::receiveMessage(THitActor *actor, u32 message) {
+  if (message == 15) {
+    addGoopCoverage(-0.01);
+    gpMarioParticleManager->emitAndBindToPosPtr(0x13B, &actor->mPosition, 1,
+                                                nullptr);
+  }
+  return true;
 }
 
 void TBossDarkZhine::control() {
@@ -525,5 +537,9 @@ void TBossDarkZhine::perform(u32 flags, JDrama::TGraphics *graphics) {
   }
   TSpineEnemy::perform(flags, graphics);
 }
+
+#pragma endregion Perform
+
+#pragma endregion DarkZhine
 
 #endif

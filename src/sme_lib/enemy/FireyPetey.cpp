@@ -12,19 +12,19 @@
 #include "sms/sound/MSoundSESystem.hxx"
 
 // BPFly
-extern int instance$3889;
+extern TNerveBase<TLiveActor> *instance$3889;
 extern bool init$3891;
 
 // BPWait
-extern int instance$3625;
+extern TNerveBase<TLiveActor> *instance$3625;
 extern bool init$3627;
 
 // BPHover
-extern int instance$3940;
+extern TNerveBase<TLiveActor> *instance$3940;
 extern bool init$3942;
 
 // BPVomit
-extern int instance$3678;
+extern TNerveBase<TLiveActor> *instance$3678;
 extern bool init$3680;
 
 // Globals
@@ -103,17 +103,13 @@ TNerveFPFireBreath::~TNerveFPFireBreath() {}
 bool TNerveFPWait::execute(TSpineBase<TLiveActor> *spine) const {
   TFireyPetey *target = reinterpret_cast<TFireyPetey *>(spine->mTarget);
   bool result = TNerveBPWait::execute(spine);
-  if (spine->mNerves[1] == (TNerveBase<TLiveActor> *)&instance$3678) {
+  if (spine->mNervePrevious == instance$3678) {
     if (target->numTornados > 0) {
-      if (spine->mVTableIndex < spine->_00) {
-        spine->mNerves[0] = &wait;
-        spine->mNerves[1] = (TNerveBase<TLiveActor> *)NerveGetByIndex__Fi(0x1d);
-      }
+      spine->mNerveStack.push((TNerveBase<TLiveActor> *)NerveGetByIndex__Fi(0x1d));
+      spine->mNerveStack.push(&wait);
       target->numTornados--;
     } else {
-      if (spine->mVTableIndex < spine->_00) {
-        spine->mNerves[0] = &takeoff;
-      }
+      spine->mNerveStack.push(&takeoff);
       target->numTornados = MAX_TORNADOS;
     }
   }
@@ -122,7 +118,7 @@ bool TNerveFPWait::execute(TSpineBase<TLiveActor> *spine) const {
 
 bool TNerveFPFly::execute(TSpineBase<TLiveActor> *spine) const {
   TFireyPetey *target = reinterpret_cast<TFireyPetey *>(spine->mTarget);
-  if (spine->mStateTimer % 25 == 10) {
+  if (spine->mNerveTimer % 25 == 10) {
 
     TKukkuBall *mKukkuBall = nullptr;
     for (int i = 0; i < NUM_GOOP_DROPS; i++) {
@@ -160,7 +156,7 @@ bool TNerveFPFly::execute(TSpineBase<TLiveActor> *spine) const {
     }
   }
 
-  if (spine->mStateTimer % 50 == 25) {
+  if (spine->mNerveTimer % 50 == 25) {
     TBPPolDrop *poldrop = target->mPollutionDrop;
     if (poldrop->_01[1] == 0) {
       JGeometry::TVec3<f32> step(0.000f, 1.500f, 0.000f);
@@ -180,7 +176,7 @@ bool TNerveFPFly::execute(TSpineBase<TLiveActor> *spine) const {
       poldrop->_02 = target->mPosition.y;
     }
   }
-  // SME_LOG("0x%08x\n", spine->mStateTimer);
+  // SME_LOG("0x%08x\n", spine->mNerveTimer);
   return TNerveBPFly::execute(spine);
 }
 
@@ -193,28 +189,26 @@ bool TNerveFPTakeOff::execute(TSpineBase<TLiveActor> *spine) const {
 
 bool TNerveFPBreakSleep::execute(TSpineBase<TLiveActor> *spine) const {
   TBossPakkun *target = reinterpret_cast<TBossPakkun *>(spine->mTarget);
-  if (spine->mStateTimer == 0) {
+  if (spine->mNerveTimer == 0) {
     target->changeBck(0x0E);
     MSBgm::stopTrackBGMs('\a', 10);
   }
   if (!target->mActorData->curAnmEndsNext(0, 0)) {
     return false;
   }
-  if (spine->mVTableIndex < spine->_00) {
-    spine->mNerves[spine->mVTableIndex++] = &takeoff;
-  }
+  spine->mNerveStack.push(&takeoff);
   return true;
 }
 
 bool TNerveFPSleep::execute(TSpineBase<TLiveActor> *param1) const {
-  if (param1->mStateTimer == 0) {
+  if (param1->mNerveTimer == 0) {
     reinterpret_cast<TBossPakkun *>(param1->mTarget)->changeBck(0x17);
   }
   return 0;
 }
 
 bool TNerveFPHover::execute(TSpineBase<TLiveActor> *spine) const {
-  if (spine->mStateTimer % 15 == 10) {
+  if (spine->mNerveTimer % 15 == 10) {
     TFireyPetey *target = reinterpret_cast<TFireyPetey *>(spine->mTarget);
 
     TKukkuBall *mKukkuBall = nullptr;
@@ -262,7 +256,7 @@ bool TNerveFPFireBreath::execute(TSpineBase<TLiveActor> *spine) const {
 
   bool isAnimPlaying = false;
 
-  if (spine->mStateTimer == 0x0) {
+  if (spine->mNerveTimer == 0x0) {
     target->changeBck(0x15);
 
     // Set positions of collision
@@ -284,7 +278,7 @@ bool TNerveFPFireBreath::execute(TSpineBase<TLiveActor> *spine) const {
     actorData->setFrameRate(SMSGetAnmFrameRate__Fv(), 0);
     if (!actorData->checkCurAnmFromIndex(0x14, 0)) {
       if (frameCtrl->mCurFrame >= 15.0f && frameCtrl->mCurFrame <= 46.0f) {
-        if (spine->mStateTimer % 10 == 0) {
+        if (spine->mNerveTimer % 10 == 0) {
           JPABaseEmitter *emitterFire =
               gpMarioParticleManager->emitAndBindToMtxPtr(
                   0x1a7, target->mActorData->mModel->mJointArray[0xC], 1,
@@ -326,7 +320,7 @@ bool TNerveFPFireBreath::execute(TSpineBase<TLiveActor> *spine) const {
 
   if (actorData->curAnmEndsNext(0, 0)) {
     if (actorData->checkCurBckFromIndex(0x15)) {
-      spine->mNerves[spine->mVTableIndex++] = &takeoff;
+      spine->mNerveStack.push(&takeoff);
       return true;
     }
     target->_02 = 0;
@@ -351,24 +345,21 @@ void TFireyPetey::init(TLiveManager *param1) {
       root->searchF(keyCode, SME_PORT_REGION((const char *)0x8037c230,
                                              (const char *)0x80373c98, 0, 0)));
 
-  group->hitActorList.mEnd->mItem = mTornado;
+  group->mHitActorList.mEnd->mItem = mTornado;
 
-  mSpineBase->mVTableIndex = 0;
-  mSpineBase->mStateTimer = 0;
-  mSpineBase->mCurVTable = &sleep;
-  mSpineBase->mPrevVTable = 0;
+  mSpineBase->setNerve(&sleep);
 
   // Will need to swap to redirection
-  instance$3889 = *(int *)&fly;
+  instance$3889 = &fly;
   init$3891 = true;
 
-  instance$3625 = *(int *)&wait;
+  instance$3625 = &wait;
   init$3627 = true;
 
-  instance$3940 = *(int *)&hover;
+  instance$3940 = &hover;
   init$3942 = true;
 
-  instance$3678 = *(int *)&fireBreath;
+  instance$3678 = &fireBreath;
   init$3680 = true;
 
   mMActorKeeperSecondary = new TMActorKeeper(mLiveManager, NUM_GOOP_DROPS);
@@ -382,7 +373,7 @@ void TFireyPetey::init(TLiveManager *param1) {
 
   for (int i = 0; i < 10; i++) {
     mFire[i] = new TFPFire(this, "fire\n");
-    group->hitActorList.insert(group->hitActorList.end(), mFire[i]);
+    group->mHitActorList.insert(group->mHitActorList.end(), mFire[i]);
   }
 }
 
@@ -401,10 +392,10 @@ void TFireyPetey::perform(u32 flags, JDrama::TGraphics *graphics) {
 }
 
 bool TFireyPetey::receiveMessage(THitActor *reciever, u32 param2) {
-  if (reciever->mObjectID == 0x1000001 && mSpineBase->mCurVTable == &sleep) {
-    mSpineBase->mPrevVTable = mSpineBase->mCurVTable;
-    mSpineBase->mStateTimer = 0;
-    mSpineBase->mCurVTable = &breakSleep;
+  if (reciever->mObjectID == 0x1000001 && mSpineBase->mNerveCurrent == &sleep) {
+    mSpineBase->mNervePrevious = mSpineBase->mNerveCurrent;
+    mSpineBase->mNerveTimer = 0;
+    mSpineBase->mNerveCurrent = &breakSleep;
     return false;
   }
   return TBossPakkun::receiveMessage(reciever, param2);

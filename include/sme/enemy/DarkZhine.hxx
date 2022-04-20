@@ -52,32 +52,40 @@ struct TBossDarkZhineParams : public TSpineEnemyParams {
   TParamRT<f32> mSLMaxPoundingHeight;
 };
 
-class TNerveBZRoll : public TNerveBase<TLiveActor> {
+class TNerveBZWait : public TNerveBase<TLiveActor> {
 public:
-  TNerveBZRoll(){};
-  virtual ~TNerveBZRoll();
-  virtual bool execute(TSpineBase<TLiveActor> *spine) const;
+  virtual ~TNerveBZWait();
+  virtual bool execute(TSpineBase<TLiveActor> *spine) const override;
+};
+
+class TNerveBZAppear : public TNerveBase<TLiveActor> {
+public:
+  virtual ~TNerveBZAppear();
+  virtual bool execute(TSpineBase<TLiveActor> *spine) const override;
 };
 
 class TNerveBZSleep : public TNerveBase<TLiveActor> {
 public:
-  TNerveBZSleep(){};
   virtual ~TNerveBZSleep();
-  virtual bool execute(TSpineBase<TLiveActor> *spine) const;
+  virtual bool execute(TSpineBase<TLiveActor> *spine) const override;
 };
 
 class TNerveBZFly : public TNerveBase<TLiveActor> {
 public:
-  TNerveBZFly(){};
   virtual ~TNerveBZFly();
-  virtual bool execute(TSpineBase<TLiveActor> *spine) const;
+  virtual bool execute(TSpineBase<TLiveActor> *spine) const override;
 };
 
 class TNerveBZPound : public TNerveBase<TLiveActor> {
 public:
-  TNerveBZPound(){};
   virtual ~TNerveBZPound();
-  virtual bool execute(TSpineBase<TLiveActor> *spine) const;
+  virtual bool execute(TSpineBase<TLiveActor> *spine) const override;
+};
+
+class TNerveBZRoll : public TNerveBase<TLiveActor> {
+public:
+  virtual ~TNerveBZRoll();
+  virtual bool execute(TSpineBase<TLiveActor> *spine) const override;
 };
 
 class TBossDarkZhineManager : public TEnemyManager {
@@ -92,6 +100,13 @@ public:
 };
 
 class TBossDarkZhine : public TSpineEnemy {
+  friend TNerveBZWait;
+  friend TNerveBZAppear;
+  friend TNerveBZSleep;
+  friend TNerveBZFly;
+  friend TNerveBZPound;
+  friend TNerveBZRoll;
+
   enum ActionState {
     IDLE,
     FLYING,
@@ -121,13 +136,20 @@ public:
   bool isGooping() const { return mIsGooping; }
   bool isShocking() const { return mIsShocking; }
   bool isInRange(const TVec3f &pos, f32 range) const;
+  // bool isIntroReady() const { return !mHasIntroHappened; }
+  // bool setIntroReady(bool ready) { mHasIntroHappened = ready; }
 
-private:
-  bool advanceDropAttack();
-  bool advanceGoopDroplet();
-  bool advanceRollAttack();
-  bool advanceFlying();
-  bool advanceRising();
+  const TVec3f &getBoundingPoint() const { return mBoundingPoint; }
+  f32 getBoundingRadius() const { return mBoundingAreaRadius; }
+  TMario *getTargetPlayer() const { return mTarget; };
+  TMario *getClosestPlayer() const;
+
+protected:
+  bool advanceDropAttack(s32 frame);
+  bool advanceGoopDroplet(s32 frame);
+  bool advanceRollAttack(s32 frame);
+  bool advanceFlying(s32 frame);
+  bool advanceRising(s32 frame);
 
   void sleep();
   bool warpToPoint(const TVec3f &point);
@@ -152,6 +174,8 @@ private:
   bool mIsPounding;
   bool mIsGooping;
   bool mIsShocking;
+  bool mHasIntroHappened;
+  s16 mIntroTimer;
 };
 
 #endif

@@ -1,5 +1,6 @@
 
 #include "enemy/DarkZhine.hxx"
+#include "JDrama/JDRFlagT.hxx"
 #include "sms/sound/MSoundSESystem.hxx"
 
 #include "SME.hxx"
@@ -10,12 +11,128 @@ using namespace SME::Util;
 
 #if SME_ZHINE_BOSS
 
+#pragma region ModelInfo
+
 static const char *zhine_bastable[]{
     "/scene/zhine/bas/zhine_fly.bas", "/scene/zhine/bas/zhine_teleport.bas",
     "/scene/zhine/bas/zhine_spin.bas", "/scene/zhine/bas/zhine_pound.bas"};
 
 static const TModelDataLoadEntry sZhineModelDatas[]{
     {.mModelPath = "zhine_body.bmd", .mModelFlags = 0x10300000}};
+
+#pragma endregion ModelInfo
+
+#pragma region Nerves
+
+static const TNerveBZWait sNerveWait;
+static const TNerveBZAppear sNerveAppear;
+static const TNerveBZSleep sNerveSleep;
+static const TNerveBZFly sNerveFly;
+static const TNerveBZPound sNervePound;
+static const TNerveBZRoll sNerveRoll;
+
+bool TNerveBZWait::execute(TSpineBase<TLiveActor> *spine) const {
+  auto zhine = reinterpret_cast<TBossDarkZhine *>(spine->mTarget);
+  zhine->mActionState = TBossDarkZhine::IDLE;
+
+  if (zhine->isInRange(zhine->getClosestPlayer()->mPosition,
+                       zhine->getBoundingRadius())) {
+    spine->mNerveStack.push(&sNerveAppear);
+    return true;
+  }
+
+  zhine->mStateFlags.asFlags.mIsObjDead = true;
+  return false;
+}
+
+bool TNerveBZAppear::execute(TSpineBase<TLiveActor> *spine) const {
+  auto zhine = reinterpret_cast<TBossDarkZhine *>(spine->mTarget);
+  zhine->mActionState = TBossDarkZhine::IDLE;
+
+  zhine->mStateFlags.asFlags.mIsObjDead = false;
+
+  if (spine->mNerveTimer == 0) {
+    gpMarDirector->fireStartDemoCamera("zhine_appear_camera.bck", nullptr, -1,
+                                       0.0f, true, nullptr, 0, nullptr,
+                                       JDrama::TFlagT<s16>(0));
+  } else if (zhine->mActorData->curAnmEndsNext(0, nullptr)) {
+    spine->mNerveStack.push(&sNerveSleep);
+    spine->mNerveStack.push(&sNerveFly);
+    return true;
+  }
+
+  return false;
+}
+
+bool TNerveBZSleep::execute(TSpineBase<TLiveActor> *spine) const {
+  auto zhine = reinterpret_cast<TBossDarkZhine *>(spine->mTarget);
+  zhine->mActionState = TBossDarkZhine::IDLE;
+
+  if (zhine->getClosestPlayer()) {
+    spine->mNerveStack.push(&sNerveSleep);
+    spine->mNerveStack.push(&sNerveFly);
+    return true;
+  }
+
+  zhine->sleep();
+  return false;
+}
+
+bool TNerveBZFly::execute(TSpineBase<TLiveActor> *spine) const {
+  auto zhine = reinterpret_cast<TBossDarkZhine *>(spine->mTarget);
+  zhine->mActionState = TBossDarkZhine::FLYING;
+
+  if (!zhine->getClosestPlayer())
+    return true;
+
+  if (zhine->advanceFlying(spine->mNerveTimer)) {
+    spine->mNerveStack.push(&sNervePound);
+    return true;
+  }
+
+  return false;
+}
+
+bool TNerveBZPound::execute(TSpineBase<TLiveActor> *spine) const {
+  auto zhine = reinterpret_cast<TBossDarkZhine *>(spine->mTarget);
+  auto params = reinterpret_cast<TBossDarkZhineParams *>(zhine->getSaveParam());
+  zhine->mActionState = TBossDarkZhine::DROPPING;
+
+  if (!zhine->getClosestPlayer())
+    return true;
+
+  if (zhine->advanceDropAttack(spine->mNerveTimer)) {
+    gpCameraShake->startShake(EnumCamShakeMode::UnknownShake27, 1.0f);
+    gpPad1RumbleMgr->start(8, zhine->mPosition);
+    gpPollution->stamp(1, zhine->mPosition.x, zhine->mGroundY, zhine->mPosition.z,
+                        params->mSLStampRadius.get());
+    MSoundSE::startSoundActor(6158, zhine->mPosition, 0, 0, 0, 4);
+
+    spine->mNerveStack.push(&sNerveRoll);
+    return true;
+  }
+  
+  return false;
+}
+
+bool TNerveBZRoll::execute(TSpineBase<TLiveActor> *spine) const {
+  auto zhine = reinterpret_cast<TBossDarkZhine *>(spine->mTarget);
+  zhine->mActionState = TBossDarkZhine::GROUNDROLL;
+
+  if (!zhine->getClosestPlayer())
+    return true;
+
+  if (zhine->advanceRollAttack(spine->mNerveTimer)) {
+    spine->mNerveStack.push(&sNerveFly);
+    return true;
+  }
+  
+  return false;
+}
+
+#pragma endregion Nerves
+
+#pragma region Manager
 
 TBossDarkZhineManager::TBossDarkZhineManager(const char *name)
     : TEnemyManager(name){};
@@ -38,10 +155,12 @@ void TBossDarkZhineManager::initJParticle() {
   gpResourceManager->load("/scene/zhine/jpa/ms_zhine_wash.jpa", 0x13B);
 }
 
+#pragma endregion Manager
+
 TBossDarkZhine::TBossDarkZhine(const char *name)
     : TSpineEnemy(name), mActionState(TBossDarkZhine::IDLE), mTarget(nullptr),
       mPolDrops(4, false), mIsFollowMario(false), mIsPounding(false),
-      mIsGooping(false), mIsShocking(false) {}
+      mIsGooping(false), mIsShocking(false), mHasIntroHappened(false) {}
 
 TBossDarkZhine::~TBossDarkZhine() {}
 
@@ -102,6 +221,7 @@ void TBossDarkZhine::init(TLiveManager *manager) {
   }
 
   mSize.set(0.3f, 0.3f, 0.3f);
+  mSpineBase->pushNerve(&sNerveWait);
 }
 
 void TBossDarkZhine::reset() {
@@ -120,14 +240,31 @@ bool TBossDarkZhine::receiveMessage(THitActor *actor, u32 message) {
   return true;
 }
 
+TMario *TBossDarkZhine::getClosestPlayer() const {
+  TMario *closest;
+  f32 closestDist = mBoundingAreaRadius;
+  for (u32 i = 0; i < TGlobals::getMaxPlayers(); ++i) {
+    TMario *player = TGlobals::getPlayerByIndex(i);
+    if (!player)
+      continue;
+
+    const f32 dist = PSVECDistance(mPosition, player->mPosition);
+    if (dist < closestDist) {
+      closest = player;
+      closestDist = dist;
+    }
+  }
+  return closest;
+}
+
 bool TBossDarkZhine::isInRange(const TVec3f &pos, f32 r) const {
   return PSVECDistance(mBoundingPoint, pos) < r;
 }
 
-bool TBossDarkZhine::advanceRollAttack() {
+bool TBossDarkZhine::advanceRollAttack(s32 frame) {
   auto params = reinterpret_cast<TBossDarkZhineParams *>(getSaveParam());
 
-  if (mStatusTimer < params->mSLRollingTimerMax.get()) {
+  if (frame < params->mSLRollingTimerMax.get()) {
     gpPollution->stamp(1, mPosition.x, mPosition.y, mPosition.z, 400.0f);
     mRotation.y +=
         (MsWrap_f(Math::Vector3::getYAngleTo(mTarget->mPosition, mPosition),
@@ -136,12 +273,10 @@ bool TBossDarkZhine::advanceRollAttack() {
         0.02f;
     mForwardSpeed += 1.0f;
     mForwardSpeed *= params->mSLAccelerationRate.get();
-    mStatusTimer += 1;
   } else {
     mForwardSpeed *= params->mSLAccelerationRate.get();
     if (mForwardSpeed < __FLT_EPSILON__) {
       mForwardSpeed = 0.0f;
-      mStatusTimer = 0;
       mActionState = TBossDarkZhine::RISING;
       return true;
     }
@@ -153,7 +288,6 @@ bool TBossDarkZhine::advanceRollAttack() {
     return false;
   } else if (yDiff > 200.0f) {
     mForwardSpeed = 0.0f;
-    mStatusTimer = 0;
     mActionState = TBossDarkZhine::RISING;
     return true;
   }
@@ -163,7 +297,7 @@ bool TBossDarkZhine::advanceRollAttack() {
   return false;
 }
 
-bool TBossDarkZhine::advanceDropAttack() {
+bool TBossDarkZhine::advanceDropAttack(s32 frame) {
   auto params = reinterpret_cast<TBossDarkZhineParams *>(getSaveParam());
 
   if (mActionState == TBossDarkZhine::DROPPING) {
@@ -177,7 +311,6 @@ bool TBossDarkZhine::advanceDropAttack() {
       gpMarioParticleManager->emitAndBindToPosPtr(70, &mPosition, 0, nullptr);
       mGravity = 1.0f;
       mActionState = TBossDarkZhine::SHOCKING;
-      mStatusTimer = 0;
       return true;
     } else {
       mGravity = 1.0f * params->mSLSpeedMultiplier.get();
@@ -186,7 +319,7 @@ bool TBossDarkZhine::advanceDropAttack() {
       return false;
     }
   } else if (mActionState == TBossDarkZhine::SHOCKING) {
-    if (mStatusTimer < 80) {
+    if (frame < 80) {
       for (u32 i = 0; i < TGlobals::getMaxPlayers(); ++i) {
         TMario *player = TGlobals::getPlayerByIndex(i);
 
@@ -204,15 +337,11 @@ bool TBossDarkZhine::advanceDropAttack() {
           }
         }
       }
-      mStatusTimer += 1;
-    } else if (mStatusTimer < params->mSLShockingTimerMax.get()) {
-      mStatusTimer += 1;
-    } else {
+    } else if (frame >= params->mSLShockingTimerMax.get()) {
       mGravity = 1.0f * params->mSLSpeedMultiplier.get();
       mSpeed.x = 0.0f;
       mSpeed.z = 0.0f;
       mForwardSpeed = 0.0f;
-      mStatusTimer = 0;
       mActionState = TBossDarkZhine::GROUNDROLL;
       return true;
     }
@@ -220,13 +349,13 @@ bool TBossDarkZhine::advanceDropAttack() {
   return false;
 }
 
-bool TBossDarkZhine::advanceFlying() {
+bool TBossDarkZhine::advanceFlying(s32 frame) {
   constexpr s32 FlyingTimer = 1000;
 
   auto params = reinterpret_cast<TBossDarkZhineParams *>(getSaveParam());
 
-  if (mStatusTimer < FlyingTimer) {
-    if (mStatusTimer % 400 == 0 || mWarpingTimer != 0) {
+  if (frame < FlyingTimer) {
+    if (frame % 400 == 0 || mWarpingTimer != 0) {
       TVec3f target(mTarget->mPosition.x,
                     mTarget->mFloorBelow + params->mSLMaxPoundingHeight.get(),
                     mTarget->mPosition.z);
@@ -237,17 +366,15 @@ bool TBossDarkZhine::advanceFlying() {
                   mRotation.y - 180.0f, mRotation.y + 180.0f) -
          mRotation.y) *
         0.05f;
-    if (mStatusTimer % 70 == 0) {
+    if (frame % 70 == 0) {
       const TVec3f vel(mSpeed.x, mSpeed.y / 2, mSpeed.z);
       TBGPolDrop *polDrop = mPolDrops.next();
       polDrop->launch(mPosition, vel);
     }
-    mStatusTimer += 1;
   } else {
     mForwardSpeed *= 0.98f;
     if (mForwardSpeed < __FLT_EPSILON__) {
       mActionState = TBossDarkZhine::DROPPING;
-      mStatusTimer = 0;
       mGravity = 1.0f;
       return true;
     }
@@ -257,7 +384,7 @@ bool TBossDarkZhine::advanceFlying() {
   return false;
 }
 
-bool TBossDarkZhine::advanceRising() {
+bool TBossDarkZhine::advanceRising(s32 frame) {
   auto params = reinterpret_cast<TBossDarkZhineParams *>(getSaveParam());
 
   mGravity = 0.0f;
@@ -357,49 +484,24 @@ void TBossDarkZhine::moveObject() {
 
   auto params = reinterpret_cast<TBossDarkZhineParams *>(getSaveParam());
 
-  bool advanced = false;
   switch (mActionState) {
   case TBossDarkZhine::DROPPING: {
-    advanced = advanceDropAttack();
-    if (advanced) {
-      gpCameraShake->startShake(EnumCamShakeMode::UnknownShake27, 1.0f);
-      gpPad1RumbleMgr->start(8, mPosition);
-      gpPollution->stamp(1, mPosition.x, mGroundY, mPosition.z,
-                         params->mSLStampRadius.get());
-      MSoundSE::startSoundActor(6158, mPosition, 0, 0, 0, 4);
-    }
     break;
   }
   case TBossDarkZhine::SHOCKING: {
-    advanced = advanceDropAttack();
-    if (advanced) {
-      // mActorData->setBckFromIndex(2);
-    }
     break;
   }
   case TBossDarkZhine::GROUNDROLL: {
-    advanced = advanceRollAttack();
-    if (advanced) {
-      // mActorData->setBckFromIndex(1);
-    }
     break;
   }
   case TBossDarkZhine::RISING: {
-    advanced = advanceRising();
-    if (advanced) {
-      // mActorData->setBckFromIndex(0);
-    }
     break;
   }
   case TBossDarkZhine::FLYING: {
-    advanced = advanceFlying();
-    if (advanced) {
-    }
     break;
   }
   case TBossDarkZhine::IDLE:
   default: {
-    sleep();
     break;
   }
   };
@@ -413,26 +515,6 @@ void TBossDarkZhine::moveObject() {
 
     TMario *player = reinterpret_cast<TMario *>(actor);
     player->receiveMessage(this, 15);
-  }
-
-  bool targetWithin = false;
-
-  for (u32 i = 0; i < TGlobals::getMaxPlayers(); ++i) {
-    TMario *player = TGlobals::getPlayerByIndex(i);
-    if (!player)
-      continue;
-
-    if (!(PSVECDistance(mBoundingPoint, player->mPosition) >
-          mBoundingAreaRadius)) {
-      targetWithin = true;
-      break;
-    }
-  }
-
-  if (advanced && !targetWithin) {
-    mActionState = TBossDarkZhine::IDLE;
-  } else if (targetWithin && mActionState == TBossDarkZhine::IDLE) {
-    mActionState = TBossDarkZhine::RISING;
   }
 }
 

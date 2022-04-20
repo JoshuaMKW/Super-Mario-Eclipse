@@ -3,9 +3,9 @@
 #include "J3D/J3DAnimation.hxx"
 #include "JDrama/JDRGraphics.hxx"
 
-template <class _T, class _A> class TViewObjPtrListT: public JDrama::TViewObj {
+template <class _T, class _A> class TViewObjPtrListT : public JDrama::TViewObj {
 public:
-  TViewObjPtrListT(const char *name) : JDrama::TViewObj(name) {};
+  TViewObjPtrListT(const char *name) : JDrama::TViewObj(name){};
   virtual ~TViewObjPtrListT();
 
   virtual void load(JSUMemoryInputStream &stream) override;

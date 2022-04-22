@@ -46,9 +46,9 @@ public:
   void changeState();
   void fireStreamingMovie(s8);
   void fireEndDemoCamera();
-  void fireStartDemoCamera(const char *, TVec3f const *, u32,
-                           f32, bool, u32 (*)(u32, u32), u32, JDrama::TActor *,
-                           JDrama::TFlagT<s16>);
+  void fireStartDemoCamera(const char *, TVec3f const *, s32,
+                           f32, bool, s32 (*)(u32, u32), u32, JDrama::TActor *,
+                           JDrama::TFlagT<u16>);
   void setNextStage(u16 stageID, JDrama::TActor *);
   void movement();
   void fireRideYoshi(TYoshi *);

@@ -54,37 +54,43 @@ struct TBossDarkZhineParams : public TSpineEnemyParams {
 
 class TNerveBZWait : public TNerveBase<TLiveActor> {
 public:
-  virtual ~TNerveBZWait();
+  virtual ~TNerveBZWait() {}
   virtual bool execute(TSpineBase<TLiveActor> *spine) const override;
 };
 
 class TNerveBZAppear : public TNerveBase<TLiveActor> {
 public:
-  virtual ~TNerveBZAppear();
+  virtual ~TNerveBZAppear() {}
   virtual bool execute(TSpineBase<TLiveActor> *spine) const override;
 };
 
 class TNerveBZSleep : public TNerveBase<TLiveActor> {
 public:
-  virtual ~TNerveBZSleep();
+  virtual ~TNerveBZSleep() {}
   virtual bool execute(TSpineBase<TLiveActor> *spine) const override;
 };
 
 class TNerveBZFly : public TNerveBase<TLiveActor> {
 public:
-  virtual ~TNerveBZFly();
+  virtual ~TNerveBZFly() {}
+  virtual bool execute(TSpineBase<TLiveActor> *spine) const override;
+};
+
+class TNerveBZDrop : public TNerveBase<TLiveActor> {
+public:
+  virtual ~TNerveBZDrop() {}
   virtual bool execute(TSpineBase<TLiveActor> *spine) const override;
 };
 
 class TNerveBZPound : public TNerveBase<TLiveActor> {
 public:
-  virtual ~TNerveBZPound();
+  virtual ~TNerveBZPound() {}
   virtual bool execute(TSpineBase<TLiveActor> *spine) const override;
 };
 
 class TNerveBZRoll : public TNerveBase<TLiveActor> {
 public:
-  virtual ~TNerveBZRoll();
+  virtual ~TNerveBZRoll() {}
   virtual bool execute(TSpineBase<TLiveActor> *spine) const override;
 };
 
@@ -104,6 +110,7 @@ class TBossDarkZhine : public TSpineEnemy {
   friend TNerveBZAppear;
   friend TNerveBZSleep;
   friend TNerveBZFly;
+  friend TNerveBZDrop;
   friend TNerveBZPound;
   friend TNerveBZRoll;
 

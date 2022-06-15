@@ -79,10 +79,9 @@ public:
     virtual ~TFPFire(){};
 
     virtual void perform(u32, JDrama::TGraphics *) override;
-    virtual bool receiveMessage(THitActor *, u32) override;
 
     TBossPakkun *parentPakkun;       // 0x0068
-    JGeometry::TVec3<f32> mVelocity; // 0x006c
+    TVec3f mVelocity; // 0x006c
     int mLifetime;
 };
 

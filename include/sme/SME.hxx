@@ -172,7 +172,7 @@
 #endif
 
 #ifndef SME_ZHINE_BOSS
-#define SME_ZHINE_BOSS 1
+#define SME_ZHINE_BOSS 0
 #endif
 
 #else

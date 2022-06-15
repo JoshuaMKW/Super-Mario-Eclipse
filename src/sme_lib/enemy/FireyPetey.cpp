@@ -10,6 +10,9 @@
 #include "ppc_intrinsics.h"
 #include "sms/game/IdxGroup.hxx"
 #include "sms/sound/MSoundSESystem.hxx"
+#include "sme/libs/sRand.hxx"
+
+using namespace SME;
 
 //BPFly
 extern int instance$3889;
@@ -36,9 +39,9 @@ static TNerveFPWait wait;
 static TNerveFPHover hover;
 static TNerveFPFireBreath fireBreath;
 
-#define MAX_TORNADOS 3
+extern const char peteyIdxGroupName[];
 
-extern void blazePlayer(TMario *player);
+#define MAX_TORNADOS 3
 
 TFireyPetey::TFireyPetey(const char *test) : TBossPakkun(test)
 {
@@ -52,12 +55,6 @@ TFPTornado::TFPTornado(TBossPakkun *parent, const char *name) : TBPTornado::TBPT
 TFPFire::TFPFire(TBossPakkun *parent, const char *name) : THitActor::THitActor(name)
 {
   initHitActor(0x8000027, 1, -0x7f000000, 275.0f, 275.0f, 100.0f, 100.0f);
-}
-
-bool TFPFire::receiveMessage(THitActor *reciever, u32 flags)
-{
-  SME_LOG("I'm colliding with Mario via\n");
-  return 1;
 }
 
 void TFPFire::perform(u32 flags, JDrama::TGraphics *graphics)
@@ -87,12 +84,10 @@ void TFPTornado::perform(u32 flags, JDrama::TGraphics *graphics)
     return;
   }
   TBPTornado::perform(flags, graphics);
-  *(float *)((char *)this + 0x70) = gpMarioPos->x;
-  *(float *)((char *)this + 0x74) = gpMarioPos->y;
-  *(float *)((char *)this + 0x78) = gpMarioPos->z;
-  for (int iVar9 = 0; iVar9 < mNumObjs; iVar9 = iVar9 + 1)
+  mTargetPos = *gpMarioPos;
+  for (int i = 0; i < mNumObjs; i = i + 1)
   {
-    if (mCollidingObjs[iVar9]->mObjectID == -0x7fffffff)
+    if (mCollidingObjs[i]->mObjectID == -0x7fffffff)
     {
        SME::Util::Mario::setFireToPlayer(gpMarioAddress);
     }
@@ -154,24 +149,11 @@ bool TNerveFPFly::execute(TSpineBase<TLiveActor> *spine) const
       if (((tmKukkuBall->unk1 & 1) != 0) && (tmKukkuBall->unk2 == 0))
       {
         mKukkuBall = tmKukkuBall;
-        JGeometry::TVec3<f32> step(0.000f, 1.500f, 0.000f);
-
-        float x = (static_cast<float>(rand()) / static_cast<float>(0x7fff)) - 0.5;
-        float y = (static_cast<float>(rand()) / static_cast<float>(0x7fff)) - 0.5;
-        float z = (static_cast<float>(rand()) / static_cast<float>(0x7fff)) - 0.5;
-
-        float mag = sqrtf(x * x + y * y + z * z);
-        x /= mag;
-        y /= mag;
-        z /= mag;
-
-        float r = (static_cast<float>(rand()) / static_cast<float>(0x7fff)) * 2000.0f;
-        JGeometry::TVec3<f32> velRandom(x, y, z);
-        JGeometry::TVec3<f32> random(x * r, y * r, z * r);
+        TVec3f step(0.0f, 1.5f, 0.0f);
 
         mKukkuBall->mPosition.set(target->mPosition);
-        mKukkuBall->mPosition.add(random);
-        step.add(velRandom);
+        mKukkuBall->mPosition.add(Util::Rand::randVector(2000.0f));
+        step.add(Util::Rand::randUnitVector());
         mKukkuBall->mVelocity.set(step);
         mKukkuBall->mObjectType = mKukkuBall->mObjectType & 0xfffffffe;
         mKukkuBall->unk1 = mKukkuBall->unk1 & 0xfffffffe;
@@ -185,10 +167,10 @@ bool TNerveFPFly::execute(TSpineBase<TLiveActor> *spine) const
     TBPPolDrop *poldrop = target->mPollutionDrop;
     if (poldrop->_01[1] == 0)
     {
-      JGeometry::TVec3<f32> step(0.000f, 1.500f, 0.000f);
+      TVec3f step(0.000f, 1.500f, 0.000f);
 
-      JGeometry::TVec3<f32> rotation(0.000f, 0.000f, 0.000f);
-      JGeometry::TVec3<f32> size(0.700f, 0.700f, 0.700f);
+      TVec3f rotation(0.000f, 0.000f, 0.000f);
+      TVec3f size(0.700f, 0.700f, 0.700f);
 
       poldrop->mVelocity.set(step);
       poldrop->mPosition.set(target->mPosition);
@@ -202,14 +184,13 @@ bool TNerveFPFly::execute(TSpineBase<TLiveActor> *spine) const
       poldrop->_02 = target->mPosition.y;
     }
   }
-  // SME_LOG("0x%08x\n", spine->mStateTimer);
   return TNerveBPFly::execute(spine);
 }
 
 bool TNerveFPTakeOff::execute(TSpineBase<TLiveActor> *spine) const
 {
   TFireyPetey *target = reinterpret_cast<TFireyPetey *>(spine->mTarget);
-  JGeometry::TVec3<f32> mPosition;
+  TVec3f mPosition;
 
   return TNerveBPTakeOff::execute(spine);
 }
@@ -256,24 +237,11 @@ bool TNerveFPHover::execute(TSpineBase<TLiveActor> *spine) const
       if (((tmKukkuBall->unk1 & 1) != 0) && (tmKukkuBall->unk2 == 0))
       {
         mKukkuBall = tmKukkuBall;
-        JGeometry::TVec3<f32> step(0.000f, 2.500f, 0.000f);
-
-        float x = (static_cast<float>(rand()) / static_cast<float>(0x7fff)) - 0.5;
-        float y = (static_cast<float>(rand()) / static_cast<float>(0x7fff)) - 0.5;
-        float z = (static_cast<float>(rand()) / static_cast<float>(0x7fff)) - 0.5;
-
-        float mag = sqrtf(x * x + y * y + z * z);
-        x /= mag;
-        y /= mag;
-        z /= mag;
-
-        float r = (static_cast<float>(rand()) / static_cast<float>(0x7fff)) * 2000.0f;
-        JGeometry::TVec3<f32> velRandom(x, y, z);
-        JGeometry::TVec3<f32> random(x * r, y * r, z * r);
+        TVec3f step(0.0f, 1.5f, 0.0f);
 
         mKukkuBall->mPosition.set(target->mPosition);
-        mKukkuBall->mPosition.add(random);
-        step.add(velRandom);
+        mKukkuBall->mPosition.add(Util::Rand::randVector(2000.0f));
+        step.add(Util::Rand::randUnitVector());
         mKukkuBall->mVelocity.set(step);
         mKukkuBall->mObjectType = mKukkuBall->mObjectType & 0xfffffffe;
         mKukkuBall->unk1 = mKukkuBall->unk1 & 0xfffffffe;
@@ -286,11 +254,10 @@ bool TNerveFPHover::execute(TSpineBase<TLiveActor> *spine) const
 
 bool TNerveFPFireBreath::execute(TSpineBase<TLiveActor> *spine) const
 {
-  bool iVar3;
-  MActor *this_00;
+  
 
   TFireyPetey *target = reinterpret_cast<TFireyPetey *>(spine->mTarget);
-  this_00 = target->mActorData;
+  MActor *peteyMActor = target->mActorData;
   if (spine->mStateTimer == 0x0)
   {
     target->changeBck(0x15);
@@ -304,12 +271,12 @@ bool TNerveFPFireBreath::execute(TSpineBase<TLiveActor> *spine) const
       target->mFire[i]->mVelocity.z = 0.0f;
       target->mFire[i]->mLifetime=0;
     }
-    this_00->setFrameRate((float)SMSGetAnmFrameRate__Fv() * 2.0f,0);
+    peteyMActor->setFrameRate((float)SMSGetAnmFrameRate__Fv() * 2.0f,0);
   }
-  iVar3 = this_00->checkCurAnmFromIndex(0x15, 0);
-  if (iVar3 != 0)
+  bool isAnimationRunning = peteyMActor->checkCurAnmFromIndex(0x15, 0);
+  if (isAnimationRunning)
   {
-    J3DFrameCtrl *frameCtrl = this_00->getFrameCtrl(0);
+    J3DFrameCtrl *frameCtrl = peteyMActor->getFrameCtrl(0);
 
     if ((frameCtrl->mCurFrame <= 25.0f) || (165.0 <= frameCtrl->mCurFrame))
     {
@@ -320,21 +287,21 @@ bool TNerveFPFireBreath::execute(TSpineBase<TLiveActor> *spine) const
       target->_02 = 0x2;
     }
   }
-  iVar3 = this_00->checkCurBckFromIndex(0x14);
-  if (iVar3 != 0)
+  bool isBckRunning = peteyMActor->checkCurBckFromIndex(0x14);
+  if (isBckRunning)
   {
-    this_00->setFrameRate(SMSGetAnmFrameRate__Fv(),0);
-    iVar3 = this_00->checkCurAnmFromIndex(0x14, 0);
-    if (iVar3 != 0)
+    peteyMActor->setFrameRate(SMSGetAnmFrameRate__Fv(),0);
+    isAnimationRunning = peteyMActor->checkCurAnmFromIndex(0x14, 0);
+    if (isAnimationRunning)
     {
-      J3DFrameCtrl *frameCtrl = this_00->getFrameCtrl(0);
+      J3DFrameCtrl *frameCtrl = peteyMActor->getFrameCtrl(0);
 
       // Joint 0xC
 
       //*(u32*)0x800003e0
       if (frameCtrl->mCurFrame >= 15.0f && frameCtrl->mCurFrame <= 46.0f)
       {
-        if(spine->mStateTimer%(10) == 0){
+        if(spine->mStateTimer%10 == 0){
         JPABaseEmitter *emitterFire = gpMarioParticleManager->emitAndBindToMtxPtr(0x1a7,target->mActorData->mModel->mJointArray[0xC], 1, target);
       
         for (int i = 0x1a6; i > 0x1a2; i--)
@@ -353,7 +320,7 @@ bool TNerveFPFireBreath::execute(TSpineBase<TLiveActor> *spine) const
 
         }
         if(found){
-          mFire->mVelocity.x = 50.0f * sinf(target->mRotation.y);
+          mFire->mVelocity.x = 50.0f * sinf(SME::Util::Math::angleToRadians(target->mRotation.y));
           mFire->mVelocity.y = 0;
           mFire->mVelocity.z = 50.0f * cosf(SME::Util::Math::angleToRadians(target->mRotation.y));
           mFire->mPosition.set(*reinterpret_cast<TVec3f*>(&emitterFire->_00[84]));
@@ -362,17 +329,14 @@ bool TNerveFPFireBreath::execute(TSpineBase<TLiveActor> *spine) const
         }
 
       }
-      if (frameCtrl->mCurFrame >= 12.0f && frameCtrl->mCurFrame <= 14.0f)
-      {
-      }
       }
     }
   }
-  iVar3 = this_00->curAnmEndsNext(0, 0x0);
-  if (iVar3 != 0)
+  bool isAnimationFinished = peteyMActor->curAnmEndsNext(0, 0x0);
+  if (isAnimationFinished)
   {
-    iVar3 = checkCurBckFromIndex__6MActorFi(this_00, 0x15);
-    if (iVar3 == 0)
+    bool isBckRunning = checkCurBckFromIndex__6MActorFi(peteyMActor, 0x15);
+    if (isBckRunning)
     {
       spine->_01[spine->mVTableIndex++] = &takeoff;
       return 1;
@@ -393,9 +357,9 @@ void TFireyPetey::init(TLiveManager *param1)
   JDrama::TNameRefGen *instance = JDrama::TNameRefGen::getInstance();
   JDrama::TNameRef *root = instance->getRootNameRef();
 
-  u16 keyCode = calcKeyCode(SME_PORT_REGION((const char *)0x8037c230,(const char *)0x80373c98,0,0));
+  u16 keyCode = calcKeyCode(peteyIdxGroupName);
 
-  IdxGroup *group = static_cast<IdxGroup *>(root->searchF(keyCode, SME_PORT_REGION((const char *)0x8037c230,(const char *)0x80373c98,0,0)));
+  IdxGroup *group = static_cast<IdxGroup *>(root->searchF(keyCode, peteyIdxGroupName));
 
   group->hitActorList.mEnd->mItem = mTornado;
 

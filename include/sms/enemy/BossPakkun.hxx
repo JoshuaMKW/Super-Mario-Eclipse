@@ -98,7 +98,7 @@ public:
     virtual void perform(u32, JDrama::TGraphics *) override;
     void move();
     TBossPakkun *parentPakkun;       // 0x0068
-    JGeometry::TVec3<f32> mVelocity; // 0x006c
+    TVec3f mVelocity; // 0x006c
     MActor *mActorData;              // 0x0078
     u32 _01[3];                      // 0x007c-84
     f32 _02;                         // 0x0088
@@ -111,7 +111,9 @@ public:
     virtual ~TBPTornado();
     virtual void perform(u32, JDrama::TGraphics *) override;
     TBossPakkun *mParent; // 0x68
-    u32 _6C[0x28 / 4];    // TMActorKeeper
+    TMActorKeeper *mMActorKeeper;    // TMActorKeeper
+    TVec3f mTargetPos; // 0x0070 - 7c
+    u32 _80[0x18 / 4]; 
     f32 _94;              // 0x94
     u32 _98;              // 0x98
 };

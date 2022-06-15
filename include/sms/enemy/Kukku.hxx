@@ -10,6 +10,6 @@ public:
 
     MActor *mActorData;              // 0x0068
     u32 unk1;                        // 0x006c
-    JGeometry::TVec3<f32> mVelocity; // 0x0070
+    TVec3f mVelocity; // 0x0070
     u32 unk2;                        // 0x007c
 };

@@ -18583,3 +18583,4 @@ __powisf2=0x80334b38
 changeObjMtx__11TMapObjBaseFPA3_A4_f=0x801a9220
 setModelMtx__11TMapObjBaseFPA3_A4_f=0x800c0570
 waitToAppear__14TMapObjGeneralFv=0x801b4d54
+peteyIdxGroupName=0x80373c98

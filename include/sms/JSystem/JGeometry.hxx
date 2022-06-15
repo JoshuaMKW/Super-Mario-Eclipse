@@ -49,7 +49,7 @@ template <typename T> struct TVec3 {
   }
 
   void set(const TVec3 &other) {
-    x - other.x;
+    x = other.x;
     y = other.y;
     z = other.z;
   }

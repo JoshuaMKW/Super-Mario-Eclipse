@@ -7718,7 +7718,7 @@
 #define SMSSwitch2DArchive__FPCcR10TARAMBlock ((int *(*)(...))0x802A78B4)
 #define SMSMountAramArchive__FP13JKRMemArchiveR10TARAMBlock ((int(*)(...))0x802A797C)
 #define SMSLoadArchive__FPCcPvUlP7JKRHeap ((int(*)(...))0x802A7A34)
-#define SMSGetAnmFrameRate__Fv ((double(*)(...))0x802A7BD8)
+#define SMSGetAnmFrameRate__Fv ((float(*)(...))0x802A7BD8)
 #define SMSGetVSyncTimesPerSec__Fv ((int(*)(...))0x802A7C48)
 #define __dt__13TMarioGamePadFv ((int(*)(...))0x802A7CB0)
 #define __sinit_Application_cpp ((int(*)(...))0x802A7D14)

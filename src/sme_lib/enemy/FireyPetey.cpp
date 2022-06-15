@@ -13,24 +13,25 @@
 #include "sme/libs/sRand.hxx"
 
 using namespace SME;
+using namespace SME::Util;
 
-//BPFly
+// BPFly
 extern int instance$3889;
 extern bool init$3891;
 
-//BPWait
+// BPWait
 extern int instance$3625;
 extern bool init$3627;
 
-//BPHover
+// BPHover
 extern int instance$3940;
 extern bool init$3942;
 
-//BPVomit
+// BPVomit
 extern int instance$3678;
 extern bool init$3680;
 
-//Globals
+// Globals
 static TNerveFPSleep sleep;
 static TNerveFPBreakSleep breakSleep;
 static TNerveFPTakeOff takeoff;
@@ -60,16 +61,17 @@ TFPFire::TFPFire(TBossPakkun *parent, const char *name) : THitActor::THitActor(n
 void TFPFire::perform(u32 flags, JDrama::TGraphics *graphics)
 {
   THitActor::perform(flags, graphics);
-  if(mLifetime>0){
-  for (int iVar9 = 0; iVar9 < mNumObjs; iVar9 = iVar9 + 1)
+  if (mLifetime > 0)
   {
-    if (mCollidingObjs[iVar9]->mObjectID == -0x7fffffff)
+    for (int iVar9 = 0; iVar9 < mNumObjs; iVar9 = iVar9 + 1)
     {
-      SME::Util::Mario::setFireToPlayer(gpMarioAddress);
+      if (mCollidingObjs[iVar9]->mObjectID == -0x7fffffff)
+      {
+        Mario::setFireToPlayer(gpMarioAddress);
+      }
     }
-  }
-  mPosition.add(mVelocity);
-  mLifetime--;
+    mPosition.add(mVelocity);
+    mLifetime--;
   }
 }
 
@@ -89,7 +91,7 @@ void TFPTornado::perform(u32 flags, JDrama::TGraphics *graphics)
   {
     if (mCollidingObjs[i]->mObjectID == -0x7fffffff)
     {
-       SME::Util::Mario::setFireToPlayer(gpMarioAddress);
+      Mario::setFireToPlayer(gpMarioAddress);
     }
   }
   stamp__17TPollutionManagerFUsffff(gpPollution, 1, mPosition.x, mPosition.y,
@@ -152,8 +154,8 @@ bool TNerveFPFly::execute(TSpineBase<TLiveActor> *spine) const
         TVec3f step(0.0f, 1.5f, 0.0f);
 
         mKukkuBall->mPosition.set(target->mPosition);
-        mKukkuBall->mPosition.add(Util::Rand::randVector(2000.0f));
-        step.add(Util::Rand::randUnitVector());
+        mKukkuBall->mPosition.add(Rand::randVector(2000.0f));
+        step.add(Rand::randUnitVector());
         mKukkuBall->mVelocity.set(step);
         mKukkuBall->mObjectType = mKukkuBall->mObjectType & 0xfffffffe;
         mKukkuBall->unk1 = mKukkuBall->unk1 & 0xfffffffe;
@@ -167,10 +169,10 @@ bool TNerveFPFly::execute(TSpineBase<TLiveActor> *spine) const
     TBPPolDrop *poldrop = target->mPollutionDrop;
     if (poldrop->_01[1] == 0)
     {
-      TVec3f step(0.000f, 1.500f, 0.000f);
+      TVec3f step(0.0f, 1.5f, 0.0f);
 
-      TVec3f rotation(0.000f, 0.000f, 0.000f);
-      TVec3f size(0.700f, 0.700f, 0.700f);
+      TVec3f rotation(0.0f, 0.0f, 0.0f);
+      TVec3f size(0.7f, 0.7f, 0.7f);
 
       poldrop->mVelocity.set(step);
       poldrop->mPosition.set(target->mPosition);
@@ -254,7 +256,6 @@ bool TNerveFPHover::execute(TSpineBase<TLiveActor> *spine) const
 
 bool TNerveFPFireBreath::execute(TSpineBase<TLiveActor> *spine) const
 {
-  
 
   TFireyPetey *target = reinterpret_cast<TFireyPetey *>(spine->mTarget);
   MActor *peteyMActor = target->mActorData;
@@ -269,9 +270,9 @@ bool TNerveFPFireBreath::execute(TSpineBase<TLiveActor> *spine) const
       target->mFire[i]->mVelocity.x = 0.0f;
       target->mFire[i]->mVelocity.y = 0.0f;
       target->mFire[i]->mVelocity.z = 0.0f;
-      target->mFire[i]->mLifetime=0;
+      target->mFire[i]->mLifetime = 0;
     }
-    peteyMActor->setFrameRate((float)SMSGetAnmFrameRate__Fv() * 2.0f,0);
+    peteyMActor->setFrameRate(SMSGetAnmFrameRate__Fv() * 2.0f, 0);
   }
   bool isAnimationRunning = peteyMActor->checkCurAnmFromIndex(0x15, 0);
   if (isAnimationRunning)
@@ -290,7 +291,7 @@ bool TNerveFPFireBreath::execute(TSpineBase<TLiveActor> *spine) const
   bool isBckRunning = peteyMActor->checkCurBckFromIndex(0x14);
   if (isBckRunning)
   {
-    peteyMActor->setFrameRate(SMSGetAnmFrameRate__Fv(),0);
+    peteyMActor->setFrameRate(SMSGetAnmFrameRate__Fv(), 0);
     isAnimationRunning = peteyMActor->checkCurAnmFromIndex(0x14, 0);
     if (isAnimationRunning)
     {
@@ -301,41 +302,42 @@ bool TNerveFPFireBreath::execute(TSpineBase<TLiveActor> *spine) const
       //*(u32*)0x800003e0
       if (frameCtrl->mCurFrame >= 15.0f && frameCtrl->mCurFrame <= 46.0f)
       {
-        if(spine->mStateTimer%10 == 0){
-        JPABaseEmitter *emitterFire = gpMarioParticleManager->emitAndBindToMtxPtr(0x1a7,target->mActorData->mModel->mJointArray[0xC], 1, target);
-      
-        for (int i = 0x1a6; i > 0x1a2; i--)
+        if (spine->mStateTimer % 10 == 0)
         {
-          gpMarioParticleManager->emitAndBindToMtxPtr(i,target->mActorData->mModel->mJointArray[0xC], 1, target);
-        }
-        TFPFire *mFire;
-        bool found = false;
-        for (int i = 0; i < 10; i++)
-        {
-          if(target->mFire[i]->mLifetime==0){
-            mFire = target->mFire[i];
-            found = true;
-            break;
+          JPABaseEmitter *emitterFire = gpMarioParticleManager->emitAndBindToMtxPtr(0x1a7, target->mActorData->mModel->mJointArray[0xC], 1, target);
+
+          for (int i = 0x1a6; i > 0x1a2; i--)
+          {
+            gpMarioParticleManager->emitAndBindToMtxPtr(i, target->mActorData->mModel->mJointArray[0xC], 1, target);
           }
-
+          TFPFire *mFire;
+          bool found = false;
+          for (int i = 0; i < 10; i++)
+          {
+            if (target->mFire[i]->mLifetime == 0)
+            {
+              mFire = target->mFire[i];
+              found = true;
+              break;
+            }
+          }
+          if (found)
+          {
+            mFire->mVelocity.x = 50.0f * sinf(Math::angleToRadians(target->mRotation.y));
+            mFire->mVelocity.y = 0;
+            mFire->mVelocity.z = 50.0f * cosf(Math::angleToRadians(target->mRotation.y));
+            mFire->mPosition.set(*reinterpret_cast<TVec3f *>(&emitterFire->_00[84]));
+            mFire->mPosition.y -= 237.5f;
+            mFire->mLifetime = 30 * 4;
+          }
         }
-        if(found){
-          mFire->mVelocity.x = 50.0f * sinf(SME::Util::Math::angleToRadians(target->mRotation.y));
-          mFire->mVelocity.y = 0;
-          mFire->mVelocity.z = 50.0f * cosf(SME::Util::Math::angleToRadians(target->mRotation.y));
-          mFire->mPosition.set(*reinterpret_cast<TVec3f*>(&emitterFire->_00[84]));
-          mFire->mPosition.y-=237.5f;
-          mFire->mLifetime = 30*4;
-        }
-
-      }
       }
     }
   }
   bool isAnimationFinished = peteyMActor->curAnmEndsNext(0, 0x0);
   if (isAnimationFinished)
   {
-    bool isBckRunning = checkCurBckFromIndex__6MActorFi(peteyMActor, 0x15);
+    bool isBckRunning = peteyMActor->checkCurBckFromIndex(0x15);
     if (isBckRunning)
     {
       spine->_01[spine->mVTableIndex++] = &takeoff;
@@ -368,7 +370,7 @@ void TFireyPetey::init(TLiveManager *param1)
   mSpineBase->mCurVTable = &sleep;
   mSpineBase->mPrevVTable = 0;
 
-  //Will need to swap to redirection
+  // Will need to swap to redirection
   instance$3889 = *(int *)&fly;
   init$3891 = true;
 

@@ -19,15 +19,16 @@ static u16 gDebugModeCheatCode[] = {
     TMarioGamePad::DPAD_LEFT, TMarioGamePad::DPAD_RIGHT,
     TMarioGamePad::DPAD_LEFT, TMarioGamePad::DPAD_RIGHT,
     TMarioGamePad::B,         TMarioGamePad::A,
-    TMarioGamePad::START};
+    TMarioGamePad::START,     0
+};
 
 J2DTextBox gDebugTextBox;
 Class::TCheatHandler gDebugHandler;
 
 static void debugModeNotify(Class::TCheatHandler *) {
-  if (gpMSound->gateCheck(MSound::SE_SHINE_TOUCH))
-    startSoundActor__Q214MSoundSESystem8MSoundSEFUlPC3VecUlPP8JAISoundUlUc(
-        gpMSound, MSound::SE_SHINE_TOUCH, 0, 0, 0, 4);
+  // if (gpMSound->gateCheck(MSound::SE_SHINE_TOUCH))
+  //   startSoundActor__Q214MSoundSESystem8MSoundSEFUlPC3VecUlPP8JAISoundUlUc(
+  //       gpMSound, MSound::SE_SHINE_TOUCH, 0, 0, 0, 4);
 
   TGlobals::setDebugMode(true);
   SME_DEBUG_LOG("Debug mode activated!\n");

@@ -86,7 +86,7 @@ static void cbForPrepareStreamAsync_(s32 result, DVDFileInfo *finfo) {
   AISetStreamVolRight(static_cast<u8>(volLR));
   AIResetStreamSampleCount();
   AISetStreamTrigger(0xBB80);
-  AISetStreamPlayState(1);
+  AISetStreamPlayState(true);
 
   DVDStopStreamAtEndAsync(streamer->mAudioCommandBlock,
                           cbForStopStreamAtEndAsync_);
@@ -279,7 +279,7 @@ void AudioStreamer::seek(f64 seconds, JSUStreamSeekFrom whence) {
 bool AudioStreamer::play_() {
   if (isPlaying()) {
     if (isPaused()) {
-      AISetStreamPlayState(1);
+      AISetStreamPlayState(true);
 
       setVolumeFadeTo((mFullVolLeft + mFullVolRight) / 2, mFadeTime);
 

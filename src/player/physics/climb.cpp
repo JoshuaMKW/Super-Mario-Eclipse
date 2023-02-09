@@ -16,7 +16,7 @@ static void climbSometimes(TMario *player) {
   const bool isMarioClimb = isMarioClimb__16TCameraMarioDataCFUl(player->mState);
   if (playerData->mIsOnFire) {
     if (isMarioClimb)
-      changePlayerStatus__6TMarioFUlUlb(player, TMario::State::FALL, 0, false);
+      changePlayerStatus__6TMarioFUlUlb(player, TMario::STATE_FALL, 0, false);
     return;
   }
   barProcess__6TMarioFv(player);
@@ -34,18 +34,18 @@ static void updateClimbContext(TMario *player) {
   #if SME_BUGFIXES
   bool checkClimbContext = false;
 
-  if ((player->mState & static_cast<u32>(TMario::State::AIRBORN)) == 0 &&
+  if ((player->mState & static_cast<u32>(TMario::STATE_AIRBORN)) == 0 &&
       (player->mState & 0x1C0) != 320)
     playerData->mClimbTiredTimer = 0;
   else if ((player->mState & 0x1C0) == 320) {
     if ((player->mState & 0x200000) != 0 && player->mRoofTriangle &&
         player->mRoofTriangle->mCollisionType != 266)
       checkClimbContext =
-          player->mState != static_cast<u32>(TMario::State::HANG);
+          player->mState != static_cast<u32>(TMario::STATE_HANG);
     else if ((player->mState & 0x200000) == 0 && player->mWallTriangle &&
              player->mWallTriangle->mCollisionType != 266)
       checkClimbContext =
-          player->mState != static_cast<u32>(TMario::State::HANG);
+          player->mState != static_cast<u32>(TMario::STATE_HANG);
 
     if (checkClimbContext) {
       if (playerData->mClimbTiredTimer ==

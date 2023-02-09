@@ -1,9 +1,9 @@
 #pragma once
 
-#include "JGeometry.hxx"
-#include "types.h"
+#include <Dolphin/types.h>
+#include <JSystem/JGeometry/JGMVec.hxx>
 
-namespace SME::Class {
+#include <SMS/Manager/ModelWaterManager.hxx>
 
 struct TLightContext {
   enum class ActiveType : u8 { DISABLED, STATIC, FOLLOWPLAYER };
@@ -15,6 +15,8 @@ struct TLightContext {
         mLightType(ActiveType::DISABLED),
         mSizeMorphing(false) {}
 
+  void process(TModelWaterManager &manager);
+
   TVec3f mShineShadowCoordinates;
   s32 mPrevShineCount;
   f32 mPrevSize;
@@ -23,9 +25,7 @@ struct TLightContext {
   f32 mStepContext;
   u8 mPrevDarkness;
   u8 mNextDarkness;
+  u8 mTargetDarkness;
   ActiveType mLightType;
   bool mSizeMorphing;
 };
-
-
-}

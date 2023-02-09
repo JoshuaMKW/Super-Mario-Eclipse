@@ -1,6 +1,10 @@
-#include "SME.hxx"
-#include "obj/BlowWindObj.hxx"
-#include "sms/mapobj/MapObjInit.hxx"
+#include <JSystem/JDrama/JDRNameRef.hxx>
+#include <JSystem/JGeometry/JGMQuat.hxx>
+#include <SMS/MapObj/MapObjBase.hxx>
+#include <BetterSMS/module.hxx>
+#include <BetterSMS/libs/constmath.hxx>
+
+#include "obj/blow_wind_obj.hxx"
 
 TBlowWindMapObj::TBlowWindMapObj(const char *name) : TMapObjBase(name) {}
 TBlowWindMapObj::~TBlowWindMapObj() {}
@@ -16,7 +20,7 @@ void TBlowWindMapObj::perform(u32 flags, JDrama::TGraphics *graphics) {
     if (!actor)
       continue;
 
-    const f32 distFactor = getDistance(actor->mPosition) / mSize.y;
+    const f32 distFactor = getDistance(actor->mTranslation) / mScale.y;
     if (distFactor > 1.0f)
       continue;
 
@@ -27,7 +31,7 @@ void TBlowWindMapObj::perform(u32 flags, JDrama::TGraphics *graphics) {
       break;
     case GradientMode::LINEAR:
     default:
-      speed = Math::lerp<f32>(mStrength, 0.0f, distFactor);
+      speed = lerp<f32>(mStrength, 0.0f, distFactor);
       break;
     case GradientMode::EXPONENTIAL:
       speed = powf(5.0f, (-distFactor - 0.85f) * mStrength * 1.4f);
@@ -38,15 +42,13 @@ void TBlowWindMapObj::perform(u32 flags, JDrama::TGraphics *graphics) {
     }
 
     JGeometry::TQuat4<f32> quat;
-    quat.x = mRotation.x;
-    quat.y = mRotation.y;
-    quat.z = mRotation.z;
-    quat.w = 1.0f;
+    quat.v = mRotation;
+    quat.s = 1.0f;
 
     TVec3f offset;
     quat.rotate(TVec3f{0.0f, 0.0f, 1.0f}, offset);
 
-    actor->mPosition.add(offset);
+    actor->mTranslation.add(offset);
   }
 }
 
@@ -66,4 +68,4 @@ ObjData blowWindData{
     .mBckMoveData = nullptr,
     ._30 = 50.0f,
     .mUnkFlags = 0,
-    .mKeyCode = SME::Util::cexp_calcKeyCode("blowwind")};
+    .mKeyCode = cexp_calcKeyCode("blowwind")};

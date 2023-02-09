@@ -7,11 +7,12 @@ set(CMAKE_CXX_STANDARD 20)
 file(GLOB SUPER_MARIO_ECLIPSE_SRC
     "src/*.c"
     "src/*.cpp"
+    "src/*/*.cpp"
     "include/*.h"
     "include/*.hxx"
 )
 
-add_executable(SuperMarioEclipse ${SUPER_MARIO_ECLIPSE_SRC} "src/rocketdive.cpp")
+add_executable(SuperMarioEclipse ${SUPER_MARIO_ECLIPSE_SRC})
 add_subdirectory(lib/BetterSunshineEngine)
 
 target_link_libraries(SuperMarioEclipse PUBLIC BetterSunshineEngine)

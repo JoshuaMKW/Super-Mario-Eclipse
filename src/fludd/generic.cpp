@@ -1,23 +1,24 @@
-#include "sms/actor/Mario.hxx"
-#include "sms/nozzle/Watergun.hxx"
-#include "sms/sound/MSound.hxx"
-#include "sms/sound/MSoundSESystem.hxx"
+#include <SMS/Player/Mario.hxx>
+#include <SMS/Player/Watergun.hxx>
+#include <SMS/MSound/MSound.hxx>
+#include <SMS/MSound/MSoundSESystem.hxx>
 
-#include "SME.hxx"
+#include <BetterSMS/module.hxx>
+#include <BetterSMS/player.hxx>
 
-using namespace SME;
+using namespace BetterSMS;
 
 static TWaterGun *bindFluddtojoint()
 {
   TMario *player;
-  SME_FROM_GPR(31, player);
+  SMS_FROM_GPR(31, player);
 
-  if (!SME::TGlobals::getPlayerData(player))
+  if (!Player::getData(player))
     return player->mFludd;
 
-  player->mBindBoneIDArray[0] =
-      SME::TGlobals::getPlayerData(player)->getNozzleBoneID(
-          static_cast<TWaterGun::NozzleType>(player->mFludd->mCurrentNozzle));
+  /*player->mBindBoneIDArray[0] =
+      Player::getData(player)->getNozzleBoneID(
+          static_cast<TWaterGun::TNozzleType>(player->mFludd->mCurrentNozzle));*/
 
   return player->mFludd;
 }

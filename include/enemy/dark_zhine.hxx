@@ -1,10 +1,11 @@
 #pragma once
 
-#include "JGeometry.hxx"
-#include "sms/enemy/BossGesso.hxx"
+#include <Dolphin/types.h>
 
-#include "SME.hxx"
-#include "types.h"
+#include <JSystem/JGeometry/JGMVec.hxx>
+#include <SMS/Enemy/BossGesso.hxx>
+
+#include <BetterSMS/module.hxx>
 
 
 #if SME_ZHINE_BOSS

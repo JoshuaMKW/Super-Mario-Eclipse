@@ -1,7 +1,6 @@
+#include <BetterSMS/module.hxx>
 
-#include "enemy/DarkZhine.hxx"
-
-#include "SME.hxx"
+#include "enemy/dark_zhine.hxx"
 
 #if SME_ZHINE_BOSS
 /*
@@ -19,14 +18,14 @@ TDarkZhine::TDarkZhine(const char *name) {}
 TDarkZhine::~TDarkZhine() {}
 
 f32 TDarkZhine::getAngleToTarget() const {
-  TVec3f zhineCoordinates = this->mPosition;
+  TVec3f zhineCoordinates = this->mTranslation;
 
-  return atan2f(this->mTarget->mPosition.x - zhineCoordinates.x,
-                this->mTarget->mPosition.z - zhineCoordinates.z);
+  return atan2f(this->mTarget->mTranslation.x - zhineCoordinates.x,
+                this->mTarget->mTranslation.z - zhineCoordinates.z);
 }
 
 bool TDarkZhine::isTargetInRangeToHome(f32 r) const {
-  return PSVECDistance(&mBoundingPoint, &mTarget->mPosition) < r;
+  return PSVECDistance(&mBoundingPoint, &mTarget->mTranslation) < r;
 }
 
 void TDarkZhine::advanceRollMovement(TPollutionManager *gpPollution) {
@@ -46,17 +45,17 @@ void TDarkZhine::advanceRollMovement(TPollutionManager *gpPollution) {
   else if (this->mGroundSpeed < 0.0f)
     this->mGroundSpeed = 0.0f;
 
-  this->mPosition.x +=
+  this->mTranslation.x +=
       (this->mGroundSpeed * sinf(angleToRadians(this->mRotation.y)));
-  this->mPosition.z +=
+  this->mTranslation.z +=
       (this->mGroundSpeed * cosf(angleToRadians(this->mRotation.y)));
   this->mSpeed.x =
       (this->mGroundSpeed * sinf(angleToRadians(this->mRotation.y)));
   this->mSpeed.z =
       (this->mGroundSpeed * cosf(angleToRadians(this->mRotation.y)));
 
-  stamp__17TPollutionManagerFUsffff(gpPollution, 1, this->mPosition.x,
-                                    this->mPosition.y, this->mPosition.z,
+  stamp__17TPollutionManagerFUsffff(gpPollution, 1, this->mTranslation.x,
+                                    this->mTranslation.y, this->mTranslation.z,
                                     400.0f);
 }
 
@@ -69,16 +68,16 @@ TDarkZhine::advanceDropAttack(TPollutionManager *gpPollution, TMario *player) {
     this->mSpeed.z = 0.0f;
     this->mSpeed.y *= this->mSpeedMultiplier;
 
-    if (this->mPosition.y - this->mFloorBelow->mMaxHeight < 10.0f &&
-        this->mPosition.y >= this->mFloorBelow->mMinHeight) {
+    if (this->mTranslation.y - this->mFloorBelow->mMaxHeight < 10.0f &&
+        this->mTranslation.y >= this->mFloorBelow->mMinHeight) {
 
       startShake__12TCameraShakeF16EnumCamShakeModef(gpCameraShake, 0x27, 1.0f);
       startSoundActor__Q214MSoundSESystem8MSoundSEFUlPC3VecUlPP8JAISoundUlUc(
-          6158, this->mPosition, 0, 0, 0, 4);
-      start__9RumbleMgrFiP3Vec(gpPad1RumbleMgr, 8, this->mPosition);
-      stamp__17TPollutionManagerFUsffff(gpPollution, 1, this->mPosition.x,
+          6158, this->mTranslation, 0, 0, 0, 4);
+      start__9RumbleMgrFiP3Vec(gpPad1RumbleMgr, 8, this->mTranslation);
+      stamp__17TPollutionManagerFUsffff(gpPollution, 1, this->mTranslation.x,
                                         this->mFloorBelow->mMaxHeight,
-                                        this->mPosition.z, mStampRadius);
+                                        this->mTranslation.z, mStampRadius);
 
       if (this->mGoopLevel > (0xFF - 0x30)) {
         this->mGoopLevel = 0xFF;
@@ -91,7 +90,7 @@ TDarkZhine::advanceDropAttack(TPollutionManager *gpPollution, TMario *player) {
     }
   } else if (this->poundingStatus() == TDarkZhine::SHOCKING) {
     if (!(player->mState & static_cast<u32>(TMario::State::AIRBORN)) &&
-        this->isTargetInRangeToHome(this->mPosition, this->shockRadius()) &&
+        this->isTargetInRangeToHome(this->mTranslation, this->shockRadius()) &&
         (player->mState != static_cast<u32>(TMario::State::KNCK_LND) &&
          player->mState != 0x4045C)) {
       decHP__6TMarioFi(player, 1);
@@ -104,7 +103,7 @@ TDarkZhine::advanceDropAttack(TPollutionManager *gpPollution, TMario *player) {
       this->setStatusTimer(this->rollingTimerMax());
     }
   } else if (this->poundingStatus() == TDarkZhine::GROUNDROLL) {
-    if (this->mPosition.y - this->mFloorBelow->mMaxHeight > 100) {
+    if (this->mTranslation.y - this->mFloorBelow->mMaxHeight > 100) {
       this->setPoundingStatus(TDarkZhine::RISING);
       this->mGravity *= (-1 * this->risingRate() * this->speedMultiplier());
     } else if (this->rollingTimer() > 0) {
@@ -118,7 +117,7 @@ TDarkZhine::advanceDropAttack(TPollutionManager *gpPollution, TMario *player) {
       }
     } else {
       this->setPoundingStatus(TDarkZhine::RISING);
-      this->mPosition.y += 1;
+      this->mTranslation.y += 1;
       this->mGravity *= (-1 * this->risingRate() * this->speedMultiplier());
     }
   } else if (this->poundingStatus() == TDarkZhine::RISING) {
@@ -127,8 +126,8 @@ TDarkZhine::advanceDropAttack(TPollutionManager *gpPollution, TMario *player) {
     this->mSpeed.x = 0.0f;
     this->mSpeed.z = 0.0f;
 
-    if (this->mPosition.y - averageFloorHeight > 500.0f &&
-        this->mPosition.y > this->boundingPoint().y + 100.0f) {
+    if (this->mTranslation.y - averageFloorHeight > 500.0f &&
+        this->mTranslation.y > this->boundingPoint().y + 100.0f) {
 
       this->mGravity *= (-1 * this->risingRate() * this->speedMultiplier());
       this->setPoundingStatus(TDarkZhine::INACTIVE);
@@ -146,7 +145,7 @@ void TDarkZhine::advanceGoopDroplet() {
 
   if (pollutionDrop->mStatus == TBGPolDrop::DEAD) {
     launch__10TBGPolDropFRCQ29JGeometry8TVec3_f(
-        this->mPollutionDrop, this->mPosition, launchVelocity);
+        this->mPollutionDrop, this->mTranslation, launchVelocity);
   } else {
     move__10TBGPolDropFv(pollutionDrop);
   }
@@ -160,15 +159,15 @@ void TDarkZhine::perform_(TMario *player) {
     if (this->isGooping())
       this->advanceGoopDroplet();
 
-    if (this->mPosition.y - averageFloorHeight < 700.0f) {
-      if (this->mPosition.y - this->mFloorBelow->mMaxHeight < 10.0f) {
-        this->mPosition.y += 1.0f;
+    if (this->mTranslation.y - averageFloorHeight < 700.0f) {
+      if (this->mTranslation.y - this->mFloorBelow->mMaxHeight < 10.0f) {
+        this->mTranslation.y += 1.0f;
       }
       this->mSpeed.y = 1.0f * this->speedMultiplier();
-    } else if (this->mPosition.y - averageFloorHeight > 700.0f) {
-      if (this->mPosition.y <
+    } else if (this->mTranslation.y - averageFloorHeight > 700.0f) {
+      if (this->mTranslation.y <
           this->boundingPoint().y - this->boundingRadius()) {
-        this->mPosition.y = this->boundingPoint().y - this->boundingRadius();
+        this->mTranslation.y = this->boundingPoint().y - this->boundingRadius();
         this->mSpeed.x = 0.0f;
       } else {
         this->mSpeed.y = -1.0f * this->speedMultiplier();
@@ -176,7 +175,7 @@ void TDarkZhine::perform_(TMario *player) {
     }
   }
 
-  if (isTargetInRangeToHome(this->mPosition, this->shockRadius()) &&
+  if (isTargetInRangeToHome(this->mTranslation, this->shockRadius()) &&
       !this->isPounding()) {
     this->setIsFollowMario(true);
     this->setPoundingTimer(this->poundingTimer() - 1);
@@ -195,7 +194,7 @@ void TDarkZhine::perform_(TMario *player) {
     this->setGoopingTimer(this->goopingTimer() - 1);
 
     if (this->poundingTimer() <= 0 &&
-        this->mPosition.y - averageFloorHeight < this->maxPoundingHeight()) {
+        this->mTranslation.y - averageFloorHeight < this->maxPoundingHeight()) {
       this->setIsPounding(true);
       this->setPoundingStatus(TDarkZhine::DROPPING);
       this->setPoundingTimer(this->poundingTimerMax());
@@ -214,7 +213,7 @@ void TDarkZhine::perform_(TMario *player) {
         this->mGroundSpeed * sinf(angleToRadians(this->mRotation.y));
     this->mSpeed.z =
         this->mGroundSpeed * cosf(angleToRadians(this->mRotation.y));
-  } else if (isTargetInRangeToHome(this->mPosition, this->shockRadius()) &&
+  } else if (isTargetInRangeToHome(this->mTranslation, this->shockRadius()) &&
              this->poundingStatus() != TDarkZhine::GROUNDROLL) {
     this->mGroundSpeed -= (this->accelerationRate() * this->mSpeedMultiplier);
     if (this->mGroundSpeed < 0.0f)
@@ -226,7 +225,7 @@ void TDarkZhine::perform_(TMario *player) {
         this->mGroundSpeed * cosf(angleToRadians(this->mRotation.y));
   }
 
-  if (isTargetInRangeToHome(this->mPosition, this->shockRadius())) {
+  if (isTargetInRangeToHome(this->mTranslation, this->shockRadius())) {
     if (this->isPounding() &&
         this->advanceDropAttack(gpPollution, player) == TDarkZhine::INACTIVE)
       this->setIsPounding(false);
@@ -235,7 +234,7 @@ void TDarkZhine::perform_(TMario *player) {
   } else {
     this->setIsPounding(false);
     this->setPoundingStatus(TDarkZhine::INACTIVE);
-    this->mPosition = this->boundingPoint();
+    this->mTranslation = this->boundingPoint();
   }
 }
 

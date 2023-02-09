@@ -1,13 +1,15 @@
-#include "obj/StarBit.hxx"
-#include "sms/rand.h"
-#include "types.h"
+#include <Dolphin/types.h>
 
-#include "J2D/J2DTexture.hxx"
-#include "J3D/J3DTexture.hxx"
-#include "J3D/J3DMaterial.hxx"
-#include "JDrama/JDRGraphics.hxx"
-#include "JUT/JUTColor.hxx"
-#include "sms/actor/item/Coin.hxx"
+#include <JSystem/J3D/J3DTexture.hxx>
+#include <JSystem/J3D/J3DMaterial.hxx>
+#include <JSystem/JDrama/JDRGraphics.hxx>
+#include <JSystem/JUtility/JUTColor.hxx>
+#include <JSystem/JUtility/JUTTexture.hxx>
+
+#include <SMS/rand.h>
+#include <SMS/MoveBG/Coin.hxx>
+
+#include "obj/star_bit.hxx"
 
 const JUtility::TColor TStarBit::sStarBitColorArray[6]{
     {0xEB, 0x57, 0x3D, 0xFF}, // RED
@@ -38,7 +40,7 @@ void TStarBit::control() {
   }
 
   mGravity = 0.6f;
-  if (!mIsBouncing || mGroundY > (mPosition.y - 20.0f))
+  if (!mIsBouncing || mGroundY > (mTranslation.y - 20.0f))
     return;
 
   mSpeed.y = mBounceSpeedY;

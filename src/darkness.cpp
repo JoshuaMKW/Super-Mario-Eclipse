@@ -1,255 +1,208 @@
+#include <SMS/Manager/FlagManager.hxx>
+
 #include <BetterSMS/module.hxx>
 #include <BetterSMS/stage.hxx>
+#include <BetterSMS/math.hxx>
+
+#include "darkness.hxx"
+#include "settings.hxx"
 
 using namespace BetterSMS;
 
-extern J2DTextBox gDebugTextBox;
+static TLightContext sLightContext;
 
-// 0x8027C6A4
-// extern -> SME.cpp
-void manageLightSize(TMarDirector *director) {
-    auto* stageConfig = Stage::getStageConfiguration();
+void TLightContext::process(TModelWaterManager &manager) {
+    /*s32 &CurrentShineCount = TFlagManager::smInstance->Type4Flag.mShineCount;
 
-  if (!stageConfig || !stageConfig->isCustomConfig())
-    return (gpMarDirector->mAreaID == 1);
+    switch (mLightType) {
+    case TLightContext::ActiveType::STATIC: {
+        if (Stage::TStageParams::sStageConfig->mLightDarkLevel.get() != 255)
+            manager.mDarkLevel = Stage::TStageParams::sStageConfig->mLightDarkLevel.get();
+        else if (CurrentShineCount >= MaxShineCount) {
+            if (manager.mDarkLevel < 255)
+                manager.mDarkLevel += 1;
+            else
+                mLightType = TLightContext::ActiveType::DISABLED;
+        }
 
-  stageConfig->
+        gShineShadowPos = mShineShadowCoordinates;
 
-  s32 &CurrentShineCount = TFlagManager::smInstance->Type4Flag.mShineCount;
-  s32 &PrevShineCount = LightContext.mPrevShineCount;
-  switch (LightContext.mLightType) {
-  case TLightContext::ActiveType::STATIC: {
-    if (TStageParams::sStageConfig->mLightDarkLevel.get() != 255)
-      gpModelWaterManager->mDarkLevel =
-          TStageParams::sStageConfig->mLightDarkLevel.get();
-    else if (CurrentShineCount >= SME_MAX_SHINES) {
-      if (gpModelWaterManager->mDarkLevel < 255)
-        gpModelWaterManager->mDarkLevel += 1;
-      else
-        LightContext.mLightType = TLightContext::ActiveType::DISABLED;
-    }
+        const f32 sigOfs      = 300.0f;
+        const f32 sigStrength = 0.04f;
 
-    gShineShadowPos = LightContext.mShineShadowCoordinates;
+        if (!mSizeMorphing) {
+            if (CurrentShineCount != mPrevShineCount) {
+                mPrevSize = manager.mSize;
+                mNextSize =
+                    mShineShadowBase + powf(((1350.0f / MaxShineCount) * CurrentShineCount), 1.5f);
+                mPrevDarkness = manager.mDarkLevel;
+                mNextDarkness = Util::Math::lerp<u8>(TGlobals::getMinDarkness(), 190,
+                                                     static_cast<f32>(CurrentShineCount) /
+                                                         static_cast<f32>(MaxShineCount));
 
-    const f32 sigOfs = 300.0f;
-    const f32 sigStrength = 0.04f;
+                mSizeMorphing = true;
+                mStepContext  = 0.0f;
+            } else {
+                break;
+            }
+        }
 
-    if (!LightContext.mSizeMorphing) {
-      if (CurrentShineCount != PrevShineCount) {
-        LightContext.mPrevSize = gpModelWaterManager->mSize;
-        LightContext.mNextSize =
-            LightContext.mShineShadowBase +
-            powf(((1350.0f / SME_MAX_SHINES) * CurrentShineCount), 1.5f);
-        LightContext.mPrevDarkness = gpModelWaterManager->mDarkLevel;
-        LightContext.mNextDarkness =
-            Util::Math::lerp<u8>(TGlobals::getMinDarkness(), 190,
-                                 static_cast<f32>(CurrentShineCount) /
-                                     static_cast<f32>(SME_MAX_SHINES));
+        const f32 cur = Math::sigmoidCurve(mStepContext, mPrevSize, mNextSize, sigOfs, sigStrength);
 
-        LightContext.mSizeMorphing = true;
-        LightContext.mStepContext = 0.0f;
-      } else {
+        if (mTargetDarkness == 255)
+            manager.mDarkLevel = static_cast<u8>(
+                Math::sigmoidCurve(mStepContext, static_cast<f32>(mPrevDarkness),
+                                   static_cast<f32>(mNextDarkness), sigOfs, sigStrength));
+
+        constexpr f32 deadZone = 1.0f;
+        constexpr f32 minSize  = 0.0f;
+        constexpr f32 maxSize  = 80000.0f;
+
+        f32 &NextSize = mNextSize;
+        f32 &PrevSize = mPrevSize;
+
+        const bool isFinished = NextSize >= PrevSize ? cur >= (NextSize - deadZone)
+                                                     : cur <= (NextSize + deadZone);
+        if (manager.mSize > maxSize) {
+            manager.mSize = maxSize;
+            mSizeMorphing  = false;
+        } else if (manager.mSize < minSize) {
+            manager.mSize = minSize;
+            mSizeMorphing  = false;
+        } else if (!isFinished) {
+            manager.mSize       = cur;
+            manager.mSphereStep = cur / 2.0f;
+            mStepContext += 1.0f;
+        } else {
+            manager.mSize       = cur;
+            manager.mSphereStep = cur / 2.0f;
+            mPrevShineCount      = CurrentShineCount;
+            mSizeMorphing        = false;
+        }
         break;
-      }
     }
-
-    const f32 cur = SME::Util::Math::sigmoidCurve(
-        LightContext.mStepContext, LightContext.mPrevSize,
-        LightContext.mNextSize, sigOfs, sigStrength);
-
-    if (TStageParams::sStageConfig->mLightDarkLevel.get() == 255)
-      gpModelWaterManager->mDarkLevel =
-          static_cast<u8>(SME::Util::Math::sigmoidCurve(
-              LightContext.mStepContext,
-              static_cast<f32>(LightContext.mPrevDarkness),
-              static_cast<f32>(LightContext.mNextDarkness), sigOfs,
-              sigStrength));
-
-    constexpr f32 deadZone = 1.0f;
-    constexpr f32 minSize = 0.0f;
-    constexpr f32 maxSize = 80000.0f;
-
-    f32 &NextSize = LightContext.mNextSize;
-    f32 &PrevSize = LightContext.mPrevSize;
-
-    const bool isFinished = NextSize >= PrevSize ? cur >= (NextSize - deadZone)
-                                                 : cur <= (NextSize + deadZone);
-    if (gpModelWaterManager->mSize > maxSize) {
-      gpModelWaterManager->mSize = maxSize;
-      LightContext.mSizeMorphing = false;
-    } else if (gpModelWaterManager->mSize < minSize) {
-      gpModelWaterManager->mSize = minSize;
-      LightContext.mSizeMorphing = false;
-    } else if (!isFinished) {
-      gpModelWaterManager->mSize = cur;
-      gpModelWaterManager->mSphereStep = cur / 2.0f;
-      LightContext.mStepContext += 1.0f;
-    } else {
-      gpModelWaterManager->mSize = cur;
-      gpModelWaterManager->mSphereStep = cur / 2.0f;
-      PrevShineCount = CurrentShineCount;
-      LightContext.mSizeMorphing = false;
+    case TLightContext::ActiveType::FOLLOWPLAYER: {
+        manager.mDarkLevel = mTargetDarkness;
+        gShineShadowPos    = *gpMarioPos + mShineShadowCoordinates;
+        break;
     }
-    break;
-  }
-  case TLightContext::ActiveType::FOLLOWPLAYER: {
-    gpModelWaterManager->mDarkLevel =
-        TStageParams::sStageConfig->mLightDarkLevel.get();
-    gShineShadowPos.x = gpMarioPos->x + LightContext.mShineShadowCoordinates.x;
-    gShineShadowPos.y = gpMarioPos->y + LightContext.mShineShadowCoordinates.y;
-    gShineShadowPos.z = gpMarioPos->z + LightContext.mShineShadowCoordinates.z;
-    break;
-  }
-  default:
-    break;
-  }
-  return LightContext.mLightType != TLightContext::ActiveType::DISABLED &&
-         gpMarDirector->mAreaID != TGameSequence::OPTION;
+    default:
+        break;
+    }*/
+
+    manager.LightType.mShowShadow = manager.mDarkLevel < 255;
 }
 
-// 0x802571F0
-/*
-f32 velocityCoordinatePatches(f32 floorCoordinateY)
-{
-    TMario *gpMario = (TMario *)*(u32 *)TMarioInstance;
+//static void initShineShadow() {
+//    auto *config = Stage::getStageConfiguration();
+//
+//    if (config->mLightType.get() == TLightContext::ActiveType::DISABLED)
+//        return;
+//
+//    Class::TLightContext &LightContext = TGlobals::sLightData;
+//
+//    s32 &CurrentShineCount = TFlagManager::smInstance->Type4Flag.mShineCount;
+//    if (CurrentShineCount < SME_MAX_SHINES) {
+//        LightContext.mLightType       = config->mLightType.get();
+//        LightContext.mShineShadowBase = config->mLightSize.get();
+//        LightContext.mPrevShineCount  = CurrentShineCount;
+//        {
+//            TVec3f coordinates(config->mLightPosX.get(), config->mLightPosY.get(),
+//                               config->mLightPosZ.get());
+//            LightContext.mShineShadowCoordinates = coordinates;
+//        }
+//
+//        gpModelWaterManager->mColor                 = config->mLightColor.get();
+//        gpModelWaterManager->mDarkLevel             = config->mLightDarkLevel.get();
+//        gpModelWaterManager->mLayerCount            = config->mLightLayerCount.get();
+//        gpModelWaterManager->mSphereStep            = config->mLightStep.get();
+//        gpModelWaterManager->mSize                  = config->mLightSize.get();
+//        gpModelWaterManager->LightType.mMaskObjects = true;
+//        gpModelWaterManager->LightType.mShowShadow  = true;
+//
+//        if (LightContext.mLightType == TLightContext::ActiveType::STATIC) {
+//            LightContext.mNextSize = LightContext.mShineShadowBase +
+//                                     powf(((1350.0f / SME_MAX_SHINES) * CurrentShineCount), 1.5f);
+//
+//            if (config->mLightDarkLevel.get() == 255)
+//                gpModelWaterManager->mDarkLevel = Util::Math::lerp<u8>(
+//                    TGlobals::getMinDarkness(), 190,
+//                    static_cast<f32>(CurrentShineCount) / static_cast<f32>(SME_MAX_SHINES));
+//            else
+//                gpModelWaterManager->mDarkLevel = config->mLightDarkLevel.get();
+//
+//            gpModelWaterManager->mSize       = LightContext.mNextSize;
+//            gpModelWaterManager->mSphereStep = gpModelWaterManager->mSize / 2.0f;
+//        }
+//    } else {
+//        LightContext.mLightType = TLightContext::ActiveType::DISABLED;
+//    }
+//}
+//SME_PATCH_B(SME_PORT_REGION(0x80280180, 0x80277F0C, 0, 0), initShineShadow);
 
-    if (gpMario->mState != TMario::State::IDLE)
-    { //Y storage
-        gpMario->mSpeed.y = 0;
-    }
-
-    if (floorCoordinateY < gpMario->mPosition.y - 20)
-    { //Downwarping
-        floorCoordinateY = gpMario->mPosition.y;
-    }
-    asm("lfs 0, -0x0EC8 (2)");
-    return floorCoordinateY;
-}
-*/
-
-/*0x8018987C
-addi r3, r31, 0
-lis r4, 0x8000
-ori r4, r4, 0x4A6C
-mtctr r4
-bctrl
-lwz r0, 0x000C (sp)
-*/
-// 0x80004A6C
-/*
-f32 downWarpPatch(TMario *gpMario, f32 yVelocity)
-{
-    if (yVelocity < -100)
-    {
-        return gpMario->mSpeed.y;
-    }
-    else
-    {
-        return yVelocity;
-    }
-}
-*/
-
-/*0x8018987C
-addi r3, r31, 0
-lis r4, 0x8000
-ori r4, r4, 0x4A6C
-mtctr r4
-bctrl
-lwz r0, 0x000C (sp)
-*/
-/*
-f32 upWarpPatch(TMario *gpMario, f32 yVelocity)
-{
-    if (yVelocity > 1000000)
-    {
-        return gpMario->mSpeed.y;
-    }
-    else
-    {
-        return yVelocity;
-    }
-}
-*/
-
-// MESSAGE MODIFICATIONS //
-
-// 0x80153DE8, 0x80153E1C
-// extern -> SME.cpp
-static void extendedTagParam() {}
-// SME_PATCH_BL(SME_PORT_REGION(0x80150c40, 0, 0, 0), extendedTagParam);
-
-static void maintainYoshi(TYoshi *yoshi) {
-  if (Util::Yoshi::isGreenYoshi(yoshi)) {
-    *(f32 *)SME_PORT_REGION(0x80415F4C, 0x8040D4A4, 0, 0) = 480.0f; // tounge
-    *(f32 *)SME_PORT_REGION(0x80415F68, 0x8040D4A8, 0, 0) = 16384.0f;
-  } else {
-    *(f32 *)SME_PORT_REGION(0x80415F4C, 0x8040D4A4, 0, 0) = 300.0f;
-    *(f32 *)SME_PORT_REGION(0x80415F68, 0x8040D4A8, 0, 0) = 10000.0f;
-  }
+void manageShineDarkness(TMarDirector *director) {
+  sLightContext.process(*gpModelWaterManager);
 }
 
-extern void blazePlayer(TMario *player);
-
-// 0x8024D3A8
-// 0x8003F8F0
-// extern -> SME.cpp
-void Patch::CKit::realTimeCustomAttrsHandler(TMario *player) {
-  if (player->mYoshi)
-    maintainYoshi(player->mYoshi);
-
-  Class::TPlayerData *playerParams = TGlobals::getPlayerData(player);
-  Class::TStageParams *stageParams = Class::TStageParams::sStageConfig;
-
-  const Class::TPlayerParams *params = playerParams->getParams();
-  const f32 sizeMultiplier =
-      params->mSizeMultiplier.get() * stageParams->mPlayerSizeMultiplier.get();
-  const f32 speedMultiplier = params->mSpeedMultiplier.get();
-
-  playerParams->scalePlayerAttrs(sizeMultiplier);
-
-#define SCALE_PARAM(param, scale) param.set(param.get() * scale)
-
-  switch (playerParams->getPlayerID()) {
-  case Enum::Player::MARIO:
-  case Enum::Player::LUIGI:
-  case Enum::Player::IL_PIANTISSIMO:
-  case Enum::Player::SHADOW_MARIO:
-    break;
-  case Enum::Player::DRY_BONES:
-    SCALE_PARAM(player->mRunParams.mMotBlendRunSp, 100.0f);
-    SCALE_PARAM(player->mSwimParams.mWaitBouyancy, -1.0f);
-    SCALE_PARAM(player->mSwimParams.mMoveBouyancy, 0.0f);
-    SCALE_PARAM(player->mSwimParams.mPaddleDown, 2.0f);
-    SCALE_PARAM(player->mSwimParams.mPaddleSpeedUp, 0.5f);
-    break;
-  default:
-    break;
-  }
-
-  SME_EVAL_LOG(playerParams->mIsOnFire);
-  if (playerParams->mIsOnFire) {
-    SCALE_PARAM(player->mDeParams.mRunningMax, 1.4f);
-    SCALE_PARAM(player->mDeParams.mDashMax, 1.4f);
-    SCALE_PARAM(player->mDeParams.mClashSpeed, 1.4f);
-    SCALE_PARAM(player->mJumpParams.mJumpSpeedAccelControl, 1.4f);
-    SCALE_PARAM(player->mJumpParams.mFenceSpeed, 1.4f);
-    SCALE_PARAM(player->mRunParams.mMaxSpeed, 1.4f);
-    SCALE_PARAM(player->mRunParams.mAddBase, 1.4f);
-    SCALE_PARAM(player->mRunParams.mDecBrake, 1.05f);
-    SCALE_PARAM(player->mRunParams.mRunAnmSpeedBase, 1.4f);
-    SCALE_PARAM(player->mHangFenceParams.mMoveSp, 1.4f);
-    SCALE_PARAM(player->mHangFenceParams.mDescentSp, 1.4f);
-    SCALE_PARAM(player->mDirtyParams.mSlipRunSp, 1.4f);
-    SCALE_PARAM(player->mDirtyParams.mSlipCatchSp, 1.4f);
-
-    if (player->mAttributes.mIsShallowWater || player->mAttributes.mIsWater)
-      Util::Mario::extinguishPlayer(player, false);
-    else
-      blazePlayer(player);
-  }
-
-#undef SCALE_PARAM
-
-  setPositions__6TMarioFv(player);
-}
+//// 0x8024D3A8
+//// 0x8003F8F0
+//// extern -> SME.cpp
+//void Patch::CKit::realTimeCustomAttrsHandler(TMario *player) {
+//  if (player->mYoshi)
+//    maintainYoshi(player->mYoshi);
+//
+//  Class::TPlayerData *playerParams = TGlobals::getPlayerData(player);
+//  Class::TStageParams *stageParams = Class::TStageParams::sStageConfig;
+//
+//  const Class::TPlayerParams *params = playerParams->getParams();
+//  const f32 sizeMultiplier =
+//      params->mSizeMultiplier.get() * stageParams->mPlayerSizeMultiplier.get();
+//  const f32 speedMultiplier = params->mSpeedMultiplier.get();
+//
+//  playerParams->scalePlayerAttrs(sizeMultiplier);
+//
+//#define SCALE_PARAM(param, scale) param.set(param.get() * scale)
+//
+//  switch (playerParams->getPlayerID()) {
+//  case Enum::Player::MARIO:
+//  case Enum::Player::LUIGI:
+//  case Enum::Player::IL_PIANTISSIMO:
+//  case Enum::Player::SHADOW_MARIO:
+//    break;
+//  case Enum::Player::DRY_BONES:
+//    SCALE_PARAM(player->mRunParams.mMotBlendRunSp, 100.0f);
+//    SCALE_PARAM(player->mSwimParams.mWaitBouyancy, -1.0f);
+//    SCALE_PARAM(player->mSwimParams.mMoveBouyancy, 0.0f);
+//    SCALE_PARAM(player->mSwimParams.mPaddleDown, 2.0f);
+//    SCALE_PARAM(player->mSwimParams.mPaddleSpeedUp, 0.5f);
+//    break;
+//  default:
+//    break;
+//  }
+//
+//  SME_EVAL_LOG(playerParams->mIsOnFire);
+//  if (playerParams->mIsOnFire) {
+//    SCALE_PARAM(player->mDeParams.mRunningMax, 1.4f);
+//    SCALE_PARAM(player->mDeParams.mDashMax, 1.4f);
+//    SCALE_PARAM(player->mDeParams.mClashSpeed, 1.4f);
+//    SCALE_PARAM(player->mJumpParams.mJumpSpeedAccelControl, 1.4f);
+//    SCALE_PARAM(player->mJumpParams.mFenceSpeed, 1.4f);
+//    SCALE_PARAM(player->mRunParams.mMaxSpeed, 1.4f);
+//    SCALE_PARAM(player->mRunParams.mAddBase, 1.4f);
+//    SCALE_PARAM(player->mRunParams.mDecBrake, 1.05f);
+//    SCALE_PARAM(player->mRunParams.mRunAnmSpeedBase, 1.4f);
+//    SCALE_PARAM(player->mHangFenceParams.mMoveSp, 1.4f);
+//    SCALE_PARAM(player->mHangFenceParams.mDescentSp, 1.4f);
+//    SCALE_PARAM(player->mDirtyParams.mSlipRunSp, 1.4f);
+//    SCALE_PARAM(player->mDirtyParams.mSlipCatchSp, 1.4f);
+//
+//    if (player->mAttributes.mIsShallowWater || player->mAttributes.mIsWater)
+//      Util::Mario::extinguishPlayer(player, false);
+//    else
+//      blazePlayer(player);
+//  }
+//
+//#undef SCALE_PARAM
+//
+//  setPositions__6TMarioFv(player);
+//}

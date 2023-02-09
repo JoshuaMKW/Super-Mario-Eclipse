@@ -1,0 +1,40 @@
+﻿{
+  "configurations": [
+    {
+      "name": "GCN-KuriboClang-Debug",
+      "generator": "Ninja",
+      "configurationType": "Debug",
+      "buildRoot": "${projectDir}\\out\\build\\${name}",
+      "installRoot": "${projectDir}\\out\\install\\${name}",
+      "cmakeCommandArgs": "",
+      "buildCommandArgs": "",
+      "ctestCommandArgs": "",
+      "cmakeToolchain": "./Targets/GCNKuriboClangDebug.cmake",
+      "inheritEnvironments": []
+    },
+    {
+      "name": "GCN-KuriboClang-Release",
+      "generator": "Ninja",
+      "configurationType": "Release",
+      "buildRoot": "${projectDir}\\out\\build\\${name}",
+      "installRoot": "${projectDir}\\out\\install\\${name}",
+      "cmakeCommandArgs": "",
+      "buildCommandArgs": "",
+      "ctestCommandArgs": "",
+      "cmakeToolchain": "./Targets/GCNKuriboClangRelease.cmake",
+      "inheritEnvironments": []
+    },
+    {
+      "name": "GCN-KuriboClang-ReleaseDeb",
+      "generator": "Ninja",
+      "configurationType": "Release",
+      "buildRoot": "${projectDir}\\out\\build\\${name}",
+      "installRoot": "${projectDir}\\out\\install\\${name}",
+      "cmakeCommandArgs": "",
+      "buildCommandArgs": "",
+      "ctestCommandArgs": "",
+      "cmakeToolchain": "./Targets/GCNKuriboClangReleaseDeb.cmake",
+      "inheritEnvironments": []
+    }
+  ]
+}

@@ -1,20 +1,23 @@
-#include "GX.h"
-#include "MTX.h"
-#include "types.h"
+#include <Dolphin/GX.h>
+#include <Dolphin/MTX.h>
+#include <Dolphin/types.h>
 
-#include "J3D/J3DModel.hxx"
-#include "J3D/J3DModelLoaderDataBase.hxx"
-#include "sms/M3DUtil/MActor.hxx"
-#include "sms/M3DUtil/MActorKeeper.hxx"
-#include "sms/manager/ModelWaterManager.hxx"
-#include "sms/mapobj/MapObjBall.hxx"
-#include "sms/mapobj/MapObjInit.hxx"
-#include "sms/nozzle/Watergun.hxx"
-#include "sms/sound/MSoundSESystem.hxx"
-#include "sms/collision/BGCheck.hxx"
+#include <JSystem/JDrama/JDRNameRef.hxx>
+#include <JSystem/J3D/J3DModel.hxx>
+#include <JSystem/J3D/J3DModelLoaderDataBase.hxx>
+#include <SMS/M3DUtil/MActor.hxx>
+#include <SMS/M3DUtil/MActorKeeper.hxx>
+#include <SMS/Manager/ModelWaterManager.hxx>
+#include <SMS/MapObj/MapObjBall.hxx>
+#include <SMS/MapObj/MapObjInit.hxx>
+#include <SMS/Player/Watergun.hxx>
+#include <SMS/MSound/MSoundSESystem.hxx>
+#include <SMS/Map/BGCheck.hxx>
 
-#include "SME.hxx"
-#include "obj/WaterBalloon.hxx"
+#include <BetterSMS/module.hxx>
+#include <BetterSMS/libs/constmath.hxx>
+
+#include "obj/water_balloon.hxx"
 
 TWaterEmitInfo *TWaterBalloon::sEmitInfo = nullptr;
 constexpr f32 MaxSpeed = 30.0f;
@@ -107,22 +110,22 @@ void TWaterBalloon::touchActor(THitActor *actor) {
   const f32 pangle = static_cast<f32>(player->mAngle.y / 182);
   const f32 speed = player->mForwardSpeed + 5.0f;
 
-  TVec3f dir(0.0f, 0.0f, 0.0f);
-  dir.x = sinf(Math::angleToRadians(pangle));
-  dir.z = cosf(Math::angleToRadians(pangle));
-  dir.scale(speed);
-
-  SME_LOG("speed = { %.02f, %.02f, %.02f }\n", dir.x, dir.y, dir.z);
-  mSpeed.add(dir);
+  {
+      TVec3f dir(0.0f, 0.0f, 0.0f);
+      dir.x = sinf(angleToRadians(pangle));
+      dir.z = cosf(angleToRadians(pangle));
+      dir.scale(speed);
+      mSpeed.add(dir);
+  }
 
   if (gpMSound->gateCheck(0x1807)) {
     MSoundSESystem::MSoundSE::startSoundActor(
-        0x1807, reinterpret_cast<Vec *>(&mPosition), 0, nullptr, 0, 4);
+        0x1807, reinterpret_cast<Vec *>(&mTranslation), 0, nullptr, 0, 4);
   }
 }
 
 void TWaterBalloon::touchGround(TVec3f *pos) {
-  if (mFloorBelow->mCollisionType == 2048) {
+  if (mFloorBelow->mType == 2048) {
     TMapObjBall::touchGround(pos);
     return;
   }
@@ -179,7 +182,7 @@ void TWaterBalloon::blast(TVec3f blastSpd) {
 
   TWaterEmitInfo emitInfo = *sEmitInfo;
 
-  TVec3f pos(mPosition);
+  TVec3f pos(mTranslation);
   pos.y += 100.0f;
 
   TVec3f vel(blastSpd);
@@ -188,7 +191,7 @@ void TWaterBalloon::blast(TVec3f blastSpd) {
 
   emitInfo.mV.set(vel);
   emitInfo.mSize.set(emitInfo.mSize.get() * 2);
-  emitInfo.mPos.set(mPosition);
+  emitInfo.mPos.set(mTranslation);
   emitInfo.mHitRadius.set(emitInfo.mHitRadius.get() * 10);
   gpModelWaterManager->emitRequest(emitInfo);
 
@@ -200,14 +203,14 @@ void TWaterBalloon::blast(TVec3f blastSpd) {
   emitInfo.mHitRadius.set(150.0f);
   emitInfo.mNum.set(3);
 
-  sEmitInfo->mPos.set(mPosition);
+  sEmitInfo->mPos.set(mTranslation);
 
   gpModelWaterManager->emitRequest(emitInfo);
 
 
   if (gpMSound->gateCheck(0x28B8)) {
     MSoundSESystem::MSoundSE::startSoundActor(
-        0x28B8, reinterpret_cast<Vec *>(&mPosition), 0, nullptr, 0, 4);
+        0x28B8, reinterpret_cast<Vec *>(&mTranslation), 0, nullptr, 0, 4);
   }
 
   makeObjDead();
@@ -287,4 +290,4 @@ ObjData waterBalloonData{
     .mBckMoveData = nullptr,
     ._30 = 50.0f,
     .mUnkFlags = 0x170100 /*0x02130100*/,
-    .mKeyCode = SME::Util::cexp_calcKeyCode("waterballoon")};
+    .mKeyCode = cexp_calcKeyCode("waterballoon")};

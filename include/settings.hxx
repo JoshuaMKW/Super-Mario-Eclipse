@@ -8,152 +8,135 @@
 #include <BetterSMS/module.hxx>
 #include <BetterSMS/icons.hxx>
 
+constexpr size_t MaxShineCount = 300;
+
 using namespace BetterSMS;
 
 extern const u8 gSaveBnr[];
 extern const u8 gSaveIcon[];
 
-class LongJumpMappingSetting final : public Settings::IntSetting {
+class HUDSetting final : public Settings::IntSetting {
 public:
-    enum Mapping { BUTTON_Z, BUTTON_L };
+    enum HUD { SMS, E3, SPACEWORLD };
 
-    LongJumpMappingSetting() : IntSetting("Long Jump/Crouch Button", &sLongJumpValue) {
-        mValueRange = { 0, 1, 1 };
+    HUDSetting() : IntSetting("HUD Style", &mHUDValue) {
+        mValueRange = { 0, 2, 1 };
         mValueChangedCB = valueChanged;
     }
-    ~LongJumpMappingSetting() override {}
+    ~HUDSetting() override {}
 
     void getValueStr(char* dst) const override {
-        switch (sLongJumpValue) {
-        case Mapping::BUTTON_Z:
-            strncpy(dst, "Z", 2);
+        switch (mHUDValue) {
+        case SMS:
+            strncpy(dst, "DEFAULT", 8);
             break;
-        case Mapping::BUTTON_L:
-            strncpy(dst, "L", 2);
+        case E3:
+            strncpy(dst, "E3 DEMO", 8);
+            break;
+        case SPACEWORLD:
+            strncpy(dst, "SPACEWORLD", 11);
             break;
         }
     }
 
     void load(JSUMemoryInputStream& in) override {
         IntSetting::load(in);
-        mValueChangedCB(mValuePtr, mValuePtr,
+        mValueChangedCB(&mHUDValue, &mHUDValue,
             getKind());  // We manually update here to set instructions on load
     }
 
     // clang-format off
     static void valueChanged(void* old, void* cur, ValueKind kind) {
-        if (*reinterpret_cast<int*>(cur) == LongJumpMappingSetting::BUTTON_Z) {
-            PowerPC::writeU32(reinterpret_cast<u32*>(SMS_PORT_REGION(0x80249670, 0, 0, 0)), 0x540004A5);
-            PowerPC::writeU32(reinterpret_cast<u32*>(SMS_PORT_REGION(0x80249730, 0, 0, 0)), 0x540004A5);
-            PowerPC::writeU32(reinterpret_cast<u32*>(SMS_PORT_REGION(0x80249C34, 0, 0, 0)), 0x540004A5);
-            PowerPC::writeU32(reinterpret_cast<u32*>(SMS_PORT_REGION(0x8024BF30, 0, 0, 0)), 0x540004A5);
-            PowerPC::writeU32(reinterpret_cast<u32*>(SMS_PORT_REGION(0x8024C248, 0, 0, 0)), 0x540004A5);
-            PowerPC::writeU32(reinterpret_cast<u32*>(SMS_PORT_REGION(0x8024C36C, 0, 0, 0)), 0x540004A5);
-            PowerPC::writeU32(reinterpret_cast<u32*>(SMS_PORT_REGION(0x80252124, 0, 0, 0)), 0x540004A5);
-            PowerPC::writeU32(reinterpret_cast<u32*>(SMS_PORT_REGION(0x802A8834, 0, 0, 0)), 0x540006F7);
-            PowerPC::writeU32(reinterpret_cast<u32*>(SMS_PORT_REGION(0x802A8840, 0, 0, 0)), 0x540006F7);
-            PowerPC::writeU32(reinterpret_cast<u32*>(SMS_PORT_REGION(0x802A884C, 0, 0, 0)), 0x41820010);  // Allow L button meaning updates
-            PowerPC::writeU32(reinterpret_cast<u32*>(SMS_PORT_REGION(0x802A8860, 0, 0, 0)), 0x54000673);
-            PowerPC::writeU32(reinterpret_cast<u32*>(SMS_PORT_REGION(0x802A886C, 0, 0, 0)), 0x54000673);
-            PowerPC::writeU32(reinterpret_cast<u32*>(SMS_PORT_REGION(0x802A88C8, 0, 0, 0)), 0x54000673);
-            PowerPC::writeU32(reinterpret_cast<u32*>(SMS_PORT_REGION(0x802A88D4, 0, 0, 0)), 0x54000673);
-        }
-        else {
-            PowerPC::writeU32(reinterpret_cast<u32*>(SMS_PORT_REGION(0x80249670, 0, 0, 0)), 0x540004E7);
-            PowerPC::writeU32(reinterpret_cast<u32*>(SMS_PORT_REGION(0x80249730, 0, 0, 0)), 0x540004E7);
-            PowerPC::writeU32(reinterpret_cast<u32*>(SMS_PORT_REGION(0x80249C34, 0, 0, 0)), 0x540004E7);
-            PowerPC::writeU32(reinterpret_cast<u32*>(SMS_PORT_REGION(0x8024BF30, 0, 0, 0)), 0x540004E7);
-            PowerPC::writeU32(reinterpret_cast<u32*>(SMS_PORT_REGION(0x8024C248, 0, 0, 0)), 0x540004E7);
-            PowerPC::writeU32(reinterpret_cast<u32*>(SMS_PORT_REGION(0x8024C36C, 0, 0, 0)), 0x54000427);
-            PowerPC::writeU32(reinterpret_cast<u32*>(SMS_PORT_REGION(0x80252124, 0, 0, 0)), 0x540004E7);
-            PowerPC::writeU32(reinterpret_cast<u32*>(SMS_PORT_REGION(0x802A8834, 0, 0, 0)), 0x54000673);
-            PowerPC::writeU32(reinterpret_cast<u32*>(SMS_PORT_REGION(0x802A8840, 0, 0, 0)), 0x54000673);
-            PowerPC::writeU32(reinterpret_cast<u32*>(SMS_PORT_REGION(0x802A884C, 0, 0, 0)), 0x60000000);  // Allow L button meaning updates
-            PowerPC::writeU32(reinterpret_cast<u32*>(SMS_PORT_REGION(0x802A8860, 0, 0, 0)), 0x540006F7);
-            PowerPC::writeU32(reinterpret_cast<u32*>(SMS_PORT_REGION(0x802A886C, 0, 0, 0)), 0x540006F7);
-            PowerPC::writeU32(reinterpret_cast<u32*>(SMS_PORT_REGION(0x802A88C8, 0, 0, 0)), 0x540006F7);
-            PowerPC::writeU32(reinterpret_cast<u32*>(SMS_PORT_REGION(0x802A88D4, 0, 0, 0)), 0x540006F7);
-        }
+        //if (*reinterpret_cast<int*>(cur) == LongJumpMappingSetting::BUTTON_Z) {
+        //    PowerPC::writeU32(reinterpret_cast<u32*>(SMS_PORT_REGION(0x80249670, 0, 0, 0)), 0x540004A5);
+        //    PowerPC::writeU32(reinterpret_cast<u32*>(SMS_PORT_REGION(0x80249730, 0, 0, 0)), 0x540004A5);
+        //    PowerPC::writeU32(reinterpret_cast<u32*>(SMS_PORT_REGION(0x80249C34, 0, 0, 0)), 0x540004A5);
+        //    PowerPC::writeU32(reinterpret_cast<u32*>(SMS_PORT_REGION(0x8024BF30, 0, 0, 0)), 0x540004A5);
+        //    PowerPC::writeU32(reinterpret_cast<u32*>(SMS_PORT_REGION(0x8024C248, 0, 0, 0)), 0x540004A5);
+        //    PowerPC::writeU32(reinterpret_cast<u32*>(SMS_PORT_REGION(0x8024C36C, 0, 0, 0)), 0x540004A5);
+        //    PowerPC::writeU32(reinterpret_cast<u32*>(SMS_PORT_REGION(0x80252124, 0, 0, 0)), 0x540004A5);
+        //    PowerPC::writeU32(reinterpret_cast<u32*>(SMS_PORT_REGION(0x802A8834, 0, 0, 0)), 0x540006F7);
+        //    PowerPC::writeU32(reinterpret_cast<u32*>(SMS_PORT_REGION(0x802A8840, 0, 0, 0)), 0x540006F7);
+        //    PowerPC::writeU32(reinterpret_cast<u32*>(SMS_PORT_REGION(0x802A884C, 0, 0, 0)), 0x41820010);  // Allow L button meaning updates
+        //    PowerPC::writeU32(reinterpret_cast<u32*>(SMS_PORT_REGION(0x802A8860, 0, 0, 0)), 0x54000673);
+        //    PowerPC::writeU32(reinterpret_cast<u32*>(SMS_PORT_REGION(0x802A886C, 0, 0, 0)), 0x54000673);
+        //    PowerPC::writeU32(reinterpret_cast<u32*>(SMS_PORT_REGION(0x802A88C8, 0, 0, 0)), 0x54000673);
+        //    PowerPC::writeU32(reinterpret_cast<u32*>(SMS_PORT_REGION(0x802A88D4, 0, 0, 0)), 0x54000673);
+        //}
+        //else {
+        //    PowerPC::writeU32(reinterpret_cast<u32*>(SMS_PORT_REGION(0x80249670, 0, 0, 0)), 0x540004E7);
+        //    PowerPC::writeU32(reinterpret_cast<u32*>(SMS_PORT_REGION(0x80249730, 0, 0, 0)), 0x540004E7);
+        //    PowerPC::writeU32(reinterpret_cast<u32*>(SMS_PORT_REGION(0x80249C34, 0, 0, 0)), 0x540004E7);
+        //    PowerPC::writeU32(reinterpret_cast<u32*>(SMS_PORT_REGION(0x8024BF30, 0, 0, 0)), 0x540004E7);
+        //    PowerPC::writeU32(reinterpret_cast<u32*>(SMS_PORT_REGION(0x8024C248, 0, 0, 0)), 0x540004E7);
+        //    PowerPC::writeU32(reinterpret_cast<u32*>(SMS_PORT_REGION(0x8024C36C, 0, 0, 0)), 0x54000427);
+        //    PowerPC::writeU32(reinterpret_cast<u32*>(SMS_PORT_REGION(0x80252124, 0, 0, 0)), 0x540004E7);
+        //    PowerPC::writeU32(reinterpret_cast<u32*>(SMS_PORT_REGION(0x802A8834, 0, 0, 0)), 0x54000673);
+        //    PowerPC::writeU32(reinterpret_cast<u32*>(SMS_PORT_REGION(0x802A8840, 0, 0, 0)), 0x54000673);
+        //    PowerPC::writeU32(reinterpret_cast<u32*>(SMS_PORT_REGION(0x802A884C, 0, 0, 0)), 0x60000000);  // Allow L button meaning updates
+        //    PowerPC::writeU32(reinterpret_cast<u32*>(SMS_PORT_REGION(0x802A8860, 0, 0, 0)), 0x540006F7);
+        //    PowerPC::writeU32(reinterpret_cast<u32*>(SMS_PORT_REGION(0x802A886C, 0, 0, 0)), 0x540006F7);
+        //    PowerPC::writeU32(reinterpret_cast<u32*>(SMS_PORT_REGION(0x802A88C8, 0, 0, 0)), 0x540006F7);
+        //    PowerPC::writeU32(reinterpret_cast<u32*>(SMS_PORT_REGION(0x802A88D4, 0, 0, 0)), 0x540006F7);
+        //}
     }
     // clang-format on
 
 private:
-    static int sLongJumpValue;
+    int mHUDValue;
 };
 
-class HoverSlideSetting final : public Settings::SwitchSetting {
+class BugsExploitsSetting final : public Settings::SwitchSetting {
 public:
-    HoverSlideSetting() : SwitchSetting("Hover Slide", &sHoverSlideActive) {
+    BugsExploitsSetting() : SwitchSetting("Enable Bugs/Exploits", &mBugsExploitsValue) {
         mValueChangedCB = valueChanged;
     }
-    ~HoverSlideSetting() override {}
+    ~BugsExploitsSetting() override {}
 
-    void load(JSUMemoryInputStream& in) override {
-        SwitchSetting::load(in);
-        mValueChangedCB(mValuePtr, mValuePtr,
-            getKind());  // We manually update here to set instructions on load
+    bool isUnlocked() const override { return sIsUnlocked; }
+
+    void load(JSUMemoryInputStream &in) override {
+        in.read(&sIsUnlocked, 1);
+        {
+            bool b;
+            in.read(&b, 1);
+            setBool(b);
+        }
+    }
+
+    void save(JSUMemoryOutputStream &out) override {
+        out.write(&sIsUnlocked, 1);
+        out.write(&mBugsExploitsValue, 1);
     }
 
     // clang-format off
     static void valueChanged(void* old, void* cur, ValueKind kind) {
-        if (*reinterpret_cast<bool*>(cur) == false) {
-            PowerPC::writeU32(reinterpret_cast<u32*>(SMS_PORT_REGION(0x803DCA00, 0x803D41E0, 0, 0)), 0x00300000 | TMarioAnimeData::FLUDD_DISABLED);
+        auto *engine_module = BetterSMS::getModuleInfo("Better Sunshine Engine");
+        if (!engine_module) {
+            OSReport("Could not find engine module!!\n");
+            return;
         }
-        else {
-            PowerPC::writeU32(reinterpret_cast<u32*>(SMS_PORT_REGION(0x803DCA00, 0x803D41E0, 0, 0)), 0x00300000 | TMarioAnimeData::FLUDD_ENABLED);
-        }
+
+        auto *bugs_setting = engine_module->mSettings->getSetting("Bug Fixes");
+        auto *exploits_setting = engine_module->mSettings->getSetting("Exploit Fixes");
+        auto *collision_setting = engine_module->mSettings->getSetting("Collision Fixes");
+
+        const bool is_unlocked = *reinterpret_cast<bool *>(cur);
+
+        if (bugs_setting)
+            bugs_setting->setBool(is_unlocked);
+        
+        if (exploits_setting)
+            exploits_setting->setBool(is_unlocked);
+        
+        if (collision_setting)
+            collision_setting->setBool(is_unlocked);
     }
     // clang-format on
 
 private:
-    static bool sHoverSlideActive;
+    bool mBugsExploitsValue;
+    static bool sIsUnlocked;
 };
 
-class FastDiveSetting final : public Settings::SwitchSetting {
-public:
-    FastDiveSetting() : SwitchSetting("Fast Dive/Rollout", &sFastDiveActive) {
-        mValueChangedCB = valueChanged;
-    }
-    ~FastDiveSetting() override {}
-
-    void load(JSUMemoryInputStream& in) override {
-        SwitchSetting::load(in);
-        mValueChangedCB(mValuePtr, mValuePtr, getKind());  // We manually update here to set instructions on load
-    }
-
-    // clang-format off
-    static void valueChanged(void* old, void* cur, ValueKind kind) {
-        if (*reinterpret_cast<bool*>(cur) == false) {
-            PowerPC::writeU32(reinterpret_cast<u32*>(SMS_PORT_REGION(0x802496AC, 0, 0, 0)), 0x4800C089);
-            PowerPC::writeU32(reinterpret_cast<u32*>(SMS_PORT_REGION(0x8024976C, 0, 0, 0)), 0x4800BFC9);
-            PowerPC::writeU32(reinterpret_cast<u32*>(SMS_PORT_REGION(0x8024999C, 0, 0, 0)), 0x4800BD99);
-            PowerPC::writeU32(reinterpret_cast<u32*>(SMS_PORT_REGION(0x80249C70, 0, 0, 0)), 0x4800BAC5);
-            PowerPC::writeU32(reinterpret_cast<u32*>(SMS_PORT_REGION(0x8024C3A8, 0, 0, 0)), 0x7FE3FB78);
-            PowerPC::writeU32(reinterpret_cast<u32*>(SMS_PORT_REGION(0x8024C284, 0, 0, 0)), 0x480094B1);
-        }
-        else {
-            // Remove arbitrary dive speed
-            PowerPC::writeU32(reinterpret_cast<u32*>(SMS_PORT_REGION(0x802496AC, 0, 0, 0)), 0x60000000);
-            PowerPC::writeU32(reinterpret_cast<u32*>(SMS_PORT_REGION(0x8024976C, 0, 0, 0)), 0x60000000);
-            PowerPC::writeU32(reinterpret_cast<u32*>(SMS_PORT_REGION(0x8024999C, 0, 0, 0)), 0x60000000);
-            PowerPC::writeU32(reinterpret_cast<u32*>(SMS_PORT_REGION(0x80249C70, 0, 0, 0)), 0x60000000);
-            PowerPC::writeU32(reinterpret_cast<u32*>(SMS_PORT_REGION(0x8024C3A8, 0, 0, 0)), 0x60000000);
-            PowerPC::writeU32(reinterpret_cast<u32*>(SMS_PORT_REGION(0x8024C284, 0, 0, 0)), 0x60000000);
-        }
-    }
-    // clang-format on
-
-private:
-    static bool sFastDiveActive;
-};
-
-extern Settings::SettingsGroup gSettingsGroup;
-
-extern LongJumpMappingSetting gLongJumpMappingSetting;
-extern Settings::SwitchSetting gLongJumpSetting;
-extern Settings::SwitchSetting gBackFlipSetting;
-extern Settings::SwitchSetting gHoverBurstSetting;
-extern HoverSlideSetting gHoverSlideSetting;
-extern Settings::SwitchSetting gRocketDiveSetting;
-extern Settings::SwitchSetting gFastTurboSetting;
-extern FastDiveSetting gFastDiveSetting;
+HUDSetting::HUD getHUDKind();

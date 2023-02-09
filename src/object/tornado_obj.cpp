@@ -1,9 +1,16 @@
-#include "obj/TornadoObj.hxx"
-#include "SME.hxx"
-#include "sms/mapobj/MapObjInit.hxx"
-#include "sms/mapobj/MapObjRail.hxx"
-#include "types.h"
+#include <Dolphin/types.h>
 
+#include <JSystem/JDrama/JDRNameRef.hxx>
+
+#include <SMS/MapObj/MapObjInit.hxx>
+#include <SMS/MapObj/MapObjRail.hxx>
+#include <SMS/raw_fn.hxx>
+
+#include <BetterSMS/module.hxx>
+#include <BetterSMS/player.hxx>
+#include <BetterSMS/libs/constmath.hxx>
+
+#include "obj/tornado_obj.hxx"
 
 TTornadoMapObj::TTornadoMapObj(const char *name)
     : TRailMapObj(name), mBlowStrength(1.0f), mTrueRotation(0.0f, 0.0f, 0.0f) {
@@ -32,7 +39,7 @@ void TTornadoMapObj::control() {
 
   for (int i = 0; i < mNumObjs; ++i) {
     THitActor *actor = mCollidingObjs[i];
-    if (!isMario__6TMarioFv(actor)) {
+    if (actor == gpMarioAddress) {
       TLiveActor *blowObj = reinterpret_cast<TLiveActor *>(actor);
       blowUp(blowObj);
     } else {
@@ -43,13 +50,13 @@ void TTornadoMapObj::control() {
 }
 
 bool TTornadoMapObj::blowUp(TLiveActor *actor) {
-  f32 startBlowHeight = mPosition.y - (mReceiveHeight / 2);
+  f32 startBlowHeight = mTranslation.y - (mReceiveHeight / 2);
 
-  if (actor->mPosition.y < startBlowHeight)
+  if (actor->mTranslation.y < startBlowHeight)
     return false;
 
   const f32 progress =
-      (actor->mPosition.y - startBlowHeight) / (mAttackHeight * 2);
+      (actor->mTranslation.y - startBlowHeight) / (mAttackHeight * 2);
 
   if (progress > 1.0f && actor->mSpeed.y >= 0.0f) {
     if (mHasFinalPush)
@@ -61,7 +68,7 @@ bool TTornadoMapObj::blowUp(TLiveActor *actor) {
   if (mHasFinalPush)
     factor = mBlowStrength;
   else
-    factor = mBlowStrength * SME::Util::Math::scaleLinearAtAnchor<f32>(
+    factor = mBlowStrength * scaleLinearAtAnchor<f32>(
                                  1 - progress, 0.5f, 1.0f);
 
   actor->mSpeed.y += 10.0f * factor;
@@ -69,39 +76,39 @@ bool TTornadoMapObj::blowUp(TLiveActor *actor) {
 }
 
 bool TTornadoMapObj::blowUp(TMario *actor) {
-  SME::Class::TPlayerData *playerData = SME::TGlobals::getPlayerData(actor);
-  f32 startBlowHeight = mPosition.y - mAttackHeight;
+    auto *playerData    = Player::getData(actor);
+    f32 startBlowHeight = mTranslation.y - mAttackHeight;
 
-  if (actor->mPosition.y < startBlowHeight)
-    return false;
+    if (actor->mTranslation.y < startBlowHeight)
+        return false;
 
-  const f32 progress =
-      (actor->mPosition.y - startBlowHeight) / (mAttackHeight * 1.5f);
+    const f32 progress =
+        (actor->mTranslation.y - startBlowHeight) / (mAttackHeight * 1.5f);
 
-  if ((actor->mState & 0x800000) == 0 &&
-      actor->mState != static_cast<u32>(TMario::State::DIVEJUMP) &&
-      actor->mState != static_cast<u32>(TMario::State::HOVER) &&
-      mBlowStrength >= 0.5f) {
-    playerData->mCollisionFlags.mIsSpinBounce = true;
-    actor->mState = static_cast<u32>(TMario::State::JUMPSPINL);
-  }
+    if ((actor->mState & 0x800000) == 0 &&
+        actor->mState != static_cast<u32>(TMario::STATE_DIVEJUMP) &&
+        actor->mState != static_cast<u32>(TMario::STATE_HOVER) &&
+        mBlowStrength >= 0.5f) {
+        playerData->mCollisionFlags.mIsSpinBounce = true;
+        actor->mState = static_cast<u32>(TMario::STATE_JUMPSPINL);
+    }
 
-  f32 factor;
-  if (mHasFinalPush)
-    factor = mBlowStrength;
-  else
-    factor = mBlowStrength * SME::Util::Math::scaleLinearAtAnchor<f32>(
-                                 1 - progress, 0.5f, 1.0f);
-
-  if (((mPosition.y + mAttackHeight) - actor->mPosition.y) < 10.0f &&
-      actor->mSpeed.y >= 0.0f) {
+    f32 factor;
     if (mHasFinalPush)
-      actor->mSpeed.y += 10.0f * factor;
-    return true;
-  }
+        factor = mBlowStrength;
+    else
+        factor = mBlowStrength * scaleLinearAtAnchor<f32>(
+                                   1 - progress, 0.5f, 1.0f);
 
-  actor->mSpeed.y += 1.5f * factor;
-  return false;
+    if (((mTranslation.y + mAttackHeight) - actor->mTranslation.y) < 10.0f &&
+        actor->mSpeed.y >= 0.0f) {
+        if (mHasFinalPush)
+            actor->mSpeed.y += 10.0f * factor;
+        return true;
+    }
+
+    actor->mSpeed.y += 1.5f * factor;
+    return false;
 }
 
 static hit_data tornado_hit_data{.mAttackRadius = 450.0f,
@@ -159,4 +166,4 @@ ObjData tornadoData{
     .mBckMoveData = nullptr,
     ._30 = 50.0f,
     .mUnkFlags = 0x10004000,
-    .mKeyCode = SME::Util::cexp_calcKeyCode("Tornado")};
+    .mKeyCode = cexp_calcKeyCode("Tornado")};

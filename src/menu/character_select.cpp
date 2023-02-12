@@ -35,7 +35,10 @@
 #include <BetterSMS/music.hxx>
 #include <BetterSMS/libs/constmath.hxx>
 
+#include "globals.hxx"
+
 #include "menu/character_select.hxx"
+
 
 static JKRMemArchive *sResourceArchive = nullptr;
 
@@ -94,9 +97,7 @@ s32 CharacterSelectDirector::direct() {
         mSelectScreen->mPerformFlags &= ~0b0001;
         
         if (fader->mFadeStatus == TSMSFader::FADE_OFF) {
-            for (int i = 0; i < 4; ++i) {
-                gpApplication.mGamePads[i]->mState.mReadInput = true;
-            }
+            mSelectScreen->mShouldReadInput = true;
         }
 
         break;
@@ -185,6 +186,9 @@ void CharacterSelectDirector::initializeLayout() {
     const int screenRenderHeight = 480;
     const int screenAdjustX      = BetterSMS::getScreenRatioAdjustX();
 
+    const f32 icon_ratio = scaleLinearAtAnchor(BetterSMS::getScreenToFullScreenRatio(), 1.8f, 1.0f);
+    const f32 poster_ratio = scaleLinearAtAnchor(BetterSMS::getScreenToFullScreenRatio(), 1.2f, 1.0f);
+
     const int margin_width = 10;
     const int poster_width = 130;
 
@@ -200,7 +204,7 @@ void CharacterSelectDirector::initializeLayout() {
         JUTTexture *text_icon      = new JUTTexture("timg/mario_t.bti");
 
         CharacterInfo info;
-        info.mPlayer = Player::MARIO;
+        info.mPlayer = SME::CharacterID::MARIO;
         info.mIcon   = new J2DPicture('mari', {0, 0, 0, 0});
         info.mIcon->insert(character_icon, 0, 1.0f);
         info.mIcon->mRect = {30, 98, 120, 188};
@@ -223,7 +227,7 @@ void CharacterSelectDirector::initializeLayout() {
         JUTTexture *text_icon      = new JUTTexture("timg/luigi_t.bti");
 
         CharacterInfo info;
-        info.mPlayer = Player::LUIGI;
+        info.mPlayer = SME::CharacterID::LUIGI;
         info.mIcon   = new J2DPicture('lugi', {0, 0, 0, 0});
         info.mIcon->insert(character_icon, 0, 1.0f);
         info.mIcon->mRect = {30, 98, 120, 188};
@@ -246,7 +250,7 @@ void CharacterSelectDirector::initializeLayout() {
         JUTTexture *text_icon      = new JUTTexture("timg/piantissimo_t.bti");
 
         CharacterInfo info;
-        info.mPlayer = Player::PIANTISSIMO;
+        info.mPlayer = SME::CharacterID::PIANTISSIMO;
         info.mIcon   = new J2DPicture('ptmo', {0, 0, 0, 0});
         info.mIcon->insert(character_icon, 0, 1.0f);
         info.mIcon->mRect = {30, 98, 120, 188};
@@ -269,7 +273,7 @@ void CharacterSelectDirector::initializeLayout() {
         JUTTexture *text_icon      = new JUTTexture("timg/shadow_mario_t.bti");
 
         CharacterInfo info;
-        info.mPlayer = Player::SHADOW_MARIO;
+        info.mPlayer = SME::CharacterID::SHADOW_MARIO;
         info.mIcon   = new J2DPicture('smar', {0, 0, 0, 0});
         info.mIcon->insert(character_icon, 0, 1.0f);
         info.mIcon->mRect = {30, 98, 120, 188};
@@ -292,14 +296,15 @@ void CharacterSelectDirector::initializeLayout() {
     int current_x = 260 - (poster_width * characters) / 2 - (margin_width * (characters - 1)) / 2;
     for (int i = 0; i < characters; ++i) {
         CharacterInfo &info = mSelectScreen->mCharacterInfos.at(i);
-        info.mIcon->mRect.move(current_x + 32, 96);
-        info.mLabel->mRect.move(current_x + 28, 62);
-        info.mPoster->mRect.move(current_x, 20);
+        int scaled_x        = ((current_x + (poster_width / 2) - 260) * poster_ratio) + 260 - poster_width / 2;
+        info.mIcon->mRect.move(scaled_x + 32, 96);
+        info.mLabel->mRect.move(scaled_x + 28, 62);
+        info.mPoster->mRect.move(scaled_x, 20);
         current_x += poster_width + margin_width;
     }
 
     for (int i = 0; i < PlayerMax; ++i) {
-        SelectionInfo s_info;
+        SelectionInfo s_info = SelectionInfo();
         s_info.mIndex = 0;
         s_info.mIsSelected = false;
         s_info.mController = gpApplication.mGamePads[i];
@@ -309,22 +314,46 @@ void CharacterSelectDirector::initializeLayout() {
         char tex_path[32];
         snprintf(tex_path, 32, "timg/hand_p%i.bti", i+1);
 
-        JUTTexture *select_icon = new JUTTexture(tex_path);
+        {
+            JUTTexture *select_icon = new JUTTexture(tex_path);
 
-        J2DPicture *select_picture = new J2DPicture('hnd\0' | i | 0x30, {0, 0, 0, 0});
-        select_picture->insert(select_icon, 0, 1.0f);
-        select_picture->mRect.move(info.mPoster->mRect.mX1 + 50,
-                                   info.mPoster->mRect.mY2 + 14);
-        select_picture->mRect.resize(38, 56);
-        iconListPane->mChildrenList.append(&select_picture->mPtrLink);
+            J2DPicture *select_picture = new J2DPicture('hnd\0' | i | 0x30, {0, 0, 0, 0});
+            select_picture->insert(select_icon, 0, 1.0f);
+            select_picture->mRect.move(info.mPoster->mRect.mX1 + 50, info.mPoster->mRect.mY2 + 14);
+            select_picture->mRect.resize(38, 56);
+            iconListPane->mChildrenList.append(&select_picture->mPtrLink);
 
-        s_info.mIcon = select_picture;
+            s_info.mHandIcon = select_picture;
+        }
+
+        {
+            for (int n = 0; n < 16; ++n) {
+                char goop_tex_path[64];
+                snprintf(goop_tex_path, 64, "/char_select/timg/goop_%i/m_%i.bti", i + 1, n);
+
+                auto *goop_anim_tex =
+                    reinterpret_cast<const ResTIMG *>(JKRFileLoader::getGlbResource(goop_tex_path));
+                s_info.mGoopTextures.push_back(goop_anim_tex);
+            }
+
+            JUTTexture *texture = new JUTTexture;
+            auto *timg =
+                reinterpret_cast<const ResTIMG *>(s_info.mGoopTextures.at(0));
+            texture->mTexObj2.val[2] = 0;
+            texture->storeTIMG(timg);
+            texture->_50 = false;
+
+            J2DPicture *goop_picture = new J2DPicture('gup\0' | i | 0x30, {0, 0, 0, 0});
+            goop_picture->insert(texture, 0, 1.0f);
+            goop_picture->mRect.resize(130, 130);
+            iconListPane->mChildrenList.append(&goop_picture->mPtrLink);
+            s_info.mGoopIcon = goop_picture;
+        }
+
         mSelectScreen->mSelectionInfos.push_back(s_info);
     }
 
     // Adjust for ratios
-    f32 ratio = scaleLinearAtAnchor(BetterSMS::getScreenToFullScreenRatio(), 1.8f, 1.0f);
-
     {
         J2DPane *bn_pane = mSelectScreen->mScreen->search('bnls');
         if (!bn_pane)
@@ -336,8 +365,9 @@ void CharacterSelectDirector::initializeLayout() {
             auto *picture      = reinterpret_cast<J2DPicture *>(ptrlink->mItemPtr);
             if (picture->mTag != 'banr') {
                 int img_width      = picture->mRect.mX2 - picture->mRect.mX1;
-                int scaled_ofs     = ((picture->mRect.mX1 + img_width / 2) - 460) * ratio;
-                picture->mRect.mX1 = 460 + scaled_ofs;
+                int scaled_ofs =
+                    ((picture->mRect.mX1 + img_width / 2) - 300) * icon_ratio - (img_width / 2);
+                picture->mRect.mX1 = 300 + scaled_ofs;
                 picture->mRect.mX2 = picture->mRect.mX1 + img_width;
             }
             ptrlink            = ptrlink->mNextLink;
@@ -353,8 +383,8 @@ void CharacterSelectDirector::initializeLayout() {
         while (ptrlink) {
             auto *picture      = reinterpret_cast<J2DPicture *>(ptrlink->mItemPtr);
             int img_width      = picture->mRect.mX2 - picture->mRect.mX1;
-            int scaled_ofs     = ((picture->mRect.mX1 + img_width / 2) - 460) * ratio;
-            picture->mRect.mX1 = 460 + scaled_ofs;
+            int scaled_ofs     = ((picture->mRect.mX1 + img_width / 2) - 300) * icon_ratio - (img_width / 2);
+            picture->mRect.mX1 = 300 + scaled_ofs;
             picture->mRect.mX2 = picture->mRect.mX1 + img_width;
             ptrlink            = ptrlink->mNextLink;
         }
@@ -381,12 +411,22 @@ void *CharacterSelectDirector::setupThreadFunc(void *param) {
     return nullptr;
 }
 
+static s32 sWaitTimer = 0;
+
 s32 CharacterSelectDirector::exit() {
     TSMSFader *fader = gpApplication.mFader;
     if (fader->mFadeStatus == TSMSFader::FADE_OFF) {
-        gpApplication.mFader->startFadeoutT(0.3f);
-        //Music::stopSong(1.0f);
+        mSelectScreen->mShouldReadInput = false;
+        if (sWaitTimer++ > SMSGetVSyncTimesPerSec()) {
+            gpApplication.mFader->startFadeoutT(0.3f);
+            Music::stopSong(1.0f);
+        }
+        int i = 0;
+        for (auto &s_info : mSelectScreen->mSelectionInfos) {
+            SME::TGlobals::sCharacterIDList[i++] = static_cast<SME::CharacterID>(s_info.mIndex);
+        }
     }
+
     return fader->mFadeStatus == TSMSFader::FADE_ON ? 5 : 1;
 }
 

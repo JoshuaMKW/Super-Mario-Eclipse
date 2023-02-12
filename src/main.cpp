@@ -21,6 +21,9 @@ extern void manageShineDarkness(TMarDirector *director);
 // Yoshi
 extern void adjustYoshiTounge(TMario *player, bool isMario);
 
+// Player
+extern void initCharacterArchives(TMarDirector *director);
+
 static BetterSMS::ModuleInfo sModuleInfo{ "Super Mario Eclipse", 1, 0, &gSettingsGroup };
 
 static void initModule() {
@@ -52,6 +55,7 @@ static void initModule() {
 
     Stage::registerUpdateCallback("__update_darkness", manageShineDarkness);
 
+    Stage::registerInitCallback("__init_player_models", initCharacterArchives);
     Player::registerUpdateProcess("__update_yoshi_tounge", adjustYoshiTounge);
 }
 

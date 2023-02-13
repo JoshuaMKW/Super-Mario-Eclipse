@@ -411,13 +411,11 @@ void *CharacterSelectDirector::setupThreadFunc(void *param) {
     return nullptr;
 }
 
-static s32 sWaitTimer = 0;
-
 s32 CharacterSelectDirector::exit() {
     TSMSFader *fader = gpApplication.mFader;
     if (fader->mFadeStatus == TSMSFader::FADE_OFF) {
         mSelectScreen->mShouldReadInput = false;
-        if (sWaitTimer++ > SMSGetVSyncTimesPerSec()) {
+        if (mExitWaitTimer++ > SMSGetVSyncTimesPerSec()) {
             gpApplication.mFader->startFadeoutT(0.3f);
             Music::stopSong(1.0f);
         }

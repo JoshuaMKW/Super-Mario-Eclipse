@@ -53,8 +53,8 @@ public:
     friend class CharacterSelectScreen;
 
     CharacterSelectDirector(bool isMario, bool isLuigi, bool isPiantissimo, bool isShadowMario)
-        : TDirector(), mState(State::INIT), mDisplay(nullptr), mSelectScreen(nullptr), mIsMario(isMario), mIsLuigi(isLuigi),
-          mIsPiantissimo(isPiantissimo), mIsShadowMario(isShadowMario) {}
+        : TDirector(), mState(State::INIT), mDisplay(nullptr), mSelectScreen(nullptr), mIsMario(isMario), mIsLuigi(isLuigi), mIsPiantissimo(isPiantissimo),
+          mIsShadowMario(isShadowMario), mExitWaitTimer(0) {}
     ~CharacterSelectDirector() override;
 
     s32 direct() override;
@@ -76,6 +76,7 @@ private:
     bool mIsLuigi       : 1;
     bool mIsPiantissimo : 1;
     bool mIsShadowMario : 1;
+    s32 mExitWaitTimer;
 };
 
 class CharacterSelectScreen : public JDrama::TViewObj {

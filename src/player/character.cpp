@@ -20,190 +20,7 @@
 #include "globals.hxx"
 #include "player.hxx"
 
-static u8 gJ3DBuffer[0x2000];
-static OSThread gCharacterSwapThread;
-static u8 gCharacterSwapStack[0x4000];
-static bool gSwapSuccessful = false;
-static u8 gHeapAllocState   = 0;
-
 static TGlobalVector<void *> sCharacterArcs;
-
-bool SME::loadParams() {
-    JKRMemArchive *marioVolumeData =
-        static_cast<JKRMemArchive *>(JKRFileLoader::getVolume("mario"));
-
-    u8 *params = static_cast<u8 *>(marioVolumeData->getResource("/params.szs"));
-
-    void *allocation;
-    if (params) {
-        u32 filesize                     = marioVolumeData->getResSize(params);
-        CompressionType compressionState = JKRDecomp::checkCompressed(params);
-
-        switch (compressionState) {
-        case CompressionType::SZS: {
-            *(u32 *)0x8040E260 = params[1];
-            allocation         = JKRHeap::sCurrentHeap->alloc(params[1], 32, JKRHeap::sCurrentHeap);
-            decompSZS_subroutine(params, static_cast<u8 *>(allocation));
-            TGlobals::sPRMFile = allocation;
-        }
-        case CompressionType::SZP:
-            TGlobals::sPRMFile = nullptr;
-        case CompressionType::NONE: {
-            allocation = JKRHeap::sCurrentHeap->alloc(filesize, 32);
-            memcpy(allocation, params, filesize);
-            TGlobals::sPRMFile = allocation;
-        }
-        }
-
-        JKRMemArchive *oldParams = static_cast<JKRMemArchive *>(JKRFileLoader::getVolume("params"));
-
-        oldParams->unmountFixed();
-        oldParams->mountFixed(TGlobals::sPRMFile, JKRMemBreakFlag::UNK_0);
-
-        return true;
-    }
-    return false;
-}
-
-bool SME::swapBinary(SME::CharacterID id) {
-    char buffer[32];
-    snprintf(buffer, 32, "/data/chr%hhu.szs", id);
-
-    if (DVDConvertPathToEntrynum(buffer) < 0) {
-        return false;
-    }
-
-    JKRMemArchive *mario_volume =
-        static_cast<JKRMemArchive *>(JKRFileLoader::getVolume("mario"));
-
-    JKRHeap::sCurrentHeap->free(arcBufMario);
-
-    void *marioData = SMSLoadArchive(buffer, nullptr, 0, nullptr);
-
-    // Character failed to load / doesn't exist
-    SMS_ASSERT(marioData, "Tried to swap the player with data that doesn't exist!");
-
-    gHeapAllocState ^= 1;
-    arcBufMario = marioData;
-
-    mario_volume->unmountFixed();
-    mario_volume->mountFixed(arcBufMario, JKRMemBreakFlag::UNK_0);
-
-    return true;
-}
-
-//static void *t_swapCharacter(void *param) {
-//    TMario *player  = reinterpret_cast<TMario *>(param);
-//    gSwapSuccessful = false;
-//
-//    char buffer[32];
-//    snprintf(buffer, 32, "/data/chr%hhu.szs", gTargetCharacterID);
-//
-//    // Player doesn't exist
-//    if (DVDConvertPathToEntrynum(buffer) < 0) {
-//        return &gSwapSuccessful;
-//    }
-//
-//    JKRExpHeap *CharacterHeap = TGlobals::sCharacterHeap;
-//    JKRMemArchive *marioVolumeData =
-//        static_cast<JKRMemArchive *>(JKRFileLoader::getVolume("mario"));
-//
-//    // -- Start screen wipe and async load the new character binary -- //
-//    u32 *marioData;
-//    if (gFadeInOut) {
-//        gpApplication.mFader->startWipe(TSMSFader::WipeRequest::FADE_CIRCLE_OUT, 1.0f, 0.0f);
-//        CharacterHeap->freeAll();
-//        marioData = reinterpret_cast<u32 *>(Util::loadArchive(
-//            buffer, CharacterHeap, static_cast<JKRDvdRipper::EAllocDirection>(gHeapAllocState)));
-//
-//        // Threaded loop to wait on fade to complete
-//        while (gpApplication.mFader->mFadeStatus != TSMSFader::FADE_ON) {
-//            SMS_ASM_BLOCK("");
-//        }
-//    } else {
-//        CharacterHeap->freeAll();
-//        marioData = reinterpret_cast<u32 *>(Util::loadArchive(
-//            buffer, CharacterHeap, static_cast<JKRDvdRipper::EAllocDirection>(gHeapAllocState)));
-//    }
-//
-//    // Character failed to load / doesn't exist
-//    SMS_ASSERT(marioData, "Tried to swap the player with data that doesn't exist!");
-//
-//    // Toggle heap direction to keep heap from fragmenting
-//    gHeapAllocState ^= 1;
-//
-//    // Make the player inactive
-//    player->mAttributes.mIsPerforming = true;
-//
-//    // Free buffer and swap pointers
-//    arcBufMario = marioData;
-//
-//    // Refresh mounted handle
-//    marioVolumeData->unmountFixed();
-//    marioVolumeData->mountFixed(arcBufMario, JKRMemBreakFlag::UNK_0);
-//
-//    // -- Update player data -- //
-//    {
-//        const s16 health = player->mHealth;
-//        Vec position;
-//        Vec rotation;
-//
-//        player->JSGGetTranslation(&position);
-//        player->JSGGetRotation(&rotation);
-//
-//        // Prevent other threads from interrupting
-//
-//        // clang-format off
-//        SMS_ATOMIC_CODE(
-//            JKRHeap *currentHeap = gJ3DHeap.becomeCurrentHeap();
-//            gJ3DHeap.freeAll();
-//            player->initValues();
-//            player->loadAfter();
-//            currentHeap->becomeCurrentHeap();
-//        )
-//        // clang-format on
-//
-//        player->mAttributes.mIsPerforming = false;
-//        player->JSGSetTranslation(position);
-//        player->JSGSetRotation(rotation);
-//    }
-//
-//    if (gFadeInOut) {
-//        gpApplication.mFader->startWipe(TSMSFader::WipeRequest::FADE_CIRCLE_IN, 1.0f, 0.0f);
-//
-//        while (gpApplication.mFader->mFadeStatus != TSMSFader::FADE_OFF) {
-//            SMS_ASM_BLOCK("");
-//        }
-//    }
-//
-//    gSwapSuccessful = true;
-//    return &gSwapSuccessful;
-//}
-//
-//void SME::switchCharacter(TMario *player, CharacterID id, bool fadeInOut) {
-//    gTargetCharacterID = id;
-//    gFadeInOut         = fadeInOut;
-//
-//    if (OSIsThreadTerminated(&gCharacterSwapThread)) {
-//        // fix stack bug, gets overwritten due to obnoxious pointer
-//        OSCreateThread(&gCharacterSwapThread, &t_swapCharacter, player,
-//                       (u8 *)(&gCharacterSwapStack) + sizeof(gCharacterSwapStack),
-//                       sizeof(gCharacterSwapStack), 18, 0);
-//        OSResumeThread(&gCharacterSwapThread);
-//    }
-//}
-
-void SME::switchCharacter(TMario *player, CharacterID id, bool is_in_stage) {
-    JKRMemArchive *archive = reinterpret_cast<JKRMemArchive *>(JKRFileLoader::getVolume("mario"));
-    archive->unmountFixed();
-    arcBufMario = sCharacterArcs.at(static_cast<int>(id));
-    archive->mountFixed(arcBufMario, UNK_0);
-
-    if (player) {
-        player->initValues();
-        player->loadAfter();
-    }
-}
 
 SMS_WRITE_32(SMS_PORT_REGION(0x802A6C4C, 0, 0, 0), 0x60000000);  // Prevent early archive init
 SMS_WRITE_32(SMS_PORT_REGION(0x802A7148, 0, 0, 0), 0x48000058);
@@ -211,14 +28,14 @@ SMS_WRITE_32(SMS_PORT_REGION(0x802A71A8, 0, 0, 0), 0x60000000);
 
 void initCharacterArchives(TMarDirector *director) {
     sCharacterArcs.clear();
-    sCharacterArcs.reserve(4);
 
-    for (int i = 0; i < 2; ++i) {
+    for (int i = 0; i < 4; ++i) {
         char buffer[32];
         snprintf(buffer, 32, "/data/chr%hhu.szs", SME::TGlobals::sCharacterIDList[i]);
 
-        OSReport("Auuugghh\n");
-        sCharacterArcs.push_back(SMSLoadArchive(buffer, nullptr, 0, nullptr));
+        void *arc = JKRDvdRipper::loadToMainRAM(buffer, nullptr, EXPAND, 0, nullptr,
+                                                JKRDvdRipper::HEAD, 0, nullptr);
+        sCharacterArcs.push_back(arc);
     }
 
     arcBufMario = sCharacterArcs.at(0);
@@ -242,17 +59,21 @@ SMS_PATCH_BL(SMS_PORT_REGION(0x80276BF0, 0, 0, 0), initCharacterBuffer);
 
 static void getGlobalOrLocalResFmt(char *dst, size_t size, const char *local_path,
                                 const char *specifier, const char *global_path) {
-    if (!JKRFileLoader::findFirstFile("/common/01_waterboost")) {
+    auto *first_file = JKRFileLoader::findFirstFile("/common/01_waterboost");
+    if (!first_file) {
         snprintf(dst, size, local_path, specifier);
         return;
     }
+    delete first_file;
     snprintf(dst, size, global_path, specifier);
 }
 
 static void *getGlobalOrLocalRes(const char *local_path, const char *global_path) {
-    if (!JKRFileLoader::findFirstFile("/common/01_waterboost")) {
+    auto *first_file = JKRFileLoader::findFirstFile("/common/01_waterboost");
+    if (!first_file) {
         return JKRFileLoader::getGlbResource(local_path);
     }
+    //delete first_file;
     return JKRFileLoader::getGlbResource(global_path);
 }
 
@@ -388,3 +209,26 @@ static void *getGlobalPlayerSplashTex(const char *local_path) {
     return getGlobalOrLocalRes(local_path, "/common/timg/splash.bti");
 }
 SMS_PATCH_BL(SMS_PORT_REGION(0x8026707C, 0, 0, 0), getGlobalPlayerSplashTex);
+
+static TMActorKeeper *sKeeper = nullptr;
+static MActor *sActor         = nullptr;
+
+static void applyShadowEffects(u32 *tremble_efx) {
+    TMario *mario;
+    SMS_FROM_GPR(31, mario);
+
+    ((u32 **)mario)[0x53C / 4] = tremble_efx;
+    if (SME::TGlobals::getCharacterIDFromPlayer(mario) == SME::CharacterID::SHADOW_MARIO) {
+        sKeeper                    = new TMActorKeeper(nullptr, 1);
+        sKeeper->mModelFlags       = 0x11300000;
+        sActor                     = sKeeper->createMActorFromDefaultBmd("/common/kagemario", 0);
+        mario->mModelData->mModel  = sActor->mModel;
+        mario->mBodyModelData      = sActor->mModel->mModelData;
+
+        /*for (int i = 0; i < sActor->mModel->mModelData->mJointNum; ++i) {
+            SMS_InitPacket_Fog__FP8J3DModelUs(sActor->mModel, i);
+        }*/
+        sActor->setBtk("kagemario_scroll");
+    }
+}
+//SMS_PATCH_BL(SMS_PORT_REGION(0x802474C0, 0, 0, 0), applyShadowEffects);

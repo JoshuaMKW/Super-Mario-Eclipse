@@ -15,6 +15,7 @@
 #include <JSystem/J2D/J2DPicture.hxx>
 #include <JSystem/J2D/J2DTextBox.hxx>
 #include <JSystem/JUtility/JUTTexture.hxx>
+#include <JSystem/JKernel/JKRDvdRipper.hxx>
 
 #include <SMS/Manager/RumbleManager.hxx>
 #include <SMS/GC2D/SMSFader.hxx>
@@ -56,7 +57,6 @@ s32 CharacterSelectDirector::direct() {
 
         gpMSound->initSound();
         gpMSound->enterStage(MS_WAVE_DELFINO_PLAZA, 1, 2);
-        // MSBgm::startBGM(BGM_MARE_SEA);
 
         Music::setMaxVolume(0x7F);
         Music::setVolume(0x7F, 0x7F);
@@ -112,12 +112,14 @@ s32 CharacterSelectDirector::direct() {
 void CharacterSelectDirector::initialize() {
     sResourceArchive = new JKRMemArchive();
 
-    void *archive = SMSLoadArchive("/data/char_select.szs", nullptr, 0, nullptr);
-    SMS_ASSERT(archive, "Failed to find character select assets (./data/char_select.szs)!");
+    void *archive = JKRDvdRipper::loadToMainRAM("/data/char_select.szs", nullptr, EXPAND, 0, nullptr,
+                                                JKRDvdRipper::HEAD,
+                                                0, nullptr);
+
+    SMS_DEBUG_ASSERT(archive, "Failed to find character select assets (./data/char_select.szs)!");
 
     sResourceArchive->mountFixed(archive, UNK_0);
 
-    OSReport("Initializing layout\n");
     initializeDramaHierarchy();
     initializeLayout();
 }
@@ -441,9 +443,7 @@ bool directCharacterSelectMenu(TApplication *app) {
 }
 
 static int flagCharacterSelectMenu() {
-    if (gpApplication.mGamePads[0]->mButtons.mInput == TMarioGamePad::R)
-        return 11;
-    return 5;
+    return 11;
 }
 SMS_PATCH_BL(SMS_PORT_REGION(0x80176160, 0, 0, 0), flagCharacterSelectMenu);
 

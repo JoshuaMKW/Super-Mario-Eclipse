@@ -2,7 +2,7 @@
 
 HUDSetting gHUDSetting;
 BugsExploitsSetting gBugsSetting;
-Settings::SettingsGroup gSettingsGroup("Super Mario Eclipse", 1, 0, Settings::Priority::GAME);
+Settings::SettingsGroup gSettingsGroup(1, 0, Settings::Priority::GAME);
 
 bool BugsExploitsSetting::sIsUnlocked = false;
 

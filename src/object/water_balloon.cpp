@@ -17,7 +17,7 @@
 #include <BetterSMS/module.hxx>
 #include <BetterSMS/libs/constmath.hxx>
 
-#include "obj/water_balloon.hxx"
+#include "object/water_balloon.hxx"
 
 TWaterEmitInfo *TWaterBalloon::sEmitInfo = nullptr;
 constexpr f32 MaxSpeed = 30.0f;
@@ -26,212 +26,222 @@ TWaterBalloon::TWaterBalloon(const char *name)
     : TMapObjBall(name), mIsPopped(false) {}
 
 void TWaterBalloon::init(TLiveManager *manager) {
-  mLiveManager = manager;
-  mLiveManager->manageObj(this);
+    mLiveManager = manager;
+    mLiveManager->manageObj(this);
 }
 
 void TWaterBalloon::initActorData() {
-  TMapObjBall::initActorData();
+    TMapObjBall::initActorData();
 
-  /*
-  MActorAnmData *anmData = new MActorAnmData();
-  anmData->init("/mario/waterballoon", nullptr);
+    /*
+    MActorAnmData *anmData = new MActorAnmData();
+    anmData->init("/mario/waterballoon", nullptr);
 
-  MActor *actor = new MActor(anmData);
+    MActor *actor = new MActor(anmData);
 
-  void *resource =
-  JKRFileLoader::getGlbResource("/mario/waterballoon/waterballoon.bmd");
-  J3DModelData *modelData =
-      J3DModelLoaderDataBase::load(resource, 0);
+    void *resource =
+    JKRFileLoader::getGlbResource("/mario/waterballoon/waterballoon.bmd");
+    J3DModelData *modelData =
+        J3DModelLoaderDataBase::load(resource, 0);
 
-  J3DModel *model = new J3DModel(modelData, 0, 1);
-  actor->setModel(model, 0);
+    J3DModel *model = new J3DModel(modelData, 0, 1);
+    actor->setModel(model, 0);
 
-  mActorData = actor;
-  */
+    mActorData = actor;
+    */
 }
 
 TWaterBalloon::~TWaterBalloon() {}
 
 void TWaterBalloon::perform(u32 flags, JDrama::TGraphics *graphics) {
-  TMapObjBall::perform(flags, graphics);
-  if (flags & PERFORM_ON_MOVEMENT) {
-    mForwardSpeed = PSVECMag(reinterpret_cast<Vec *>(&mSpeed));
-  }
+    TMapObjBall::perform(flags, graphics);
+    if (flags & PERFORM_ON_MOVEMENT) {
+    mForwardSpeed = sqrtf(mSpeed.x*mSpeed.x+mSpeed.z*mSpeed.z);
+    }
 }
 
 bool TWaterBalloon::receiveMessage(THitActor *actor, u32 message) {
-  return TMapObjBall::receiveMessage(actor, message);
+    return TMapObjBall::receiveMessage(actor, message);
 }
 
 void TWaterBalloon::control() {
-  TMapObjBall::control();
-  if (mForwardSpeed > MaxSpeed) {
+    TMapObjBall::control();
+    /*if (mForwardSpeed > MaxSpeed) {
     TVec3f dir;
     getReflectionDir(*mFloorBelow->getNormal(), dir);
 
     blast(dir);
-  }
+    }*/
 }
 
 void TWaterBalloon::kill() { TMapObjBall::kill(); }
 
 void TWaterBalloon::appear() {
-  TMapObjBall::appear();
-  mIsPopped = false;
+    TMapObjBall::appear();
+    mIsPopped = false;
 }
 
 s32 TWaterBalloon::getLivingTime() const { return 0x7FFFFFFF; }
 s32 TWaterBalloon::getFlushTime() const { return 0; }
 
-void TWaterBalloon::hold(TTakeActor *actor) { TMapObjBall::hold(actor); }
+void TWaterBalloon::hold(TTakeActor *actor) { 
+    TMapObjBall::hold(actor);
+    if (actor->mObjectID == OBJECT_ID_MARIO)
+        mHoldingActor = reinterpret_cast<TMario *>(actor);
+}
 void TWaterBalloon::put() { TMapObjBall::put(); }
 
-void TWaterBalloon::thrown() { TMapObjBall::thrown(); }
+void TWaterBalloon::thrown() {
+    TMapObjBall::thrown();
+    if (mHoldingActor->mObjectID == OBJECT_ID_MARIO) {
+        // Add mario speed to balloon speed
+
+    }
+}
 
 void TWaterBalloon::touchActor(THitActor *actor) {
-  if (actor->mObjectID != 0x80000001) { // Not Mario
-    blast({0.0f, 1.0f, 0.0f});
-    return;
-  }
+    if (actor->mObjectID != OBJECT_ID_MARIO) {  // Not Mario
+        blast({0.0f, 1.0f, 0.0f});
+        return;
+    }
 
-  TMario *player = reinterpret_cast<TMario *>(actor);
-  if (player->mState == 0x820008AB)
+    TMario *player = reinterpret_cast<TMario *>(actor);
+    if (player->mState == 0x820008AB)
     return; // Throwing
 
-  if (mForwardSpeed >= MaxSpeed) {
-    blast({0.0f, 1.0f, 0.0f});
-    return;
-  } else if (PSVECMag(reinterpret_cast<Vec *>(&player->mSpeed)) >= MaxSpeed) {
-    blast({0.0f, 1.0f, 0.0f});
-    return;
-  }
+    if (mForwardSpeed >= MaxSpeed || mSpeed.y < -10.0f) {
+        blast({0.0f, 1.0f, 0.0f});
+        return;
+    } else if (PSVECMag(player->mSpeed - mSpeed) >= MaxSpeed) {
+        blast({0.0f, 1.0f, 0.0f});
+        return;
+    }
 
-  const f32 pangle = static_cast<f32>(player->mAngle.y / 182);
-  const f32 speed = player->mForwardSpeed + 5.0f;
+    const f32 pangle = static_cast<f32>(player->mAngle.y / 182);
+    const f32 speed = player->mForwardSpeed + 5.0f;
 
-  {
-      TVec3f dir(0.0f, 0.0f, 0.0f);
-      dir.x = sinf(angleToRadians(pangle));
-      dir.z = cosf(angleToRadians(pangle));
-      dir.scale(speed);
-      mSpeed.add(dir);
-  }
+    {
+        TVec3f dir(0.0f, 0.0f, 0.0f);
+        dir.x = sinf(angleToRadians(pangle));
+        dir.z = cosf(angleToRadians(pangle));
+        dir.scale(speed);
+        mSpeed.add(dir);
+    }
 
-  if (gpMSound->gateCheck(0x1807)) {
+    if (gpMSound->gateCheck(0x1807)) {
     MSoundSESystem::MSoundSE::startSoundActor(
         0x1807, reinterpret_cast<Vec *>(&mTranslation), 0, nullptr, 0, 4);
-  }
+    }
 }
 
 void TWaterBalloon::touchGround(TVec3f *pos) {
-  if (mFloorBelow->mType == 2048) {
+    if (mFloorBelow->mType == 2048) {
     TMapObjBall::touchGround(pos);
     return;
-  }
+    }
 
-  if (!(mForwardSpeed >= MaxSpeed || mSpeed.y < -10.0f)) {
+    if (!(mForwardSpeed >= MaxSpeed || mSpeed.y < -10.0f)) {
     TMapObjBall::touchGround(pos);
     return;
-  }
+    }
 
-  TVec3f dir;
-  getReflectionDir(*mFloorBelow->getNormal(), dir);
+    TVec3f dir;
+    getReflectionDir(*mFloorBelow->getNormal(), dir);
 
-  blast(dir);
+    blast(dir);
 }
 
 void TWaterBalloon::touchWall(TVec3f *pos,
-                              TBGWallCheckRecord *record) {
-  TVec3f dir;
-  getReflectionDir(*mWallTouching->getNormal(), dir);
+                                TBGWallCheckRecord *record) {
+    TVec3f dir;
+    getReflectionDir(*mWallTouching->getNormal(), dir);
 
-  blast(dir);
+    blast(dir);
 }
 
 void TWaterBalloon::touchPollution() {
-  TVec3f dir;
-  getReflectionDir(*mFloorBelow->getNormal(), dir);
+    TVec3f dir;
+    getReflectionDir(*mFloorBelow->getNormal(), dir);
 
-  blast(dir);
+    blast(dir);
 }
 
 void TWaterBalloon::touchWaterSurface() {
-  TVec3f dir;
-  getReflectionDir({0.0f, 1.0f, 0.0f}, dir);
+    TVec3f dir;
+    getReflectionDir({0.0f, 1.0f, 0.0f}, dir);
 
-  blast(dir);
+    blast(dir);
 }
 
 void TWaterBalloon::touchWater(THitActor *actor) {
-  TMapObjBall::touchWater(actor);
+    TMapObjBall::touchWater(actor);
 }
 
 void TWaterBalloon::touchRoof(TVec3f *pos) {
-  TVec3f dir;
-  getReflectionDir(*mRoofTouching->getNormal(), dir);
+    TVec3f dir;
+    getReflectionDir(*mRoofTouching->getNormal(), dir);
 
-  blast(dir);
+    blast(dir);
 }
 
 void TWaterBalloon::kicked() { TMapObjBall::kicked(); }
 
 void TWaterBalloon::blast(TVec3f blastSpd) {
-  if (mHolder && mHolder->mObjectID == 0x80000001)
+    if (mHolder && mHolder->mObjectID == 0x80000001)
     receiveMessage(mHolder, 7); // Drop from Mario
 
-  TWaterEmitInfo emitInfo = *sEmitInfo;
+    TWaterEmitInfo emitInfo = *sEmitInfo;
 
-  TVec3f pos(mTranslation);
-  pos.y += 100.0f;
+    TVec3f pos(mTranslation);
+    pos.y += 100.0f;
 
-  TVec3f vel(blastSpd);
-  PSVECNormalize(reinterpret_cast<Vec *>(&vel), reinterpret_cast<Vec *>(&vel));
-  vel.scale(7.0f + PSVECMag(reinterpret_cast<Vec *>(&blastSpd)) * 0.1f);
+    TVec3f vel(blastSpd);
+    PSVECNormalize(reinterpret_cast<Vec *>(&vel), reinterpret_cast<Vec *>(&vel));
+    vel.scale(7.0f + PSVECMag(reinterpret_cast<Vec *>(&blastSpd)) * 0.1f);
 
-  emitInfo.mV.set(vel);
-  emitInfo.mSize.set(emitInfo.mSize.get() * 2);
-  emitInfo.mPos.set(mTranslation);
-  emitInfo.mHitRadius.set(emitInfo.mHitRadius.get() * 10);
-  gpModelWaterManager->emitRequest(emitInfo);
+    emitInfo.mV.set(vel);
+    emitInfo.mSize.set(emitInfo.mSize.get() * 2);
+    emitInfo.mPos.set(mTranslation);
+    emitInfo.mHitRadius.set(emitInfo.mHitRadius.get() * 10);
+    gpModelWaterManager->emitRequest(emitInfo);
 
-  emitInfo = *sEmitInfo;
-  vel.y -= 5.0f;
-  emitInfo.mPos.set(pos);
-  emitInfo.mV.set(vel);
-  emitInfo.mSize.set(80.0f);
-  emitInfo.mHitRadius.set(150.0f);
-  emitInfo.mNum.set(3);
+    emitInfo = *sEmitInfo;
+    vel.y -= 5.0f;
+    emitInfo.mPos.set(pos);
+    emitInfo.mV.set(vel);
+    emitInfo.mSize.set(80.0f);
+    emitInfo.mHitRadius.set(150.0f);
+    emitInfo.mNum.set(3);
 
-  sEmitInfo->mPos.set(mTranslation);
+    sEmitInfo->mPos.set(mTranslation);
 
-  gpModelWaterManager->emitRequest(emitInfo);
+    gpModelWaterManager->emitRequest(emitInfo);
 
 
-  if (gpMSound->gateCheck(0x28B8)) {
+    if (gpMSound->gateCheck(0x28B8)) {
     MSoundSESystem::MSoundSE::startSoundActor(
         0x28B8, reinterpret_cast<Vec *>(&mTranslation), 0, nullptr, 0, 4);
-  }
+    }
 
-  makeObjDead();
-  mIsPopped = true;
+    makeObjDead();
+    mIsPopped = true;
 }
 
 void TWaterBalloon::getReflectionDir(
     const TVec3f &reflectionNormal,
     TVec3f &out) const {
-  f32 dot2 =
-      2 * PSVECDotProduct(reinterpret_cast<const Vec *>(&mSpeed),
-                          reinterpret_cast<const Vec *>(&reflectionNormal));
-  TVec3f rvec(0.0f, 0.0f, 0.0f);
-  rvec.scale(dot2, reflectionNormal);
-  out.sub(mSpeed, rvec);
+    f32 dot2 =
+        2 * PSVECDotProduct(reinterpret_cast<const Vec *>(&mSpeed),
+                            reinterpret_cast<const Vec *>(&reflectionNormal));
+    TVec3f rvec(0.0f, 0.0f, 0.0f);
+    rvec.scale(dot2, reflectionNormal);
+    out.sub(mSpeed, rvec);
 }
 
 static hit_data waterBalloon_hit_data{.mAttackRadius = 40.0f,
-                                      .mAttackHeight = 40.0f,
-                                      .mReceiveRadius = 50.0f,
-                                      .mReceiveHeight = 50.0f};
+                                        .mAttackHeight = 40.0f,
+                                        .mReceiveRadius = 50.0f,
+                                        .mReceiveHeight = 50.0f};
 // static hit_data waterBalloon_hit_data{.mAttackRadius = 150.0f,
 //                                       .mAttackHeight = 60.0f,
 //                                       .mReceiveRadius = 60.0f,
@@ -260,16 +270,16 @@ static sound_info waterBalloon_sound_info{
     .mLength = 10, .mSoundData = &waterBalloon_sound_data};
 
 static ObjPhysicalData waterBalloon_physical_data{.mGravity = 0.3f,
-                                                  .mFloorBounceSpeed = 0.3f,
-                                                  .mWallBounceSpeed = 0.1f,
-                                                  .mRotationStopFactor = 0.1f,
-                                                  .mFloorBrakeFactor = 0.9f,
-                                                  .mRollBrakeFactor = 0.97f,
-                                                  .mAirBrakeFactor = 1.0f,
-                                                  .mRollBrakeFactor2 = 1.0f,
-                                                  ._20 = {0.0f, 0.7f, 0.6f},
-                                                  .mThrowDistance = 2.8f,
-                                                  .mThrowHeight = 16.0f};
+                                                    .mFloorBounceSpeed = 0.3f,
+                                                    .mWallBounceSpeed = 0.1f,
+                                                    .mRotationStopFactor = 0.1f,
+                                                    .mFloorBrakeFactor = 0.9f,
+                                                    .mRollBrakeFactor = 0.97f,
+                                                    .mAirBrakeFactor = 1.0f,
+                                                    .mRollBrakeFactor2 = 1.0f,
+                                                    ._20 = {0.0f, 0.7f, 0.6f},
+                                                    .mThrowDistance = 2.8f,
+                                                    .mThrowHeight = 16.0f};
 
 static ObjPhysicalInfo waterBalloon_physical_info{
     ._00 = 13, .mPhysicalData = &waterBalloon_physical_data, ._0C = 2};

@@ -6,7 +6,6 @@
 #include <BetterSMS/settings.hxx>
 #include <BetterSMS/memory.hxx>
 #include <BetterSMS/module.hxx>
-#include <BetterSMS/icons.hxx>
 
 constexpr size_t MaxShineCount = 300;
 

@@ -4,7 +4,7 @@
 #include <BetterSMS/module.hxx>
 #include <BetterSMS/libs/constmath.hxx>
 
-#include "obj/blow_wind_obj.hxx"
+#include "object/blow_wind_obj.hxx"
 
 TBlowWindMapObj::TBlowWindMapObj(const char *name) : TMapObjBase(name) {}
 TBlowWindMapObj::~TBlowWindMapObj() {}

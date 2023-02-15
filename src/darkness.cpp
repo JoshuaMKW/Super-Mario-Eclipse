@@ -2,22 +2,35 @@
 
 #include <BetterSMS/module.hxx>
 #include <BetterSMS/stage.hxx>
-#include <BetterSMS/math.hxx>
+#include <BetterSMS/libs/constmath.hxx>
 
 #include "darkness.hxx"
+#include "globals.hxx"
 #include "settings.hxx"
 
 using namespace BetterSMS;
 
 static TLightContext sLightContext;
+static u8 sBrightLevel = 255;
+
+void initializeParameters(TLightContext::ActiveType type, TVec3f pos, u8 layer_count, JUtility::TColor color, f32 scale, u8 brightness) {
+    sLightContext.mLightType   = type;
+    sLightContext.mTranslation = pos;
+    sLightContext.mColor       = color;
+    sLightContext.mBaseScale   = scale;
+    sLightContext.mLayerCount  = layer_count;
+    sBrightLevel               = brightness;
+}
 
 void TLightContext::process(TModelWaterManager &manager) {
-    /*s32 &CurrentShineCount = TFlagManager::smInstance->Type4Flag.mShineCount;
+    s32 &CurrentShineCount = TFlagManager::smInstance->Type4Flag.mShineCount;
+
+    manager.mLayerCount = sLightContext.mLayerCount;
 
     switch (mLightType) {
     case TLightContext::ActiveType::STATIC: {
-        if (Stage::TStageParams::sStageConfig->mLightDarkLevel.get() != 255)
-            manager.mDarkLevel = Stage::TStageParams::sStageConfig->mLightDarkLevel.get();
+        if (sBrightLevel != 255)
+            manager.mDarkLevel = sBrightLevel;
         else if (CurrentShineCount >= MaxShineCount) {
             if (manager.mDarkLevel < 255)
                 manager.mDarkLevel += 1;
@@ -25,7 +38,7 @@ void TLightContext::process(TModelWaterManager &manager) {
                 mLightType = TLightContext::ActiveType::DISABLED;
         }
 
-        gShineShadowPos = mShineShadowCoordinates;
+        gShineShadowPos = mTranslation;
 
         const f32 sigOfs      = 300.0f;
         const f32 sigStrength = 0.04f;
@@ -34,9 +47,9 @@ void TLightContext::process(TModelWaterManager &manager) {
             if (CurrentShineCount != mPrevShineCount) {
                 mPrevSize = manager.mSize;
                 mNextSize =
-                    mShineShadowBase + powf(((1350.0f / MaxShineCount) * CurrentShineCount), 1.5f);
+                    mBaseScale + powf(((1350.0f / MaxShineCount) * CurrentShineCount), 1.5f);
                 mPrevDarkness = manager.mDarkLevel;
-                mNextDarkness = Util::Math::lerp<u8>(TGlobals::getMinDarkness(), 190,
+                mNextDarkness = lerp<u8>(SME::TGlobals::getMinDarkness(), 190,
                                                      static_cast<f32>(CurrentShineCount) /
                                                          static_cast<f32>(MaxShineCount));
 
@@ -47,11 +60,11 @@ void TLightContext::process(TModelWaterManager &manager) {
             }
         }
 
-        const f32 cur = Math::sigmoidCurve(mStepContext, mPrevSize, mNextSize, sigOfs, sigStrength);
+        const f32 cur = sigmoid(mStepContext, mPrevSize, mNextSize, sigOfs, sigStrength);
 
-        if (mTargetDarkness == 255)
+        if (sBrightLevel == 255)
             manager.mDarkLevel = static_cast<u8>(
-                Math::sigmoidCurve(mStepContext, static_cast<f32>(mPrevDarkness),
+                sigmoid(mStepContext, static_cast<f32>(mPrevDarkness),
                                    static_cast<f32>(mNextDarkness), sigOfs, sigStrength));
 
         constexpr f32 deadZone = 1.0f;
@@ -83,62 +96,51 @@ void TLightContext::process(TModelWaterManager &manager) {
     }
     case TLightContext::ActiveType::FOLLOWPLAYER: {
         manager.mDarkLevel = mTargetDarkness;
-        gShineShadowPos    = *gpMarioPos + mShineShadowCoordinates;
+        gShineShadowPos    = *gpMarioPos + mTranslation;
         break;
     }
     default:
         break;
-    }*/
+    }
 
     manager.LightType.mShowShadow = manager.mDarkLevel < 255;
 }
 
-//static void initShineShadow() {
-//    auto *config = Stage::getStageConfiguration();
-//
-//    if (config->mLightType.get() == TLightContext::ActiveType::DISABLED)
-//        return;
-//
-//    Class::TLightContext &LightContext = TGlobals::sLightData;
-//
-//    s32 &CurrentShineCount = TFlagManager::smInstance->Type4Flag.mShineCount;
-//    if (CurrentShineCount < SME_MAX_SHINES) {
-//        LightContext.mLightType       = config->mLightType.get();
-//        LightContext.mShineShadowBase = config->mLightSize.get();
-//        LightContext.mPrevShineCount  = CurrentShineCount;
-//        {
-//            TVec3f coordinates(config->mLightPosX.get(), config->mLightPosY.get(),
-//                               config->mLightPosZ.get());
-//            LightContext.mShineShadowCoordinates = coordinates;
-//        }
-//
-//        gpModelWaterManager->mColor                 = config->mLightColor.get();
-//        gpModelWaterManager->mDarkLevel             = config->mLightDarkLevel.get();
-//        gpModelWaterManager->mLayerCount            = config->mLightLayerCount.get();
-//        gpModelWaterManager->mSphereStep            = config->mLightStep.get();
-//        gpModelWaterManager->mSize                  = config->mLightSize.get();
-//        gpModelWaterManager->LightType.mMaskObjects = true;
-//        gpModelWaterManager->LightType.mShowShadow  = true;
-//
-//        if (LightContext.mLightType == TLightContext::ActiveType::STATIC) {
-//            LightContext.mNextSize = LightContext.mShineShadowBase +
-//                                     powf(((1350.0f / SME_MAX_SHINES) * CurrentShineCount), 1.5f);
-//
-//            if (config->mLightDarkLevel.get() == 255)
-//                gpModelWaterManager->mDarkLevel = Util::Math::lerp<u8>(
-//                    TGlobals::getMinDarkness(), 190,
-//                    static_cast<f32>(CurrentShineCount) / static_cast<f32>(SME_MAX_SHINES));
-//            else
-//                gpModelWaterManager->mDarkLevel = config->mLightDarkLevel.get();
-//
-//            gpModelWaterManager->mSize       = LightContext.mNextSize;
-//            gpModelWaterManager->mSphereStep = gpModelWaterManager->mSize / 2.0f;
-//        }
-//    } else {
-//        LightContext.mLightType = TLightContext::ActiveType::DISABLED;
-//    }
-//}
-//SME_PATCH_B(SME_PORT_REGION(0x80280180, 0x80277F0C, 0, 0), initShineShadow);
+#define SME_MAX_SHINES 300
+
+static void initShineShadow() {
+    if (sLightContext.mLightType == TLightContext::ActiveType::DISABLED)
+        return;
+
+    s32 &CurrentShineCount = TFlagManager::smInstance->Type4Flag.mShineCount;
+    if (CurrentShineCount < SME_MAX_SHINES) {
+        sLightContext.mPrevShineCount  = CurrentShineCount;
+
+        gpModelWaterManager->mDarkLevel             = sBrightLevel;
+        gpModelWaterManager->mSphereStep            = sLightContext.mBaseScale / 2;
+        gpModelWaterManager->mSize                  = sLightContext.mBaseScale;
+        gpModelWaterManager->LightType.mMaskObjects = true;
+        gpModelWaterManager->LightType.mShowShadow  = true;
+
+        if (sLightContext.mLightType == TLightContext::ActiveType::STATIC) {
+            sLightContext.mNextSize = sLightContext.mBaseScale +
+                                      powf(((1350.0f / SME_MAX_SHINES) * CurrentShineCount), 1.5f);
+
+            if (sBrightLevel == 255)
+                gpModelWaterManager->mDarkLevel = lerp<u8>(SME::TGlobals::getMinDarkness(), 190,
+                                                           static_cast<f32>(CurrentShineCount) /
+                                                               static_cast<f32>(SME_MAX_SHINES));
+            else
+                gpModelWaterManager->mDarkLevel = sBrightLevel;
+
+            gpModelWaterManager->mSize       = sLightContext.mNextSize;
+            gpModelWaterManager->mSphereStep = gpModelWaterManager->mSize / 2.0f;
+        }
+    } else {
+        sLightContext.mLightType = TLightContext::ActiveType::DISABLED;
+    }
+}
+SMS_PATCH_B(SMS_PORT_REGION(0x80280180, 0x80277F0C, 0, 0), initShineShadow);
 
 void manageShineDarkness(TMarDirector *director) {
   sLightContext.process(*gpModelWaterManager);

@@ -9,7 +9,7 @@
 #include <SMS/rand.h>
 #include <SMS/MoveBG/Coin.hxx>
 
-#include "obj/star_bit.hxx"
+#include "object/star_bit.hxx"
 
 const JUtility::TColor TStarBit::sStarBitColorArray[6]{
     {0xEB, 0x57, 0x3D, 0xFF}, // RED

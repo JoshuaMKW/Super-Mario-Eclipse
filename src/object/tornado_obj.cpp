@@ -10,7 +10,7 @@
 #include <BetterSMS/player.hxx>
 #include <BetterSMS/libs/constmath.hxx>
 
-#include "obj/tornado_obj.hxx"
+#include "object/tornado_obj.hxx"
 
 TTornadoMapObj::TTornadoMapObj(const char *name)
     : TRailMapObj(name), mBlowStrength(1.0f), mTrueRotation(0.0f, 0.0f, 0.0f) {
@@ -39,7 +39,7 @@ void TTornadoMapObj::control() {
 
   for (int i = 0; i < mNumObjs; ++i) {
     THitActor *actor = mCollidingObjs[i];
-    if (actor == gpMarioAddress) {
+    if (actor->mObjectID != OBJECT_ID_MARIO) {
       TLiveActor *blowObj = reinterpret_cast<TLiveActor *>(actor);
       blowUp(blowObj);
     } else {
@@ -90,6 +90,7 @@ bool TTornadoMapObj::blowUp(TMario *actor) {
         actor->mState != static_cast<u32>(TMario::STATE_HOVER) &&
         mBlowStrength >= 0.5f) {
         playerData->mCollisionFlags.mIsSpinBounce = true;
+        playerData->setCanSprayFludd(true);
         actor->mState = static_cast<u32>(TMario::STATE_JUMPSPINL);
     }
 

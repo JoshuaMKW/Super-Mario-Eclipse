@@ -1,1 +1,0 @@
-Insert your system files here (replaces system files on the ISO, such as main.dol)

@@ -1,0 +1,3 @@
+[submodule "lib/BetterSunshineEngine"]
+	path = lib/BetterSunshineEngine
+	url = https://github.com/JoshuaMKW/BetterSunshineEngine

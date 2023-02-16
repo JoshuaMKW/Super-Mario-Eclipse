@@ -70,18 +70,20 @@ static void initModule() {
 }
 
 static void deinitModule() {
-    OSReport("Deinitializing Module...\n");
-
-    BetterSMS::deregisterModule("Super Mario Eclipse");
-
-    // Cleanup callbacks
     Application::deregisterContextCallback(11);
 
     Stage::deregisterUpdateCallback("__update_darkness");
 
+    Stage::deregisterInitCallback("__init_player_models");
+    Player::deregisterLoadAfterCallback("__init_water_balloons");
+    Player::deregisterUpdateCallback("__update_water_balloons");
     Player::deregisterUpdateCallback("__update_yoshi_tounge");
 
+    Objects::deregisterObject("DarknessEffect");
+    Objects::deregisterObject("Tornado");
+    Objects::deregisterObject("WaterBalloon");
 
+    BetterSMS::deregisterModule("Super Mario Eclipse");
 }
 
 // Definition block

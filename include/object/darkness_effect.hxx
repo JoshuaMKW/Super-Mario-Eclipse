@@ -8,7 +8,9 @@
 
 class TDarknessEffect : public JDrama::TViewObj {
 public:
-    static JDrama::TNameRef *instantiate() { return new TDarknessEffect("TDarknessEffect"); }
+    BETTER_SMS_FOR_CALLBACK static JDrama::TNameRef *instantiate() {
+        return new TDarknessEffect("TDarknessEffect");
+    }
 
     TDarknessEffect(const char *name) : TViewObj(name) {}
 

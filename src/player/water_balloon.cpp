@@ -25,7 +25,7 @@
 
 using WaterBalloonBuffer = TRingBuffer<TWaterBalloon>;
 
-void initializeWaterBalloons(TMario *player) {
+BETTER_SMS_FOR_CALLBACK void initializeWaterBalloons(TMario *player) {
     TWaterBalloon::sEmitInfo = new TWaterEmitInfo("/common/prm/waterballoon.prm");
 
     void *balloon_prm = JKRFileLoader::getGlbResource("/common/prm/waterballoon.prm");
@@ -46,7 +46,7 @@ void initializeWaterBalloons(TMario *player) {
     }
 }
 
-void createWaterBalloonAndThrow(TMario *player, bool isMario) {
+BETTER_SMS_FOR_CALLBACK void createWaterBalloonAndThrow(TMario *player, bool isMario) {
     if (gpMarDirector->mCurState != 4 || !isMario)
         return;
 

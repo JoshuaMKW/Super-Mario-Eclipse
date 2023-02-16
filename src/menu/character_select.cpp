@@ -430,7 +430,7 @@ s32 CharacterSelectDirector::exit() {
     return fader->mFadeStatus == TSMSFader::FADE_ON ? 5 : 1;
 }
 
-bool directCharacterSelectMenu(TApplication *app) {
+BETTER_SMS_FOR_CALLBACK bool directCharacterSelectMenu(TApplication *app) {
     SMSSetupTitleRenderingInfo(app->mDisplay);
 
     app->mFader->setDisplaySize(SMSGetTitleRenderWidth(), SMSGetTitleRenderHeight());

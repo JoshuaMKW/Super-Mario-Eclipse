@@ -7,7 +7,9 @@
 
 class TWaterBalloon : public TMapObjBall {
 public:
-    static JDrama::TNameRef *instantiate() { return new TWaterBalloon("TWaterBalloon"); }
+    BETTER_SMS_FOR_CALLBACK static JDrama::TNameRef *instantiate() {
+        return new TWaterBalloon("TWaterBalloon");
+    }
 
     TWaterBalloon(const char *name);
     virtual ~TWaterBalloon();

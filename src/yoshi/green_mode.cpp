@@ -155,7 +155,7 @@ static void fixYoshiJuiceDecrement() {
 }
 SMS_PATCH_BL(SMS_PORT_REGION(0x8026E810, 0x8026659C, 0, 0), fixYoshiJuiceDecrement);
 
-void adjustYoshiTounge(TMario *player, bool isMario) {
+BETTER_SMS_FOR_CALLBACK void adjustYoshiTounge(TMario *player, bool isMario) {
     if (!player->mYoshi)
         return;
 

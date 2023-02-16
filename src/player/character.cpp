@@ -26,7 +26,7 @@ SMS_WRITE_32(SMS_PORT_REGION(0x802A6C4C, 0, 0, 0), 0x60000000);  // Prevent earl
 SMS_WRITE_32(SMS_PORT_REGION(0x802A7148, 0, 0, 0), 0x48000058);
 SMS_WRITE_32(SMS_PORT_REGION(0x802A71A8, 0, 0, 0), 0x60000000);
 
-void initCharacterArchives(TMarDirector *director) {
+BETTER_SMS_FOR_CALLBACK void initCharacterArchives(TMarDirector *director) {
     sCharacterArcs.clear();
 
     for (int i = 0; i < 4; ++i) {
@@ -209,6 +209,8 @@ static void *getGlobalPlayerSplashTex(const char *local_path) {
     return getGlobalOrLocalRes(local_path, "/common/timg/splash.bti");
 }
 SMS_PATCH_BL(SMS_PORT_REGION(0x8026707C, 0, 0, 0), getGlobalPlayerSplashTex);
+
+// ---
 
 static TMActorKeeper *sKeeper = nullptr;
 static MActor *sActor         = nullptr;

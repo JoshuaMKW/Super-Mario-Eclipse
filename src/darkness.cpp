@@ -142,7 +142,7 @@ static void initShineShadow() {
 }
 SMS_PATCH_B(SMS_PORT_REGION(0x80280180, 0x80277F0C, 0, 0), initShineShadow);
 
-void manageShineDarkness(TMarDirector *director) {
+BETTER_SMS_FOR_CALLBACK void manageShineDarkness(TMarDirector *director) {
   sLightContext.process(*gpModelWaterManager);
 }
 

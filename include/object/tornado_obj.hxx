@@ -16,7 +16,9 @@ class TTornadoMapObj : public TRailMapObj {
   };
 
 public:
-  static JDrama::TNameRef *instantiate() { return new TTornadoMapObj("TornadoMapObj"); }
+  BETTER_SMS_FOR_CALLBACK static JDrama::TNameRef *instantiate() {
+    return new TTornadoMapObj("TornadoMapObj");
+  }
 
   TTornadoMapObj(const char *name);
   virtual ~TTornadoMapObj();

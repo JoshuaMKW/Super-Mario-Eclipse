@@ -30,7 +30,7 @@ extern void initCharacterArchives(TMarDirector *director);
 extern void initializeWaterBalloons(TMario *player);
 extern void createWaterBalloonAndThrow(TMario *player, bool isMario);
 
-static BetterSMS::ModuleInfo sModuleInfo{ "Super Mario Eclipse", 1, 0, &gSettingsGroup };
+static BetterSMS::ModuleInfo sModuleInfo("Super Mario Eclipse", 1, 0, &gSettingsGroup);
 
 static void initModule() {
     // Register settings
@@ -60,12 +60,11 @@ static void initModule() {
     Stage::registerUpdateCallback("__update_darkness", manageShineDarkness);
 
     Stage::registerInitCallback("__init_player_models", initCharacterArchives);
-    Player::registerUpdateCallback("__update_yoshi_tounge", adjustYoshiTounge);
     Player::registerLoadAfterCallback("__init_water_balloons", initializeWaterBalloons);
     Player::registerUpdateCallback("__update_water_balloons", createWaterBalloonAndThrow);
+    Player::registerUpdateCallback("__update_yoshi_tounge", adjustYoshiTounge);
 
     Objects::registerObjectAsMisc("DarknessEffect", TDarknessEffect::instantiate);
-    Objects::registerObjectAsMapObj("WaterBalloon", &waterBalloonData, TWaterBalloon::instantiate);
     Objects::registerObjectAsMapObj("Tornado", &tornadoData, TTornadoMapObj::instantiate);
     Objects::registerObjectAsMapObj("WaterBalloon", &waterBalloonData, TWaterBalloon::instantiate);
 }

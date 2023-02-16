@@ -83,7 +83,7 @@ static void deinitModule() {
     Objects::deregisterObject("Tornado");
     Objects::deregisterObject("WaterBalloon");
 
-    BetterSMS::deregisterModule("Super Mario Eclipse");
+    BetterSMS::deregisterModule(&sModuleInfo);
 }
 
 // Definition block

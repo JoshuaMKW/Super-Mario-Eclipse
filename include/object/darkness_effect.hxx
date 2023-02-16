@@ -6,6 +6,8 @@
 #include <JSystem/JDrama/JDRActor.hxx>
 #include <JSystem/JUtility/JUTColor.hxx>
 
+#include <BetterSMS/module.hxx>
+
 class TDarknessEffect : public JDrama::TViewObj {
 public:
     BETTER_SMS_FOR_CALLBACK static JDrama::TNameRef *instantiate() {

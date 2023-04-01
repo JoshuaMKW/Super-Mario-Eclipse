@@ -10,7 +10,7 @@ struct TLightContext {
 
   TLightContext()
       : mLightType(ActiveType::DISABLED), mTranslation(0.0f, 0.0f, 0.0f), mColor(0, 0, 10, 255),
-        mLayerCount(24), mBaseScale(1.0f), mPrevSize(0.0f), mNextSize(0.0f), mStepContext(0.0f),
+        mLayerCount(24), mBaseScale(1.0f), mLayerScale(0.5f), mPrevSize(0.0f), mNextSize(0.0f), mStepContext(0.0f),
         mPrevDarkness(0), mNextDarkness(0), mTargetDarkness(0), mPrevShineCount(0), mSizeMorphing(false) {}
 
   void process(TModelWaterManager &manager);
@@ -20,6 +20,7 @@ struct TLightContext {
   JUtility::TColor mColor;
   u8 mLayerCount;
   f32 mBaseScale;
+  f32 mLayerScale;
   f32 mPrevSize;
   f32 mNextSize;
   f32 mStepContext;
@@ -31,4 +32,4 @@ struct TLightContext {
 };
 
 void initializeParameters(TLightContext::ActiveType type, TVec3f pos, u8 layer_count,
-                          JUtility::TColor color, f32 scale, u8 brightness);
+                          JUtility::TColor color, f32 scale, f32 layer_scale, u8 brightness);

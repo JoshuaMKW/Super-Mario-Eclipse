@@ -2,6 +2,7 @@
 
 #include <JSystem/JDrama/JDRNameRef.hxx>
 
+#include <SMS/Manager/MarioParticleManager.hxx>
 #include <SMS/MapObj/MapObjInit.hxx>
 #include <SMS/MapObj/MapObjRail.hxx>
 #include <SMS/raw_fn.hxx>
@@ -28,10 +29,29 @@ void TTornadoMapObj::perform(u32 flags, JDrama::TGraphics *graphics) {
   TRailMapObj::perform(flags, graphics);
 }
 
+static void clampRotation(TVec3f &rotation) {
+  auto clampPreserve = [](f32 degrees) {
+      if (degrees > 360.0f)
+          degrees -= 360.0f;
+      else if (degrees < -360.0f)
+          degrees += 360.0f;
+      return degrees;
+  };
+
+  rotation.x = clampPreserve(rotation.x);
+  rotation.y = clampPreserve(rotation.y);
+  rotation.z = clampPreserve(rotation.z);
+}
+
 void TTornadoMapObj::control() {
   TRailMapObj::control();
 
   mTrueRotation.y += mBlowStrength;
+  mWispRotation.y += mBlowStrength * 1.7f;
+
+  clampRotation(mTrueRotation);
+  clampRotation(mWispRotation);
+
   mRotation = mTrueRotation;
 
   mSpeed.set(0.0f, 0.0f, 0.0f);
@@ -45,6 +65,60 @@ void TTornadoMapObj::control() {
     } else {
       TMario *player = reinterpret_cast<TMario *>(actor);
       blowUp(player);
+    }
+  }
+}
+
+void TTornadoMapObj::calcRootMatrix() {
+  TRailMapObj::calcRootMatrix();
+
+  mWispPos[0] = mTranslation;
+  mWispPos[1] = mTranslation;
+  mSpinPos    = mTranslation;
+
+  f32 c_r = cosf(angleToRadians(mWispRotation.y));
+  f32 s_r = sinf(angleToRadians(mWispRotation.y));
+  f32 s_r2 = sinf(angleToRadians(mWispRotation.y * 2)) * 0.25f;
+
+  f32 p_scale = scaleLinearAtAnchor((s_r2 * 2.0f + 0.5f), 0.2f, 1.0f);
+  f32 n_scale = scaleLinearAtAnchor((-s_r2 * 2.0f + 0.5f), 0.2f, 1.0f);
+
+  mWispPos[0].x += -s_r * (600.0f * p_scale) * mScale.x;
+  mWispPos[0].y += s_r2 * 200.0f * mScale.y + 130.0f * mScale.y;
+  mWispPos[0].z += -c_r * (600.0f * p_scale) * mScale.z;
+
+  mWispPos[1].x += s_r * (600.0f * n_scale) * mScale.x;
+  mWispPos[1].y += -s_r2 * 200.0f * mScale.y + 130.0f * mScale.y;
+  mWispPos[1].z += c_r * (600.0f * n_scale) * mScale.z;
+
+  mSpinPos.y -= 200.0f * mScale.y;
+
+  {
+    auto *particle =
+        gpMarioParticleManager->emitAndBindToPosPtr(394, &mWispPos[0], 1, &mWispPos[0]);
+    if (particle) {
+      particle->mSize1 = mScale;
+      particle->mSize1.scale(p_scale);
+    }
+  }
+
+  {
+    auto *particle =
+        gpMarioParticleManager->emitAndBindToPosPtr(394, &mWispPos[1], 1, &mWispPos[1]);
+    if (particle) {
+      particle->mSize1 = mScale;
+      particle->mSize1.scale(n_scale);
+    }
+  }
+
+  {
+    auto *particle =
+        gpMarioParticleManager->emitAndBindToPosPtr(393, &mSpinPos, 1, this);
+    if (particle) {
+      particle->mSize1 = mScale;
+      particle->mSize1.scale(0.5f);
+      particle->mSize3 = mScale;
+      particle->mSize3.scale(0.5f);
     }
   }
 }

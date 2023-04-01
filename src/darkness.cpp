@@ -13,13 +13,19 @@ using namespace BetterSMS;
 static TLightContext sLightContext;
 static u8 sBrightLevel = 255;
 
-void initializeParameters(TLightContext::ActiveType type, TVec3f pos, u8 layer_count, JUtility::TColor color, f32 scale, u8 brightness) {
+void initializeParameters(TLightContext::ActiveType type, TVec3f pos, u8 layer_count, JUtility::TColor color, f32 scale, f32 layer_scale, u8 brightness) {
     sLightContext.mLightType   = type;
     sLightContext.mTranslation = pos;
     sLightContext.mColor       = color;
     sLightContext.mBaseScale   = scale;
+    sLightContext.mLayerScale   = layer_scale;
     sLightContext.mLayerCount  = layer_count;
     sBrightLevel               = brightness;
+}
+
+void initToDefault(TMarDirector *director) {
+    initializeParameters(TLightContext::ActiveType::DISABLED, {0, 0, 0}, 5, {0, 0, 0, 0}, 10000,
+                         0.5, 255);
 }
 
 void TLightContext::process(TModelWaterManager &manager) {
@@ -84,19 +90,27 @@ void TLightContext::process(TModelWaterManager &manager) {
             mSizeMorphing  = false;
         } else if (!isFinished) {
             manager.mSize       = cur;
-            manager.mSphereStep = cur / 2.0f;
+            manager.mSphereStep = cur * mLayerScale;
             mStepContext += 1.0f;
         } else {
             manager.mSize       = cur;
-            manager.mSphereStep = cur / 2.0f;
+            manager.mSphereStep  = cur * mLayerScale;
             mPrevShineCount      = CurrentShineCount;
             mSizeMorphing        = false;
         }
         break;
     }
     case TLightContext::ActiveType::FOLLOWPLAYER: {
-        manager.mDarkLevel = mTargetDarkness;
-        gShineShadowPos    = *gpMarioPos + mTranslation;
+        manager.mDarkLevel = sBrightLevel;
+        if (((f32 *)gpCamera)[0x134 / 4] > 13000.0f) {
+            manager.mDarkLevel = lerp<f32>(
+                static_cast<f32>(sBrightLevel), 255.0f,
+                clamp(1.0f - ((21000.0f - ((f32 *)gpCamera)[0x134 / 4]) / 8000.0f), 0.0f, 1.0f));
+        }
+        manager.mSphereStep = mBaseScale * mLayerScale;
+        manager.mSize      = mBaseScale;
+        manager.mColor      = mColor;
+        gShineShadowPos    = gpCamera->mTranslation + mTranslation;
         break;
     }
     default:
@@ -113,11 +127,13 @@ static void initShineShadow() {
         return;
 
     s32 &CurrentShineCount = TFlagManager::smInstance->Type4Flag.mShineCount;
-    if (CurrentShineCount < SME_MAX_SHINES) {
+    if (CurrentShineCount < SME_MAX_SHINES ||
+        sLightContext.mLightType == TLightContext::ActiveType::FOLLOWPLAYER) {
         sLightContext.mPrevShineCount  = CurrentShineCount;
 
+        gpModelWaterManager->mColor                 = sLightContext.mColor;
         gpModelWaterManager->mDarkLevel             = sBrightLevel;
-        gpModelWaterManager->mSphereStep            = sLightContext.mBaseScale / 2;
+        gpModelWaterManager->mSphereStep            = sLightContext.mBaseScale * sLightContext.mLayerScale;
         gpModelWaterManager->mSize                  = sLightContext.mBaseScale;
         gpModelWaterManager->LightType.mMaskObjects = true;
         gpModelWaterManager->LightType.mShowShadow  = true;
@@ -145,6 +161,12 @@ SMS_PATCH_B(SMS_PORT_REGION(0x80280180, 0x80277F0C, 0, 0), initShineShadow);
 BETTER_SMS_FOR_CALLBACK void manageShineDarkness(TMarDirector *director) {
   sLightContext.process(*gpModelWaterManager);
 }
+
+static bool checkIfActive() {
+  return sLightContext.mLightType != TLightContext::ActiveType::DISABLED;
+}
+SMS_PATCH_BL(0x8027C6A4, checkIfActive);
+SMS_WRITE_32(0x8027C6A8, 0x28030001);
 
 //// 0x8024D3A8
 //// 0x8003F8F0

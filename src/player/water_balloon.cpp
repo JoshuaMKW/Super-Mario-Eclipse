@@ -50,7 +50,7 @@ BETTER_SMS_FOR_CALLBACK void createWaterBalloonAndThrow(TMario *player, bool isM
     if (gpMarDirector->mCurState != 4 || !isMario)
         return;
 
-    if (player->mState == 0x200009 || player->mState == 0x80000588 ||
+    if (player->mState == 0x200009 || player->mState == 0x80000588 || (player->mState & 0x800000) != 0 ||
         player->mState == TMario::STATE_SHINE_C || (player->mState & TMario::STATE_WATERBORN) != 0)
         return;
 
@@ -66,6 +66,8 @@ BETTER_SMS_FOR_CALLBACK void createWaterBalloonAndThrow(TMario *player, bool isM
 
     TWaterBalloon *balloon = water_balloons->next();
     balloon->mTranslation.set(player->mTranslation);
+    balloon->mSpeed.set(0, 0, 0);
+    balloon->mForwardSpeed = 0;
     balloon->appear();
 
     // Have player grab balloon

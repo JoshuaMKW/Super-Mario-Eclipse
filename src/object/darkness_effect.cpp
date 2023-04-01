@@ -26,16 +26,17 @@ void TDarknessEffect::load(JSUMemoryInputStream &in) {
     JDrama::TViewObj::load(in);
 
     TVec3f position;
-    f32 scale;
+    f32 scale, layer_scale;
     u8 type, brightness, layer_count;
     JUtility::TColor color;
 
     in.readData(&position, sizeof(TVec3f));
     in.readData(&scale, sizeof(f32));
+    in.readData(&layer_scale, sizeof(f32));
     in.readData(&type, sizeof(u8));
     in.readData(&color, sizeof(JUtility::TColor));
     in.readData(&brightness, sizeof(u8));
     in.readData(&layer_count, sizeof(u8));
 
-    initializeParameters(static_cast<TLightContext::ActiveType>(type), position, layer_count, color, scale, brightness);
+    initializeParameters(static_cast<TLightContext::ActiveType>(type), position, layer_count, color, scale, layer_scale, brightness);
 }

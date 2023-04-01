@@ -17,6 +17,7 @@
 #include <JSystem/JUtility/JUTTexture.hxx>
 #include <JSystem/JKernel/JKRDvdRipper.hxx>
 
+#include <SMS/Manager/FlagManager.hxx>
 #include <SMS/Manager/RumbleManager.hxx>
 #include <SMS/GC2D/SMSFader.hxx>
 #include <SMS/MSound/MSBGM.hxx>
@@ -39,6 +40,8 @@
 #include "globals.hxx"
 
 #include "menu/character_select.hxx"
+
+constexpr size_t PlayerMax = 1;
 
 
 static JKRMemArchive *sResourceArchive = nullptr;
@@ -65,6 +68,12 @@ s32 CharacterSelectDirector::direct() {
 
         fader->startFadeinT(0.8f);
 
+        if (mSelectScreen->mCharacterInfos.size() == 1) {
+            for (auto &s_info : mSelectScreen->mSelectionInfos) {
+                s_info.mHandIcon->mIsVisible = false;
+            }
+        }
+
         mState = State::CONTROL;
         return 0;
     }
@@ -72,22 +81,36 @@ s32 CharacterSelectDirector::direct() {
     TDirector::direct();
 
 #define SMS_CHECK_RESET_FLAG(gamepad) (((1 << (gamepad)->mPort) & TMarioGamePad::mResetFlag) == 1)
-    if (SMS_CHECK_RESET_FLAG(gpApplication.mGamePads[0])) {
-        return TApplication::CONTEXT_GAME_INTRO;
-    }
-#undef SMS_CHECK_RESET_FLAG
 
-    bool any_unselected = false;
-    for (auto &s_info : mSelectScreen->mSelectionInfos) {
-        if (!s_info.mIsSelected) {
-            any_unselected = true;
-            break;
+    if (mState == State::CONTROL) {
+        if (fader->mFadeStatus == TSMSFader::FADE_OFF || fader->mFadeStatus == TSMSFader::FADE_IN) {
+            if (SMS_CHECK_RESET_FLAG(gpApplication.mGamePads[0])) {
+                mSelectScreen->mShouldReadInput = false;
+                fader->startWipe(TSMSFader::WipeRequest::FADE_DIAMOND_OUT, 1.0f, 0.0f);
+            }
+        } else if (fader->mFadeStatus == TSMSFader::FADE_ON) {
+            return TApplication::CONTEXT_GAME_INTRO;
+        }
+
+        if (mSelectScreen->mCharacterInfos.size() == 1) {
+            mState = State::EXIT;
+        } else {
+            bool any_unselected = false;
+            for (auto &s_info : mSelectScreen->mSelectionInfos) {
+                if (!s_info.mIsSelected) {
+                    any_unselected = true;
+                    break;
+                }
+            }
+
+            if (!any_unselected) {
+                mState = State::EXIT;
+            }
         }
     }
 
-    if (!any_unselected) {
-        mState = State::EXIT;
-    }
+#undef SMS_CHECK_RESET_FLAG
+
 
     s32 ret = 1;
     switch (mState) {
@@ -417,34 +440,138 @@ s32 CharacterSelectDirector::exit() {
     TSMSFader *fader = gpApplication.mFader;
     if (fader->mFadeStatus == TSMSFader::FADE_OFF) {
         mSelectScreen->mShouldReadInput = false;
-        if (mExitWaitTimer++ > SMSGetVSyncTimesPerSec()) {
+        if (mExitWaitTimer++ > SMSGetVSyncTimesPerSec() * 1.5f) {
             gpApplication.mFader->startFadeoutT(0.3f);
             Music::stopSong(1.0f);
         }
         int i = 0;
         for (auto &s_info : mSelectScreen->mSelectionInfos) {
-            SME::TGlobals::sCharacterIDList[i++] = static_cast<SME::CharacterID>(s_info.mIndex);
+            SME::TGlobals::sCharacterIDList[i++] =
+                mSelectScreen->mCharacterInfos.at(s_info.mIndex).mPlayer;
         }
     }
 
     return fader->mFadeStatus == TSMSFader::FADE_ON ? 5 : 1;
 }
 
+static bool sMario, sLuigi, sPiantissimo, sShadowMario;
+
 BETTER_SMS_FOR_CALLBACK bool directCharacterSelectMenu(TApplication *app) {
     SMSSetupTitleRenderingInfo(app->mDisplay);
 
     app->mFader->setDisplaySize(SMSGetTitleRenderWidth(), SMSGetTitleRenderHeight());
 
-    auto *director = new CharacterSelectDirector(true, true, true, true);
+    auto *director = new CharacterSelectDirector(sMario, sLuigi, sPiantissimo, sShadowMario);
     app->mDirector = director;
 
     director->setup(app->mDisplay);
     return false;
 }
 
+#if 1
+static int flagCharacterSelectMenu(u8 state) {
+    if (gpApplication.mContext != TApplication::CONTEXT_DIRECT_STAGE)
+        return state;
+
+    if (state != TApplication::CONTEXT_DIRECT_STAGE)
+        return state;
+
+    auto &next_scene = gpApplication.mNextScene;
+    auto &cur_scene = gpApplication.mCurrentScene;
+    auto &prev_scene = gpApplication.mPrevScene;
+
+    if (next_scene.mAreaID == 40 && next_scene.mEpisodeID == 0) {
+        // Planes and Trains
+        //
+        // Keeps double screen from happening on exstages when first play
+        u32 id = SMS_getShineIDofExStage__FUc(next_scene.mAreaID);
+        if (id != 255) {
+            if (TFlagManager::smInstance->getShineFlag(id) == false) {
+                if (TFlagManager::smInstance->getBool(0x3000D) == false) {
+                    return state;
+                }
+            }
+        }
+
+        sMario       = true;
+        sLuigi       = true;
+        sPiantissimo = true;
+        sShadowMario = false;
+        return 11;
+    }
+
+    if ((next_scene.mAreaID == 40 && next_scene.mEpisodeID == 0) ||
+        (next_scene.mAreaID == 41 && next_scene.mEpisodeID == 0)) {
+        // Planes and Trains + Secret of the Rook
+        //
+        // Keeps double screen from happening on exstages when first play
+        u32 id = SMS_getShineIDofExStage__FUc(next_scene.mAreaID);
+        if (id != 255) {
+            if (TFlagManager::smInstance->getShineFlag(id) == false) {
+                if (TFlagManager::smInstance->getBool(0x3000D) == false) {
+                    return state;
+                }
+            }
+        }
+
+        sMario       = true;
+        sLuigi       = true;
+        sPiantissimo = true;
+        sShadowMario = false;
+        return 11;
+    }
+
+    if (next_scene.mAreaID == 3) {
+        // Mario's Dream
+        const bool isFree = next_scene.mEpisodeID != 0;
+        sMario       = true;
+        sLuigi       = isFree;
+        sPiantissimo = isFree;
+        sShadowMario = false;
+        return 11;
+    } else if (next_scene.mAreaID == 14 && next_scene.mEpisodeID == 1) {
+        // Casino
+        sMario       = true;
+        sLuigi       = true;
+        sPiantissimo = true;
+        sShadowMario = false;
+        return 11;
+    } else if (next_scene.mAreaID == 25 && next_scene.mEpisodeID == 0) {
+        // Memphis
+        return state;
+    } else if (next_scene.mAreaID == 26 && next_scene.mEpisodeID == 0) {
+        if (cur_scene.mAreaID == 25 && cur_scene.mEpisodeID == 0)
+            return state;
+
+        // Vaporwave
+        sMario       = true;
+        sLuigi       = true;
+        sPiantissimo = false;
+        sShadowMario = false;
+        return 11;
+    } else if (next_scene.mAreaID == 40 && next_scene.mEpisodeID == 0) {
+        // Planes and Trains
+        sMario       = true;
+        sLuigi       = true;
+        sPiantissimo = true;
+        sShadowMario = false;
+        return 11;
+    } else if (next_scene.mAreaID != 6) {
+        sMario       = true;
+        sLuigi       = true;
+        sPiantissimo = true;
+        sShadowMario = false;
+        return 11;
+    }
+
+    return state;
+}
+SMS_PATCH_B(SMS_PORT_REGION(0x802A637C, 0, 0, 0), flagCharacterSelectMenu);
+#else
 static int flagCharacterSelectMenu() {
     return 11;
 }
 SMS_PATCH_BL(SMS_PORT_REGION(0x80176160, 0, 0, 0), flagCharacterSelectMenu);
+#endif
 
 SMS_WRITE_32(SMS_PORT_REGION(0x8017606C, 0, 0, 0), 0x38000000);

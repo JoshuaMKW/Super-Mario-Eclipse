@@ -1,16 +1,17 @@
 import "ssc/common.sun";
-import "ssc/sme.sun";
 
-builtin print();
+var const shineID = 123;
+var const shineKey = "シャイン（ホテル上げ用）"; // Key for shine that spawns
+var const camEventName = "coin_reward"; // Camera demo bck file to use
 
-while (true){
-	if (isTalkModeNow())
-	{
-        var npcName = getTalkNPCName();
-		if (npcName == "TipBoard")
-		{
-			talkAndClose(0x00020000);
-		}
+var shineSpawned = false;
+
+while (true) {
+	var coins = getSystemFlag(SYSF_GOLDCOINNUM);
+	var shineCollected = getSystemFlag(0x10000 + shineID);
+	if (coins >= 100 && !shineSpawned && !shineCollected) {
+		appearShine(shineKey, camEventName);
+		shineSpawned = true;
 	}
 	yield;
 }

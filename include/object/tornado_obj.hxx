@@ -26,6 +26,7 @@ public:
   virtual void load(JSUMemoryInputStream &) override;
   virtual void perform(u32, JDrama::TGraphics *) override;
   virtual void control() override;
+  virtual void calcRootMatrix() override;
 
   f32 getStrength() const { return mBlowStrength; }
   void setStrength(f32 strength) { mBlowStrength = strength; }
@@ -47,6 +48,9 @@ private:
   f32 mBlowStrength;
   bool mHasFinalPush;
   TVec3f mTrueRotation;
+  TVec3f mWispRotation;
+  TVec3f mWispPos[2];
+  TVec3f mSpinPos;
 };
 
 extern ObjData tornadoData;

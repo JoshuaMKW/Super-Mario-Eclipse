@@ -2,12 +2,14 @@
 #include <Dolphin/printf.h>
 #include <Dolphin/DVD.h>
 
+#include <JSystem/J2D/J2DOrthoGraph.hxx>
 #include <JSystem/JGadget/Vector.hxx>
 #include <JSystem/JKernel/JKRDecomp.hxx>
 #include <JSystem/JKernel/JKRDvdRipper.hxx>
 #include <JSystem/JKernel/JKRHeap.hxx>
 #include <JSystem/JKernel/JKRMemArchive.hxx>
 #include <SMS/Camera/PolarSubCamera.hxx>
+#include <SMS/GC2D/GCConsole2.hxx>
 #include <SMS/System/Application.hxx>
 #include <SMS/assert.h>
 #include <SMS/macros.h>
@@ -26,12 +28,19 @@ SMS_WRITE_32(SMS_PORT_REGION(0x802A6C4C, 0, 0, 0), 0x60000000);  // Prevent earl
 SMS_WRITE_32(SMS_PORT_REGION(0x802A7148, 0, 0, 0), 0x48000058);
 SMS_WRITE_32(SMS_PORT_REGION(0x802A71A8, 0, 0, 0), 0x60000000);
 
+static const char *sCharacterPaths[] = {"/data/mario.szs", "/data/luigi.szs",
+                                        "/data/piantissimo.szs", "/data/shadow_mario.szs"};
+
 BETTER_SMS_FOR_CALLBACK void initCharacterArchives(TMarDirector *director) {
+    /*auto *multiplayer_module = BetterSMS::getModuleInfo("Mario Sunshine Coop");
+    if (multiplayer_module)
+        return;*/
+
     sCharacterArcs.clear();
 
-    for (int i = 0; i < 4; ++i) {
+    for (int i = 0; i < 2; ++i) {
         char buffer[32];
-        snprintf(buffer, 32, "/data/chr%hhu.szs", SME::TGlobals::sCharacterIDList[i]);
+        snprintf(buffer, 32, "%s", sCharacterPaths[(int)SME::TGlobals::sCharacterIDList[i]]);
 
         void *arc = JKRDvdRipper::loadToMainRAM(buffer, nullptr, EXPAND, 0, nullptr,
                                                 JKRDvdRipper::HEAD, 0, nullptr);
@@ -45,7 +54,7 @@ BETTER_SMS_FOR_CALLBACK void initCharacterArchives(TMarDirector *director) {
         archive = new JKRMemArchive(arcBufMario, 0, UNK_0);
 }
 
-
+#if 1
 void initCharacterBuffer(TMario *player, JSUMemoryInputStream *input) {
     load__Q26JDrama6TActorFR20JSUMemoryInputStream(player, input);
     u8 player_index        = 0;
@@ -73,7 +82,7 @@ static void *getGlobalOrLocalRes(const char *local_path, const char *global_path
     if (!first_file) {
         return JKRFileLoader::getGlbResource(local_path);
     }
-    //delete first_file;
+    delete first_file;
     return JKRFileLoader::getGlbResource(global_path);
 }
 
@@ -233,4 +242,40 @@ static void applyShadowEffects(u32 *tremble_efx) {
         sActor->setBtk("kagemario_scroll");
     }
 }
+#else
+#endif
 //SMS_PATCH_BL(SMS_PORT_REGION(0x802474C0, 0, 0, 0), applyShadowEffects);
+const char *player_fnames[] = {"mario", "luigi", "piantissimo", "shadow_mario"};
+
+void updatePlayerHUD(TMarDirector *director, const J2DOrthoGraph *graph) {
+    char buffer[64];
+    char namebuf[32];
+
+    auto *console = director->mGCConsole;
+
+    {
+        J2DPicture *marioIcon =
+            reinterpret_cast<J2DPicture *>(console->mMainScreen->search('m_ic'));
+
+        snprintf(buffer, 64, "/game_6/timg/%s_icon.bti",
+                 player_fnames[static_cast<int>(
+                     SME::TGlobals::getCharacterIDFromPlayer(gpMarioAddress))]);
+
+        auto *timg = reinterpret_cast<ResTIMG *>(JKRFileLoader::getGlbResource(buffer));
+        if (timg)
+            marioIcon->changeTexture(timg, 0);
+    }
+
+    {
+        J2DPicture *marioName =
+            reinterpret_cast<J2DPicture *>(console->mMainScreen->search('m_tx'));
+
+            snprintf(buffer, 64, "/game_6/timg/%s_text.bti",
+                     player_fnames[static_cast<int>(
+                         SME::TGlobals::getCharacterIDFromPlayer(gpMarioAddress))]);
+
+        auto *timg = reinterpret_cast<ResTIMG *>(JKRFileLoader::getGlbResource(buffer));
+        if (timg)
+            marioName->changeTexture(timg, 0);
+    }
+}

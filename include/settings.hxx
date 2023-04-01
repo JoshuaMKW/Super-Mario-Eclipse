@@ -108,22 +108,21 @@ public:
         out.write(&mBugsExploitsValue, 1);
     }
 
+    void getValueStr(char *dst) const override {
+        getBool() ? strncpy(dst, "ON\n", 4) : strncpy(dst, "OFF\n", 5);
+    }
+
+    inline void lock() { sIsUnlocked = false; }
+    inline void unlock() { sIsUnlocked = true; }
+
     // clang-format off
     static void valueChanged(void* old, void* cur, ValueKind kind) {
         auto *engine_module = BetterSMS::getModuleInfo("Better Sunshine Engine");
-        if (!engine_module) {
-            OSReport("Could not find engine module!!\n");
-            return;
-        }
 
-        auto *bugs_setting = engine_module->mSettings->getSetting("Bug Fixes");
         auto *exploits_setting = engine_module->mSettings->getSetting("Exploit Fixes");
         auto *collision_setting = engine_module->mSettings->getSetting("Collision Fixes");
 
         const bool is_unlocked = *reinterpret_cast<bool *>(cur);
-
-        if (bugs_setting)
-            bugs_setting->setBool(is_unlocked);
         
         if (exploits_setting)
             exploits_setting->setBool(is_unlocked);
@@ -136,6 +135,34 @@ public:
 private:
     bool mBugsExploitsValue;
     static bool sIsUnlocked;
+};
+
+// Invisible flag that doesn't show in settings menu
+class MirrorModeFlag final : public Settings::SwitchSetting {
+public:
+    MirrorModeFlag() : SwitchSetting("__mirror_mode_unlocked", &mMirrorModeFlag) {}
+    ~MirrorModeFlag() override {}
+
+    void load(JSUMemoryInputStream &in) override {
+        SwitchSetting::load(in);
+        updateSetting();
+    }
+
+    bool isUnlocked() const override { return false; }
+
+    bool isUnlocked_() const { return mMirrorModeFlag; }
+    
+    void updateSetting() const {
+        auto *mirror_module = BetterSMS::getModuleInfo("Mirror Mode");
+
+        auto *active_setting   = mirror_module->mSettings->getSetting("Is Enabled");
+        active_setting->setUserEditable(mMirrorModeFlag, BetterSMS::Settings::Priority::GAME);
+        if (!mMirrorModeFlag)
+            active_setting->setBool(false);
+    }
+
+private:
+    bool mMirrorModeFlag;
 };
 
 HUDSetting::HUD getHUDKind();

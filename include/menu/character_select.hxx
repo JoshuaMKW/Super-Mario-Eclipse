@@ -18,6 +18,8 @@
 #include <BetterSMS/module.hxx>
 #include <BetterSMS/libs/anim2d.hxx>
 
+#include "coop.hxx"
+
 #include "player.hxx"
 
 using namespace BetterSMS;
@@ -41,8 +43,6 @@ struct SelectionInfo {
     JGadget::TVector<const ResTIMG *> mGoopTextures;
     u8 mCurrentGoopTex;
 };
-
-constexpr size_t PlayerMax = 1;
 
 class CharacterSelectScreen;
 

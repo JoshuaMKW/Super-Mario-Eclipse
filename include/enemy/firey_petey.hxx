@@ -1,9 +1,9 @@
 #pragma once
 
 #include "types.h"
-#include "sms/enemy/BossPakkun.hxx"
-#include "sms/actor/SpineBase.hxx"
-#include "sms/enemy/Kukku.hxx"
+#include <SMS/Enemy/BossPakkun.hxx>
+#include <SMS/Enemy/SpineBase.hxx>
+#include <SMS/Enemy/Kukku.hxx>
 
 
 #define NUM_GOOP_DROPS 12
@@ -88,6 +88,11 @@ public:
 class TFireyPetey : public TBossPakkun
 {
 public:
+
+    BETTER_SMS_FOR_CALLBACK static JDrama::TNameRef* instantiate() {
+        return new TFireyPetey("TDarknessEffect");
+    }
+
     TFireyPetey(const char *);
     virtual ~TFireyPetey();
     virtual void perform(u32, JDrama::TGraphics *) override;

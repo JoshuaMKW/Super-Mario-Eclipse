@@ -108,6 +108,11 @@ public:
 class TFireyPeteyManager : public TBossPakkunManager
 {
 public:
+
+    BETTER_SMS_FOR_CALLBACK static JDrama::TNameRef* instantiate() {
+        return new TFireyPeteyManager("FireyPeteyManager", 0);
+    }
+
     TFireyPeteyManager(char const *,int);
     virtual ~TFireyPeteyManager(){};
 

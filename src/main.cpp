@@ -87,7 +87,7 @@ static void initModule() {
     Objects::registerObjectAsMapObj("LaunchStar", &launchStarData, TLaunchStarObj::instantiate);
 
     Objects::registerObjectAsMisc("FireyPetey", TFireyPetey::instantiate);
-
+    Objects::registerObjectAsMisc("FireyPeteyManager", TFireyPeteyManager::instantiate);
 }
 
 static void deinitModule() {

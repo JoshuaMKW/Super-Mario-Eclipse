@@ -90,7 +90,7 @@ class TFireyPetey : public TBossPakkun
 public:
 
     BETTER_SMS_FOR_CALLBACK static JDrama::TNameRef* instantiate() {
-        return new TFireyPetey("TDarknessEffect");
+        return new TFireyPetey("FireyPetey");
     }
 
     TFireyPetey(const char *);

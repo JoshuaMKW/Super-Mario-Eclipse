@@ -86,7 +86,7 @@ static void initModule() {
     Objects::registerObjectAsMapObj("WaterBalloon", &waterBalloonData, TWaterBalloon::instantiate);
     Objects::registerObjectAsMapObj("LaunchStar", &launchStarData, TLaunchStarObj::instantiate);
 
-    // Objects::registerObjectAsMisc("FireyPetey", TFireyPetey::instantiate);
+    Objects::registerObjectAsMisc("FireyPetey", TFireyPetey::instantiate);
 
 }
 

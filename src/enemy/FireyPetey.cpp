@@ -122,7 +122,7 @@ bool TNerveFPWait::execute(TSpineBase<TLiveActor> *spine) const
   //   }
   // }
   // return result;
-    return 0;
+    return false;
 }
 
 bool TNerveFPFly::execute(TSpineBase<TLiveActor> *spine) const
@@ -210,7 +210,7 @@ bool TNerveFPSleep::execute(TSpineBase<TLiveActor> *param1) const
   {
     reinterpret_cast<TBossPakkun *>(param1->mTarget)->changeBck(0x17);
   }
-  return 0;
+  return false;
 }
 
 bool TNerveFPHover::execute(TSpineBase<TLiveActor> *spine) const
@@ -323,17 +323,11 @@ bool TNerveFPFireBreath::execute(TSpineBase<TLiveActor> *spine) const
   bool isAnimationFinished = peteyMActor->curAnmEndsNext(0, 0x0);
   if (isAnimationFinished)
   {
-    bool isBckRunning = peteyMActor->checkCurBckFromIndex(0x15);
-    if (isBckRunning)
-    {
-        spine->pushNerve(&takeoff);
-        return 1;
-    }
     target->_02 = 0x0;
     target->changeBck(0x14);
     target->rumblePad(1, target->mTranslation);
   }
-  return 0;
+  return false;
 }
 
 void TFireyPetey::init(TLiveManager *param1)
@@ -369,7 +363,6 @@ void TFireyPetey::init(TLiveManager *param1)
     mFire[i] = new TFPFire(this, "fire\n");
     group->mViewObjList.insert(group->mViewObjList.end(), mFire[i]);
   }
-  mSpineBase->setNerve(&sleep);
 }
 
 void TFireyPetey::perform(u32 flags, JDrama::TGraphics *graphics)
@@ -407,7 +400,8 @@ bool TFireyPetey::receiveMessage(THitActor *reciever, u32 param2)
           }
       }
   }
-  return TBossPakkun::receiveMessage(reciever, param2);
+  return false;
+  // return TBossPakkun::receiveMessage(reciever, param2);
 }
 
 

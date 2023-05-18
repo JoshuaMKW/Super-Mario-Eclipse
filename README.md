@@ -6,13 +6,12 @@ If you simply want to view the source code for referential or curious purposes, 
 
 ## Requirements
 
-- Build [Kuribo-Clang](https://github.com/DotKuribo/llvm-project) and move the files into `assets/bin/compiler/clang/`
-- Supply the DOL file for SMS of any supported region into `assets/bin/<build>/<region>/system/`
+- Visual Studio 2022
 
 ## Compile
 
-Building this mod is as simple as configuring the build scripts to use your extracted root for patching and then running these build scripts as you need. **Release**, **Release-Debug**, and **Debug** configurations are provided.
+This code compiles into the Kuribo module that drives Super Mario Eclipse. To compile it, select a build configuration and then build.
 
 ## Credits
 
-Any and all uses of this repository's source code should credit both **JoshuaMK** (myself), and **CyrusLoS**, and use of the source assets should credit the **SME Dev Team**.
+Any and all uses of this repository's source code should credit both **JoshuaMK** (myself), **CyrusLoS**, and **Eclipse Team** as a whole. Any and all use of the source assets should credit **Eclipse Team**.

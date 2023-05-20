@@ -25,8 +25,8 @@ set(CMAKE_CXX_STANDARD_LIBRARIES "")
 set(SMS_REGION us)
 
 set(SMS_COMPILE_DEFINES
-    -D__powerpc__ -DKURIBO_NO_TYPES
-    -DGEKKO -DNTSCU
+    -D__powerpc__ -DKURIBO_NO_TYPES -DNTSCU
+    -DGEKKO -DNDEBUG -D_GLIBCXX_HAVE_WCHAR_H -D__ISO_C_VISIBLE=2000
 )
 
 set(SMS_COMPILE_FLAGS
@@ -35,7 +35,6 @@ set(SMS_COMPILE_FLAGS
 
     ${SMS_COMPILE_DEFINES}
 
-    #-fno-inline
 	-Os -fno-exceptions 
     -fno-rtti -ffast-math -fpermissive
     -fdeclspec -fno-unwind-tables

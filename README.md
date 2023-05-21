@@ -1,8 +1,6 @@
 ![eclipse 5](https://user-images.githubusercontent.com/60854312/160558618-ef697b4c-890e-46fd-b45c-bfb3a6824534.png)
 
-Welcome to the home of **Super Mario Eclipse's** source code and assets! This is where you can reference things for your own mod, or even build the project yourself!
-
-If you simply want to view the source code for referential or curious purposes, you can find it in `src/`
+Welcome to the home of **Super Mario Eclipse's** source code!
 
 ## Requirements
 

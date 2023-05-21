@@ -469,6 +469,10 @@ BETTER_SMS_FOR_CALLBACK bool directCharacterSelectMenu(TApplication *app) {
 }
 
 static int flagCharacterSelectMenu() {
+    sMario = true;
+    sLuigi = true;
+    sPiantissimo = true;
+    sShadowMario = true;
     return 11;
 }
 SMS_PATCH_BL(SMS_PORT_REGION(0x80176160, 0, 0, 0), flagCharacterSelectMenu);

@@ -134,12 +134,11 @@ public:
 
 class TFPFire : public THitActor {
 public:
-    TFPFire(TBossPakkun *parent, const char *);
+    TFPFire(const char *);
     virtual ~TFPFire(){};
 
     virtual void perform(u32, JDrama::TGraphics *) override;
 
-    TBossPakkun *parentPakkun;       // 0x0068
     TVec3f mVelocity; // 0x006c
     int mLifetime;
 };

@@ -104,6 +104,7 @@ bool TNerveFPWait::execute(TSpineBase<TLiveActor> *spine) const {
 bool TNerveFPFly::execute(TSpineBase<TLiveActor> *spine) const {
     auto target = reinterpret_cast<TFireyPetey *>(spine->mTarget);
     dropLava(spine, target);
+    dropLavaBig(spine, target);
     if (spine->mNerveTimer == 0) {
         target->changeBck(0xB);
         target->goToRandomNextGraphNode();
@@ -184,7 +185,7 @@ bool TNerveFPBreakSleep::execute(TSpineBase<TLiveActor> *spine) const {
         return false;
     }
     if (spine->mNerveStack.depth() < spine->mNerveStack.capacity()) {
-        spine->pushNerve(&fireBreath);
+        spine->pushNerve(&takeoff);
     }
     return true;
 }
@@ -321,7 +322,6 @@ bool TNerveFPFireBreath::execute(TSpineBase<TLiveActor> *spine) const {
         }
         bool isAnimationFinished = peteyMActor->curAnmEndsNext(0, nullptr);
         if (isAnimationFinished) {
-            spine->pushNerve(&fireBreath);
             return true;
         }
     }
@@ -438,12 +438,14 @@ bool TNerveFPTumble::execute(TSpineBase<TLiveActor> *spine) const {
 
 
 TFireyPetey::TFireyPetey(const char *test)
-    : TBossPakkun(test) {
+    : TBossPakkun(test), mMActorKeeperSecondary(nullptr), mKukkuBall{}, mFire{} {
     mNumTornados = MAX_TORNADOS;
 }
 
 void TFireyPetey::init(TLiveManager *liveManager) {
     TBossPakkun::init(liveManager);
+
+
 
     mTornado = new TFPTornado(this, "<TFPTornado>\n");
     mNavel = new TFPNavel(this, "<TFPNavel>\n");
@@ -473,7 +475,7 @@ void TFireyPetey::init(TLiveManager *liveManager) {
     }
 
     for (int i = 0; i < 10; i++) {
-        mFire[i] = new TFPFire(this, "fire\n");
+        mFire[i] = new TFPFire("fire\n");
         group->mViewObjList.insert(group->mViewObjList.end(), mFire[i]);
     }
 }
@@ -541,17 +543,21 @@ void TFireyPetey::gotHipDropDamage() {
 
 TFPTornado::TFPTornado(TBossPakkun *parent, const char *name)
     : TBPTornado(parent, name) {
+    mMaxTornadoHeight = mAttackHeight;
 }
 
 void TFPTornado::perform(u32 flags, JDrama::TGraphics *graphics) {
-    if (((*(int **)(this->mParent))[0x3c] & 1U) != 0) {
-        return;
-    }
-    if (this->_98 == 0) {
-        return;
-    }
     TBPTornado::perform(flags, graphics);
     mTargetPos = *gpMarioPos;
+
+    const f32 scaleFactor = 0.5f - cosf(_94 / 60.0f) * 0.5f;
+
+    mScale.y = scaleFactor;
+    mAttackHeight = scaleFactor * mMaxTornadoHeight;
+    mReceiveHeight = scaleFactor * mMaxTornadoHeight;
+
+    OSReport("%f\n", scaleFactor);
+
     for (int i = 0; i < mNumObjs; i = i + 1) {
         if (mCollidingObjs[i]->mObjectID == OBJECT_ID_MARIO) {
 
@@ -571,7 +577,6 @@ void TFPFire::perform(u32 flags, JDrama::TGraphics *graphics) {
     if (mLifetime > 0) {
         for (int iVar9 = 0; iVar9 < mNumObjs; iVar9 = iVar9 + 1) {
             if (mCollidingObjs[iVar9]->mObjectID == OBJECT_ID_MARIO) {
-                OSReport("Burning\n");
                 // Player::setFire(gpMarioAddress);
             }
         }
@@ -614,34 +619,30 @@ bool TFPHeadHit::receiveMessage(THitActor *sender, u32 msg) {
         if ((sender->mObjectID == 0x1000001) && msg == 0xf) {
 
             // Angle check
-            // float xPosDifference = (mTranslation.x - gpMarioPos->x);
-            // float zPosDifference = (mTranslation.z - gpMarioPos->z);
-            //
-            // float angle;
-            //
-            // if(zPosDifference == 0.0f) {
-            //     if(xPosDifference < zPosDifference) {
-            //         angle = -90.0f;
-            //     }else {
-            //         angle = 90.0f;
-            //     }
-            // }else if(zPosDifference < 0){
-            //     angle = 180.0f - RADIANS_TO_DEGREES(matan__Fff(-zPosDifference, xPosDifference));
-            // }else {
-            //     angle = RADIANS_TO_DEGREES(matan__Fff(zPosDifference, xPosDifference));
-            // }
-            // OSReport("%f\n", angle);
-            // // Shift angle into range 0 - 360
-            // angle = fmodf__3stdFff(this, angle, 360.0f);
-            // if (angle < 0)
-            //     angle += 360.0f;
-            //
-            // float wrappedAngle = MsWrap(mParent->mRotation.y, angle - 180.0f, angle + 180.0f);
-            // angle = angle - wrappedAngle;
-            //
-            // OSReport("wrapped %f\n", wrappedAngle);
-            // OSReport("final %f\n", angle);
-            // if (fabs(angle) < 0.5f * params->mSLDamageAngle.get())
+            float xPosDifference = (gpMarioPos->x - mTranslation.x);
+            float zPosDifference = (gpMarioPos->z - mTranslation.z);
+            
+            float angle;
+
+            if (zPosDifference == 0.0f) {
+                if (xPosDifference < zPosDifference) {
+                    angle = -90.0f;
+                }
+                else {
+                    angle = 90.0f;
+                }
+            }
+            else if (zPosDifference < 0) {
+                angle = 180.0f - RADIANS_TO_DEGREES(matan__Fff(-zPosDifference, xPosDifference));
+            }
+            else {
+                angle = RADIANS_TO_DEGREES(matan__Fff(zPosDifference, xPosDifference));
+            }
+
+            float wrappedAngle = MsWrap(mParent->mRotation.y, angle - 180.0f, angle + 180.0f);
+            angle = angle - wrappedAngle;
+
+            if (fabs(angle) < 0.5f * params->mSLDamageAngle.get())
             {
                 mParent->_03[0]++;
 
@@ -699,15 +700,17 @@ void dropLava(TSpineBase<TLiveActor> *spine, TFireyPetey *target) {
             }
         }
     }
+}
 
+void dropLavaBig(TSpineBase<TLiveActor>* spine, TFireyPetey* target) {
     if (spine->mNerveTimer % 50 == 25) {
         TBPPolDrop *poldrop = target->mPollutionDrop;
         if (poldrop->_01[1] == 0) {
             TVec3f step(0.0f, 1.5f, 0.0f);
-
+    
             TVec3f rotation(0.0f, 0.0f, 0.0f);
             TVec3f size(0.7f, 0.7f, 0.7f);
-
+    
             poldrop->mVelocity.set(step);
             poldrop->mTranslation.set(target->mTranslation);
             poldrop->mScale.set(size);
@@ -721,7 +724,6 @@ void dropLava(TSpineBase<TLiveActor> *spine, TFireyPetey *target) {
         }
     }
 }
-
 
 //// Manager code
 TFireyPeteyManager::TFireyPeteyManager(const char *name, int isDemo)

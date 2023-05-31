@@ -114,6 +114,9 @@ public:
     TFPTornado(TBossPakkun *parent, const char *);
     virtual ~TFPTornado(){};
     virtual void perform(u32, JDrama::TGraphics *) override;
+
+private:
+    f32 mMaxTornadoHeight;
 };
 
 class TFPHeadHit : public TBPHeadHit {
@@ -178,3 +181,7 @@ public:
 
     virtual void load(JSUMemoryInputStream &);
 };
+
+
+void dropLava(TSpineBase<TLiveActor>* spine, TFireyPetey* petey);
+void dropLavaBig(TSpineBase<TLiveActor>* spine, TFireyPetey* petey);

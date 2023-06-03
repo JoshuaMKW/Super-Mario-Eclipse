@@ -59,8 +59,7 @@ bool TNerveFPWait::execute(TSpineBase<TLiveActor> *spine) const {
         target->changeBck(0x19);
         target->_02 = 0x0;
     }
-    s32 timeTillAttack = 300;
-    if (timeTillAttack <= params->mSLWaitFrameStg0.get()) {
+    if (spine->mNerveTimer >= params->mSLWaitFrameStg0.get()) {
         if (!target->mActorData->isCurAnmAlreadyEnd(0x0)) {
 
             if (target->mNumTornados > 0) {
@@ -132,16 +131,14 @@ bool TNerveFPFly::execute(TSpineBase<TLiveActor> *spine) const {
 
     target->turnToCurPathNode(target->_144);
 
-    TSpineEnemyParams *params = target->getSaveParam();
-
-    travelVector = TVec3f(target->mTranslation.x - target->_108,
-                          target->mTranslation.y - target->_10C,
-                          target->mTranslation.z - target->_110);
+    travelVector = TVec3f(target->_108 - target->mTranslation.x,
+                          target->_10C - target->mTranslation.y,
+                          target->_110 - target->mTranslation.z);
 
     TVec3f velocity = travelVector;
     velocity.normalize();
 
-    velocity.scale(-20.0f);
+    velocity.scale(params->mSLFlySpeed.get());
 
     target->mPositionalVelocity = velocity;
 
@@ -554,8 +551,6 @@ void TFPTornado::perform(u32 flags, JDrama::TGraphics *graphics) {
     mScale.y = scaleFactor;
     mAttackHeight = scaleFactor * mMaxTornadoHeight;
     mReceiveHeight = scaleFactor * mMaxTornadoHeight;
-
-    OSReport("%f\n", scaleFactor);
 
     for (int i = 0; i < mNumObjs; i = i + 1) {
         if (mCollidingObjs[i]->mObjectID == OBJECT_ID_MARIO) {

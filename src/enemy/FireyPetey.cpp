@@ -45,7 +45,7 @@ static TNerveFPTumbleOut tumbleOut;
 #define MAX_TORNADOS 3
 
 bool TNerveFPWait::execute(TSpineBase<TLiveActor> *spine) const {
-    auto target = reinterpret_cast<TFireyPetey *>(spine->mTarget);
+    TFireyPetey *target = reinterpret_cast<TFireyPetey *>(spine->mTarget);
 
     TVec3f distanceVector = (target->mTranslation - *gpMarioPos);
 
@@ -102,7 +102,7 @@ bool TNerveFPWait::execute(TSpineBase<TLiveActor> *spine) const {
 }
 
 bool TNerveFPFly::execute(TSpineBase<TLiveActor> *spine) const {
-    auto target = reinterpret_cast<TFireyPetey *>(spine->mTarget);
+    TFireyPetey *target = reinterpret_cast<TFireyPetey *>(spine->mTarget);
     dropLava(spine, target);
     dropLavaBig(spine, target);
     if (spine->mNerveTimer == 0) {
@@ -114,9 +114,9 @@ bool TNerveFPFly::execute(TSpineBase<TLiveActor> *spine) const {
         }
     }
 
-    auto travelVector = TVec3f(target->_108 - target->mTranslation.x,
-                               0.0f,
-                               target->_110 - target->mTranslation.z);
+    TVec3f travelVector = TVec3f(target->_108 - target->mTranslation.x,
+                                 0.0f,
+                                 target->_110 - target->mTranslation.z);
 
     f32 magnitude = travelVector.magnitude();
 
@@ -148,7 +148,7 @@ bool TNerveFPFly::execute(TSpineBase<TLiveActor> *spine) const {
 }
 
 bool TNerveFPTakeOff::execute(TSpineBase<TLiveActor> *spine) const {
-    auto target = reinterpret_cast<TFireyPetey *>(spine->mTarget);
+    TFireyPetey *target = reinterpret_cast<TFireyPetey *>(spine->mTarget);
 
     if (spine->mNerveTimer == 0) {
         // TODO: Use asFlags
@@ -176,7 +176,7 @@ bool TNerveFPTakeOff::execute(TSpineBase<TLiveActor> *spine) const {
 }
 
 bool TNerveFPBreakSleep::execute(TSpineBase<TLiveActor> *spine) const {
-    auto target = reinterpret_cast<TBossPakkun *>(spine->mTarget);
+    TFireyPetey *target = reinterpret_cast<TFireyPetey *>(spine->mTarget);
     if (spine->mNerveTimer == 0) {
         target->changeBck(0x0E);
         MSBgm::stopTrackBGMs('\a', 10);
@@ -191,7 +191,7 @@ bool TNerveFPBreakSleep::execute(TSpineBase<TLiveActor> *spine) const {
 }
 
 bool TNerveFPFall::execute(TSpineBase<TLiveActor> *spine) const {
-    auto target = reinterpret_cast<TFireyPetey *>(spine->mTarget);
+    TFireyPetey *target = reinterpret_cast<TFireyPetey *>(spine->mTarget);
     if (spine->mNerveTimer == 0) {
         target->mStateFlags.asU32 = target->mStateFlags.asU32 & 0xffffffef;
         target->mStateFlags.asU32 = target->mStateFlags.asU32 | 0x80;
@@ -240,16 +240,16 @@ bool TNerveFPSleep::execute(TSpineBase<TLiveActor> *param1) const {
 }
 
 bool TNerveFPHover::execute(TSpineBase<TLiveActor> *spine) const {
-    auto target = reinterpret_cast<TFireyPetey *>(spine->mTarget);
+    TFireyPetey *target = reinterpret_cast<TFireyPetey *>(spine->mTarget);
+    TBossPakkunParams *params = reinterpret_cast<TBossPakkunParams *>(target->getSaveParam());
+
     if (spine->mNerveTimer == 0) {
         target->changeBck(0x10);
         target->_02 = 3;
     }
     dropLava(spine, target);
-    // SaveParam Again!
 
-    // Use Params
-    if (spine->mNerveTimer < 600) {
+    if (spine->mNerveTimer < params->mSLHoverTimer.get()) {
         return false;
     }
     target->_02 = 0;
@@ -259,7 +259,7 @@ bool TNerveFPHover::execute(TSpineBase<TLiveActor> *spine) const {
 
 bool TNerveFPFireBreath::execute(TSpineBase<TLiveActor> *spine) const {
 
-    auto target = reinterpret_cast<TFireyPetey *>(spine->mTarget);
+    TFireyPetey *target = reinterpret_cast<TFireyPetey *>(spine->mTarget);
     MActor *peteyMActor = target->mActorData;
     if (spine->mNerveTimer == 0x0) {
         target->changeBck(0x15);
@@ -335,8 +335,8 @@ bool TNerveFPFireBreath::execute(TSpineBase<TLiveActor> *spine) const {
 }
 
 bool TNerveFPSwallow::execute(TSpineBase<TLiveActor> *spine) const {
-    auto target = reinterpret_cast<TFireyPetey *>(spine->mTarget);
-    auto params = reinterpret_cast<TBossPakkunParams *>(target->getSaveParam());
+    TFireyPetey *target = reinterpret_cast<TFireyPetey *>(spine->mTarget);
+    TBossPakkunParams *params = reinterpret_cast<TBossPakkunParams *>(target->getSaveParam());
     if (spine->mNerveTimer == 0) {
         target->changeBck(0x1a);
     }
@@ -362,7 +362,7 @@ bool TNerveFPSwallow::execute(TSpineBase<TLiveActor> *spine) const {
 }
 
 bool TNerveFPTumbleIn::execute(TSpineBase<TLiveActor> *spine) const {
-    auto target = reinterpret_cast<TFireyPetey *>(spine->mTarget);
+    TFireyPetey *target = reinterpret_cast<TFireyPetey *>(spine->mTarget);
     if (spine->mNerveTimer == 0) {
         target->changeBck(3);
     }
@@ -382,8 +382,8 @@ bool TNerveFPTumbleIn::execute(TSpineBase<TLiveActor> *spine) const {
 }
 
 bool TNerveFPTumbleOut::execute(TSpineBase<TLiveActor> *spine) const {
-    auto target = reinterpret_cast<TFireyPetey *>(spine->mTarget);
-    auto params = reinterpret_cast<TBossPakkunParams *>(target->getSaveParam());
+    TFireyPetey *target = reinterpret_cast<TFireyPetey *>(spine->mTarget);
+    TBossPakkunParams *params = reinterpret_cast<TBossPakkunParams *>(target->getSaveParam());
     if (spine->mNerveTimer == 0) {
         target->changeBck(0xE);
         gpCameraShake->startShake(UnknownShake10, 1.0);
@@ -406,7 +406,7 @@ bool TNerveFPTumbleOut::execute(TSpineBase<TLiveActor> *spine) const {
             target->_09 = 0x32;
 
             if (target->mWaterEmitInfo) {
-                auto jointTranslation = TVec3f(0.0f, 0.0f, 0.0f);
+                TVec3f jointTranslation = TVec3f(0.0f, 0.0f, 0.0f);
                 target->getJointTransByIndex(0x12, &jointTranslation);
                 jointTranslation.y += 250.0f;
                 target->mWaterEmitInfo->mPos.set(jointTranslation);
@@ -422,8 +422,8 @@ bool TNerveFPTumbleOut::execute(TSpineBase<TLiveActor> *spine) const {
 }
 
 bool TNerveFPTumble::execute(TSpineBase<TLiveActor> *spine) const {
-    auto target = reinterpret_cast<TFireyPetey *>(spine->mTarget);
-    auto params = reinterpret_cast<TBossPakkunParams *>(target->getSaveParam());
+    TFireyPetey *target = reinterpret_cast<TFireyPetey *>(spine->mTarget);
+    TBossPakkunParams *params = reinterpret_cast<TBossPakkunParams *>(target->getSaveParam());
     if (spine->mNerveTimer == 0) {
         target->changeBck(6);
         target->_02 = 1;
@@ -444,8 +444,6 @@ TFireyPetey::TFireyPetey(const char *test)
 
 void TFireyPetey::init(TLiveManager *liveManager) {
     TBossPakkun::init(liveManager);
-
-
 
     mTornado = new TFPTornado(this, "<TFPTornado>\n");
     mNavel = new TFPNavel(this, "<TFPNavel>\n");
@@ -602,7 +600,7 @@ bool TFPNavel::receiveMessage(THitActor *sender, u32 msg) {
 
 bool TFPHeadHit::receiveMessage(THitActor *sender, u32 msg) {
 
-    auto params = reinterpret_cast<TBossPakkunParams *>(mParent->getSaveParam());
+    TBossPakkunParams *params = reinterpret_cast<TBossPakkunParams *>(mParent->getSaveParam());
 
     if (mParent->mSpineBase->getLatestNerve() == &sleep) {
         return mParent->receiveMessage(sender, msg);
@@ -621,29 +619,25 @@ bool TFPHeadHit::receiveMessage(THitActor *sender, u32 msg) {
             // Angle check
             float xPosDifference = (gpMarioPos->x - mTranslation.x);
             float zPosDifference = (gpMarioPos->z - mTranslation.z);
-            
+
             float angle;
 
             if (zPosDifference == 0.0f) {
                 if (xPosDifference < zPosDifference) {
                     angle = -90.0f;
-                }
-                else {
+                } else {
                     angle = 90.0f;
                 }
-            }
-            else if (zPosDifference < 0) {
+            } else if (zPosDifference < 0) {
                 angle = 180.0f - RADIANS_TO_DEGREES(matan__Fff(-zPosDifference, xPosDifference));
-            }
-            else {
+            } else {
                 angle = RADIANS_TO_DEGREES(matan__Fff(zPosDifference, xPosDifference));
             }
 
             float wrappedAngle = MsWrap(mParent->mRotation.y, angle - 180.0f, angle + 180.0f);
             angle = angle - wrappedAngle;
 
-            if (fabs(angle) < 0.5f * params->mSLDamageAngle.get())
-            {
+            if (fabs(angle) < 0.5f * params->mSLDamageAngle.get()) {
                 mParent->_03[0]++;
 
                 if (mParent->_03[2] < params->mSLWaterMarkLimit.get()) {
@@ -702,15 +696,15 @@ void dropLava(TSpineBase<TLiveActor> *spine, TFireyPetey *target) {
     }
 }
 
-void dropLavaBig(TSpineBase<TLiveActor>* spine, TFireyPetey* target) {
+void dropLavaBig(TSpineBase<TLiveActor> *spine, TFireyPetey *target) {
     if (spine->mNerveTimer % 50 == 25) {
         TBPPolDrop *poldrop = target->mPollutionDrop;
         if (poldrop->_01[1] == 0) {
             TVec3f step(0.0f, 1.5f, 0.0f);
-    
+
             TVec3f rotation(0.0f, 0.0f, 0.0f);
             TVec3f size(0.7f, 0.7f, 0.7f);
-    
+
             poldrop->mVelocity.set(step);
             poldrop->mTranslation.set(target->mTranslation);
             poldrop->mScale.set(size);

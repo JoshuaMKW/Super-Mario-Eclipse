@@ -46,11 +46,11 @@ static TNerveFPTumbleOut tumbleOut;
 
 bool TNerveFPWait::execute(TSpineBase<TLiveActor> *spine) const {
     TFireyPetey *target = reinterpret_cast<TFireyPetey *>(spine->mTarget);
+    TBossPakkunParams* params = reinterpret_cast<TBossPakkunParams*>(target->getSaveParam());
 
     TVec3f distanceVector = (target->mTranslation - *gpMarioPos);
 
-    f32 swingRange = 400.0f * 400.0f;
-    if (distanceVector.dot(distanceVector) < swingRange) {
+    if (distanceVector.dot(distanceVector) < params->mSLSwingLength.get()) {
         spine->pushNerve(&wait);
         spine->pushNerve(reinterpret_cast<TNerveBase<TLiveActor> *>(theNerve__13TNerveBPSwingFv()));
         return true;
@@ -60,7 +60,7 @@ bool TNerveFPWait::execute(TSpineBase<TLiveActor> *spine) const {
         target->_02 = 0x0;
     }
     s32 timeTillAttack = 300;
-    if (timeTillAttack <= spine->mNerveTimer) {
+    if (timeTillAttack <= params->mSLWaitFrameStg0.get()) {
         if (!target->mActorData->isCurAnmAlreadyEnd(0x0)) {
 
             if (target->mNumTornados > 0) {
@@ -103,6 +103,7 @@ bool TNerveFPWait::execute(TSpineBase<TLiveActor> *spine) const {
 
 bool TNerveFPFly::execute(TSpineBase<TLiveActor> *spine) const {
     TFireyPetey *target = reinterpret_cast<TFireyPetey *>(spine->mTarget);
+    TBossPakkunParams* params = reinterpret_cast<TBossPakkunParams*>(target->getSaveParam());
     dropLava(spine, target);
     dropLavaBig(spine, target);
     if (spine->mNerveTimer == 0) {
@@ -120,7 +121,7 @@ bool TNerveFPFly::execute(TSpineBase<TLiveActor> *spine) const {
 
     f32 magnitude = travelVector.magnitude();
 
-    if (magnitude < 100) {
+    if (magnitude < 100.0f) {
         if ((target->mGraphTracer->mGraph->mNodes[target->mGraphTracer->mCurrentNode]._08 & 0x800)
             != 0) {
             spine->pushNerve(&hover);
@@ -167,7 +168,7 @@ bool TNerveFPTakeOff::execute(TSpineBase<TLiveActor> *spine) const {
             if (target->mGraphTracer) {
                 spine->pushNerve(&fly);
             } else {
-                spine->pushNerve(&sleep);
+                spine->pushNerve(&fall);
             }
             return true;
         }

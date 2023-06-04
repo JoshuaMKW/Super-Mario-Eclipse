@@ -29,11 +29,13 @@ extern void forceYoshiUnlock(TMarDirector *director);
 extern void adjustYoshiTounge(TMario *player, bool isMario);
 
 // Player
+extern void initEclipseData(TMario *player, bool isMario);
 extern void initCharacterArchives(TMarDirector *director);
 extern void initializeWaterBalloons(TMario *player);
 extern void createWaterBalloonAndThrow(TMario *player, bool isMario);
 extern bool holdPlayerState(TMario *player);
 extern bool launchPlayerState(TMario *player);
+extern void blazePlayer(TMario *player, bool isMario);
 
 // HUD
 extern void updatePlayerHUD(TMarDirector *, const J2DOrthoGraph *);
@@ -70,9 +72,11 @@ static void initModule() {
 
     Stage::registerInitCallback("__init_player_models", initCharacterArchives);
     Stage::registerDraw2DCallback("__update_player_hud", updatePlayerHUD);
+    Player::registerInitCallback("__init_eclipse_data", initEclipseData);
     Player::registerLoadAfterCallback("__init_water_balloons", initializeWaterBalloons);
     Player::registerUpdateCallback("__update_water_balloons", createWaterBalloonAndThrow);
     Player::registerUpdateCallback("__update_yoshi_tounge", adjustYoshiTounge);
+    Player::registerUpdateCallback("__update_blaze_state", blazePlayer);
     Player::registerStateMachine(PlayerLaunchStarWait, holdPlayerState);
     Player::registerStateMachine(PlayerLaunchStarLaunch, launchPlayerState);
 

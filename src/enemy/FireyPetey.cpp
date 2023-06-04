@@ -18,6 +18,7 @@
 
 #include <enemy/firey_petey.hxx>
 
+#include "player.hxx"
 #include "rand.h"
 #include "Enemy/Conductor.hxx"
 #include "Manager/MarioParticleManager.hxx"
@@ -42,7 +43,7 @@ static TNerveFPTumble tumble;
 static TNerveFPTumbleOut tumbleOut;
 
 
-#define MAX_TORNADOS 3
+#define MAX_TORNADOS 1
 
 bool TNerveFPWait::execute(TSpineBase<TLiveActor> *spine) const {
     TFireyPetey *target = reinterpret_cast<TFireyPetey *>(spine->mTarget);
@@ -543,10 +544,26 @@ TFPTornado::TFPTornado(TBossPakkun *parent, const char *name)
 }
 
 void TFPTornado::perform(u32 flags, JDrama::TGraphics *graphics) {
+    if ((mParent->mStateFlags.asU32 & 1) != 0)
+    {
+      return;
+    }
+    if (_98 == 0) {
+        return;
+    }
+
     TBPTornado::perform(flags, graphics);
+    TBossPakkunParams* params = reinterpret_cast<TBossPakkunParams*>(mParent->getSaveParam());
     mTargetPos = *gpMarioPos;
 
-    const f32 scaleFactor = 0.5f - cosf(_94 / 60.0f) * 0.5f;
+    const f32 distanceToTravel = params->mSLTornadoMoveLimit.get() - params->mSLTornadoMoveInit.get();
+    const f32 distanceTraveled = _94 - params->mSLTornadoMoveInit.get();
+
+    f32 scaleFactor = 2.0f * distanceTraveled / distanceToTravel;
+
+    if(scaleFactor >= 1.0f) {
+        scaleFactor = (2.0f - (2.0f * distanceTraveled / distanceToTravel));
+    }
 
     mScale.y = scaleFactor;
     mAttackHeight = scaleFactor * mMaxTornadoHeight;
@@ -555,7 +572,7 @@ void TFPTornado::perform(u32 flags, JDrama::TGraphics *graphics) {
     for (int i = 0; i < mNumObjs; i = i + 1) {
         if (mCollidingObjs[i]->mObjectID == OBJECT_ID_MARIO) {
 
-            // Player::setFire(gpMarioAddress);
+            SME::Player::setFire(gpMarioAddress);
         }
     }
     gpPollution->stamp(1, mTranslation.x, mTranslation.y, mTranslation.z, 384.0f);
@@ -571,7 +588,7 @@ void TFPFire::perform(u32 flags, JDrama::TGraphics *graphics) {
     if (mLifetime > 0) {
         for (int iVar9 = 0; iVar9 < mNumObjs; iVar9 = iVar9 + 1) {
             if (mCollidingObjs[iVar9]->mObjectID == OBJECT_ID_MARIO) {
-                // Player::setFire(gpMarioAddress);
+                SME::Player::setFire(gpMarioAddress);
             }
         }
         mTranslation.add(mVelocity);

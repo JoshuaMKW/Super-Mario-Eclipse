@@ -49,9 +49,9 @@ bool TNerveFPWait::execute(TSpineBase<TLiveActor> *spine) const {
     TFireyPetey *target = reinterpret_cast<TFireyPetey *>(spine->mTarget);
     TBossPakkunParams* params = reinterpret_cast<TBossPakkunParams*>(target->getSaveParam());
 
-    TVec3f distanceVector = (target->mTranslation - *gpMarioPos);
+    TVec3f distanceToMario = (target->mTranslation - *gpMarioPos);
 
-    if (distanceVector.dot(distanceVector) < params->mSLSwingLength.get()) {
+    if (distanceToMario.dot(distanceToMario) < params->mSLSwingLength.get()) {
         spine->pushNerve(&wait);
         spine->pushNerve(reinterpret_cast<TNerveBase<TLiveActor> *>(theNerve__13TNerveBPSwingFv()));
         return true;
@@ -231,9 +231,9 @@ bool TNerveFPFall::execute(TSpineBase<TLiveActor> *spine) const {
     return false;
 }
 
-bool TNerveFPSleep::execute(TSpineBase<TLiveActor> *param1) const {
-    if (param1->mNerveTimer == 0) {
-        reinterpret_cast<TBossPakkun *>(param1->mTarget)->changeBck(0x17);
+bool TNerveFPSleep::execute(TSpineBase<TLiveActor> *spine) const {
+    if (spine->mNerveTimer == 0) {
+        reinterpret_cast<TBossPakkun *>(spine->mTarget)->changeBck(0x17);
     }
     return false;
 }
@@ -424,7 +424,7 @@ bool TNerveFPTumble::execute(TSpineBase<TLiveActor> *spine) const {
     TFireyPetey *target = reinterpret_cast<TFireyPetey *>(spine->mTarget);
     TBossPakkunParams *params = reinterpret_cast<TBossPakkunParams *>(target->getSaveParam());
     if (spine->mNerveTimer == 0) {
-        target->changeBck(6);
+        target->changeBck(0x6);
         target->_02 = 1;
     }
 
@@ -453,12 +453,10 @@ void TFireyPetey::init(TLiveManager *liveManager) {
 
     u16 keyCode = calcKeyCode(gUnkManagerName);
 
-    auto group = static_cast<TIdxGroupObj *>(root->searchF(keyCode, gUnkManagerName));
+    TIdxGroupObj* group = static_cast<TIdxGroupObj *>(root->searchF(keyCode, gUnkManagerName));
 
     group->mViewObjList.insert(group->mViewObjList.end(), mTornado);
-
     group->mViewObjList.insert(group->mViewObjList.end(), mNavel);
-
     group->mViewObjList.insert(group->mViewObjList.end(), mHeadHit);
 
     mSpineBase->setNerve(&sleep);
@@ -602,7 +600,7 @@ bool TFPNavel::receiveMessage(THitActor *sender, u32 msg) {
         return false;
     }
     if (mParent->_02 == 1) {
-        if (sender->mObjectID == -0x7fffffff && msg == 1) {
+        if (sender->mObjectID == OBJECT_ID_MARIO && msg == 1) {
             reinterpret_cast<TFireyPetey *>(mParent)->gotHipDropDamage();
             return true;
         }

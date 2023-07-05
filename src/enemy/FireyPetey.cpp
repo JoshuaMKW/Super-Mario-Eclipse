@@ -58,7 +58,7 @@ bool TNerveFPWait::execute(TSpineBase<TLiveActor> *spine) const {
     }
     if (spine->mNerveTimer == 0) {
         target->changeBck(0x19);
-        target->_02 = 0x0;
+        target->mState = TBossPakkun::BossPakkunState::NORMAL;
     }
     if (spine->mNerveTimer >= params->mSLWaitFrameStg0.get()) {
         if (!target->mActorData->isCurAnmAlreadyEnd(0x0)) {
@@ -244,14 +244,14 @@ bool TNerveFPHover::execute(TSpineBase<TLiveActor> *spine) const {
 
     if (spine->mNerveTimer == 0) {
         target->changeBck(0x10);
-        target->_02 = 3;
+        target->mState = TBossPakkun::BossPakkunState::AIRBORNE_VULNERABLE;
     }
     dropLava(spine, target);
 
     if (spine->mNerveTimer < params->mSLHoverTimer.get()) {
         return false;
     }
-    target->_02 = 0;
+    target->mState = TBossPakkun::BossPakkunState::NORMAL;
     spine->pushNerve(&fly);
     return true;
 }
@@ -277,9 +277,9 @@ bool TNerveFPFireBreath::execute(TSpineBase<TLiveActor> *spine) const {
     if (isAnimationRunning) {
         J3DFrameCtrl *frameCtrl = peteyMActor->getFrameCtrl(0);
         if ((frameCtrl->mCurFrame <= 25.0f) || (frameCtrl->mCurFrame >= 165.0)) {
-            target->_02 = 0x0;
+            target->mState = TBossPakkun::BossPakkunState::NORMAL;
         } else {
-            target->_02 = 0x2;
+            target->mState = TBossPakkun::BossPakkunState::MOUTH_OPEN;
         }
     }
     bool isBckRunning = peteyMActor->checkCurBckFromIndex(0x14);
@@ -326,7 +326,7 @@ bool TNerveFPFireBreath::execute(TSpineBase<TLiveActor> *spine) const {
     }
     bool isAnimationFinished = peteyMActor->curAnmEndsNext(0, nullptr);
     if (isAnimationFinished) {
-        target->_02 = 0x0;
+        target->mState = TBossPakkun::BossPakkunState::NORMAL;
         target->changeBck(0x14);
         target->rumblePad(1, target->mTranslation);
     }
@@ -355,7 +355,7 @@ bool TNerveFPSwallow::execute(TSpineBase<TLiveActor> *spine) const {
 
     }
     spine->pushNerve(&tumbleIn);
-    target->_02 = 0;
+    target->mState = TBossPakkun::BossPakkunState::NORMAL;
     target->_03[0] = 0;
     return true;
 }
@@ -425,7 +425,7 @@ bool TNerveFPTumble::execute(TSpineBase<TLiveActor> *spine) const {
     TBossPakkunParams *params = reinterpret_cast<TBossPakkunParams *>(target->getSaveParam());
     if (spine->mNerveTimer == 0) {
         target->changeBck(0x6);
-        target->_02 = 1;
+        target->mState = TBossPakkun::BossPakkunState::VULNERABLE;
     }
 
     if (spine->mNerveTimer < params->mSLTumbleTime.get()) {
@@ -490,14 +490,14 @@ void TFireyPetey::perform(u32 flags, JDrama::TGraphics *graphics) {
 }
 
 bool TFireyPetey::receiveMessage(THitActor *reciever, u32 param2) {
-    if (reciever->mObjectID == 0x1000001 && mSpineBase->getLatestNerve() == &sleep) {
+    if (reciever->mObjectID == OBJECT_ID_POINK && mSpineBase->getLatestNerve() == &sleep) {
         mSpineBase->setNerve(&breakSleep);
         return false;
     }
-    if (_02 == 3 && (reciever->mObjectID == 0x1000001) || (reciever->mObjectID == 0x100000d)) {
+    if (mState == BossPakkunState::AIRBORNE_VULNERABLE && (reciever->mObjectID == OBJECT_ID_WATER_SPRAY) || (reciever->mObjectID == OBJECT_ID_POINK)) {
         if (mTranslation.y - 300.0f <= reciever->mTranslation.y) {
             if (reciever->mTranslation.y <= mTranslation.y + 1500.0f) {
-                _02 = 0;
+                mState = BossPakkunState::NORMAL;
                 mSpineBase->setNerve(&fall);
                 return true;
             }
@@ -507,10 +507,7 @@ bool TFireyPetey::receiveMessage(THitActor *reciever, u32 param2) {
 }
 
 void TFireyPetey::gotHipDropDamage() {
-    if (mHealth != 0) {
-        mHealth--;
-    }
-    _02 = 0;
+    mState = BossPakkunState::NORMAL;
     if (mHealth == 0) {
         if (mSpineBase->getLatestNerve() != reinterpret_cast<TNerveBase<TLiveActor> *>(
                 theNerve__14TNerveBPPreDieFv())) {
@@ -521,6 +518,7 @@ void TFireyPetey::gotHipDropDamage() {
             }
         }
     } else {
+        mHealth--;
         if (mSpineBase->getLatestNerve() != reinterpret_cast<TNerveBase<TLiveActor> *>(
                 theNerve__17TNerveBPTumbleOutFv())) {
             if (gpMSound->gateCheck(0x284d)) {
@@ -599,7 +597,7 @@ bool TFPNavel::receiveMessage(THitActor *sender, u32 msg) {
     if (sender->mObjectID == 0x1000001) {
         return false;
     }
-    if (mParent->_02 == 1) {
+    if (mParent->mState == TBossPakkun::BossPakkunState::VULNERABLE) {
         if (sender->mObjectID == OBJECT_ID_MARIO && msg == 1) {
             reinterpret_cast<TFireyPetey *>(mParent)->gotHipDropDamage();
             return true;
@@ -616,16 +614,16 @@ bool TFPHeadHit::receiveMessage(THitActor *sender, u32 msg) {
     if (mParent->mSpineBase->getLatestNerve() == &sleep) {
         return mParent->receiveMessage(sender, msg);
     }
-    if (mParent->_02 == 3 && (sender->mObjectID == 0x1000001) || (sender->mObjectID == 0x100000d)) {
-        mParent->_02 = 0;
+    if (mParent->mState == TBossPakkun::BossPakkunState::AIRBORNE_VULNERABLE && (sender->mObjectID == OBJECT_ID_WATER_SPRAY) || (sender->mObjectID == OBJECT_ID_POINK)) {
+        mParent->mState = TBossPakkun::BossPakkunState::NORMAL;
         mParent->mSpineBase->setNerve(&fall);
         if (gpMSound->gateCheck(0x2817)) {
             MSoundSE::startSoundActor(0x2817, mTranslation, 0, nullptr, 0x0, 4);
         }
         return true;
     }
-    if (mParent->_02 == 2) {
-        if ((sender->mObjectID == 0x1000001) && msg == 0xf) {
+    if (mParent->mState == TBossPakkun::BossPakkunState::MOUTH_OPEN) {
+        if ((sender->mObjectID == OBJECT_ID_WATER_SPRAY) && msg == 0xf) {
 
             // Angle check
             float xPosDifference = (gpMarioPos->x - mTranslation.x);

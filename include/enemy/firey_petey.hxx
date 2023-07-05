@@ -143,7 +143,7 @@ public:
     virtual void perform(u32, JDrama::TGraphics *) override;
 
     TVec3f mVelocity; // 0x006c
-    int mLifetime;
+    u32 mLifetime;
 };
 
 class TFireyPetey : public TBossPakkun
@@ -162,7 +162,7 @@ public:
 
     void gotHipDropDamage();
 
-    short mNumTornados;
+    s16 mNumTornados;
     TMActorKeeper *mMActorKeeperSecondary;
     TKukkuBall *mKukkuBall[NUM_GOOP_DROPS];
     TFPFire *mFire[10];

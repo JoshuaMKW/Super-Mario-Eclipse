@@ -12,6 +12,7 @@
 #include <BetterSMS/stage.hxx>
 #include <BetterSMS/debug.hxx>
 
+#include "enemy/firey_petey.hxx"
 #include "object/darkness_effect.hxx"
 #include "object/water_balloon.hxx"
 #include "object/tornado_obj.hxx"
@@ -89,6 +90,9 @@ static void initModule() {
     Objects::registerObjectAsMapObj("Tornado", &tornadoData, TTornadoMapObj::instantiate);
     Objects::registerObjectAsMapObj("WaterBalloon", &waterBalloonData, TWaterBalloon::instantiate);
     Objects::registerObjectAsMapObj("LaunchStar", &launchStarData, TLaunchStarObj::instantiate);
+
+    Objects::registerObjectAsMisc("FireyPetey", TFireyPetey::instantiate);
+    Objects::registerObjectAsMisc("FireyPeteyManager", TFireyPeteyManager::instantiate);
 }
 
 static void deinitModule() {

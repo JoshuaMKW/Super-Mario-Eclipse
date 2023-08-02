@@ -138,7 +138,7 @@ void TLaunchStarObj::launchPlayer(TMario *player) {
             assignPlayerToRail(player, gpConductor->getGraphByName(mTravelRail));
         } else {
             player->mSpeed = TVec3f::up();
-            player->mSpeed.scale(180.0f);
+            player->mSpeed.scale(mTravelSpeed);
             player->changePlayerStatus(PlayerLaunchStarLaunch, 0, false);
             player->startVoice(TMario::VOICE_CANNON_WAIL);
         }

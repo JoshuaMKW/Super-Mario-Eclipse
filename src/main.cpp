@@ -10,6 +10,7 @@
 #include <BetterSMS/object.hxx>
 #include <BetterSMS/player.hxx>
 #include <BetterSMS/stage.hxx>
+#include <BetterSMS/debug.hxx>
 
 #include "object/darkness_effect.hxx"
 #include "object/water_balloon.hxx"
@@ -39,6 +40,9 @@ extern void blazePlayer(TMario *player, bool isMario);
 
 // HUD
 extern void updatePlayerHUD(TMarDirector *, const J2DOrthoGraph *);
+
+// SETTINGS
+extern void checkForCompletionAwards(TApplication *);
 
 static BetterSMS::ModuleInfo sModuleInfo("Super Mario Eclipse", 1, 0, &gSettingsGroup);
 
@@ -79,6 +83,7 @@ static void initModule() {
     Player::registerUpdateCallback("__update_blaze_state", blazePlayer);
     Player::registerStateMachine(PlayerLaunchStarWait, holdPlayerState);
     Player::registerStateMachine(PlayerLaunchStarLaunch, launchPlayerState);
+    Debug::registerUpdateCallback("__check_awards", checkForCompletionAwards);
 
     Objects::registerObjectAsMisc("DarknessEffect", TDarknessEffect::instantiate);
     Objects::registerObjectAsMapObj("Tornado", &tornadoData, TTornadoMapObj::instantiate);

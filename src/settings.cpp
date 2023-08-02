@@ -1,3 +1,4 @@
+#include <SMS/Manager/FlagManager.hxx>
 #include "settings.hxx"
 
 HUDSetting gHUDSetting;
@@ -351,3 +352,13 @@ const u8 gSaveIcon[] = {
     0x65, 0x36, 0x66, 0x36, 0x66, 0x15, 0x65, 0x04};
 
 HUDSetting::HUD getHUDKind() { return static_cast<HUDSetting::HUD>(gHUDSetting.getInt()); }
+
+BETTER_SMS_FOR_CALLBACK void checkForCompletionAwards(TApplication *app) {
+    if (!TFlagManager::smInstance)
+        return;
+
+    const size_t shineCount = TFlagManager::smInstance->getFlag(0x40000);
+    if (shineCount >= 300 && !BetterSMS::getBugFixesSetting()->isUnlocked()) {
+        BetterSMS::getBugFixesSetting()->unlock();
+    }
+}

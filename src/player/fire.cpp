@@ -39,7 +39,7 @@ static constexpr s32 MaxFireDamageTime = 300;
 static constexpr s32 MaxFireTime       = MaxFireDamageTime * 3;
 
 BETTER_SMS_FOR_EXPORT void SME::Player::setFire(TMario *player) {
-    auto playerData = BetterSMS::Player::getData(player);
+    auto playerData = getEclipseData(player);
 
     if (playerData->mIsOnFire) {
         playerData->mFireTimer %= MaxFireDamageTime;
@@ -52,7 +52,7 @@ BETTER_SMS_FOR_EXPORT void SME::Player::setFire(TMario *player) {
 }
 
 BETTER_SMS_FOR_EXPORT void SME::Player::extinguishFire(TMario *player, bool expired) {
-    auto playerData = BetterSMS::Player::getData(player);
+    auto playerData = getEclipseData(player);
 
     if (playerData->mIsOnFire && !expired)
         MSoundSE::startSoundActor(0x28C5, reinterpret_cast<Vec *>(&player->mTranslation), 0,
@@ -66,7 +66,7 @@ BETTER_SMS_FOR_CALLBACK void blazePlayer(TMario *player, bool isMario) {
     if (!isMario)
         return;
 
-    auto playerData = BetterSMS::Player::getData(player);
+    auto playerData = SME::Player::getEclipseData(player);
     if (!playerData->mIsOnFire)
         return;
 

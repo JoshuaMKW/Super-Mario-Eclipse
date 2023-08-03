@@ -20,6 +20,10 @@ static BoundingBox sIcePlatformBoundingBoxes[] = {
 
 static int sIcePlatformIndex = 0;
 
+BETTER_SMS_FOR_CALLBACK void resetTutorialIceStageCheckpoints(TMarDirector *director) {
+    sIcePlatformIndex = 0;
+}
+
 BETTER_SMS_FOR_CALLBACK void checkTutorialIceStageCheckpoints(TMario *player, bool isMario) {
     if (!isMario)
         return;

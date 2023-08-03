@@ -47,6 +47,7 @@ extern void lockModuleSettings(TApplication *app);
 extern void unlockSettings(TMarDirector *director);
 extern void setPlayerPosRotOnLoad(TMario *player);
 extern void checkForBlueCoinTrade(TMarDirector *director);
+extern void resetTutorialIceStageCheckpoints(TMarDirector *director);
 extern void checkTutorialIceStageCheckpoints(TMario *player, bool isMario);
 
 // SETTINGS
@@ -92,6 +93,7 @@ static void initModule() {
     Game::registerBootCallback("__lock_demo_settings", lockModuleSettings);
 
     Stage::registerInitCallback("__init_player_models", initCharacterArchives);
+    Stage::registerInitCallback("__reset_tutorial_ice_stage", resetTutorialIceStageCheckpoints);
     Stage::registerDraw2DCallback("__update_player_hud", updatePlayerHUD);
     Player::registerInitCallback("__init_eclipse_data", initEclipseData);
     Player::registerLoadAfterCallback("__init_water_balloons", initializeWaterBalloons);

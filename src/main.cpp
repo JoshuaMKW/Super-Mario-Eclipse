@@ -84,6 +84,12 @@ static void initModule() {
     Stage::registerInitCallback("__reset_darkness", initToDefault);
     Stage::registerUpdateCallback("__update_darkness", manageShineDarkness);
 
+    // Demo
+    Stage::registerInitCallback("__force_yoshi_unlock", forceYoshiUnlock);
+    Stage::registerUpdateCallback("__check_for_bugs_unlock", unlockSettings);
+    Stage::registerUpdateCallback("__check_for_blue_coin_shine", checkForBlueCoinTrade);
+    Game::registerBootCallback("__lock_demo_settings", lockModuleSettings);
+
     Stage::registerInitCallback("__init_player_models", initCharacterArchives);
     Stage::registerDraw2DCallback("__update_player_hud", updatePlayerHUD);
     Player::registerInitCallback("__init_eclipse_data", initEclipseData);

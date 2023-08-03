@@ -42,6 +42,12 @@ extern void blazePlayer(TMario *player, bool isMario);
 // HUD
 extern void updatePlayerHUD(TMarDirector *, const J2DOrthoGraph *);
 
+// DEMO
+extern void lockModuleSettings(TApplication *app);
+extern void unlockSettings(TMarDirector *director);
+extern void setPlayerPosRotOnLoad(TMario *player);
+extern void checkForBlueCoinTrade(TMarDirector *director);
+
 // SETTINGS
 extern void checkForCompletionAwards(TApplication *);
 
@@ -49,8 +55,11 @@ static BetterSMS::ModuleInfo sModuleInfo("Super Mario Eclipse", 1, 0, &gSettings
 
 static void initModule() {
     // Register settings
-    gSettingsGroup.addSetting(&gHUDSetting);
+    // gSettingsGroup.addSetting(&gHUDSetting);
     gSettingsGroup.addSetting(&gBugsSetting);
+
+    extern void initDemoCredits(Settings::SettingsGroup &group);
+    initDemoCredits(gSettingsGroup);
     {
         auto& saveInfo = gSettingsGroup.getSaveInfo();
         saveInfo.mSaveName = Settings::getGroupName(gSettingsGroup);
@@ -79,6 +88,7 @@ static void initModule() {
     Stage::registerDraw2DCallback("__update_player_hud", updatePlayerHUD);
     Player::registerInitCallback("__init_eclipse_data", initEclipseData);
     Player::registerLoadAfterCallback("__init_water_balloons", initializeWaterBalloons);
+    Player::registerLoadAfterCallback("__init_player_pos_rot", setPlayerPosRotOnLoad);
     Player::registerUpdateCallback("__update_water_balloons", createWaterBalloonAndThrow);
     Player::registerUpdateCallback("__update_yoshi_tounge", adjustYoshiTounge);
     Player::registerUpdateCallback("__update_blaze_state", blazePlayer);

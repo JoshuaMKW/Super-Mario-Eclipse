@@ -47,6 +47,7 @@ extern void lockModuleSettings(TApplication *app);
 extern void unlockSettings(TMarDirector *director);
 extern void setPlayerPosRotOnLoad(TMario *player);
 extern void checkForBlueCoinTrade(TMarDirector *director);
+extern void checkTutorialIceStageCheckpoints(TMario *player, bool isMario);
 
 // SETTINGS
 extern void checkForCompletionAwards(TApplication *);
@@ -95,6 +96,7 @@ static void initModule() {
     Player::registerInitCallback("__init_eclipse_data", initEclipseData);
     Player::registerLoadAfterCallback("__init_water_balloons", initializeWaterBalloons);
     Player::registerLoadAfterCallback("__init_player_pos_rot", setPlayerPosRotOnLoad);
+    Player::registerUpdateCallback("__update_tutorial_ice_stage", checkTutorialIceStageCheckpoints);
     Player::registerUpdateCallback("__update_water_balloons", createWaterBalloonAndThrow);
     Player::registerUpdateCallback("__update_yoshi_tounge", adjustYoshiTounge);
     Player::registerUpdateCallback("__update_blaze_state", blazePlayer);

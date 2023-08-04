@@ -30,8 +30,8 @@ BETTER_SMS_FOR_CALLBACK void checkTutorialIceStageCheckpoints(TMario *player, bo
 
     if (player->mFloorTriangle->mType == 3333) {
         if (player->mTranslation.y - player->mFloorBelow < 15.0f) {
-            if (gpMSound->gateCheck(MSound::SE_YOSHI_DENY_FRUIT)) {
-                MSoundSE::startSoundSystemSE(MSound::SE_YOSHI_DENY_FRUIT, 0, nullptr, 0);
+            if (gpMSound->gateCheck(MSD_SE_SY_NOT_COLLECT_YOSHI)) {
+                MSoundSE::startSoundSystemSE(MSD_SE_SY_NOT_COLLECT_YOSHI, 0, nullptr, 0);
             }
             player->warpRequest(sIcePlatformBoundingBoxes[sIcePlatformIndex].center, 180.0f);
         }
@@ -45,14 +45,14 @@ BETTER_SMS_FOR_CALLBACK void checkTutorialIceStageCheckpoints(TMario *player, bo
                     continue;
                 }
                 if (i == 5) {
-                    if (gpMSound->gateCheck(MSound::SE_SHINE_APPEAR)) {
-                        MSoundSE::startSoundSystemSE(MSound::SE_SHINE_APPEAR, 0, nullptr, 0);
+                    if (gpMSound->gateCheck(MSD_SE_SY_GET_SHINE)) {
+                        MSoundSE::startSoundSystemSE(MSD_SE_SY_GET_SHINE, 0, nullptr, 0);
                     }
                     break;
                 } else {
-                    if (gpMSound->gateCheck(MSound::SE_FRUIT_IN_BASKET)) {
+                    if (gpMSound->gateCheck(MSD_SE_FGM_SOCCER_GOAL)) {
                         auto *sound =
-                            MSoundSE::startSoundSystemSE(MSound::SE_FRUIT_IN_BASKET, 0, nullptr, 0);
+                            MSoundSE::startSoundSystemSE(MSD_SE_FGM_SOCCER_GOAL, 0, nullptr, 0);
                         if (sound) {
                             sound->setPitch(1 + ((i - 1) * 0.1f), 0, 0);
                         }

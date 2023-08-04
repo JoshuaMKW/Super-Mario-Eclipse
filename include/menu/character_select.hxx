@@ -129,8 +129,8 @@ private:
                 }
 
                 if (controller->mButtons.mRapidInput & TMarioGamePad::A) {
-                    if (gpMSound->gateCheck(MSound::SE_TALK_OPEN)) {
-                        MSoundSE::startSoundSystemSE(MSound::SE_TALK_OPEN, 0, nullptr, 0);
+                    if (gpMSound->gateCheck(MSD_SE_SY_TALK_MODE_IN)) {
+                        MSoundSE::startSoundSystemSE(MSD_SE_SY_TALK_MODE_IN, 0, nullptr, 0);
                     }
                     s_info.mIsSelected = true;
                     for (auto &s_s_info : mSelectionInfos) {
@@ -140,16 +140,16 @@ private:
                 }
             } else {
                 if (controller->mButtons.mRapidInput & TMarioGamePad::B) {
-                    if (gpMSound->gateCheck(MSound::SE_TALK_CLOSE)) {
-                        MSoundSE::startSoundSystemSE(MSound::SE_TALK_CLOSE, 0, nullptr, 0);
+                    if (gpMSound->gateCheck(MSD_SE_SY_TALK_MODE_OUT)) {
+                        MSoundSE::startSoundSystemSE(MSD_SE_SY_TALK_MODE_OUT, 0, nullptr, 0);
                     }
                     s_info.mIsSelected = false;
                 }
             }
 
             if (old_id != character_id) {
-                if (gpMSound->gateCheck(MSound::SE_MENU_CURSOR_MOVE)) {
-                    MSoundSE::startSoundSystemSE(MSound::SE_MENU_CURSOR_MOVE, 0, nullptr, 0);
+                if (gpMSound->gateCheck(MSD_SE_SY_CURSOR)) {
+                    MSoundSE::startSoundSystemSE(MSD_SE_SY_CURSOR, 0, nullptr, 0);
                 }
                 s_info.mIndex = character_id;
             }

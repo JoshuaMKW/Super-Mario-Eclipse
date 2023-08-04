@@ -56,8 +56,8 @@ static void loadIceStageSlideSandB(JPAResourceManager *manager, const char *old_
 SMS_PATCH_BL(0x802B4470, loadIceStageWalkSandA);
 
 static bool checkSpecialBlueCoinSound(MSound *msound, u32 soundID) {
-    return msound->gateCheck(
-        TFlagManager::smInstance->getFlag(0x40001) >= 10 ? MSound::SE_SHINE_TOUCH : soundID);
+    return msound->gateCheck(TFlagManager::smInstance->getFlag(0x40001) >= 10 ? MSD_SE_SY_GET_SHINE
+                                                                              : soundID);
 }
 SMS_PATCH_BL(SMS_PORT_REGION(0x8029A76C, 0, 0, 0), checkSpecialBlueCoinSound);
 
@@ -66,7 +66,7 @@ static bool sShineTradeReady = false;
 static void makeSpecialBlueCoinSound(u32 soundID, const Vec *vec, u32 _0, JAISound **_1, u32 _2,
                                      u8 _3) {
     if (TFlagManager::smInstance->getFlag(0x40001) % 10 == 0) {
-        MSoundSE::startSoundActor(MSound::SE_SHINE_TOUCH, vec, _0, _1, _2, _3);
+        MSoundSE::startSoundActor(MSD_SE_SY_GET_SHINE, vec, _0, _1, _2, _3);
         sShineTradeReady = true;
     } else {
         MSoundSE::startSoundActor(soundID, vec, _0, _1, _2, _3);

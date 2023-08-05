@@ -45,8 +45,8 @@ BETTER_SMS_FOR_CALLBACK void checkTutorialIceStageCheckpoints(TMario *player, bo
                     continue;
                 }
                 if (i == 5) {
-                    if (gpMSound->gateCheck(MSD_SE_SY_GET_SHINE)) {
-                        MSoundSE::startSoundSystemSE(MSD_SE_SY_GET_SHINE, 0, nullptr, 0);
+                    if (gpMSound->gateCheck(MSD_SE_BS_UNG_TEATH_FLASH)) {
+                        MSoundSE::startSoundSystemSE(MSD_SE_BS_UNG_TEATH_FLASH, 0, nullptr, 0);
                     }
                     break;
                 } else {

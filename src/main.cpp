@@ -5,18 +5,18 @@
 #include <SMS/System/Application.hxx>
 
 #include <BetterSMS/application.hxx>
+#include <BetterSMS/debug.hxx>
 #include <BetterSMS/game.hxx>
 #include <BetterSMS/module.hxx>
 #include <BetterSMS/object.hxx>
 #include <BetterSMS/player.hxx>
 #include <BetterSMS/stage.hxx>
-#include <BetterSMS/debug.hxx>
 
 #include "enemy/firey_petey.hxx"
 #include "object/darkness_effect.hxx"
-#include "object/water_balloon.hxx"
-#include "object/tornado_obj.hxx"
 #include "object/launch_star.hxx"
+#include "object/tornado_obj.hxx"
+#include "object/water_balloon.hxx"
 #include "p_settings.hxx"
 
 // Application
@@ -29,6 +29,9 @@ extern void manageShineDarkness(TMarDirector *director);
 // Yoshi
 extern void forceYoshiUnlock(TMarDirector *director);
 extern void adjustYoshiTounge(TMario *player, bool isMario);
+
+// Stage
+void resetForExStage(TMarDirector *director);
 
 // Player
 extern void initEclipseData(TMario *player, bool isMario);
@@ -49,6 +52,11 @@ extern void setPlayerPosRotOnLoad(TMario *player);
 extern void checkForBlueCoinTrade(TMarDirector *director);
 extern void resetTutorialIceStageCheckpoints(TMarDirector *director);
 extern void checkTutorialIceStageCheckpoints(TMario *player, bool isMario);
+extern void resetTutorialCasinoStageCheckpoints(TMarDirector *director);
+extern void checkTutorialCasinoStageCheckpoints(TMario *player, bool isMario);
+extern void resetTutorialPiantaPitStageCheckpoints(TMarDirector *director);
+extern void checkTutorialPiantaPitStageCheckpoints(TMario *player, bool isMario);
+extern void checkTutorialCollisionRespawn(TMario *player, bool isMario);
 
 // SETTINGS
 extern void checkForCompletionAwards(TApplication *);
@@ -60,21 +68,21 @@ static void initModule() {
     // gSettingsGroup.addSetting(&gHUDSetting);
     gSettingsGroup.addSetting(&gBugsSetting);
 
-    extern void initDemoCredits(Settings::SettingsGroup &group);
+    extern void initDemoCredits(Settings::SettingsGroup & group);
     initDemoCredits(gSettingsGroup);
     {
-        auto& saveInfo = gSettingsGroup.getSaveInfo();
-        saveInfo.mSaveName = Settings::getGroupName(gSettingsGroup);
-        saveInfo.mBlocks = 1;
-        saveInfo.mGameCode = 'GMSE';
-        saveInfo.mCompany = 0x3034;  // '04'
-        saveInfo.mBannerFmt = CARD_BANNER_CI;
+        auto &saveInfo        = gSettingsGroup.getSaveInfo();
+        saveInfo.mSaveName    = Settings::getGroupName(gSettingsGroup);
+        saveInfo.mBlocks      = 1;
+        saveInfo.mGameCode    = 'GMSE';
+        saveInfo.mCompany     = 0x3034;  // '04'
+        saveInfo.mBannerFmt   = CARD_BANNER_CI;
         saveInfo.mBannerImage = reinterpret_cast<const ResTIMG *>(gSaveBnr);
-        saveInfo.mIconFmt = CARD_ICON_CI;
-        saveInfo.mIconSpeed = CARD_SPEED_SLOW;
-        saveInfo.mIconCount = 2;
-        saveInfo.mIconTable = reinterpret_cast<const ResTIMG *>(gSaveIcon);
-        saveInfo.mSaveGlobal = true;
+        saveInfo.mIconFmt     = CARD_ICON_CI;
+        saveInfo.mIconSpeed   = CARD_SPEED_SLOW;
+        saveInfo.mIconCount   = 2;
+        saveInfo.mIconTable   = reinterpret_cast<const ResTIMG *>(gSaveIcon);
+        saveInfo.mSaveGlobal  = true;
     }
 
     // Register module
@@ -93,12 +101,22 @@ static void initModule() {
     Game::registerBootCallback("__lock_demo_settings", lockModuleSettings);
 
     Stage::registerInitCallback("__init_player_models", initCharacterArchives);
+    Stage::registerInitCallback("__init_ex_stage", resetForExStage);
     Stage::registerInitCallback("__reset_tutorial_ice_stage", resetTutorialIceStageCheckpoints);
+    Stage::registerInitCallback("__reset_tutorial_casino_stage",
+                                resetTutorialCasinoStageCheckpoints);
+    Stage::registerInitCallback("__reset_tutorial_pianta_pit_stage",
+                                resetTutorialPiantaPitStageCheckpoints);
     Stage::registerDraw2DCallback("__update_player_hud", updatePlayerHUD);
     Player::registerInitCallback("__init_eclipse_data", initEclipseData);
     Player::registerLoadAfterCallback("__init_water_balloons", initializeWaterBalloons);
     Player::registerLoadAfterCallback("__init_player_pos_rot", setPlayerPosRotOnLoad);
     Player::registerUpdateCallback("__update_tutorial_ice_stage", checkTutorialIceStageCheckpoints);
+    Player::registerUpdateCallback("__update_tutorial_casino_stage",
+                                   checkTutorialCasinoStageCheckpoints);
+    Player::registerUpdateCallback("__update_tutorial_pianta_pit_stage",
+                                   checkTutorialPiantaPitStageCheckpoints);
+    //Player::registerUpdateCallback("__update_tutorial_respawn", checkTutorialCollisionRespawn); 
     Player::registerUpdateCallback("__update_water_balloons", createWaterBalloonAndThrow);
     Player::registerUpdateCallback("__update_yoshi_tounge", adjustYoshiTounge);
     Player::registerUpdateCallback("__update_blaze_state", blazePlayer);
@@ -136,7 +154,7 @@ static void deinitModule() {
 // Definition block
 KURIBO_MODULE_BEGIN("Super Mario Eclipse", "JoshuaMK", "v1.0") {
     // Set the load and unload callbacks to our registration functions
-    KURIBO_EXECUTE_ON_LOAD{ initModule(); }
-    KURIBO_EXECUTE_ON_UNLOAD{ deinitModule(); }
+    KURIBO_EXECUTE_ON_LOAD { initModule(); }
+    KURIBO_EXECUTE_ON_UNLOAD { deinitModule(); }
 }
 KURIBO_MODULE_END()

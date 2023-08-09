@@ -223,7 +223,7 @@ void lockModuleSettings(TApplication *app) {
 
             {
                 auto *setting = movement_settings->getSetting("Long Jump");
-                setting->setBool(true);
+                setting->setInt(1);
                 setting->setUserEditable(false, BetterSMS::Settings::Priority::GAME);
             }
 

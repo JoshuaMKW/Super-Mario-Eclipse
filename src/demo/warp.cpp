@@ -63,8 +63,8 @@ SMS_WRITE_32(SMS_PORT_REGION(0x80156B80, 0, 0, 0), 0x60000000);
 static void assignExitAreaDestination(JDrama::TFlagT<u16> flags, u16 flag) {
     flags.set(flag);
     if (gpMarDirector->mAreaID == 11 && gpMarDirector->mEpisodeID == 2) {
-        gpApplication.mNextScene.mAreaID    = 15;
-        gpApplication.mNextScene.mEpisodeID = 0;
+        gpApplication.mNextScene.mAreaID    = 11;
+        gpApplication.mNextScene.mEpisodeID = 2;
         return;
     }
 

@@ -90,4 +90,4 @@ void checkForBlueCoinTrade(TMarDirector *director) {
 SMS_WRITE_32(SMS_PORT_REGION(0x80297A64, 0, 0, 0), 0x4800000C);
 
 // Disable fludd balloons
-SMS_WRITE_32(0x8014A1EC, 0x4E800020);
+//SMS_WRITE_32(0x8014A1EC, 0x4E800020);

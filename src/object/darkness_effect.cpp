@@ -17,8 +17,8 @@
 #include <SMS/Player/Watergun.hxx>
 #include <SMS/raw_fn.hxx>
 
-#include <BetterSMS/libs/constmath.hxx>
 #include "object/darkness_effect.hxx"
+#include <BetterSMS/libs/constmath.hxx>
 
 #include "darkness.hxx"
 
@@ -38,5 +38,6 @@ void TDarknessEffect::load(JSUMemoryInputStream &in) {
     in.readData(&brightness, sizeof(u8));
     in.readData(&layer_count, sizeof(u8));
 
-    initializeParameters(static_cast<TLightContext::ActiveType>(type), position, layer_count, color, scale, layer_scale, brightness);
+    initializeParameters(static_cast<TLightContext::ActiveType>(type), position, layer_count, color,
+                         scale, layer_scale, brightness);
 }

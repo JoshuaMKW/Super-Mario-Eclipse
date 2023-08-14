@@ -1,6 +1,6 @@
-#include <Dolphin/types.h>
-#include <Dolphin/printf.h>
 #include <Dolphin/DVD.h>
+#include <Dolphin/printf.h>
+#include <Dolphin/types.h>
 
 #include <JSystem/J2D/J2DOrthoGraph.hxx>
 #include <JSystem/JGadget/Vector.hxx>
@@ -14,10 +14,10 @@
 #include <SMS/assert.h>
 #include <SMS/macros.h>
 
+#include <BetterSMS/libs/global_vector.hxx>
 #include <BetterSMS/module.hxx>
 #include <BetterSMS/player.hxx>
 #include <BetterSMS/stage.hxx>
-#include <BetterSMS/libs/global_vector.hxx>
 
 #include "globals.hxx"
 #include "player.hxx"
@@ -57,7 +57,7 @@ BETTER_SMS_FOR_CALLBACK void initCharacterArchives(TMarDirector *director) {
 #if 1
 void initCharacterBuffer(TMario *player, JSUMemoryInputStream *input) {
     load__Q26JDrama6TActorFR20JSUMemoryInputStream(player, input);
-    u8 player_index        = 0;
+    u8 player_index = 0;
 
     JKRMemArchive *archive = reinterpret_cast<JKRMemArchive *>(JKRFileLoader::getVolume("mario"));
     archive->unmountFixed();
@@ -67,7 +67,7 @@ void initCharacterBuffer(TMario *player, JSUMemoryInputStream *input) {
 SMS_PATCH_BL(SMS_PORT_REGION(0x80276BF0, 0, 0, 0), initCharacterBuffer);
 
 static void getGlobalOrLocalResFmt(char *dst, size_t size, const char *local_path,
-                                const char *specifier, const char *global_path) {
+                                   const char *specifier, const char *global_path) {
     auto *first_file = JKRFileLoader::findFirstFile("/common/01_waterboost");
     if (!first_file) {
         snprintf(dst, size, local_path, specifier);
@@ -86,7 +86,8 @@ static void *getGlobalOrLocalRes(const char *local_path, const char *global_path
     return JKRFileLoader::getGlbResource(global_path);
 }
 
-static void getGlobalPlayerBoneAnim(char *dst, size_t size, const char *local_path, const char *specifier) {
+static void getGlobalPlayerBoneAnim(char *dst, size_t size, const char *local_path,
+                                    const char *specifier) {
     getGlobalOrLocalResFmt(dst, size, local_path, specifier, "/common/bck/ma_%s.bck");
 }
 SMS_PATCH_BL(SMS_PORT_REGION(0x80246B2C, 0, 0, 0), getGlobalPlayerBoneAnim);
@@ -95,7 +96,7 @@ static void getGlobalPlayerSoundAnim(char *dst, size_t size, const char *local_p
                                      const char *specifier) {
     getGlobalOrLocalResFmt(dst, size, local_path, specifier, "/common/bas/ma_%s.bas");
 }
-//SMS_PATCH_BL(SMS_PORT_REGION(0x80246B60, 0, 0, 0), getGlobalPlayerSoundAnim);
+// SMS_PATCH_BL(SMS_PORT_REGION(0x80246B60, 0, 0, 0), getGlobalPlayerSoundAnim);
 
 static void getGlobalPlayerTobiKomiAnim(MActorAnmData *data, const char *local_path) {
     if (!JKRFileLoader::findFirstFile("/common/04_tobikomi")) {
@@ -112,10 +113,12 @@ static void *getGlobalPlayerTobiKomiMdl(const char *local_path) {
 SMS_PATCH_BL(SMS_PORT_REGION(0x80272160, 0, 0, 0), getGlobalPlayerTobiKomiMdl);
 
 static void getGlobalPlayerWaterAnim(MActorAnmData *data, const char *local_path) {
-    if (!JKRFileLoader::findFirstFile("/common/01_waterboost")) {
+    auto *first_file = JKRFileLoader::findFirstFile("/common/01_waterboost");
+    if (!first_file) {
         data->init(local_path, nullptr);
         return;
     }
+    delete first_file;
     data->init("common/01_waterboost", nullptr);
 }
 SMS_PATCH_BL(SMS_PORT_REGION(0x802721F0, 0, 0, 0), getGlobalPlayerWaterAnim);
@@ -176,10 +179,13 @@ static void *getGlobalPlayerWaterDiverHelmMdl(const char *local_path) {
 SMS_PATCH_BL(SMS_PORT_REGION(0x802423B0, 0, 0, 0), getGlobalPlayerWaterDiverHelmMdl);
 
 static void getGlobalPlayerWaterGunAnim(MActorAnmData *data, const char *local_path) {
-    if (!JKRFileLoader::findFirstFile("/common/01_waterboost")) {
+    auto *first_file = JKRFileLoader::findFirstFile("/common/01_waterboost");
+    if (!first_file) {
         data->init(local_path, nullptr);
         return;
     }
+
+    delete first_file;
 
     char buffer[64];
     snprintf(buffer, 64, "/common/%s", local_path + 7);  // Replace /mario/ with /common/
@@ -189,9 +195,12 @@ static void getGlobalPlayerWaterGunAnim(MActorAnmData *data, const char *local_p
 SMS_PATCH_BL(SMS_PORT_REGION(0x8026A6E8, 0, 0, 0), getGlobalPlayerWaterGunAnim);
 
 static void *getGlobalPlayerWaterGunMdl(const char *local_path) {
-    if (!JKRFileLoader::findFirstFile("/common/01_waterboost")) {
+    auto *first_file = JKRFileLoader::findFirstFile("/common/01_waterboost");
+    if (!first_file) {
         return JKRFileLoader::getGlbResource(local_path);
     }
+
+    delete first_file;
 
     char buffer[64];
     snprintf(buffer, 64, "/common/%s", local_path + 7);  // Replace /mario/ with /common/
@@ -201,10 +210,12 @@ static void *getGlobalPlayerWaterGunMdl(const char *local_path) {
 SMS_PATCH_BL(SMS_PORT_REGION(0x8026A71C, 0, 0, 0), getGlobalPlayerWaterGunMdl);
 
 static void getGlobalPlayerWaterGunBodyAnim(MActorAnmData *data, const char *local_path) {
-    if (!JKRFileLoader::findFirstFile("/common/01_waterboost")) {
+    auto *first_file = JKRFileLoader::findFirstFile("/common/01_waterboost");
+    if (!first_file) {
         data->init(local_path, nullptr);
         return;
     }
+    delete first_file;
     data->init("common/watergun2/body", nullptr);
 }
 SMS_PATCH_BL(SMS_PORT_REGION(0x8026A550, 0, 0, 0), getGlobalPlayerWaterGunBodyAnim);
@@ -230,11 +241,11 @@ static void applyShadowEffects(u32 *tremble_efx) {
 
     ((u32 **)mario)[0x53C / 4] = tremble_efx;
     if (SME::TGlobals::getCharacterIDFromPlayer(mario) == SME::CharacterID::SHADOW_MARIO) {
-        sKeeper                    = new TMActorKeeper(nullptr, 1);
-        sKeeper->mModelFlags       = 0x11300000;
-        sActor                     = sKeeper->createMActorFromDefaultBmd("/common/kagemario", 0);
-        mario->mModelData->mModel  = sActor->mModel;
-        mario->mBodyModelData      = sActor->mModel->mModelData;
+        sKeeper                   = new TMActorKeeper(nullptr, 1);
+        sKeeper->mModelFlags      = 0x11300000;
+        sActor                    = sKeeper->createMActorFromDefaultBmd("/common/kagemario", 0);
+        mario->mModelData->mModel = sActor->mModel;
+        mario->mBodyModelData     = sActor->mModel->mModelData;
 
         /*for (int i = 0; i < sActor->mModel->mModelData->mJointNum; ++i) {
             SMS_InitPacket_Fog__FP8J3DModelUs(sActor->mModel, i);
@@ -244,7 +255,7 @@ static void applyShadowEffects(u32 *tremble_efx) {
 }
 #else
 #endif
-//SMS_PATCH_BL(SMS_PORT_REGION(0x802474C0, 0, 0, 0), applyShadowEffects);
+// SMS_PATCH_BL(SMS_PORT_REGION(0x802474C0, 0, 0, 0), applyShadowEffects);
 const char *player_fnames[] = {"mario", "luigi", "piantissimo", "shadow_mario"};
 
 void updatePlayerHUD(TMarDirector *director, const J2DOrthoGraph *graph) {
@@ -270,9 +281,9 @@ void updatePlayerHUD(TMarDirector *director, const J2DOrthoGraph *graph) {
         J2DPicture *marioName =
             reinterpret_cast<J2DPicture *>(console->mMainScreen->search('m_tx'));
 
-            snprintf(buffer, 64, "/game_6/timg/%s_text.bti",
-                     player_fnames[static_cast<int>(
-                         SME::TGlobals::getCharacterIDFromPlayer(gpMarioAddress))]);
+        snprintf(buffer, 64, "/game_6/timg/%s_text.bti",
+                 player_fnames[static_cast<int>(
+                     SME::TGlobals::getCharacterIDFromPlayer(gpMarioAddress))]);
 
         auto *timg = reinterpret_cast<ResTIMG *>(JKRFileLoader::getGlbResource(buffer));
         if (timg)

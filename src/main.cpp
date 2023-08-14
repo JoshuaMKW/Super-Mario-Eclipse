@@ -21,6 +21,7 @@
 
 // Application
 extern bool directCharacterSelectMenu(TApplication *app);
+extern void setIntroStage(TApplication *application);
 
 // Light
 extern void initToDefault(TMarDirector *director);
@@ -41,6 +42,8 @@ extern void createWaterBalloonAndThrow(TMario *player, bool isMario);
 extern bool holdPlayerState(TMario *player);
 extern bool launchPlayerState(TMario *player);
 extern void blazePlayer(TMario *player, bool isMario);
+extern void initColdState(TMarDirector *director);
+extern void processColdState(TMario *player, bool isMario);
 
 // HUD
 extern void updatePlayerHUD(TMarDirector *, const J2DOrthoGraph *);
@@ -67,6 +70,7 @@ static void initModule() {
     // Register settings
     // gSettingsGroup.addSetting(&gHUDSetting);
     gSettingsGroup.addSetting(&gBugsSetting);
+    gSettingsGroup.addSetting(&gTutorialSetting);
 
     extern void initDemoCredits(Settings::SettingsGroup & group);
     initDemoCredits(gSettingsGroup);
@@ -90,6 +94,7 @@ static void initModule() {
 
     // Register callbacks
     Application::registerContextCallback(11, directCharacterSelectMenu);
+    Game::registerChangeCallback("__set_intro_stage", setIntroStage);
 
     Stage::registerInitCallback("__reset_darkness", initToDefault);
     Stage::registerUpdateCallback("__update_darkness", manageShineDarkness);
@@ -116,7 +121,9 @@ static void initModule() {
                                    checkTutorialCasinoStageCheckpoints);
     Player::registerUpdateCallback("__update_tutorial_pianta_pit_stage",
                                    checkTutorialPiantaPitStageCheckpoints);
-    //Player::registerUpdateCallback("__update_tutorial_respawn", checkTutorialCollisionRespawn); 
+    Stage::registerInitCallback("__init_cold_state", initColdState);
+    Player::registerUpdateCallback("__check_for_freezing_water", processColdState);
+    // Player::registerUpdateCallback("__update_tutorial_respawn", checkTutorialCollisionRespawn);
     Player::registerUpdateCallback("__update_water_balloons", createWaterBalloonAndThrow);
     Player::registerUpdateCallback("__update_yoshi_tounge", adjustYoshiTounge);
     Player::registerUpdateCallback("__update_blaze_state", blazePlayer);
@@ -158,3 +165,37 @@ KURIBO_MODULE_BEGIN("Super Mario Eclipse", "JoshuaMK", "v1.0") {
     KURIBO_EXECUTE_ON_UNLOAD { deinitModule(); }
 }
 KURIBO_MODULE_END()
+
+SMS_WRITE_32(0x802bf47c, 0x808da0d4);  // Use current heap for files
+
+// static u32 sAddresses[0x10000] = {0};
+//
+// static void printAllocSpace(OSMutex *mutex) {
+//     u32 alloced;
+//     SMS_FROM_GPR(31, alloced);
+//
+//     for (int i = 0; i < 0x10000; i++) {
+//         if (sAddresses[i] == 0) {
+//             sAddresses[i] = alloced;
+//             break;
+//         }
+//     }
+//
+//     OSUnlockMutex(mutex);
+// }
+// SMS_PATCH_BL(0x802C14A8, printAllocSpace);
+//
+// static void printFreeSpace(OSMutex *mutex) {
+//     u32 alloced;
+//     SMS_FROM_GPR(31, alloced);
+//
+//     for (int i = 0; i < 0x10000; i++) {
+//         if (sAddresses[i] == alloced) {
+//             sAddresses[i] = 0;
+//             break;
+//         }
+//     }
+//
+//     OSLockMutex(mutex);
+// }
+// SMS_PATCH_BL(0x802C1B34, printFreeSpace);

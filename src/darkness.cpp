@@ -1,8 +1,8 @@
 #include <SMS/Manager/FlagManager.hxx>
 
+#include <BetterSMS/libs/constmath.hxx>
 #include <BetterSMS/module.hxx>
 #include <BetterSMS/stage.hxx>
-#include <BetterSMS/libs/constmath.hxx>
 
 #include "darkness.hxx"
 #include "globals.hxx"
@@ -13,12 +13,13 @@ using namespace BetterSMS;
 static TLightContext sLightContext;
 static u8 sBrightLevel = 255;
 
-void initializeParameters(TLightContext::ActiveType type, TVec3f pos, u8 layer_count, JUtility::TColor color, f32 scale, f32 layer_scale, u8 brightness) {
+void initializeParameters(TLightContext::ActiveType type, TVec3f pos, u8 layer_count,
+                          JUtility::TColor color, f32 scale, f32 layer_scale, u8 brightness) {
     sLightContext.mLightType   = type;
     sLightContext.mTranslation = pos;
     sLightContext.mColor       = color;
     sLightContext.mBaseScale   = scale;
-    sLightContext.mLayerScale   = layer_scale;
+    sLightContext.mLayerScale  = layer_scale;
     sLightContext.mLayerCount  = layer_count;
     sBrightLevel               = brightness;
 }
@@ -55,9 +56,9 @@ void TLightContext::process(TModelWaterManager &manager) {
                 mNextSize =
                     mBaseScale + powf(((1350.0f / MaxShineCount) * CurrentShineCount), 1.5f);
                 mPrevDarkness = manager.mDarkLevel;
-                mNextDarkness = lerp<u8>(SME::TGlobals::getMinDarkness(), 190,
-                                                     static_cast<f32>(CurrentShineCount) /
-                                                         static_cast<f32>(MaxShineCount));
+                mNextDarkness =
+                    lerp<u8>(SME::TGlobals::getMinDarkness(), 190,
+                             static_cast<f32>(CurrentShineCount) / static_cast<f32>(MaxShineCount));
 
                 mSizeMorphing = true;
                 mStepContext  = 0.0f;
@@ -69,9 +70,9 @@ void TLightContext::process(TModelWaterManager &manager) {
         const f32 cur = sigmoid(mStepContext, mPrevSize, mNextSize, sigOfs, sigStrength);
 
         if (sBrightLevel == 255)
-            manager.mDarkLevel = static_cast<u8>(
-                sigmoid(mStepContext, static_cast<f32>(mPrevDarkness),
-                                   static_cast<f32>(mNextDarkness), sigOfs, sigStrength));
+            manager.mDarkLevel =
+                static_cast<u8>(sigmoid(mStepContext, static_cast<f32>(mPrevDarkness),
+                                        static_cast<f32>(mNextDarkness), sigOfs, sigStrength));
 
         constexpr f32 deadZone = 1.0f;
         constexpr f32 minSize  = 0.0f;
@@ -84,19 +85,19 @@ void TLightContext::process(TModelWaterManager &manager) {
                                                      : cur <= (NextSize + deadZone);
         if (manager.mSize > maxSize) {
             manager.mSize = maxSize;
-            mSizeMorphing  = false;
+            mSizeMorphing = false;
         } else if (manager.mSize < minSize) {
             manager.mSize = minSize;
-            mSizeMorphing  = false;
+            mSizeMorphing = false;
         } else if (!isFinished) {
             manager.mSize       = cur;
             manager.mSphereStep = cur * mLayerScale;
             mStepContext += 1.0f;
         } else {
             manager.mSize       = cur;
-            manager.mSphereStep  = cur * mLayerScale;
-            mPrevShineCount      = CurrentShineCount;
-            mSizeMorphing        = false;
+            manager.mSphereStep = cur * mLayerScale;
+            mPrevShineCount     = CurrentShineCount;
+            mSizeMorphing       = false;
         }
         break;
     }
@@ -108,9 +109,9 @@ void TLightContext::process(TModelWaterManager &manager) {
                 clamp(1.0f - ((21000.0f - ((f32 *)gpCamera)[0x134 / 4]) / 8000.0f), 0.0f, 1.0f));
         }
         manager.mSphereStep = mBaseScale * mLayerScale;
-        manager.mSize      = mBaseScale;
+        manager.mSize       = mBaseScale;
         manager.mColor      = mColor;
-        gShineShadowPos    = gpCamera->mTranslation + mTranslation;
+        gShineShadowPos     = gpCamera->mTranslation + mTranslation;
         break;
     }
     default:
@@ -129,12 +130,12 @@ static void initShineShadow() {
     s32 &CurrentShineCount = TFlagManager::smInstance->Type4Flag.mShineCount;
     if (CurrentShineCount < SME_MAX_SHINES ||
         sLightContext.mLightType == TLightContext::ActiveType::FOLLOWPLAYER) {
-        sLightContext.mPrevShineCount  = CurrentShineCount;
+        sLightContext.mPrevShineCount = CurrentShineCount;
 
-        gpModelWaterManager->mColor                 = sLightContext.mColor;
-        gpModelWaterManager->mDarkLevel             = sBrightLevel;
-        gpModelWaterManager->mSphereStep            = sLightContext.mBaseScale * sLightContext.mLayerScale;
-        gpModelWaterManager->mSize                  = sLightContext.mBaseScale;
+        gpModelWaterManager->mColor      = sLightContext.mColor;
+        gpModelWaterManager->mDarkLevel  = sBrightLevel;
+        gpModelWaterManager->mSphereStep = sLightContext.mBaseScale * sLightContext.mLayerScale;
+        gpModelWaterManager->mSize       = sLightContext.mBaseScale;
         gpModelWaterManager->LightType.mMaskObjects = true;
         gpModelWaterManager->LightType.mShowShadow  = true;
 
@@ -159,11 +160,11 @@ static void initShineShadow() {
 SMS_PATCH_B(SMS_PORT_REGION(0x80280180, 0x80277F0C, 0, 0), initShineShadow);
 
 BETTER_SMS_FOR_CALLBACK void manageShineDarkness(TMarDirector *director) {
-  sLightContext.process(*gpModelWaterManager);
+    sLightContext.process(*gpModelWaterManager);
 }
 
 static bool checkIfActive() {
-  return sLightContext.mLightType != TLightContext::ActiveType::DISABLED;
+    return sLightContext.mLightType != TLightContext::ActiveType::DISABLED;
 }
 SMS_PATCH_BL(0x8027C6A4, checkIfActive);
 SMS_WRITE_32(0x8027C6A8, 0x28030001);
@@ -171,62 +172,62 @@ SMS_WRITE_32(0x8027C6A8, 0x28030001);
 //// 0x8024D3A8
 //// 0x8003F8F0
 //// extern -> SME.cpp
-//void Patch::CKit::realTimeCustomAttrsHandler(TMario *player) {
-//  if (player->mYoshi)
-//    maintainYoshi(player->mYoshi);
+// void Patch::CKit::realTimeCustomAttrsHandler(TMario *player) {
+//   if (player->mYoshi)
+//     maintainYoshi(player->mYoshi);
 //
-//  Class::TPlayerData *playerParams = TGlobals::getPlayerData(player);
-//  Class::TStageParams *stageParams = Class::TStageParams::sStageConfig;
+//   Class::TPlayerData *playerParams = TGlobals::getPlayerData(player);
+//   Class::TStageParams *stageParams = Class::TStageParams::sStageConfig;
 //
-//  const Class::TPlayerParams *params = playerParams->getParams();
-//  const f32 sizeMultiplier =
-//      params->mSizeMultiplier.get() * stageParams->mPlayerSizeMultiplier.get();
-//  const f32 speedMultiplier = params->mSpeedMultiplier.get();
+//   const Class::TPlayerParams *params = playerParams->getParams();
+//   const f32 sizeMultiplier =
+//       params->mSizeMultiplier.get() * stageParams->mPlayerSizeMultiplier.get();
+//   const f32 speedMultiplier = params->mSpeedMultiplier.get();
 //
-//  playerParams->scalePlayerAttrs(sizeMultiplier);
+//   playerParams->scalePlayerAttrs(sizeMultiplier);
 //
-//#define SCALE_PARAM(param, scale) param.set(param.get() * scale)
+// #define SCALE_PARAM(param, scale) param.set(param.get() * scale)
 //
-//  switch (playerParams->getPlayerID()) {
-//  case Enum::Player::MARIO:
-//  case Enum::Player::LUIGI:
-//  case Enum::Player::IL_PIANTISSIMO:
-//  case Enum::Player::SHADOW_MARIO:
-//    break;
-//  case Enum::Player::DRY_BONES:
-//    SCALE_PARAM(player->mRunParams.mMotBlendRunSp, 100.0f);
-//    SCALE_PARAM(player->mSwimParams.mWaitBouyancy, -1.0f);
-//    SCALE_PARAM(player->mSwimParams.mMoveBouyancy, 0.0f);
-//    SCALE_PARAM(player->mSwimParams.mPaddleDown, 2.0f);
-//    SCALE_PARAM(player->mSwimParams.mPaddleSpeedUp, 0.5f);
-//    break;
-//  default:
-//    break;
-//  }
+//   switch (playerParams->getPlayerID()) {
+//   case Enum::Player::MARIO:
+//   case Enum::Player::LUIGI:
+//   case Enum::Player::IL_PIANTISSIMO:
+//   case Enum::Player::SHADOW_MARIO:
+//     break;
+//   case Enum::Player::DRY_BONES:
+//     SCALE_PARAM(player->mRunParams.mMotBlendRunSp, 100.0f);
+//     SCALE_PARAM(player->mSwimParams.mWaitBouyancy, -1.0f);
+//     SCALE_PARAM(player->mSwimParams.mMoveBouyancy, 0.0f);
+//     SCALE_PARAM(player->mSwimParams.mPaddleDown, 2.0f);
+//     SCALE_PARAM(player->mSwimParams.mPaddleSpeedUp, 0.5f);
+//     break;
+//   default:
+//     break;
+//   }
 //
-//  SME_EVAL_LOG(playerParams->mIsOnFire);
-//  if (playerParams->mIsOnFire) {
-//    SCALE_PARAM(player->mDeParams.mRunningMax, 1.4f);
-//    SCALE_PARAM(player->mDeParams.mDashMax, 1.4f);
-//    SCALE_PARAM(player->mDeParams.mClashSpeed, 1.4f);
-//    SCALE_PARAM(player->mJumpParams.mJumpSpeedAccelControl, 1.4f);
-//    SCALE_PARAM(player->mJumpParams.mFenceSpeed, 1.4f);
-//    SCALE_PARAM(player->mRunParams.mMaxSpeed, 1.4f);
-//    SCALE_PARAM(player->mRunParams.mAddBase, 1.4f);
-//    SCALE_PARAM(player->mRunParams.mDecBrake, 1.05f);
-//    SCALE_PARAM(player->mRunParams.mRunAnmSpeedBase, 1.4f);
-//    SCALE_PARAM(player->mHangFenceParams.mMoveSp, 1.4f);
-//    SCALE_PARAM(player->mHangFenceParams.mDescentSp, 1.4f);
-//    SCALE_PARAM(player->mDirtyParams.mSlipRunSp, 1.4f);
-//    SCALE_PARAM(player->mDirtyParams.mSlipCatchSp, 1.4f);
+//   SME_EVAL_LOG(playerParams->mIsOnFire);
+//   if (playerParams->mIsOnFire) {
+//     SCALE_PARAM(player->mDeParams.mRunningMax, 1.4f);
+//     SCALE_PARAM(player->mDeParams.mDashMax, 1.4f);
+//     SCALE_PARAM(player->mDeParams.mClashSpeed, 1.4f);
+//     SCALE_PARAM(player->mJumpParams.mJumpSpeedAccelControl, 1.4f);
+//     SCALE_PARAM(player->mJumpParams.mFenceSpeed, 1.4f);
+//     SCALE_PARAM(player->mRunParams.mMaxSpeed, 1.4f);
+//     SCALE_PARAM(player->mRunParams.mAddBase, 1.4f);
+//     SCALE_PARAM(player->mRunParams.mDecBrake, 1.05f);
+//     SCALE_PARAM(player->mRunParams.mRunAnmSpeedBase, 1.4f);
+//     SCALE_PARAM(player->mHangFenceParams.mMoveSp, 1.4f);
+//     SCALE_PARAM(player->mHangFenceParams.mDescentSp, 1.4f);
+//     SCALE_PARAM(player->mDirtyParams.mSlipRunSp, 1.4f);
+//     SCALE_PARAM(player->mDirtyParams.mSlipCatchSp, 1.4f);
 //
-//    if (player->mAttributes.mIsShallowWater || player->mAttributes.mIsWater)
-//      Util::Mario::extinguishPlayer(player, false);
-//    else
-//      blazePlayer(player);
-//  }
+//     if (player->mAttributes.mIsShallowWater || player->mAttributes.mIsWater)
+//       Util::Mario::extinguishPlayer(player, false);
+//     else
+//       blazePlayer(player);
+//   }
 //
-//#undef SCALE_PARAM
+// #undef SCALE_PARAM
 //
-//  setPositions__6TMarioFv(player);
-//}
+//   setPositions__6TMarioFv(player);
+// }

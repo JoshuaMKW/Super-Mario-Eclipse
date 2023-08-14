@@ -1,6 +1,6 @@
-#include <Dolphin/types.h>
-#include <Dolphin/printf.h>
 #include <Dolphin/DVD.h>
+#include <Dolphin/printf.h>
+#include <Dolphin/types.h>
 
 #include <JSystem/JGadget/Vector.hxx>
 #include <JSystem/JKernel/JKRDecomp.hxx>
@@ -8,19 +8,19 @@
 #include <JSystem/JKernel/JKRHeap.hxx>
 #include <JSystem/JKernel/JKRMemArchive.hxx>
 #include <SMS/Camera/PolarSubCamera.hxx>
-#include <SMS/System/Application.hxx>
 #include <SMS/Manager/PollutionManager.hxx>
+#include <SMS/System/Application.hxx>
 #include <SMS/assert.h>
 #include <SMS/macros.h>
 
+#include <BetterSMS/libs/container.hxx>
+#include <BetterSMS/libs/global_vector.hxx>
 #include <BetterSMS/module.hxx>
 #include <BetterSMS/player.hxx>
 #include <BetterSMS/stage.hxx>
-#include <BetterSMS/libs/container.hxx>
-#include <BetterSMS/libs/global_vector.hxx>
 
-#include "object/water_balloon.hxx"
 #include "globals.hxx"
+#include "object/water_balloon.hxx"
 #include "player.hxx"
 
 using WaterBalloonBuffer = TRingBuffer<TWaterBalloon>;
@@ -50,8 +50,9 @@ BETTER_SMS_FOR_CALLBACK void createWaterBalloonAndThrow(TMario *player, bool isM
     if (gpMarDirector->mCurState != 4 || !isMario)
         return;
 
-    if (player->mState == 0x200009 || player->mState == 0x80000588 || (player->mState & 0x800000) != 0 ||
-        player->mState == TMario::STATE_SHINE_C || (player->mState & TMario::STATE_WATERBORN) != 0)
+    if (player->mState == 0x200009 || player->mState == 0x80000588 ||
+        (player->mState & 0x800000) != 0 || player->mState == TMario::STATE_SHINE_C ||
+        (player->mState & TMario::STATE_WATERBORN) != 0)
         return;
 
     if (player->mHeldObject || player->mAttributes.mHasFludd)
@@ -60,8 +61,7 @@ BETTER_SMS_FOR_CALLBACK void createWaterBalloonAndThrow(TMario *player, bool isM
     if (!(player->mController->mButtons.mFrameInput & TMarioGamePad::R))
         return;
 
-    auto *water_balloons =
-        reinterpret_cast<WaterBalloonBuffer *>(
+    auto *water_balloons = reinterpret_cast<WaterBalloonBuffer *>(
         Player::getRegisteredData(player, "sme_balloon_info"));
 
     TWaterBalloon *balloon = water_balloons->next();
@@ -72,7 +72,7 @@ BETTER_SMS_FOR_CALLBACK void createWaterBalloonAndThrow(TMario *player, bool isM
 
     // Have player grab balloon
     if (balloon->receiveMessage(player, 4)) {  // 4 = grab
-        player->mHeldObject = balloon;
+        player->mHeldObject      = balloon;
         player->mFluddUsageState = 2;
     } else {
         player->mHeldObject = nullptr;
@@ -80,10 +80,11 @@ BETTER_SMS_FOR_CALLBACK void createWaterBalloonAndThrow(TMario *player, bool isM
     }
 
     if (player->mState == static_cast<u32>(TMario::STATE_IDLE)) {
-        player->changePlayerStatus(0x80000588, 0, 1); // 0x80000387
+        player->changePlayerStatus(0x80000588, 0, 1);  // 0x80000387
     } else if (player->mState == TMario::STATE_JUMP || player->mState == TMario::STATE_D_JUMP ||
                player->mState == TMario::STATE_FALL || player->mState == TMario::STATE_JUMPSPINL ||
-               player->mState == TMario::STATE_JUMPSPINR || player->mState == TMario::STATE_JUMPSPIN) {
+               player->mState == TMario::STATE_JUMPSPINR ||
+               player->mState == TMario::STATE_JUMPSPIN) {
         player->changePlayerStatus(0x820008AB, 0, 1);
     } else {
         player->changePlayerStatus(0x80000588, 0, 1);

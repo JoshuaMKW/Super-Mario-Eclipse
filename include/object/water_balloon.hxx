@@ -27,8 +27,7 @@ public:
     virtual void put() override;
     virtual void thrown() override;
     virtual void touchGround(TVec3f *) override;
-    virtual void touchWall(TVec3f *,
-                            TBGWallCheckRecord *) override;
+    virtual void touchWall(TVec3f *, TBGWallCheckRecord *) override;
     virtual void touchRoof(TVec3f *) override;
     virtual void touchPollution() override;
     virtual void touchWaterSurface() override;

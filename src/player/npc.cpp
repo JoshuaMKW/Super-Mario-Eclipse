@@ -2,9 +2,9 @@
 #include <Dolphin/math.h>
 #include <Dolphin/types.h>
 
-#include <SMS/Player/Mario.hxx>
 #include <SMS/Enemy/EnemyMario.hxx>
 #include <SMS/NPC/NpcBase.hxx>
+#include <SMS/Player/Mario.hxx>
 
 #include <BetterSMS/module.hxx>
 
@@ -16,65 +16,60 @@ using namespace BetterSMS;
 
 // 0x8029A87C
 static u32 carryOrTalkNPC(TBaseNPC *npc) {
-  const Class::TPlayerData *playerData =
-      TGlobals::getPlayerData(gpMarioAddress);
+    const Class::TPlayerData *playerData = TGlobals::getPlayerData(gpMarioAddress);
 
-  if (!playerData->isMario())
-    return isNowCanTaken__8TBaseNPCCFv(npc);
+    if (!playerData->isMario())
+        return isNowCanTaken__8TBaseNPCCFv(npc);
 
-  if ((*(u32 *)(&npc->mStateFlags.asFlags) & 0x840007) != 0)
-    return 0;
+    if ((*(u32 *)(&npc->mStateFlags.asFlags) & 0x840007) != 0)
+        return 0;
 
-  if (gpMarioAddress->mState == static_cast<u32>(TMario::STATE_IDLE))
-    return 0;
+    if (gpMarioAddress->mState == static_cast<u32>(TMario::STATE_IDLE))
+        return 0;
 
-  bool oldTake = npc->mStateFlags.asFlags.mCanBeTaken;
-  npc->mStateFlags.asFlags.mCanBeTaken =
-      playerData->getParams()->mCanHoldNPCs.get();
+    bool oldTake                         = npc->mStateFlags.asFlags.mCanBeTaken;
+    npc->mStateFlags.asFlags.mCanBeTaken = playerData->getParams()->mCanHoldNPCs.get();
 
-  u32 ret = isNowCanTaken__8TBaseNPCCFv(npc);
+    u32 ret = isNowCanTaken__8TBaseNPCCFv(npc);
 
-  npc->mStateFlags.asFlags.mCanBeTaken = oldTake;
-  return ret;
+    npc->mStateFlags.asFlags.mCanBeTaken = oldTake;
+    return ret;
 }
 SME_PATCH_BL(SME_PORT_REGION(0x8029A87C, 0x80292758, 0, 0), carryOrTalkNPC);
 
 // 0x802815F0
 static bool canGrabAtNPC() {
-  TBaseNPC *npc;
-  SME_FROM_GPR(30, npc);
+    TBaseNPC *npc;
+    SME_FROM_GPR(30, npc);
 
-  const Class::TPlayerData *playerData =
-      TGlobals::getPlayerData(gpMarioAddress);
+    const Class::TPlayerData *playerData = TGlobals::getPlayerData(gpMarioAddress);
 
-  if (!playerData->isMario())
-    return npc->mStateFlags.asFlags.mCanBeTaken;
+    if (!playerData->isMario())
+        return npc->mStateFlags.asFlags.mCanBeTaken;
 
-  return (playerData->getParams()->mCanHoldNPCs.get() &&
-          gpMarioAddress->mState != static_cast<u32>(TMario::STATE_IDLE)) ||
-         npc->mStateFlags.asFlags.mCanBeTaken;
+    return (playerData->getParams()->mCanHoldNPCs.get() &&
+            gpMarioAddress->mState != static_cast<u32>(TMario::STATE_IDLE)) ||
+           npc->mStateFlags.asFlags.mCanBeTaken;
 }
 SME_PATCH_BL(SME_PORT_REGION(0x802815F0, 0x8027937C, 0, 0), canGrabAtNPC);
 SME_WRITE_32(SME_PORT_REGION(0x802815F4, 0x80279380, 0, 0), 0x2C030000);
 
 // 0x80207430
 static bool canCarryNPC() {
-  TBaseNPC *npc;
-  SME_FROM_GPR(29, npc);
+    TBaseNPC *npc;
+    SME_FROM_GPR(29, npc);
 
-  const Class::TPlayerData *playerData =
-      TGlobals::getPlayerData(gpMarioAddress);
+    const Class::TPlayerData *playerData = TGlobals::getPlayerData(gpMarioAddress);
 
-  if (!playerData->isMario())
-    return npc->mStateFlags.asFlags.mCanBeTaken;
+    if (!playerData->isMario())
+        return npc->mStateFlags.asFlags.mCanBeTaken;
 
-  return (playerData->getParams()->mCanHoldNPCs.get() &&
-          gpMarioAddress->mState != static_cast<u32>(TMario::STATE_IDLE)) ||
-         npc->mStateFlags.asFlags.mCanBeTaken;
+    return (playerData->getParams()->mCanHoldNPCs.get() &&
+            gpMarioAddress->mState != static_cast<u32>(TMario::STATE_IDLE)) ||
+           npc->mStateFlags.asFlags.mCanBeTaken;
 }
 SME_PATCH_BL(SME_PORT_REGION(0x80207430, 0x801FF314, 0, 0), canCarryNPC);
 SME_WRITE_32(SME_PORT_REGION(0x80207434, 0x801FF318, 0, 0), 0x2C030000);
-
 
 // // extern -> SME.cpp
 // // 0x802145F0
@@ -133,12 +128,12 @@ SME_WRITE_32(SME_PORT_REGION(0x80207434, 0x801FF318, 0, 0), 0x2C030000);
 
 // 0x80213314
 static SMS_ASM_FUNC void scaleNPCTalkRadius() {
-  SMS_ASM_BLOCK("lis 3, gpMarioAddress@ha                \n\t"
-                "lwz 3, gpMarioAddress@l (3)             \n\t"
-                "lfs 0, 0x2C (3)                         \n\t"
-                "fmuls 30, 30, 0                         \n\t"
-                "lis 3, mPtrSaveNormal__8TBaseNPC@ha     \n\t"
-                "lwz 3, mPtrSaveNormal__8TBaseNPC@l (3)  \n\t"
-                "blr                                     \n\t");
+    SMS_ASM_BLOCK("lis 3, gpMarioAddress@ha                \n\t"
+                  "lwz 3, gpMarioAddress@l (3)             \n\t"
+                  "lfs 0, 0x2C (3)                         \n\t"
+                  "fmuls 30, 30, 0                         \n\t"
+                  "lis 3, mPtrSaveNormal__8TBaseNPC@ha     \n\t"
+                  "lwz 3, mPtrSaveNormal__8TBaseNPC@l (3)  \n\t"
+                  "blr                                     \n\t");
 }
 SMS_PATCH_BL(SMS_PORT_REGION(0x80213314, 0x8020B1FC, 0, 0), scaleNPCTalkRadius);

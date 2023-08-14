@@ -1,13 +1,40 @@
 #include <JSystem/JParticle/JPAResourceManager.hxx>
+#include <SMS/Camera/PolarSubCamera.hxx>
 #include <SMS/MSound/MSound.hxx>
 #include <SMS/MSound/MSoundSESystem.hxx>
 #include <SMS/Manager/FlagManager.hxx>
+#include <SMS/Manager/MarioParticleManager.hxx>
 #include <SMS/raw_fn.hxx>
 
+#include <BetterSMS/application.hxx>
 #include <BetterSMS/libs/boundbox.hxx>
 #include <BetterSMS/module.hxx>
+#include <BetterSMS/objects/generic.hxx>
 
 #include "settings.hxx"
+
+extern Settings::SettingsGroup gSettingsGroup;
+extern TutorialSetting gTutorialSetting;
+
+static const char *sTutorialDoorNames[] = {
+    "smalldoorIce", "smalldoorCasino", "smalldoorForest", "bigdoor", "bigdooropen",
+};
+
+static const char *sTutorialExitPadNames[] = {
+    "iceExitLight",
+    "casinoExitLight",
+    "forestExitLight",
+};
+
+static const char *sTutorialChipNames[] = {
+    "starchipice",
+    "starchipcasino",
+    "starchipforest",
+};
+
+static TGenericRailObj *sTutorialDoors[]    = {nullptr, nullptr, nullptr, nullptr, nullptr};
+static TGenericRailObj *sTutorialExitPads[] = {nullptr, nullptr, nullptr};
+static TGenericRailObj *sTutorialChips[]    = {nullptr, nullptr, nullptr};
 
 static BoundingBox sStartingPlatform = {
     {0,   110, 0  },
@@ -105,6 +132,52 @@ static const BoundingBox *getNearestCheckpointBox(const TVec3f &pos) {
     return nearestBox;
 }
 
+static bool processChips(TMario *player, TGenericRailObj *chip, TGenericRailObj *door,
+                         TGenericRailObj *pad) {
+    if (chip) {
+        if ((chip->mObjectType & 1) == 1)
+            return true;
+
+        if (PSVECDistance(chip->mTranslation, player->mTranslation) < 120.0f) {
+            chip->makeObjDead();
+            if (door) {
+                door->makeObjAppeared();
+            }
+            if (pad) {
+                pad->makeObjAppeared();
+            }
+            player->emitGetEffect();
+            return true;
+        }
+    }
+    return false;
+}
+
+static bool areAllChipsCollected() {
+    if ((sTutorialChips[0]->mObjectType & 1) == 0)
+        return false;
+
+    if ((sTutorialChips[1]->mObjectType & 1) == 0)
+        return false;
+
+    if ((sTutorialChips[2]->mObjectType & 1) == 0)
+        return false;
+
+    return true;
+}
+
+static bool sDoorSoundActive = false;
+
+static s32 finalCameraCB(u32 param_1, u32 param_2) {
+    if (param_2 == 1) {
+        sTutorialDoors[3]->makeObjDead();
+        sTutorialDoors[4]->makeObjAppeared();
+        TFlagManager::smInstance->setBool(true, 0x50062);
+        sDoorSoundActive = false;
+    }
+    return 1;
+}
+
 static int processCheckpoints(const BoundingBox *boxes, const int *dialogues, int checkpointCount,
                               int currentCheckpoint, bool includeWater, bool playSound,
                               TMario *player, bool isMario) {
@@ -182,13 +255,77 @@ static int processCheckpoints(const BoundingBox *boxes, const int *dialogues, in
     return currentCheckpoint;
 }
 
+static void getAllScriptedObjects(TMarDirector *director) {
+    ((void (*)(TMarDirector *))0x8029C6F8)(director);
+
+    auto *nameRefRoot = TMarNameRefGen::getInstance()->getRootNameRef();
+    for (int i = 0; i < 5; ++i) {
+        auto *nameRef = nameRefRoot->searchF(JDrama::TNameRef::calcKeyCode(sTutorialDoorNames[i]),
+                                             sTutorialDoorNames[i]);
+        if (!nameRef) {
+            continue;
+        }
+        sTutorialDoors[i] = reinterpret_cast<TGenericRailObj *>(nameRef);
+        if (i != 3)
+            sTutorialDoors[i]->makeObjDead();
+    }
+
+    for (int i = 0; i < 3; ++i) {
+        auto *nameRef = nameRefRoot->searchF(
+            JDrama::TNameRef::calcKeyCode(sTutorialExitPadNames[i]), sTutorialExitPadNames[i]);
+        if (!nameRef) {
+            continue;
+        }
+        sTutorialExitPads[i] = reinterpret_cast<TGenericRailObj *>(nameRef);
+        sTutorialExitPads[i]->makeObjDead();
+    }
+
+    for (int i = 0; i < 3; ++i) {
+        auto *nameRef = nameRefRoot->searchF(JDrama::TNameRef::calcKeyCode(sTutorialChipNames[i]),
+                                             sTutorialChipNames[i]);
+        if (!nameRef) {
+            continue;
+        }
+        sTutorialChips[i] = reinterpret_cast<TGenericRailObj *>(nameRef);
+    }
+}
+SMS_PATCH_BL(SMS_PORT_REGION(0x802B9760, 0, 0, 0), getAllScriptedObjects);
+
+static bool sIsCameraPlayed = false;
+static bool sIsDoorStopped  = false;
+
 BETTER_SMS_FOR_CALLBACK void resetTutorialIceStageCheckpoints(TMarDirector *director) {
     sIcePlatformIndex = -1;
+    sIsCameraPlayed   = false;
+    sIsDoorStopped    = false;
 }
 
 BETTER_SMS_FOR_CALLBACK void checkTutorialIceStageCheckpoints(TMario *player, bool isMario) {
     if (gpMarDirector->mAreaID != 11 || gpMarDirector->mEpisodeID != 2)
         return;
+
+    if (sDoorSoundActive && !sTutorialDoors[3]->mActorData->isCurAnmAlreadyEnd(MActor::BCK)) {
+        if (gpMSound->gateCheck(MSD_SE_OBJ_QUAKE)) {
+            auto *sound = MSoundSE::startSoundActor(
+                MSD_SE_OBJ_QUAKE, sTutorialDoors[3]->mTranslation, 0, nullptr, 0, 4);
+        }
+    }
+
+    if (!sIsDoorStopped) {
+        auto *actorData = sTutorialDoors[3]->mActorData;
+        auto *fileName  = sTutorialDoors[3]->mModelName;
+
+        auto *framectrl = actorData->getFrameCtrl(MActor::BCK);
+        if (framectrl) {
+            framectrl->mAnimState = J3DFrameCtrl::ONCE;
+            framectrl->mCurFrame  = 0.0f;
+            framectrl->mFrameRate = 0.0f;
+        }
+        sIsDoorStopped = true;
+    }
+
+    bool isExitActive =
+        processChips(player, sTutorialChips[0], sTutorialDoors[0], sTutorialExitPads[0]);
 
     BoundingBox entrance = {
         {3000, 250, -615},
@@ -204,7 +341,8 @@ BETTER_SMS_FOR_CALLBACK void checkTutorialIceStageCheckpoints(TMario *player, bo
         player->warpRequest(target, box.rotation.y);
         player->mAttributes.mHasFludd = true;
         player->mFludd->changeNozzle(TWaterGun::Rocket, false);
-    } else if (exit.contains(player->mTranslation) && playerIsGrounded(*player, false)) {
+    } else if (isExitActive && exit.contains(player->mTranslation) &&
+               playerIsGrounded(*player, false)) {
         BoundingBox &box = sStartingPlatform;
         TVec3f target    = {box.center.x, box.center.y, box.center.z};
         player->warpRequest(target, box.rotation.y);
@@ -213,6 +351,43 @@ BETTER_SMS_FOR_CALLBACK void checkTutorialIceStageCheckpoints(TMario *player, bo
     sIcePlatformIndex =
         processCheckpoints(sIcePlatformBoundingBoxes, sIceFluddDialogues, 6, sIcePlatformIndex,
                            false, sIcePlatformIndex >= 0, player, isMario);
+
+    bool chipsComplete = areAllChipsCollected();
+    if (chipsComplete) {
+        // Flag sunscript to update noki elder
+        TFlagManager::smInstance->setBool(true, 0x50060);
+    }
+
+    /// JANK BUT HERE ANYWAY ///
+    // Has noki elder been spoken to?
+    if (TFlagManager::smInstance->getBool(0x50061)) {
+        TFlagManager::smInstance->setBool(false, 0x50061);
+        if (areAllChipsCollected()) {
+            auto *actorData = sTutorialDoors[3]->mActorData;
+            auto *fileName  = sTutorialDoors[3]->mModelName;
+
+            if (actorData->checkAnmFileExist(fileName, MActor::BCK)) {
+                actorData->setBck(fileName);
+                auto *frameCtrl = actorData->getFrameCtrl(MActor::BCK);
+                if (frameCtrl) {
+                    frameCtrl->mAnimState = J3DFrameCtrl::ONCE;
+                    frameCtrl->mFrameRate = 0.7f * (SMSGetAnmFrameRate() / 2);
+                }
+            }
+            JDrama::TFlagT<u16> flags(0);
+            gpMarDirector->fireStartDemoCamera("event0", nullptr, -1, 0.0, true, finalCameraCB, 0,
+                                               nullptr, flags);
+            sIsCameraPlayed  = true;
+            sDoorSoundActive = true;
+            gTutorialSetting.setBool(true);
+
+            s32 cardStatus = Settings::mountCard();
+            if (cardStatus >= CARD_ERROR_READY) {
+                Settings::saveSettingsGroup(gSettingsGroup);
+                Settings::unmountCard();
+            }
+        }
+    }
 }
 
 BETTER_SMS_FOR_CALLBACK void resetTutorialCasinoStageCheckpoints(TMarDirector *director) {
@@ -222,6 +397,9 @@ BETTER_SMS_FOR_CALLBACK void resetTutorialCasinoStageCheckpoints(TMarDirector *d
 BETTER_SMS_FOR_CALLBACK void checkTutorialCasinoStageCheckpoints(TMario *player, bool isMario) {
     if (gpMarDirector->mAreaID != 11 || gpMarDirector->mEpisodeID != 2)
         return;
+
+    bool isExitActive =
+        processChips(player, sTutorialChips[1], sTutorialDoors[1], sTutorialExitPads[1]);
 
     BoundingBox entrance = {
         {-3000, 250, -615},
@@ -237,7 +415,7 @@ BETTER_SMS_FOR_CALLBACK void checkTutorialCasinoStageCheckpoints(TMario *player,
         player->warpRequest(target, box.rotation.y);
         player->mAttributes.mHasFludd = true;
         player->mFludd->changeNozzle(TWaterGun::Turbo, false);
-    } else if (exit.contains(player->mTranslation, 1.0f, BoundingType::Spheroid) &&
+    } else if (isExitActive && exit.contains(player->mTranslation, 1.0f, BoundingType::Spheroid) &&
                playerIsGrounded(*player, false)) {
         BoundingBox &box = sStartingPlatform;
         TVec3f target    = {box.center.x, box.center.y, box.center.z};
@@ -257,6 +435,9 @@ BETTER_SMS_FOR_CALLBACK void checkTutorialPiantaPitStageCheckpoints(TMario *play
     if (gpMarDirector->mAreaID != 11 || gpMarDirector->mEpisodeID != 2)
         return;
 
+    bool isExitActive =
+        processChips(player, sTutorialChips[2], sTutorialDoors[2], sTutorialExitPads[2]);
+
     BoundingBox entrance = {
         {0,   250, 2500},
         {600, 600, 600 }
@@ -269,7 +450,7 @@ BETTER_SMS_FOR_CALLBACK void checkTutorialPiantaPitStageCheckpoints(TMario *play
         BoundingBox &box = sPiantaPitPlatformBoundingBoxes[0];
         TVec3f target    = {box.center.x, box.center.y + 400, box.center.z};
         player->warpRequest(target, box.rotation.y);
-    } else if (exit.contains(player->mTranslation, 1.0f, BoundingType::Spheroid) &&
+    } else if (isExitActive && exit.contains(player->mTranslation, 1.0f, BoundingType::Spheroid) &&
                playerIsGrounded(*player, false)) {
         BoundingBox &box = sStartingPlatform;
         TVec3f target    = {box.center.x, box.center.y, box.center.z};
@@ -277,8 +458,8 @@ BETTER_SMS_FOR_CALLBACK void checkTutorialPiantaPitStageCheckpoints(TMario *play
         player->mAttributes.mHasFludd = false;
     }
     sPiantaPitPlatformIndex = processCheckpoints(
-        sPiantaPitPlatformBoundingBoxes, sPiantaPitFluddDialogues, 6, sPiantaPitPlatformIndex,
-        true, sPiantaPitPlatformIndex > 0, player, isMario);
+        sPiantaPitPlatformBoundingBoxes, sPiantaPitFluddDialogues, 6, sPiantaPitPlatformIndex, true,
+        sPiantaPitPlatformIndex > 0, player, isMario);
 }
 
 BETTER_SMS_FOR_CALLBACK void checkTutorialCollisionRespawn(TMario *player, bool isMario) {
@@ -303,5 +484,13 @@ BETTER_SMS_FOR_CALLBACK void checkTutorialCollisionRespawn(TMario *player, bool 
     player->mLastGroundedPos = box->center;
     if (player->mFludd) {
         restoreFluddWater(*player->mFludd);
+    }
+}
+
+BETTER_SMS_FOR_CALLBACK void setIntroStage(TApplication *application) {
+    if (gTutorialSetting.getBool()) {
+        BetterSMS::Application::setIntroStage(15, 0);
+    } else {
+        BetterSMS::Application::setIntroStage(11, 2);
     }
 }

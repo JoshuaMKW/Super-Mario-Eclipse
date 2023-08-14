@@ -3,27 +3,27 @@
 
 #include <JSystem/J2D/J2DPrint.hxx>
 #include <JSystem/JKernel/JKRFileLoader.hxx>
+#include <SMS/Enemy/EffectObjBase.hxx>
 #include <SMS/GC2D/ConsoleStr.hxx>
-#include <SMS/Player/Mario.hxx>
-#include <SMS/Strategic/HitActor.hxx>
-#include <SMS/Strategic/LiveActor.hxx>
-#include <SMS/assert.h>
-#include <SMS/System/Application.hxx>
-#include <SMS/macros.h>
+#include <SMS/MSound/MSoundSESystem.hxx>
 #include <SMS/Manager/MarioParticleManager.hxx>
 #include <SMS/Manager/ModelWaterManager.hxx>
 #include <SMS/MapObj/MapObjNormalLift.hxx>
 #include <SMS/MapObj/MapObjTree.hxx>
-#include <SMS/Enemy/EffectObjBase.hxx>
+#include <SMS/Player/Mario.hxx>
+#include <SMS/Strategic/HitActor.hxx>
+#include <SMS/Strategic/LiveActor.hxx>
+#include <SMS/System/Application.hxx>
 #include <SMS/System/CardManager.hxx>
+#include <SMS/assert.h>
+#include <SMS/macros.h>
 #include <SMS/raw_fn.hxx>
-#include <SMS/MSound/MSoundSESystem.hxx>
 
 #include <BetterSMS/libs/constmath.hxx>
 #include <BetterSMS/libs/global_unordered_map.hxx>
 #include <BetterSMS/libs/profiler.hxx>
-#include <BetterSMS/libs/triangle.hxx>
 #include <BetterSMS/libs/string.hxx>
+#include <BetterSMS/libs/triangle.hxx>
 
 #include <BetterSMS/logging.hxx>
 #include <BetterSMS/module.hxx>
@@ -31,7 +31,6 @@
 #include <BetterSMS/stage.hxx>
 
 #include "player.hxx"
-
 
 #pragma region FireAPI
 

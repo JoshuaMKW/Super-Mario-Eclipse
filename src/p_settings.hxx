@@ -3,3 +3,4 @@
 extern HUDSetting gHUDSetting;
 extern BugsExploitsSetting gBugsSetting;
 extern Settings::SettingsGroup gSettingsGroup;
+extern TutorialSetting gTutorialSetting;

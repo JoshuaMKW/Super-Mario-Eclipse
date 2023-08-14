@@ -1,10 +1,11 @@
-#include <SMS/Manager/FlagManager.hxx>
 #include "settings.hxx"
+#include <SMS/Manager/FlagManager.hxx>
 
 HUDSetting gHUDSetting;
 BugsExploitsSetting gBugsSetting;
 MirrorModeFlag gMirrorModeSetting;
-Settings::SettingsGroup gSettingsGroup(1, 0, Settings::Priority::GAME);
+TutorialSetting gTutorialSetting;
+Settings::SettingsGroup gSettingsGroup(1, 1, Settings::Priority::GAME);
 
 bool BugsExploitsSetting::sIsUnlocked = false;
 

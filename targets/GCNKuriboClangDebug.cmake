@@ -26,7 +26,7 @@ set(SMS_REGION us)
 
 set(SMS_COMPILE_DEFINES
     -D__powerpc__ -DKURIBO_NO_TYPES
-    -DGEKKO
+    -DGEKKO -DNTSCU
 )
 
 set(SMS_COMPILE_FLAGS

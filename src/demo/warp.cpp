@@ -126,7 +126,7 @@ static void assignGameOverDestination(TMarDirector *director) {
     if (gpApplication.mCurrentScene.mAreaID == 6 && gpApplication.mCurrentScene.mEpisodeID == 1)
         gpApplication.mNextScene = gpApplication.mCurrentScene;
     else if (gpApplication.mCurrentScene.mAreaID == 11 &&
-             gpApplication.mCurrentScene.mEpisodeID == 0)
+             gpApplication.mCurrentScene.mEpisodeID == 2)
         gpApplication.mNextScene.set(15, 0, 0);
     else
         gpApplication.mNextScene.set(6, 2, 0);

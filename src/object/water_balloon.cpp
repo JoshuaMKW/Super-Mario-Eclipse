@@ -98,10 +98,10 @@ void TWaterBalloon::thrown() {
 }
 
 void TWaterBalloon::touchActor(THitActor *actor) {
-    #if 1
+#if 1
     if (strcmp(actor->mKeyName, "daisycruiser") == 0)
         return;
-    #endif
+#endif
 
     if (actor->mObjectID != OBJECT_ID_MARIO) {  // Not Mario
         blast({0.0f, 1.0f, 0.0f});
@@ -115,10 +115,10 @@ void TWaterBalloon::touchActor(THitActor *actor) {
     if (mForwardSpeed >= MaxSpeed || mSpeed.y < -10.0f) {
         blast({0.0f, 1.0f, 0.0f});
         return;
-    }/* else if (PSVECMag(player->mSpeed - mSpeed) >= MaxSpeed) {
-        blast({0.0f, 1.0f, 0.0f});
-        return;
-    }*/
+    } /* else if (PSVECMag(player->mSpeed - mSpeed) >= MaxSpeed) {
+         blast({0.0f, 1.0f, 0.0f});
+         return;
+     }*/
 
     const f32 pangle = static_cast<f32>(player->mAngle.y / 182);
     const f32 speed  = player->mForwardSpeed + 5.0f;

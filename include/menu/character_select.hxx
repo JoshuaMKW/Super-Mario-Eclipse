@@ -3,20 +3,20 @@
 #include <JSystem/J2D/J2DOrthoGraph.hxx>
 #include <JSystem/J2D/J2DPicture.hxx>
 #include <JSystem/J2D/J2DSetScreen.hxx>
-#include <JSystem/JUtility/JUTTexture.hxx>
 #include <JSystem/JDrama/JDRDirector.hxx>
 #include <JSystem/JDrama/JDRDisplay.hxx>
 #include <JSystem/JGadget/Vector.hxx>
+#include <JSystem/JUtility/JUTTexture.hxx>
 
-#include <SMS/Player/Mario.hxx>
 #include <SMS/MSound/MSound.hxx>
 #include <SMS/MSound/MSoundSESystem.hxx>
-#include <SMS/MarioUtil/gd-reinit-gx.hxx>
 #include <SMS/MarioUtil/DrawUtil.hxx>
+#include <SMS/MarioUtil/gd-reinit-gx.hxx>
+#include <SMS/Player/Mario.hxx>
 #include <SMS/System/Resolution.hxx>
 
-#include <BetterSMS/module.hxx>
 #include <BetterSMS/libs/anim2d.hxx>
+#include <BetterSMS/module.hxx>
 
 #include "coop.hxx"
 
@@ -32,7 +32,7 @@ struct CharacterInfo {
 };
 
 struct SelectionInfo {
-    SelectionInfo() = default;
+    SelectionInfo()  = default;
     ~SelectionInfo() = default;
 
     bool mIsSelected;
@@ -53,7 +53,8 @@ public:
     friend class CharacterSelectScreen;
 
     CharacterSelectDirector(bool isMario, bool isLuigi, bool isPiantissimo, bool isShadowMario)
-        : TDirector(), mState(State::INIT), mDisplay(nullptr), mSelectScreen(nullptr), mIsMario(isMario), mIsLuigi(isLuigi), mIsPiantissimo(isPiantissimo),
+        : TDirector(), mState(State::INIT), mDisplay(nullptr), mSelectScreen(nullptr),
+          mIsMario(isMario), mIsLuigi(isLuigi), mIsPiantissimo(isPiantissimo),
           mIsShadowMario(isShadowMario), mExitWaitTimer(0) {}
     ~CharacterSelectDirector() override;
 
@@ -86,8 +87,7 @@ public:
     CharacterSelectScreen()
         : TViewObj("<CharacterSelectScreen>"), mScreen(nullptr), mSelectionInfos(),
           mCharacterInfos(), mIconAnimationTimer(0), mIconAnimationStage(false),
-          mShouldReadInput(false) {
-    }
+          mShouldReadInput(false) {}
 
     ~CharacterSelectScreen() override {}
 
@@ -159,7 +159,7 @@ private:
     void updateUI() {
         // Animate background icons
         if (mIconAnimationTimer++ > 17 * (SMSGetVSyncTimesPerSec() / 30)) {
-            J2DPane *pane       = mScreen->search('icls');
+            J2DPane *pane = mScreen->search('icls');
             if (!pane)
                 return;
 
@@ -213,8 +213,8 @@ private:
             auto &c_info = mCharacterInfos.at(s_info.mIndex);
             if (s_info.mIsSelected) {
                 s_info.mGoopIcon->mIsVisible = true;
-                s_info.mGoopIcon->changeTexture(s_info.mGoopTextures.at(s_info.mCurrentGoopTex >> 2),
-                                                0);
+                s_info.mGoopIcon->changeTexture(
+                    s_info.mGoopTextures.at(s_info.mCurrentGoopTex >> 2), 0);
                 if (s_info.mCurrentGoopTex < 60)
                     s_info.mCurrentGoopTex += 4 / (SMSGetVSyncTimesPerSec() / 30);
             } else {
@@ -222,7 +222,8 @@ private:
                     s_info.mGoopIcon->mIsVisible = false;
                     continue;
                 }
-                s_info.mGoopIcon->changeTexture(s_info.mGoopTextures.at(s_info.mCurrentGoopTex >> 2), 0);
+                s_info.mGoopIcon->changeTexture(
+                    s_info.mGoopTextures.at(s_info.mCurrentGoopTex >> 2), 0);
                 if (s_info.mCurrentGoopTex > 0)
                     s_info.mCurrentGoopTex -= 4 / (SMSGetVSyncTimesPerSec() / 30);
             }

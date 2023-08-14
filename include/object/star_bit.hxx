@@ -2,13 +2,13 @@
 
 #include <Dolphin/math.h>
 
-#include <SMS/MoveBG/Coin.hxx>
-#include <JSystem/J3D/J3DTexture.hxx>
 #include <JSystem/J3D/J3DMaterial.hxx>
+#include <JSystem/J3D/J3DTexture.hxx>
 #include <JSystem/JDrama/JDRGraphics.hxx>
 #include <JSystem/JParticle/JPABaseEmitter.hxx>
 #include <JSystem/JUtility/JUTColor.hxx>
 #include <JSystem/JUtility/JUTTexture.hxx>
+#include <SMS/MoveBG/Coin.hxx>
 
 class TStarBit final : public TCoin {
     static const JUtility::TColor sStarBitColorArray[6];

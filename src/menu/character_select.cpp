@@ -476,6 +476,11 @@ static int flagCharacterSelectMenu(u8 state) {
     auto &cur_scene  = gpApplication.mCurrentScene;
     auto &prev_scene = gpApplication.mPrevScene;
 
+    if (cur_scene.mAreaID == 15 && cur_scene.mEpisodeID == 0) {
+        // File select
+        return state;
+    }
+
     if ((cur_scene.mAreaID == 11 && cur_scene.mEpisodeID == 2) ||
         (next_scene.mAreaID == 11 && next_scene.mEpisodeID == 2)) {
         return state;

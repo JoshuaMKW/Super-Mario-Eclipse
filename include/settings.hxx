@@ -1,11 +1,11 @@
 #pragma once
 
-#include <Dolphin/types.h>
 #include <Dolphin/CARD.h>
+#include <Dolphin/types.h>
 
-#include <BetterSMS/settings.hxx>
 #include <BetterSMS/memory.hxx>
 #include <BetterSMS/module.hxx>
+#include <BetterSMS/settings.hxx>
 
 constexpr size_t MaxShineCount = 300;
 
@@ -19,12 +19,12 @@ public:
     enum HUD { SMS, E3, SPACEWORLD };
 
     HUDSetting() : IntSetting("HUD Style", &mHUDValue) {
-        mValueRange = { 0, 2, 1 };
+        mValueRange     = {0, 2, 1};
         mValueChangedCB = valueChanged;
     }
     ~HUDSetting() override {}
 
-    void getValueStr(char* dst) const override {
+    void getValueName(char *dst) const override {
         switch (mHUDValue) {
         case SMS:
             strncpy(dst, "DEFAULT", 8);
@@ -38,10 +38,10 @@ public:
         }
     }
 
-    void load(JSUMemoryInputStream& in) override {
+    void load(JSUMemoryInputStream &in) override {
         IntSetting::load(in);
         mValueChangedCB(&mHUDValue, &mHUDValue,
-            getKind());  // We manually update here to set instructions on load
+                        getKind());  // We manually update here to set instructions on load
     }
 
     // clang-format off
@@ -87,7 +87,7 @@ private:
 
 class BugsExploitsSetting final : public Settings::SwitchSetting {
 public:
-    BugsExploitsSetting() : SwitchSetting("Enable Bugs/Exploits", &mBugsExploitsValue) {
+    BugsExploitsSetting() : SwitchSetting("Bugs/Exploits", &mBugsExploitsValue) {
         mValueChangedCB = valueChanged;
     }
     ~BugsExploitsSetting() override {}
@@ -108,7 +108,7 @@ public:
         out.write(&mBugsExploitsValue, 1);
     }
 
-    void getValueStr(char *dst) const override {
+    void getValueName(char *dst) const override {
         getBool() ? strncpy(dst, "ON\n", 4) : strncpy(dst, "OFF\n", 5);
     }
 
@@ -125,10 +125,10 @@ public:
         const bool is_unlocked = *reinterpret_cast<bool *>(cur);
         
         if (exploits_setting)
-            exploits_setting->setBool(is_unlocked);
+            exploits_setting->setBool(!is_unlocked);
         
         if (collision_setting)
-            collision_setting->setBool(is_unlocked);
+            collision_setting->setBool(!is_unlocked);
     }
     // clang-format on
 
@@ -151,11 +151,11 @@ public:
     bool isUnlocked() const override { return false; }
 
     bool isUnlocked_() const { return mMirrorModeFlag; }
-    
+
     void updateSetting() const {
         auto *mirror_module = BetterSMS::getModuleInfo("Mirror Mode");
 
-        auto *active_setting   = mirror_module->mSettings->getSetting("Is Enabled");
+        auto *active_setting = mirror_module->mSettings->getSetting("Is Enabled");
         active_setting->setUserEditable(mMirrorModeFlag, BetterSMS::Settings::Priority::GAME);
         if (!mMirrorModeFlag)
             active_setting->setBool(false);
@@ -163,6 +163,25 @@ public:
 
 private:
     bool mMirrorModeFlag;
+};
+
+class TutorialSetting final : public Settings::SwitchSetting {
+public:
+    TutorialSetting() : SwitchSetting("Bugs/Exploits", &mTutorialValue) {}
+    ~TutorialSetting() override {}
+
+    bool isUnlocked() const override { return false; }
+
+    void load(JSUMemoryInputStream &in) override {
+        bool b;
+        in.read(&b, 1);
+        setBool(b);
+    }
+
+    void save(JSUMemoryOutputStream &out) override { out.write(&mTutorialValue, 1); }
+
+private:
+    bool mTutorialValue;
 };
 
 HUDSetting::HUD getHUDKind();

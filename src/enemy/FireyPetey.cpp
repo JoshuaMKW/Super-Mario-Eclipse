@@ -1,30 +1,30 @@
 #include <Dolphin/math.h>
 
-#include <JSystem/JGadget/List.hxx>
 #include <JSystem/JDrama/JDRNameRefGen.hxx>
 #include <JSystem/JDrama/JDRNameRefPtrListT.hxx>
+#include <JSystem/JGadget/List.hxx>
 #include <JSystem/JParticle/JPAResourceManager.hxx>
 
-#include <SMS/Player/Mario.hxx>
-#include <SMS/MoveBG/Coin.hxx>
-#include <SMS/Manager/PollutionManager.hxx>
-#include <SMS/Strategic/ObjHitCheck.hxx>
 #include <SMS/Camera/CameraShake.hxx>
+#include <SMS/Manager/PollutionManager.hxx>
 #include <SMS/MarioUtil/MathUtil.hxx>
+#include <SMS/MoveBG/Coin.hxx>
+#include <SMS/Player/Mario.hxx>
+#include <SMS/Strategic/ObjHitCheck.hxx>
 
+#include <BetterSMS/libs/constmath.hxx>
 #include <BetterSMS/module.hxx>
 #include <BetterSMS/player.hxx>
-#include <BetterSMS/libs/constmath.hxx>
 
 #include <enemy/firey_petey.hxx>
 
-#include "player.hxx"
-#include "rand.h"
 #include "Enemy/Conductor.hxx"
-#include "Manager/MarioParticleManager.hxx"
-#include "Manager/ModelWaterManager.hxx"
 #include "MSound/MSBGM.hxx"
 #include "MSound/MSoundSESystem.hxx"
+#include "Manager/MarioParticleManager.hxx"
+#include "Manager/ModelWaterManager.hxx"
+#include "player.hxx"
+#include "rand.h"
 
 using namespace BetterSMS;
 
@@ -42,12 +42,11 @@ static TNerveFPTumbleIn tumbleIn;
 static TNerveFPTumble tumble;
 static TNerveFPTumbleOut tumbleOut;
 
-
 #define MAX_TORNADOS 1
 
 bool TNerveFPWait::execute(TSpineBase<TLiveActor> *spine) const {
-    TFireyPetey *target = reinterpret_cast<TFireyPetey *>(spine->mTarget);
-    TBossPakkunParams* params = reinterpret_cast<TBossPakkunParams*>(target->getSaveParam());
+    TFireyPetey *target       = reinterpret_cast<TFireyPetey *>(spine->mTarget);
+    TBossPakkunParams *params = reinterpret_cast<TBossPakkunParams *>(target->getSaveParam());
 
     TVec3f distanceToMario = (target->mTranslation - *gpMarioPos);
 
@@ -74,36 +73,35 @@ bool TNerveFPWait::execute(TSpineBase<TLiveActor> *spine) const {
                 target->mNumTornados = MAX_TORNADOS;
             }
 
-            float randomX = ((static_cast<float>(rand()) / static_cast<float>(0x7fff)) - 0.5f) *
-                            10000.0f;
-            float randomZ = ((static_cast<float>(rand()) / static_cast<float>(0x7fff)) - 0.5f) *
-                            10000.0f;
+            float randomX =
+                ((static_cast<float>(rand()) / static_cast<float>(0x7fff)) - 0.5f) * 10000.0f;
+            float randomZ =
+                ((static_cast<float>(rand()) / static_cast<float>(0x7fff)) - 0.5f) * 10000.0f;
 
             if (target->_118 < target->_114) {
                 u32 *unk = ((target->_11C) + (target->_118) * 0x10);
-                unk[0] = target->_F4;
-                unk[1] = target->_F8;
-                unk[2] = target->_FC;
-                unk[3] = target->_100;
+                unk[0]   = target->_F4;
+                unk[1]   = target->_F8;
+                unk[2]   = target->_FC;
+                unk[3]   = target->_100;
                 target->_118++;
             }
-            target->_F4 = 0;
-            target->_F8 = (target->mTranslation.x + randomX);
-            target->_FC = target->mTranslation.y;
+            target->_F4  = 0;
+            target->_F8  = (target->mTranslation.x + randomX);
+            target->_FC  = target->mTranslation.y;
             target->_100 = (target->mTranslation.z + randomZ);
             spine->pushNerve(
                 reinterpret_cast<TNerveBase<TLiveActor> *>(theNerve__13TNerveBPPivotFv()));
 
             return true;
         }
-
     }
     return false;
 }
 
 bool TNerveFPFly::execute(TSpineBase<TLiveActor> *spine) const {
-    TFireyPetey *target = reinterpret_cast<TFireyPetey *>(spine->mTarget);
-    TBossPakkunParams* params = reinterpret_cast<TBossPakkunParams*>(target->getSaveParam());
+    TFireyPetey *target       = reinterpret_cast<TFireyPetey *>(spine->mTarget);
+    TBossPakkunParams *params = reinterpret_cast<TBossPakkunParams *>(target->getSaveParam());
     dropLava(spine, target);
     dropLavaBig(spine, target);
     if (spine->mNerveTimer == 0) {
@@ -115,15 +113,14 @@ bool TNerveFPFly::execute(TSpineBase<TLiveActor> *spine) const {
         }
     }
 
-    TVec3f travelVector = TVec3f(target->_108 - target->mTranslation.x,
-                                 0.0f,
-                                 target->_110 - target->mTranslation.z);
+    TVec3f travelVector =
+        TVec3f(target->_108 - target->mTranslation.x, 0.0f, target->_110 - target->mTranslation.z);
 
     f32 magnitude = travelVector.magnitude();
 
     if (magnitude < 100.0f) {
-        if ((target->mGraphTracer->mGraph->mNodes[target->mGraphTracer->mCurrentNode]._08 & 0x800)
-            != 0) {
+        if ((target->mGraphTracer->mGraph->mNodes[target->mGraphTracer->mCurrentNode]._08 &
+             0x800) != 0) {
             spine->pushNerve(&hover);
             return true;
         }
@@ -132,9 +129,9 @@ bool TNerveFPFly::execute(TSpineBase<TLiveActor> *spine) const {
 
     target->turnToCurPathNode(target->_144);
 
-    travelVector = TVec3f(target->_108 - target->mTranslation.x,
-                          target->_10C - target->mTranslation.y,
-                          target->_110 - target->mTranslation.z);
+    travelVector =
+        TVec3f(target->_108 - target->mTranslation.x, target->_10C - target->mTranslation.y,
+               target->_110 - target->mTranslation.z);
 
     TVec3f velocity = travelVector;
     velocity.normalize();
@@ -155,8 +152,8 @@ bool TNerveFPTakeOff::execute(TSpineBase<TLiveActor> *spine) const {
         target->mStateFlags.asU32 = target->mStateFlags.asU32 | 0x80;
         target->changeBck(0xD);
     }
-    if (target->mActorData->checkCurBckFromIndex(0xD) && target->mActorData->
-                                                                 curAnmEndsNext(0, nullptr)) {
+    if (target->mActorData->checkCurBckFromIndex(0xD) &&
+        target->mActorData->curAnmEndsNext(0, nullptr)) {
         target->changeBck(0xB);
     }
     if (target->mActorData->checkCurBckFromIndex(0xB)) {
@@ -213,8 +210,8 @@ bool TNerveFPFall::execute(TSpineBase<TLiveActor> *spine) const {
             gpCameraShake->startShake(UnknownShake10, 1.0f);
             target->rumblePad(0, target->mTranslation);
         }
-    } else if (target->mActorData->checkCurBckFromIndex(0xe) && target->mActorData->
-               curAnmEndsNext(0, nullptr)) {
+    } else if (target->mActorData->checkCurBckFromIndex(0xe) &&
+               target->mActorData->curAnmEndsNext(0, nullptr)) {
         if (target->mNumTornados > 0) {
             spine->pushNerve(&wait);
             spine->pushNerve(
@@ -239,7 +236,7 @@ bool TNerveFPSleep::execute(TSpineBase<TLiveActor> *spine) const {
 }
 
 bool TNerveFPHover::execute(TSpineBase<TLiveActor> *spine) const {
-    TFireyPetey *target = reinterpret_cast<TFireyPetey *>(spine->mTarget);
+    TFireyPetey *target       = reinterpret_cast<TFireyPetey *>(spine->mTarget);
     TBossPakkunParams *params = reinterpret_cast<TBossPakkunParams *>(target->getSaveParam());
 
     if (spine->mNerveTimer == 0) {
@@ -269,7 +266,7 @@ bool TNerveFPFireBreath::execute(TSpineBase<TLiveActor> *spine) const {
             target->mFire[i]->mVelocity.x = 0.0f;
             target->mFire[i]->mVelocity.y = 0.0f;
             target->mFire[i]->mVelocity.z = 0.0f;
-            target->mFire[i]->mLifetime = 0;
+            target->mFire[i]->mLifetime   = 0;
         }
         peteyMActor->setFrameRate(SMSGetAnmFrameRate__Fv() * 2.0f, 0);
     }
@@ -334,7 +331,7 @@ bool TNerveFPFireBreath::execute(TSpineBase<TLiveActor> *spine) const {
 }
 
 bool TNerveFPSwallow::execute(TSpineBase<TLiveActor> *spine) const {
-    TFireyPetey *target = reinterpret_cast<TFireyPetey *>(spine->mTarget);
+    TFireyPetey *target       = reinterpret_cast<TFireyPetey *>(spine->mTarget);
     TBossPakkunParams *params = reinterpret_cast<TBossPakkunParams *>(target->getSaveParam());
     if (spine->mNerveTimer == 0) {
         target->changeBck(0x1a);
@@ -352,7 +349,6 @@ bool TNerveFPSwallow::execute(TSpineBase<TLiveActor> *spine) const {
         target->changeBck(0x1a);
         target->_03[0] = 0;
         return false;
-
     }
     spine->pushNerve(&tumbleIn);
     target->mState = TBossPakkun::BossPakkunState::NORMAL;
@@ -381,7 +377,7 @@ bool TNerveFPTumbleIn::execute(TSpineBase<TLiveActor> *spine) const {
 }
 
 bool TNerveFPTumbleOut::execute(TSpineBase<TLiveActor> *spine) const {
-    TFireyPetey *target = reinterpret_cast<TFireyPetey *>(spine->mTarget);
+    TFireyPetey *target       = reinterpret_cast<TFireyPetey *>(spine->mTarget);
     TBossPakkunParams *params = reinterpret_cast<TBossPakkunParams *>(target->getSaveParam());
     if (spine->mNerveTimer == 0) {
         target->changeBck(0xE);
@@ -399,10 +395,10 @@ bool TNerveFPTumbleOut::execute(TSpineBase<TLiveActor> *spine) const {
     if (target->mActorData->checkCurBckFromIndex(0x16)) {
         J3DFrameCtrl *frameCtrl = target->mActorData->getFrameCtrl(0);
         if (frameCtrl->mCurFrame > 140.0f && frameCtrl->mCurFrame < 160.0f && target->_04 == 0) {
-            target->_04 = 1;
+            target->_04    = 1;
             target->_03[1] = 0;
             target->_03[0] = 0;
-            target->_09 = 0x32;
+            target->_09    = 0x32;
 
             if (target->mWaterEmitInfo) {
                 TVec3f jointTranslation = TVec3f(0.0f, 0.0f, 0.0f);
@@ -411,7 +407,6 @@ bool TNerveFPTumbleOut::execute(TSpineBase<TLiveActor> *spine) const {
                 target->mWaterEmitInfo->mPos.set(jointTranslation);
                 gpModelWaterManager->emitRequest(*target->mWaterEmitInfo);
             }
-
         }
         if (frameCtrl->mCurFrame > 35.0f) {
             target->_10 = 1;
@@ -421,7 +416,7 @@ bool TNerveFPTumbleOut::execute(TSpineBase<TLiveActor> *spine) const {
 }
 
 bool TNerveFPTumble::execute(TSpineBase<TLiveActor> *spine) const {
-    TFireyPetey *target = reinterpret_cast<TFireyPetey *>(spine->mTarget);
+    TFireyPetey *target       = reinterpret_cast<TFireyPetey *>(spine->mTarget);
     TBossPakkunParams *params = reinterpret_cast<TBossPakkunParams *>(target->getSaveParam());
     if (spine->mNerveTimer == 0) {
         target->changeBck(0x6);
@@ -435,7 +430,6 @@ bool TNerveFPTumble::execute(TSpineBase<TLiveActor> *spine) const {
     return true;
 }
 
-
 TFireyPetey::TFireyPetey(const char *test)
     : TBossPakkun(test), mMActorKeeperSecondary(nullptr), mKukkuBall{}, mFire{} {
     mNumTornados = MAX_TORNADOS;
@@ -445,15 +439,15 @@ void TFireyPetey::init(TLiveManager *liveManager) {
     TBossPakkun::init(liveManager);
 
     mTornado = new TFPTornado(this, "<TFPTornado>\n");
-    mNavel = new TFPNavel(this, "<TFPNavel>\n");
+    mNavel   = new TFPNavel(this, "<TFPNavel>\n");
     mHeadHit = new TFPHeadHit(this, "<TFPHeadHit>\n");
 
     JDrama::TNameRefGen *instance = JDrama::TNameRefGen::getInstance();
-    TNameRef *root = instance->getRootNameRef();
+    TNameRef *root                = instance->getRootNameRef();
 
     u16 keyCode = calcKeyCode(gUnkManagerName);
 
-    TIdxGroupObj* group = static_cast<TIdxGroupObj *>(root->searchF(keyCode, gUnkManagerName));
+    TIdxGroupObj *group = static_cast<TIdxGroupObj *>(root->searchF(keyCode, gUnkManagerName));
 
     group->mViewObjList.insert(group->mViewObjList.end(), mTornado);
     group->mViewObjList.insert(group->mViewObjList.end(), mNavel);
@@ -464,7 +458,7 @@ void TFireyPetey::init(TLiveManager *liveManager) {
     mMActorKeeperSecondary = new TMActorKeeper(mLiveManager, NUM_GOOP_DROPS);
 
     for (int i = 0; i < NUM_GOOP_DROPS; i++) {
-        mKukkuBall[i] = new TKukkuBall("lavaDrop\n");
+        mKukkuBall[i]             = new TKukkuBall("lavaDrop\n");
         mKukkuBall[i]->mActorData = mMActorKeeperSecondary->createMActor("torifun.bmd", 3);
         mKukkuBall[i]->init();
     }
@@ -494,7 +488,9 @@ bool TFireyPetey::receiveMessage(THitActor *reciever, u32 param2) {
         mSpineBase->setNerve(&breakSleep);
         return false;
     }
-    if (mState == BossPakkunState::AIRBORNE_VULNERABLE && (reciever->mObjectID == OBJECT_ID_WATER_SPRAY) || (reciever->mObjectID == OBJECT_ID_POINK)) {
+    if (mState == BossPakkunState::AIRBORNE_VULNERABLE &&
+            (reciever->mObjectID == OBJECT_ID_WATER_SPRAY) ||
+        (reciever->mObjectID == OBJECT_ID_POINK)) {
         if (mTranslation.y - 300.0f <= reciever->mTranslation.y) {
             if (reciever->mTranslation.y <= mTranslation.y + 1500.0f) {
                 mState = BossPakkunState::NORMAL;
@@ -509,8 +505,8 @@ bool TFireyPetey::receiveMessage(THitActor *reciever, u32 param2) {
 void TFireyPetey::gotHipDropDamage() {
     mState = BossPakkunState::NORMAL;
     if (mHealth == 0) {
-        if (mSpineBase->getLatestNerve() != reinterpret_cast<TNerveBase<TLiveActor> *>(
-                theNerve__14TNerveBPPreDieFv())) {
+        if (mSpineBase->getLatestNerve() !=
+            reinterpret_cast<TNerveBase<TLiveActor> *>(theNerve__14TNerveBPPreDieFv())) {
             mSpineBase->setNerve(
                 reinterpret_cast<TNerveBase<TLiveActor> *>(theNerve__14TNerveBPPreDieFv()));
             if (gpMSound->gateCheck(0x284e)) {
@@ -519,8 +515,8 @@ void TFireyPetey::gotHipDropDamage() {
         }
     } else {
         mHealth--;
-        if (mSpineBase->getLatestNerve() != reinterpret_cast<TNerveBase<TLiveActor> *>(
-                theNerve__17TNerveBPTumbleOutFv())) {
+        if (mSpineBase->getLatestNerve() !=
+            reinterpret_cast<TNerveBase<TLiveActor> *>(theNerve__17TNerveBPTumbleOutFv())) {
             if (gpMSound->gateCheck(0x284d)) {
                 MSoundSE::startSoundActor(0x284d, mTranslation, 0, nullptr, 0x0, 4);
             }
@@ -531,38 +527,36 @@ void TFireyPetey::gotHipDropDamage() {
                 reinterpret_cast<TNerveBase<TLiveActor> *>(theNerve__18TNerveBPStompReactFv()));
         }
     }
-
 }
 
-TFPTornado::TFPTornado(TBossPakkun *parent, const char *name)
-    : TBPTornado(parent, name) {
+TFPTornado::TFPTornado(TBossPakkun *parent, const char *name) : TBPTornado(parent, name) {
     mMaxTornadoHeight = mAttackHeight;
 }
 
 void TFPTornado::perform(u32 flags, JDrama::TGraphics *graphics) {
-    if ((mParent->mStateFlags.asU32 & 1) != 0)
-    {
-      return;
+    if ((mParent->mStateFlags.asU32 & 1) != 0) {
+        return;
     }
     if (_98 == 0) {
         return;
     }
 
     TBPTornado::perform(flags, graphics);
-    TBossPakkunParams* params = reinterpret_cast<TBossPakkunParams*>(mParent->getSaveParam());
-    mTargetPos = *gpMarioPos;
+    TBossPakkunParams *params = reinterpret_cast<TBossPakkunParams *>(mParent->getSaveParam());
+    mTargetPos                = *gpMarioPos;
 
-    const f32 distanceToTravel = params->mSLTornadoMoveLimit.get() - params->mSLTornadoMoveInit.get();
+    const f32 distanceToTravel =
+        params->mSLTornadoMoveLimit.get() - params->mSLTornadoMoveInit.get();
     const f32 distanceTraveled = _94 - params->mSLTornadoMoveInit.get();
 
     f32 scaleFactor = 2.0f * distanceTraveled / distanceToTravel;
 
-    if(scaleFactor >= 1.0f) {
+    if (scaleFactor >= 1.0f) {
         scaleFactor = (2.0f - (2.0f * distanceTraveled / distanceToTravel));
     }
 
-    mScale.y = scaleFactor;
-    mAttackHeight = scaleFactor * mMaxTornadoHeight;
+    mScale.y       = scaleFactor;
+    mAttackHeight  = scaleFactor * mMaxTornadoHeight;
     mReceiveHeight = scaleFactor * mMaxTornadoHeight;
 
     for (int i = 0; i < mNumObjs; i = i + 1) {
@@ -574,8 +568,7 @@ void TFPTornado::perform(u32 flags, JDrama::TGraphics *graphics) {
     gpPollution->stamp(1, mTranslation.x, mTranslation.y, mTranslation.z, 384.0f);
 }
 
-TFPFire::TFPFire(const char *name)
-    : THitActor(name), mVelocity(0.0f, 0.0f, 0.0f), mLifetime(0) {
+TFPFire::TFPFire(const char *name) : THitActor(name), mVelocity(0.0f, 0.0f, 0.0f), mLifetime(0) {
     initHitActor(0x8000027, 1, -0x7f000000, 275.0f, 275.0f, 100.0f, 100.0f);
 }
 
@@ -614,7 +607,9 @@ bool TFPHeadHit::receiveMessage(THitActor *sender, u32 msg) {
     if (mParent->mSpineBase->getLatestNerve() == &sleep) {
         return mParent->receiveMessage(sender, msg);
     }
-    if (mParent->mState == TBossPakkun::BossPakkunState::AIRBORNE_VULNERABLE && (sender->mObjectID == OBJECT_ID_WATER_SPRAY) || (sender->mObjectID == OBJECT_ID_POINK)) {
+    if (mParent->mState == TBossPakkun::BossPakkunState::AIRBORNE_VULNERABLE &&
+            (sender->mObjectID == OBJECT_ID_WATER_SPRAY) ||
+        (sender->mObjectID == OBJECT_ID_POINK)) {
         mParent->mState = TBossPakkun::BossPakkunState::NORMAL;
         mParent->mSpineBase->setNerve(&fall);
         if (gpMSound->gateCheck(0x2817)) {
@@ -644,7 +639,7 @@ bool TFPHeadHit::receiveMessage(THitActor *sender, u32 msg) {
             }
 
             float wrappedAngle = MsWrap(mParent->mRotation.y, angle - 180.0f, angle + 180.0f);
-            angle = angle - wrappedAngle;
+            angle              = angle - wrappedAngle;
 
             if (fabs(angle) < 0.5f * params->mSLDamageAngle.get()) {
                 mParent->_03[0]++;
@@ -662,7 +657,6 @@ bool TFPHeadHit::receiveMessage(THitActor *sender, u32 msg) {
         }
     }
     return true;
-
 }
 
 void dropLava(TSpineBase<TLiveActor> *spine, TFireyPetey *target) {
@@ -671,25 +665,21 @@ void dropLava(TSpineBase<TLiveActor> *spine, TFireyPetey *target) {
         TKukkuBall *mKukkuBall = nullptr;
         for (int i = 0; i < NUM_GOOP_DROPS; i++) {
             TKukkuBall *tmKukkuBall = target->mKukkuBall[i];
-            bool bVar1 = false;
+            bool bVar1              = false;
             if (((tmKukkuBall->unk1 & 1) != 0) && (tmKukkuBall->unk2 == 0)) {
                 mKukkuBall = tmKukkuBall;
                 JGeometry::TVec3<f32> step(0.000f, 1.500f, 0.000f);
 
-                float x =
-                    (static_cast<float>(rand()) / static_cast<float>(0x7fff)) - 0.5f;
-                float y =
-                    (static_cast<float>(rand()) / static_cast<float>(0x7fff)) - 0.5f;
-                float z =
-                    (static_cast<float>(rand()) / static_cast<float>(0x7fff)) - 0.5f;
+                float x = (static_cast<float>(rand()) / static_cast<float>(0x7fff)) - 0.5f;
+                float y = (static_cast<float>(rand()) / static_cast<float>(0x7fff)) - 0.5f;
+                float z = (static_cast<float>(rand()) / static_cast<float>(0x7fff)) - 0.5f;
 
                 float mag = sqrtf(x * x + y * y + z * z);
                 x /= mag;
                 y /= mag;
                 z /= mag;
 
-                float r =
-                    (static_cast<float>(rand()) / static_cast<float>(0x7fff)) * 2000.0f;
+                float r = (static_cast<float>(rand()) / static_cast<float>(0x7fff)) * 2000.0f;
                 const JGeometry::TVec3<f32> velRandom(x, y, z);
                 const JGeometry::TVec3<f32> random(x * r, y * r, z * r);
 
@@ -698,7 +688,7 @@ void dropLava(TSpineBase<TLiveActor> *spine, TFireyPetey *target) {
                 step.add(velRandom);
                 mKukkuBall->mVelocity.set(step);
                 mKukkuBall->mObjectType = mKukkuBall->mObjectType & 0xfffffffe;
-                mKukkuBall->unk1 = mKukkuBall->unk1 & 0xfffffffe;
+                mKukkuBall->unk1        = mKukkuBall->unk1 & 0xfffffffe;
                 break;
             }
         }
@@ -730,8 +720,7 @@ void dropLavaBig(TSpineBase<TLiveActor> *spine, TFireyPetey *target) {
 
 //// Manager code
 TFireyPeteyManager::TFireyPeteyManager(const char *name, int isDemo)
-    : TBossPakkunManager(name, isDemo) {
-}
+    : TBossPakkunManager(name, isDemo) {}
 
 void TFireyPeteyManager::load(JSUMemoryInputStream &inputStream) {
     TBossPakkunManager::load(inputStream);
@@ -740,5 +729,4 @@ void TFireyPeteyManager::load(JSUMemoryInputStream &inputStream) {
     gpResourceManager->load("/scene/bosspakkun/jpa/ms_kp_fire_c.jpa", 0x1a5);
     gpResourceManager->load("/scene/bosspakkun/jpa/ms_kp_fire_d.jpa", 0x1a6);
     gpResourceManager->load("/scene/bosspakkun/jpa/ms_kp_fire_e.jpa", 0x1a7);
-
 }

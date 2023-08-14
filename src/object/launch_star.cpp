@@ -3,12 +3,12 @@
 #include <JSystem/JDrama/JDRNameRef.hxx>
 #include <JSystem/JParticle/JPAResourceManager.hxx>
 
-#include <SMS/Manager/MarioParticleManager.hxx>
+#include <SMS/Enemy/Conductor.hxx>
+#include <SMS/Graph/GraphGroup.hxx>
 #include <SMS/Manager/FlagManager.hxx>
+#include <SMS/Manager/MarioParticleManager.hxx>
 #include <SMS/MapObj/MapObjInit.hxx>
 #include <SMS/MapObj/MapObjRail.hxx>
-#include <SMS/Graph/GraphGroup.hxx>
-#include <SMS/Enemy/Conductor.hxx>
 #include <SMS/raw_fn.hxx>
 
 #include <BetterSMS/libs/constmath.hxx>
@@ -18,7 +18,8 @@
 #include "object/launch_star.hxx"
 
 TLaunchStarObj::TLaunchStarObj(const char *name)
-    : TMapObjGeneral(name), mTravelRail(nullptr), mCameraDemo(nullptr), mTravelSpeed(1.0f), mInactiveTimer(0), mLaunchTimer(0), mPlayer(nullptr) {}
+    : TMapObjGeneral(name), mTravelRail(nullptr), mCameraDemo(nullptr), mTravelSpeed(1.0f),
+      mInactiveTimer(0), mLaunchTimer(0), mPlayer(nullptr) {}
 
 TLaunchStarObj::~TLaunchStarObj() {}
 
@@ -88,8 +89,7 @@ void TLaunchStarObj::control() {
         if (actor->mObjectID != OBJECT_ID_MARIO)
             continue;
 
-
-        auto *player = reinterpret_cast<TMario *>(actor);
+        auto *player     = reinterpret_cast<TMario *>(actor);
         auto *controller = player->mController;
 
         if (mPlayer && mPlayer != actor)
@@ -108,22 +108,20 @@ void TLaunchStarObj::control() {
             }
         }
     }
-
 }
 
-void TLaunchStarObj::calcRootMatrix() {
-    TMapObjGeneral::calcRootMatrix();
-}
+void TLaunchStarObj::calcRootMatrix() { TMapObjGeneral::calcRootMatrix(); }
 
 bool TLaunchStarObj::attractPlayer(TMario *player) {
     if (player->mState != PlayerLaunchStarWait) {
         player->changePlayerStatus(PlayerLaunchStarWait, 0, false);
     }
 
-    TVec3f diff = mTranslation - player->mTranslation;
+    TVec3f diff   = mTranslation - player->mTranslation;
     TVec3f diffXZ = {diff.x, 0.0f, diff.z};
     diff.y += (sinf(angleToRadians(static_cast<f32>(player->mSubStateTimer) * 1.5f)) *
-               (200 - diff.magnitude()) * 0.25f) - 50;
+               (200 - diff.magnitude()) * 0.25f) -
+              50;
     diff.scale(0.04f);
     player->mTranslation += diff;
 
@@ -210,21 +208,21 @@ static sound_data launch_star_sound_data{
 
 static sound_info launch_star_sound_info{.mLength = 10, .mSoundData = &launch_star_sound_data};
 
-ObjData launchStarData{.mMdlName  = "launch_star",
-                    .mObjectID = 0x80000400,
-                    .mLiveManagerName = gLiveManagerName,
-                    .mObjKey           = nullptr,
-                    .mAnimInfo         = nullptr,
-                    .mObjCollisionData = &launch_star_collision_data,
-                    .mMapCollisionInfo = nullptr,
-                    .mSoundInfo        = &launch_star_sound_info,
-                    .mPhysicalInfo     = nullptr,  //&tornado_physical_info,
-                    .mSinkData         = nullptr,
-                    ._28               = nullptr,
-                    .mBckMoveData      = nullptr,
-                    ._30               = 50.0f,
-                    .mUnkFlags         = 0x10004000,
-                    .mKeyCode          = cexp_calcKeyCode("LaunchStar")};
+ObjData launchStarData{.mMdlName          = "launch_star",
+                       .mObjectID         = 0x80000400,
+                       .mLiveManagerName  = gLiveManagerName,
+                       .mObjKey           = nullptr,
+                       .mAnimInfo         = nullptr,
+                       .mObjCollisionData = &launch_star_collision_data,
+                       .mMapCollisionInfo = nullptr,
+                       .mSoundInfo        = &launch_star_sound_info,
+                       .mPhysicalInfo     = nullptr,  //&tornado_physical_info,
+                       .mSinkData         = nullptr,
+                       ._28               = nullptr,
+                       .mBckMoveData      = nullptr,
+                       ._30               = 50.0f,
+                       .mUnkFlags         = 0x10004000,
+                       .mKeyCode          = cexp_calcKeyCode("LaunchStar")};
 
 BETTER_SMS_FOR_CALLBACK bool holdPlayerState(TMario *player) {
     auto *controller = player->mController;
@@ -235,13 +233,13 @@ BETTER_SMS_FOR_CALLBACK bool holdPlayerState(TMario *player) {
 
     player->mSpeed.scale(0.92f);
     player->mSubStateTimer += 1;
-    //player->mTranslation += player->mSpeed;
+    // player->mTranslation += player->mSpeed;
 
     float normalThing = player->mFloorTriangle ? player->mFloorTriangle->mNormal.y : 0.0f;
     TVec3f succ{player->mTranslation.x + (player->mSpeed.x * normalThing * 0.25f),
                 player->mTranslation.y,
                 player->mTranslation.z + (player->mSpeed.z * normalThing * 0.25f)};
-    //player->checkCollision();
+    // player->checkCollision();
 
     player->setAnimation(TMario::ANIMATION_FALL, 1.0f);
 
@@ -273,10 +271,10 @@ BETTER_SMS_FOR_CALLBACK bool launchPlayerState(TMario *player) {
         }
     }
 
-
     {
-        Mtx *lh_mtx    = &player->mModelData->mModel->mJointArray[0x18];
-        auto *trail_lh = gpMarioParticleManager->emitAndBindToMtxPtr(397, *lh_mtx, 1, ((u8 *)player));
+        Mtx *lh_mtx = &player->mModelData->mModel->mJointArray[0x18];
+        auto *trail_lh =
+            gpMarioParticleManager->emitAndBindToMtxPtr(397, *lh_mtx, 1, ((u8 *)player));
         if (trail_lh) {
             trail_lh->mSize1 = {0.3f, 0.3f, 0.3f};
             trail_lh->mSize3 = {0.3f, 0.3f, 0.3f};
@@ -284,15 +282,16 @@ BETTER_SMS_FOR_CALLBACK bool launchPlayerState(TMario *player) {
     }
 
     {
-        Mtx *rh_mtx     = &player->mModelData->mModel->mJointArray[0x12];
-        auto *trail_rh = gpMarioParticleManager->emitAndBindToMtxPtr(397, *rh_mtx, 1, ((u8 *)player) + 0x100);
+        Mtx *rh_mtx = &player->mModelData->mModel->mJointArray[0x12];
+        auto *trail_rh =
+            gpMarioParticleManager->emitAndBindToMtxPtr(397, *rh_mtx, 1, ((u8 *)player) + 0x100);
         if (trail_rh) {
             trail_rh->mSize1 = {0.3f, 0.3f, 0.3f};
             trail_rh->mSize3 = {0.3f, 0.3f, 0.3f};
         }
     }
 
-    player->mPrevSpeed = {0.0f, 0.0f, 0.0f};
+    player->mPrevSpeed    = {0.0f, 0.0f, 0.0f};
     player->mForwardSpeed = 0.0f;
 
     if (SMS_IsMarioTouchGround4cm__Fv() && player->mSpeed.y <= 0.0f) {

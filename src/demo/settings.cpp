@@ -8,6 +8,7 @@
 
 #include "settings.hxx"
 
+extern Settings::SettingsGroup gSettingsGroup;
 extern BugsExploitsSetting gBugsSetting;
 extern MirrorModeFlag gMirrorModeSetting;
 
@@ -22,13 +23,13 @@ public:
 
     void load(JSUMemoryInputStream &in) override {}
     void save(JSUMemoryOutputStream &out) override {}
-    void getValueStr(char *dst) const override { strcpy(dst, sDirectors[mIndex]); }
+    void getValueName(char *dst) const override { strcpy(dst, sDirectors[mIndex]); }
 
 private:
     int mIndex;
 };
 
-static const char *sProgrammers[] = {"JoshuaMK", "CyrusLoS", "Halleester"};
+static const char *sProgrammers[] = {"JoshuaMK", "CyrusLoS", "Adam Tollios"};
 
 class ProgrammerCreditSetting final : public Settings::IntSetting {
 public:
@@ -39,13 +40,13 @@ public:
 
     void load(JSUMemoryInputStream &in) override {}
     void save(JSUMemoryOutputStream &out) override {}
-    void getValueStr(char *dst) const override { strcpy(dst, sProgrammers[mIndex]); }
+    void getValueName(char *dst) const override { strcpy(dst, sProgrammers[mIndex]); }
 
 private:
     int mIndex;
 };
 
-static const char *sStageDesigners[] = {"UncleMeat", "epicwade", "Tempo"};
+static const char *sStageDesigners[] = {"UncleMeat", "epicwade"};
 
 class StageCreditSetting final : public Settings::IntSetting {
 public:
@@ -56,13 +57,13 @@ public:
 
     void load(JSUMemoryInputStream &in) override {}
     void save(JSUMemoryOutputStream &out) override {}
-    void getValueStr(char *dst) const override { strcpy(dst, sStageDesigners[mIndex]); }
+    void getValueName(char *dst) const override { strcpy(dst, sStageDesigners[mIndex]); }
 
 private:
     int mIndex;
 };
 
-static const char *sComposers[] = {"ddumpy", "Sherman Haynes"};
+static const char *sComposers[] = {"ddumpy", "Sherman Haynes", "Trevor Scott"};
 
 class ComposerCreditSetting final : public Settings::IntSetting {
 public:
@@ -73,7 +74,7 @@ public:
 
     void load(JSUMemoryInputStream &in) override {}
     void save(JSUMemoryOutputStream &out) override {}
-    void getValueStr(char *dst) const override { strcpy(dst, sComposers[mIndex]); }
+    void getValueName(char *dst) const override { strcpy(dst, sComposers[mIndex]); }
 
 private:
     int mIndex;
@@ -90,13 +91,13 @@ public:
 
     void load(JSUMemoryInputStream &in) override {}
     void save(JSUMemoryOutputStream &out) override {}
-    void getValueStr(char *dst) const override { strcpy(dst, sSoundDesigners[mIndex]); }
+    void getValueName(char *dst) const override { strcpy(dst, sSoundDesigners[mIndex]); }
 
 private:
     int mIndex;
 };
 
-static const char *sSequencers[] = {"Alex Benito", "ddumpy", "Purple Twirler"};
+static const char *sSequencers[] = {"ddumpy", "Purple Twirler"};
 
 class SequencingCreditSetting final : public Settings::IntSetting {
 public:
@@ -107,7 +108,7 @@ public:
 
     void load(JSUMemoryInputStream &in) override {}
     void save(JSUMemoryOutputStream &out) override {}
-    void getValueStr(char *dst) const override { strcpy(dst, sSequencers[mIndex]); }
+    void getValueName(char *dst) const override { strcpy(dst, sSequencers[mIndex]); }
 
 private:
     int mIndex;
@@ -124,7 +125,7 @@ public:
 
     void load(JSUMemoryInputStream &in) override {}
     void save(JSUMemoryOutputStream &out) override {}
-    void getValueStr(char *dst) const override { strcpy(dst, sTextures[mIndex]); }
+    void getValueName(char *dst) const override { strcpy(dst, sTextures[mIndex]); }
 
 private:
     int mIndex;
@@ -141,13 +142,13 @@ public:
 
     void load(JSUMemoryInputStream &in) override {}
     void save(JSUMemoryOutputStream &out) override {}
-    void getValueStr(char *dst) const override { strcpy(dst, sCharacters[mIndex]); }
+    void getValueName(char *dst) const override { strcpy(dst, sCharacters[mIndex]); }
 
 private:
     int mIndex;
 };
 
-static const char *sSpecialThanks[] = {"Xayr", "ShaneMGD", "Arie"};
+static const char *sSpecialThanks[] = {"Xayr", "ShaneMGD", "Halleester"};
 
 class SpecialThanksCreditSetting final : public Settings::IntSetting {
 public:
@@ -158,7 +159,7 @@ public:
 
     void load(JSUMemoryInputStream &in) override {}
     void save(JSUMemoryOutputStream &out) override {}
-    void getValueStr(char *dst) const override { strcpy(dst, sSpecialThanks[mIndex]); }
+    void getValueName(char *dst) const override { strcpy(dst, sSpecialThanks[mIndex]); }
 
 private:
     int mIndex;
@@ -203,8 +204,23 @@ void lockModuleSettings(TApplication *app) {
 
     auto *engine_settings = engine_module->mSettings;
     {
-        auto *setting = engine_settings->getSetting("Bug Fixes");
-        setting->setBool(true);
+        {
+            auto *setting =
+                reinterpret_cast<BugsSetting *>(engine_settings->getSetting("Bug Fixes"));
+            setting->setBool(true);
+            setting->lock();
+        }
+        {
+            auto *setting =
+                reinterpret_cast<BugsSetting *>(engine_settings->getSetting("Exploit Fixes"));
+            setting->lock();
+        }
+
+        {
+            auto *setting = reinterpret_cast<CollisionFixesSetting *>(
+                engine_settings->getSetting("Collision Fixes"));
+            setting->lock();
+        }
     }
 
     if (!isDemoComplete()) {
@@ -223,7 +239,7 @@ void lockModuleSettings(TApplication *app) {
 
             {
                 auto *setting = movement_settings->getSetting("Long Jump");
-                setting->setInt(1);
+                setting->setInt(2);
                 setting->setUserEditable(false, BetterSMS::Settings::Priority::GAME);
             }
 
@@ -262,6 +278,12 @@ void lockModuleSettings(TApplication *app) {
                 setting->setBool(true);
                 setting->setUserEditable(false, BetterSMS::Settings::Priority::GAME);
             }
+
+            {
+                auto *setting = movement_settings->getSetting("Fall Damage");
+                setting->setInt(1);
+                setting->setUserEditable(false, BetterSMS::Settings::Priority::GAME);
+            }
         }
     }
 
@@ -280,6 +302,8 @@ void lockModuleSettings(TApplication *app) {
 
 void unlockSettings(TMarDirector *director) {
     size_t shine_count = TFlagManager::smInstance->getFlag(0x40000);
+
+    bool update_save = false;
 
     if (shine_count >= 43 && !gBugsSetting.isUnlocked()) {
         gBugsSetting.unlock();
@@ -322,12 +346,28 @@ void unlockSettings(TMarDirector *director) {
                 auto *setting = movement_settings->getSetting("Fast Dive/Rollout");
                 setting->setUserEditable(true, BetterSMS::Settings::Priority::GAME);
             }
+
+            {
+                auto *setting = movement_settings->getSetting("Fall Damage");
+                setting->setUserEditable(true, BetterSMS::Settings::Priority::GAME);
+            }
         }
+
+        update_save = true;
     }
 
     if (shine_count >= 30 && !gMirrorModeSetting.getBool()) {
         gMirrorModeSetting.setBool(true);
         gMirrorModeSetting.updateSetting();
+        update_save = true;
+    }
+
+    if (update_save) {
+        s32 cardStatus = Settings::mountCard();
+        if (cardStatus >= CARD_ERROR_READY) {
+            Settings::saveSettingsGroup(gSettingsGroup);
+            Settings::unmountCard();
+        }
     }
 }
 

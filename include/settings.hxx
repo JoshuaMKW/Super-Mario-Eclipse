@@ -109,7 +109,7 @@ public:
     }
 
     void getValueName(char *dst) const override {
-        getBool() ? strncpy(dst, "ON\n", 4) : strncpy(dst, "OFF\n", 5);
+        getBool() ? strncpy(dst, "ON", 4) : strncpy(dst, "OFF", 5);
     }
 
     inline void lock() { sIsUnlocked = false; }
@@ -156,9 +156,11 @@ public:
         auto *mirror_module = BetterSMS::getModuleInfo("Mirror Mode");
 
         auto *active_setting = mirror_module->mSettings->getSetting("Is Enabled");
-        active_setting->setUserEditable(mMirrorModeFlag, BetterSMS::Settings::Priority::GAME);
-        if (!mMirrorModeFlag)
-            active_setting->setBool(false);
+        if (active_setting) {
+            active_setting->setUserEditable(mMirrorModeFlag, BetterSMS::Settings::Priority::GAME);
+            if (!mMirrorModeFlag)
+                active_setting->setBool(false);
+        }
     }
 
 private:

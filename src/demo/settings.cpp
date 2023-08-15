@@ -198,6 +198,8 @@ void lockModuleSettings(TApplication *app) {
                "Super Mario Eclipse requires the Mirror Mode module to be present and "
                "loaded. Please restore \"MirrorMode.kxe\" to \"./Kuribo!/Mods/\"!");
 
+    OSReport("Checking settings\n");
+
     auto *engine_module   = BetterSMS::getModuleInfo("Better Sunshine Engine");
     auto *movement_module = BetterSMS::getModuleInfo("Better Sunshine Moveset");
     auto *mirror_module   = BetterSMS::getModuleInfo("Mirror Mode");
@@ -298,6 +300,9 @@ void lockModuleSettings(TApplication *app) {
             }
         }
     }
+
+    
+    OSReport("Purple settings\n");
 }
 
 void unlockSettings(TMarDirector *director) {

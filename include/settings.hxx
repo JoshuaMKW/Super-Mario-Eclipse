@@ -153,6 +153,8 @@ public:
     bool isUnlocked_() const { return mMirrorModeFlag; }
 
     void updateSetting() const {
+        if (!BetterSMS::isModuleRegistered("Mirror Mode"))
+            return;
         auto *mirror_module = BetterSMS::getModuleInfo("Mirror Mode");
 
         auto *active_setting = mirror_module->mSettings->getSetting("Is Enabled");

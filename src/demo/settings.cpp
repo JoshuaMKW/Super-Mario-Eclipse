@@ -194,15 +194,14 @@ void lockModuleSettings(TApplication *app) {
                "Super Mario Eclipse requires the Better Sunshine Movement module to be present and "
                "loaded. Please restore \"BetterSunshineMovement.kxe\" to \"./Kuribo!/Mods/\"!");
 
-    SMS_ASSERT(BetterSMS::isModuleRegistered("Mirror Mode"),
+    /*SMS_ASSERT(BetterSMS::isModuleRegistered("Mirror Mode"),
                "Super Mario Eclipse requires the Mirror Mode module to be present and "
-               "loaded. Please restore \"MirrorMode.kxe\" to \"./Kuribo!/Mods/\"!");
+               "loaded. Please restore \"MirrorMode.kxe\" to \"./Kuribo!/Mods/\"!");*/
 
     OSReport("Checking settings\n");
 
     auto *engine_module   = BetterSMS::getModuleInfo("Better Sunshine Engine");
     auto *movement_module = BetterSMS::getModuleInfo("Better Sunshine Moveset");
-    auto *mirror_module   = BetterSMS::getModuleInfo("Mirror Mode");
 
     auto *engine_settings = engine_module->mSettings;
     {
@@ -289,8 +288,9 @@ void lockModuleSettings(TApplication *app) {
         }
     }
 
-    if (!gMirrorModeSetting.getBool()) {
+    if (BetterSMS::isModuleRegistered("Mirror Mode") && !gMirrorModeSetting.getBool()) {
         {
+            auto *mirror_module   = BetterSMS::getModuleInfo("Mirror Mode");
             auto *mirror_settings = mirror_module->mSettings;
 
             {
@@ -300,9 +300,6 @@ void lockModuleSettings(TApplication *app) {
             }
         }
     }
-
-    
-    OSReport("Purple settings\n");
 }
 
 void unlockSettings(TMarDirector *director) {

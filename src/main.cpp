@@ -32,6 +32,7 @@ extern void forceYoshiUnlock(TMarDirector *director);
 extern void adjustYoshiTounge(TMario *player, bool isMario);
 
 // Stage
+extern void initializeStageInfo(TApplication *app);
 void resetForExStage(TMarDirector *director);
 
 // Player
@@ -92,8 +93,11 @@ static void initModule() {
     // Register module
     BetterSMS::registerModule(&sModuleInfo);
 
+    Game::setMaxShines(300);
+
     // Register callbacks
     Application::registerContextCallback(11, directCharacterSelectMenu);
+    Game::registerInitCallback("__init_stage_info", initializeStageInfo);
     Game::registerChangeCallback("__set_intro_stage", setIntroStage);
 
     Stage::registerInitCallback("__reset_darkness", initToDefault);

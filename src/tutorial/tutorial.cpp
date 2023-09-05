@@ -488,9 +488,13 @@ BETTER_SMS_FOR_CALLBACK void checkTutorialCollisionRespawn(TMario *player, bool 
 }
 
 BETTER_SMS_FOR_CALLBACK void setIntroStage(TApplication *application) {
+#if 0
     if (gTutorialSetting.getBool()) {
         BetterSMS::Application::setIntroStage(15, 0);
     } else {
         BetterSMS::Application::setIntroStage(11, 2);
     }
+#else
+    BetterSMS::Application::setIntroStage(15, 0);
+#endif
 }

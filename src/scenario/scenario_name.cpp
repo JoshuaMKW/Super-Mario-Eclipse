@@ -5,31 +5,31 @@
 #include <BetterSMS/logging.hxx>
 #include <BetterSMS/module.hxx>
 
-char *loadStageNameFromBMG(void *global_bmg, u32 index) {
+const char *loadStageNameFromBMG(void *global_bmg, u32 index) {
     void *stage_bmg = JKRFileLoader::getGlbResource("/scene/map/stagename.bmg");
-    char *message;
+    const char *message;
     if (stage_bmg) {
         BetterSMS::Console::log("[WARNING] /scene/map/stagename.bmg missing from archive, falling "
                                 "back to default stage name loading\n");
-        message = (char *)SMSGetMessageData__FPvUl(stage_bmg, 0);
+        message = (const char *)SMSGetMessageData__FPvUl(stage_bmg, 0);
     } else {
-        message = (char *)SMSGetMessageData__FPvUl(global_bmg, index);
+        message = (const char *)SMSGetMessageData__FPvUl(global_bmg, index);
     }
-    return message;
+    return message ? message : "NO DATA";
 }
 
-char *loadScenarioNameFromBMG(void *global_bmg, u32 index) {
+const char *loadScenarioNameFromBMG(void *global_bmg, u32 index) {
     void *stage_bmg = JKRFileLoader::getGlbResource("/scene/map/stagename.bmg");
 
-    char *message;
+    const char *message;
     if (stage_bmg) {
-        message = (char *)SMSGetMessageData__FPvUl(stage_bmg, 1);
+        message = (const char *)SMSGetMessageData__FPvUl(stage_bmg, 1);
     } else {
         BetterSMS::Console::log("[WARNING] /scene/map/stagename.bmg missing from archive, falling "
                                 "back to default scenario name loading\n");
-        message = (char *)SMSGetMessageData__FPvUl(global_bmg, index);
+        message = (const char *)SMSGetMessageData__FPvUl(global_bmg, index);
     }
-    return message;
+    return message ? message : "NO DATA";
 }
 
 SMS_PATCH_BL(SMS_PORT_REGION(0x80172704, 0x802A0C00, 0, 0), loadStageNameFromBMG);

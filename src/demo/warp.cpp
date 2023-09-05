@@ -57,8 +57,8 @@ static void assignExitAreaStages(TApplication *app) {
     SMS_FROM_GPR(29, tpausemenu);
     tpausemenu[0x104 / 4] = app->mCurrentScene.mAreaID == 6 ? 2 : 3;
 }
-SMS_PATCH_BL(SMS_PORT_REGION(0x80156B70, 0, 0, 0), assignExitAreaStages);
-SMS_WRITE_32(SMS_PORT_REGION(0x80156B80, 0, 0, 0), 0x60000000);
+//SMS_PATCH_BL(SMS_PORT_REGION(0x80156B70, 0, 0, 0), assignExitAreaStages);
+//SMS_WRITE_32(SMS_PORT_REGION(0x80156B80, 0, 0, 0), 0x60000000);
 
 static void assignExitAreaDestination(JDrama::TFlagT<u16> flags, u16 flag) {
     flags.set(flag);
@@ -91,7 +91,7 @@ static void assignExitAreaDestination(JDrama::TFlagT<u16> flags, u16 flag) {
         return;
     }
 }
-SMS_PATCH_BL(SMS_PORT_REGION(0x80299808, 0, 0, 0), assignExitAreaDestination);
+//SMS_PATCH_BL(SMS_PORT_REGION(0x80299808, 0, 0, 0), assignExitAreaDestination);
 
 static void assignShineExitDestination(TApplication *app, u8 area, u8 episode,
                                        JDrama::TFlagT<u16> flag) {
@@ -119,8 +119,8 @@ static void assignShineExitDestination(TApplication *app, u8 area, u8 episode,
         app->mNextScene.set(area, episode, flag);
     }
 }
-SMS_PATCH_BL(SMS_PORT_REGION(0x80297C80, 0, 0, 0), assignShineExitDestination);
-SMS_WRITE_32(SMS_PORT_REGION(0x80297C84, 0, 0, 0), 0x60000000);
+//SMS_PATCH_BL(SMS_PORT_REGION(0x80297C80, 0, 0, 0), assignShineExitDestination);
+//SMS_WRITE_32(SMS_PORT_REGION(0x80297C84, 0, 0, 0), 0x60000000);
 
 static void assignGameOverDestination(TMarDirector *director) {
     if (gpApplication.mCurrentScene.mAreaID == 6 && gpApplication.mCurrentScene.mEpisodeID == 1)
@@ -132,7 +132,7 @@ static void assignGameOverDestination(TMarDirector *director) {
         gpApplication.mNextScene.set(6, 2, 0);
     director->moveStage();
 }
-SMS_PATCH_BL(SMS_PORT_REGION(0x8029933C, 0, 0, 0), assignGameOverDestination);
+//SMS_PATCH_BL(SMS_PORT_REGION(0x8029933C, 0, 0, 0), assignGameOverDestination);
 
 static void checkMariosDreamWarp(JDrama::TFlagT<u16> flags, u16 flag) {
     flags.set(flag);
@@ -146,26 +146,26 @@ static void checkMariosDreamWarp(JDrama::TFlagT<u16> flags, u16 flag) {
         gpApplication.mNextScene.mEpisodeID = 0;
     }
 }
-SMS_PATCH_BL(SMS_PORT_REGION(0x8029A3E0, 0, 0, 0), checkMariosDreamWarp);
-
-// On Airstrip from file select
-SMS_WRITE_32(SMS_PORT_REGION(0x80164E30, 0, 0, 0), 0x38800701);
-// On Delfino from file select
-SMS_WRITE_32(SMS_PORT_REGION(0x80164E44, 0, 0, 0), 0x38800702);
-
-// On Delfino Plaza from shine exit
-SMS_WRITE_32(SMS_PORT_REGION(0x80297C2C, 0, 0, 0), 0x60000000);
-SMS_WRITE_32(SMS_PORT_REGION(0x80297C4C, 0, 0, 0), 0x38000006);
-SMS_WRITE_32(SMS_PORT_REGION(0x80297C54, 0, 0, 0), 0x38600000);
-
-// On Delfino Plaza from death
-SMS_WRITE_32(SMS_PORT_REGION(0x802997A4, 0, 0, 0), 0x38000006);
-SMS_WRITE_32(SMS_PORT_REGION(0x802997AC, 0, 0, 0), 0x38000000);
-SMS_WRITE_32(SMS_PORT_REGION(0x802997BC, 0, 0, 0), 0x38000006);
-SMS_WRITE_32(SMS_PORT_REGION(0x802997C4, 0, 0, 0), 0x38600000);
-
-// On Delfino Plaza from exit area
-SMS_WRITE_32(SMS_PORT_REGION(0x802991E0, 0, 0, 0), 0x38000006);
-SMS_WRITE_32(SMS_PORT_REGION(0x802991E8, 0, 0, 0), 0x38000000);
-SMS_WRITE_32(SMS_PORT_REGION(0x802991F8, 0, 0, 0), 0x38000006);
-SMS_WRITE_32(SMS_PORT_REGION(0x80299200, 0, 0, 0), 0x38600000);
+//SMS_PATCH_BL(SMS_PORT_REGION(0x8029A3E0, 0, 0, 0), checkMariosDreamWarp);
+//
+//// On Airstrip from file select
+//SMS_WRITE_32(SMS_PORT_REGION(0x80164E30, 0, 0, 0), 0x38800701);
+//// On Delfino from file select
+//SMS_WRITE_32(SMS_PORT_REGION(0x80164E44, 0, 0, 0), 0x38800702);
+//
+//// On Delfino Plaza from shine exit
+//SMS_WRITE_32(SMS_PORT_REGION(0x80297C2C, 0, 0, 0), 0x60000000);
+//SMS_WRITE_32(SMS_PORT_REGION(0x80297C4C, 0, 0, 0), 0x38000006);
+//SMS_WRITE_32(SMS_PORT_REGION(0x80297C54, 0, 0, 0), 0x38600000);
+//
+//// On Delfino Plaza from death
+//SMS_WRITE_32(SMS_PORT_REGION(0x802997A4, 0, 0, 0), 0x38000006);
+//SMS_WRITE_32(SMS_PORT_REGION(0x802997AC, 0, 0, 0), 0x38000000);
+//SMS_WRITE_32(SMS_PORT_REGION(0x802997BC, 0, 0, 0), 0x38000006);
+//SMS_WRITE_32(SMS_PORT_REGION(0x802997C4, 0, 0, 0), 0x38600000);
+//
+//// On Delfino Plaza from exit area
+//SMS_WRITE_32(SMS_PORT_REGION(0x802991E0, 0, 0, 0), 0x38000006);
+//SMS_WRITE_32(SMS_PORT_REGION(0x802991E8, 0, 0, 0), 0x38000000);
+//SMS_WRITE_32(SMS_PORT_REGION(0x802991F8, 0, 0, 0), 0x38000006);
+//SMS_WRITE_32(SMS_PORT_REGION(0x80299200, 0, 0, 0), 0x38600000);

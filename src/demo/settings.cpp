@@ -190,20 +190,14 @@ void initDemoCredits(Settings::SettingsGroup &group) {
 bool isDemoComplete() { return gBugsSetting.isUnlocked(); }
 
 void lockModuleSettings(TApplication *app) {
-    SMS_ASSERT(BetterSMS::isModuleRegistered("Better Sunshine Moveset"),
+    optional<ModuleInfo> engine_module   = BetterSMS::getModuleInfo("Better Sunshine Engine");
+    optional<ModuleInfo> movement_module = BetterSMS::getModuleInfo("Better Sunshine Moveset");
+
+    SMS_ASSERT(movement_module,
                "Super Mario Eclipse requires the Better Sunshine Movement module to be present and "
                "loaded. Please restore \"BetterSunshineMovement.kxe\" to \"./Kuribo!/Mods/\"!");
 
-    /*SMS_ASSERT(BetterSMS::isModuleRegistered("Mirror Mode"),
-               "Super Mario Eclipse requires the Mirror Mode module to be present and "
-               "loaded. Please restore \"MirrorMode.kxe\" to \"./Kuribo!/Mods/\"!");*/
-
-    OSReport("Checking settings\n");
-
-    auto *engine_module   = BetterSMS::getModuleInfo("Better Sunshine Engine");
-    auto *movement_module = BetterSMS::getModuleInfo("Better Sunshine Moveset");
-
-    auto *engine_settings = engine_module->mSettings;
+    Settings::SettingsGroup *engine_settings = engine_module->mSettings;
     {
         {
             auto *setting =
@@ -290,8 +284,8 @@ void lockModuleSettings(TApplication *app) {
 
     if (BetterSMS::isModuleRegistered("Mirror Mode") && !gMirrorModeSetting.getBool()) {
         {
-            auto *mirror_module   = BetterSMS::getModuleInfo("Mirror Mode");
-            auto *mirror_settings = mirror_module->mSettings;
+            optional<ModuleInfo> mirror_module       = BetterSMS::getModuleInfo("Mirror Mode");
+            Settings::SettingsGroup *mirror_settings = mirror_module->mSettings;
 
             {
                 auto *setting = mirror_settings->getSetting("Is Enabled");
@@ -310,9 +304,9 @@ void unlockSettings(TMarDirector *director) {
     if (shine_count >= 43 && !gBugsSetting.isUnlocked()) {
         gBugsSetting.unlock();
 
-        auto *movement_module = BetterSMS::getModuleInfo("Better Sunshine Moveset");
+        optional<ModuleInfo> movement_module = BetterSMS::getModuleInfo("Better Sunshine Moveset");
         {
-            auto *movement_settings = movement_module->mSettings;
+            Settings::SettingsGroup *movement_settings = movement_module->mSettings;
 
             {
                 auto *setting = movement_settings->getSetting("Long Jump");

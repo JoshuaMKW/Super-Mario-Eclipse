@@ -117,10 +117,10 @@ public:
 
     // clang-format off
     static void valueChanged(void* old, void* cur, ValueKind kind) {
-        auto *engine_module = BetterSMS::getModuleInfo("Better Sunshine Engine");
+        ModuleInfo engine_module = BetterSMS::getModuleInfo("Better Sunshine Engine").value();
 
-        auto *exploits_setting = engine_module->mSettings->getSetting("Exploit Fixes");
-        auto *collision_setting = engine_module->mSettings->getSetting("Collision Fixes");
+        SingleSetting *exploits_setting = engine_module.mSettings->getSetting("Exploit Fixes");
+        SingleSetting *collision_setting = engine_module.mSettings->getSetting("Collision Fixes");
 
         const bool is_unlocked = *reinterpret_cast<bool *>(cur);
         
@@ -153,9 +153,9 @@ public:
     bool isUnlocked_() const { return mMirrorModeFlag; }
 
     void updateSetting() const {
-        if (!BetterSMS::isModuleRegistered("Mirror Mode"))
+        optional<ModuleInfo> mirror_module = BetterSMS::getModuleInfo("Mirror Mode");
+        if (!mirror_module)
             return;
-        auto *mirror_module = BetterSMS::getModuleInfo("Mirror Mode");
 
         auto *active_setting = mirror_module->mSettings->getSetting("Is Enabled");
         if (active_setting) {

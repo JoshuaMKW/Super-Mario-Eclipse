@@ -91,49 +91,45 @@ static void initModule() {
     }
 
     // Register module
-    BetterSMS::registerModule(&sModuleInfo);
+    BetterSMS::registerModule(sModuleInfo);
 
     Game::setMaxShines(300);
 
     // Register callbacks
     Application::registerContextCallback(11, directCharacterSelectMenu);
-    Game::registerInitCallback("__init_stage_info", initializeStageInfo);
-    Game::registerChangeCallback("__set_intro_stage", setIntroStage);
+    Game::addInitCallback(initializeStageInfo);
+    Game::addChangeCallback(setIntroStage);
 
-    Stage::registerInitCallback("__reset_darkness", initToDefault);
-    Stage::registerUpdateCallback("__update_darkness", manageShineDarkness);
+    Stage::addInitCallback(initToDefault);
+    Stage::addUpdateCallback(manageShineDarkness);
 
     // Demo
-    Stage::registerInitCallback("__force_yoshi_unlock", forceYoshiUnlock);
-    Stage::registerUpdateCallback("__check_for_bugs_unlock", unlockSettings);
-    Stage::registerUpdateCallback("__check_for_blue_coin_shine", checkForBlueCoinTrade);
-    Game::registerBootCallback("__lock_demo_settings", lockModuleSettings);
+    Stage::addInitCallback(forceYoshiUnlock);
+    Stage::addUpdateCallback(unlockSettings);
+    Stage::addUpdateCallback(checkForBlueCoinTrade);
+    Game::addBootCallback(lockModuleSettings);
 
-    Stage::registerInitCallback("__init_player_models", initCharacterArchives);
-    Stage::registerInitCallback("__init_ex_stage", resetForExStage);
-    Stage::registerInitCallback("__reset_tutorial_ice_stage", resetTutorialIceStageCheckpoints);
-    Stage::registerInitCallback("__reset_tutorial_casino_stage",
-                                resetTutorialCasinoStageCheckpoints);
-    Stage::registerInitCallback("__reset_tutorial_pianta_pit_stage",
-                                resetTutorialPiantaPitStageCheckpoints);
-    Stage::registerDraw2DCallback("__update_player_hud", updatePlayerHUD);
-    Player::registerInitCallback("__init_eclipse_data", initEclipseData);
-    Player::registerLoadAfterCallback("__init_water_balloons", initializeWaterBalloons);
-    Player::registerLoadAfterCallback("__init_player_pos_rot", setPlayerPosRotOnLoad);
-    Player::registerUpdateCallback("__update_tutorial_ice_stage", checkTutorialIceStageCheckpoints);
-    Player::registerUpdateCallback("__update_tutorial_casino_stage",
-                                   checkTutorialCasinoStageCheckpoints);
-    Player::registerUpdateCallback("__update_tutorial_pianta_pit_stage",
-                                   checkTutorialPiantaPitStageCheckpoints);
-    Stage::registerInitCallback("__init_cold_state", initColdState);
-    Player::registerUpdateCallback("__check_for_freezing_water", processColdState);
-    // Player::registerUpdateCallback("__update_tutorial_respawn", checkTutorialCollisionRespawn);
-    Player::registerUpdateCallback("__update_water_balloons", createWaterBalloonAndThrow);
-    Player::registerUpdateCallback("__update_yoshi_tounge", adjustYoshiTounge);
-    Player::registerUpdateCallback("__update_blaze_state", blazePlayer);
+    Stage::addInitCallback(initCharacterArchives);
+    Stage::addInitCallback(resetForExStage);
+    Stage::addInitCallback(resetTutorialIceStageCheckpoints);
+    Stage::addInitCallback(resetTutorialCasinoStageCheckpoints);
+    Stage::addInitCallback(resetTutorialPiantaPitStageCheckpoints);
+    Stage::addDraw2DCallback(updatePlayerHUD);
+    Player::addInitCallback(initEclipseData);
+    Player::addLoadAfterCallback(initializeWaterBalloons);
+    Player::addLoadAfterCallback(setPlayerPosRotOnLoad);
+    Player::addUpdateCallback(checkTutorialIceStageCheckpoints);
+    Player::addUpdateCallback(checkTutorialCasinoStageCheckpoints);
+    Player::addUpdateCallback(checkTutorialPiantaPitStageCheckpoints);
+    Stage::addInitCallback(initColdState);
+    Player::addUpdateCallback(processColdState);
+    // Player::addUpdateCallback(checkTutorialCollisionRespawn);
+    Player::addUpdateCallback(createWaterBalloonAndThrow);
+    Player::addUpdateCallback(adjustYoshiTounge);
+    Player::addUpdateCallback(blazePlayer);
     Player::registerStateMachine(PlayerLaunchStarWait, holdPlayerState);
     Player::registerStateMachine(PlayerLaunchStarLaunch, launchPlayerState);
-    Debug::registerUpdateCallback("__check_awards", checkForCompletionAwards);
+    Debug::addUpdateCallback(checkForCompletionAwards);
 
     Objects::registerObjectAsMisc("DarknessEffect", TDarknessEffect::instantiate);
     Objects::registerObjectAsMapObj("Tornado", &tornadoData, TTornadoMapObj::instantiate);
@@ -144,29 +140,10 @@ static void initModule() {
     Objects::registerObjectAsMisc("FireyPeteyManager", TFireyPeteyManager::instantiate);
 }
 
-static void deinitModule() {
-    Application::deregisterContextCallback(11);
-
-    Stage::deregisterUpdateCallback("__update_darkness");
-
-    Stage::deregisterInitCallback("__init_player_models");
-    Player::deregisterLoadAfterCallback("__init_water_balloons");
-    Player::deregisterUpdateCallback("__update_water_balloons");
-    Player::deregisterUpdateCallback("__update_yoshi_tounge");
-
-    Objects::deregisterObject("DarknessEffect");
-    Objects::deregisterObject("Tornado");
-    Objects::deregisterObject("WaterBalloon");
-    Objects::deregisterObject("LaunchStar");
-
-    BetterSMS::deregisterModule(&sModuleInfo);
-}
-
 // Definition block
 KURIBO_MODULE_BEGIN("Super Mario Eclipse", "JoshuaMK", "v1.0") {
     // Set the load and unload callbacks to our registration functions
     KURIBO_EXECUTE_ON_LOAD { initModule(); }
-    KURIBO_EXECUTE_ON_UNLOAD { deinitModule(); }
 }
 KURIBO_MODULE_END()
 

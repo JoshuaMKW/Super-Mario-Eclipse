@@ -93,7 +93,7 @@ static void initModule() {
     // Register module
     BetterSMS::registerModule(sModuleInfo);
 
-    Game::setMaxShines(300);
+    Game::setMaxShines(240);
 
     // Register callbacks
     Application::registerContextCallback(11, directCharacterSelectMenu);

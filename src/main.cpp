@@ -36,6 +36,7 @@ extern void initializeStageInfo(TApplication *app);
 void resetForExStage(TMarDirector *director);
 
 // Player
+extern void initializePoundJumpAnimation(TApplication *app);
 extern void initEclipseData(TMario *player, bool isMario);
 extern void initCharacterArchives(TMarDirector *director);
 extern void initializeWaterBalloons(TMario *player);
@@ -99,6 +100,8 @@ static void initModule() {
     Application::registerContextCallback(11, directCharacterSelectMenu);
     Game::addInitCallback(initializeStageInfo);
     Game::addChangeCallback(setIntroStage);
+
+    Game::addInitCallback(initializePoundJumpAnimation);
 
     Stage::addInitCallback(initToDefault);
     Stage::addUpdateCallback(manageShineDarkness);

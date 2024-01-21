@@ -4,7 +4,9 @@
 #include <BetterSMS/player.hxx>
 
 constexpr int PoundJumpAnimationID = 112;
+constexpr int CrouchAnimationID = 113;
 
 BETTER_SMS_FOR_CALLBACK void initializePoundJumpAnimation(TApplication *app) {
-    bool success = Player::addAnimationDataEx(PoundJumpAnimationID, "hipjump", true, true);
+    Player::addAnimationDataEx(PoundJumpAnimationID, "hipjump", true, true);
+    Player::addAnimationDataEx(CrouchAnimationID, "crouch", false);
 }

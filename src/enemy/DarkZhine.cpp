@@ -2,17 +2,6 @@
 
 #include "enemy/dark_zhine.hxx"
 
-#if SME_ZHINE_BOSS
-/*
-VTABLE
-
-.long 0x00000000, 0x00000000, 0x8007BC50, 0x80007D70
-.long 0x8003C39C, 0x802FA6F4, 0x802FA6F8, 0x802FA6FC
-.long 0x80075C44* 0x00000000, 0x00000000, 0x8007C2C0
-.long 0x803370C0, 0x8033720C, 0x80037214, 0x8033721C
-.long 0x80337220, 0x80337228, 0x8033722C, 0x80337230
-.long 0x*/
-
 TDarkZhine::TDarkZhine(const char *name) {}
 
 TDarkZhine::~TDarkZhine() {}
@@ -324,5 +313,3 @@ void control_(TDarkZhine *thisZhine) { thisZhine->perform_(gpMarioAddress); }
 // 0x800FFFAC = remove tentacles BLR, 0x800764CC perform tentacles?
 
 // 0x802A9D54 = TBossGesso Class Size
-
-#endif

@@ -236,10 +236,10 @@ BETTER_SMS_FOR_CALLBACK void initializeStageInfo(TApplication *app) {
             info->mScenarioIDs.push_back(0x101);
             info->mScenarioIDs.push_back(0x102);
             info->mScenarioIDs.push_back(0x103);
-            info->mScenarioNameIDs.push_back(118);
-            info->mScenarioNameIDs.push_back(119);
             info->mScenarioNameIDs.push_back(120);
             info->mScenarioNameIDs.push_back(121);
+            info->mScenarioNameIDs.push_back(122);
+            info->mScenarioNameIDs.push_back(123);
             info->mShineSelectPaneID = 'md_0';
             BetterSMS::Stage::registerStageInfo(0x43, info);
         }
@@ -256,11 +256,11 @@ BETTER_SMS_FOR_CALLBACK void initializeStageInfo(TApplication *app) {
             info->mExScenarioIDs.push_back(0x105);
             info->mExScenarioIDs.push_back(0xEA);
             info->mExScenarioIDs.push_back(0x00);
-            info->mScenarioNameIDs.push_back(122);
-            info->mScenarioNameIDs.push_back(123);
             info->mScenarioNameIDs.push_back(124);
             info->mScenarioNameIDs.push_back(125);
-            info->mExScenarioNameIDs.push_back(126);
+            info->mScenarioNameIDs.push_back(126);
+            info->mScenarioNameIDs.push_back(127);
+            info->mExScenarioNameIDs.push_back(128);
             info->mShineSelectPaneID = 'lf_0';
             BetterSMS::Stage::registerStageInfo(0x44, info);
         }
@@ -277,11 +277,11 @@ BETTER_SMS_FOR_CALLBACK void initializeStageInfo(TApplication *app) {
             info->mExScenarioIDs.push_back(0x106);
             info->mExScenarioIDs.push_back(0xEB);
             info->mExScenarioIDs.push_back(0x00);
-            info->mScenarioNameIDs.push_back(127);
-            info->mScenarioNameIDs.push_back(128);
             info->mScenarioNameIDs.push_back(129);
             info->mScenarioNameIDs.push_back(130);
-            info->mExScenarioNameIDs.push_back(131);
+            info->mScenarioNameIDs.push_back(131);
+            info->mScenarioNameIDs.push_back(132);
+            info->mExScenarioNameIDs.push_back(133);
             info->mShineSelectPaneID = 'vw_0';
             BetterSMS::Stage::registerStageInfo(0x45, info);
         }
@@ -298,11 +298,11 @@ BETTER_SMS_FOR_CALLBACK void initializeStageInfo(TApplication *app) {
             info->mExScenarioIDs.push_back(0x107);
             info->mExScenarioIDs.push_back(0xEC);
             info->mExScenarioIDs.push_back(0x00);
-            info->mScenarioNameIDs.push_back(132);
-            info->mScenarioNameIDs.push_back(133);
             info->mScenarioNameIDs.push_back(134);
             info->mScenarioNameIDs.push_back(135);
-            info->mExScenarioNameIDs.push_back(136);
+            info->mScenarioNameIDs.push_back(136);
+            info->mScenarioNameIDs.push_back(137);
+            info->mExScenarioNameIDs.push_back(138);
             info->mShineSelectPaneID = 'yv_0';
             BetterSMS::Stage::registerStageInfo(0x46, info);
         }
@@ -319,11 +319,11 @@ BETTER_SMS_FOR_CALLBACK void initializeStageInfo(TApplication *app) {
             info->mExScenarioIDs.push_back(0x108);
             info->mExScenarioIDs.push_back(0xED);
             info->mExScenarioIDs.push_back(0x00);
-            info->mScenarioNameIDs.push_back(137);
-            info->mScenarioNameIDs.push_back(138);
             info->mScenarioNameIDs.push_back(139);
             info->mScenarioNameIDs.push_back(140);
-            info->mExScenarioNameIDs.push_back(141);
+            info->mScenarioNameIDs.push_back(141);
+            info->mScenarioNameIDs.push_back(142);
+            info->mExScenarioNameIDs.push_back(143);
             info->mShineSelectPaneID = 'wp_0';
             BetterSMS::Stage::registerStageInfo(0x47, info);
         }
@@ -340,11 +340,11 @@ BETTER_SMS_FOR_CALLBACK void initializeStageInfo(TApplication *app) {
             info->mExScenarioIDs.push_back(0x109);
             info->mExScenarioIDs.push_back(0xEE);
             info->mExScenarioIDs.push_back(0x00);
-            info->mScenarioNameIDs.push_back(142);
-            info->mScenarioNameIDs.push_back(143);
             info->mScenarioNameIDs.push_back(144);
             info->mScenarioNameIDs.push_back(145);
-            info->mExScenarioNameIDs.push_back(146);
+            info->mScenarioNameIDs.push_back(146);
+            info->mScenarioNameIDs.push_back(147);
+            info->mExScenarioNameIDs.push_back(148);
             info->mShineSelectPaneID = 'rl_0';
             BetterSMS::Stage::registerStageInfo(0x48, info);
         }
@@ -361,11 +361,11 @@ BETTER_SMS_FOR_CALLBACK void initializeStageInfo(TApplication *app) {
             info->mExScenarioIDs.push_back(0x10A);
             info->mExScenarioIDs.push_back(0xEF);
             info->mExScenarioIDs.push_back(0x00);
-            info->mScenarioNameIDs.push_back(147);
-            info->mScenarioNameIDs.push_back(148);
             info->mScenarioNameIDs.push_back(149);
             info->mScenarioNameIDs.push_back(150);
-            info->mExScenarioNameIDs.push_back(151);
+            info->mScenarioNameIDs.push_back(151);
+            info->mScenarioNameIDs.push_back(152);
+            info->mExScenarioNameIDs.push_back(153);
             info->mShineSelectPaneID = 'pb_0';
             BetterSMS::Stage::registerStageInfo(0x49, info);
         }
@@ -382,12 +382,12 @@ BETTER_SMS_FOR_CALLBACK void initializeStageInfo(TApplication *app) {
             info->mExScenarioIDs.push_back(0x10B);
             info->mExScenarioIDs.push_back(0xF0);
             info->mExScenarioIDs.push_back(0x00);
-            info->mScenarioNameIDs.push_back(152);
-            info->mScenarioNameIDs.push_back(153);
             info->mScenarioNameIDs.push_back(154);
             info->mScenarioNameIDs.push_back(155);
-            info->mExScenarioNameIDs.push_back(156);
-            info->mShineSelectPaneID = 'sc_0';
+            info->mScenarioNameIDs.push_back(156);
+            info->mScenarioNameIDs.push_back(157);
+            info->mExScenarioNameIDs.push_back(158);
+            info->mShineSelectPaneID = 'sp_0';
             BetterSMS::Stage::registerStageInfo(0x4A, info);
         }
 
@@ -413,21 +413,21 @@ BETTER_SMS_FOR_CALLBACK void initializeStageInfo(TApplication *app) {
             info->mExScenarioIDs.push_back(0xFD);
             info->mExScenarioIDs.push_back(0xFE);
             info->mExScenarioIDs.push_back(0x00);
-            info->mScenarioNameIDs.push_back(157);
-            info->mExScenarioNameIDs.push_back(158);  // Block world
-            info->mExScenarioNameIDs.push_back(159);  // Beta Bianco
-            info->mExScenarioNameIDs.push_back(160);  // Secret Aquarium
-            info->mExScenarioNameIDs.push_back(161);  // Battle Fort
-            info->mExScenarioNameIDs.push_back(162);  // Sunshine Isles
-            info->mExScenarioNameIDs.push_back(163);  // Starshine Beach
-            info->mExScenarioNameIDs.push_back(164);  // Beta Ricco
-            info->mExScenarioNameIDs.push_back(165);  // E3 Bianco
-            info->mExScenarioNameIDs.push_back(166);  // E3 Dolpic
-            info->mExScenarioNameIDs.push_back(167);  // Sweet Sweet Galaxy
-            info->mExScenarioNameIDs.push_back(168);  // Zelda Windwaker
-            info->mExScenarioNameIDs.push_back(169);  // Spaceworld Dolpic
-            info->mExScenarioNameIDs.push_back(170);  // Beta Shell Secret
-            info->mExScenarioNameIDs.push_back(171);  // Super Monkey Ball
+            info->mScenarioNameIDs.push_back(159);
+            info->mExScenarioNameIDs.push_back(160);  // Block world
+            info->mExScenarioNameIDs.push_back(161);  // Beta Bianco
+            info->mExScenarioNameIDs.push_back(162);  // Secret Aquarium
+            info->mExScenarioNameIDs.push_back(163);  // Battle Fort
+            info->mExScenarioNameIDs.push_back(164);  // Sunshine Isles
+            info->mExScenarioNameIDs.push_back(165);  // Starshine Beach
+            info->mExScenarioNameIDs.push_back(166);  // Beta Ricco
+            info->mExScenarioNameIDs.push_back(167);  // E3 Bianco
+            info->mExScenarioNameIDs.push_back(168);  // E3 Dolpic
+            info->mExScenarioNameIDs.push_back(169);  // Sweet Sweet Galaxy
+            info->mExScenarioNameIDs.push_back(170);  // Zelda Windwaker
+            info->mExScenarioNameIDs.push_back(171);  // Spaceworld Dolpic
+            info->mExScenarioNameIDs.push_back(172);  // Beta Shell Secret
+            info->mExScenarioNameIDs.push_back(173);  // Super Monkey Ball
             info->mShineSelectPaneID = 'pc_0';
             BetterSMS::Stage::registerStageInfo(0x4B, info);
         }
@@ -444,13 +444,13 @@ BETTER_SMS_FOR_CALLBACK void initializeStageInfo(TApplication *app) {
             info->mScenarioIDs.push_back(0x12B);
             info->mScenarioIDs.push_back(0x12C);
             info->mScenarioIDs.push_back(0x12D);
-            info->mScenarioNameIDs.push_back(172);
-            info->mScenarioNameIDs.push_back(173);
-            info->mScenarioNameIDs.push_back(174);
-            info->mScenarioNameIDs.push_back(175);
-            info->mScenarioNameIDs.push_back(176);
-            info->mScenarioNameIDs.push_back(177);
-            info->mScenarioNameIDs.push_back(178);
+            info->mScenarioNameIDs.push_back(174);  // Giovane Creek
+            info->mScenarioNameIDs.push_back(175);  // Arido Trail
+            info->mScenarioNameIDs.push_back(176);  // Boilente Crypt
+            info->mScenarioNameIDs.push_back(177);  // Marea Crypt
+            info->mScenarioNameIDs.push_back(178);  // Rugivosa Marsh
+            info->mScenarioNameIDs.push_back(179);  // Sonnolento Grove
+            info->mScenarioNameIDs.push_back(180);  // Arcobaleno Cove
             info->mShineSelectPaneID = 'ij_0';
             BetterSMS::Stage::registerStageInfo(0x4C, info);
         }
@@ -463,7 +463,7 @@ BETTER_SMS_FOR_CALLBACK void initializeStageInfo(TApplication *app) {
             info->mExScenarioIDs.push_back(0x10D);
             info->mExScenarioIDs.push_back(0xFF);
             info->mExScenarioIDs.push_back(0x00);
-            info->mExScenarioNameIDs.push_back(179);
+            info->mExScenarioNameIDs.push_back(181);
             info->mShineSelectPaneID = 'el_0';
             BetterSMS::Stage::registerStageInfo(0x35, info);
         }

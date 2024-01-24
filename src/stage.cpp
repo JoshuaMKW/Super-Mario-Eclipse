@@ -458,14 +458,14 @@ BETTER_SMS_FOR_CALLBACK void initializeStageInfo(TApplication *app) {
         // Register Final Corona Level
         {
             auto *info           = new BetterSMS::Stage::AreaInfo;
-            info->mShineStageID  = 0x35;
-            info->mNormalStageID = 0x35;
-            info->mExScenarioIDs.push_back(0x10D);
-            info->mExScenarioIDs.push_back(0xFF);
-            info->mExScenarioIDs.push_back(0x00);
-            info->mExScenarioNameIDs.push_back(181);
+            info->mShineStageID  = 0x9;
+            info->mNormalStageID = 0xA;
+            info->mScenarioIDs.push_back(0x12E);
+            info->mScenarioIDs.push_back(0x12F);
+            info->mScenarioNameIDs.push_back(181);
+            info->mScenarioNameIDs.push_back(182);
             info->mShineSelectPaneID = 'el_0';
-            BetterSMS::Stage::registerStageInfo(0x35, info);
+            BetterSMS::Stage::registerStageInfo(0x9, info);
         }
 
         old_heap->becomeCurrentHeap();

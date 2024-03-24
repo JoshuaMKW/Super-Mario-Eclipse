@@ -105,7 +105,7 @@ static u32 calcYoshiSwimVelocity(TMario *player, u32 arg1) {
     }
 
     player->mSwimParams = player_data->mDefaultAttrs.mSwimParams;
-    // Check for water death
+    // Check for underwater
     if (player->isUnderWater()) {
 #define SCALE_PARAM(param, scale) param.set(param.get() * scale)
         SCALE_PARAM(player->mSwimParams.mMoveSp, 3.0f);

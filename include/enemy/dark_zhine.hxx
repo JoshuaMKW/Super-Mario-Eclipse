@@ -1,5 +1,8 @@
 #pragma once
 
+#include "Manager/EnemyManager.hxx"
+#include "Manager/PollutionManager.hxx"
+
 #include <Dolphin/types.h>
 
 #include <JSystem/JGeometry/JGMVec.hxx>
@@ -7,7 +10,6 @@
 
 #include <BetterSMS/module.hxx>
 
-#if SME_ZHINE_BOSS
 
 /*
 VTABLE
@@ -20,18 +22,15 @@ VTABLE
 .long 0x*/
 
 struct TZhineParams : public TParams {
-#define CONSTRUCT_PARAM(name, val)                                                                 \
-    name(this, val, JDrama::TNameRef::calcKeyCode(SME_STRINGIZE(name)), SME_STRINGIZE(name))
-
     TZhineParams(const char *prm)
-        : TParams(), CONSTRUCT_PARAM(mBoundingAreaRadius, 1000.0f),
-          CONSTRUCT_PARAM(mDistanceFromMario, 2000.0f), CONSTRUCT_PARAM(mSpeedMultiplier, 1.0f),
-          CONSTRUCT_PARAM(mAccelerationRate, 0.98f), CONSTRUCT_PARAM(mShockRadius, 2000.0f),
-          CONSTRUCT_PARAM(mMaxSpeed, 60.0f), CONSTRUCT_PARAM(mStampRadius, 1000.0f),
-          CONSTRUCT_PARAM(mFramesToCleanOnce, 3), CONSTRUCT_PARAM(mPoundingTimerMax, 300),
-          CONSTRUCT_PARAM(mGoopingTimerMax, 0), CONSTRUCT_PARAM(mShockingTimerMax, 120),
-          CONSTRUCT_PARAM(mRollingTimerMax, 300), CONSTRUCT_PARAM(mHardMode, false),
-          CONSTRUCT_PARAM(mRisingRate, 1.4f), CONSTRUCT_PARAM(mMaxPoundingHeight, 800.0f) {
+        : TParams(), SMS_TPARAM_INIT(mBoundingAreaRadius, 1000.0f),
+          SMS_TPARAM_INIT(mDistanceFromMario, 2000.0f), SMS_TPARAM_INIT(mSpeedMultiplier, 1.0f),
+          SMS_TPARAM_INIT(mAccelerationRate, 0.98f), SMS_TPARAM_INIT(mShockRadius, 2000.0f),
+          SMS_TPARAM_INIT(mMaxSpeed, 60.0f), SMS_TPARAM_INIT(mStampRadius, 1000.0f),
+          SMS_TPARAM_INIT(mFramesToCleanOnce, 3), SMS_TPARAM_INIT(mPoundingTimerMax, 300),
+          SMS_TPARAM_INIT(mGoopingTimerMax, 0), SMS_TPARAM_INIT(mShockingTimerMax, 120),
+          SMS_TPARAM_INIT(mRollingTimerMax, 300), SMS_TPARAM_INIT(mHardMode, false),
+          SMS_TPARAM_INIT(mRisingRate, 1.4f), SMS_TPARAM_INIT(mMaxPoundingHeight, 800.0f) {
         load(prm);
     }
 
@@ -71,19 +70,21 @@ class TDarkZhine : public TSpineEnemy {
     bool mIsGooping;
     bool mIsShocking;
     TZhineParams mParams;
+    TBGPolDrop *mPollutionDrop;
 
 public:
+
+    BETTER_SMS_FOR_CALLBACK static JDrama::TNameRef *instantiate() {
+        return new TDarkZhine("DarkZhine");
+    }
+
     TDarkZhine(const char *);
     virtual ~TDarkZhine();
 
-    virtual void load(JSUMemoryInputStream &) override;
-    virtual void perform(u32, JDrama::TGraphics *) override;
-    virtual bool receiveMessage(THitActor *, u32) override;
-    virtual void init(TLiveManager *) override;
-    virtual void control() override;
-    virtual void bind() override;
-    virtual void moveObject() override;
-    virtual void *getBasNameTable() const;
+    // void load(JSUMemoryInputStream &) override;
+    void perform(u32, JDrama::TGraphics *) override;
+    // bool receiveMessage(THitActor *, u32) override;
+    void init(TLiveManager *) override;
 
     f32 getAngleToTarget() const;
 
@@ -98,7 +99,19 @@ public:
     void advanceRollMovement(TPollutionManager *gpPollution);
     void canUtilizeTentacles(u32 *TBGTentacle, u32 *unk1, u32 *JDramaGraphics,
                              TDarkZhine *thisZhine);
-    static u32 cleanFromSpineBase(u32 *gpNerveBGEye, TSpineBase<TLiveActor> *gpSpineBase);
+    // static u32 cleanFromSpineBase(u32 *gpNerveBGEye, TSpineBase<TLiveActor> *gpSpineBase);
 };
 
-#endif
+class TDarkZhineManager : public TEnemyManager {
+public:
+    BETTER_SMS_FOR_CALLBACK static JDrama::TNameRef *instantiate() {
+        return new TDarkZhineManager("DarkZhineManager");
+    }
+
+    TDarkZhineManager(char const *);
+    virtual ~TDarkZhineManager(){};
+
+    virtual void load(JSUMemoryInputStream &);
+    virtual void createModelData();
+    virtual void createAnmData();
+};

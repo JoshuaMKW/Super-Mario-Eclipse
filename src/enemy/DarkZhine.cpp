@@ -1,8 +1,11 @@
+#include "raw_fn.hxx"
+#include "Enemy/BossPakkun.hxx"
+#include "JParticle/JPAResourceManager.hxx"
+
 #include <BetterSMS/module.hxx>
 
 #include "enemy/dark_zhine.hxx"
 
-#if SME_ZHINE_BOSS
 /*
 VTABLE
 
@@ -13,7 +16,9 @@ VTABLE
 .long 0x80337220, 0x80337228, 0x8033722C, 0x80337230
 .long 0x*/
 
-TDarkZhine::TDarkZhine(const char *name) {}
+TDarkZhine::TDarkZhine(const char *name)
+    : TSpineEnemy(name), mBoundingPoint(0, 0, 0), mTarget(nullptr),
+      mParams("/enemy/bossgesso.prm") {}
 
 TDarkZhine::~TDarkZhine() {}
 
@@ -25,112 +30,113 @@ f32 TDarkZhine::getAngleToTarget() const {
 }
 
 bool TDarkZhine::isTargetInRangeToHome(f32 r) const {
-    return PSVECDistance(&mBoundingPoint, &mTarget->mTranslation) < r;
+    return PSVECDistance(mBoundingPoint, mTarget->mTranslation) < r;
 }
 
 void TDarkZhine::advanceRollMovement(TPollutionManager *gpPollution) {
 
-    if (this->rollingTimer() < this->rollingTimerMax() / 2)
-        this->mGroundSpeed =
-            sigmoidCurve(this->rollingTimer(), 0.0f, this->maxSpeed() * this->speedMultiplier(),
-                         300.0f, 0.04f * this->accelerationRate());
-    else
-        this->mGroundSpeed = sigmoidCurve(this->rollingTimer() - this->rollingTimerMax() / 2, 0,
-                                          this->maxSpeed() * this->speedMultiplier(), 300.0f,
-                                          -0.04f * this->accelerationRate());
-
-    if (this->mGroundSpeed > this->maxSpeed())
-        this->mGroundSpeed = this->maxSpeed();
-    else if (this->mGroundSpeed < 0.0f)
-        this->mGroundSpeed = 0.0f;
-
-    this->mTranslation.x += (this->mGroundSpeed * sinf(angleToRadians(this->mRotation.y)));
-    this->mTranslation.z += (this->mGroundSpeed * cosf(angleToRadians(this->mRotation.y)));
-    this->mSpeed.x = (this->mGroundSpeed * sinf(angleToRadians(this->mRotation.y)));
-    this->mSpeed.z = (this->mGroundSpeed * cosf(angleToRadians(this->mRotation.y)));
-
-    stamp__17TPollutionManagerFUsffff(gpPollution, 1, this->mTranslation.x, this->mTranslation.y,
-                                      this->mTranslation.z, 400.0f);
+    // if (this->rollingTimer() < this->rollingTimerMax() / 2)
+    //     this->mGroundSpeed =
+    //         sigmoidCurve(this->rollingTimer(), 0.0f, this->maxSpeed() * this->speedMultiplier(),
+    //                      300.0f, 0.04f * this->accelerationRate());
+    // else
+    //     this->mGroundSpeed = sigmoidCurve(this->rollingTimer() - this->rollingTimerMax() / 2, 0,
+    //                                       this->maxSpeed() * this->speedMultiplier(), 300.0f,
+    //                                       -0.04f * this->accelerationRate());
+    //
+    // if (this->mGroundSpeed > this->maxSpeed())
+    //     this->mGroundSpeed = this->maxSpeed();
+    // else if (this->mGroundSpeed < 0.0f)
+    //     this->mGroundSpeed = 0.0f;
+    //
+    // this->mTranslation.x += (this->mGroundSpeed * sinf(angleToRadians(this->mRotation.y)));
+    // this->mTranslation.z += (this->mGroundSpeed * cosf(angleToRadians(this->mRotation.y)));
+    // this->mSpeed.x = (this->mGroundSpeed * sinf(angleToRadians(this->mRotation.y)));
+    // this->mSpeed.z = (this->mGroundSpeed * cosf(angleToRadians(this->mRotation.y)));
+    //
+    // stamp__17TPollutionManagerFUsffff(gpPollution, 1, this->mTranslation.x, this->mTranslation.y,
+    //                                   this->mTranslation.z, 400.0f);
 }
 
 TDarkZhine::PoundingState TDarkZhine::advanceDropAttack(TPollutionManager *gpPollution,
                                                         TMario *player) {
 
-    if (this->poundingStatus() == TDarkZhine::DROPPING) {
-        this->mGravity = 1.0f;
-        this->mSpeed.x = 0.0f;
-        this->mSpeed.z = 0.0f;
-        this->mSpeed.y *= this->mSpeedMultiplier;
-
-        if (this->mTranslation.y - this->mFloorBelow->mMaxHeight < 10.0f &&
-            this->mTranslation.y >= this->mFloorBelow->mMinHeight) {
-
-            startShake__12TCameraShakeF16EnumCamShakeModef(gpCameraShake, 0x27, 1.0f);
-            startSoundActor__Q214MSoundSESystem8MSoundSEFUlPC3VecUlPP8JAISoundUlUc(
-                6158, this->mTranslation, 0, 0, 0, 4);
-            start__9RumbleMgrFiP3Vec(gpPad1RumbleMgr, 8, this->mTranslation);
-            stamp__17TPollutionManagerFUsffff(gpPollution, 1, this->mTranslation.x,
-                                              this->mFloorBelow->mMaxHeight, this->mTranslation.z,
-                                              mStampRadius);
-
-            if (this->mGoopLevel > (0xFF - 0x30)) {
-                this->mGoopLevel = 0xFF;
-            } else {
-                this->mGoopLevel += 0x20;
-            }
-
-            this->setPoundingStatus(TDarkZhine::SHOCKING);
-            this->setStatusTimer(this->shockingTimerMax());
-        }
-    } else if (this->poundingStatus() == TDarkZhine::SHOCKING) {
-        if (!(player->mState & static_cast<u32>(TMario::State::AIRBORN)) &&
-            this->isTargetInRangeToHome(this->mTranslation, this->shockRadius()) &&
-            (player->mState != static_cast<u32>(TMario::State::KNCK_LND) &&
-             player->mState != 0x4045C)) {
-            decHP__6TMarioFi(player, 1);
-            changePlayerStatus__6TMarioFUlUlb(player, static_cast<u32>(TMario::State::KNCK_LND), 0,
-                                              0);
-        }
-
-        if (this->statusTimer() <= 0) {
-            this->setPoundingStatus(TDarkZhine::GROUNDROLL);
-            this->setStatusTimer(this->rollingTimerMax());
-        }
-    } else if (this->poundingStatus() == TDarkZhine::GROUNDROLL) {
-        if (this->mTranslation.y - this->mFloorBelow->mMaxHeight > 100) {
-            this->setPoundingStatus(TDarkZhine::RISING);
-            this->mGravity *= (-1 * this->risingRate() * this->speedMultiplier());
-        } else if (this->rollingTimer() > 0) {
-            this->advanceRollMovement(gpPollution);
-            if (!(this->statusTimer() % 15)) {
-                if (this->mGoopLevel == 0xFF) {
-                    this->mGoopLevel = 0xFF;
-                } else {
-                    this->mGoopLevel += 1;
-                }
-            }
-        } else {
-            this->setPoundingStatus(TDarkZhine::RISING);
-            this->mTranslation.y += 1;
-            this->mGravity *= (-1 * this->risingRate() * this->speedMultiplier());
-        }
-    } else if (this->poundingStatus() == TDarkZhine::RISING) {
-        f32 averageFloorHeight =
-            (this->mFloorBelow->mMaxHeight + this->mFloorBelow->mMinHeight) / 2;
-        this->mSpeed.x = 0.0f;
-        this->mSpeed.z = 0.0f;
-
-        if (this->mTranslation.y - averageFloorHeight > 500.0f &&
-            this->mTranslation.y > this->boundingPoint().y + 100.0f) {
-
-            this->mGravity *= (-1 * this->risingRate() * this->speedMultiplier());
-            this->setPoundingStatus(TDarkZhine::INACTIVE);
-        }
-    } else {
-        this->setPoundingStatus(TDarkZhine::INACTIVE);
-    }
-    this->setStatusTimer(this->statusTimer() - 1);
-    return this->poundingStatus();
+    // if (this->poundingStatus() == TDarkZhine::DROPPING) {
+    //     this->mGravity = 1.0f;
+    //     this->mSpeed.x = 0.0f;
+    //     this->mSpeed.z = 0.0f;
+    //     this->mSpeed.y *= this->mSpeedMultiplier;
+    //
+    //     if (this->mTranslation.y - this->mFloorBelow->mMaxHeight < 10.0f &&
+    //         this->mTranslation.y >= this->mFloorBelow->mMinHeight) {
+    //
+    //         startShake__12TCameraShakeF16EnumCamShakeModef(gpCameraShake, 0x27, 1.0f);
+    //         startSoundActor__Q214MSoundSESystem8MSoundSEFUlPC3VecUlPP8JAISoundUlUc(
+    //             6158, this->mTranslation, 0, 0, 0, 4);
+    //         start__9RumbleMgrFiP3Vec(gpPad1RumbleMgr, 8, this->mTranslation);
+    //         stamp__17TPollutionManagerFUsffff(gpPollution, 1, this->mTranslation.x,
+    //                                           this->mFloorBelow->mMaxHeight, this->mTranslation.z,
+    //                                           mStampRadius);
+    //
+    //         if (this->mGoopLevel > (0xFF - 0x30)) {
+    //             this->mGoopLevel = 0xFF;
+    //         } else {
+    //             this->mGoopLevel += 0x20;
+    //         }
+    //
+    //         this->setPoundingStatus(TDarkZhine::SHOCKING);
+    //         this->setStatusTimer(this->shockingTimerMax());
+    //     }
+    // } else if (this->poundingStatus() == TDarkZhine::SHOCKING) {
+    //     if (!(player->mState & static_cast<u32>(TMario::State::AIRBORN)) &&
+    //         this->isTargetInRangeToHome(this->mTranslation, this->shockRadius()) &&
+    //         (player->mState != static_cast<u32>(TMario::State::KNCK_LND) &&
+    //          player->mState != 0x4045C)) {
+    //         decHP__6TMarioFi(player, 1);
+    //         changePlayerStatus__6TMarioFUlUlb(player, static_cast<u32>(TMario::State::KNCK_LND), 0,
+    //                                           0);
+    //     }
+    //
+    //     if (this->statusTimer() <= 0) {
+    //         this->setPoundingStatus(TDarkZhine::GROUNDROLL);
+    //         this->setStatusTimer(this->rollingTimerMax());
+    //     }
+    // } else if (this->poundingStatus() == TDarkZhine::GROUNDROLL) {
+    //     if (this->mTranslation.y - this->mFloorBelow->mMaxHeight > 100) {
+    //         this->setPoundingStatus(TDarkZhine::RISING);
+    //         this->mGravity *= (-1 * this->risingRate() * this->speedMultiplier());
+    //     } else if (this->rollingTimer() > 0) {
+    //         this->advanceRollMovement(gpPollution);
+    //         if (!(this->statusTimer() % 15)) {
+    //             if (this->mGoopLevel == 0xFF) {
+    //                 this->mGoopLevel = 0xFF;
+    //             } else {
+    //                 this->mGoopLevel += 1;
+    //             }
+    //         }
+    //     } else {
+    //         this->setPoundingStatus(TDarkZhine::RISING);
+    //         this->mTranslation.y += 1;
+    //         this->mGravity *= (-1 * this->risingRate() * this->speedMultiplier());
+    //     }
+    // } else if (this->poundingStatus() == TDarkZhine::RISING) {
+    //     f32 averageFloorHeight =
+    //         (this->mFloorBelow->mMaxHeight + this->mFloorBelow->mMinHeight) / 2;
+    //     this->mSpeed.x = 0.0f;
+    //     this->mSpeed.z = 0.0f;
+    //
+    //     if (this->mTranslation.y - averageFloorHeight > 500.0f &&
+    //         this->mTranslation.y > this->boundingPoint().y + 100.0f) {
+    //
+    //         this->mGravity *= (-1 * this->risingRate() * this->speedMultiplier());
+    //         this->setPoundingStatus(TDarkZhine::INACTIVE);
+    //     }
+    // } else {
+    //     this->setPoundingStatus(TDarkZhine::INACTIVE);
+    // }
+    // this->setStatusTimer(this->statusTimer() - 1);
+    // return this->poundingStatus();
+    return INACTIVE;
 }
 
 void TDarkZhine::advanceGoopDroplet() {
@@ -145,141 +151,23 @@ void TDarkZhine::advanceGoopDroplet() {
     }
 }
 
-void TDarkZhine::perform_(TMario *player) {
-    f32 averageFloorHeight = (this->mFloorBelow->mMaxHeight + this->mFloorBelow->mMinHeight) / 2;
-
-    if (!this->isPounding()) {
-        if (this->isGooping())
-            this->advanceGoopDroplet();
-
-        if (this->mTranslation.y - averageFloorHeight < 700.0f) {
-            if (this->mTranslation.y - this->mFloorBelow->mMaxHeight < 10.0f) {
-                this->mTranslation.y += 1.0f;
-            }
-            this->mSpeed.y = 1.0f * this->speedMultiplier();
-        } else if (this->mTranslation.y - averageFloorHeight > 700.0f) {
-            if (this->mTranslation.y < this->boundingPoint().y - this->boundingRadius()) {
-                this->mTranslation.y = this->boundingPoint().y - this->boundingRadius();
-                this->mSpeed.x       = 0.0f;
-            } else {
-                this->mSpeed.y = -1.0f * this->speedMultiplier();
-            }
-        }
-    }
-
-    if (isTargetInRangeToHome(this->mTranslation, this->shockRadius()) && !this->isPounding()) {
-        this->setIsFollowMario(true);
-        this->setPoundingTimer(this->poundingTimer() - 1);
-        this->setGoopingTimer(this->goopingTimer() - 1);
-        this->mGravity = 0;
-    } else {
-        this->setIsFollowMario(false);
-    }
-
-    if (this->poundingStatus() == TDarkZhine::DROPPING ||
-        this->poundingStatus() == TDarkZhine::INACTIVE)
-        moveObject__10TLiveActorFv(this);
-
-    if (this->isFollowMario() == true) {
-        this->setPoundingTimer(this->poundingTimer() - 1);
-        this->setGoopingTimer(this->goopingTimer() - 1);
-
-        if (this->poundingTimer() <= 0 &&
-            this->mTranslation.y - averageFloorHeight < this->maxPoundingHeight()) {
-            this->setIsPounding(true);
-            this->setPoundingStatus(TDarkZhine::DROPPING);
-            this->setPoundingTimer(this->poundingTimerMax());
-        }
-
-        if (this->goopingTimer() <= 0) {
-            this->setIsGooping(true);
-            this->setGoopingTimer(this->goopingTimerMax());
-        }
-
-        this->mGroundSpeed += (this->accelerationRate() * this->mSpeedMultiplier);
-        if (this->mGroundSpeed > this->mMaxSpeed)
-            this->mGroundSpeed = this->mMaxSpeed;
-
-        this->mSpeed.x = this->mGroundSpeed * sinf(angleToRadians(this->mRotation.y));
-        this->mSpeed.z = this->mGroundSpeed * cosf(angleToRadians(this->mRotation.y));
-    } else if (isTargetInRangeToHome(this->mTranslation, this->shockRadius()) &&
-               this->poundingStatus() != TDarkZhine::GROUNDROLL) {
-        this->mGroundSpeed -= (this->accelerationRate() * this->mSpeedMultiplier);
-        if (this->mGroundSpeed < 0.0f)
-            this->mGroundSpeed = 0.0f;
-
-        this->mSpeed.x = this->mGroundSpeed * sinf(angleToRadians(this->mRotation.y));
-        this->mSpeed.z = this->mGroundSpeed * cosf(angleToRadians(this->mRotation.y));
-    }
-
-    if (isTargetInRangeToHome(this->mTranslation, this->shockRadius())) {
-        if (this->isPounding() &&
-            this->advanceDropAttack(gpPollution, player) == TDarkZhine::INACTIVE)
-            this->setIsPounding(false);
-        else
-            this->mGravity = 0.0f;
-    } else {
-        this->setIsPounding(false);
-        this->setPoundingStatus(TDarkZhine::INACTIVE);
-        this->mTranslation = this->boundingPoint();
-    }
+void TDarkZhine::perform(u32 flags, JDrama::TGraphics *graphics) {
+    TSpineEnemy::perform(flags, graphics);
+    // mPollutionDrop->perform(flags,graphics);
 }
 
 // 0x80079B44
-/*
-void TDarkZhine::init()
-{
-    ZhineFile *gessoZhineFile = (ZhineFile
-*)getResource__10JKRArchiveFPCc(getVolume__13JKRFileLoaderFPCc("scene"),
-"/bgeso/zhine.data"); this->mGoopLevel = 0xE6;
-
-    if (gessoZhineFile)
-    {
-
-        u32 *newVTable = (u32 *)SME::Util::Memory::malloc(0x120, 32);
-        memcpy(newVTable, this->vTable, 0x114);
-        newVTable[0xD0 / 4] = (u32)gessoZhineFile +
-(u32)gessoZhineFile->mCodeBlock[0]; //Replace move vtable entry
-        *(u32 *)0x803B2A94 = (u32)gessoZhineFile +
-(u32)gessoZhineFile->mCodeBlock[1];  //Replace eye damage vtable entry
-
-        this->setBoundingPoint(gessoZhineFile->ZhineBinData.mBoundingPoint);
-        this->setBoundingRadius(gessoZhineFile->ZhineBinData.mBoundingAreaRadius);
-        this->setShockRadius(gessoZhineFile->ZhineBinData.mShockRadius);
-        this->setStampRadius(gessoZhineFile->ZhineBinData.mStampRadius);
-        this->setMarioDistance(gessoZhineFile->ZhineBinData.mDistanceFromMario);
-        this->setSpeedMultiplier(gessoZhineFile->ZhineBinData.mSpeedMultiplier);
-        this->setAccelerationRate(gessoZhineFile->ZhineBinData.mAccelerationRate);
-        this->setMaxSpeed(gessoZhineFile->ZhineBinData.mMaxSpeed);
-        this->setFramesToCleanOnce(gessoZhineFile->ZhineBinData.mFramesToCleanOnce);
-        this->setPoundingTimer(gessoZhineFile->ZhineBinData.mPoundingTimerMax);
-        this->setShockingTimer(gessoZhineFile->ZhineBinData.mShockingTimerMax);
-        this->setRollingTimer(gessoZhineFile->ZhineBinData.mRollingTimerMax);
-        this->setGoopingTimer(gessoZhineFile->ZhineBinData.mGoopingTimerMax);
-        this->setPoundingTimerMax(gessoZhineFile->ZhineBinData.mPoundingTimerMax);
-        this->setShockingTimerMax(gessoZhineFile->ZhineBinData.mShockingTimerMax);
-        this->setRollingTimerMax(gessoZhineFile->ZhineBinData.mRollingTimerMax);
-        this->setGoopingTimerMax(gessoZhineFile->ZhineBinData.mGoopingTimerMax);
-        this->setRisingRate(gessoZhineFile->ZhineBinData.mRisingRate);
-        this->setMaxPoundingHeight(gessoZhineFile->ZhineBinData.mMaxPoundingHeight);
-
-        this->vTable = newVTable;
-        *(f32 *)0x8041014C = gessoZhineFile->ZhineBinData.mBoundingAreaRadius;
-        *(f32 *)0x80410150 *= gessoZhineFile->ZhineBinData.mSpeedMultiplier;
-
-        this->mGoopLevel = gessoZhineFile->ZhineBinData.mGoopLevel;
-        this->setIsDarkZhine(true);
-        OSReport("BossGesso set to Zhine mode");
-    }
-    else
-    {
-        this->setIsDarkZhine(false);
-        OSReport("BossGesso set to Normal mode");
-    }
-    initAnmSound__10TLiveActorFv(this);
+void TDarkZhine::init(TLiveManager * manager) {
+    // OSReport("%s\n", manager->mObjAry[0]->mKeyName);
+    mLiveManager = manager;
+    mLiveManager->manageActor(this);
+    mActorKeeper = new TMActorKeeper(mLiveManager, 0xf);
+    mActorData   = mActorKeeper->createMActor("bosspaku_model.bmd", 0xf);
+    initAnmSound();
     return;
 }
 
+/*
 TDarkZhine *TDarkZhine::destroy()
 {
     //use r6 and up
@@ -291,16 +179,16 @@ TDarkZhine *TDarkZhine::destroy()
 */
 
 // 0x80005004
-u32 TDarkZhine::cleanFromSpineBase(u32 *gpNerveBGEye, TSpineBase<TLiveActor> *gpSpineBase) {
-    TDarkZhine *gpDarkZhine = (TDarkZhine *)gpSpineBase->mTarget;
-    if (gpDarkZhine->cleaningTimer() < gpDarkZhine->framesToCleanOnce()) {
-        gpDarkZhine->setCleaningTimer(gpDarkZhine->cleaningTimer() + 1);
-        return 0;
-    } else {
-        gpDarkZhine->setCleaningTimer(0);
-        return execute__17TNerveBGEyeDamageCFP24TSpineBase_1(gpNerveBGEye, gpSpineBase);
-    }
-}
+// u32 TDarkZhine::cleanFromSpineBase(u32 *gpNerveBGEye, TSpineBase<TLiveActor> *gpSpineBase) {
+//     TDarkZhine *gpDarkZhine = (TDarkZhine *)gpSpineBase->mTarget;
+//     if (gpDarkZhine->cleaningTimer() < gpDarkZhine->framesToCleanOnce()) {
+//         gpDarkZhine->setCleaningTimer(gpDarkZhine->cleaningTimer() + 1);
+//         return 0;
+//     } else {
+//         gpDarkZhine->setCleaningTimer(0);
+//         return execute__17TNerveBGEyeDamageCFP24TSpineBase_1(gpNerveBGEye, gpSpineBase);
+//     }
+// }
 
 // 0x800764CC
 /*
@@ -319,10 +207,24 @@ kmCall(0x800764CC, &canUtilizeTentacles);
 */
 
 // 0x80005000
-void control_(TDarkZhine *thisZhine) { thisZhine->perform_(gpMarioAddress); }
+// void control_(TDarkZhine *thisZhine) { thisZhine->perform_(gpMarioAddress); }
 
 // 0x800FFFAC = remove tentacles BLR, 0x800764CC perform tentacles?
 
 // 0x802A9D54 = TBossGesso Class Size
 
-#endif
+TDarkZhineManager::TDarkZhineManager(const char *name) : TEnemyManager(name) {}
+
+void TDarkZhineManager::load(JSUMemoryInputStream &inputStream) {
+    TEnemyManager::load(inputStream);
+}
+
+void TDarkZhineManager::createModelData() {
+    createModelDataArrayBase((TModelDataLoadEntry *)(0x8037befc), "/scene/darkzhine");
+}
+
+void TDarkZhineManager::createAnmData() {
+    MActorAnmData* data = new MActorAnmData();
+    data->init("/scene/darkzhine",nullptr);
+    this->_20 = (u32)data;
+}

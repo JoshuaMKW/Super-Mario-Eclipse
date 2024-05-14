@@ -18,6 +18,7 @@
 #include "object/tornado_obj.hxx"
 #include "object/water_balloon.hxx"
 #include "p_settings.hxx"
+#include "enemy/dark_zhine.hxx"
 
 // Application
 extern bool directCharacterSelectMenu(TApplication *app);
@@ -141,6 +142,9 @@ static void initModule() {
 
     Objects::registerObjectAsMisc("FireyPetey", TFireyPetey::instantiate);
     Objects::registerObjectAsMisc("FireyPeteyManager", TFireyPeteyManager::instantiate);
+
+    Objects::registerObjectAsMisc("DarkZhine", TDarkZhine::instantiate);
+    Objects::registerObjectAsMisc("DarkZhineManager", TDarkZhineManager::instantiate);
 }
 
 // Definition block

@@ -21,6 +21,25 @@ VTABLE
 .long 0x80337220, 0x80337228, 0x8033722C, 0x80337230
 .long 0x*/
 
+static const TModelDataLoadEntry anim_data[] = {
+    {.mModelPath = "bosspaku_model.bmd", .mModelFlags = 0x0, ._0C = 0x0}
+};
+
+class TNerveZhineSleep : public TNerveBase<TLiveActor> {
+public:
+    TNerveZhineSleep(){};
+    virtual ~TNerveZhineSleep() = default;
+    virtual bool execute(TSpineBase<TLiveActor> *mSpineBase) const;
+};
+
+class TNerveZhineWake : public TNerveBase<TLiveActor> {
+public:
+    TNerveZhineWake(){};
+    virtual ~TNerveZhineWake() = default;
+    virtual bool execute(TSpineBase<TLiveActor> *) const;
+};
+
+
 struct TZhineParams : public TParams {
     TZhineParams(const char *prm)
         : TParams(), SMS_TPARAM_INIT(mBoundingAreaRadius, 1000.0f),

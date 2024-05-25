@@ -232,6 +232,11 @@ bool TNerveFPSleep::execute(TSpineBase<TLiveActor> *spine) const {
     if (spine->mNerveTimer == 0) {
         reinterpret_cast<TBossPakkun *>(spine->mTarget)->changeBck(0x17);
     }
+    if (SMS_IsMarioTouchGround4cm__Fv(gpMarioAddress) &&
+        PSVECDistance(*gpMarioPos, spine->mTarget->mTranslation) < 3000.0f) {
+        spine->pushNerve(&breakSleep);
+        return true;
+    }
     return false;
 }
 

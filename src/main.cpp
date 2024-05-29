@@ -33,7 +33,7 @@ extern void adjustYoshiTounge(TMario *player, bool isMario);
 
 // Stage
 extern void initializeStageInfo(TApplication *app);
-void resetForExStage(TMarDirector *director);
+extern void resetForExStage(TMarDirector *director);
 
 // Player
 extern void initializePoundJumpAnimation(TApplication *app);
@@ -144,7 +144,7 @@ static void initModule() {
 }
 
 // Definition block
-KURIBO_MODULE_BEGIN("Super Mario Eclipse", "JoshuaMK", "v1.0") {
+KURIBO_MODULE_BEGIN("Super Mario Eclipse", "JoshuaMK", SUPER_MARIO_ECLIPSE_VERSION) {
     // Set the load and unload callbacks to our registration functions
     KURIBO_EXECUTE_ON_LOAD { initModule(); }
 }

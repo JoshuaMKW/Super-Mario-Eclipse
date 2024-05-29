@@ -46,10 +46,6 @@ static bool canMountYoshi() {
 
     auto *params = Player::getData(player)->getParams();
 
-    // Prevent very large players from mounting
-    if (params->mScaleMultiplier.get() * stage_config->mPlayerSizeMultiplier.get() > 1.5f)
-        return false;
-
     if (player->mState & static_cast<u32>(TMario::STATE_WATERBORN))
         return params->mCanRideYoshi.get();
     else

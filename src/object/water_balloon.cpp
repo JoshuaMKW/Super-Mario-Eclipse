@@ -59,22 +59,6 @@ void TWaterBalloon::perform(u32 flags, JDrama::TGraphics *graphics) {
     }
 }
 
-bool TWaterBalloon::receiveMessage(THitActor *actor, u32 message) {
-    return TMapObjBall::receiveMessage(actor, message);
-}
-
-void TWaterBalloon::control() {
-    TMapObjBall::control();
-    /*if (mForwardSpeed > MaxSpeed) {
-    TVec3f dir;
-    getReflectionDir(*mFloorBelow->getNormal(), dir);
-
-    blast(dir);
-    }*/
-}
-
-void TWaterBalloon::kill() { TMapObjBall::kill(); }
-
 void TWaterBalloon::appear() {
     TMapObjBall::appear();
     mIsPopped = false;
@@ -115,10 +99,7 @@ void TWaterBalloon::touchActor(THitActor *actor) {
     if (mForwardSpeed >= MaxSpeed || mSpeed.y < -10.0f) {
         blast({0.0f, 1.0f, 0.0f});
         return;
-    } /* else if (PSVECMag(player->mSpeed - mSpeed) >= MaxSpeed) {
-         blast({0.0f, 1.0f, 0.0f});
-         return;
-     }*/
+    }
 
     const f32 pangle = static_cast<f32>(player->mAngle.y / 182);
     const f32 speed  = player->mForwardSpeed + 5.0f;
@@ -132,26 +113,26 @@ void TWaterBalloon::touchActor(THitActor *actor) {
     }
 
     if (gpMSound->gateCheck(0x1807)) {
-        MSoundSESystem::MSoundSE::startSoundActor(0x1807, reinterpret_cast<Vec *>(&mTranslation), 0,
+        MSoundSE::startSoundActor(0x1807, reinterpret_cast<Vec *>(&mTranslation), 0,
                                                   nullptr, 0, 4);
     }
 }
 
 void TWaterBalloon::touchGround(TVec3f *pos) {
-    if (mFloorBelow->mType == 2048) {
-        TMapObjBall::touchGround(pos);
-        return;
-    }
-
-    if (!(mForwardSpeed >= MaxSpeed || mSpeed.y < -10.0f)) {
-        TMapObjBall::touchGround(pos);
-        return;
-    }
-
     TVec3f dir;
     getReflectionDir(*mFloorBelow->getNormal(), dir);
 
-    blast(dir);
+    if (mFloorBelow->mType == 2048) {
+        blast(dir);
+        return;
+    }
+
+    if ((mForwardSpeed >= MaxSpeed || mSpeed.y < -10.0f)) {
+        blast(dir);
+        return;
+    }
+
+    TMapObjBall::touchGround(pos);
 }
 
 void TWaterBalloon::touchWall(TVec3f *pos, TBGWallCheckRecord *record) {
@@ -218,7 +199,7 @@ void TWaterBalloon::blast(TVec3f blastSpd) {
     gpModelWaterManager->emitRequest(emitInfo);
 
     if (gpMSound->gateCheck(0x28B8)) {
-        MSoundSESystem::MSoundSE::startSoundActor(0x28B8, reinterpret_cast<Vec *>(&mTranslation), 0,
+        MSoundSE::startSoundActor(0x28B8, reinterpret_cast<Vec *>(&mTranslation), 0,
                                                   nullptr, 0, 4);
     }
 
@@ -238,10 +219,6 @@ static hit_data waterBalloon_hit_data{.mAttackRadius  = 40.0f,
                                       .mAttackHeight  = 40.0f,
                                       .mReceiveRadius = 50.0f,
                                       .mReceiveHeight = 50.0f};
-// static hit_data waterBalloon_hit_data{.mAttackRadius = 150.0f,
-//                                       .mAttackHeight = 60.0f,
-//                                       .mReceiveRadius = 60.0f,
-//                                       .mReceiveHeight = 90.0f};
 
 static obj_hit_info waterBalloon_collision_data{
     ._00 = 1, .mType = 0xDC000000, ._08 = 0, .mHitData = &waterBalloon_hit_data};

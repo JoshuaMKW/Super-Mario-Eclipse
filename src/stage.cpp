@@ -39,14 +39,16 @@ BETTER_SMS_FOR_CALLBACK void initializeStageInfo(TApplication *app) {
 
             {
                 auto exinfo            = new BetterSMS::Stage::ExAreaInfo;
-                exinfo->mParentStageID = 0x3D;
+                exinfo->mShineStageID  = 0x3D;
+                exinfo->mNormalStageID = 0x4D;
                 exinfo->mShineID       = 0xA0;
                 BetterSMS::Stage::registerExStageInfo(0xA0, exinfo);
             }
 
             {
                 auto exinfo            = new BetterSMS::Stage::ExAreaInfo;
-                exinfo->mParentStageID = 0x3D;
+                exinfo->mShineStageID  = 0x3D;
+                exinfo->mNormalStageID = 0x4D;
                 exinfo->mShineID       = 0xA1;
                 BetterSMS::Stage::registerExStageInfo(0xA1, exinfo);
             }
@@ -84,14 +86,16 @@ BETTER_SMS_FOR_CALLBACK void initializeStageInfo(TApplication *app) {
 
             {
                 auto exinfo            = new BetterSMS::Stage::ExAreaInfo;
-                exinfo->mParentStageID = 0x3E;
+                exinfo->mShineStageID  = 0x3E;
+                exinfo->mNormalStageID = 0x4E;
                 exinfo->mShineID       = 0xA2;
                 BetterSMS::Stage::registerExStageInfo(0xA2, exinfo);
             }
 
             {
                 auto exinfo            = new BetterSMS::Stage::ExAreaInfo;
-                exinfo->mParentStageID = 0x3E;
+                exinfo->mShineStageID  = 0x3E;
+                exinfo->mNormalStageID = 0x4E;
                 exinfo->mShineID       = 0xA3;
                 BetterSMS::Stage::registerExStageInfo(0xA3, exinfo);
             }
@@ -129,14 +133,16 @@ BETTER_SMS_FOR_CALLBACK void initializeStageInfo(TApplication *app) {
 
             {
                 auto exinfo            = new BetterSMS::Stage::ExAreaInfo;
-                exinfo->mParentStageID = 0x3F;
+                exinfo->mShineStageID  = 0x3F;
+                exinfo->mNormalStageID = 0x4F;
                 exinfo->mShineID       = 0xA4;
                 BetterSMS::Stage::registerExStageInfo(0xA4, exinfo);
             }
 
             {
                 auto exinfo            = new BetterSMS::Stage::ExAreaInfo;
-                exinfo->mParentStageID = 0x3E;
+                exinfo->mShineStageID  = 0x3F;
+                exinfo->mNormalStageID = 0x4F;
                 exinfo->mShineID       = 0xA5;
                 BetterSMS::Stage::registerExStageInfo(0xA5, exinfo);
             }
@@ -174,14 +180,16 @@ BETTER_SMS_FOR_CALLBACK void initializeStageInfo(TApplication *app) {
 
             {
                 auto exinfo            = new BetterSMS::Stage::ExAreaInfo;
-                exinfo->mParentStageID = 0x40;
+                exinfo->mShineStageID  = 0x40;
+                exinfo->mNormalStageID = 0x50;
                 exinfo->mShineID       = 0xA6;
                 BetterSMS::Stage::registerExStageInfo(0xA7, exinfo);
             }
 
             {
                 auto exinfo            = new BetterSMS::Stage::ExAreaInfo;
-                exinfo->mParentStageID = 0x40;
+                exinfo->mShineStageID  = 0x40;
+                exinfo->mNormalStageID = 0x50;
                 exinfo->mShineID       = 0xA8;
                 BetterSMS::Stage::registerExStageInfo(0xA8, exinfo);
             }

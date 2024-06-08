@@ -39,6 +39,33 @@ public:
     virtual bool execute(TSpineBase<TLiveActor> *) const;
 };
 
+class TNerveZhineRise : public TNerveBase<TLiveActor> {
+public:
+    TNerveZhineRise(){};
+    virtual ~TNerveZhineRise() = default;
+    virtual bool execute(TSpineBase<TLiveActor> *) const;
+};
+
+class TNerveZhineFly : public TNerveBase<TLiveActor> {
+public:
+    TNerveZhineFly(){};
+    virtual ~TNerveZhineFly() = default;
+    virtual bool execute(TSpineBase<TLiveActor> *) const;
+};
+
+class TNerveZhinePound : public TNerveBase<TLiveActor> {
+public:
+    TNerveZhinePound(){};
+    virtual ~TNerveZhinePound() = default;
+    virtual bool execute(TSpineBase<TLiveActor> *) const;
+};
+
+class TNerveZhineRoll : public TNerveBase<TLiveActor> {
+public:
+    TNerveZhineRoll(){};
+    virtual ~TNerveZhineRoll() = default;
+    virtual bool execute(TSpineBase<TLiveActor> *) const;
+};
 
 struct TZhineParams : public TParams {
     TZhineParams(const char *prm)
@@ -52,8 +79,6 @@ struct TZhineParams : public TParams {
           SMS_TPARAM_INIT(mRisingRate, 1.4f), SMS_TPARAM_INIT(mMaxPoundingHeight, 800.0f) {
         load(prm);
     }
-
-#undef CONSTRUCT_PARAM
 
     TParamRT<f32> mBoundingAreaRadius;
     TParamRT<f32> mDistanceFromMario;

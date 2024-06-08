@@ -1,6 +1,7 @@
 #include "raw_fn.hxx"
+#include "BetterSMS/libs/constmath.hxx"
+#include "Camera/CameraShake.hxx"
 #include "Enemy/BossPakkun.hxx"
-#include "JParticle/JPAResourceManager.hxx"
 
 #include <BetterSMS/module.hxx>
 
@@ -18,10 +19,10 @@ VTABLE
 
 static TNerveZhineSleep s_zhine_nerve_sleep;
 static TNerveZhineWake s_zhine_nerve_wake;
-// static TNerveZhineFly s_zhine_nerve_fly;
-// static TNerveZhinePound s_zhine_nerve_pound;
-// static TNerveZhineRoll s_zhine_nerve_roll;
-// static TNerveZhineRise s_zhine_nerve_rise;
+static TNerveZhineFly s_zhine_nerve_fly;
+static TNerveZhinePound s_zhine_nerve_pound;
+static TNerveZhineRoll s_zhine_nerve_roll;
+static TNerveZhineRise s_zhine_nerve_rise;
 
 
 TDarkZhine::TDarkZhine(const char *name)
@@ -33,10 +34,8 @@ TDarkZhine::~TDarkZhine() {
 }
 
 f32 TDarkZhine::getAngleToTarget() const {
-    TVec3f zhineCoordinates = this->mTranslation;
-
-    return atan2f(this->mTarget->mTranslation.x - zhineCoordinates.x,
-                  this->mTarget->mTranslation.z - zhineCoordinates.z);
+    
+    return atan2f(gpMarioPos->x - mTranslation.x, gpMarioPos->z - mTranslation.z);
 }
 
 bool TDarkZhine::isTargetInRangeToHome(f32 r) const {
@@ -106,15 +105,84 @@ bool TNerveZhineWake::execute(TSpineBase<TLiveActor> *spine) const {
         gpMarioAddress->changePlayerStatus(TMario::STATE_KNCK_GND, 0, false);
     }
 
-    // if (zhine->mActorData->isCurAnmAlreadyEnd(MActor::BCK)) {
-    //     spine->pushNerve(&s_zhine_nerve_rise);
-    //     return true;
-    // }
+    if (zhine->mActorData->isCurAnmAlreadyEnd(MActor::BCK)) {
+        spine->pushNerve(&s_zhine_nerve_rise);
+        return true;
+    }
 
     // zhine->setBckAnm(ZHINE_ANM_IDX_WAKE);
     return false;
 }
 
+// 0x80005000
+// void control_(TDarkZhine *thisZhine) { thisZhine->perform_(gpMarioAddress); }
+bool TNerveZhineRise::execute(TSpineBase<TLiveActor> *spine) const {
+    TDarkZhine *zhine = reinterpret_cast<TDarkZhine *>(spine->mTarget);
+
+    if (spine->mNerveTimer == 0) {
+        // TODO: Use asFlags
+        zhine->mStateFlags.asU32 = zhine->mStateFlags.asU32 | 0x10;
+        zhine->mStateFlags.asU32 = zhine->mStateFlags.asU32 | 0x80;
+        // target->changeBck(0xD);
+    }
+
+    zhine->mTranslation.y += 5.0f;
+    if (3800.0f < zhine->mTranslation.y) {
+        // zhine->mTranslation.y = zhine->_10C;
+        if (zhine->mGraphTracer) {
+            spine->pushNerve(&s_zhine_nerve_fly);
+        }
+        return true;
+    }
+    return false;
+}
+
+bool TNerveZhineFly::execute(TSpineBase<TLiveActor> *spine) const {
+    TDarkZhine *zhine = reinterpret_cast<TDarkZhine *>(spine->mTarget);
+
+    if ((spine->mNerveTimer % 50) == 25) {
+        // zhine->launchPolDrop();
+        OSReport("Attack\n");
+    }
+
+    if (spine->mNerveTimer == 300) {
+        spine->pushNerve(&s_zhine_nerve_pound);
+        return true;
+    }
+
+    // zhine->setBckAnm(ZHINE_ANM_IDX_FLY);
+    return false;
+}
+
+bool TNerveZhinePound::execute(TSpineBase<TLiveActor> *spine) const {
+    TDarkZhine *zhine = reinterpret_cast<TDarkZhine *>(spine->mTarget);
+    if (spine->mNerveTimer == 0) {
+        zhine->mStateFlags.asU32 = zhine->mStateFlags.asU32 & 0xffffffef;
+        zhine->mStateFlags.asU32 = zhine->mStateFlags.asU32 | 0x80;
+    }
+
+    if ((zhine->mStateFlags.asU32 & 0x80U) == 0) {
+        // zhine->changeBck(0x8);
+        gpCameraShake->startShake(UnknownShakeF, 1.0f);
+        // zhine->rumblePad(2, zhine->mTranslation);
+        spine->pushNerve(&s_zhine_nerve_roll);
+        return true;
+    }
+    return false;
+}
+
+bool TNerveZhineRoll::execute(TSpineBase<TLiveActor> *spine) const {
+    TDarkZhine *zhine = reinterpret_cast<TDarkZhine *>(spine->mTarget);
+
+
+    zhine->mRotationalVelocity.y = 0.2;
+    // zhine->calcTurnSpeedToReach()
+
+
+    // zhine->mSpeed.x = 10.0f * sinf(zhine->mRotation.y);
+    // zhine->mSpeed.z = 10.0f * cosf(zhine->mRotation.y);
+    return false;
+}
 
 TDarkZhineManager::TDarkZhineManager(const char *name)
     : TEnemyManager(name) {

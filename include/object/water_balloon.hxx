@@ -16,9 +16,6 @@ public:
 
     virtual void init(TLiveManager *) override;
     virtual void perform(u32, JDrama::TGraphics *) override;
-    virtual bool receiveMessage(THitActor *, u32) override;
-    virtual void control() override;
-    virtual void kill() override;
     virtual void appear() override;
     virtual void touchActor(THitActor *actor) override;
     virtual s32 getLivingTime() const override;

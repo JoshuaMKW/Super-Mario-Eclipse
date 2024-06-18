@@ -29,11 +29,11 @@ extern void manageShineDarkness(TMarDirector *director);
 
 // Yoshi
 extern void forceYoshiUnlock(TMarDirector *director);
-extern void adjustYoshiTounge(TMario *player, bool isMario);
+extern void adjustYoshiTongue(TMario *player, bool isMario);
 
 // Stage
 extern void initializeStageInfo(TApplication *app);
-void resetForExStage(TMarDirector *director);
+extern void resetForExStage(TMarDirector *director);
 
 // Player
 extern void initializePoundJumpAnimation(TApplication *app);
@@ -128,7 +128,7 @@ static void initModule() {
     Player::addUpdateCallback(processColdState);
     // Player::addUpdateCallback(checkTutorialCollisionRespawn);
     Player::addUpdateCallback(createWaterBalloonAndThrow);
-    Player::addUpdateCallback(adjustYoshiTounge);
+    Player::addUpdateCallback(adjustYoshiTongue);
     Player::addUpdateCallback(blazePlayer);
     Player::registerStateMachine(PlayerLaunchStarWait, holdPlayerState);
     Player::registerStateMachine(PlayerLaunchStarLaunch, launchPlayerState);
@@ -144,7 +144,7 @@ static void initModule() {
 }
 
 // Definition block
-KURIBO_MODULE_BEGIN("Super Mario Eclipse", "JoshuaMK", "v1.0") {
+KURIBO_MODULE_BEGIN("Super Mario Eclipse", "JoshuaMK", SUPER_MARIO_ECLIPSE_VERSION) {
     // Set the load and unload callbacks to our registration functions
     KURIBO_EXECUTE_ON_LOAD { initModule(); }
 }

@@ -29,7 +29,7 @@ extern void manageShineDarkness(TMarDirector *director);
 
 // Yoshi
 extern void forceYoshiUnlock(TMarDirector *director);
-extern void adjustYoshiTounge(TMario *player, bool isMario);
+extern void adjustYoshiTongue(TMario *player, bool isMario);
 
 // Stage
 extern void initializeStageInfo(TApplication *app);
@@ -128,7 +128,7 @@ static void initModule() {
     Player::addUpdateCallback(processColdState);
     // Player::addUpdateCallback(checkTutorialCollisionRespawn);
     Player::addUpdateCallback(createWaterBalloonAndThrow);
-    Player::addUpdateCallback(adjustYoshiTounge);
+    Player::addUpdateCallback(adjustYoshiTongue);
     Player::addUpdateCallback(blazePlayer);
     Player::registerStateMachine(PlayerLaunchStarWait, holdPlayerState);
     Player::registerStateMachine(PlayerLaunchStarLaunch, launchPlayerState);

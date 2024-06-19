@@ -30,10 +30,6 @@ void TLaunchStarObj::load(JSUMemoryInputStream &stream) {
     stream.read(&mTravelSpeed, 4);
 
     gpResourceManager->load("/scene/mapobj/ms_launchstar_wind.jpa", 397);
-
-    if (TFlagManager::smInstance->getFlag(0x40000) < 20) {
-        makeObjDead();
-    }
 }
 
 void TLaunchStarObj::perform(u32 flags, JDrama::TGraphics *graphics) {

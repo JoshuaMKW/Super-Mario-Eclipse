@@ -54,7 +54,6 @@ extern void updatePlayerHUD(TMarDirector *, const J2DOrthoGraph *);
 extern void lockModuleSettings(TApplication *app);
 extern void unlockSettings(TMarDirector *director);
 extern void setPlayerPosRotOnLoad(TMario *player);
-extern void checkForBlueCoinTrade(TMarDirector *director);
 extern void resetTutorialIceStageCheckpoints(TMarDirector *director);
 extern void checkTutorialIceStageCheckpoints(TMario *player, bool isMario);
 extern void resetTutorialCasinoStageCheckpoints(TMarDirector *director);
@@ -94,7 +93,7 @@ static void initModule() {
     // Register module
     BetterSMS::registerModule(sModuleInfo);
 
-    Game::setMaxShines(240);
+    Game::setMaxShines(MaxShineCount);
 
     // Register callbacks
     Application::registerContextCallback(11, directCharacterSelectMenu);
@@ -109,7 +108,6 @@ static void initModule() {
     // Demo
     Stage::addInitCallback(forceYoshiUnlock);
     Stage::addUpdateCallback(unlockSettings);
-    Stage::addUpdateCallback(checkForBlueCoinTrade);
     Game::addBootCallback(lockModuleSettings);
 
     Stage::addInitCallback(initCharacterArchives);

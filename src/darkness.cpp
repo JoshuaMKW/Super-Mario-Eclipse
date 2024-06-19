@@ -121,14 +121,12 @@ void TLightContext::process(TModelWaterManager &manager) {
     manager.LightType.mShowShadow = manager.mDarkLevel < 255;
 }
 
-#define SME_MAX_SHINES 300
-
 static void initShineShadow() {
     if (sLightContext.mLightType == TLightContext::ActiveType::DISABLED)
         return;
 
     s32 &CurrentShineCount = TFlagManager::smInstance->Type4Flag.mShineCount;
-    if (CurrentShineCount < SME_MAX_SHINES ||
+    if (CurrentShineCount < MaxShineCount ||
         sLightContext.mLightType == TLightContext::ActiveType::FOLLOWPLAYER) {
         sLightContext.mPrevShineCount = CurrentShineCount;
 
@@ -141,12 +139,12 @@ static void initShineShadow() {
 
         if (sLightContext.mLightType == TLightContext::ActiveType::STATIC) {
             sLightContext.mNextSize = sLightContext.mBaseScale +
-                                      powf(((1350.0f / SME_MAX_SHINES) * CurrentShineCount), 1.5f);
+                                      powf(((1350.0f / MaxShineCount) * CurrentShineCount), 1.5f);
 
             if (sBrightLevel == 255)
-                gpModelWaterManager->mDarkLevel = lerp<u8>(SME::TGlobals::getMinDarkness(), 190,
-                                                           static_cast<f32>(CurrentShineCount) /
-                                                               static_cast<f32>(SME_MAX_SHINES));
+                gpModelWaterManager->mDarkLevel =
+                    lerp<u8>(SME::TGlobals::getMinDarkness(), 190,
+                             static_cast<f32>(CurrentShineCount) / static_cast<f32>(MaxShineCount));
             else
                 gpModelWaterManager->mDarkLevel = sBrightLevel;
 

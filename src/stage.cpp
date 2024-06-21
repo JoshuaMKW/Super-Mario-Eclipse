@@ -512,6 +512,134 @@ BETTER_SMS_FOR_CALLBACK void initializeStageInfo(TApplication *app) {
                 exinfo->mShineID       = 0xB8;
                 BetterSMS::Stage::registerExStageInfo(0x5D, exinfo);
             }
+
+            {
+                auto exinfo            = new BetterSMS::Stage::ExAreaInfo;
+                exinfo->mShineStageID  = 0x4B;
+                exinfo->mNormalStageID = 0x5E;
+                exinfo->mShineID       = 0xB9;
+                BetterSMS::Stage::registerExStageInfo(0x5E, exinfo);
+            }
+
+            {
+                auto exinfo            = new BetterSMS::Stage::ExAreaInfo;
+                exinfo->mShineStageID  = 0x4B;
+                exinfo->mNormalStageID = 0x5F;
+                exinfo->mShineID       = 0xBA;
+                BetterSMS::Stage::registerExStageInfo(0x5F, exinfo);
+            }
+
+            {
+                auto exinfo            = new BetterSMS::Stage::ExAreaInfo;
+                exinfo->mShineStageID  = 0x4B;
+                exinfo->mNormalStageID = 0x60;
+                exinfo->mShineID       = 0xBB;
+                BetterSMS::Stage::registerExStageInfo(0x60, exinfo);
+            }
+
+            {
+                auto exinfo            = new BetterSMS::Stage::ExAreaInfo;
+                exinfo->mShineStageID  = 0x4B;
+                exinfo->mNormalStageID = 0x61;
+                exinfo->mShineID       = 0xBC;
+                BetterSMS::Stage::registerExStageInfo(0x61, exinfo);
+            }
+
+            {
+                auto exinfo            = new BetterSMS::Stage::ExAreaInfo;
+                exinfo->mShineStageID  = 0x4B;
+                exinfo->mNormalStageID = 0x62;
+                exinfo->mShineID       = 0xBD;
+                BetterSMS::Stage::registerExStageInfo(0x62, exinfo);
+            }
+
+            {
+                auto exinfo            = new BetterSMS::Stage::ExAreaInfo;
+                exinfo->mShineStageID  = 0x4B;
+                exinfo->mNormalStageID = 0x63;
+                exinfo->mShineID       = 0xBE;
+                BetterSMS::Stage::registerExStageInfo(0x63, exinfo);
+            }
+
+            {
+                auto exinfo            = new BetterSMS::Stage::ExAreaInfo;
+                exinfo->mShineStageID  = 0x4B;
+                exinfo->mNormalStageID = 0x64;
+                exinfo->mShineID       = 0xBF;
+                BetterSMS::Stage::registerExStageInfo(0x64, exinfo);
+            }
+
+            {
+                auto exinfo            = new BetterSMS::Stage::ExAreaInfo;
+                exinfo->mShineStageID  = 0x4B;
+                exinfo->mNormalStageID = 0x65;
+                exinfo->mShineID       = 0xC0;
+                BetterSMS::Stage::registerExStageInfo(0x65, exinfo);
+            }
+
+            {
+                auto exinfo            = new BetterSMS::Stage::ExAreaInfo;
+                exinfo->mShineStageID  = 0x4B;
+                exinfo->mNormalStageID = 0x66;
+                exinfo->mShineID       = 0xC1;
+                BetterSMS::Stage::registerExStageInfo(0x66, exinfo);
+            }
+
+            {
+                auto exinfo            = new BetterSMS::Stage::ExAreaInfo;
+                exinfo->mShineStageID  = 0x4B;
+                exinfo->mNormalStageID = 0x67;
+                exinfo->mShineID       = 0xC2;
+                BetterSMS::Stage::registerExStageInfo(0x67, exinfo);
+            }
+
+            {
+                auto exinfo            = new BetterSMS::Stage::ExAreaInfo;
+                exinfo->mShineStageID  = 0x4B;
+                exinfo->mNormalStageID = 0x68;
+                exinfo->mShineID       = 0xC3;
+                BetterSMS::Stage::registerExStageInfo(0x68, exinfo);
+            }
+
+            {
+                auto exinfo            = new BetterSMS::Stage::ExAreaInfo;
+                exinfo->mShineStageID  = 0x4B;
+                exinfo->mNormalStageID = 0x69;
+                exinfo->mShineID       = 0xC4;
+                BetterSMS::Stage::registerExStageInfo(0x69, exinfo);
+            }
+
+            {
+                auto exinfo            = new BetterSMS::Stage::ExAreaInfo;
+                exinfo->mShineStageID  = 0x4B;
+                exinfo->mNormalStageID = 0x6A;
+                exinfo->mShineID       = 0xC5;
+                BetterSMS::Stage::registerExStageInfo(0x6A, exinfo);
+            }
+
+            {
+                auto exinfo            = new BetterSMS::Stage::ExAreaInfo;
+                exinfo->mShineStageID  = 0x4B;
+                exinfo->mNormalStageID = 0x6B;
+                exinfo->mShineID       = 0xC6;
+                BetterSMS::Stage::registerExStageInfo(0x6B, exinfo);
+            }
+
+            {
+                auto exinfo            = new BetterSMS::Stage::ExAreaInfo;
+                exinfo->mShineStageID  = 0x4B;
+                exinfo->mNormalStageID = 0x6C;
+                exinfo->mShineID       = 0xC7;
+                BetterSMS::Stage::registerExStageInfo(0x6C, exinfo);
+            }
+
+            {
+                auto exinfo            = new BetterSMS::Stage::ExAreaInfo;
+                exinfo->mShineStageID  = 0x4B;
+                exinfo->mNormalStageID = 0x6D;
+                exinfo->mShineID       = 0xC8;
+                BetterSMS::Stage::registerExStageInfo(0x6D, exinfo);
+            }
         }
 
         // Register Island Junctions stage info

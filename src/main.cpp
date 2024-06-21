@@ -31,11 +31,11 @@ extern void manageShineDarkness(TMarDirector *director);
 
 // Yoshi
 extern void forceYoshiUnlock(TMarDirector *director);
-extern void adjustYoshiTounge(TMario *player, bool isMario);
+extern void adjustYoshiTongue(TMario *player, bool isMario);
 
 // Stage
 extern void initializeStageInfo(TApplication *app);
-void resetForExStage(TMarDirector *director);
+extern void resetForExStage(TMarDirector *director);
 
 // Player
 extern void initializePoundJumpAnimation(TApplication *app);
@@ -56,7 +56,6 @@ extern void updatePlayerHUD(TMarDirector *, const J2DOrthoGraph *);
 extern void lockModuleSettings(TApplication *app);
 extern void unlockSettings(TMarDirector *director);
 extern void setPlayerPosRotOnLoad(TMario *player);
-extern void checkForBlueCoinTrade(TMarDirector *director);
 extern void resetTutorialIceStageCheckpoints(TMarDirector *director);
 extern void checkTutorialIceStageCheckpoints(TMario *player, bool isMario);
 extern void resetTutorialCasinoStageCheckpoints(TMarDirector *director);
@@ -96,7 +95,7 @@ static void initModule() {
     // Register module
     BetterSMS::registerModule(sModuleInfo);
 
-    Game::setMaxShines(240);
+    Game::setMaxShines(MaxShineCount);
 
     // Register callbacks
     Application::registerContextCallback(11, directCharacterSelectMenu);
@@ -111,7 +110,6 @@ static void initModule() {
     // Demo
     Stage::addInitCallback(forceYoshiUnlock);
     Stage::addUpdateCallback(unlockSettings);
-    Stage::addUpdateCallback(checkForBlueCoinTrade);
     Game::addBootCallback(lockModuleSettings);
 
     Stage::addInitCallback(initCharacterArchives);
@@ -130,7 +128,7 @@ static void initModule() {
     Player::addUpdateCallback(processColdState);
     // Player::addUpdateCallback(checkTutorialCollisionRespawn);
     Player::addUpdateCallback(createWaterBalloonAndThrow);
-    Player::addUpdateCallback(adjustYoshiTounge);
+    Player::addUpdateCallback(adjustYoshiTongue);
     Player::addUpdateCallback(blazePlayer);
     Player::registerStateMachine(PlayerLaunchStarWait, holdPlayerState);
     Player::registerStateMachine(PlayerLaunchStarLaunch, launchPlayerState);
@@ -147,7 +145,7 @@ static void initModule() {
 }
 
 // Definition block
-KURIBO_MODULE_BEGIN("Super Mario Eclipse", "JoshuaMK", "v1.0") {
+KURIBO_MODULE_BEGIN("Super Mario Eclipse", "JoshuaMK", SUPER_MARIO_ECLIPSE_VERSION) {
     // Set the load and unload callbacks to our registration functions
     KURIBO_EXECUTE_ON_LOAD { initModule(); }
 }

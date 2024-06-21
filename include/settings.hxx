@@ -7,7 +7,7 @@
 #include <BetterSMS/module.hxx>
 #include <BetterSMS/settings.hxx>
 
-constexpr size_t MaxShineCount = 300;
+constexpr size_t MaxShineCount = 240;
 
 using namespace BetterSMS;
 

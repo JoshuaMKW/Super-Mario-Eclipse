@@ -301,7 +301,7 @@ BETTER_SMS_FOR_CALLBACK void resetTutorialIceStageCheckpoints(TMarDirector *dire
 }
 
 BETTER_SMS_FOR_CALLBACK void checkTutorialIceStageCheckpoints(TMario *player, bool isMario) {
-    if (gpMarDirector->mAreaID != 11 || gpMarDirector->mEpisodeID != 2)
+    if (gpMarDirector->mAreaID != 80)
         return;
 
     if (sDoorSoundActive && !sTutorialDoors[3]->mActorData->isCurAnmAlreadyEnd(MActor::BCK)) {
@@ -395,7 +395,7 @@ BETTER_SMS_FOR_CALLBACK void resetTutorialCasinoStageCheckpoints(TMarDirector *d
 }
 
 BETTER_SMS_FOR_CALLBACK void checkTutorialCasinoStageCheckpoints(TMario *player, bool isMario) {
-    if (gpMarDirector->mAreaID != 11 || gpMarDirector->mEpisodeID != 2)
+    if (gpMarDirector->mAreaID != 80)
         return;
 
     bool isExitActive =
@@ -432,7 +432,7 @@ BETTER_SMS_FOR_CALLBACK void resetTutorialPiantaPitStageCheckpoints(TMarDirector
 }
 
 BETTER_SMS_FOR_CALLBACK void checkTutorialPiantaPitStageCheckpoints(TMario *player, bool isMario) {
-    if (gpMarDirector->mAreaID != 11 || gpMarDirector->mEpisodeID != 2)
+    if (gpMarDirector->mAreaID != 80)
         return;
 
     bool isExitActive =

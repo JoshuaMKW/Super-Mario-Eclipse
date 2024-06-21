@@ -20,6 +20,7 @@ namespace SME {
         struct PlayerState {
             PlayerState() {}
 
+            bool mIsHoldingKey   = false;
             bool mIsOnFire       = false;
             s16 mFireTimer       = 0;
             s16 mFireTimerMax    = 0;

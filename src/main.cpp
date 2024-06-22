@@ -138,8 +138,8 @@ static void initModule() {
     Objects::registerObjectAsMapObj("Tornado", &tornadoData, TTornadoMapObj::instantiate);
     Objects::registerObjectAsMapObj("WaterBalloon", &waterBalloonData, TWaterBalloon::instantiate);
     Objects::registerObjectAsMapObj("LaunchStar", &launchStarData, TLaunchStarObj::instantiate);
-    Objects::registerObjectAsMapObj("followKey", &followKeyData, TFollowKey::instantiate);
-    Objects::registerObjectAsMapObj("keyChest", &keyChestData, TKeyChest::instantiate);
+    Objects::registerObjectAsMapObj("KeyFollow", &followKeyData, TFollowKey::instantiate);
+    Objects::registerObjectAsMapObj("KeyChest", &keyChestData, TKeyChest::instantiate);
     Objects::registerObjectAsMisc("FireyPetey", TFireyPetey::instantiate);
     Objects::registerObjectAsMisc("FireyPeteyManager", TFireyPeteyManager::instantiate);
 }

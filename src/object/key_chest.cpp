@@ -2,6 +2,7 @@
 #include <Dolphin/MTX.h>
 #include <Dolphin/types.h>
 
+#include "player.hxx"
 #include <BetterSMS/libs/constmath.hxx>
 #include <BetterSMS/module.hxx>
 #include <JSystem/J3D/J3DModel.hxx>
@@ -10,43 +11,83 @@
 #include <SMS/M3DUtil/MActor.hxx>
 #include <SMS/M3DUtil/MActorKeeper.hxx>
 #include <SMS/MSound/MSoundSESystem.hxx>
+#include <SMS/Manager/ItemManager.hxx>
 #include <SMS/Manager/ModelWaterManager.hxx>
 #include <SMS/Map/BGCheck.hxx>
 #include <SMS/Player/Mario.hxx>
-#include <object/follow_key.hxx>
-#include <SMS/Manager/ItemManager.hxx>
-#include <object/key_chest.hxx>
-#include "player.hxx"
-TKeyChest::TKeyChest(const char *name) : TMapObjGeneral(name) {}
 
-TKeyChest::~TKeyChest() {}
+#include "object/follow_key.hxx"
+#include "object/key_chest.hxx"
 
-void TKeyChest::kill() {}
-void TKeyChest::control() { 
-    TMapObjGeneral::control(); }
+TKeyChest::TKeyChest(const char *name) : TMapObjGeneral(name), mOpening(false), mHasFinishedSounds(false) {}
+
+void TKeyChest::control() {
+  TMapObjGeneral::control();
+
+  if (mOpening) {
+      // Play chest next open sound when first sound has ended
+      bool isNextSoundReady = gpMSound->gateCheck(0x1967) && gpMSound->gateCheck(0x1966);
+      if (!mHasFinishedSounds && isNextSoundReady) {
+          MSoundSE::startSoundActor(0x1966, mTranslation, 0, nullptr, 0, 4);
+          mHasFinishedSounds = true;
+      }
+
+      if (mActorData->isCurAnmAlreadyEnd(MActor::BCK)) {
+          mOpening = false;
+          spawnShine();
+      }
+  }
+}
 
 void TKeyChest::playIdleAnim() {}
 
+void TKeyChest::playOpenAnim() {
+    mActorData->setBck("key_chest_open");
+    auto *ctrl       = mActorData->getFrameCtrl(MActor::BCK);
+    ctrl->mAnimState = J3DFrameCtrl::ONCE;
+    ctrl->mFrameRate = 0.5f;
+    mModelLoadFlags &= ~0x100;
+
+    // Play chest open sound
+    if (gpMSound->gateCheck(0x1967)) {
+        MSoundSE::startSoundActor(0x1967, mTranslation, 0, nullptr, 0, 4);
+    }
+}
+
+bool TKeyChest::receiveMessage(THitActor *sender, u32 message) {
+    if (TMapObjGeneral::receiveMessage(sender, message)) {
+        return true;
+    }
+
+    if (message == MESSAGE_KEY_OPEN_CHEST) {
+        playOpenAnim();
+        mOpening = true;
+        return true;
+    }
+
+    return false;
+}
+
+void TKeyChest::spawnShine() {
+    auto *nameRef = TMarNameRefGen::getInstance()->getRootNameRef();
+    u16 keyCode   = JDrama::TNameRef::calcKeyCode("Treasure_Shine");
+    if (TNameRef *p = nameRef->searchF(keyCode, "Treasure_Shine")) {
+        TShine *shine = reinterpret_cast<TShine *>(p);
+        shine->appearWithDemo("TreasureCamera");
+    }
+}
+
 void TKeyChest::touchPlayer(THitActor *actor) {
-
-    OSReport("Touched Actor ID %X: \n ", actor->mObjectID);
-
     if (actor->mObjectID == OBJECT_ID_MARIO) {
-        mFollowActor = reinterpret_cast<TMario *>(actor);
-        auto *data   = SME::Player::getEclipseData(mFollowActor);
-        if (data->mIsHoldingKey)
-        {
-
-            OSReport("Touching Chest With Key");
+        TMario *player = reinterpret_cast<TMario *>(actor);
+        auto *data   = SME::Player::getEclipseData(player);
+        if (data->mIsHoldingKey) {
             auto *nameRef = TMarNameRefGen::getInstance()->getRootNameRef();
             u16 keyCode   = JDrama::TNameRef::calcKeyCode("follow_key");
             if (TNameRef *p = nameRef->searchF(keyCode, "follow_key")) {
                 TFollowKey *foll = reinterpret_cast<TFollowKey *>(p);
-                foll->makeObjDead();
-
-                gpItemManager->makeShineAppearWithTime("Treasure_Shine", 0, mTranslation.x,
-                                                       mTranslation.y + 60.f, mTranslation.z,0,0,0);
-               
+                foll->receiveMessage(this, MESSAGE_KEY_OPEN_CHEST);
+                data->mIsHoldingKey = false;
             }
         }
     }

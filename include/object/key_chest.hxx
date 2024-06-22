@@ -5,6 +5,7 @@
 #include <SMS/Manager/MarioParticleManager.hxx>
 #include <SMS/MapObj/MapObjGeneral.hxx>
 #include <SMS/MapObj/MapObjInit.hxx>
+
 class TKeyChest : public TMapObjGeneral {
 public:
     BETTER_SMS_FOR_CALLBACK static JDrama::TNameRef *instantiate() {
@@ -12,15 +13,19 @@ public:
     }
 
     TKeyChest(const char *name);
-    virtual ~TKeyChest();
-    virtual void kill() override;
-    virtual void control() override;
-    virtual void touchPlayer(THitActor *) override;
-    virtual void playIdleAnim();
+    ~TKeyChest() override = default;
 
-   
-    TMario *mFollowActor;
-    
+    void control() override;
+    void touchPlayer(THitActor *) override;
+    bool receiveMessage(THitActor *, u32) override;
+
+    void playIdleAnim();
+    void playOpenAnim();
+    void spawnShine();
+
+    private:
+    bool mOpening;
+        bool mHasFinishedSounds;
 };
 
 extern ObjData keyChestData;

@@ -70,8 +70,8 @@ bool TKeyChest::receiveMessage(THitActor *sender, u32 message) {
 
 void TKeyChest::spawnShine() {
     auto *nameRef = TMarNameRefGen::getInstance()->getRootNameRef();
-    u16 keyCode   = JDrama::TNameRef::calcKeyCode("Treasure_Shine");
-    if (TNameRef *p = nameRef->searchF(keyCode, "Treasure_Shine")) {
+    u16 keyCode   = JDrama::TNameRef::calcKeyCode("TreasureShine");
+    if (TNameRef *p = nameRef->searchF(keyCode, "TreasureShine")) {
         TShine *shine = reinterpret_cast<TShine *>(p);
         shine->appearWithDemo("TreasureCamera");
     }
@@ -83,8 +83,8 @@ void TKeyChest::touchPlayer(THitActor *actor) {
         auto *data   = SME::Player::getEclipseData(player);
         if (data->mIsHoldingKey) {
             auto *nameRef = TMarNameRefGen::getInstance()->getRootNameRef();
-            u16 keyCode   = JDrama::TNameRef::calcKeyCode("follow_key");
-            if (TNameRef *p = nameRef->searchF(keyCode, "follow_key")) {
+            u16 keyCode   = JDrama::TNameRef::calcKeyCode("TreasureKey");
+            if (TNameRef *p = nameRef->searchF(keyCode, "TreasureKey")) {
                 TFollowKey *foll = reinterpret_cast<TFollowKey *>(p);
                 foll->receiveMessage(this, MESSAGE_KEY_OPEN_CHEST);
                 data->mIsHoldingKey = false;
@@ -114,4 +114,4 @@ ObjData keyChestData{.mMdlName  = "key_chest",
                      .mBckMoveData      = nullptr,
                      ._30               = 50.0f,
                      .mUnkFlags         = 0x10004000 /*0x02130100*/,
-                     .mKeyCode          = cexp_calcKeyCode("key_chest")};
+                     .mKeyCode          = cexp_calcKeyCode("TreasureChest")};

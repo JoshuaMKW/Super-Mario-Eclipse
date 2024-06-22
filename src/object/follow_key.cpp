@@ -177,7 +177,7 @@ static hit_data follow_key_hit_data{.mAttackRadius  = 100.0f,
 static obj_hit_info follow_key_collision_data{
     ._00 = 1, .mType = 0xFC000000, ._08 = 0, .mHitData = &follow_key_hit_data};
 
-ObjData followKeyData{.mMdlName  = "follow_key",
+ObjData followKeyData{.mMdlName  = "key_follow",
                       .mObjectID = 0x80000400 /*0x80000FFF*/,
                       .mLiveManagerName = gLiveManagerName,  // const_cast<char *>("木マネージャー")
                       .mObjKey           = gUnkManagerName,  // const_cast<char *>("waterballoon"),
@@ -191,4 +191,4 @@ ObjData followKeyData{.mMdlName  = "follow_key",
                       .mBckMoveData      = nullptr,
                       ._30               = 50.0f,
                       .mUnkFlags         = 0x10004000 /*0x02130100*/,
-                      .mKeyCode          = cexp_calcKeyCode("follow_key")};
+                      .mKeyCode          = cexp_calcKeyCode("TreasureKey")};

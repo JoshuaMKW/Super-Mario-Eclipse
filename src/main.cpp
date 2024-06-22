@@ -14,6 +14,8 @@
 
 #include "enemy/firey_petey.hxx"
 #include "object/darkness_effect.hxx"
+#include "object/follow_key.hxx"
+#include "object/key_chest.hxx"
 #include "object/launch_star.hxx"
 #include "object/tornado_obj.hxx"
 #include "object/water_balloon.hxx"
@@ -136,7 +138,8 @@ static void initModule() {
     Objects::registerObjectAsMapObj("Tornado", &tornadoData, TTornadoMapObj::instantiate);
     Objects::registerObjectAsMapObj("WaterBalloon", &waterBalloonData, TWaterBalloon::instantiate);
     Objects::registerObjectAsMapObj("LaunchStar", &launchStarData, TLaunchStarObj::instantiate);
-
+    Objects::registerObjectAsMapObj("KeyFollow", &followKeyData, TFollowKey::instantiate);
+    Objects::registerObjectAsMapObj("KeyChest", &keyChestData, TKeyChest::instantiate);
     Objects::registerObjectAsMisc("FireyPetey", TFireyPetey::instantiate);
     Objects::registerObjectAsMisc("FireyPeteyManager", TFireyPeteyManager::instantiate);
 }

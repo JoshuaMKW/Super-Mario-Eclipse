@@ -72,7 +72,9 @@ void TKeyChest::spawnShine() {
     auto *nameRef = TMarNameRefGen::getInstance()->getRootNameRef();
     u16 keyCode   = JDrama::TNameRef::calcKeyCode("TreasureShine");
     if (TNameRef *p = nameRef->searchF(keyCode, "TreasureShine")) {
-        TShine *shine = reinterpret_cast<TShine *>(p);
+        TShine *shine       = reinterpret_cast<TShine *>(p);
+        shine->mTranslation = mTranslation;
+        shine->mTranslation.y += 100.0f;
         shine->appearWithDemo("TreasureCamera");
     }
 }

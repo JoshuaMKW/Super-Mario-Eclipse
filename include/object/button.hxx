@@ -3,22 +3,24 @@
 #include <BetterSMS/module.hxx>
 #include <SMS/MapObj/MapObjGeneral.hxx>
 
-class TPearlCracked : public TMapObjGeneral {
+class TButtonSwitch : public TMapObjGeneral {
 protected:
     enum class State : u8 {
         STATE_NORMAL,
-        STATE_BROKEN,
-        STATE_RESTING,
+        STATE_PRESSING,
+        STATE_PRESSED,
+        STATE_RISING
     };
 
 public:
     BETTER_SMS_FOR_CALLBACK static JDrama::TNameRef *instantiate() {
-        return new TPearlCracked("TPearlCracked");
+        return new TButtonSwitch("TButtonSwitch");
     }
 
-    TPearlCracked(const char *name);
-    ~TPearlCracked() override = default;
+    TButtonSwitch(const char *name);
+    ~TButtonSwitch() override = default;
 
+    void load(JSUMemoryInputStream &in) override;
     void control() override;
     void initMapCollisionData() override;
     void initMapObj() override;
@@ -27,12 +29,16 @@ public:
 protected:
     bool checkMarioRiding(TMario *player);
     bool checkMarioPounding(TMario *player);
-    void swapToCracked();
-    void playFractureAnim();
-    void spawnShine();
+    void swapToPressed();
+    void swapToUnpressed();
+    void playPressedAnim();
+    void playUnpressedAnim();
 
 private:
     State mState;
+    u32 mFlagID;
+    s32 mPressedSoundID;
+    bool mNeedsPound;
 };
 
-extern ObjData pearlData;
+extern ObjData buttonSwitchData;

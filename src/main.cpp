@@ -18,7 +18,7 @@
 #include "object/jizo_stone.hxx"
 #include "object/key_chest.hxx"
 #include "object/launch_star.hxx"
-#include "object/pearl.hxx"
+#include "object/button.hxx"
 #include "object/tornado_obj.hxx"
 #include "object/water_balloon.hxx"
 #include "p_settings.hxx"
@@ -143,7 +143,7 @@ static void initModule() {
     Objects::registerObjectAsMapObj("KeyFollow", &followKeyData, TFollowKey::instantiate);
     Objects::registerObjectAsMapObj("KeyChest", &keyChestData, TKeyChest::instantiate);
     Objects::registerObjectAsMapObj("JizoStone", &jizoStoneData, TJizoStone::instantiate);
-    Objects::registerObjectAsMapObj("Pearl", &pearlData, TPearlCracked::instantiate);
+    Objects::registerObjectAsMapObj("ButtonSwitch", &buttonSwitchData, TButtonSwitch::instantiate);
     Objects::registerObjectAsMisc("FireyPetey", TFireyPetey::instantiate);
     Objects::registerObjectAsMisc("FireyPeteyManager", TFireyPeteyManager::instantiate);
 }

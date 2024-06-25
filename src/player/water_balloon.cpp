@@ -34,7 +34,6 @@ BETTER_SMS_FOR_CALLBACK void initializeWaterBalloons(TMario *player) {
     TWaterBalloon::sEmitInfo->load(in);
 
     auto *water_balloons = new BalloonBuf(4, false);
-    Player::deregisterData(player, "sme_balloon_info");
     Player::registerData(player, "sme_balloon_info", water_balloons);
 
     for (int i = 0; i < water_balloons->capacity(); ++i) {

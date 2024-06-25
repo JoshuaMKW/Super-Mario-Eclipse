@@ -168,15 +168,15 @@ void initDemoCredits(Settings::SettingsGroup &group) {
     group.addSetting(&sSpecialThanksCreditSetting);
 }
 
-bool isDemoComplete() { return gBugsSetting.isUnlocked(); }
+bool isGameCompletedPrior() { return gBugsSetting.isUnlocked(); }
 
 void lockModuleSettings(TApplication *app) {
     optional<ModuleInfo> engine_module   = BetterSMS::getModuleInfo("Better Sunshine Engine");
     optional<ModuleInfo> movement_module = BetterSMS::getModuleInfo("Better Sunshine Moveset");
 
-    SMS_ASSERT(movement_module,
+    /*SMS_ASSERT(movement_module,
                "Super Mario Eclipse requires the Better Sunshine Movement module to be present and "
-               "loaded. Please restore \"BetterSunshineMovement.kxe\" to \"./Kuribo!/Mods/\"!");
+               "loaded. Please restore \"BetterSunshineMovement.kxe\" to \"./Kuribo!/Mods/\"!");*/
 
     Settings::SettingsGroup *engine_settings = engine_module->mSettings;
     {
@@ -200,13 +200,13 @@ void lockModuleSettings(TApplication *app) {
         }
     }
 
-    if (!isDemoComplete()) {
+    if (!isGameCompletedPrior()) {
         {
             auto *setting = engine_settings->getSetting("Exploit Fixes");
             setting->setBool(true);
         }
 
-        {
+        if (movement_module) {
             auto *movement_settings = movement_module->mSettings;
 
             {
@@ -281,7 +281,7 @@ void unlockSettings(TMarDirector *director) {
     if (shine_count >= MaxShineCount && !gBugsSetting.isUnlocked()) {
         gBugsSetting.unlock();
 
-        optional<ModuleInfo> movement_module = BetterSMS::getModuleInfo("Better Sunshine Moveset");
+        if (optional<ModuleInfo> movement_module = BetterSMS::getModuleInfo("Better Sunshine Moveset"))
         {
             Settings::SettingsGroup *movement_settings = movement_module->mSettings;
 
@@ -329,7 +329,7 @@ void unlockSettings(TMarDirector *director) {
         update_save = true;
     }
 
-    if (shine_count >= 30 && !gMirrorModeSetting.getBool()) {
+    if (shine_count >= MaxShineCount && !gMirrorModeSetting.getBool()) {
         gMirrorModeSetting.setBool(true);
         gMirrorModeSetting.updateSetting();
         update_save = true;

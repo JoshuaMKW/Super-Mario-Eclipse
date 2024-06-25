@@ -23,9 +23,9 @@ public:
     void playOpenAnim();
     void spawnShine();
 
-    private:
+private:
     bool mOpening;
-        bool mHasFinishedSounds;
+    bool mHasFinishedSounds;
 };
 
 extern ObjData keyChestData;

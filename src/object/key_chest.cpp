@@ -19,24 +19,25 @@
 #include "object/follow_key.hxx"
 #include "object/key_chest.hxx"
 
-TKeyChest::TKeyChest(const char *name) : TMapObjGeneral(name), mOpening(false), mHasFinishedSounds(false) {}
+TKeyChest::TKeyChest(const char *name)
+    : TMapObjGeneral(name), mOpening(false), mHasFinishedSounds(false) {}
 
 void TKeyChest::control() {
-  TMapObjGeneral::control();
+    TMapObjGeneral::control();
 
-  if (mOpening) {
-      // Play chest next open sound when first sound has ended
-      bool isNextSoundReady = gpMSound->gateCheck(0x1967) && gpMSound->gateCheck(0x1966);
-      if (!mHasFinishedSounds && isNextSoundReady) {
-          MSoundSE::startSoundActor(0x1966, mTranslation, 0, nullptr, 0, 4);
-          mHasFinishedSounds = true;
-      }
+    if (mOpening) {
+        // Play chest next open sound when first sound has ended
+        bool isNextSoundReady = gpMSound->gateCheck(0x1967) && gpMSound->gateCheck(0x1966);
+        if (!mHasFinishedSounds && isNextSoundReady) {
+            MSoundSE::startSoundActor(0x1966, mTranslation, 0, nullptr, 0, 4);
+            mHasFinishedSounds = true;
+        }
 
-      if (mActorData->isCurAnmAlreadyEnd(MActor::BCK)) {
-          mOpening = false;
-          spawnShine();
-      }
-  }
+        if (mActorData->isCurAnmAlreadyEnd(MActor::BCK)) {
+            mOpening = false;
+            spawnShine();
+        }
+    }
 }
 
 void TKeyChest::playIdleAnim() {}
@@ -82,7 +83,7 @@ void TKeyChest::spawnShine() {
 void TKeyChest::touchPlayer(THitActor *actor) {
     if (actor->mObjectID == OBJECT_ID_MARIO) {
         TMario *player = reinterpret_cast<TMario *>(actor);
-        auto *data   = SME::Player::getEclipseData(player);
+        auto *data     = SME::Player::getEclipseData(player);
         if (data->mIsHoldingKey) {
             auto *nameRef = TMarNameRefGen::getInstance()->getRootNameRef();
             u16 keyCode   = JDrama::TNameRef::calcKeyCode("TreasureKey");

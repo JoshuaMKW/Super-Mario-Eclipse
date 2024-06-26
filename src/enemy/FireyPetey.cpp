@@ -15,6 +15,7 @@
 #include <BetterSMS/libs/constmath.hxx>
 #include <BetterSMS/module.hxx>
 #include <BetterSMS/player.hxx>
+#include <BetterSMS/music.hxx>
 
 #include <enemy/firey_petey.hxx>
 
@@ -119,7 +120,7 @@ bool TNerveFPFly::execute(TSpineBase<TLiveActor> *spine) const {
     f32 magnitude = travelVector.magnitude();
 
     if (magnitude < 100.0f) {
-        if ((target->mGraphTracer->mGraph->mNodes[target->mGraphTracer->mCurrentNode]._08 &
+        if ((target->mGraphTracer->mGraph->mNodes[target->mGraphTracer->mCurrentNode].mRailNode->mFlags &
              0x800) != 0) {
             spine->pushNerve(&hover);
             return true;
@@ -176,6 +177,7 @@ bool TNerveFPBreakSleep::execute(TSpineBase<TLiveActor> *spine) const {
     if (spine->mNerveTimer == 0) {
         target->changeBck(0x0E);
         MSBgm::stopTrackBGMs('\a', 10);
+        Music::pauseSong(0.2f);
     }
     if (!target->mActorData->curAnmEndsNext(0, nullptr)) {
         return false;
@@ -273,7 +275,7 @@ bool TNerveFPFireBreath::execute(TSpineBase<TLiveActor> *spine) const {
             target->mFire[i]->mVelocity.z = 0.0f;
             target->mFire[i]->mLifetime   = 0;
         }
-        peteyMActor->setFrameRate(SMSGetAnmFrameRate__Fv() * 2.0f, 0);
+        peteyMActor->setFrameRate(SMSGetAnmFrameRate__Fv() * 1.5f, 0);
     }
     bool isAnimationRunning = peteyMActor->checkCurAnmFromIndex(0x15, 0);
     if (isAnimationRunning) {
@@ -566,23 +568,22 @@ void TFPTornado::perform(u32 flags, JDrama::TGraphics *graphics) {
 
     for (int i = 0; i < mNumObjs; i = i + 1) {
         if (mCollidingObjs[i]->mObjectID == OBJECT_ID_MARIO) {
-
-            SME::Player::setFire(gpMarioAddress);
+            mCollidingObjs[i]->receiveMessage(this, MESSAGE_MARIO_BURN);
         }
     }
     gpPollution->stamp(1, mTranslation.x, mTranslation.y, mTranslation.z, 384.0f);
 }
 
 TFPFire::TFPFire(const char *name) : THitActor(name), mVelocity(0.0f, 0.0f, 0.0f), mLifetime(0) {
-    initHitActor(0x8000027, 1, -0x7f000000, 275.0f, 275.0f, 100.0f, 100.0f);
+    initHitActor(0x10000005, 5, 0x80000000, 275.0f, 275.0f, 100.0f, 100.0f);
 }
 
 void TFPFire::perform(u32 flags, JDrama::TGraphics *graphics) {
     THitActor::perform(flags, graphics);
     if (mLifetime > 0) {
-        for (int iVar9 = 0; iVar9 < mNumObjs; iVar9 = iVar9 + 1) {
-            if (mCollidingObjs[iVar9]->mObjectID == OBJECT_ID_MARIO) {
-                SME::Player::setFire(gpMarioAddress);
+        for (int i = 0; i < mNumObjs; i = i + 1) {
+            if (mCollidingObjs[i]->mObjectID == OBJECT_ID_MARIO) {
+                mCollidingObjs[i]->receiveMessage(this, MESSAGE_MARIO_BURN);
             }
         }
         mTranslation.add(mVelocity);

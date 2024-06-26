@@ -47,7 +47,6 @@ extern void initializeWaterBalloons(TMario *player);
 extern void createWaterBalloonAndThrow(TMario *player, bool isMario);
 extern bool holdPlayerState(TMario *player);
 extern bool launchPlayerState(TMario *player);
-extern void blazePlayer(TMario *player, bool isMario);
 extern void initColdState(TMarDirector *director);
 extern void processColdState(TMario *player, bool isMario);
 
@@ -131,7 +130,6 @@ static void initModule() {
     // Player::addUpdateCallback(checkTutorialCollisionRespawn);
     Player::addUpdateCallback(createWaterBalloonAndThrow);
     Player::addUpdateCallback(adjustYoshiTongue);
-    Player::addUpdateCallback(blazePlayer);
     Player::registerStateMachine(PlayerLaunchStarWait, holdPlayerState);
     Player::registerStateMachine(PlayerLaunchStarLaunch, launchPlayerState);
     Debug::addUpdateCallback(checkForCompletionAwards);

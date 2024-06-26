@@ -21,6 +21,7 @@
 #include "object/button.hxx"
 #include "object/tornado_obj.hxx"
 #include "object/water_balloon.hxx"
+#include "object/mafia_pianta.hxx"
 #include "p_settings.hxx"
 
 // Application
@@ -136,6 +137,7 @@ static void initModule() {
     Player::registerStateMachine(PlayerLaunchStarLaunch, launchPlayerState);
     Debug::addUpdateCallback(checkForCompletionAwards);
 
+    Objects::registerObjectAsMapObj("NPCMonteMafia", &mafiaPiantaData,TMafiaPianta::instantiate);
     Objects::registerObjectAsMisc("DarknessEffect", TDarknessEffect::instantiate);
     Objects::registerObjectAsMapObj("Tornado", &tornadoData, TTornadoMapObj::instantiate);
     Objects::registerObjectAsMapObj("WaterBalloon", &waterBalloonData, TWaterBalloon::instantiate);

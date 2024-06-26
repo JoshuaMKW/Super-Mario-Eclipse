@@ -735,3 +735,8 @@ void TFireyPeteyManager::load(JSUMemoryInputStream &inputStream) {
     gpResourceManager->load("/scene/bosspakkun/jpa/ms_kp_fire_d.jpa", 0x1a6);
     gpResourceManager->load("/scene/bosspakkun/jpa/ms_kp_fire_e.jpa", 0x1a7);
 }
+
+
+static bool isFireyPeteyFlyMode(TMarDirector* director) { return director->mAreaID != 55; }
+SMS_PATCH_BL(0x80093EE0, isFireyPeteyFlyMode);
+SMS_WRITE_32(0x80093EE4, 0x2C030001);

@@ -12,7 +12,7 @@ extern Settings::SettingsGroup gSettingsGroup;
 extern BugsExploitsSetting gBugsSetting;
 extern MirrorModeFlag gMirrorModeSetting;
 
-static const char *sDirectors[] = {"JoshuaMK", "Tempo", "UncleMeat", "epicwade", "ddumpy"};
+static const char *sDirectors[] = {"JoshuaMK", "Tempo", "UncleMeat", "epicwade"};
 
 class DirectorCreditSetting final : public Settings::IntSetting {
 public:
@@ -46,7 +46,7 @@ private:
     int mIndex;
 };
 
-static const char *sStageDesigners[] = {"UncleMeat", "epicwade"};
+static const char *sStageDesigners[] = {"UncleMeat", "Tempo", "epicwade"};
 
 class StageCreditSetting final : public Settings::IntSetting {
 public:
@@ -63,7 +63,7 @@ private:
     int mIndex;
 };
 
-static const char *sComposers[] = {"ddumpy", "Sherman Haynes", "Trevor Scott"};
+static const char *sComposers[] = {"Trevor Scott"};
 
 class ComposerCreditSetting final : public Settings::IntSetting {
 public:
@@ -80,7 +80,7 @@ private:
     int mIndex;
 };
 
-static const char *sSoundDesigners[] = {"ddumpy", "Purple Twirler"};
+static const char *sSoundDesigners[] = {"Trevor Scott"};
 
 class SoundDesignCreditSetting final : public Settings::IntSetting {
 public:
@@ -97,24 +97,7 @@ private:
     int mIndex;
 };
 
-static const char *sSequencers[] = {"ddumpy", "Purple Twirler"};
-
-class SequencingCreditSetting final : public Settings::IntSetting {
-public:
-    SequencingCreditSetting() : IntSetting("Sequencing", &mIndex) {
-        mValueRange = {0, (sizeof(sSequencers) / sizeof(const char *)) - 1, 1};
-    }
-    ~SequencingCreditSetting() override {}
-
-    void load(JSUMemoryInputStream &in) override {}
-    void save(JSUMemoryOutputStream &out) override {}
-    void getValueName(char *dst) const override { strcpy(dst, sSequencers[mIndex]); }
-
-private:
-    int mIndex;
-};
-
-static const char *sTextures[] = {"Purple Twirler", "Fecal-Matter-Photoshops", "UncleMeat"};
+static const char *sTextures[] = {"UncleMeat", "Fecal-Matter-Photoshops", "ShaneMGD"};
 
 class TextureCreditSetting final : public Settings::IntSetting {
 public:
@@ -131,7 +114,7 @@ private:
     int mIndex;
 };
 
-static const char *sCharacters[] = {"GamerSubZero", "UncleMeat"};
+static const char *sCharacters[] = {"UncleMeat", "MasterMario777", "StevenShockley"};
 
 class CharacterCreditSetting final : public Settings::IntSetting {
 public:
@@ -148,7 +131,7 @@ private:
     int mIndex;
 };
 
-static const char *sSpecialThanks[] = {"Xayr", "ShaneMGD", "Halleester"};
+static const char *sSpecialThanks[] = {"Xayr", "Halleester"};
 
 class SpecialThanksCreditSetting final : public Settings::IntSetting {
 public:
@@ -170,7 +153,6 @@ ProgrammerCreditSetting sProgrammerCreditSetting;
 StageCreditSetting sStageCreditSetting;
 ComposerCreditSetting sComposerCreditSetting;
 SoundDesignCreditSetting sSoundDesignCreditSetting;
-SequencingCreditSetting sSequencingCreditSetting;
 TextureCreditSetting sTextureCreditSetting;
 CharacterCreditSetting sCharacterCreditSetting;
 SpecialThanksCreditSetting sSpecialThanksCreditSetting;
@@ -181,21 +163,20 @@ void initDemoCredits(Settings::SettingsGroup &group) {
     group.addSetting(&sStageCreditSetting);
     group.addSetting(&sComposerCreditSetting);
     group.addSetting(&sSoundDesignCreditSetting);
-    group.addSetting(&sSequencingCreditSetting);
     group.addSetting(&sTextureCreditSetting);
     group.addSetting(&sCharacterCreditSetting);
     group.addSetting(&sSpecialThanksCreditSetting);
 }
 
-bool isDemoComplete() { return gBugsSetting.isUnlocked(); }
+bool isGameCompletedPrior() { return gBugsSetting.isUnlocked(); }
 
 void lockModuleSettings(TApplication *app) {
     optional<ModuleInfo> engine_module   = BetterSMS::getModuleInfo("Better Sunshine Engine");
     optional<ModuleInfo> movement_module = BetterSMS::getModuleInfo("Better Sunshine Moveset");
 
-    SMS_ASSERT(movement_module,
+    /*SMS_ASSERT(movement_module,
                "Super Mario Eclipse requires the Better Sunshine Movement module to be present and "
-               "loaded. Please restore \"BetterSunshineMovement.kxe\" to \"./Kuribo!/Mods/\"!");
+               "loaded. Please restore \"BetterSunshineMovement.kxe\" to \"./Kuribo!/Mods/\"!");*/
 
     Settings::SettingsGroup *engine_settings = engine_module->mSettings;
     {
@@ -214,22 +195,18 @@ void lockModuleSettings(TApplication *app) {
         {
             auto *setting = reinterpret_cast<CollisionFixesSetting *>(
                 engine_settings->getSetting("Collision Fixes"));
+            setting->setBool(true);
             setting->lock();
         }
     }
 
-    if (!isDemoComplete()) {
+    if (!isGameCompletedPrior()) {
         {
             auto *setting = engine_settings->getSetting("Exploit Fixes");
             setting->setBool(true);
         }
 
-        {
-            auto *setting = engine_settings->getSetting("Collision Fixes");
-            setting->setBool(true);
-        }
-
-        {
+        if (movement_module) {
             auto *movement_settings = movement_module->mSettings;
 
             {
@@ -301,10 +278,10 @@ void unlockSettings(TMarDirector *director) {
 
     bool update_save = false;
 
-    if (shine_count >= 43 && !gBugsSetting.isUnlocked()) {
+    if (shine_count >= MaxShineCount && !gBugsSetting.isUnlocked()) {
         gBugsSetting.unlock();
 
-        optional<ModuleInfo> movement_module = BetterSMS::getModuleInfo("Better Sunshine Moveset");
+        if (optional<ModuleInfo> movement_module = BetterSMS::getModuleInfo("Better Sunshine Moveset"))
         {
             Settings::SettingsGroup *movement_settings = movement_module->mSettings;
 
@@ -352,7 +329,7 @@ void unlockSettings(TMarDirector *director) {
         update_save = true;
     }
 
-    if (shine_count >= 30 && !gMirrorModeSetting.getBool()) {
+    if (shine_count >= MaxShineCount && !gMirrorModeSetting.getBool()) {
         gMirrorModeSetting.setBool(true);
         gMirrorModeSetting.updateSetting();
         update_save = true;

@@ -56,7 +56,7 @@ s32 CharacterSelectDirector::direct() {
         OSJoinThread(&gSetupThread, (void **)joinBuf);
 
         gpMSound->initSound();
-        gpMSound->enterStage(MS_WAVE_DELFINO_PLAZA, 1, 2);
+        gpMSound->enterStage(MS_WAVE_DOLPIC, 1, 2);
 
         Music::setMaxVolume(0x7F);
         Music::setVolume(0x7F, 0x7F);

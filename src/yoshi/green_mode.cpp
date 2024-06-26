@@ -46,10 +46,6 @@ static bool canMountYoshi() {
 
     auto *params = Player::getData(player)->getParams();
 
-    // Prevent very large players from mounting
-    if (params->mScaleMultiplier.get() * stage_config->mPlayerSizeMultiplier.get() > 1.5f)
-        return false;
-
     if (player->mState & static_cast<u32>(TMario::STATE_WATERBORN))
         return params->mCanRideYoshi.get();
     else
@@ -104,6 +100,14 @@ static u32 calcYoshiSwimVelocity(TMario *player, u32 arg1) {
             player_data->mYoshiWaterSpeed.y -= 0.34375f;
     }
 
+    player->mSwimParams = player_data->mDefaultAttrs.mSwimParams;
+    // Check for underwater
+    if (player->isUnderWater()) {
+#define SCALE_PARAM(param, scale) param.set(param.get() * scale)
+        SCALE_PARAM(player->mSwimParams.mMoveSp, 3.0f);
+        SCALE_PARAM(player->mSwimParams.mStartSp, 3.0f);
+    }
+
     player->mSpeed.y = player_data->mYoshiWaterSpeed.y;
     return player->jumpProcess(arg1);
 }
@@ -152,12 +156,12 @@ static void fixYoshiJuiceDecrement() {
 }
 SMS_PATCH_BL(SMS_PORT_REGION(0x8026E810, 0x8026659C, 0, 0), fixYoshiJuiceDecrement);
 
-BETTER_SMS_FOR_CALLBACK void adjustYoshiTounge(TMario *player, bool isMario) {
+BETTER_SMS_FOR_CALLBACK void adjustYoshiTongue(TMario *player, bool isMario) {
     if (!player->mYoshi)
         return;
 
     if (Yoshi::isGreenYoshi(player->mYoshi)) {
-        *(f32 *)SMS_PORT_REGION(0x80415F4C, 0x8040D4A4, 0, 0) = 480.0f;  // tounge
+        *(f32 *)SMS_PORT_REGION(0x80415F4C, 0x8040D4A4, 0, 0) = 480.0f;  // tongue
         *(f32 *)SMS_PORT_REGION(0x80415F68, 0x8040D4A8, 0, 0) = 16384.0f;
     } else {
         *(f32 *)SMS_PORT_REGION(0x80415F4C, 0x8040D4A4, 0, 0) = 300.0f;

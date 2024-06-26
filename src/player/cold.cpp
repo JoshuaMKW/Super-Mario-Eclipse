@@ -49,7 +49,7 @@ BETTER_SMS_FOR_CALLBACK void processColdState(TMario *player, bool isMario) {
     }
 
     if ((player->mState & TMario::STATE_WATERBORN)) {
-        if (gpMarDirector->mAreaID == 13 && gpMarDirector->mEpisodeID == 0) {
+        if (gpMarDirector->mAreaID == 70) {
             SME::Player::setCold(player, 700, 300);
         }
     }

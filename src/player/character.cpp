@@ -38,7 +38,7 @@ BETTER_SMS_FOR_CALLBACK void initCharacterArchives(TMarDirector *director) {
 
     sCharacterArcs.clear();
 
-    for (int i = 0; i < 2; ++i) {
+    for (int i = 0; i < 1; ++i) {
         char buffer[32];
         snprintf(buffer, 32, "%s", sCharacterPaths[(int)SME::TGlobals::sCharacterIDList[i]]);
 
@@ -230,29 +230,6 @@ static void *getGlobalPlayerSplashTex(const char *local_path) {
 }
 SMS_PATCH_BL(SMS_PORT_REGION(0x8026707C, 0, 0, 0), getGlobalPlayerSplashTex);
 
-// ---
-
-static TMActorKeeper *sKeeper = nullptr;
-static MActor *sActor         = nullptr;
-
-static void applyShadowEffects(u32 *tremble_efx) {
-    TMario *mario;
-    SMS_FROM_GPR(31, mario);
-
-    ((u32 **)mario)[0x53C / 4] = tremble_efx;
-    if (SME::TGlobals::getCharacterIDFromPlayer(mario) == SME::CharacterID::SHADOW_MARIO) {
-        sKeeper                   = new TMActorKeeper(nullptr, 1);
-        sKeeper->mModelFlags      = 0x11300000;
-        sActor                    = sKeeper->createMActorFromDefaultBmd("/common/kagemario", 0);
-        mario->mModelData->mModel = sActor->mModel;
-        mario->mBodyModelData     = sActor->mModel->mModelData;
-
-        /*for (int i = 0; i < sActor->mModel->mModelData->mJointNum; ++i) {
-            SMS_InitPacket_Fog__FP8J3DModelUs(sActor->mModel, i);
-        }*/
-        sActor->setBtk("kagemario_scroll");
-    }
-}
 #else
 #endif
 // SMS_PATCH_BL(SMS_PORT_REGION(0x802474C0, 0, 0, 0), applyShadowEffects);

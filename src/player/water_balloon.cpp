@@ -23,7 +23,7 @@
 #include "object/water_balloon.hxx"
 #include "player.hxx"
 
-using WaterBalloonBuffer = TRingBuffer<TWaterBalloon>;
+using BalloonBuf = TRingBuffer<TWaterBalloon>;
 
 BETTER_SMS_FOR_CALLBACK void initializeWaterBalloons(TMario *player) {
     TWaterBalloon::sEmitInfo = new TWaterEmitInfo("/common/prm/waterballoon.prm");
@@ -33,8 +33,7 @@ BETTER_SMS_FOR_CALLBACK void initializeWaterBalloons(TMario *player) {
 
     TWaterBalloon::sEmitInfo->load(in);
 
-    auto *water_balloons = new WaterBalloonBuffer(4, false);
-    Player::deregisterData(player, "sme_balloon_info");
+    auto *water_balloons = new BalloonBuf(4, false);
     Player::registerData(player, "sme_balloon_info", water_balloons);
 
     for (int i = 0; i < water_balloons->capacity(); ++i) {
@@ -61,7 +60,7 @@ BETTER_SMS_FOR_CALLBACK void createWaterBalloonAndThrow(TMario *player, bool isM
     if (!(player->mController->mButtons.mFrameInput & TMarioGamePad::R))
         return;
 
-    auto *water_balloons = reinterpret_cast<WaterBalloonBuffer *>(
+    auto *water_balloons = reinterpret_cast<BalloonBuf *>(
         Player::getRegisteredData(player, "sme_balloon_info"));
 
     TWaterBalloon *balloon = water_balloons->next();

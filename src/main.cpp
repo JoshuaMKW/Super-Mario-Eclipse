@@ -14,7 +14,11 @@
 
 #include "enemy/firey_petey.hxx"
 #include "object/darkness_effect.hxx"
+#include "object/follow_key.hxx"
+#include "object/jizo_stone.hxx"
+#include "object/key_chest.hxx"
 #include "object/launch_star.hxx"
+#include "object/button.hxx"
 #include "object/tornado_obj.hxx"
 #include "object/water_balloon.hxx"
 #include "p_settings.hxx"
@@ -29,11 +33,11 @@ extern void manageShineDarkness(TMarDirector *director);
 
 // Yoshi
 extern void forceYoshiUnlock(TMarDirector *director);
-extern void adjustYoshiTounge(TMario *player, bool isMario);
+extern void adjustYoshiTongue(TMario *player, bool isMario);
 
 // Stage
 extern void initializeStageInfo(TApplication *app);
-void resetForExStage(TMarDirector *director);
+extern void resetForExStage(TMarDirector *director);
 
 // Player
 extern void initializePoundJumpAnimation(TApplication *app);
@@ -43,7 +47,6 @@ extern void initializeWaterBalloons(TMario *player);
 extern void createWaterBalloonAndThrow(TMario *player, bool isMario);
 extern bool holdPlayerState(TMario *player);
 extern bool launchPlayerState(TMario *player);
-extern void blazePlayer(TMario *player, bool isMario);
 extern void initColdState(TMarDirector *director);
 extern void processColdState(TMario *player, bool isMario);
 
@@ -54,7 +57,6 @@ extern void updatePlayerHUD(TMarDirector *, const J2DOrthoGraph *);
 extern void lockModuleSettings(TApplication *app);
 extern void unlockSettings(TMarDirector *director);
 extern void setPlayerPosRotOnLoad(TMario *player);
-extern void checkForBlueCoinTrade(TMarDirector *director);
 extern void resetTutorialIceStageCheckpoints(TMarDirector *director);
 extern void checkTutorialIceStageCheckpoints(TMario *player, bool isMario);
 extern void resetTutorialCasinoStageCheckpoints(TMarDirector *director);
@@ -94,7 +96,7 @@ static void initModule() {
     // Register module
     BetterSMS::registerModule(sModuleInfo);
 
-    Game::setMaxShines(240);
+    Game::setMaxShines(MaxShineCount);
 
     // Register callbacks
     Application::registerContextCallback(11, directCharacterSelectMenu);
@@ -109,7 +111,6 @@ static void initModule() {
     // Demo
     Stage::addInitCallback(forceYoshiUnlock);
     Stage::addUpdateCallback(unlockSettings);
-    Stage::addUpdateCallback(checkForBlueCoinTrade);
     Game::addBootCallback(lockModuleSettings);
 
     Stage::addInitCallback(initCharacterArchives);
@@ -128,8 +129,7 @@ static void initModule() {
     Player::addUpdateCallback(processColdState);
     // Player::addUpdateCallback(checkTutorialCollisionRespawn);
     Player::addUpdateCallback(createWaterBalloonAndThrow);
-    Player::addUpdateCallback(adjustYoshiTounge);
-    Player::addUpdateCallback(blazePlayer);
+    Player::addUpdateCallback(adjustYoshiTongue);
     Player::registerStateMachine(PlayerLaunchStarWait, holdPlayerState);
     Player::registerStateMachine(PlayerLaunchStarLaunch, launchPlayerState);
     Debug::addUpdateCallback(checkForCompletionAwards);
@@ -138,13 +138,16 @@ static void initModule() {
     Objects::registerObjectAsMapObj("Tornado", &tornadoData, TTornadoMapObj::instantiate);
     Objects::registerObjectAsMapObj("WaterBalloon", &waterBalloonData, TWaterBalloon::instantiate);
     Objects::registerObjectAsMapObj("LaunchStar", &launchStarData, TLaunchStarObj::instantiate);
-
+    Objects::registerObjectAsMapObj("KeyFollow", &followKeyData, TFollowKey::instantiate);
+    Objects::registerObjectAsMapObj("KeyChest", &keyChestData, TKeyChest::instantiate);
+    Objects::registerObjectAsMapObj("JizoStone", &jizoStoneData, TJizoStone::instantiate);
+    Objects::registerObjectAsMapObj("ButtonSwitch", &buttonSwitchData, TButtonSwitch::instantiate);
     Objects::registerObjectAsMisc("FireyPetey", TFireyPetey::instantiate);
     Objects::registerObjectAsMisc("FireyPeteyManager", TFireyPeteyManager::instantiate);
 }
 
 // Definition block
-KURIBO_MODULE_BEGIN("Super Mario Eclipse", "JoshuaMK", "v1.0") {
+KURIBO_MODULE_BEGIN("Super Mario Eclipse", "JoshuaMK", SUPER_MARIO_ECLIPSE_VERSION) {
     // Set the load and unload callbacks to our registration functions
     KURIBO_EXECUTE_ON_LOAD { initModule(); }
 }

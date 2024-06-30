@@ -4,48 +4,12 @@
 
 #include <JSystem/JGeometry/JGMVec.hxx>
 #include <SMS/Enemy/BossGesso.hxx>
+#include <SMS/Manager/EnemyManager.hxx>
 
 #include <BetterSMS/module.hxx>
 #include <Manager/PollutionManager.hxx>
 
 #define ZHINE_POL_DROP_COUNT 4
-
-class TDarkZhine;
-
-// struct TZhineParams : public TParams {
-// #def ine CONSTRUCT_PARAM(name, val) \
-//    name(this, val, JDrama::TNameRef::calcKeyCode(SME_STRINGIZE(name)), SME_STRINGIZE(name))
-//
-//     TZhineParams(const char *prm)
-//         : TParams(), CONSTRUCT_PARAM(mBoundingAreaRadius, 1000.0f),
-//           CONSTRUCT_PARAM(mDistanceFromMario, 2000.0f), CONSTRUCT_PARAM(mSpeedMultiplier, 1.0f),
-//           CONSTRUCT_PARAM(mAccelerationRate, 0.98f), CONSTRUCT_PARAM(mShockRadius, 2000.0f),
-//           CONSTRUCT_PARAM(mMaxSpeed, 60.0f), CONSTRUCT_PARAM(mStampRadius, 1000.0f),
-//           CONSTRUCT_PARAM(mFramesToCleanOnce, 3), CONSTRUCT_PARAM(mPoundingTimerMax, 300),
-//           CONSTRUCT_PARAM(mGoopingTimerMax, 0), CONSTRUCT_PARAM(mShockingTimerMax, 120),
-//           CONSTRUCT_PARAM(mRollingTimerMax, 300), CONSTRUCT_PARAM(mHardMode, false),
-//           CONSTRUCT_PARAM(mRisingRate, 1.4f), CONSTRUCT_PARAM(mMaxPoundingHeight, 800.0f) {
-//         load(prm);
-//     }
-//
-// #undef CONSTRUCT_PARAM
-//
-//     TParamRT<f32> mBoundingAreaRadius;
-//     TParamRT<f32> mDistanceFromMario;
-//     TParamRT<f32> mSpeedMultiplier;
-//     TParamRT<f32> mAccelerationRate;
-//     TParamRT<f32> mShockRadius;
-//     TParamRT<f32> mMaxSpeed;
-//     TParamRT<f32> mStampRadius;
-//     TParamRT<s16> mFramesToCleanOnce;
-//     TParamRT<s16> mPoundingTimerMax;
-//     TParamRT<s16> mGoopingTimerMax;
-//     TParamRT<s16> mShockingTimerMax;
-//     TParamRT<s16> mRollingTimerMax;
-//     TParamRT<bool> mHardMode;
-//     TParamRT<f32> mRisingRate;
-//     TParamRT<f32> mMaxPoundingHeight;
-// };
 
 class TNerveZhineSleep : public TNerveBase<TLiveActor> {
     friend class TDarkZhine;
@@ -74,12 +38,66 @@ public:
     virtual bool execute(TSpineBase<TLiveActor> *) const;
 };
 
+class TNerveZhineTeleport : public TNerveBase<TLiveActor> {
+    friend class TDarkZhine;
+
+public:
+    TNerveZhineTeleport(){};
+    virtual ~TNerveZhineTeleport() = default;
+    virtual bool execute(TSpineBase<TLiveActor> *) const;
+};
+
 class TNerveZhinePound : public TNerveBase<TLiveActor> {
     friend class TDarkZhine;
 
 public:
     TNerveZhinePound(){};
     virtual ~TNerveZhinePound() = default;
+    virtual bool execute(TSpineBase<TLiveActor> *) const;
+};
+
+class TNerveZhineIdle : public TNerveBase<TLiveActor> {
+    friend class TDarkZhine;
+
+public:
+    TNerveZhineIdle(){};
+    virtual ~TNerveZhineIdle() = default;
+    virtual bool execute(TSpineBase<TLiveActor> *) const;
+};
+
+class TNerveZhineKnockBack : public TNerveBase<TLiveActor> {
+    friend class TDarkZhine;
+
+public:
+    TNerveZhineKnockBack(){};
+    virtual ~TNerveZhineKnockBack() = default;
+    virtual bool execute(TSpineBase<TLiveActor> *) const;
+};
+
+class TNerveZhineCrash : public TNerveBase<TLiveActor> {
+    friend class TDarkZhine;
+
+public:
+    TNerveZhineCrash(){};
+    virtual ~TNerveZhineCrash() = default;
+    virtual bool execute(TSpineBase<TLiveActor> *) const;
+};
+
+class TNerveZhineRecover : public TNerveBase<TLiveActor> {
+    friend class TDarkZhine;
+
+public:
+    TNerveZhineRecover(){};
+    virtual ~TNerveZhineRecover() = default;
+    virtual bool execute(TSpineBase<TLiveActor> *) const;
+};
+
+class TNerveZhineStun : public TNerveBase<TLiveActor> {
+    friend class TDarkZhine;
+
+public:
+    TNerveZhineStun(){};
+    virtual ~TNerveZhineStun() = default;
     virtual bool execute(TSpineBase<TLiveActor> *) const;
 };
 
@@ -101,65 +119,143 @@ public:
     virtual bool execute(TSpineBase<TLiveActor> *) const;
 };
 
+class TNerveZhinePreKill : public TNerveBase<TLiveActor> {
+    friend class TDarkZhine;
+
+public:
+    TNerveZhinePreKill(){};
+    virtual ~TNerveZhinePreKill() = default;
+    virtual bool execute(TSpineBase<TLiveActor> *) const;
+};
+
+class TNerveZhineKill : public TNerveBase<TLiveActor> {
+    friend class TDarkZhine;
+
+public:
+    TNerveZhineKill(){};
+    virtual ~TNerveZhineKill() = default;
+    virtual bool execute(TSpineBase<TLiveActor> *) const;
+};
+
+class TNerveZhineAngry : public TNerveBase<TLiveActor> {
+    friend class TDarkZhine;
+
+public:
+    TNerveZhineAngry(){};
+    virtual ~TNerveZhineAngry() = default;
+    virtual bool execute(TSpineBase<TLiveActor> *) const;
+};
+
 class TDarkZhine : public TSpineEnemy {
     enum PoundingState { INACTIVE, DROPPING, SHOCKING, GROUNDROLL, RISING };
 
 public:
+    BETTER_SMS_FOR_CALLBACK static JDrama::TNameRef *instantiate() {
+        return new TDarkZhine("TDarkZhine");
+    }
+
     TDarkZhine(const char *);
-    virtual ~TDarkZhine();
+    virtual ~TDarkZhine() = default;
 
     void load(JSUMemoryInputStream &) override;
     void perform(u32, JDrama::TGraphics *) override;
     bool receiveMessage(THitActor *, u32) override;
+    void loadAfter() override;
     void init(TLiveManager *) override;
     void control() override;
     void bind() override;
     void moveObject() override;
-    const char **getBasNameTable() const;
+    void calcRootMatrix() override;
+    void reset() override;
 
-    f32 getAngleToTarget() const;
+    bool isDefeated() const { return m_health_points == 0; }
 
-    bool isFollowMario() const { return mIsFollowMario; }
-    bool isPounding() const { return mIsPounding; }
-    bool isGooping() const { return mIsGooping; }
-    bool isShocking() const { return mIsShocking; }
+    bool isHardMode() const { return m_is_hard_mode; }
     bool isTargetInRangeToHome(f32 range) const;
 
+    void setStunned(bool stunned) { m_stunned = stunned; }
+    bool isStunned() const { return m_stunned; }
+
+    void setInvincible(bool invincible) { m_invincible = invincible; }
+    bool isInvincible() const { return m_invincible; }
+
+    void setHostile(bool hostile) { m_hostile = hostile; }
+    bool isHostile() const { return m_hostile; }
+
+    f32 getDistanceToTargetXZ() const;
+    f32 getAngleToTarget() const;
+
+    f32 getForwardSpeed() const { return m_forward_speed; }
+    void setForwardSpeed(f32 speed) { m_forward_speed = speed; }
+
+    u8 getPollutionAlpha() const { return m_pol_alpha; }
+    void setPollutionAlpha(u8 alpha) { m_pol_alpha = alpha; }
+
     void setBckAnm(int index) {
-        mCurAnmIndex = index;
+        m_anm_index = index;
         mActorData->setBckFromIndex(index);
+        /*
         const char **bas_table = getBasNameTable();
         if (bas_table) {
             setAnmSound(bas_table[index]);
         }
+        */
     }
 
-    bool doGroundPound();
-    void launchPolDrop();
+    void calcReflectingVelocity(TBGCheckData *data, f32 speed, TVec3f &out);
+    void calcReflectingAngle(TBGCheckData *data, f32 *angle);
+    void moveToTargetXZ();
+    void checkForActorContact();
+    bool isPlayerAttacking(TMario *);
+    bool isPlayerPounding(TMario *);
 
-    PoundingState advanceDropAttack(TPollutionManager *gpPollution, TMario *player);
+    bool doGroundPound(bool attack, bool *illegal_out);
+    void doWorldShake(f32 strength);
+    void launchPolDrop();
     void advanceGoopDroplet();
-    void advanceRollMovement(TPollutionManager *gpPollution);
-    static u32 cleanFromSpineBase(u32 *gpNerveBGEye, TSpineBase<TLiveActor> *gpSpineBase);
+
+    f32 calcNextAngle(f32 turn_power, f32 offset, bool indiscriminate = false);
+
+    void spawnShine();
+
+    f32 getModelOffsetY() const { return m_model_ofs_y; }
+    void setModelOffsetY(f32 offset) { m_model_ofs_y = offset; }
 
 private:
-    TBGPolDrop mPolDrops[ZHINE_POL_DROP_COUNT];
-    u8 mPolDropCurrent;
+    bool m_is_hard_mode;
+    u8 m_pol_alpha;
+    u8 m_pol_collect_timer;
 
-    int mCurAnmIndex;
-    s32 mGroundPoundTimer;
+    bool m_stunned;
+    bool m_invincible;
+    bool m_hostile;
 
-    TVec3f mBoundingPoint;
-    PoundingState mPoundingStatus;
-    JDrama::TActor *mTarget;
-    s16 mPoundingTimer;
-    s16 mGoopingTimer;
-    s16 mShockingTimer;
-    s16 mRollingTimer;
-    s16 mStatusTimer;
-    s16 mCleaningTimer;
-    bool mIsFollowMario;
-    bool mIsPounding;
-    bool mIsGooping;
-    bool mIsShocking;
+    TVec3f m_ground_point;
+
+    TBGPolDrop *m_pol_drops[ZHINE_POL_DROP_COUNT];
+    u8 m_pol_drop_index;
+
+    int m_anm_index;
+
+    TVec3f m_bounding_point;
+    PoundingState m_pounding_status;
+    JDrama::TActor *m_target;
+
+    u8 m_health_points;
+    u16 m_damage_timer;
+
+    f32 m_forward_speed;
+    f32 m_model_ofs_y;
+};
+
+class TDarkZhineManager : public TEnemyManager {
+public:
+    BETTER_SMS_FOR_CALLBACK static JDrama::TNameRef *instantiate() {
+        return new TDarkZhineManager("DarkZhineManager");
+    }
+
+    TDarkZhineManager(const char *);
+    ~TDarkZhineManager() override = default;
+
+    void load(JSUMemoryInputStream &) override;
 };

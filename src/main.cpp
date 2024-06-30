@@ -12,6 +12,7 @@
 #include <BetterSMS/player.hxx>
 #include <BetterSMS/stage.hxx>
 
+#include "enemy/dark_zhine.hxx"
 #include "enemy/firey_petey.hxx"
 #include "object/darkness_effect.hxx"
 #include "object/follow_key.hxx"
@@ -144,6 +145,8 @@ static void initModule() {
     Objects::registerObjectAsMapObj("ButtonSwitch", &buttonSwitchData, TButtonSwitch::instantiate);
     Objects::registerObjectAsMisc("FireyPetey", TFireyPetey::instantiate);
     Objects::registerObjectAsMisc("FireyPeteyManager", TFireyPeteyManager::instantiate);
+    Objects::registerObjectAsMisc("DarkZhine", TDarkZhine::instantiate);
+    Objects::registerObjectAsMisc("DarkZhineManager", TDarkZhineManager::instantiate);
 }
 
 // Definition block

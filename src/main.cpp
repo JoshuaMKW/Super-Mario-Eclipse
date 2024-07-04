@@ -12,6 +12,7 @@
 #include <BetterSMS/player.hxx>
 #include <BetterSMS/stage.hxx>
 
+#include "enemy/dark_zhine.hxx"
 #include "enemy/firey_petey.hxx"
 #include "object/darkness_effect.hxx"
 #include "object/follow_key.hxx"
@@ -53,7 +54,7 @@ extern void processColdState(TMario *player, bool isMario);
 // HUD
 extern void updatePlayerHUD(TMarDirector *, const J2DOrthoGraph *);
 
-// DEMO
+// GAME BEHAVIOR
 extern void lockModuleSettings(TApplication *app);
 extern void unlockSettings(TMarDirector *director);
 extern void setPlayerPosRotOnLoad(TMario *player);
@@ -64,6 +65,9 @@ extern void checkTutorialCasinoStageCheckpoints(TMario *player, bool isMario);
 extern void resetTutorialPiantaPitStageCheckpoints(TMarDirector *director);
 extern void checkTutorialPiantaPitStageCheckpoints(TMario *player, bool isMario);
 extern void checkTutorialCollisionRespawn(TMario *player, bool isMario);
+extern void setTutorialVisited(TApplication *director);
+extern void resetCruiserUnlocked(TMarDirector *director);
+extern void checkForCruiserUnlocked(TMarDirector *director);
 
 // SETTINGS
 extern void checkForCompletionAwards(TApplication *);
@@ -76,7 +80,7 @@ static void initModule() {
     gSettingsGroup.addSetting(&gBugsSetting);
     gSettingsGroup.addSetting(&gTutorialSetting);
 
-    extern void initDemoCredits(Settings::SettingsGroup & group);
+    extern void initDemoCredits(Settings::SettingsGroup &group);
     initDemoCredits(gSettingsGroup);
     {
         auto &saveInfo        = gSettingsGroup.getSaveInfo();
@@ -97,6 +101,7 @@ static void initModule() {
     BetterSMS::registerModule(sModuleInfo);
 
     Game::setMaxShines(MaxShineCount);
+    Application::showSettingsOnFirstBoot(true);
 
     // Register callbacks
     Application::registerContextCallback(11, directCharacterSelectMenu);
@@ -112,6 +117,9 @@ static void initModule() {
     Stage::addInitCallback(forceYoshiUnlock);
     Stage::addUpdateCallback(unlockSettings);
     Game::addBootCallback(lockModuleSettings);
+    
+    Stage::addInitCallback(resetCruiserUnlocked);
+    Stage::addUpdateCallback(checkForCruiserUnlocked);
 
     Stage::addInitCallback(initCharacterArchives);
     Stage::addInitCallback(resetForExStage);
@@ -119,6 +127,7 @@ static void initModule() {
     Stage::addInitCallback(resetTutorialCasinoStageCheckpoints);
     Stage::addInitCallback(resetTutorialPiantaPitStageCheckpoints);
     Stage::addDraw2DCallback(updatePlayerHUD);
+    Stage::addExitCallback(setTutorialVisited);
     Player::addInitCallback(initEclipseData);
     Player::addLoadAfterCallback(initializeWaterBalloons);
     Player::addLoadAfterCallback(setPlayerPosRotOnLoad);
@@ -127,7 +136,7 @@ static void initModule() {
     Player::addUpdateCallback(checkTutorialPiantaPitStageCheckpoints);
     Stage::addInitCallback(initColdState);
     Player::addUpdateCallback(processColdState);
-    // Player::addUpdateCallback(checkTutorialCollisionRespawn);
+    Player::addUpdateCallback(checkTutorialCollisionRespawn);
     Player::addUpdateCallback(createWaterBalloonAndThrow);
     Player::addUpdateCallback(adjustYoshiTongue);
     Player::registerStateMachine(PlayerLaunchStarWait, holdPlayerState);
@@ -144,6 +153,8 @@ static void initModule() {
     Objects::registerObjectAsMapObj("ButtonSwitch", &buttonSwitchData, TButtonSwitch::instantiate);
     Objects::registerObjectAsMisc("FireyPetey", TFireyPetey::instantiate);
     Objects::registerObjectAsMisc("FireyPeteyManager", TFireyPeteyManager::instantiate);
+    Objects::registerObjectAsMisc("DarkZhine", TDarkZhine::instantiate);
+    Objects::registerObjectAsMisc("DarkZhineManager", TDarkZhineManager::instantiate);
 }
 
 // Definition block

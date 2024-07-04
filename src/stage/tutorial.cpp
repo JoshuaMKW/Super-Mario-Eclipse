@@ -379,13 +379,6 @@ BETTER_SMS_FOR_CALLBACK void checkTutorialIceStageCheckpoints(TMario *player, bo
                                                nullptr, flags);
             sIsCameraPlayed  = true;
             sDoorSoundActive = true;
-            gTutorialSetting.setBool(true);
-
-            s32 cardStatus = Settings::mountCard();
-            if (cardStatus >= CARD_ERROR_READY) {
-                Settings::saveSettingsGroup(gSettingsGroup);
-                Settings::unmountCard();
-            }
         }
     }
 }
@@ -488,13 +481,19 @@ BETTER_SMS_FOR_CALLBACK void checkTutorialCollisionRespawn(TMario *player, bool 
 }
 
 BETTER_SMS_FOR_CALLBACK void setIntroStage(TApplication *application) {
-#if 0
     if (gTutorialSetting.getBool()) {
         BetterSMS::Application::setIntroStage(15, 0);
     } else {
-        BetterSMS::Application::setIntroStage(11, 2);
+        BetterSMS::Application::setIntroStage(80, 0);
     }
-#else
-    BetterSMS::Application::setIntroStage(15, 0);
-#endif
+}
+
+BETTER_SMS_FOR_CALLBACK void setTutorialVisited(TApplication *application) {
+    gTutorialSetting.setBool(true);
+
+    s32 cardStatus = Settings::mountCard();
+    if (cardStatus >= CARD_ERROR_READY) {
+        Settings::saveSettingsGroup(gSettingsGroup);
+        Settings::unmountCard();
+    }
 }

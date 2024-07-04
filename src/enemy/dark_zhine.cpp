@@ -31,11 +31,13 @@ static TNerveZhinePound s_zhine_nerve_pound;
 static TNerveZhineIdle s_zhine_nerve_idle;
 static TNerveZhineRoll s_zhine_nerve_roll;
 static TNerveZhineRise s_zhine_nerve_rise;
+static TNerveZhineRecover s_zhine_nerve_recover;
 static TNerveZhinePreKill s_zhine_nerve_prekill;
 static TNerveZhineKill s_zhine_nerve_kill;
 static TNerveZhineAngry s_zhine_nerve_angry;
 
 static bool s_has_bgm_started = false;
+static bool s_first_pound     = true;
 
 #define ZHINE_ANM_IDX_FLY   0
 #define ZHINE_ANM_IDX_RISE  1
@@ -90,6 +92,67 @@ static bool isMarioVulnerableToShock(TMario *player) {
            SMS_IsMarioTouchGround4cm__Fv(player);
 }
 
+class AtomMessageViewer;
+
+static AtomMessageViewer *s_message_queue[10] = {0};
+static size_t s_message_queue_head            = 0;
+static size_t s_message_queue_size            = 0;
+static s32 s_message_duration                 = -1;
+
+static void pushMessage(AtomMessageViewer *message) {
+    if (s_message_queue_size < 10) {
+        s_message_queue[(s_message_queue_head + s_message_queue_size) % 10] = message;
+        s_message_queue_size++;
+    }
+}
+
+static AtomMessageViewer *peekMessage() {
+    if (s_message_queue_size > 0) {
+        return s_message_queue[s_message_queue_head];
+    }
+    return nullptr;
+}
+
+static void popMessage() {
+    if (s_message_queue_size > 0) {
+        s_message_queue_head = (s_message_queue_head + 1) % 10;
+        s_message_queue_size--;
+    }
+}
+
+class AtomMessageViewer {
+public:
+    AtomMessageViewer() = delete;
+    AtomMessageViewer(u32 messageID, s32 duration)
+        : m_message_id(messageID), m_duration(duration), m_is_used(false) {}
+
+    u32 id() const { return m_message_id; }
+    s32 duration() const { return m_duration; }
+
+    void reset() { m_is_used = false; }
+
+    void show() {
+        if (m_is_used) {
+            return;
+        }
+        pushMessage(this);
+        m_is_used = true;
+    }
+
+private:
+    u32 m_message_id;
+    s32 m_duration;
+    bool m_is_used;
+};
+
+static AtomMessageViewer s_msg_sleep(104, 460);
+static AtomMessageViewer s_msg_pound_a(105, 500);
+static AtomMessageViewer s_msg_pound_b(106, 560);
+static AtomMessageViewer s_msg_pound_c(107, 560);
+static AtomMessageViewer s_msg_attack(108, 520);
+static AtomMessageViewer s_msg_last_point(109, 560);
+static AtomMessageViewer s_msg_finish(110, 580);
+
 bool TNerveZhineSleep::execute(TSpineBase<TLiveActor> *spine) const {
     TDarkZhine *zhine  = static_cast<TDarkZhine *>(spine->mTarget);
     zhine->mGravity    = ZHINE_GRAVITY;
@@ -101,10 +164,14 @@ bool TNerveZhineSleep::execute(TSpineBase<TLiveActor> *spine) const {
     zhine->setInvincible(true);
 
     J3DFrameCtrl *ctrl = zhine->mActorData->getFrameCtrl(MActor::BCK);
+    zhine->mRotation.y = zhine->calcNextAngle(ZHINE_TURN_POWER, 0.0f);
 
     if (spine->mNerveTimer == 0) {
-        OSReport("Sleep Nerve!\n");
         zhine->mActorData->setBck("zhine_resting");
+    }
+
+    if (spine->mNerveTimer > 120) {
+        s_msg_sleep.show();
     }
 
     if (gpMSound->gateCheck(MSD_SE_BS_TELESA_BREATHE) && (spine->mNerveTimer % 120) == 0) {
@@ -135,6 +202,7 @@ bool TNerveZhineWake::execute(TSpineBase<TLiveActor> *spine) const {
     if (spine->mNerveTimer == 0) {
         zhine->mActorData->setBck("zhine_notice");
         zhine->setStunned(false);
+
         if (!s_has_bgm_started) {
             MSBgm::startBGM(BGM_BOSS);
             s_has_bgm_started = true;
@@ -275,7 +343,20 @@ bool TNerveZhineIdle::execute(TSpineBase<TLiveActor> *spine) const {
 
     zhine->setInvincible(false);
 
+    if (spine->mNerveTimer == 0) {
+        zhine->mActorData->setBck("zhine_resting");
+        zhine->mActorData->setFrameRate(2.0f, MActor::BCK);
+    }
+
+    if (gpMSound->gateCheck(MSD_SE_BS_TELESA_BREATHE) && (spine->mNerveTimer % 60) == 0) {
+        MSoundSE::startSoundActor(MSD_SE_BS_TELESA_BREATHE, zhine->mTranslation, 0, nullptr, 0, 4);
+    }
+
     if (spine->mNerveTimer > 300) {
+        if (s_first_pound) {
+            s_msg_pound_a.show();
+            s_msg_pound_b.show();
+        }
         spine->pushNerve(&s_zhine_nerve_roll);
         return true;
     }
@@ -327,7 +408,7 @@ bool TNerveZhineKnockBack::execute(TSpineBase<TLiveActor> *spine) const {
     f32 contact_speed =
         fabsf(forward_speed * sinf(angleToRadians(getAngleDelta(prev_angle, new_angle)) * 0.5f));
     f32 contact_speed_blend = Min(contact_speed / 30.0f, 1.0f);
-    if (contact_speed_blend > 0.25f) {
+    if (contact_speed_blend > 0.40f) {
         if (gpMSound->gateCheck(0x28E1)) {
             MSoundSE::startSoundActor(0x28E1, zhine->mTranslation, 0, nullptr, 0, 4);
         }
@@ -359,6 +440,8 @@ bool TNerveZhineCrash::execute(TSpineBase<TLiveActor> *spine) const {
             MSoundSE::startSoundActor(MSD_SE_BS_TELESA_SPICY_HIT, zhine->mTranslation, 0, nullptr,
                                       0, 4);
         }
+
+        s_msg_attack.show();
     }
 
     if (fabsf(zhine->mTranslation.y - zhine->mGroundY) < 10.0f && zhine->mSpeed.y <= 0.0f) {
@@ -371,10 +454,10 @@ bool TNerveZhineCrash::execute(TSpineBase<TLiveActor> *spine) const {
             spine->pushNerve(&s_zhine_nerve_prekill);
         } else if (zhine->isHardMode()) {
             spine->pushNerve(&s_zhine_nerve_angry);
-            spine->pushNerve(&s_zhine_nerve_wake);
+            spine->pushNerve(&s_zhine_nerve_recover);
         } else {
             spine->pushNerve(&s_zhine_nerve_roll);
-            spine->pushNerve(&s_zhine_nerve_wake);
+            spine->pushNerve(&s_zhine_nerve_recover);
         }
         return true;
     }
@@ -396,12 +479,12 @@ bool TNerveZhineCrash::execute(TSpineBase<TLiveActor> *spine) const {
     f32 forward_speed = TVec3f(zhine->mSpeed.x, 0.0f, zhine->mSpeed.z).magnitude();
     zhine->setForwardSpeed(forward_speed);
 
-    f32 new_angle  = zhine->mRotation.y;
+    f32 new_angle = zhine->mRotation.y;
 
     f32 contact_speed =
         fabsf(forward_speed * sinf(angleToRadians(getAngleDelta(prev_angle, new_angle)) * 0.5f));
     f32 contact_speed_blend = Min(contact_speed / 30.0f, 1.0f);
-    if (contact_speed_blend > 0.25f) { 
+    if (contact_speed_blend > 0.40f) {
         if (gpMSound->gateCheck(0x28E1)) {
             MSoundSE::startSoundActor(0x28E1, zhine->mTranslation, 0, nullptr, 0, 4);
         }
@@ -412,7 +495,50 @@ bool TNerveZhineCrash::execute(TSpineBase<TLiveActor> *spine) const {
     return false;
 }
 
-bool TNerveZhineRecover::execute(TSpineBase<TLiveActor> *) const { return false; }
+bool TNerveZhineRecover::execute(TSpineBase<TLiveActor> *spine) const {
+    TDarkZhine *zhine = static_cast<TDarkZhine *>(spine->mTarget);
+    zhine->setHostile(true);
+    zhine->setInvincible(true);
+
+    MActor *actor = zhine->mActorData;
+
+    if (spine->mNerveTimer == 0) {
+        actor->setFrameRate(0.8f, MActor::BCK);
+    }
+
+    if (spine->mNerveTimer == 120) {
+        zhine->mActorData->setBck("zhine_recover_a");
+
+        if (gpMSound->gateCheck(MSD_SE_BS_TELESA_V_LAUGH2)) {
+            MSoundSE::startSoundActor(MSD_SE_BS_TELESA_V_LAUGH2, zhine->mTranslation, 0, nullptr, 0,
+                                      4);
+        }
+    }
+
+    if (spine->mNerveTimer >= 120) {
+        bool is_first_anim = zhine->mActorData->checkCurAnm("zhine_recover_a", MActor::BCK);
+        bool is_anim_done  = zhine->mActorData->isCurAnmAlreadyEnd(MActor::BCK);
+
+        if (is_first_anim && is_anim_done) {
+            zhine->mActorData->setBck("zhine_recover_b");
+        }
+
+        if (!is_first_anim) {
+            if (is_anim_done) {
+                return true;
+            }
+
+            f32 cur_frame  = actor->getFrameCtrl(MActor::BCK)->mCurFrame;
+            f32 num_frames = actor->getFrameCtrl(MActor::BCK)->mNumFrames;
+            f32 f          = num_frames != 0 ? cur_frame / num_frames : 1.0f;
+
+            f32 model_y = lerp<f32>(zhine->getModelOffsetY(), ZHINE_MODEL_TRANS_Y, f);
+            zhine->setModelOffsetY(model_y);
+        }
+    }
+
+    return false;
+}
 
 bool TNerveZhineStun::execute(TSpineBase<TLiveActor> *spine) const {
     TDarkZhine *zhine  = static_cast<TDarkZhine *>(spine->mTarget);
@@ -427,20 +553,22 @@ bool TNerveZhineStun::execute(TSpineBase<TLiveActor> *spine) const {
     forward_speed     = Max(forward_speed - 0.1f, 0.0f);
     zhine->setForwardSpeed(forward_speed);
 
-    zhine->mSpeed.x = sinf(angleToRadians(zhine->mRotation.y)) * forward_speed;
-    zhine->mSpeed.z = sinf(angleToRadians(zhine->mRotation.y)) * forward_speed;
+    zhine->mSpeed.normalize();
+    zhine->mSpeed.scale(forward_speed);
 
     J3DFrameCtrl *ctrl = zhine->mActorData->getFrameCtrl(MActor::BCK);
 
     if (spine->mNerveTimer == 0) {
         zhine->mActorData->setBck("zhine_stun");
         zhine->setStunned(true);
+        s_msg_pound_c.show();
     }
 
     if (spine->mNerveTimer > 700) {
         zhine->setStunned(false);
         zhine->setHostile(true);
         spine->pushNerve(&s_zhine_nerve_roll);
+        spine->pushNerve(&s_zhine_nerve_recover);
         return true;
     }
 
@@ -456,7 +584,6 @@ bool TNerveZhineRoll::execute(TSpineBase<TLiveActor> *spine) const {
     TDarkZhine *zhine = static_cast<TDarkZhine *>(spine->mTarget);
 
     if (spine->mNerveTimer == 0) {
-        OSReport("Roll Nerve!\n");
         zhine->mActorData->setBck("zhine_roll");
     }
 
@@ -532,7 +659,7 @@ bool TNerveZhineRoll::execute(TSpineBase<TLiveActor> *spine) const {
         fabsf(forward_speed * sinf(angleToRadians(getAngleDelta(prev_angle, new_angle)) * 0.5f));
     f32 contact_speed_blend = contact_speed / max_speed;
 
-    if (contact_speed_blend > 0.25f) {
+    if (contact_speed_blend > 0.40f) {
         if (gpMSound->gateCheck(MSD_SE_EN_WANWAN_REFLECT)) {
             MSoundSE::startSoundActor(MSD_SE_EN_WANWAN_REFLECT, zhine->mTranslation, 0, nullptr, 0,
                                       4);
@@ -556,7 +683,6 @@ bool TNerveZhineRise::execute(TSpineBase<TLiveActor> *spine) const {
     zhine->setModelOffsetY(Max(zhine->getModelOffsetY() - 0.5f, 0.0f));
 
     if (spine->mNerveTimer == 0) {
-        OSReport("Rise Nerve!\n");
         actor->setBck("zhine_rise");
     }
 
@@ -581,13 +707,15 @@ bool TNerveZhinePreKill::execute(TSpineBase<TLiveActor> *spine) const {
     TDarkZhine *zhine = static_cast<TDarkZhine *>(spine->mTarget);
     MActor *actor     = zhine->mActorData;
 
+    zhine->mGravity = 0.0f;
+    zhine->mSpeed   = TVec3f::zero();
+
     zhine->setInvincible(true);
-    zhine->setModelOffsetY(Min(zhine->getModelOffsetY() + 1.0f, ZHINE_MODEL_TRANS_Y + 15.0f));
+    zhine->setModelOffsetY(Min(zhine->getModelOffsetY() + 1.0f, ZHINE_MODEL_TRANS_Y + 5.0f));
 
     if (spine->mNerveTimer == 0) {
-        OSReport("Dying Nerve!\n");
         actor->setBck("zhine_dying");
-        actor->setFrameRate(0.90f, MActor::BCK);
+        actor->setFrameRate(1.1f, MActor::BCK);
 
         if (gpMSound->gateCheck(MSD_SE_BS_TELESA_DOWN)) {
             MSoundSE::startSoundActor(MSD_SE_BS_TELESA_DOWN, zhine->mTranslation, 0, nullptr, 0, 4);
@@ -607,15 +735,6 @@ bool TNerveZhinePreKill::execute(TSpineBase<TLiveActor> *spine) const {
     zhine->mTranslation.y = current_height;
     zhine->mRotation.y    = zhine->calcNextAngle(ZHINE_TURN_POWER, 0.0f);
 
-    // Beams
-    {
-        auto *particle = gpMarioParticleManager->emitAndBindToMtxPtr(
-            296, zhine->mActorData->mModel->mBaseMtx, 1, this);
-        if (particle) {
-            particle->mSize1 = {particle_scale, particle_scale, particle_scale};
-        }
-    }
-
     if (actor->isCurAnmAlreadyEnd(MActor::BCK)) {
         spine->pushNerve(&s_zhine_nerve_kill);
         return true;
@@ -628,21 +747,27 @@ bool TNerveZhineKill::execute(TSpineBase<TLiveActor> *spine) const {
     TDarkZhine *zhine = static_cast<TDarkZhine *>(spine->mTarget);
     MActor *actor     = zhine->mActorData;
 
+    zhine->mGravity = 0.0f;
+    zhine->mSpeed   = TVec3f::zero();
+
+    zhine->setModelOffsetY(ZHINE_MODEL_TRANS_Y + 5.0f);
+
     if (spine->mNerveTimer == 0) {
-        OSReport("Dying Nerve!\n");
         actor->setBck("zhine_explode");
 
         // Drops
         {
-            auto *particle = gpMarioParticleManager->emit(132, &zhine->mTranslation, 0, this);
+            auto *particle = gpMarioParticleManager->emit(132, &zhine->mTranslation, 0, nullptr);
             if (particle) {
-                particle->mSize1 = {2.0f, 2.0f, 2.0f};
+                particle->mSize1 = {4.0f, 4.0f, 4.0f};
             }
         }
 
         zhine->mStateFlags.asU32 |= 0x100;
         zhine->mStateFlags.asU32 &= ~0x8;
         zhine->spawnShine();
+
+        s_msg_finish.show();
     }
 
     f32 cur_frame  = actor->getFrameCtrl(MActor::BCK)->mCurFrame;
@@ -668,7 +793,7 @@ bool TNerveZhineAngry::execute(TSpineBase<TLiveActor> *spine) const {
     if (spine->mNerveTimer == 0) {
         MSBgm::startBGM(BGM_BOSSHANA_2ND3RD);
         (*(MSModBgm **)((u8 *)gpMSound + 0x9C))->changeTempo(0, 1);
-        actor->setBck("zhine_wake");
+        actor->setBck("zhine_angry");
         // actor->setFrameRate(0.2f, MActor::BCK);
     }
 
@@ -750,6 +875,10 @@ void TDarkZhine::perform(u32 flags, JDrama::TGraphics *graphics) {
         m_pol_drops[i]->perform(flags, graphics);
     }
 
+    if ((flags & 1)) {
+        checkMessagePool();
+    }
+
     if ((flags & 2)) {
         if (isStunned()) {
             gpTargetArrow->mIsVisible = true;
@@ -760,7 +889,7 @@ void TDarkZhine::perform(u32 flags, JDrama::TGraphics *graphics) {
     }
 
     if ((flags & 4)) {
-        // Request a shadow
+        requestShadow();
     }
 
     if ((flags & 0x200)) {
@@ -794,6 +923,17 @@ bool TDarkZhine::receiveMessage(THitActor *sender, u32 message) {
 void TDarkZhine::loadAfter() {
     m_target         = gpMarioAddress;
     m_bounding_point = mTranslation;
+
+    s_msg_sleep.reset();
+    s_msg_pound_a.reset();
+    s_msg_pound_b.reset();
+    s_msg_pound_c.reset();
+    s_msg_attack.reset();
+    s_msg_last_point.reset();
+    s_msg_finish.reset();
+
+    s_first_pound     = true;
+    s_has_bgm_started = false;
 }
 
 void TDarkZhine::control() {
@@ -818,8 +958,8 @@ void TDarkZhine::control() {
     checkForActorContact();
 
     if (isHardMode()) {
-        gpMarioParticleManager->emitAndBindToPosPtr(296, &mTranslation, 1, this);
-        gpMarioParticleManager->emitAndBindToPosPtr(297, &mTranslation, 1, this);
+        gpMarioParticleManager->emitAndBindToMtxPtr(296, getModel()->mBaseMtx, 1, this);
+        gpMarioParticleManager->emitAndBindToMtxPtr(297, getModel()->mBaseMtx, 1, this);
     }
 }
 
@@ -842,6 +982,12 @@ void TDarkZhine::reset() {
     setInvincible(true);
     mTranslation = m_bounding_point;
     mRotation    = TVec3f::zero();
+}
+
+void TDarkZhine::kill() {
+    TSpineEnemy::kill();
+    mStateFlags.asU32 |= 0xD9;
+    mObjectType |= 1;  // Disable collision
 }
 
 f32 TDarkZhine::getDistanceToTargetXZ() const {
@@ -911,11 +1057,13 @@ void TDarkZhine::checkForActorContact() {
                         MSoundSE::startSoundActor(0x28E1, mTranslation, 0, nullptr, 0, 4);
                     }
 
+                    // Block FLUDD analysis.
+                    s_first_pound = false;
                     mSpineBase->setNerve(&s_zhine_nerve_knockback);
                     break;
                 }
 
-                if (isHostile()) {
+                if (isHostile() && !isDefeated()) {
                     if (getForwardSpeed() > 20.0f) {
                         player->damageExec(this, 1, 2, 0, 16.0f, 0x19, 0.0f, 160);
                     } else {
@@ -930,6 +1078,7 @@ void TDarkZhine::checkForActorContact() {
                     m_health_points -= 1;
                     if (m_health_points == 1) {
                         m_is_hard_mode = true;
+                        s_msg_last_point.show();
                     }
 
                     mSpineBase->setNerve(&s_zhine_nerve_crash);
@@ -1032,6 +1181,33 @@ void TDarkZhine::doWorldShake(f32 strength) {
     }
     if (gpMSound->gateCheck(6158)) {
         MSoundSE::startSoundActor(6158, mTranslation, 0, nullptr, 0, 4);
+    }
+}
+
+void TDarkZhine::checkMessagePool() {
+    bool is_console_ready = *(u16 *)((u8 *)gpMarDirector->mGCConsole + 0x3F4) == 0;
+
+    AtomMessageViewer *message = peekMessage();
+    if (!message) {
+        return;
+    }
+
+    if (s_message_duration == -1 && is_console_ready) {
+        s_message_duration = 0;
+        startAppearBalloon__11TGCConsole2FUlb(gpMarDirector->mGCConsole, message->id(), false);
+    } else if (s_message_duration++ == message->duration()) {
+        startDisappearBalloon__11TGCConsole2FUlb(gpMarDirector->mGCConsole, message->id(), true);
+    } else if (is_console_ready) {
+        popMessage();
+
+        AtomMessageViewer *next_message = peekMessage();
+        if (next_message) {
+            s_message_duration = 0;
+            startAppearBalloon__11TGCConsole2FUlb(gpMarDirector->mGCConsole, next_message->id(),
+                                                  false);
+        } else {
+            s_message_duration = -1;
+        }
     }
 }
 

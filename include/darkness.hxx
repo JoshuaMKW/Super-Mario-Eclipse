@@ -6,7 +6,7 @@
 #include <SMS/Manager/ModelWaterManager.hxx>
 
 struct TLightContext {
-    enum class ActiveType : u8 { DISABLED, STATIC, FOLLOWPLAYER };
+    enum class ActiveType : u8 { DISABLED, STATIC, FOLLOWPLAYER, FOLLOWCAMERA };
 
     TLightContext()
         : mLightType(ActiveType::DISABLED), mTranslation(0.0f, 0.0f, 0.0f), mColor(0, 0, 10, 255),

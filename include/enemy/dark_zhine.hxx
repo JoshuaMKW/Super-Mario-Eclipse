@@ -167,6 +167,7 @@ public:
     void moveObject() override;
     void calcRootMatrix() override;
     void reset() override;
+    void kill() override;
 
     bool isDefeated() const { return m_health_points == 0; }
 
@@ -191,6 +192,9 @@ public:
     u8 getPollutionAlpha() const { return m_pol_alpha; }
     void setPollutionAlpha(u8 alpha) { m_pol_alpha = alpha; }
 
+    f32 getModelOffsetY() const { return m_model_ofs_y; }
+    void setModelOffsetY(f32 offset) { m_model_ofs_y = offset; }
+
     void setBckAnm(int index) {
         m_anm_index = index;
         mActorData->setBckFromIndex(index);
@@ -212,14 +216,11 @@ public:
     bool doGroundPound(bool attack, bool *illegal_out);
     void doWorldShake(f32 strength);
     void launchPolDrop();
-    void advanceGoopDroplet();
+    void checkMessagePool();
 
     f32 calcNextAngle(f32 turn_power, f32 offset, bool indiscriminate = false);
 
     void spawnShine();
-
-    f32 getModelOffsetY() const { return m_model_ofs_y; }
-    void setModelOffsetY(f32 offset) { m_model_ofs_y = offset; }
 
 private:
     bool m_is_hard_mode;

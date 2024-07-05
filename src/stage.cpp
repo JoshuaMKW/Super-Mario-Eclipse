@@ -56,338 +56,159 @@ BETTER_SMS_FOR_CALLBACK void initializeStageInfo(TApplication *app) {
 
         // Register Erto Rock stage info
         {
-            auto *info           = new BetterSMS::Stage::AreaInfo;
-            info->mShineStageID  = SME::STAGE_ERTO;
-            info->mNormalStageID = SME::STAGE_ERTO;
-            info->mScenarioIDs.push_back(0x78);
-            info->mScenarioIDs.push_back(0x79);
-            info->mScenarioIDs.push_back(0x7A);
-            info->mScenarioIDs.push_back(0x7B);
-            info->mScenarioIDs.push_back(0x7C);
-            info->mScenarioIDs.push_back(0x7D);
-            info->mScenarioIDs.push_back(0x7E);
-            info->mScenarioIDs.push_back(0x7F);
-            info->mExScenarioIDs.push_back(0x200);
-            info->mExScenarioIDs.push_back(0x80);
-            info->mExScenarioIDs.push_back(0x81);
-            info->mExScenarioIDs.push_back(0x00);
-            info->mScenarioNameIDs.push_back(72);
-            info->mScenarioNameIDs.push_back(73);
-            info->mScenarioNameIDs.push_back(74);
-            info->mScenarioNameIDs.push_back(75);
-            info->mScenarioNameIDs.push_back(76);
-            info->mScenarioNameIDs.push_back(77);
-            info->mScenarioNameIDs.push_back(78);
-            info->mScenarioNameIDs.push_back(79);
-            info->mExScenarioNameIDs.push_back(80);
-            info->mExScenarioNameIDs.push_back(81);
-            info->mShineSelectPaneID = 'er_0';
-            BetterSMS::Stage::registerStageInfo(info->mNormalStageID, info);
-
-            {
-                auto exinfo            = new BetterSMS::Stage::ExAreaInfo;
-                exinfo->mShineStageID  = info->mShineStageID;
-                exinfo->mNormalStageID = SME::STAGE_ERTO_EX;
-                exinfo->mShineID       = 0xA0;
-                BetterSMS::Stage::registerExStageInfo(exinfo->mNormalStageID, exinfo);
-            }
+            Stage::ShineAreaInfo *info = new Stage::ShineAreaInfo(SME::STAGE_ERTO, 'er_0');
+            info->addScenario(0x78, 72);
+            info->addScenario(0x79, 73);
+            info->addScenario(0x7A, 74);
+            info->addScenario(0x7B, 75);
+            info->addScenario(0x7C, 76);
+            info->addScenario(0x7D, 77);
+            info->addScenario(0x7E, 78);
+            info->addScenario(0x7F, 79);
+            info->addExScenario(0x80, 80);
+            info->addExScenario(0x81, 81);
+            Stage::registerShineStage(info);
+            Stage::registerNormalStage(SME::STAGE_ERTO, info->getShineStageID());
+            Stage::registerExStage(SME::STAGE_ERTO_EX, info->getShineStageID(), 0x7C);
         }
 
         // Register Lighthouse Island stage info
         {
-            auto *info           = new BetterSMS::Stage::AreaInfo;
-            info->mShineStageID  = SME::STAGE_LIGHTHOUSE;
-            info->mNormalStageID = SME::STAGE_LIGHTHOUSE;
-            info->mScenarioIDs.push_back(0x82);
-            info->mScenarioIDs.push_back(0x83);
-            info->mScenarioIDs.push_back(0x84);
-            info->mScenarioIDs.push_back(0x85);
-            info->mScenarioIDs.push_back(0x86);
-            info->mScenarioIDs.push_back(0x87);
-            info->mScenarioIDs.push_back(0x88);
-            info->mScenarioIDs.push_back(0x89);
-            info->mExScenarioIDs.push_back(0x201);
-            info->mExScenarioIDs.push_back(0x8A);
-            info->mExScenarioIDs.push_back(0x8B);
-            info->mExScenarioIDs.push_back(0x00);
-            info->mScenarioNameIDs.push_back(82);
-            info->mScenarioNameIDs.push_back(83);
-            info->mScenarioNameIDs.push_back(84);
-            info->mScenarioNameIDs.push_back(85);
-            info->mScenarioNameIDs.push_back(86);
-            info->mScenarioNameIDs.push_back(87);
-            info->mScenarioNameIDs.push_back(88);
-            info->mScenarioNameIDs.push_back(89);
-            info->mExScenarioNameIDs.push_back(90);
-            info->mExScenarioNameIDs.push_back(91);
-            info->mShineSelectPaneID = 'li_0';
-            BetterSMS::Stage::registerStageInfo(info->mNormalStageID, info);
-
-            {
-                auto exinfo            = new BetterSMS::Stage::ExAreaInfo;
-                exinfo->mShineStageID  = info->mShineStageID;
-                exinfo->mNormalStageID = SME::STAGE_LIGHTHOUSE_EX;
-                exinfo->mShineID       = 0xA2;
-                BetterSMS::Stage::registerExStageInfo(exinfo->mNormalStageID, exinfo);
-            }
+            Stage::ShineAreaInfo *info = new Stage::ShineAreaInfo(SME::STAGE_LIGHTHOUSE, 'li_0');
+            info->addScenario(0x82, 82);
+            info->addScenario(0x83, 83);
+            info->addScenario(0x84, 84);
+            info->addScenario(0x85, 85);
+            info->addScenario(0x86, 86);
+            info->addScenario(0x87, 87);
+            info->addScenario(0x88, 88);
+            info->addScenario(0x89, 89);
+            info->addExScenario(0x8A, 90);
+            info->addExScenario(0x8B, 91);
+            Stage::registerShineStage(info);
+            Stage::registerNormalStage(SME::STAGE_LIGHTHOUSE, info->getShineStageID());
+            Stage::registerNormalStage(SME::STAGE_LIGHTHOUSE_BOSS, info->getShineStageID());
+            Stage::registerExStage(SME::STAGE_LIGHTHOUSE_EX, info->getShineStageID(), 0x85);
         }
 
         // Register Warship Island stage info
         {
-            auto *info           = new BetterSMS::Stage::AreaInfo;
-            info->mShineStageID  = SME::STAGE_WARSHIP;
-            info->mNormalStageID = SME::STAGE_WARSHIP;
-            info->mScenarioIDs.push_back(0x8C);
-            info->mScenarioIDs.push_back(0x8D);
-            info->mScenarioIDs.push_back(0x8E);
-            info->mScenarioIDs.push_back(0x8F);
-            info->mScenarioIDs.push_back(0x90);
-            info->mScenarioIDs.push_back(0x91);
-            info->mScenarioIDs.push_back(0x92);
-            info->mScenarioIDs.push_back(0x93);
-            info->mExScenarioIDs.push_back(0x202);
-            info->mExScenarioIDs.push_back(0x94);
-            info->mExScenarioIDs.push_back(0x95);
-            info->mExScenarioIDs.push_back(0x00);
-            info->mScenarioNameIDs.push_back(92);
-            info->mScenarioNameIDs.push_back(93);
-            info->mScenarioNameIDs.push_back(94);
-            info->mScenarioNameIDs.push_back(95);
-            info->mScenarioNameIDs.push_back(96);
-            info->mScenarioNameIDs.push_back(97);
-            info->mScenarioNameIDs.push_back(98);
-            info->mScenarioNameIDs.push_back(99);
-            info->mExScenarioNameIDs.push_back(100);
-            info->mExScenarioNameIDs.push_back(101);
-            info->mShineSelectPaneID = 'wr_0';
-            BetterSMS::Stage::registerStageInfo(info->mNormalStageID, info);
-
-            {
-                auto exinfo            = new BetterSMS::Stage::ExAreaInfo;
-                exinfo->mShineStageID  = info->mShineStageID;
-                exinfo->mNormalStageID = SME::STAGE_WARSHIP_EX;
-                exinfo->mShineID       = 0xA4;
-                BetterSMS::Stage::registerExStageInfo(exinfo->mNormalStageID, exinfo);
-            }
+            Stage::ShineAreaInfo *info = new Stage::ShineAreaInfo(SME::STAGE_WARSHIP, 'wr_0');
+            info->addScenario(0x8C, 92);
+            info->addScenario(0x8D, 93);
+            info->addScenario(0x8E, 94);
+            info->addScenario(0x8F, 95);
+            info->addScenario(0x90, 96);
+            info->addScenario(0x91, 97);
+            info->addScenario(0x92, 98);
+            info->addScenario(0x93, 99);
+            info->addExScenario(0x94, 100);
+            info->addExScenario(0x95, 101);
+            Stage::registerShineStage(info);
+            Stage::registerNormalStage(SME::STAGE_WARSHIP, info->getShineStageID());
+            Stage::registerExStage(SME::STAGE_WARSHIP_EX, info->getShineStageID(), 0x8F);
         }
 
         // Register Hotel Lacrima stage info
         {
-            auto *info           = new BetterSMS::Stage::AreaInfo;
-            info->mShineStageID  = SME::STAGE_LACRIMA;
-            info->mNormalStageID = SME::STAGE_LACRIMA;
-            info->mScenarioIDs.push_back(0x96);
-            info->mScenarioIDs.push_back(0x97);
-            info->mScenarioIDs.push_back(0x98);
-            info->mScenarioIDs.push_back(0x99);
-            info->mScenarioIDs.push_back(0x9A);
-            info->mScenarioIDs.push_back(0x9B);
-            info->mScenarioIDs.push_back(0x9C);
-            info->mScenarioIDs.push_back(0x9D);
-            info->mExScenarioIDs.push_back(0x203);
-            info->mExScenarioIDs.push_back(0x9E);
-            info->mExScenarioIDs.push_back(0x9F);
-            info->mExScenarioIDs.push_back(0x00);
-            info->mScenarioNameIDs.push_back(102);
-            info->mScenarioNameIDs.push_back(103);
-            info->mScenarioNameIDs.push_back(104);
-            info->mScenarioNameIDs.push_back(105);
-            info->mScenarioNameIDs.push_back(106);
-            info->mScenarioNameIDs.push_back(107);
-            info->mScenarioNameIDs.push_back(108);
-            info->mScenarioNameIDs.push_back(109);
-            info->mExScenarioNameIDs.push_back(110);
-            info->mExScenarioNameIDs.push_back(111);
-            info->mShineSelectPaneID = 'hl_0';
-            BetterSMS::Stage::registerStageInfo(info->mNormalStageID, info);
-
-            {
-                auto exinfo            = new BetterSMS::Stage::ExAreaInfo;
-                exinfo->mShineStageID  = info->mShineStageID;
-                exinfo->mNormalStageID = SME::STAGE_LACRIMA_EX0;
-                exinfo->mShineID       = 0xA6;
-                BetterSMS::Stage::registerExStageInfo(exinfo->mNormalStageID, exinfo);
-            }
-
-            {
-                auto exinfo            = new BetterSMS::Stage::ExAreaInfo;
-                exinfo->mShineStageID  = info->mShineStageID;
-                exinfo->mNormalStageID = SME::STAGE_LACRIMA_EX1;
-                exinfo->mShineID       = 0xA8;
-                BetterSMS::Stage::registerExStageInfo(exinfo->mNormalStageID, exinfo);
-            }
-        }
-
-        // Register Hotel Lacrima Inside info
-        {
-            auto *info           = new BetterSMS::Stage::AreaInfo;
-            info->mShineStageID  = SME::STAGE_LACRIMA;
-            info->mNormalStageID = SME::STAGE_LACRIMA_INSIDE;
-            info->mScenarioIDs.push_back(0x96);
-            info->mScenarioIDs.push_back(0x9C);
-            info->mScenarioNameIDs.push_back(102);
-            info->mScenarioNameIDs.push_back(108);
-            BetterSMS::Stage::registerStageInfo(info->mNormalStageID, info);
-        }
-
-        // Register Hotel Lacrima Backhouse info
-        {
-            auto *info           = new BetterSMS::Stage::AreaInfo;
-            info->mShineStageID  = SME::STAGE_LACRIMA;
-            info->mNormalStageID = SME::STAGE_LACRIMA_BACKHOUSE;
-            info->mScenarioIDs.push_back(0x96);
-            info->mScenarioIDs.push_back(0x9C);
-            info->mScenarioNameIDs.push_back(102);
-            info->mScenarioNameIDs.push_back(108);
-            BetterSMS::Stage::registerStageInfo(info->mNormalStageID, info);
+            Stage::ShineAreaInfo *info = new Stage::ShineAreaInfo(SME::STAGE_LACRIMA, 'hl_0');
+            info->addScenario(0x96, 102);
+            info->addScenario(0x97, 103);
+            info->addScenario(0x98, 104);
+            info->addScenario(0x99, 105);
+            info->addScenario(0x9A, 106);
+            info->addScenario(0x9B, 107);
+            info->addScenario(0x9C, 108);
+            info->addScenario(0x9D, 109);
+            info->addExScenario(0x9E, 110);
+            info->addExScenario(0x9F, 111);
+            Stage::registerShineStage(info);
+            Stage::registerNormalStage(SME::STAGE_LACRIMA, info->getShineStageID());
+            Stage::registerNormalStage(SME::STAGE_LACRIMA_INSIDE, info->getShineStageID());
+            Stage::registerNormalStage(SME::STAGE_LACRIMA_BACKHOUSE, info->getShineStageID());
+            Stage::registerExStage(SME::STAGE_LACRIMA_EX0, info->getShineStageID(), 0x98);
+            Stage::registerExStage(SME::STAGE_LACRIMA_EX1, info->getShineStageID(), 0x9B);
         }
 
         // Register Pianta Pit stage info
         {
-            auto *info           = new BetterSMS::Stage::AreaInfo;
-            info->mShineStageID  = SME::STAGE_PIANTA_PIT - 2;
-            info->mNormalStageID = SME::STAGE_PIANTA_PIT;
-            info->mScenarioIDs.push_back(0xA0);
-            info->mScenarioIDs.push_back(0xA1);
-            info->mScenarioNameIDs.push_back(112);
-            info->mScenarioNameIDs.push_back(113);
-            info->mShineSelectPaneID = 'pp_0';
-            BetterSMS::Stage::registerStageInfo(info->mNormalStageID, info);
+            Stage::ShineAreaInfo *info =
+                new Stage::ShineAreaInfo(SME::STAGE_PIANTA_PIT - 2, 'pp_0');
+            info->addScenario(0xA0, 112);
+            info->addScenario(0xA1, 113);
+            info->addScenario(0xA2, 114);
+            info->addScenario(0xA3, 115);
+            info->addScenario(0xA4, 116);
+            info->addScenario(0xA5, 117);
+            info->addScenario(0xA6, 118);
+            info->addScenario(0xA7, 119);
+            Stage::registerShineStage(info);
+            Stage::registerNormalStage(SME::STAGE_PIANTA_PIT, info->getShineStageID());
         }
 
         // Register Daisy Cruiser stage info
         {
-            auto *info           = new BetterSMS::Stage::AreaInfo;
-            info->mShineStageID  = SME::STAGE_CRUISER - 2;
-            info->mNormalStageID = SME::STAGE_CRUISER;
-            info->mScenarioIDs.push_back(0xA2);
-            info->mScenarioIDs.push_back(0xA3);
-            info->mScenarioIDs.push_back(0xA4);
-            info->mScenarioIDs.push_back(0xA5);
-            info->mExScenarioIDs.push_back(0x204);
-            info->mExScenarioIDs.push_back(0xA6);
-            info->mExScenarioIDs.push_back(0xA7);
-            info->mExScenarioIDs.push_back(0x00);
-            info->mScenarioNameIDs.push_back(114);
-            info->mScenarioNameIDs.push_back(115);
-            info->mScenarioNameIDs.push_back(116);
-            info->mScenarioNameIDs.push_back(117);
-            info->mExScenarioNameIDs.push_back(118);
-            info->mExScenarioNameIDs.push_back(119);
-            info->mShineSelectPaneID = 'dc_0';
-            BetterSMS::Stage::registerStageInfo(info->mNormalStageID, info);
-
-            {
-                auto exinfo            = new BetterSMS::Stage::ExAreaInfo;
-                exinfo->mShineStageID  = info->mShineStageID;
-                exinfo->mNormalStageID = SME::STAGE_CRUISER_EX;
-                exinfo->mShineID       = 0xA9;
-                BetterSMS::Stage::registerExStageInfo(exinfo->mNormalStageID, exinfo);
-            }
+            Stage::ShineAreaInfo *info = new Stage::ShineAreaInfo(SME::STAGE_CRUISER - 2, 'dc_0');
+            info->addScenario(0xA8, 120);
+            info->addScenario(0xA9, 121);
+            info->addScenario(0xAA, 122);
+            info->addScenario(0xAB, 123);
+            info->addExScenario(0xAC, 124);
+            Stage::registerShineStage(info);
+            Stage::registerNormalStage(SME::STAGE_CRUISER, info->getShineStageID());
+            Stage::registerExStage(SME::STAGE_CRUISER_EX, info->getShineStageID(), 0xAB);
         }
 
         // Register Mario's Dream stage info
         {
-            auto *info           = new BetterSMS::Stage::AreaInfo;
-            info->mShineStageID  = SME::STAGE_MARIO_DREAM - 2;
-            info->mNormalStageID = SME::STAGE_MARIO_DREAM;
-            info->mScenarioIDs.push_back(0xA8);
-            info->mScenarioIDs.push_back(0xA9);
-            info->mScenarioIDs.push_back(0xAA);
-            info->mScenarioIDs.push_back(0xAB);
-            info->mScenarioNameIDs.push_back(120);
-            info->mScenarioNameIDs.push_back(121);
-            info->mScenarioNameIDs.push_back(122);
-            info->mScenarioNameIDs.push_back(123);
-            info->mShineSelectPaneID = 'md_0';
-            BetterSMS::Stage::registerStageInfo(info->mNormalStageID, info);
+            Stage::ShineAreaInfo *info =
+                new Stage::ShineAreaInfo(SME::STAGE_MARIO_DREAM - 2, 'md_0');
+            info->addScenario(0xAD, 125);
+            info->addScenario(0xAE, 126);
+            info->addScenario(0xAF, 127);
+            info->addScenario(0xB0, 128);
+            Stage::registerShineStage(info);
+            Stage::registerNormalStage(SME::STAGE_MARIO_DREAM, info->getShineStageID());
         }
 
         // Register Lancia Fredda stage info
         {
-            auto *info           = new BetterSMS::Stage::AreaInfo;
-            info->mShineStageID  = SME::STAGE_LANCIA - 2;
-            info->mNormalStageID = SME::STAGE_LANCIA;
-            info->mScenarioIDs.push_back(0xAC);
-            info->mScenarioIDs.push_back(0xAD);
-            info->mScenarioIDs.push_back(0xAE);
-            info->mScenarioIDs.push_back(0xAF);
-            info->mExScenarioIDs.push_back(0x205);
-            info->mExScenarioIDs.push_back(0xB0);
-            info->mExScenarioIDs.push_back(0xB1);
-            info->mScenarioNameIDs.push_back(124);
-            info->mScenarioNameIDs.push_back(125);
-            info->mScenarioNameIDs.push_back(126);
-            info->mScenarioNameIDs.push_back(127);
-            info->mExScenarioNameIDs.push_back(128);
-            info->mShineSelectPaneID = 'lf_0';
-            BetterSMS::Stage::registerStageInfo(info->mNormalStageID, info);
-
-            {
-                auto exinfo            = new BetterSMS::Stage::ExAreaInfo;
-                exinfo->mShineStageID  = info->mShineStageID;
-                exinfo->mNormalStageID = SME::STAGE_LANCIA_EX;
-                exinfo->mShineID       = 0xAB;
-                BetterSMS::Stage::registerExStageInfo(exinfo->mNormalStageID, exinfo);
-            }
+            Stage::ShineAreaInfo *info = new Stage::ShineAreaInfo(SME::STAGE_LANCIA - 2, 'lf_0');
+            info->addScenario(0xB1, 129);
+            info->addScenario(0xB2, 130);
+            info->addScenario(0xB3, 131);
+            info->addScenario(0xB4, 132);
+            info->addExScenario(0xB5, 133);
+            Stage::registerShineStage(info);
+            Stage::registerNormalStage(SME::STAGE_LANCIA, info->getShineStageID());
+            Stage::registerExStage(SME::STAGE_LANCIA_EX, info->getShineStageID(), 0xB4);
         }
 
         // Register Vaporwave stage info
         {
-            auto *info           = new BetterSMS::Stage::AreaInfo;
-            info->mShineStageID  = SME::STAGE_VAPORWAVE - 2;
-            info->mNormalStageID = SME::STAGE_VAPORWAVE;
-            info->mScenarioIDs.push_back(0xB2);
-            info->mScenarioIDs.push_back(0xB3);
-            info->mScenarioIDs.push_back(0xB4);
-            info->mScenarioIDs.push_back(0xB5);
-            info->mExScenarioIDs.push_back(0x206);
-            info->mExScenarioIDs.push_back(0xB6);
-            info->mExScenarioIDs.push_back(0x00);
-            info->mScenarioNameIDs.push_back(129);
-            info->mScenarioNameIDs.push_back(130);
-            info->mScenarioNameIDs.push_back(131);
-            info->mScenarioNameIDs.push_back(132);
-            info->mExScenarioNameIDs.push_back(133);
-            info->mShineSelectPaneID = 'vw_0';
-            BetterSMS::Stage::registerStageInfo(info->mNormalStageID, info);
-
-            {
-                auto exinfo            = new BetterSMS::Stage::ExAreaInfo;
-                exinfo->mShineStageID  = 0x45;
-                exinfo->mNormalStageID = 0x57;
-                exinfo->mShineID       = 0xAD;
-                BetterSMS::Stage::registerExStageInfo(exinfo->mNormalStageID, exinfo);
-            }
+            Stage::ShineAreaInfo *info = new Stage::ShineAreaInfo(SME::STAGE_VAPORWAVE - 2, 'vw_0');
+            info->addScenario(0xB6, 134);
+            info->addScenario(0xB7, 135);
+            info->addScenario(0xB8, 136);
+            info->addScenario(0xB9, 137);
+            info->addExScenario(0xBA, 138);
+            Stage::registerShineStage(info);
+            Stage::registerNormalStage(SME::STAGE_VAPORWAVE, info->getShineStageID());
+            Stage::registerExStage(SME::STAGE_VAPORWAVE_EX, info->getShineStageID(), 0xB9);
         }
 
         // Register Yoshi Village stage info
         {
-            auto *info           = new BetterSMS::Stage::AreaInfo;
-            info->mShineStageID  = SME::STAGE_YOSHI_VILLAGE - 2;
-            info->mNormalStageID = SME::STAGE_YOSHI_VILLAGE;
-            info->mScenarioIDs.push_back(0xB7);
-            info->mScenarioIDs.push_back(0xB8);
-            info->mScenarioIDs.push_back(0xB9);
-            info->mScenarioIDs.push_back(0xBA);
-            info->mExScenarioIDs.push_back(0x207);
-            info->mExScenarioIDs.push_back(0xBB);
-            info->mExScenarioIDs.push_back(0x00);
-            info->mScenarioNameIDs.push_back(134);
-            info->mScenarioNameIDs.push_back(135);
-            info->mScenarioNameIDs.push_back(136);
-            info->mScenarioNameIDs.push_back(137);
-            info->mExScenarioNameIDs.push_back(138);
-            info->mShineSelectPaneID = 'yv_0';
-            BetterSMS::Stage::registerStageInfo(info->mNormalStageID, info);
-
-            {
-                auto exinfo            = new BetterSMS::Stage::ExAreaInfo;
-                exinfo->mShineStageID  = info->mShineStageID;
-                exinfo->mNormalStageID = SME::STAGE_YOSHI_EX;
-                exinfo->mShineID       = 0xAF;
-                BetterSMS::Stage::registerExStageInfo(exinfo->mNormalStageID, exinfo);
-            }
+            Stage::ShineAreaInfo *info =
+                new Stage::ShineAreaInfo(SME::STAGE_YOSHI_VILLAGE - 2, 'yv_0');
+            info->addScenario(0xBB, 139);
+            info->addScenario(0xBC, 140);
+            info->addScenario(0xBD, 141);
+            info->addScenario(0xBE, 142);
+            info->addExScenario(0xBF, 143);
+            Stage::registerShineStage(info);
+            Stage::registerNormalStage(SME::STAGE_YOSHI_VILLAGE, info->getShineStageID());
+            Stage::registerExStage(SME::STAGE_YOSHI_EX, info->getShineStageID(), 0xBE);
         }
 
         // Waterpark UNUSED
@@ -395,327 +216,99 @@ BETTER_SMS_FOR_CALLBACK void initializeStageInfo(TApplication *app) {
 
         // Register Red Lily City stage info
         {
-            auto *info           = new BetterSMS::Stage::AreaInfo;
-            info->mShineStageID  = SME::STAGE_RED_LILY - 2;
-            info->mNormalStageID = SME::STAGE_RED_LILY;
-            info->mScenarioIDs.push_back(0xC1);
-            info->mScenarioIDs.push_back(0xC2);
-            info->mScenarioIDs.push_back(0xC3);
-            info->mScenarioIDs.push_back(0xC4);
-            info->mExScenarioIDs.push_back(0x209);
-            info->mExScenarioIDs.push_back(0xC5);
-            info->mExScenarioIDs.push_back(0x00);
-            info->mScenarioNameIDs.push_back(144);
-            info->mScenarioNameIDs.push_back(145);
-            info->mScenarioNameIDs.push_back(146);
-            info->mScenarioNameIDs.push_back(147);
-            info->mExScenarioNameIDs.push_back(148);
-            info->mShineSelectPaneID = 'rl_0';
-            BetterSMS::Stage::registerStageInfo(info->mNormalStageID, info);
-
-            {
-                auto exinfo            = new BetterSMS::Stage::ExAreaInfo;
-                exinfo->mShineStageID  = info->mShineStageID;
-                exinfo->mNormalStageID = SME::STAGE_RED_LILY_EX;
-                exinfo->mShineID       = 0xB1;
-                BetterSMS::Stage::registerExStageInfo(exinfo->mNormalStageID, exinfo);
-            }
+            Stage::ShineAreaInfo *info = new Stage::ShineAreaInfo(SME::STAGE_RED_LILY - 2, 'rl_0');
+            info->addScenario(0xC0, 144);
+            info->addScenario(0xC1, 145);
+            info->addScenario(0xC2, 146);
+            info->addScenario(0xC3, 147);
+            info->addExScenario(0xC5, 148);
+            Stage::registerShineStage(info);
+            Stage::registerNormalStage(SME::STAGE_RED_LILY, info->getShineStageID());
+            Stage::registerExStage(SME::STAGE_RED_LILY_EX, info->getShineStageID(), 0xC3);
         }
 
         // Register Peach Beach stage info
         {
-            auto *info           = new BetterSMS::Stage::AreaInfo;
-            info->mShineStageID  = SME::STAGE_PEACH_BEACH - 2;
-            info->mNormalStageID = SME::STAGE_PEACH_BEACH;
-            info->mScenarioIDs.push_back(0xC6);
-            info->mScenarioIDs.push_back(0xC7);
-            info->mScenarioIDs.push_back(0xC8);
-            info->mScenarioIDs.push_back(0xC9);
-            info->mExScenarioIDs.push_back(0x20A);
-            info->mExScenarioIDs.push_back(0xCA);
-            info->mExScenarioIDs.push_back(0x00);
-            info->mScenarioNameIDs.push_back(149);
-            info->mScenarioNameIDs.push_back(150);
-            info->mScenarioNameIDs.push_back(151);
-            info->mScenarioNameIDs.push_back(152);
-            info->mExScenarioNameIDs.push_back(153);
-            info->mShineSelectPaneID = 'pb_0';
-            BetterSMS::Stage::registerStageInfo(info->mNormalStageID, info);
-
-            {
-                auto exinfo            = new BetterSMS::Stage::ExAreaInfo;
-                exinfo->mShineStageID  = info->mShineStageID;
-                exinfo->mNormalStageID = SME::STAGE_PEACH_BEACH_EX;
-                exinfo->mShineID       = 0xB3;
-                BetterSMS::Stage::registerExStageInfo(exinfo->mNormalStageID, exinfo);
-            }
+            Stage::ShineAreaInfo *info =
+                new Stage::ShineAreaInfo(SME::STAGE_PEACH_BEACH - 2, 'pb_0');
+            info->addScenario(0xC6, 149);
+            info->addScenario(0xC7, 150);
+            info->addScenario(0xC8, 151);
+            info->addScenario(0xC9, 152);
+            info->addExScenario(0xCA, 153);
+            Stage::registerShineStage(info);
+            Stage::registerNormalStage(SME::STAGE_PEACH_BEACH, info->getShineStageID());
+            Stage::registerExStage(SME::STAGE_PEACH_BEACH_EX, info->getShineStageID(), 0xC9);
         }
 
         // Register Spettro Casino stage info
         {
-            auto *info           = new BetterSMS::Stage::AreaInfo;
-            info->mShineStageID  = SME::STAGE_SPETTRO_CASINO - 2;
-            info->mNormalStageID = SME::STAGE_SPETTRO_CASINO;
-            info->mScenarioIDs.push_back(0xCB);
-            info->mScenarioIDs.push_back(0xCC);
-            info->mScenarioIDs.push_back(0xCD);
-            info->mScenarioIDs.push_back(0xCE);
-            info->mExScenarioIDs.push_back(0x20B);
-            info->mExScenarioIDs.push_back(0xCF);
-            info->mExScenarioIDs.push_back(0x00);
-            info->mScenarioNameIDs.push_back(154);
-            info->mScenarioNameIDs.push_back(155);
-            info->mScenarioNameIDs.push_back(156);
-            info->mScenarioNameIDs.push_back(157);
-            info->mExScenarioNameIDs.push_back(158);
-            info->mShineSelectPaneID = 'sp_0';
-            BetterSMS::Stage::registerStageInfo(info->mNormalStageID, info);
-
-            {
-                auto exinfo            = new BetterSMS::Stage::ExAreaInfo;
-                exinfo->mShineStageID  = info->mShineStageID;
-                exinfo->mNormalStageID = SME::STAGE_SPETTRO_EX;
-                exinfo->mShineID       = 0xB5;
-                BetterSMS::Stage::registerExStageInfo(exinfo->mNormalStageID, exinfo);
-            }
+            Stage::ShineAreaInfo *info =
+                new Stage::ShineAreaInfo(SME::STAGE_SPETTRO_CASINO - 2, 'sp_0');
+            info->addScenario(0xCB, 154);
+            info->addScenario(0xCC, 155);
+            info->addScenario(0xCD, 156);
+            info->addScenario(0xCE, 157);
+            info->addExScenario(0xCF, 158);
+            Stage::registerShineStage(info);
+            Stage::registerNormalStage(SME::STAGE_SPETTRO_CASINO, info->getShineStageID());
+            Stage::registerExStage(SME::STAGE_SPETTRO_EX, info->getShineStageID(), 0xC9);
         }
 
         // Register Peach's Castle stage info
         {
-            auto *info           = new BetterSMS::Stage::AreaInfo;
-            info->mShineStageID  = SME::STAGE_PEACH_CASTLE - 2;
-            info->mNormalStageID = SME::STAGE_PEACH_CASTLE;
-            info->mScenarioIDs.push_back(0xD0);
-            info->mScenarioIDs.push_back(0xD1);
-            info->mScenarioIDs.push_back(0xD2);
-            info->mScenarioIDs.push_back(0xD3);
-            info->mScenarioIDs.push_back(0xD4);
-            info->mExScenarioIDs.push_back(0x20C);
-            info->mExScenarioIDs.push_back(0xD5);
-            info->mExScenarioIDs.push_back(0xD6);
-            info->mExScenarioIDs.push_back(0xD7);
-            info->mExScenarioIDs.push_back(0xD8);
-            info->mExScenarioIDs.push_back(0xD9);
-            info->mExScenarioIDs.push_back(0xDA);
-            info->mExScenarioIDs.push_back(0xDB);
-            info->mExScenarioIDs.push_back(0xDC);
-            info->mExScenarioIDs.push_back(0xDD);
-            info->mExScenarioIDs.push_back(0xDE);
-            info->mExScenarioIDs.push_back(0xDF);
-            info->mExScenarioIDs.push_back(0xE0);
-            info->mExScenarioIDs.push_back(0xE1);
-            info->mExScenarioIDs.push_back(0xE2);
-            info->mExScenarioIDs.push_back(0xE3);
-            info->mExScenarioIDs.push_back(0xE4);
-            info->mExScenarioIDs.push_back(0xE5);
-            info->mExScenarioIDs.push_back(0x00);
-            info->mScenarioNameIDs.push_back(159);
-            info->mScenarioNameIDs.push_back(160);
-            info->mScenarioNameIDs.push_back(161);
-            info->mScenarioNameIDs.push_back(162);
-            info->mScenarioNameIDs.push_back(163);
-            info->mExScenarioNameIDs.push_back(164);  // Block world
-            info->mExScenarioNameIDs.push_back(165);  // Beta Bianco
-            info->mExScenarioNameIDs.push_back(166);  // Secret Aquarium
-            info->mExScenarioNameIDs.push_back(167);  // Battle Fort
-            info->mExScenarioNameIDs.push_back(168);  // Sunshine Isles
-            info->mExScenarioNameIDs.push_back(169);  // Starshine Beach
-            info->mExScenarioNameIDs.push_back(170);  // Beta Ricco
-            info->mExScenarioNameIDs.push_back(171);  // E3 Bianco
-            info->mExScenarioNameIDs.push_back(172);  // E3 Dolpic
-            info->mExScenarioNameIDs.push_back(173);  // Dolpic Town
-            info->mExScenarioNameIDs.push_back(174);  // Super Monkey Ball
-            info->mExScenarioNameIDs.push_back(175);  // Beta Shell Secret
-            info->mExScenarioNameIDs.push_back(176);  // Wade Stage
-            info->mExScenarioNameIDs.push_back(177);  // Spaceworld Bianco
-            info->mExScenarioNameIDs.push_back(178);  // Starshine Beach
-            info->mExScenarioNameIDs.push_back(179);  // Windfall Island
-            info->mExScenarioNameIDs.push_back(180);  // Old Lighthouse Island
-            info->mShineSelectPaneID = 'pc_0';
-            BetterSMS::Stage::registerStageInfo(info->mNormalStageID, info);
-
-            {
-                auto exinfo            = new BetterSMS::Stage::ExAreaInfo;
-                exinfo->mShineStageID  = info->mShineStageID;
-                exinfo->mNormalStageID = SME::STAGE_PEACH_CASTLE_EX0;
-                exinfo->mShineID       = 0xB7;
-                BetterSMS::Stage::registerExStageInfo(exinfo->mNormalStageID, exinfo);
-            }
-
-            {
-                auto exinfo            = new BetterSMS::Stage::ExAreaInfo;
-                exinfo->mShineStageID  = info->mShineStageID;
-                exinfo->mNormalStageID = SME::STAGE_PEACH_CASTLE_EX1;
-                exinfo->mShineID       = 0xB8;
-                BetterSMS::Stage::registerExStageInfo(exinfo->mNormalStageID, exinfo);
-            }
-
-            {
-                auto exinfo            = new BetterSMS::Stage::ExAreaInfo;
-                exinfo->mShineStageID  = info->mShineStageID;
-                exinfo->mNormalStageID = SME::STAGE_PEACH_CASTLE_EX2;
-                exinfo->mShineID       = 0xB9;
-                BetterSMS::Stage::registerExStageInfo(exinfo->mNormalStageID, exinfo);
-            }
-
-            {
-                auto exinfo            = new BetterSMS::Stage::ExAreaInfo;
-                exinfo->mShineStageID  = info->mShineStageID;
-                exinfo->mNormalStageID = SME::STAGE_PEACH_CASTLE_EX3;
-                exinfo->mShineID       = 0xBA;
-                BetterSMS::Stage::registerExStageInfo(exinfo->mNormalStageID, exinfo);
-            }
-
-            {
-                auto exinfo            = new BetterSMS::Stage::ExAreaInfo;
-                exinfo->mShineStageID  = info->mShineStageID;
-                exinfo->mNormalStageID = SME::STAGE_PEACH_CASTLE_EX4;
-                exinfo->mShineID       = 0xBB;
-                BetterSMS::Stage::registerExStageInfo(exinfo->mNormalStageID, exinfo);
-            }
-
-            {
-                auto exinfo            = new BetterSMS::Stage::ExAreaInfo;
-                exinfo->mShineStageID  = info->mShineStageID;
-                exinfo->mNormalStageID = SME::STAGE_PEACH_CASTLE_EX5;
-                exinfo->mShineID       = 0xBC;
-                BetterSMS::Stage::registerExStageInfo(exinfo->mNormalStageID, exinfo);
-            }
-
-            {
-                auto exinfo            = new BetterSMS::Stage::ExAreaInfo;
-                exinfo->mShineStageID  = info->mShineStageID;
-                exinfo->mNormalStageID = SME::STAGE_PEACH_CASTLE_EX6;
-                exinfo->mShineID       = 0xBD;
-                BetterSMS::Stage::registerExStageInfo(exinfo->mNormalStageID, exinfo);
-            }
-
-            {
-                auto exinfo            = new BetterSMS::Stage::ExAreaInfo;
-                exinfo->mShineStageID  = info->mShineStageID;
-                exinfo->mNormalStageID = SME::STAGE_PEACH_CASTLE_EX7;
-                exinfo->mShineID       = 0xBE;
-                BetterSMS::Stage::registerExStageInfo(exinfo->mNormalStageID, exinfo);
-            }
-
-            {
-                auto exinfo            = new BetterSMS::Stage::ExAreaInfo;
-                exinfo->mShineStageID  = info->mShineStageID;
-                exinfo->mNormalStageID = SME::STAGE_PEACH_CASTLE_EX8;
-                exinfo->mShineID       = 0xBF;
-                BetterSMS::Stage::registerExStageInfo(exinfo->mNormalStageID, exinfo);
-            }
-
-            {
-                auto exinfo            = new BetterSMS::Stage::ExAreaInfo;
-                exinfo->mShineStageID  = info->mShineStageID;
-                exinfo->mNormalStageID = SME::STAGE_PEACH_CASTLE_EX9;
-                exinfo->mShineID       = 0xC0;
-                BetterSMS::Stage::registerExStageInfo(exinfo->mNormalStageID, exinfo);
-            }
-
-            {
-                auto exinfo            = new BetterSMS::Stage::ExAreaInfo;
-                exinfo->mShineStageID  = info->mShineStageID;
-                exinfo->mNormalStageID = SME::STAGE_PEACH_CASTLE_EX10;
-                exinfo->mShineID       = 0xC1;
-                BetterSMS::Stage::registerExStageInfo(exinfo->mNormalStageID, exinfo);
-            }
-
-            {
-                auto exinfo            = new BetterSMS::Stage::ExAreaInfo;
-                exinfo->mShineStageID  = info->mShineStageID;
-                exinfo->mNormalStageID = SME::STAGE_PEACH_CASTLE_EX11;
-                exinfo->mShineID       = 0xC2;
-                BetterSMS::Stage::registerExStageInfo(exinfo->mNormalStageID, exinfo);
-            }
-
-            {
-                auto exinfo            = new BetterSMS::Stage::ExAreaInfo;
-                exinfo->mShineStageID  = info->mShineStageID;
-                exinfo->mNormalStageID = SME::STAGE_PEACH_CASTLE_EX12;
-                exinfo->mShineID       = 0xC3;
-                BetterSMS::Stage::registerExStageInfo(exinfo->mNormalStageID, exinfo);
-            }
-
-            {
-                auto exinfo            = new BetterSMS::Stage::ExAreaInfo;
-                exinfo->mShineStageID  = info->mShineStageID;
-                exinfo->mNormalStageID = SME::STAGE_PEACH_CASTLE_EX13;
-                exinfo->mShineID       = 0xC4;
-                BetterSMS::Stage::registerExStageInfo(exinfo->mNormalStageID, exinfo);
-            }
-
-            {
-                auto exinfo            = new BetterSMS::Stage::ExAreaInfo;
-                exinfo->mShineStageID  = info->mShineStageID;
-                exinfo->mNormalStageID = SME::STAGE_PEACH_CASTLE_EX14;
-                exinfo->mShineID       = 0xC5;
-                BetterSMS::Stage::registerExStageInfo(exinfo->mNormalStageID, exinfo);
-            }
-
-            {
-                auto exinfo            = new BetterSMS::Stage::ExAreaInfo;
-                exinfo->mShineStageID  = info->mShineStageID;
-                exinfo->mNormalStageID = SME::STAGE_PEACH_CASTLE_EX15;
-                exinfo->mShineID       = 0xC6;
-                BetterSMS::Stage::registerExStageInfo(exinfo->mNormalStageID, exinfo);
-            }
-
-            {
-                auto exinfo            = new BetterSMS::Stage::ExAreaInfo;
-                exinfo->mShineStageID  = info->mShineStageID;
-                exinfo->mNormalStageID = SME::STAGE_PEACH_CASTLE_EX16;
-                exinfo->mShineID       = 0xC7;
-                BetterSMS::Stage::registerExStageInfo(exinfo->mNormalStageID, exinfo);
-            }
+            Stage::ShineAreaInfo *info =
+                new Stage::ShineAreaInfo(SME::STAGE_PEACH_CASTLE - 2, 'pc_0');
+            info->addScenario(-1, 159);
+            info->addScenario(-1, 160);
+            info->addScenario(-1, 161);
+            info->addScenario(-1, 162);
+            info->addScenario(-1, 163);
+            // Painting episodes (not ex so they can have names)
+            info->addScenario(-1, 164);
+            info->addScenario(-1, 165);
+            info->addScenario(-1, 166);
+            info->addScenario(-1, 167);
+            info->addScenario(-1, 168);
+            info->addScenario(-1, 169);
+            info->addScenario(-1, 170);
+            info->addScenario(-1, 171);
+            info->addScenario(-1, 172);
+            info->addScenario(-1, 173);
+            info->addScenario(-1, 174);
+            info->addScenario(-1, 175);
+            info->addScenario(-1, 176);
+            info->addScenario(-1, 177);
+            info->addScenario(-1, 178);
+            info->addScenario(-1, 179);
+            info->addScenario(-1, 180);
+            Stage::registerShineStage(info);
+            Stage::registerNormalStage(SME::STAGE_PEACH_CASTLE, info->getShineStageID());
         }
 
         // Register Island Junctions stage info
         {
-            auto *info           = new BetterSMS::Stage::AreaInfo;
-            info->mShineStageID  = SME::STAGE_VAPORWAVE - 2;
-            info->mNormalStageID = SME::STAGE_VAPORWAVE;
-            info->mScenarioIDs.push_back(0xE6);
-            info->mScenarioIDs.push_back(0xE7);
-            info->mScenarioIDs.push_back(0xE8);
-            info->mScenarioIDs.push_back(0xE9);
-            info->mScenarioIDs.push_back(0xEA);
-            info->mScenarioIDs.push_back(0xEB);
-            info->mScenarioIDs.push_back(0xEC);
-            info->mScenarioIDs.push_back(0xED);
-            info->mScenarioIDs.push_back(0xF0);
-            info->mScenarioNameIDs.push_back(181);  // Boilente Crypt
-            info->mScenarioNameIDs.push_back(182);  // Arido Trail
-            info->mScenarioNameIDs.push_back(183);  // Arcobaleno Cove
-            info->mScenarioNameIDs.push_back(184);  // Sonnolento Grove
-            info->mScenarioNameIDs.push_back(185);  // Rugivosa Marsh
-            info->mScenarioNameIDs.push_back(186);  // Giovane Creek
-            info->mScenarioNameIDs.push_back(187);  // Marea Reef
-            info->mScenarioNameIDs.push_back(188);  // Ricco Station
-            info->mScenarioNameIDs.push_back(189);  // Train Car
-            info->mShineSelectPaneID = 'ij_0';
-            BetterSMS::Stage::registerStageInfo(info->mNormalStageID, info);
-        }
-
-        // Register Lighthouse Island Boss
-        {
-            auto *info           = new BetterSMS::Stage::AreaInfo;
-            info->mShineStageID  = SME::STAGE_LIGHTHOUSE;
-            info->mNormalStageID = SME::STAGE_LIGHTHOUSE_BOSS;
-            info->mScenarioIDs.push_back(0x82);
-            info->mScenarioNameIDs.push_back(82);
-            BetterSMS::Stage::registerStageInfo(info->mNormalStageID, info);
+            Stage::ShineAreaInfo *info =
+                new Stage::ShineAreaInfo(SME::STAGE_ISLE_DELFINO - 2, 'ij_0');
+            info->addScenario(0xE6, 181);  // Boilente Crypt
+            info->addScenario(0xE7, 182);  // Arido Trail
+            info->addScenario(0xE8, 183);  // Arcobaleno Cove
+            info->addScenario(0xE9, 184);  // Sonnolento Grove
+            info->addScenario(0xEA, 185);  // Rugivosa Marsh
+            info->addScenario(0xEB, 186);  // Giovane Creek
+            info->addScenario(0xEC, 187);  // Marea Reef
+            info->addScenario(0xED, 188);  // Ricco Station
+            info->addScenario(-1, 189);    // Train Car
+            Stage::registerShineStage(info);
+            Stage::registerNormalStage(SME::STAGE_ISLE_DELFINO, info->getShineStageID());
         }
 
         // Register Tutorial Stage Info
         {
-            auto *info           = new BetterSMS::Stage::AreaInfo;
-            info->mShineStageID  = SME::STAGE_TUTORIAL - 2;
-            info->mNormalStageID = SME::STAGE_TUTORIAL;
-            info->mScenarioIDs.push_back(0xF1);
-            info->mScenarioNameIDs.push_back(190);
-            BetterSMS::Stage::registerStageInfo(info->mNormalStageID, info);
+            Stage::ShineAreaInfo *info = new Stage::ShineAreaInfo(SME::STAGE_TUTORIAL - 3);
+            info->addScenario(-1, 190);
+            Stage::registerShineStage(info);
+            Stage::registerNormalStage(SME::STAGE_TUTORIAL, SME::STAGE_TUTORIAL - 3);
         }
 
         //// Register Final Corona Level
@@ -723,8 +316,8 @@ BETTER_SMS_FOR_CALLBACK void initializeStageInfo(TApplication *app) {
         //    auto *info           = new BetterSMS::Stage::AreaInfo;
         //    info->mShineStageID  = 0x9;
         //    info->mNormalStageID = 0xA;
-        //    info->mScenarioIDs.push_back(0xED);
-        //    info->mScenarioIDs.push_back(0xEE);
+        //    info->addScenario(0xED);
+        //    info->addScenario(0xEE);
         //    info->mScenarioNameIDs.push_back(190);
         //    info->mScenarioNameIDs.push_back(191);
         //    info->mShineSelectPaneID = 'el_0';

@@ -60,4 +60,4 @@ namespace SME {
                           s32 from_episode = -1);
     bool getSpawnTransRot(TApplication *app, TVec3f &trans, TVec3f &rot);
 
-}  // namespace SME
+}  // namespace SME 

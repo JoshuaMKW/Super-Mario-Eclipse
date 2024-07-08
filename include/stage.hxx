@@ -56,7 +56,7 @@ namespace SME {
         STAGE_PEACH_CASTLE_EX16 = 109,
     };
 
-    void setSpawnTransRot(s32 stage, TVec3f &trans, TVec3f &rot, s32 from_stage = -1,
+    void setSpawnTransRot(s32 stage, s32 episode, const TVec3f &trans, const TVec3f &rot, s32 from_stage = -1,
                           s32 from_episode = -1);
     bool getSpawnTransRot(TApplication *app, TVec3f &trans, TVec3f &rot);
 

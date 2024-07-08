@@ -50,6 +50,7 @@ extern bool holdPlayerState(TMario *player);
 extern bool launchPlayerState(TMario *player);
 extern void initColdState(TMarDirector *director);
 extern void processColdState(TMario *player, bool isMario);
+extern void setPlayerStartPos(TMario *player);
 
 // HUD
 extern void updatePlayerHUD(TMarDirector *, const J2DOrthoGraph *);
@@ -139,6 +140,7 @@ static void initModule() {
     Player::addUpdateCallback(checkTutorialCollisionRespawn);
     Player::addUpdateCallback(createWaterBalloonAndThrow);
     Player::addUpdateCallback(adjustYoshiTongue);
+    Player::addLoadAfterCallback(setPlayerStartPos);
     Player::registerStateMachine(PlayerLaunchStarWait, holdPlayerState);
     Player::registerStateMachine(PlayerLaunchStarLaunch, launchPlayerState);
     Debug::addUpdateCallback(checkForCompletionAwards);

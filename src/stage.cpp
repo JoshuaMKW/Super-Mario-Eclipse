@@ -4,44 +4,52 @@
 #include <BetterSMS/module.hxx>
 #include <BetterSMS/stage.hxx>
 #include <SMS/Manager/FlagManager.hxx>
+#include <SMS/System/GameSequence.hxx>
 
 #include "stage.hxx"
+#include <BetterSMS/libs/constmath.hxx>
 
 using namespace BetterSMS;
 
 struct SpawnInfo {
-    s32 m_area_id    = -1;
-    s32 m_episode_id = -1;
+    s32 m_to_episode_id   = -1;
+    s32 m_from_area_id    = -1;
+    s32 m_from_episode_id = -1;
     TVec3f m_spawn_pos;
     TVec3f m_spawn_rot;
 };
 
 static TGlobalVector<SpawnInfo> s_area_spawn_map[256];
 
-void SME::setSpawnTransRot(s32 stage, TVec3f &trans, TVec3f &rot, s32 from_stage,
-                           s32 from_episode) {
+void SME::setSpawnTransRot(s32 stage, s32 episode, const TVec3f &trans, const TVec3f &rot,
+                           s32 from_stage, s32 from_episode) {
     SpawnInfo info;
-    info.m_area_id    = from_stage;
-    info.m_episode_id = from_episode;
-    info.m_spawn_pos  = trans;
-    info.m_spawn_rot  = rot;
+    info.m_to_episode_id   = episode;
+    info.m_from_area_id    = from_stage;
+    info.m_from_episode_id = from_episode;
+    info.m_spawn_pos       = trans;
+    info.m_spawn_rot       = rot;
     s_area_spawn_map[stage].push_back(info);
 }
 
 bool SME::getSpawnTransRot(TApplication *app, TVec3f &trans, TVec3f &rot) {
     const TGlobalVector<SpawnInfo> &spawn_info = s_area_spawn_map[app->mCurrentScene.mAreaID];
     for (const SpawnInfo &info : spawn_info) {
-        if (info.m_area_id == -1) {
+        if (info.m_to_episode_id != -1 && info.m_to_episode_id != app->mCurrentScene.mEpisodeID) {
+            continue;
+        }
+
+        if (info.m_from_area_id == -1) {
             trans = info.m_spawn_pos;
             rot   = info.m_spawn_rot;
             return true;
         }
 
-        if (info.m_area_id != app->mPrevScene.mAreaID) {
+        if (info.m_from_area_id != app->mPrevScene.mAreaID) {
             continue;
         }
 
-        if (info.m_episode_id == -1 || info.m_episode_id == app->mPrevScene.mEpisodeID) {
+        if (info.m_from_episode_id == -1 || info.m_from_episode_id == app->mPrevScene.mEpisodeID) {
             trans = info.m_spawn_pos;
             rot   = info.m_spawn_rot;
             return true;
@@ -70,6 +78,16 @@ BETTER_SMS_FOR_CALLBACK void initializeStageInfo(TApplication *app) {
             Stage::registerShineStage(info);
             Stage::registerNormalStage(SME::STAGE_ERTO, info->getShineStageID());
             Stage::registerExStage(SME::STAGE_ERTO_EX, info->getShineStageID(), 0x7C);
+
+            /*SME::setSpawnTransRot(SME::STAGE_ERTO, TVec3f(-10000.0f, -110.0f, -2580.0f),
+                                  TVec3f(0.0f, 100.0f, 0.0f), TGameSequence::AREA_DELFINO, -1);*/
+
+            SME::setSpawnTransRot(SME::STAGE_ERTO, -1, TVec3f(9910.0f, 2500.0f, -15000.0f),
+                                  TVec3f(0.0f, -45.0f, 0.0f), SME::STAGE_ISLE_DELFINO, 1);  // Arido Trail
+
+            SME::setSpawnTransRot(SME::STAGE_ERTO, -1, TVec3f(1830.0f, 2820.0f, -11400.0f),
+                                  TVec3f(0.0f, 0.0f, 0.0f), SME::STAGE_ISLE_DELFINO,
+                                  8);  // Delfino Express
         }
 
         // Register Lighthouse Island stage info
@@ -89,6 +107,15 @@ BETTER_SMS_FOR_CALLBACK void initializeStageInfo(TApplication *app) {
             Stage::registerNormalStage(SME::STAGE_LIGHTHOUSE, info->getShineStageID());
             Stage::registerNormalStage(SME::STAGE_LIGHTHOUSE_BOSS, info->getShineStageID());
             Stage::registerExStage(SME::STAGE_LIGHTHOUSE_EX, info->getShineStageID(), 0x85);
+
+            SME::setSpawnTransRot(SME::STAGE_LIGHTHOUSE, -1, TVec3f(13620.0f, -750.0f, 3840.0f),
+                                  TVec3f(0.0f, -90.0f, 0.0f), TGameSequence::AREA_RICCO, -1);
+
+            SME::setSpawnTransRot(SME::STAGE_LIGHTHOUSE, -1, TVec3f(-10750.0f, -500.0f, 5400.0f),
+                                  TVec3f(0.0f, 90.0f, 0.0f), TGameSequence::AREA_PINNABEACH, -1);
+
+            SME::setSpawnTransRot(SME::STAGE_LIGHTHOUSE, -1, TVec3f(-270.0f, -1080.0f, -16800.0f),
+                                  TVec3f(0.0f, 0.0f, 0.0f), SME::STAGE_ISLE_DELFINO, 6);
         }
 
         // Register Warship Island stage info
@@ -107,6 +134,10 @@ BETTER_SMS_FOR_CALLBACK void initializeStageInfo(TApplication *app) {
             Stage::registerShineStage(info);
             Stage::registerNormalStage(SME::STAGE_WARSHIP, info->getShineStageID());
             Stage::registerExStage(SME::STAGE_WARSHIP_EX, info->getShineStageID(), 0x8F);
+
+            SME::setSpawnTransRot(SME::STAGE_WARSHIP, -1, TVec3f(-18000.0f, 180.0f, 13240.0f),
+                                  TVec3f(0.0f, 100.0f, 0.0f), SME::STAGE_ISLE_DELFINO,
+                                  5);  // Rugivosa Marsh
         }
 
         // Register Hotel Lacrima stage info
@@ -128,6 +159,17 @@ BETTER_SMS_FOR_CALLBACK void initializeStageInfo(TApplication *app) {
             Stage::registerNormalStage(SME::STAGE_LACRIMA_BACKHOUSE, info->getShineStageID());
             Stage::registerExStage(SME::STAGE_LACRIMA_EX0, info->getShineStageID(), 0x98);
             Stage::registerExStage(SME::STAGE_LACRIMA_EX1, info->getShineStageID(), 0x9B);
+
+            SME::setSpawnTransRot(SME::STAGE_LACRIMA, -1, TVec3f(-1140.0f, 230.0f, 5400.0f),
+                                  TVec3f(0.0f, -180.0f, 0.0f), SME::STAGE_LACRIMA_INSIDE, -1);
+
+            SME::setSpawnTransRot(SME::STAGE_LACRIMA, -1, TVec3f(13300.0f, 2740.0f, 9400.0f),
+                                  TVec3f(0.0f, 0.0f, 0.0f), SME::STAGE_ISLE_DELFINO,
+                                  8);  // Delfino Express
+
+            SME::setSpawnTransRot(SME::STAGE_LACRIMA, -1, TVec3f(-9000.0f, 270.0f, 4400.0f),
+                                  TVec3f(0.0f, 145.0f, 0.0f), SME::STAGE_ISLE_DELFINO,
+                                  4);  // Sonnolento Grove
         }
 
         // Register Pianta Pit stage info
@@ -301,6 +343,65 @@ BETTER_SMS_FOR_CALLBACK void initializeStageInfo(TApplication *app) {
             info->addScenario(-1, 189);    // Train Car
             Stage::registerShineStage(info);
             Stage::registerNormalStage(SME::STAGE_ISLE_DELFINO, info->getShineStageID());
+
+            // Boilente Crypt
+            SME::setSpawnTransRot(SME::STAGE_ISLE_DELFINO, 0, TVec3f(1800.0f, 30.0f, -4300.0f),
+                                  TVec3f(0.0f, -10.0f, 0.0f), TGameSequence::AREA_BIANCO, -1);
+
+            // Arido Trail
+            SME::setSpawnTransRot(SME::STAGE_ISLE_DELFINO, 1, TVec3f(4500.0f, 340.0f, 2027.0f),
+                                  TVec3f(0.0f, -120.0f, 0.0f), SME::STAGE_ERTO, -1);
+
+            // Arcobaleno Cove
+            SME::setSpawnTransRot(SME::STAGE_ISLE_DELFINO, 2, TVec3f(-1400.0f, 120.0f, -1900.0f),
+                                  TVec3f(0.0f, -170.0f, 0.0f), TGameSequence::AREA_SIRENA, -1);
+
+            // Sonnolento Grove
+            {
+                SME::setSpawnTransRot(SME::STAGE_ISLE_DELFINO, 3, TVec3f(1000.0f, -10.0f, -1470.0f),
+                                      TVec3f(0.0f, -35.0f, 0.0f), SME::STAGE_LACRIMA, -1);
+
+                SME::setSpawnTransRot(SME::STAGE_ISLE_DELFINO, 3, TVec3f(-1900.0f, -40.0f, -600.0f),
+                                      TVec3f(0.0f, 70.0f, 0.0f), TGameSequence::AREA_MARE, -1);
+            }
+
+            // Rugivosa Marsh
+            {
+                SME::setSpawnTransRot(SME::STAGE_ISLE_DELFINO, 4, TVec3f(3950.0f, 140.0f, 140.0f),
+                                      TVec3f(0.0f, 0.0f, 0.0f), SME::STAGE_WARSHIP, -1);
+
+                SME::setSpawnTransRot(SME::STAGE_ISLE_DELFINO, 4,
+                                      TVec3f(-3800.0f, 190.0f, -1175.0f), TVec3f(0.0f, 90.0f, 0.0f),
+                                      SME::STAGE_LACRIMA, -1);
+            }
+
+            // Giovane Creek
+            {
+                SME::setSpawnTransRot(SME::STAGE_ISLE_DELFINO, 5, TVec3f(235.0f, 270.0f, 920.0f),
+                                      TVec3f(0.0f, -155.0f, 0.0f), TGameSequence::AREA_RICCO, -1);
+
+                SME::setSpawnTransRot(SME::STAGE_ISLE_DELFINO, 5,
+                                      TVec3f(-2950.0f, 270.0f, -2030.0f), TVec3f(0.0f, 72.0f, 0.0f),
+                                      TGameSequence::AREA_MAMMA, -1);
+            }
+
+            // Marea Reef
+            {
+                SME::setSpawnTransRot(SME::STAGE_ISLE_DELFINO, 6, TVec3f(770.0f, -80.0f, -1070.0f),
+                                      TVec3f(0.0f, -30.0f, 0.0f), TGameSequence::AREA_MAMMA, -1);
+
+                SME::setSpawnTransRot(SME::STAGE_ISLE_DELFINO, 6, TVec3f(-1240.0f, -80.0f, -650.0f),
+                                      TVec3f(0.0f, 56.0f, 0.0f), TGameSequence::AREA_SIRENA, -1);
+            }
+
+            // Ricco Station
+            {
+                SME::setSpawnTransRot(SME::STAGE_ISLE_DELFINO, 7, TVec3f(0.0f, 0.0f, 0.0f),
+                                      TVec3f(0.0f, 0.0f, 0.0f), SME::STAGE_PIANTA_PIT, -1);
+
+                SME::setSpawnTransRot(SME::STAGE_ISLE_DELFINO, 7, TVec3f(0.0f, 0.0f, 0.0f),
+                                      TVec3f(0.0f, 0.0f, 0.0f), SME::STAGE_CRUISER, -1);
+            }
         }
 
         // Register Tutorial Stage Info
@@ -324,6 +425,176 @@ BETTER_SMS_FOR_CALLBACK void initializeStageInfo(TApplication *app) {
         //    BetterSMS::Stage::registerStageInfo(info->mNormalStageID info);
         //}
 
+        // Set up warps for base stages
+        {
+            // Delfino Plaza
+            {
+                SME::setSpawnTransRot(TGameSequence::AREA_DOLPIC, -1,
+                                      TVec3f(13700.0f, 300.0f, -12700.0f), TVec3f(0.0f, -50.0f, 0.0f),
+                                      SME::STAGE_ERTO, -1);
+            }
+
+            // Bianco Hills
+            {
+                SME::setSpawnTransRot(TGameSequence::AREA_BIANCO, -1,
+                                      TVec3f(4370.0f, 2700.0f, 12050.0f), TVec3f(0.0f, 100.0f, 0.0f),
+                                      SME::STAGE_ISLE_DELFINO,
+                                      7);  // Ricco Station
+
+                SME::setSpawnTransRot(TGameSequence::AREA_BIANCO, -1,
+                                      TVec3f(11450.0f, 3670.0f, 10000.0f), TVec3f(0.0f, -135.0f, 0.0f),
+                                      SME::STAGE_ISLE_DELFINO,
+                                      0);  // Boilente Crypt
+
+                SME::setSpawnTransRot(TGameSequence::AREA_BIANCO, -1,
+                                      TVec3f(-7250.0f, 6600.0f, -15000.0f), TVec3f(0.0f, 20.0f, 0.0f),
+                                      TGameSequence::AREA_MONTE, -1);
+
+                SME::setSpawnTransRot(TGameSequence::AREA_BIANCO, -1,
+                                      TVec3f(-14000.0f, 2250.0f, 5300.0f), TVec3f(0.0f, 120.0f, 0.0f),
+                                      SME::STAGE_ISLE_DELFINO,
+                                      5);  // Giovane Creek
+            }
+
+            // Ricco Harbor
+            {
+                SME::setSpawnTransRot(TGameSequence::AREA_RICCO, -1,
+                                      TVec3f(-18500.0f, 300.0f, 860.0f), TVec3f(0.0f, 73.0f, 0.0f),
+                                      SME::STAGE_ISLE_DELFINO,
+                                      5);  // Giovane Creek
+
+                SME::setSpawnTransRot(TGameSequence::AREA_RICCO, -1,
+                                      TVec3f(9100.0f, 1500.0f, 1780.0f), TVec3f(0.0f, 90.0f, 0.0f),
+                                      SME::STAGE_ISLE_DELFINO,
+                                      7);  // Ricco Station
+            }
+
+            // Gelato Beach
+            {
+                SME::setSpawnTransRot(TGameSequence::AREA_MAMMA, -1,
+                                      TVec3f(9450.0f, 415.0f, -8550.0f), TVec3f(0.0f, -80.0f, 0.0f),
+                                      SME::STAGE_ISLE_DELFINO,
+                                      5);  // Giovane Creek
+
+                SME::setSpawnTransRot(TGameSequence::AREA_MAMMA, -1,
+                                      TVec3f(-10310.0f, 4780.0f, -12090.0f), TVec3f(0.0f, 0.0f, 0.0f),
+                                      TGameSequence::AREA_MONTE, -1);
+
+                SME::setSpawnTransRot(TGameSequence::AREA_MAMMA, -1,
+                                      TVec3f(1700.0f, -80.0f, 24000.0f), TVec3f(0.0f, -170.0f, 0.0f),
+                                      TGameSequence::AREA_SIRENA, -1);
+
+                SME::setSpawnTransRot(TGameSequence::AREA_MAMMA, -1,
+                                      TVec3f(27000.0f, -80.0f, 10100.0f), TVec3f(0.0f, 90.0f, 0.0f),
+                                      SME::STAGE_ISLE_DELFINO,
+                                      6);  // Marea Reef
+            }
+
+            // Pinna Beach
+            {
+                SME::setSpawnTransRot(TGameSequence::AREA_PINNABEACH, -1,
+                                      TVec3f(-3500.0f, 120.0f, 12670.0f), TVec3f(0.0f, 115.0f, 0.0f),
+                                      SME::STAGE_LIGHTHOUSE, -1);
+
+                SME::setSpawnTransRot(TGameSequence::AREA_PINNABEACH, -1,
+                                      TVec3f(-3500.0f, 400.0f, 2800.0f), TVec3f(0.0f, 0.0f, 0.0f),
+                                      TGameSequence::AREA_PINNAPARCO, -1);
+            }
+
+            // Pinna Park
+            {
+                SME::setSpawnTransRot(TGameSequence::AREA_PINNAPARCO, -1,
+                                      TVec3f(-6280.0f, 40.0f, -13700.0f), TVec3f(0.0f, 40.0f, 0.0f),
+                                      TGameSequence::AREA_SIRENA, -1);
+            }
+
+            // Sirena Beach
+            {
+                SME::setSpawnTransRot(TGameSequence::AREA_SIRENA, -1,
+                                      TVec3f(8150.0f, 980.0f, 650.0f), TVec3f(0.0f, -85.0f, 0.0f),
+                                      SME::STAGE_ISLE_DELFINO,
+                                      8);  // Delfino Express
+
+                SME::setSpawnTransRot(TGameSequence::AREA_SIRENA, -1,
+                                      TVec3f(-8200.0f, 760.0f, 9270.0f), TVec3f(0.0f, 145.0f, 0.0f),
+                                      SME::STAGE_ISLE_DELFINO,
+                                      2);  // Arcobaleno Cove
+
+                SME::setSpawnTransRot(TGameSequence::AREA_SIRENA, -1,
+                                      TVec3f(-8100.0f, -80.0f, 15550.0f), TVec3f(0.0f, 160.0f, 0.0f),
+                                      TGameSequence::AREA_PINNAPARCO, -1);
+
+                SME::setSpawnTransRot(TGameSequence::AREA_SIRENA, -1,
+                                      TVec3f(10600.0f, -80.0f, 15900.0f), TVec3f(0.0f, -130.0f, 0.0f),
+                                      TGameSequence::AREA_MAMMA, -1);
+
+                SME::setSpawnTransRot(TGameSequence::AREA_SIRENA, -1,
+                                      TVec3f(-50.0f, 900.0f, -1770.0f), TVec3f(0.0f, 0.0f, 0.0f),
+                                      TGameSequence::AREA_DELFINO,
+                                      -1);  // Hotel
+            }
+
+            // Sirena Hotel
+            {
+                SME::setSpawnTransRot(TGameSequence::AREA_DELFINO, -1,
+                                      TVec3f(-2450.0f, 0.0f, -1250.0f), TVec3f(0.0f, 90.0f, 0.0f),
+                                      TGameSequence::AREA_CASINO, -1);
+            }
+
+            // Pianta Village
+            {
+                SME::setSpawnTransRot(TGameSequence::AREA_MONTE, -1,
+                                      TVec3f(-4350.0f, -2500.0f, 13770.0f), TVec3f(0.0f, 80.0f, 0.0f),
+                                      SME::STAGE_PIANTA_PIT, -1);
+
+                SME::setSpawnTransRot(TGameSequence::AREA_MONTE, -1,
+                                      TVec3f(23900.0f, -2310.0f, -16250.0f), TVec3f(0.0f, -55.0f, 0.0f),
+                                      SME::STAGE_ISLE_DELFINO, 4);  // Rugivosa Marsh
+
+                SME::setSpawnTransRot(TGameSequence::AREA_MONTE, -1,
+                                      TVec3f(-17360.0f, -2290.0f, -21250.0f), TVec3f(0.0f, 35.0f, 0.0f),
+                                      SME::STAGE_ISLE_DELFINO, 3);  // Sonnolento Grove
+
+                SME::setSpawnTransRot(TGameSequence::AREA_MONTE, -1,
+                                      TVec3f(6000.0f, 200.0f, 30000.0f), TVec3f(0.0f, -150.0f, 0.0f),
+                                      TGameSequence::AREA_BIANCO, -1);
+            }
+
+            // Noki Bay
+            {
+                SME::setSpawnTransRot(TGameSequence::AREA_MARE, -1,
+                                      TVec3f(-12510.0f, 280.0f, 7000.0f), TVec3f(0.0f, 150.0f, 0.0f),
+                                      SME::STAGE_ISLE_DELFINO,
+                                      2);  // Arcobaleno Cove
+
+                SME::setSpawnTransRot(TGameSequence::AREA_MARE, -1,
+                                      TVec3f(7400.0f, 5000.0f, -4000.0f), TVec3f(0.0f, -120.0f, 0.0f),
+                                      SME::STAGE_ISLE_DELFINO,
+                                      3);  // Sonnolento Grove
+
+                SME::setSpawnTransRot(TGameSequence::AREA_MARE, -1,
+                                      TVec3f(3400.0f, 340.0f, 1700.0f), TVec3f(0.0f, -40.0f, 0.0f),
+                                      TGameSequence::AREA_MAREUNDERSEA, -1);
+
+                SME::setSpawnTransRot(TGameSequence::AREA_MARE, -1,
+                                      TVec3f(3400.0f, 340.0f, 1700.0f), TVec3f(0.0f, -40.0f, 0.0f),
+                                      TGameSequence::AREA_MAREBOSS, -1);
+
+                SME::setSpawnTransRot(TGameSequence::AREA_MARE, -1,
+                                      TVec3f(-120.0f, -80.0f, -2000.0f), TVec3f(0.0f, -30.0f, 0.0f),
+                                      TGameSequence::AREA_MAREEX0, -1);
+            }
+
+            // Corona Mountain
+            {
+                SME::setSpawnTransRot(TGameSequence::AREA_COROEX6, -1,
+                                      TVec3f(-2500.0f, 530.0f, 23000.0f), TVec3f(0.0f, 90.0f, 0.0f),
+                                      SME::STAGE_ISLE_DELFINO, 0);  // Boilente Crypt
+            }
+        }
+
+        //
+
         old_heap->becomeCurrentHeap();
     }
 }
@@ -333,4 +604,13 @@ BETTER_SMS_FOR_CALLBACK void resetForExStage(TMarDirector *director) {
         return;
 
     TFlagManager::smInstance->setFlag(0x40002, 0);
+}
+
+BETTER_SMS_FOR_CALLBACK void setPlayerStartPos(TMario *player) {
+    TVec3f trans, rot;
+    if (SME::getSpawnTransRot(&gpApplication, trans, rot)) {
+        player->mTranslation = trans;
+        player->mRotation    = rot;
+        player->mAngle.y     = convertAngleFloatToS16(rot.y);
+    }
 }

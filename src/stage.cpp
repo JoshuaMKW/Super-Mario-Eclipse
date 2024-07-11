@@ -511,7 +511,7 @@ BETTER_SMS_FOR_CALLBACK void initializeStageInfo(TApplication *app) {
             // Sirena Beach
             {
                 SME::setSpawnTransRot(TGameSequence::AREA_SIRENA, -1,
-                                      TVec3f(8150.0f, 980.0f, 650.0f), TVec3f(0.0f, -85.0f, 0.0f),
+                                      TVec3f(8150.0f, 990.0f, 650.0f), TVec3f(0.0f, -85.0f, 0.0f),
                                       SME::STAGE_ISLE_DELFINO,
                                       8);  // Delfino Express
 
@@ -523,7 +523,7 @@ BETTER_SMS_FOR_CALLBACK void initializeStageInfo(TApplication *app) {
                 SME::setSpawnTransRot(TGameSequence::AREA_SIRENA, -1,
                                       TVec3f(-8100.0f, -80.0f, 15550.0f), TVec3f(0.0f, 160.0f, 0.0f),
                                       TGameSequence::AREA_PINNAPARCO, -1);
-
+                 
                 SME::setSpawnTransRot(TGameSequence::AREA_SIRENA, -1,
                                       TVec3f(10600.0f, -80.0f, 15900.0f), TVec3f(0.0f, -130.0f, 0.0f),
                                       TGameSequence::AREA_MAMMA, -1);
@@ -588,7 +588,7 @@ BETTER_SMS_FOR_CALLBACK void initializeStageInfo(TApplication *app) {
             // Corona Mountain
             {
                 SME::setSpawnTransRot(TGameSequence::AREA_COROEX6, -1,
-                                      TVec3f(-2500.0f, 530.0f, 23000.0f), TVec3f(0.0f, 90.0f, 0.0f),
+                                      TVec3f(-3000.0f, 610.0f, 22960.0f), TVec3f(0.0f, 90.0f, 0.0f),
                                       SME::STAGE_ISLE_DELFINO, 0);  // Boilente Crypt
             }
         }

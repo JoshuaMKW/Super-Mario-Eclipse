@@ -17,6 +17,9 @@ public:
     void perform(u32 flags, JDrama::TGraphics *graphics) override;
     bool receiveMessage(THitActor *sender, u32 message) override;
     void load(JSUMemoryInputStream &in) override;
+    void playIdleAnim();
+    void playSpottedAnim();
+    void rotatePianta();
 
 private:
     float mMaxAngle;
@@ -27,6 +30,8 @@ private:
     float mYTeleport;
     float mZTeleport;
 
+    int frameCounter;
+    int currentFrameCount;
     TVec3f mTeleportLoc;
 };
 

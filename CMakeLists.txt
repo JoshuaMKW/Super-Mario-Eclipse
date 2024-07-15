@@ -7,9 +7,12 @@ set(CMAKE_CXX_STANDARD 20)
 file(GLOB SUPER_MARIO_ECLIPSE_SRC
     "src/*.c"
     "src/*.cpp"
+    "src/*/*.c"
     "src/*/*.cpp"
     "include/*.h"
     "include/*.hxx"
+    "include/*/*.h"
+    "include/*/*.hxx"
 )
 
 add_executable(SuperMarioEclipse ${SUPER_MARIO_ECLIPSE_SRC})

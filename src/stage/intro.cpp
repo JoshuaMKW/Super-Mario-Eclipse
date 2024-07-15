@@ -1,0 +1,57 @@
+#include <JSystem/JParticle/JPAResourceManager.hxx>
+#include <SMS/Camera/PolarSubCamera.hxx>
+#include <SMS/MSound/MSound.hxx>
+#include <SMS/MSound/MSoundSESystem.hxx>
+#include <SMS/Manager/FlagManager.hxx>
+#include <SMS/raw_fn.hxx>
+
+#include <BetterSMS/libs/constmath.hxx>
+#include <BetterSMS/module.hxx>
+
+#include "settings.hxx"
+#include "stage.hxx"
+
+static bool isStartCameraPresent(const char *default_path) {
+    char camera_name[32] = {};
+    sprintf(camera_name, "startcamera%d", gpMarDirector->mEpisodeID);
+
+    char camera_path[64] = {};
+    sprintf(camera_path, "/scene/map/camera/%s.bck", camera_name);
+
+    if (JKRFileLoader::getGlbResource(camera_path) != nullptr) {
+        return true;
+    }
+
+    return JKRFileLoader::getGlbResource(default_path) != nullptr;
+}
+SMS_PATCH_BL(0x80298F64, isStartCameraPresent);
+
+static void extendedNextStateInitialize(TMarDirector *director, s8 next_state) {
+    bool is_extended_area = director->mAreaID >= SME::STAGE_ERTO &&
+                            director->mAreaID <= SME::STAGE_TUTORIAL;
+    if (next_state != TMarDirector::STATE_INTRO_PLAYING || !is_extended_area) {
+        director->nextStateInitialize(next_state);
+        return;
+    }
+
+    char camera_name[32] = {};
+    sprintf(camera_name, "startcamera%d", director->mEpisodeID);
+
+    char camera_path[64] = {};
+    sprintf(camera_path, "/scene/map/camera/%s.bck", camera_name);
+
+    if (JKRFileLoader::getGlbResource(camera_path) != nullptr) {
+        gpCamera->startDemoCamera(camera_name, nullptr, -1, 0.0f, true);
+    } else {
+        gpCamera->startDemoCamera("startcamera", nullptr, -1, 0.0f, true);
+    }
+
+    u16 unk_state = *(u16 *)((u8 *)director + 0x50);
+    if ((unk_state & 0x4) != 0) {
+        director->mGCConsole->mConsoleStr->startAppearScenario();
+        *(u16 *)((u8 *)director + 0x50) &= ~0x4;
+    }
+
+    startStageEntranceDemo__10MSMainProcFUcUc(director->mAreaID, director->mEpisodeID);
+}
+SMS_PATCH_BL(0x802995C8, extendedNextStateInitialize);

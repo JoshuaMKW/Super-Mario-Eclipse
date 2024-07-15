@@ -5,8 +5,39 @@
 #include <SMS/raw_fn.hxx>
 
 #include <BetterSMS/module.hxx>
+#include <BetterSMS/objects/generic.hxx>
 
 #include "settings.hxx"
+
+#pragma region CruiserDelfino
+
+static bool s_cruiser_checked = false;
+
+BETTER_SMS_FOR_CALLBACK void resetCruiserUnlocked(TMarDirector* director) {
+    s_cruiser_checked = false;
+}
+
+BETTER_SMS_FOR_CALLBACK void checkForCruiserUnlocked(TMarDirector *director) {
+    if (s_cruiser_checked)
+        return;
+
+    s_cruiser_checked = true;
+
+    auto *nameRef = TMarNameRefGen::getInstance()->getRootNameRef();
+    u16 keyCode   = JDrama::TNameRef::calcKeyCode("mini_cruiser");
+    if (JDrama::TNameRef *p = nameRef->searchF(keyCode, "mini_cruiser")) {
+        TGenericRailObj *cruiser = reinterpret_cast<TGenericRailObj *>(p);
+
+        bool cruiser_unlocked =
+            TFlagManager::smInstance->getBool(0x10077);  // Corona Mountain beaten
+
+        if (cruiser_unlocked) {
+            cruiser->makeObjAppeared();
+        } else {
+            cruiser->makeObjDead();
+        }
+    }
+}
 
 #pragma region SnowParticles
 

@@ -63,7 +63,7 @@ private:
     int mIndex;
 };
 
-static const char *sComposers[] = {"Trevor Scott"};
+static const char *sComposers[] = {"Trevor Scott", "StevenShockley"};
 
 class ComposerCreditSetting final : public Settings::IntSetting {
 public:
@@ -80,7 +80,7 @@ private:
     int mIndex;
 };
 
-static const char *sSoundDesigners[] = {"Trevor Scott"};
+static const char *sSoundDesigners[] = {"Trevor Scott", "StevenShockley"};
 
 class SoundDesignCreditSetting final : public Settings::IntSetting {
 public:
@@ -131,7 +131,7 @@ private:
     int mIndex;
 };
 
-static const char *sSpecialThanks[] = {"Xayr", "Halleester"};
+static const char *sSpecialThanks[] = {"Xayr", "Halleester", "Portable Productions", "Gonz", "Truegamer02", "zackthepillow", "MissB"};
 
 class SpecialThanksCreditSetting final : public Settings::IntSetting {
 public:

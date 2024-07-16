@@ -614,3 +614,9 @@ BETTER_SMS_FOR_CALLBACK void setPlayerStartPos(TMario *player) {
         player->mAngle.y     = convertAngleFloatToS16(rot.y);
     }
 }
+
+void SME_extendedCorrectFlags(TFlagManager *manager) {
+    manager->correctFlag();
+    manager->setFlag(0x20013, 2670);
+}
+SMS_PATCH_BL(0x802954f4, SME_extendedCorrectFlags);

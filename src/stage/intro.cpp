@@ -46,7 +46,13 @@ static void extendedNextStateInitialize(TMarDirector *director, s8 next_state) {
         gpCamera->startDemoCamera("startcamera", nullptr, -1, 0.0f, true);
     }
 
+    bool isExStage = SMS_isExMap__Fv();
+    if (!isExStage && director->mAreaID > 60) {
+        *(u16 *)((u8 *)director + 0x50) |= 6;
+    }
+
     u16 unk_state = *(u16 *)((u8 *)director + 0x50);
+
     if ((unk_state & 0x4) != 0) {
         director->mGCConsole->mConsoleStr->startAppearScenario();
         *(u16 *)((u8 *)director + 0x50) &= ~0x4;

@@ -179,10 +179,10 @@ bool TTornadoMapObj::blowUp(TMario *actor) {
     return false;
 }
 
-static hit_data tornado_hit_data{.mAttackRadius  = 450.0f,
-                                 .mAttackHeight  = 450.0f,
-                                 .mReceiveRadius = 450.0f,
-                                 .mReceiveHeight = 450.0f};
+static hit_data tornado_hit_data{.mAttackRadius  = 550.0f,
+                                 .mAttackHeight  = 550.0f,
+                                 .mReceiveRadius = 550.0f,
+                                 .mReceiveHeight = 550.0f};
 
 static obj_hit_info tornado_collision_data{
     ._00 = 1, .mType = 0xFC000000, ._08 = 0, .mHitData = &tornado_hit_data};

@@ -195,6 +195,7 @@ BETTER_SMS_FOR_CALLBACK void initializeStageInfo(TApplication *app) {
             info->addScenario(0xA9, 121);
             info->addScenario(0xAA, 122);
             info->addScenario(0xAB, 123);
+            info->addScenario(-1, 191);  // Cruiser cabin
             info->addExScenario(0xAC, 124);
             Stage::registerShineStage(info);
             Stage::registerNormalStage(SME::STAGE_CRUISER, info->getShineStageID());

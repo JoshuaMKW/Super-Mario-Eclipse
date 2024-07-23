@@ -5,8 +5,8 @@
 #include <SMS/Camera/PolarSubCamera.hxx>
 #include <SMS/MarioUtil/MathUtil.hxx>
 
-#define CAMERA_TYPE_2D 128
-#define CAMERA_PAN_DIST 250.0f
+#define CAMERA_TYPE_2D     128
+#define CAMERA_PAN_DIST    250.0f
 #define CAMERA_FOLLOW_LERP 0.07f
 
 static void controlCameraByCodeExt(CPolarSubCamera *camera) {
@@ -14,14 +14,18 @@ static void controlCameraByCodeExt(CPolarSubCamera *camera) {
         f32 c_stick_x = gpMarioAddress->mController->mCStick.mStickX;
         f32 c_stick_y = gpMarioAddress->mController->mCStick.mStickY;
 
-        camera->mTranslation.x =
-            lerp<f32>(camera->mTranslation.x, gpMarioPos->x + c_stick_x * CAMERA_PAN_DIST,
-                      CAMERA_FOLLOW_LERP);
-        camera->mTranslation.y =
-            lerp<f32>(camera->mTranslation.y, gpMarioPos->y + 200.0f + c_stick_y * CAMERA_PAN_DIST,
-                      CAMERA_FOLLOW_LERP);
-        camera->mTranslation.z =
-            lerp<f32>(camera->mTranslation.z, gpMarioPos->z + 1500.0f, CAMERA_FOLLOW_LERP);
+        if (!camera->isNormalDeadDemo() && !camera->isHellDeadDemo()) {
+            camera->mTranslation.x =
+                lerp<f32>(camera->mTranslation.x, gpMarioPos->x + c_stick_x * CAMERA_PAN_DIST,
+                          CAMERA_FOLLOW_LERP);
+            camera->mTranslation.y =
+                lerp<f32>(camera->mTranslation.y,
+                          gpMarioPos->y + 400.0f + c_stick_y * CAMERA_PAN_DIST, CAMERA_FOLLOW_LERP);
+            camera->mTranslation.z =
+                lerp<f32>(camera->mTranslation.z, gpMarioPos->z + 2500.0f, CAMERA_FOLLOW_LERP);
+        }
+
+        camera->mProjectionFovy = 50.0f;
 
         camera->mAnglePitch = 0;
         camera->mAngleYaw   = convertAngleFloatToS16(-180.0f);
@@ -31,8 +35,8 @@ static void controlCameraByCodeExt(CPolarSubCamera *camera) {
                          camera->mProjectionFar);
         C_MTXLookAt(camera->mTRSMatrix, camera->mTranslation, TVec3f::up(), *gpMarioPos);
 
-        camera->mTargetPos.x = camera->mTranslation.x;
-        camera->mTargetPos.y           = camera->mTranslation.y;
+        camera->mTargetPos.x      = camera->mTranslation.x;
+        camera->mTargetPos.y      = camera->mTranslation.y;
         camera->mTargetPos.z      = gpMarioPos->z;
         camera->mWorldTranslation = camera->mTranslation;
 

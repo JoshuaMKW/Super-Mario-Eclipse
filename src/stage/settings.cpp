@@ -131,7 +131,7 @@ private:
     int mIndex;
 };
 
-static const char *sSpecialThanks[] = {"Xayr", "Halleester", "Portable Productions", "Gonz", "Truegamer02", "zackthepillow", "MissB"};
+static const char *sSpecialThanks[] = {"Xayr", "Halleester", "Portable Productions", "Gonz", "Truegamer02", "zachthepillow", "MissB"};
 
 class SpecialThanksCreditSetting final : public Settings::IntSetting {
 public:

@@ -39,6 +39,7 @@ extern void adjustYoshiTongue(TMario *player, bool isMario);
 // Stage
 extern void initializeStageInfo(TApplication *app);
 extern void resetForExStage(TMarDirector *director);
+extern void forcePlayerZOn2D(TMario *player, bool isMario);
 
 // Player
 extern void initializePoundJumpAnimation(TApplication *app);
@@ -121,6 +122,7 @@ static void initModule() {
     
     Stage::addInitCallback(resetCruiserUnlocked);
     Stage::addUpdateCallback(checkForCruiserUnlocked);
+    Player::addUpdateCallback(forcePlayerZOn2D);
 
     Stage::addInitCallback(initCharacterArchives);
     Stage::addInitCallback(resetForExStage);

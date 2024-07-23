@@ -235,7 +235,7 @@ SMS_PATCH_BL(SMS_PORT_REGION(0x8026707C, 0, 0, 0), getGlobalPlayerSplashTex);
 // SMS_PATCH_BL(SMS_PORT_REGION(0x802474C0, 0, 0, 0), applyShadowEffects);
 const char *player_fnames[] = {"mario", "luigi", "piantissimo", "shadow_mario"};
 
-void updatePlayerHUD(TMarDirector *director, const J2DOrthoGraph *graph) {
+BETTER_SMS_FOR_CALLBACK void updatePlayerHUD(TMarDirector *director, const J2DOrthoGraph *graph) {
     char buffer[64];
     char namebuf[32];
 

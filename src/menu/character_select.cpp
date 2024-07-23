@@ -38,6 +38,7 @@
 #include "globals.hxx"
 
 #include "menu/character_select.hxx"
+#include "stage.hxx"
 
 constexpr size_t PlayerMax = 1;
 
@@ -218,11 +219,11 @@ void CharacterSelectDirector::initializeLayout() {
 
     J2DPane *iconListPane = mSelectScreen->mScreen->search('list');
 
-    JUTTexture *poster_image = new JUTTexture("timg/poster.bti");
+    JUTTexture *poster_image = new JUTTexture("/char_select/timg/poster.bti");
 
     if (mIsMario) {
-        JUTTexture *character_icon = new JUTTexture("timg/mario.bti");
-        JUTTexture *text_icon      = new JUTTexture("timg/mario_t.bti");
+        JUTTexture *character_icon = new JUTTexture("/char_select/timg/mario.bti");
+        JUTTexture *text_icon      = new JUTTexture("/char_select/timg/mario_t.bti");
 
         CharacterInfo info;
         info.mPlayer = SME::CharacterID::MARIO;
@@ -244,8 +245,8 @@ void CharacterSelectDirector::initializeLayout() {
     }
 
     if (mIsLuigi) {
-        JUTTexture *character_icon = new JUTTexture("timg/luigi.bti");
-        JUTTexture *text_icon      = new JUTTexture("timg/luigi_t.bti");
+        JUTTexture *character_icon = new JUTTexture("/char_select/timg/luigi.bti");
+        JUTTexture *text_icon      = new JUTTexture("/char_select/timg/luigi_t.bti");
 
         CharacterInfo info;
         info.mPlayer = SME::CharacterID::LUIGI;
@@ -267,8 +268,8 @@ void CharacterSelectDirector::initializeLayout() {
     }
 
     if (mIsPiantissimo) {
-        JUTTexture *character_icon = new JUTTexture("timg/piantissimo.bti");
-        JUTTexture *text_icon      = new JUTTexture("timg/piantissimo_t.bti");
+        JUTTexture *character_icon = new JUTTexture("/char_select/timg/piantissimo.bti");
+        JUTTexture *text_icon      = new JUTTexture("/char_select/timg/piantissimo_t.bti");
 
         CharacterInfo info;
         info.mPlayer = SME::CharacterID::PIANTISSIMO;
@@ -290,8 +291,8 @@ void CharacterSelectDirector::initializeLayout() {
     }
 
     if (mIsShadowMario) {
-        JUTTexture *character_icon = new JUTTexture("timg/shadow_mario.bti");
-        JUTTexture *text_icon      = new JUTTexture("timg/shadow_mario_t.bti");
+        JUTTexture *character_icon = new JUTTexture("/char_select/timg/shadow_mario.bti");
+        JUTTexture *text_icon      = new JUTTexture("/char_select/timg/shadow_mario_t.bti");
 
         CharacterInfo info;
         info.mPlayer = SME::CharacterID::SHADOW_MARIO;
@@ -334,7 +335,7 @@ void CharacterSelectDirector::initializeLayout() {
         CharacterInfo &info = mSelectScreen->mCharacterInfos.at(i);
 
         char tex_path[32];
-        snprintf(tex_path, 32, "timg/hand_p%i.bti", i + 1);
+        snprintf(tex_path, 32, "/char_select/timg/hand_p%i.bti", i + 1);
 
         {
             JUTTexture *select_icon = new JUTTexture(tex_path);
@@ -466,17 +467,68 @@ BETTER_SMS_FOR_CALLBACK bool directCharacterSelectMenu(TApplication *app) {
 
 #if 1
 static int flagCharacterSelectMenu(u8 state) {
-    if (gpApplication.mContext != TApplication::CONTEXT_DIRECT_STAGE)
-        return state;
+    /*if (gpApplication.mContext != TApplication::CONTEXT_DIRECT_STAGE)
+        return state;*/
 
     if (state != TApplication::CONTEXT_DIRECT_STAGE)
         return state;
 
-    auto &next_scene = gpApplication.mNextScene;
-    auto &cur_scene  = gpApplication.mCurrentScene;
-      auto &prev_scene = gpApplication.mPrevScene;
+    TGameSequence &next_scene = gpApplication.mNextScene;
+    TGameSequence &cur_scene  = gpApplication.mCurrentScene;
+    TGameSequence &prev_scene = gpApplication.mPrevScene;
 
-    return state;
+    // No character select for secret courses
+    if (Stage::isExStage(next_scene.mAreaID, next_scene.mEpisodeID)) {
+        OSReport("Ex stage\n");
+        return state;
+    }
+
+    // No character select for diving stages
+    if (Stage::isDivingStage(next_scene.mAreaID, next_scene.mEpisodeID)) {
+        OSReport("Diving stage\n");
+        return state;
+    }
+
+    // No character select for intra-areas
+    if (cur_scene.mEpisodeID != 0xFF) {
+        if (SMS_getShineStage__FUc(next_scene.mAreaID) ==
+            SMS_getShineStage__FUc(cur_scene.mAreaID)) {
+            return state;
+        }
+    }
+
+    // No character select for Delfino Plaza
+    if (next_scene.mAreaID == TGameSequence::AREA_DOLPIC) {
+        return state;
+    }
+
+    // No character select for options menu
+    if (next_scene.mAreaID == TGameSequence::AREA_OPTION) {
+        return state;
+    }
+
+    // No character select for junction rooms
+    if (next_scene.mAreaID == SME::STAGE_ISLE_DELFINO) {
+        return state;
+    }
+
+    // No character select for Daisy Cruiser
+    if (next_scene.mAreaID == SME::STAGE_CRUISER) {
+        return state;
+    }
+
+    sMario = true;
+    sLuigi = true;
+    sPiantissimo = true;
+
+    if (next_scene.mAreaID == SME::STAGE_MARIO_DREAM) {
+        if (next_scene.mEpisodeID == 0) {
+            sLuigi = false;
+            sPiantissimo = false;
+        }
+    }
+
+    return CONTEXT_CHARACTER_SELECT;
 }
 SMS_PATCH_B(SMS_PORT_REGION(0x802A637C, 0, 0, 0), flagCharacterSelectMenu);
 #else

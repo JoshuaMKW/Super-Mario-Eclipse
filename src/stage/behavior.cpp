@@ -4,6 +4,7 @@
 #include <SMS/Manager/FlagManager.hxx>
 #include <SMS/raw_fn.hxx>
 
+#include <BetterSMS/libs/boundbox.hxx>
 #include <BetterSMS/module.hxx>
 #include <BetterSMS/objects/generic.hxx>
 
@@ -13,7 +14,7 @@
 
 static bool s_cruiser_checked = false;
 
-BETTER_SMS_FOR_CALLBACK void resetCruiserUnlocked(TMarDirector* director) {
+BETTER_SMS_FOR_CALLBACK void resetCruiserUnlocked(TMarDirector *director) {
     s_cruiser_checked = false;
 }
 
@@ -124,6 +125,34 @@ static void checkForSamboFlowerDecrement(MActor *actor, const char *hit_anm_name
     TFlagManager::smInstance->incFlag(0x60021, -1);
 }
 SMS_PATCH_BL(0x800E3F9C, checkForSamboFlowerDecrement);
+
+static BoundingBox s_begin_bound_box = {
+    {-14900, 24000, 0   },
+    {6000,   16000, 4000},
+    {0,      0,     0   }
+};
+
+static BoundingBox s_secret_a_bound_box = {
+    {14900, 21300, 200 },
+    {10000, 11000, 4000},
+    {0,     0,     0   }
+};
+
+BETTER_SMS_FOR_CALLBACK void forcePlayerZOn2D(TMario *player, bool isMario) {
+    if (gpMarDirector->mAreaID != 88) {
+        return;
+    }
+
+    if (s_secret_a_bound_box.contains(player->mTranslation)) {
+        player->mTranslation.z = clamp<f32>(player->mTranslation.z, 150.0f, 250.0f);
+        return;
+    }
+
+    if (!s_begin_bound_box.contains(player->mTranslation)) {
+        player->mTranslation.z = clamp<f32>(player->mTranslation.z, -50.0f, 50.0f);
+        return;
+    }
+}
 
 // Disable guide menu
 SMS_WRITE_32(SMS_PORT_REGION(0x80297A64, 0, 0, 0), 0x4800000C);

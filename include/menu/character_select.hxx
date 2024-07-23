@@ -22,6 +22,8 @@
 
 #include "player.hxx"
 
+#define CONTEXT_CHARACTER_SELECT 11
+
 using namespace BetterSMS;
 
 struct CharacterInfo {

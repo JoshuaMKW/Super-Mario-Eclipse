@@ -6,6 +6,7 @@
 #include <SMS/Player/Mario.hxx>
 
 namespace SMSCoop {
+
     void setCamera(int i);
     CPolarSubCamera *getCameraById(int i);
     int getActivePerspective();
@@ -15,4 +16,5 @@ namespace SMSCoop {
     u8 getPlayerId(TMario *mario);
     int getPlayerCount();
     void setActiveMario(int id);
+
 }  // namespace SMSCoop

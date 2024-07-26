@@ -94,14 +94,15 @@ private:
 };
 
 static bool setMSoundEnterStageExtended(TFlagManager *manager, u32 flag) {
-    if (gpMarDirector->mEpisodeID == 6) {
-        OSReport("Setting up MSound for Kage Mario\n");
-        *(u32 *)0x8040E200 = -16;
-        *(u32 *)0x8040E204 = -16;
-        *(u16 *)0x8040E1FA += -0x83;
-        *(u32 *)0x8040E1EC = BGM_KAGEMARIO;
-        *(u8 *)0x8040E1F9  = 6;
-        *(u8 *)0x8040E1FC  = 1;
+    if (gpMarDirector->mAreaID >= SME::STAGE_ERTO && gpMarDirector->mAreaID <= SME::STAGE_LACRIMA_BACKHOUSE) {
+        if (gpMarDirector->mEpisodeID == 6) {
+            *(u32 *)0x8040E200 = -16;
+            *(u32 *)0x8040E204 = -16;
+            *(u16 *)0x8040E1FA += -0x83;
+            *(u32 *)0x8040E1EC = BGM_KAGEMARIO;
+            *(u8 *)0x8040E1F9  = 6;
+            *(u8 *)0x8040E1FC  = 1;
+        }
     }
     return manager->getBool(flag);
 }

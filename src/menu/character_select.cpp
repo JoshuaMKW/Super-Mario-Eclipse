@@ -61,6 +61,7 @@ s32 CharacterSelectDirector::direct() {
 
         Music::setMaxVolume(0x7F);
         Music::setVolume(0x7F, 0x7F);
+        Music::setLooping(true);
         Music::queueSong("character_select");
         Music::playSong();
 

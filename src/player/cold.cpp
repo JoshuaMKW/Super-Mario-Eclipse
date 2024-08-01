@@ -56,7 +56,9 @@ BETTER_SMS_FOR_CALLBACK void processColdState(TMario *player, bool isMario) {
 
     auto *data = SME::Player::getEclipseData(player);
     if (data->mColdTimer > 0) {
-        player->startVoiceIfNoVoice(MSD_SE_MV02_DAMAGE_MID_04);
+        if ((data->mColdTimer % 60) == 0) {
+            player->startVoiceIfNoVoice(MSD_SE_MV02_DAMAGE_MID_04);
+        }
         auto *particle =
             gpMarioParticleManager->emitAndBindToPosPtr(344, &player->mTranslation, 1, player);
         if (particle) {

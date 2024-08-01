@@ -49,7 +49,7 @@ public:
     ~MSStageDistFadeStream(){};
 
     void proc() override {
-        if (!Music::isPlaying()) {
+        if (!Music::isPlaying() || Music::isPaused()) {
             return;
         }
 

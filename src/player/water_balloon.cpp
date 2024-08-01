@@ -54,14 +54,18 @@ BETTER_SMS_FOR_CALLBACK void createWaterBalloonAndThrow(TMario *player, bool isM
         (player->mState & TMario::STATE_WATERBORN) != 0)
         return;
 
+    if (player->mState == 0x208B0 || player->mState == 0x20462) {
+        return;
+    }
+
     if (player->mHeldObject || player->mAttributes.mHasFludd)
         return;
 
     if (!(player->mController->mButtons.mFrameInput & TMarioGamePad::R))
         return;
 
-    auto *water_balloons = reinterpret_cast<BalloonBuf *>(
-        Player::getRegisteredData(player, "sme_balloon_info"));
+    auto *water_balloons =
+        reinterpret_cast<BalloonBuf *>(Player::getRegisteredData(player, "sme_balloon_info"));
 
     TWaterBalloon *balloon = water_balloons->next();
     balloon->mTranslation.set(player->mTranslation);
@@ -83,7 +87,7 @@ BETTER_SMS_FOR_CALLBACK void createWaterBalloonAndThrow(TMario *player, bool isM
     } else if (player->mState == TMario::STATE_JUMP || player->mState == TMario::STATE_D_JUMP ||
                player->mState == TMario::STATE_FALL || player->mState == TMario::STATE_JUMPSPINL ||
                player->mState == TMario::STATE_JUMPSPINR ||
-               player->mState == TMario::STATE_JUMPSPIN) {
+               player->mState == TMario::STATE_JUMPSPIN || player->mState == 0x4045C) {
         player->changePlayerStatus(0x820008AB, 0, 1);
     } else {
         player->changePlayerStatus(0x80000588, 0, 1);

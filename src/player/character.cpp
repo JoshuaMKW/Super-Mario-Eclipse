@@ -68,21 +68,21 @@ SMS_PATCH_BL(SMS_PORT_REGION(0x80276BF0, 0, 0, 0), initCharacterBuffer);
 
 static void getGlobalOrLocalResFmt(char *dst, size_t size, const char *local_path,
                                    const char *specifier, const char *global_path) {
-    auto *first_file = JKRFileLoader::findFirstFile("/common/01_waterboost");
-    if (!first_file) {
+    char buffer[64];
+    snprintf(buffer, 64, local_path, specifier);
+    void *res = JKRFileLoader::getGlbResource(buffer);
+    if (res) {
         snprintf(dst, size, local_path, specifier);
         return;
     }
-    delete first_file;
     snprintf(dst, size, global_path, specifier);
 }
 
 static void *getGlobalOrLocalRes(const char *local_path, const char *global_path) {
-    auto *first_file = JKRFileLoader::findFirstFile("/common/01_waterboost");
-    if (!first_file) {
-        return JKRFileLoader::getGlbResource(local_path);
+    void *res = JKRFileLoader::getGlbResource(local_path);
+    if (res) {
+        return res;
     }
-    delete first_file;
     return JKRFileLoader::getGlbResource(global_path);
 }
 

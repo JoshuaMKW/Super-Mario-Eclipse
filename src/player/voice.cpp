@@ -28,14 +28,14 @@ void SoundSESystem_startSoundActorInner(u32 soundId, JAISound **sound, JAIActor 
     // 780A and 0x78B9 is spin
     u32 overridenSoundId = soundId;
     if (player_id == SME::CharacterID::LUIGI) {
-        if (soundId == 0x78ab || soundId == 0x7803 || soundId == 0x7807 || soundId == 0x78b1 ||
-            soundId == 0x7800 || soundId == 0x78b6 || soundId == 0x780A || soundId == 0x78B9) {
+        if (soundId == 0x78ab || soundId == 0x7803 || soundId == 0x7807 ||
+            soundId == 0x7800 || soundId == 0x780A || soundId == 0x78B9) {
             overridenSoundId = 0x7901;
         }
-        if (soundId == 0x7884) {
+        if (soundId == 0x7884 || soundId == 0x78b1) {
             overridenSoundId = 0x78fb;
         }
-        if (soundId == 0x788F) {
+        if (soundId == 0x788F || soundId == 0x78b6) {
             overridenSoundId = 0x78FE;
         }
     } else {

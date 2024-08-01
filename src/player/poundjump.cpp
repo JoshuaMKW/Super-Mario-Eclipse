@@ -8,5 +8,4 @@ constexpr int CrouchAnimationID = 113;
 
 BETTER_SMS_FOR_CALLBACK void initializePoundJumpAnimation(TApplication *app) {
     Player::addAnimationDataEx(PoundJumpAnimationID, "hipjump", true, true);
-    Player::addAnimationDataEx(CrouchAnimationID, "crouch", false);
 }

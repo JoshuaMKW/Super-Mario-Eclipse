@@ -325,6 +325,17 @@ BETTER_SMS_FOR_CALLBACK void initializeStageInfo(TApplication *app) {
             info->addScenario(-1, 178);
             info->addScenario(-1, 179);
             info->addScenario(-1, 180);
+            info->addScenario(-1, 192);
+            info->addScenario(-1, 193);
+            info->addScenario(-1, 194);
+            info->addScenario(-1, 195);
+            info->addScenario(-1, 196);
+            info->addScenario(-1, 197);
+            info->addScenario(-1, 198);
+            info->addScenario(-1, 199);
+            info->addScenario(-1, 200);
+            info->addScenario(-1, 201);
+            info->addScenario(-1, 202);
             Stage::registerShineStage(info);
             Stage::registerNormalStage(SME::STAGE_PEACH_CASTLE, info->getShineStageID());
         }

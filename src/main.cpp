@@ -23,6 +23,8 @@
 #include "object/tornado_obj.hxx"
 #include "object/water_balloon.hxx"
 #include "object/water_mine.hxx"
+#include "object/cannonball.hxx"
+#include "object/cannonbox.hxx"
 #include "p_settings.hxx"
 
 // Application
@@ -157,6 +159,8 @@ static void initModule() {
     Objects::registerObjectAsMapObj("JizoStone", &jizoStoneData, TJizoStone::instantiate);
     Objects::registerObjectAsMapObj("ButtonSwitch", &buttonSwitchData, TButtonSwitch::instantiate);
     Objects::registerObjectAsMapObj("WaterMine", &waterMineData, TWaterMine::instantiate);
+    Objects::registerObjectAsMapObj("CannonBall", &cannonBallData, TCannonBall::instantiate);
+    Objects::registerObjectAsMapObj("CannonBox", &cannonBoxData, TCannonBox::instantiate);
     Objects::registerObjectAsMisc("FireyPetey", TFireyPetey::instantiate);
     Objects::registerObjectAsMisc("FireyPeteyManager", TFireyPeteyManager::instantiate);
     Objects::registerObjectAsMisc("DarkZhine", TDarkZhine::instantiate);

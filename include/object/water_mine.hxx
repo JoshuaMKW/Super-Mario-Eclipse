@@ -6,8 +6,6 @@
 #include <SMS/MapObj/MapObjGeneral.hxx>
 #include <SMS/MapObj/MapObjInit.hxx>
 
-// #define SEAMINE_COLLISION
-
 class TWaterMine : public TMapObjGeneral {
 public:
     BETTER_SMS_FOR_CALLBACK static JDrama::TNameRef *instantiate() {
@@ -17,18 +15,10 @@ public:
     TWaterMine(const char *name);
     ~TWaterMine() override = default;
 
-    //void loadAfter() override;
     void control() override;
     bool receiveMessage(THitActor *, u32) override;
-    //void touchPlayer(THitActor *) override;
 
     void calc() override;
-
-    #if SEAMINE_COLLISION
-    void initMapCollisionData() override;
-    void initMapObj() override;
-    void setGroundCollision() override;
-    #endif
 
     bool isFragmentAnimComplete() const;
     void playFragmentAnim();

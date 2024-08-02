@@ -24,30 +24,6 @@
 TWaterMine::TWaterMine(const char *name)
     : TMapObjGeneral(name), m_is_hit(false), m_is_dead(false) {}
 
-#if SEAMINE_COLLISION
-void TWaterMine::initMapCollisionData() {
-    mCollisionManager = new TMapCollisionManager(1, "mapObj", this);
-    mCollisionManager->init("seamine", 1, nullptr);
-}
-
-void TWaterMine::initMapObj() {
-    TMapObjGeneral::initMapObj();
-
-    if (mCollisionManager) {
-        mCollisionManager->changeCollision(0);
-        mCollisionManager->mCurrentMapCollision->setAllActor(this);
-    }
-}
-
-void TWaterMine::setGroundCollision() {
-    auto *model = getModel();
-    if (mCollisionManager) {
-        mCollisionManager->mCurrentMapCollision->_5C &= 0xFFFFFFFE;  // Enable
-        mCollisionManager->mCurrentMapCollision->moveMtx(*model->mJointArray);
-    }
-}
-#endif
-
 void TWaterMine::control() {
     TMapObjGeneral::control();
 
@@ -67,6 +43,16 @@ void TWaterMine::control() {
     for (size_t i = 0; i < mNumObjs; ++i) {
         if (mCollidingObjs[i]->mObjectID == 0x1000002B) {
             playFragmentAnim();
+
+            if (PSVECDistance(gpMarioAddress->mTranslation, mTranslation) < 600.0f) {
+                // Hurt player
+                TMario *player = reinterpret_cast<TMario *>(mCollidingObjs[i]);
+                player->decHP(player->mHealth);
+                player->loserExec();
+                player->mAttributes.mIsVisible = true;
+                player->mTranslation.y         = mTranslation.y - 200.0f;
+            }
+
             m_is_hit = true;
             break;
         }
@@ -90,11 +76,11 @@ bool TWaterMine::isFragmentAnimComplete() const {
     return mActorData->isCurAnmAlreadyEnd(MActor::BCK) && m_is_hit;
 }
 
-const char *s_column_water_name =
+static const char *s_column_water_name =
     "\x83\x47\x83\x74\x83\x46\x83\x4E\x83\x67\x94\x9A\x94\xAD\x90\x85\x92\x8C\x83\x7D\x83\x6C\x81"
     "\x5B\x83\x57\x83\x83\x81\x5B";
 
-const char *s_explosion_name =
+static const char *s_explosion_name =
     "\x83\x47\x83\x74\x83\x46\x83\x4E\x83\x67\x94\x9A\x94\xAD\x83\x7D\x83\x6C\x81\x5B\x83\x57\x83\x83\x81\x5B";
 
 void TWaterMine::playFragmentAnim() {
@@ -121,8 +107,6 @@ void TWaterMine::playFragmentAnim() {
 }
 
 bool TWaterMine::receiveMessage(THitActor *sender, u32 message) {
-    OSReport("TWaterMine::receiveMessage: %08X\n", message);
-
     if (sender->mObjectID == 0x1000002B) {
         playFragmentAnim();
         m_is_hit = true;

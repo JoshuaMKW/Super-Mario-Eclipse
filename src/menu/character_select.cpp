@@ -473,7 +473,8 @@ static int flagCharacterSelectMenu(u8 state) {
 
     if (state != TApplication::CONTEXT_DIRECT_STAGE)
         return state;
-
+    if (gpApplication.mContext == CONTEXT_CHARACTER_SELECT)
+        return state;
     TGameSequence &next_scene = gpApplication.mNextScene;
     TGameSequence &cur_scene  = gpApplication.mCurrentScene;
     TGameSequence &prev_scene = gpApplication.mPrevScene;

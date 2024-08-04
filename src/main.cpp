@@ -14,17 +14,18 @@
 
 #include "enemy/dark_zhine.hxx"
 #include "enemy/firey_petey.hxx"
+#include "object/button.hxx"
+#include "object/cannonball.hxx"
+#include "object/cannonbox.hxx"
 #include "object/darkness_effect.hxx"
+#include "object/elevator_object.hxx"
 #include "object/follow_key.hxx"
 #include "object/jizo_stone.hxx"
 #include "object/key_chest.hxx"
 #include "object/launch_star.hxx"
-#include "object/button.hxx"
 #include "object/tornado_obj.hxx"
 #include "object/water_balloon.hxx"
 #include "object/water_mine.hxx"
-#include "object/cannonball.hxx"
-#include "object/cannonbox.hxx"
 #include "p_settings.hxx"
 
 // Application
@@ -85,7 +86,7 @@ static void initModule() {
     gSettingsGroup.addSetting(&gBugsSetting);
     gSettingsGroup.addSetting(&gTutorialSetting);
 
-    extern void initDemoCredits(Settings::SettingsGroup &group);
+    extern void initDemoCredits(Settings::SettingsGroup & group);
     initDemoCredits(gSettingsGroup);
     {
         auto &saveInfo        = gSettingsGroup.getSaveInfo();
@@ -122,7 +123,7 @@ static void initModule() {
     Stage::addInitCallback(forceYoshiUnlock);
     Stage::addUpdateCallback(unlockSettings);
     Game::addBootCallback(lockModuleSettings);
-    
+
     Stage::addInitCallback(resetCruiserUnlocked);
     Stage::addUpdateCallback(checkForCruiserUnlocked);
     Player::addUpdateCallback(forcePlayerZOn2D);
@@ -153,7 +154,7 @@ static void initModule() {
     Objects::registerObjectAsMisc("DarknessEffect", TDarknessEffect::instantiate);
     Objects::registerObjectAsMapObj("Tornado", &tornadoData, TTornadoMapObj::instantiate);
     Objects::registerObjectAsMapObj("WaterBalloon", &waterBalloonData, TWaterBalloon::instantiate);
-    Objects::registerObjectAsMapObj("LaunchStar", &launchStarData, TLaunchStarObj::instantiate);
+    //Objects::registerObjectAsMapObj("LaunchStar", &launchStarData, TLaunchStarObj::instantiate);
     Objects::registerObjectAsMapObj("KeyFollow", &followKeyData, TFollowKey::instantiate);
     Objects::registerObjectAsMapObj("KeyChest", &keyChestData, TKeyChest::instantiate);
     Objects::registerObjectAsMapObj("JizoStone", &jizoStoneData, TJizoStone::instantiate);
@@ -161,6 +162,7 @@ static void initModule() {
     Objects::registerObjectAsMapObj("WaterMine", &waterMineData, TWaterMine::instantiate);
     Objects::registerObjectAsMapObj("CannonBall", &cannonBallData, TCannonBall::instantiate);
     Objects::registerObjectAsMapObj("CannonBox", &cannonBoxData, TCannonBox::instantiate);
+    Objects::registerObjectAsMapObj("ElevatorDoor", &elevatorObjectData, TElevatorObject::instantiate);
     Objects::registerObjectAsMisc("FireyPetey", TFireyPetey::instantiate);
     Objects::registerObjectAsMisc("FireyPeteyManager", TFireyPeteyManager::instantiate);
     Objects::registerObjectAsMisc("DarkZhine", TDarkZhine::instantiate);

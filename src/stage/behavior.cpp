@@ -154,6 +154,12 @@ BETTER_SMS_FOR_CALLBACK void forcePlayerZOn2D(TMario *player, bool isMario) {
     }
 }
 
+BETTER_SMS_FOR_CALLBACK void resetCoinsOnUniqueStage(TMarDirector *director) {
+    if (SMS_getShineStage__FUc(gpApplication.mPrevScene.mAreaID) != SMS_getShineStage__FUc(gpApplication.mCurrentScene.mAreaID)) {
+        TFlagManager::smInstance->setFlag(0x40002, 0);
+    }
+}
+
 // Disable guide menu
 SMS_WRITE_32(SMS_PORT_REGION(0x80297A64, 0, 0, 0), 0x4800000C);
 

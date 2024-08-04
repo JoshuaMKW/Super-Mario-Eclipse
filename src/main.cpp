@@ -14,6 +14,7 @@
 
 #include "enemy/dark_zhine.hxx"
 #include "enemy/firey_petey.hxx"
+#include "menu/character_select.hxx"
 #include "object/darkness_effect.hxx"
 #include "object/follow_key.hxx"
 #include "object/jizo_stone.hxx"
@@ -43,6 +44,7 @@ extern void adjustYoshiTongue(TMario *player, bool isMario);
 extern void initializeStageInfo(TApplication *app);
 extern void resetForExStage(TMarDirector *director);
 extern void forcePlayerZOn2D(TMario *player, bool isMario);
+extern void resetCoinsOnUniqueStage(TMarDirector *director);
 
 // Player
 extern void initializePoundJumpAnimation(TApplication *app);
@@ -109,7 +111,7 @@ static void initModule() {
     Application::showSettingsOnFirstBoot(true);
 
     // Register callbacks
-    Application::registerContextCallback(11, directCharacterSelectMenu);
+    Application::registerContextCallback(CONTEXT_CHARACTER_SELECT, directCharacterSelectMenu);
     Game::addInitCallback(initializeStageInfo);
     Game::addChangeCallback(setIntroStage);
 
@@ -123,23 +125,27 @@ static void initModule() {
     Stage::addUpdateCallback(unlockSettings);
     Game::addBootCallback(lockModuleSettings);
     
+    Stage::addInitCallback(resetCoinsOnUniqueStage);
+    Stage::addInitCallback(resetForExStage);
     Stage::addInitCallback(resetCruiserUnlocked);
     Stage::addUpdateCallback(checkForCruiserUnlocked);
     Player::addUpdateCallback(forcePlayerZOn2D);
 
     Stage::addInitCallback(initCharacterArchives);
-    Stage::addInitCallback(resetForExStage);
-    Stage::addInitCallback(resetTutorialIceStageCheckpoints);
-    Stage::addInitCallback(resetTutorialCasinoStageCheckpoints);
-    Stage::addInitCallback(resetTutorialPiantaPitStageCheckpoints);
     Stage::addDraw2DCallback(updatePlayerHUD);
     Stage::addExitCallback(setTutorialVisited);
+
     Player::addInitCallback(initEclipseData);
     Player::addLoadAfterCallback(initializeWaterBalloons);
     Player::addLoadAfterCallback(setPlayerPosRotOnLoad);
+
+    Stage::addInitCallback(resetTutorialIceStageCheckpoints);
+    Stage::addInitCallback(resetTutorialCasinoStageCheckpoints);
+    Stage::addInitCallback(resetTutorialPiantaPitStageCheckpoints);
     Player::addUpdateCallback(checkTutorialIceStageCheckpoints);
     Player::addUpdateCallback(checkTutorialCasinoStageCheckpoints);
     Player::addUpdateCallback(checkTutorialPiantaPitStageCheckpoints);
+
     Stage::addInitCallback(initColdState);
     Player::addUpdateCallback(processColdState);
     Player::addUpdateCallback(checkTutorialCollisionRespawn);

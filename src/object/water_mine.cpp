@@ -41,7 +41,7 @@ void TWaterMine::control() {
     }
 
     for (size_t i = 0; i < mNumObjs; ++i) {
-        if (mCollidingObjs[i]->mObjectID == 0x1000002B) {
+        if (mCollidingObjs[i]->mObjectID == 0x1000002B || mCollidingObjs[i]->mObjectID == 0x4000022E) {
             playFragmentAnim();
 
             if (PSVECDistance(gpMarioAddress->mTranslation, mTranslation) < 600.0f) {
@@ -107,7 +107,7 @@ void TWaterMine::playFragmentAnim() {
 }
 
 bool TWaterMine::receiveMessage(THitActor *sender, u32 message) {
-    if (sender->mObjectID == 0x1000002B) {
+    if (sender->mObjectID == 0x1000002B || mCollidingObjs[i]->mObjectID == 0x4000022E) {
         playFragmentAnim();
         m_is_hit = true;
         return true;

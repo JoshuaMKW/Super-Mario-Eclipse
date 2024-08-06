@@ -56,6 +56,7 @@ void TWaterBalloon::perform(u32 flags, JDrama::TGraphics *graphics) {
     TMapObjBall::perform(flags, graphics);
     if (flags & PERFORM_ON_MOVEMENT) {
         mForwardSpeed = sqrtf(mSpeed.x * mSpeed.x + mSpeed.z * mSpeed.z);
+        mLivingTime += 1;
     }
 }
 
@@ -69,8 +70,10 @@ s32 TWaterBalloon::getFlushTime() const { return 0; }
 
 void TWaterBalloon::hold(TTakeActor *actor) {
     TMapObjBall::hold(actor);
-    if (actor->mObjectID == OBJECT_ID_MARIO)
+    if (actor->mObjectID == OBJECT_ID_MARIO) {
         mHoldingActor = reinterpret_cast<TMario *>(actor);
+        mLivingTime   = 0;
+    }
 }
 void TWaterBalloon::put() { TMapObjBall::put(); }
 
@@ -79,6 +82,8 @@ void TWaterBalloon::thrown() {
     if (mHoldingActor->mObjectID == OBJECT_ID_MARIO) {
         // Add mario speed to balloon speed
     }
+    mHoldingActor = nullptr;
+    mLivingTime   = 0;
 }
 
 void TWaterBalloon::touchActor(THitActor *actor) {
@@ -95,6 +100,10 @@ void TWaterBalloon::touchActor(THitActor *actor) {
     TMario *player = reinterpret_cast<TMario *>(actor);
     if (player->mState == 0x820008AB || player->mState == 0x80000588)
         return;  // Throwing
+
+    if (mLivingTime < 60) {
+        return;
+    }
 
     if (mForwardSpeed >= MaxSpeed || mSpeed.y < -10.0f) {
         blast({0.0f, 1.0f, 0.0f});

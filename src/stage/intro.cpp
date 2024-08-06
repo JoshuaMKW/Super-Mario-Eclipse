@@ -34,6 +34,9 @@ static void extendedNextStateInitialize(TMarDirector *director, s8 next_state) {
         return;
     }
 
+    director->mGamePads[0]->mState._02 = 1;
+    *(u32 *)((u8 *)director + 0x68) = 0;
+
     char camera_name[32] = {};
     sprintf(camera_name, "startcamera%d", director->mEpisodeID);
 

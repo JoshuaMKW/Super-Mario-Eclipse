@@ -131,7 +131,9 @@ private:
     int mIndex;
 };
 
-static const char *sSpecialThanks[] = {"Xayr", "Halleester", "Portable Productions", "Gonz", "Truegamer02", "zachthepillow", "MissB"};
+static const char *sSpecialThanks[] = {
+    "Xayr", "Halleester",  "Portable Productions", "Henk_Wasmachine",
+    "Gonz", "Truegamer02", "zachthepillow",        "MissB"};
 
 class SpecialThanksCreditSetting final : public Settings::IntSetting {
 public:
@@ -281,8 +283,8 @@ void unlockSettings(TMarDirector *director) {
     if (shine_count >= MaxShineCount && !gBugsSetting.isUnlocked()) {
         gBugsSetting.unlock();
 
-        if (optional<ModuleInfo> movement_module = BetterSMS::getModuleInfo("Better Sunshine Moveset"))
-        {
+        if (optional<ModuleInfo> movement_module =
+                BetterSMS::getModuleInfo("Better Sunshine Moveset")) {
             Settings::SettingsGroup *movement_settings = movement_module->mSettings;
 
             {

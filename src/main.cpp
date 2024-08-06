@@ -45,6 +45,7 @@ extern void initializeStageInfo(TApplication *app);
 extern void resetForExStage(TMarDirector *director);
 extern void forcePlayerZOn2D(TMario *player, bool isMario);
 extern void resetCoinsOnUniqueStage(TMarDirector *director);
+extern void updateWarpStatesForCruiserCabin(TMarDirector *director);
 
 // Player
 extern void initializePoundJumpAnimation(TApplication *app);
@@ -129,6 +130,7 @@ static void initModule() {
     Stage::addInitCallback(resetForExStage);
     Stage::addInitCallback(resetCruiserUnlocked);
     Stage::addUpdateCallback(checkForCruiserUnlocked);
+    Stage::addUpdateCallback(updateWarpStatesForCruiserCabin);
     Player::addUpdateCallback(forcePlayerZOn2D);
 
     Stage::addInitCallback(initCharacterArchives);

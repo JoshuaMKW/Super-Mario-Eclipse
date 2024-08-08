@@ -3,6 +3,7 @@
 #include <JSystem/J2D/J2DTextBox.hxx>
 
 #include <SMS/System/Application.hxx>
+#include <SMS/SPC/SpcInterp.hxx>
 
 #include <BetterSMS/application.hxx>
 #include <BetterSMS/debug.hxx>
@@ -11,6 +12,7 @@
 #include <BetterSMS/object.hxx>
 #include <BetterSMS/player.hxx>
 #include <BetterSMS/stage.hxx>
+#include <BetterSMS/sunscript.hxx>
 
 #include "enemy/dark_zhine.hxx"
 #include "enemy/firey_petey.hxx"
@@ -80,6 +82,9 @@ extern void checkForCruiserUnlocked(TMarDirector *director);
 // SETTINGS
 extern void checkForCompletionAwards(TApplication *);
 
+// SPC
+extern void evNpcWaitOn(TSpcInterp *spc, u32 argc);
+
 static BetterSMS::ModuleInfo sModuleInfo("Super Mario Eclipse", 1, 0, &gSettingsGroup);
 
 static void initModule() {
@@ -132,6 +137,8 @@ static void initModule() {
     Stage::addUpdateCallback(checkForCruiserUnlocked);
     Stage::addUpdateCallback(updateWarpStatesForCruiserCabin);
     Player::addUpdateCallback(forcePlayerZOn2D);
+
+    Spc::registerBuiltinFunction("npcWaitOn", evNpcWaitOn);
 
     Stage::addInitCallback(initCharacterArchives);
     Stage::addDraw2DCallback(updatePlayerHUD);

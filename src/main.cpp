@@ -2,8 +2,8 @@
 #include <JSystem/J2D/J2DOrthoGraph.hxx>
 #include <JSystem/J2D/J2DTextBox.hxx>
 
-#include <SMS/System/Application.hxx>
 #include <SMS/SPC/SpcInterp.hxx>
+#include <SMS/System/Application.hxx>
 
 #include <BetterSMS/application.hxx>
 #include <BetterSMS/debug.hxx>
@@ -17,17 +17,17 @@
 #include "enemy/dark_zhine.hxx"
 #include "enemy/firey_petey.hxx"
 #include "menu/character_select.hxx"
+#include "object/button.hxx"
+#include "object/cannonball.hxx"
+#include "object/cannonbox.hxx"
 #include "object/darkness_effect.hxx"
 #include "object/follow_key.hxx"
 #include "object/jizo_stone.hxx"
 #include "object/key_chest.hxx"
 #include "object/launch_star.hxx"
-#include "object/button.hxx"
 #include "object/tornado_obj.hxx"
 #include "object/water_balloon.hxx"
 #include "object/water_mine.hxx"
-#include "object/cannonball.hxx"
-#include "object/cannonbox.hxx"
 #include "p_settings.hxx"
 
 // Application
@@ -61,6 +61,9 @@ extern void initColdState(TMarDirector *director);
 extern void processColdState(TMario *player, bool isMario);
 extern void setPlayerStartPos(TMario *player);
 
+// Camera
+extern void resetFixedCameraOnLoad(TMarDirector *director);
+
 // HUD
 extern void updatePlayerHUD(TMarDirector *, const J2DOrthoGraph *);
 
@@ -83,7 +86,21 @@ extern void checkForCruiserUnlocked(TMarDirector *director);
 extern void checkForCompletionAwards(TApplication *);
 
 // SPC
+extern void evSetFixedCameraState(TSpcInterp *spc, u32 argc);
+extern void evSetFixedCameraPos(TSpcInterp *spc, u32 argc);
+extern void evSetFixedCameraLookAt(TSpcInterp *spc, u32 argc);
+extern void evSetFixedCameraFollowActor(TSpcInterp *spc, u32 argc);
+extern void evSetFixedCameraFov(TSpcInterp *spc, u32 argc);
+
+extern void evGetAddressFromGraphWebName(TSpcInterp *spc, u32 argc);
+extern void evNpcSetGraphWeb(TSpcInterp *spc, u32 argc);
+extern void evNpcStepOn(TSpcInterp *spc, u32 argc);
 extern void evNpcWaitOn(TSpcInterp *spc, u32 argc);
+extern void evNpcMadOn(TSpcInterp *spc, u32 argc);
+extern void evIsInSightOfActor(TSpcInterp *spc, u32 argc);
+extern void evSetLiveActorFlag(TSpcInterp *spc, u32 argc);
+extern void evFadeScreen(TSpcInterp *spc, u32 argc);
+extern void evIsFadingScreen(TSpcInterp *spc, u32 argc);
 
 static BetterSMS::ModuleInfo sModuleInfo("Super Mario Eclipse", 1, 0, &gSettingsGroup);
 
@@ -93,7 +110,7 @@ static void initModule() {
     gSettingsGroup.addSetting(&gBugsSetting);
     gSettingsGroup.addSetting(&gTutorialSetting);
 
-    extern void initDemoCredits(Settings::SettingsGroup &group);
+    extern void initDemoCredits(Settings::SettingsGroup & group);
     initDemoCredits(gSettingsGroup);
     {
         auto &saveInfo        = gSettingsGroup.getSaveInfo();
@@ -130,7 +147,7 @@ static void initModule() {
     Stage::addInitCallback(forceYoshiUnlock);
     Stage::addUpdateCallback(unlockSettings);
     Game::addBootCallback(lockModuleSettings);
-    
+
     Stage::addInitCallback(resetCoinsOnUniqueStage);
     Stage::addInitCallback(resetForExStage);
     Stage::addInitCallback(resetCruiserUnlocked);
@@ -138,7 +155,22 @@ static void initModule() {
     Stage::addUpdateCallback(updateWarpStatesForCruiserCabin);
     Player::addUpdateCallback(forcePlayerZOn2D);
 
+    Stage::addInitCallback(resetFixedCameraOnLoad);
+
+    Spc::registerBuiltinFunction("setFixedCameraState", evSetFixedCameraState);
+    Spc::registerBuiltinFunction("setFixedCameraPos", evSetFixedCameraPos);
+    Spc::registerBuiltinFunction("setFixedCameraLookAt", evSetFixedCameraLookAt);
+    Spc::registerBuiltinFunction("setFixedCameraFollowActor", evSetFixedCameraFollowActor);
+    Spc::registerBuiltinFunction("setFixedCameraFov", evSetFixedCameraFov);
+    Spc::registerBuiltinFunction("getAddressFromGraphWebName", evGetAddressFromGraphWebName);
+    Spc::registerBuiltinFunction("npcSetGraphWeb", evNpcSetGraphWeb);
+    Spc::registerBuiltinFunction("npcStepOn", evNpcStepOn);
     Spc::registerBuiltinFunction("npcWaitOn", evNpcWaitOn);
+    Spc::registerBuiltinFunction("npcMadOn", evNpcMadOn);
+    Spc::registerBuiltinFunction("isInSightOfActor", evIsInSightOfActor);
+    Spc::registerBuiltinFunction("setLiveActorFlag", evSetLiveActorFlag);
+    Spc::registerBuiltinFunction("fadeScreen", evFadeScreen);
+    Spc::registerBuiltinFunction("isFadingScreen", evIsFadingScreen);
 
     Stage::addInitCallback(initCharacterArchives);
     Stage::addDraw2DCallback(updatePlayerHUD);

@@ -1,5 +1,5 @@
-#include <JSystem/JParticle/JPAResourceManager.hxx>
 #include <JSystem/JDrama/JDRNameRef.hxx>
+#include <JSystem/JParticle/JPAResourceManager.hxx>
 
 #include <SMS/MSound/MSound.hxx>
 #include <SMS/MSound/MSoundSESystem.hxx>
@@ -10,8 +10,8 @@
 #include <BetterSMS/module.hxx>
 #include <BetterSMS/objects/generic.hxx>
 
-#include "stage.hxx"
 #include "settings.hxx"
+#include "stage.hxx"
 
 #pragma region CruiserDelfino
 
@@ -96,17 +96,17 @@ SMS_PATCH_BL(0x802B4470, loadIceStageWalkSandA);
 
 #pragma region OutsideDelfinoBehavior
 
-BETTER_SMS_FOR_CALLBACK void updateWarpStatesForCruiserCabin(TMarDirector* director) {
+BETTER_SMS_FOR_CALLBACK void updateWarpStatesForCruiserCabin(TMarDirector *director) {
     if (director->mAreaID != SME::STAGE_CRUISER) {
         return;
     }
 
     size_t shine_count = TFlagManager::smInstance->getFlag(0x40000);
 
-    J3DGXColor enabled_color = {0, 255, 0, 255};
+    J3DGXColor enabled_color  = {0, 255, 0, 255};
     J3DGXColor disabled_color = {200, 50, 50, 255};
     J3DGXColor off_color      = {0, 0, 0, 255};
-    J3DGXColor on_color      = {255, 255, 255, 255};
+    J3DGXColor on_color       = {255, 255, 255, 255};
 
     JDrama::TNameRef *name_ref = TMarNameRefGen::getInstance()->getRootNameRef();
 
@@ -120,7 +120,8 @@ BETTER_SMS_FOR_CALLBACK void updateWarpStatesForCruiserCabin(TMarDirector* direc
             J3DTevBlock *tev_block     = *(J3DTevBlock **)((u8 *)tev_stage + 0x28);
             tev_block->setTevKColor(0, is_enabled ? enabled_color : disabled_color);
 
-            if (is_enabled && PSVECDistance(gpMarioAddress->mTranslation, light_obj->mTranslation) < 250.0f) {
+            if (is_enabled &&
+                PSVECDistance(gpMarioAddress->mTranslation, light_obj->mTranslation) < 250.0f) {
                 director->setNextStage(SME::STAGE_LANCIA, nullptr);
             }
         }
@@ -227,6 +228,16 @@ static void checkForSamboFlowerDecrement(MActor *actor, const char *hit_anm_name
 }
 SMS_PATCH_BL(0x800E3F9C, checkForSamboFlowerDecrement);
 
+static void checkHinoKuri2Level(void *hinokuri, int level) {
+    if (gpMarDirector->mAreaID == SME::STAGE_LACRIMA_BACKHOUSE) {
+        setLevel__10THinokuri2Fi(hinokuri, 2);
+    } else {
+        setLevel__10THinokuri2Fi(hinokuri, level);
+    }
+}
+SMS_PATCH_BL(0x8005d5e4, checkHinoKuri2Level);
+SMS_WRITE_32(0x8005b54c, 0x60000000);
+
 #pragma region 2DWorldBehavior
 
 static BoundingBox s_begin_bound_box = {
@@ -260,7 +271,8 @@ BETTER_SMS_FOR_CALLBACK void forcePlayerZOn2D(TMario *player, bool isMario) {
 #pragma endregion
 
 BETTER_SMS_FOR_CALLBACK void resetCoinsOnUniqueStage(TMarDirector *director) {
-    if (SMS_getShineStage__FUc(gpApplication.mPrevScene.mAreaID) != SMS_getShineStage__FUc(gpApplication.mCurrentScene.mAreaID)) {
+    if (SMS_getShineStage__FUc(gpApplication.mPrevScene.mAreaID) !=
+        SMS_getShineStage__FUc(gpApplication.mCurrentScene.mAreaID)) {
         TFlagManager::smInstance->setFlag(0x40002, 0);
     }
 }

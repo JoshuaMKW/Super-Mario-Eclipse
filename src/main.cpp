@@ -2,6 +2,7 @@
 #include <JSystem/J2D/J2DOrthoGraph.hxx>
 #include <JSystem/J2D/J2DTextBox.hxx>
 
+#include <SMS/SPC/SpcInterp.hxx>
 #include <SMS/System/Application.hxx>
 
 #include <BetterSMS/application.hxx>
@@ -11,9 +12,11 @@
 #include <BetterSMS/object.hxx>
 #include <BetterSMS/player.hxx>
 #include <BetterSMS/stage.hxx>
+#include <BetterSMS/sunscript.hxx>
 
 #include "enemy/dark_zhine.hxx"
 #include "enemy/firey_petey.hxx"
+#include "menu/character_select.hxx"
 #include "object/button.hxx"
 #include "object/cannonball.hxx"
 #include "object/cannonbox.hxx"
@@ -44,6 +47,8 @@ extern void adjustYoshiTongue(TMario *player, bool isMario);
 extern void initializeStageInfo(TApplication *app);
 extern void resetForExStage(TMarDirector *director);
 extern void forcePlayerZOn2D(TMario *player, bool isMario);
+extern void resetCoinsOnUniqueStage(TMarDirector *director);
+extern void updateWarpStatesForCruiserCabin(TMarDirector *director);
 
 // Player
 extern void initializePoundJumpAnimation(TApplication *app);
@@ -56,6 +61,9 @@ extern bool launchPlayerState(TMario *player);
 extern void initColdState(TMarDirector *director);
 extern void processColdState(TMario *player, bool isMario);
 extern void setPlayerStartPos(TMario *player);
+
+// Camera
+extern void resetFixedCameraOnLoad(TMarDirector *director);
 
 // HUD
 extern void updatePlayerHUD(TMarDirector *, const J2DOrthoGraph *);
@@ -77,6 +85,26 @@ extern void checkForCruiserUnlocked(TMarDirector *director);
 
 // SETTINGS
 extern void checkForCompletionAwards(TApplication *);
+
+// SPC
+extern void evSetFixedCameraState(TSpcInterp *spc, u32 argc);
+extern void evSetFixedCameraPos(TSpcInterp *spc, u32 argc);
+extern void evSetFixedCameraLookAt(TSpcInterp *spc, u32 argc);
+extern void evSetFixedCameraFollowActor(TSpcInterp *spc, u32 argc);
+extern void evSetFixedCameraFov(TSpcInterp *spc, u32 argc);
+
+extern void evGetAddressFromGraphWebName(TSpcInterp *spc, u32 argc);
+extern void evNpcSetGraphWeb(TSpcInterp *spc, u32 argc);
+extern void evNpcStepOn(TSpcInterp *spc, u32 argc);
+extern void evNpcWaitOn(TSpcInterp *spc, u32 argc);
+extern void evNpcMadOn(TSpcInterp *spc, u32 argc);
+extern void evIsInSightOfActor(TSpcInterp *spc, u32 argc);
+extern void evSetLiveActorFlag(TSpcInterp *spc, u32 argc);
+extern void evFadeScreen(TSpcInterp *spc, u32 argc);
+extern void evIsFadingScreen(TSpcInterp *spc, u32 argc);
+
+// Objects
+extern void cannonBallCollideInteractor(THitActor *self, TMario *player);
 
 static BetterSMS::ModuleInfo sModuleInfo("Super Mario Eclipse", 1, 0, &gSettingsGroup);
 
@@ -110,7 +138,7 @@ static void initModule() {
     Application::showSettingsOnFirstBoot(true);
 
     // Register callbacks
-    Application::registerContextCallback(11, directCharacterSelectMenu);
+    Application::registerContextCallback(CONTEXT_CHARACTER_SELECT, directCharacterSelectMenu);
     Game::addInitCallback(initializeStageInfo);
     Game::addChangeCallback(setIntroStage);
 
@@ -124,29 +152,50 @@ static void initModule() {
     Stage::addUpdateCallback(unlockSettings);
     Game::addBootCallback(lockModuleSettings);
 
+    Stage::addInitCallback(resetCoinsOnUniqueStage);
+    Stage::addInitCallback(resetForExStage);
     Stage::addInitCallback(resetCruiserUnlocked);
     Stage::addUpdateCallback(checkForCruiserUnlocked);
+    Stage::addUpdateCallback(updateWarpStatesForCruiserCabin);
     Player::addUpdateCallback(forcePlayerZOn2D);
 
+    Stage::addInitCallback(resetFixedCameraOnLoad);
+
+    Spc::registerBuiltinFunction("setFixedCameraState", evSetFixedCameraState);
+    Spc::registerBuiltinFunction("setFixedCameraPos", evSetFixedCameraPos);
+    Spc::registerBuiltinFunction("setFixedCameraLookAt", evSetFixedCameraLookAt);
+    Spc::registerBuiltinFunction("setFixedCameraFollowActor", evSetFixedCameraFollowActor);
+    Spc::registerBuiltinFunction("setFixedCameraFov", evSetFixedCameraFov);
+    Spc::registerBuiltinFunction("getAddressFromGraphWebName", evGetAddressFromGraphWebName);
+    Spc::registerBuiltinFunction("npcSetGraphWeb", evNpcSetGraphWeb);
+    Spc::registerBuiltinFunction("npcStepOn", evNpcStepOn);
+    Spc::registerBuiltinFunction("npcWaitOn", evNpcWaitOn);
+    Spc::registerBuiltinFunction("npcMadOn", evNpcMadOn);
+    Spc::registerBuiltinFunction("isInSightOfActor", evIsInSightOfActor);
+    Spc::registerBuiltinFunction("setLiveActorFlag", evSetLiveActorFlag);
+    Spc::registerBuiltinFunction("fadeScreen", evFadeScreen);
+    Spc::registerBuiltinFunction("isFadingScreen", evIsFadingScreen);
+
     Stage::addInitCallback(initCharacterArchives);
-    Stage::addInitCallback(resetForExStage);
+    Stage::addDraw2DCallback(updatePlayerHUD);
+    Stage::addExitCallback(setTutorialVisited);
+
+    Player::addInitCallback(initEclipseData);
+    Player::addLoadAfterCallback(initializeWaterBalloons);
+    Player::addLoadAfterCallback(setPlayerStartPos);
+
     Stage::addInitCallback(resetTutorialIceStageCheckpoints);
     Stage::addInitCallback(resetTutorialCasinoStageCheckpoints);
     Stage::addInitCallback(resetTutorialPiantaPitStageCheckpoints);
-    Stage::addDraw2DCallback(updatePlayerHUD);
-    Stage::addExitCallback(setTutorialVisited);
-    Player::addInitCallback(initEclipseData);
-    Player::addLoadAfterCallback(initializeWaterBalloons);
-    Player::addLoadAfterCallback(setPlayerPosRotOnLoad);
     Player::addUpdateCallback(checkTutorialIceStageCheckpoints);
     Player::addUpdateCallback(checkTutorialCasinoStageCheckpoints);
     Player::addUpdateCallback(checkTutorialPiantaPitStageCheckpoints);
+
     Stage::addInitCallback(initColdState);
     Player::addUpdateCallback(processColdState);
     Player::addUpdateCallback(checkTutorialCollisionRespawn);
     Player::addUpdateCallback(createWaterBalloonAndThrow);
     Player::addUpdateCallback(adjustYoshiTongue);
-    Player::addLoadAfterCallback(setPlayerStartPos);
     Player::registerStateMachine(PlayerLaunchStarWait, holdPlayerState);
     Player::registerStateMachine(PlayerLaunchStarLaunch, launchPlayerState);
     Debug::addUpdateCallback(checkForCompletionAwards);
@@ -160,7 +209,10 @@ static void initModule() {
     Objects::registerObjectAsMapObj("JizoStone", &jizoStoneData, TJizoStone::instantiate);
     Objects::registerObjectAsMapObj("ButtonSwitch", &buttonSwitchData, TButtonSwitch::instantiate);
     Objects::registerObjectAsMapObj("WaterMine", &waterMineData, TWaterMine::instantiate);
+
     Objects::registerObjectAsMapObj("CannonBall", &cannonBallData, TCannonBall::instantiate);
+    Objects::registerObjectCollideInteractor(cannonBallData.mObjectID, cannonBallCollideInteractor);
+
     Objects::registerObjectAsMapObj("CannonBox", &cannonBoxData, TCannonBox::instantiate);
     Objects::registerObjectAsMapObj("ElevatorDoor", &elevatorObjectData, TElevatorObject::instantiate);
     Objects::registerObjectAsMisc("FireyPetey", TFireyPetey::instantiate);
@@ -177,6 +229,10 @@ KURIBO_MODULE_BEGIN("Super Mario Eclipse", "JoshuaMK", SUPER_MARIO_ECLIPSE_VERSI
 KURIBO_MODULE_END()
 
 SMS_WRITE_32(0x802bf47c, 0x808da0d4);  // Use current heap for files
+
+// ObjHitCheck fixes for Bianco
+SMS_WRITE_32(SMS_PORT_REGION(0x8021B340, 0, 0, 0), 0x60638004);  // Allocate about 1.8x memory
+SMS_WRITE_32(SMS_PORT_REGION(0x8021B354, 0, 0, 0), 0x38E03000);  // Allocate about 1.8x array slices
 
 // static u32 sAddresses[0x10000] = {0};
 //

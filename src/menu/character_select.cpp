@@ -86,6 +86,7 @@ s32 CharacterSelectDirector::direct() {
             if (SMS_CHECK_RESET_FLAG(gpApplication.mGamePads[0])) {
                 mSelectScreen->mShouldReadInput = false;
                 fader->startWipe(TSMSFader::WipeRequest::FADE_DIAMOND_OUT, 1.0f, 0.0f);
+                Music::stopSong(1.0f);
             }
         } else if (fader->mFadeStatus == TSMSFader::FADE_ON) {
             return TApplication::CONTEXT_GAME_INTRO;
@@ -473,8 +474,11 @@ static int flagCharacterSelectMenu(u8 state) {
 
     if (state != TApplication::CONTEXT_DIRECT_STAGE)
         return state;
-    if (gpApplication.mContext == CONTEXT_CHARACTER_SELECT)
+
+    if (gpApplication.mContext == CONTEXT_CHARACTER_SELECT) {
         return state;
+    }
+
     TGameSequence &next_scene = gpApplication.mNextScene;
     TGameSequence &cur_scene  = gpApplication.mCurrentScene;
     TGameSequence &prev_scene = gpApplication.mPrevScene;

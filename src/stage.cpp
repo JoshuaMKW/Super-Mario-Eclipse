@@ -65,16 +65,16 @@ BETTER_SMS_FOR_CALLBACK void initializeStageInfo(TApplication *app) {
         // Register Erto Rock stage info
         {
             Stage::ShineAreaInfo *info = new Stage::ShineAreaInfo(SME::STAGE_ERTO, 'er_0');
-            info->addScenario(0x78, 72);
-            info->addScenario(0x79, 73);
-            info->addScenario(0x7A, 74);
-            info->addScenario(0x7B, 75);
-            info->addScenario(0x7C, 76);
-            info->addScenario(0x7D, 77);
-            info->addScenario(0x7E, 78);
-            info->addScenario(0x7F, 79);
-            info->addExScenario(0x80, 80);
-            info->addExScenario(0x81, 81);
+            info->addScenario(120, 72);
+            info->addScenario(121, 73);
+            info->addScenario(122, 74);
+            info->addScenario(123, 75);
+            info->addScenario(124, 76);
+            info->addScenario(125, 77);
+            info->addScenario(126, 78);
+            info->addScenario(127, 79);
+            info->addExScenario(128, 80);
+            info->addExScenario(129, 81);
             Stage::registerShineStage(info);
             Stage::registerNormalStage(SME::STAGE_ERTO, info->getShineStageID());
             Stage::registerExStage(SME::STAGE_ERTO_EX, info->getShineStageID(), 0x7C);
@@ -82,7 +82,7 @@ BETTER_SMS_FOR_CALLBACK void initializeStageInfo(TApplication *app) {
             /*SME::setSpawnTransRot(SME::STAGE_ERTO, TVec3f(-10000.0f, -110.0f, -2580.0f),
                                   TVec3f(0.0f, 100.0f, 0.0f), TGameSequence::AREA_DELFINO, -1);*/
 
-            SME::setSpawnTransRot(SME::STAGE_ERTO, -1, TVec3f(9910.0f, 2500.0f, -15000.0f),
+            SME::setSpawnTransRot(SME::STAGE_ERTO, -1, TVec3f(9125.0f, 2774.0f, -13620.0f),
                                   TVec3f(0.0f, -45.0f, 0.0f), SME::STAGE_ISLE_DELFINO, 1);  // Arido Trail
 
             SME::setSpawnTransRot(SME::STAGE_ERTO, -1, TVec3f(1830.0f, 2820.0f, -11400.0f),
@@ -437,6 +437,11 @@ BETTER_SMS_FOR_CALLBACK void initializeStageInfo(TApplication *app) {
         //    BetterSMS::Stage::registerStageInfo(info->mNormalStageID info);
         //}
 
+        // Update Corona Stage Info
+        {
+             Stage::registerExStage(0x31, 9, -1);
+        }
+
         // Set up warps for base stages
         {
             // Delfino Plaza
@@ -629,6 +634,6 @@ BETTER_SMS_FOR_CALLBACK void setPlayerStartPos(TMario *player) {
 
 void SME_extendedCorrectFlags(TFlagManager *manager) {
     manager->correctFlag();
-    manager->setFlag(0x20013, 2670);
+    manager->setFlag(0x20013, 2670);  // Red Lily City
 }
 SMS_PATCH_BL(0x802954f4, SME_extendedCorrectFlags);

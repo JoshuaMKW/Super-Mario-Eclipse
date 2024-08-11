@@ -22,6 +22,28 @@
 TKeyChest::TKeyChest(const char *name)
     : TMapObjGeneral(name), mOpening(false), mHasFinishedSounds(false) {}
 
+void TKeyChest::initMapCollisionData() {
+    mCollisionManager = new TMapCollisionManager(1, "mapObj", this);
+    mCollisionManager->init("key_chest", 1, nullptr);
+}
+
+void TKeyChest::initMapObj() {
+    TMapObjGeneral::initMapObj();
+
+    if (mCollisionManager) {
+        mCollisionManager->changeCollision(0);
+        mCollisionManager->mCurrentMapCollision->setAllActor(this);
+    }
+}
+
+void TKeyChest::setGroundCollision() {
+    auto *model = getModel();
+    if (mCollisionManager) {
+        mCollisionManager->mCurrentMapCollision->_5C &= 0xFFFFFFFE;  // Enable
+        mCollisionManager->mCurrentMapCollision->moveMtx(*model->mJointArray);
+    }
+}
+
 void TKeyChest::control() {
     TMapObjGeneral::control();
 

@@ -41,16 +41,14 @@ void TWaterMine::control() {
     }
 
     for (size_t i = 0; i < mNumObjs; ++i) {
-        if (mCollidingObjs[i]->mObjectID == 0x1000002B) {
+        if (mCollidingObjs[i]->mObjectID == 0x1000002B || mCollidingObjs[i]->mObjectID == 0x4000022E) {
             playFragmentAnim();
 
             if (PSVECDistance(gpMarioAddress->mTranslation, mTranslation) < 600.0f) {
                 // Hurt player
-                TMario *player = reinterpret_cast<TMario *>(mCollidingObjs[i]);
-                player->decHP(player->mHealth);
-                player->loserExec();
-                player->mAttributes.mIsVisible = true;
-                player->mTranslation.y         = mTranslation.y - 200.0f;
+                gpMarioAddress->decHP(gpMarioAddress->mHealth);
+                gpMarioAddress->mAttributes.mIsVisible = true;
+                gpMarioAddress->mTranslation.y         = mTranslation.y - 200.0f;
             }
 
             m_is_hit = true;
@@ -64,7 +62,6 @@ void TWaterMine::control() {
             // Hurt player
             TMario *player = reinterpret_cast<TMario *>(mCollidingObjs[i]);
             player->decHP(player->mHealth);
-            player->loserExec();
             player->mAttributes.mIsVisible = true;
             player->mTranslation.y = mTranslation.y - 200.0f;
             break;
@@ -107,9 +104,18 @@ void TWaterMine::playFragmentAnim() {
 }
 
 bool TWaterMine::receiveMessage(THitActor *sender, u32 message) {
-    if (sender->mObjectID == 0x1000002B) {
+    if (sender->mObjectID == 0x1000002B || sender->mObjectID == 0x4000022E) {
         playFragmentAnim();
+
+        if (PSVECDistance(gpMarioAddress->mTranslation, mTranslation) < 600.0f) {
+            // Hurt player
+            gpMarioAddress->decHP(gpMarioAddress->mHealth);
+            gpMarioAddress->mAttributes.mIsVisible = true;
+            gpMarioAddress->mTranslation.y         = mTranslation.y - 200.0f;
+        }
+
         m_is_hit = true;
+
         return true;
     }
 

@@ -12,8 +12,19 @@ public:
     }
 
     TCannonBall(const char *name)
-        : TMapObjBall(name), m_water_surface(nullptr), m_water_surface_y(0.0f), m_was_in_air(false) {}
+        : TMapObjBall(name), m_water_surface(nullptr), m_water_surface_y(0.0f),
+          m_was_in_air(false) {}
     ~TCannonBall() override = default;
+
+    void load(JSUMemoryInputStream &in) override {
+        JDrama::TActor::load(in);
+
+        mRegisterName = "cannonball";
+        mModelName    = in.readString();
+
+        initMapObj();
+        makeObjAppeared();
+    }
 
     void loadAfter() override {
         TMapObjBall::loadAfter();
@@ -21,6 +32,7 @@ public:
     }
 
     Mtx44 *getTakingMtx() override;
+    void makeMActors() override;
 
     void checkGroundCollision(TVec3f *out) override;
 
@@ -34,6 +46,7 @@ public:
     void kicked() override {}
 
 private:
+    const char *mModelName;
     const TBGCheckData *m_water_surface;
     f32 m_water_surface_y;
     bool m_was_in_air;

@@ -8,6 +8,7 @@
 #include <BetterSMS/module.hxx>
 
 #include "settings.hxx"
+#include "stage.hxx"
 
 void setPlayerPosRotOnLoad(TMario *player) {
     auto &cur_scene  = gpApplication.mCurrentScene;
@@ -73,70 +74,81 @@ SMS_WRITE_32(SMS_PORT_REGION(0x80156B80, 0, 0, 0), 0x60000000);
 static void assignExitAreaDestination(JDrama::TFlagT<u16> flags, u16 flag) {
     flags.set(flag);
 
-    if (gpMarDirector->mAreaID == 6 &&
-        (gpMarDirector->mEpisodeID == 1 || gpMarDirector->mEpisodeID == 2)) {
-        gpApplication.mNextScene.mAreaID    = 6;
-        gpApplication.mNextScene.mEpisodeID = gpMarDirector->mEpisodeID;
+    if (gpMarDirector->mAreaID == SME::STAGE_ISLE_DELFINO) {
         return;
     }
 
-    if (gpMarDirector->mAreaID == 25 && gpMarDirector->mEpisodeID == 0) {
-        gpApplication.mNextScene.mAreaID    = 26;
+    if (gpMarDirector->mAreaID == SME::STAGE_LIGHTHOUSE_BOSS) {
+        return;
+    }
+
+    if (gpMarDirector->mAreaID == SME::STAGE_TUTORIAL) {
+        gpApplication.mNextScene.mAreaID    = TGameSequence::AREA_OPTION;
         gpApplication.mNextScene.mEpisodeID = 0;
         return;
     }
 
-    if ((gpMarDirector->mAreaID == 4 && gpMarDirector->mEpisodeID == 5) ||   // Starshine Beach
-        (gpMarDirector->mAreaID == 32 && gpMarDirector->mEpisodeID == 0) ||  // Flip Panel
-        (gpMarDirector->mAreaID == 26 && gpMarDirector->mEpisodeID == 0) ||
-        ((gpMarDirector->mAreaID == 13 || gpMarDirector->mAreaID == 50) &&
-         gpMarDirector->mEpisodeID == 0)) {
-        gpApplication.mNextScene.mAreaID    = 6;
-        gpApplication.mNextScene.mEpisodeID = 3;
+    if (gpMarDirector->mAreaID == SME::STAGE_PEACH_CASTLE) {
+        gpApplication.mNextScene.mAreaID    = SME::STAGE_PEACH_CASTLE;
+        gpApplication.mNextScene.mEpisodeID = 2;
+        return;
+    }
+
+    if (gpMarDirector->mAreaID >= SME::STAGE_CRUISER &&
+        gpMarDirector->mAreaID < SME::STAGE_ERTO_EX) {
+        gpApplication.mNextScene.mAreaID    = SME::STAGE_CRUISER;
+        gpApplication.mNextScene.mEpisodeID = 0;
         return;
     }
 }
-// SMS_PATCH_BL(SMS_PORT_REGION(0x80299808, 0, 0, 0), assignExitAreaDestination);
+SMS_PATCH_BL(SMS_PORT_REGION(0x80299808, 0, 0, 0), assignExitAreaDestination);
 
 static void assignShineExitDestination(TApplication *app, u8 area, u8 episode,
                                        JDrama::TFlagT<u16> flag) {
-
     if (!(gpMarDirector->mCollectedShine->mType & 0x10)) {
-        if (gpMarDirector->mAreaID == 11 && gpMarDirector->mEpisodeID == 2) {
-            gpApplication.mNextScene.mAreaID    = 15;
-            gpApplication.mNextScene.mEpisodeID = 0;
+        app->mNextScene.set(area, episode, flag);
+
+        if (gpMarDirector->mAreaID == SME::STAGE_ISLE_DELFINO) {
             return;
         }
-        if (gpMarDirector->mAreaID == 6 &&
-            (gpMarDirector->mEpisodeID == 1 || gpMarDirector->mEpisodeID == 2)) {
-            area    = 6;
-            episode = gpMarDirector->mEpisodeID;
+
+        if (gpMarDirector->mAreaID == SME::STAGE_LIGHTHOUSE_BOSS) {
+            return;
         }
-        if ((gpMarDirector->mAreaID == 4 && gpMarDirector->mEpisodeID == 5) ||   // Starshine Beach
-            (gpMarDirector->mAreaID == 32 && gpMarDirector->mEpisodeID == 0) ||  // Flip Panel
-            ((gpMarDirector->mAreaID == 25 || gpMarDirector->mAreaID == 26) &&
-             gpMarDirector->mEpisodeID == 0) ||
-            ((gpMarDirector->mAreaID == 13 || gpMarDirector->mAreaID == 50) &&
-             gpMarDirector->mEpisodeID == 0)) {
-            area    = 6;
-            episode = 3;
+
+        if (gpMarDirector->mAreaID == SME::STAGE_TUTORIAL) {
+            app->mNextScene.mAreaID    = TGameSequence::AREA_OPTION;
+            app->mNextScene.mEpisodeID = 0;
+            return;
         }
-        app->mNextScene.set(area, episode, flag);
+
+        if (gpMarDirector->mAreaID == SME::STAGE_PEACH_CASTLE) {
+            app->mNextScene.mAreaID    = SME::STAGE_PEACH_CASTLE;
+            app->mNextScene.mEpisodeID = 2;
+            return;
+        }
+
+        if (gpMarDirector->mAreaID >= SME::STAGE_CRUISER &&
+            gpMarDirector->mAreaID < SME::STAGE_ERTO_EX) {
+            app->mNextScene.mAreaID    = SME::STAGE_CRUISER;
+            app->mNextScene.mEpisodeID = 0;
+            return;
+        }
     }
 }
-// SMS_PATCH_BL(SMS_PORT_REGION(0x80297C80, 0, 0, 0), assignShineExitDestination);
-// SMS_WRITE_32(SMS_PORT_REGION(0x80297C84, 0, 0, 0), 0x60000000);
+SMS_PATCH_BL(SMS_PORT_REGION(0x80297C80, 0, 0, 0), assignShineExitDestination);
+SMS_WRITE_32(SMS_PORT_REGION(0x80297C84, 0, 0, 0), 0x60000000);
 
-static void assignGameOverDestination(TMarDirector *director) {
-    if (gpApplication.mCurrentScene.mAreaID == 6 && gpApplication.mCurrentScene.mEpisodeID == 1)
-        gpApplication.mNextScene = gpApplication.mCurrentScene;
-    else if (gpApplication.mCurrentScene.mAreaID == 11 &&
-             gpApplication.mCurrentScene.mEpisodeID == 2)
-        gpApplication.mNextScene.set(15, 0, 0);
-    else
-        gpApplication.mNextScene.set(6, 2, 0);
-    director->moveStage();
-}
+// static void assignGameOverDestination(TMarDirector *director) {
+//     if (gpApplication.mCurrentScene.mAreaID == 6 && gpApplication.mCurrentScene.mEpisodeID == 1)
+//         gpApplication.mNextScene = gpApplication.mCurrentScene;
+//     else if (gpApplication.mCurrentScene.mAreaID == 11 &&
+//              gpApplication.mCurrentScene.mEpisodeID == 2)
+//         gpApplication.mNextScene.set(15, 0, 0);
+//     else
+//         gpApplication.mNextScene.set(6, 2, 0);
+//     director->moveStage();
+// }
 // SMS_PATCH_BL(SMS_PORT_REGION(0x8029933C, 0, 0, 0), assignGameOverDestination);
 
 static void checkMariosDreamWarp(JDrama::TFlagT<u16> flags, u16 flag) {
@@ -152,9 +164,10 @@ static void checkMariosDreamWarp(JDrama::TFlagT<u16> flags, u16 flag) {
     }
 }
 // SMS_PATCH_BL(SMS_PORT_REGION(0x8029A3E0, 0, 0, 0), checkMariosDreamWarp);
-//
-//// On Airstrip from file select
-// SMS_WRITE_32(SMS_PORT_REGION(0x80164E30, 0, 0, 0), 0x38800701);
+
+// On Airstrip from file select
+SMS_WRITE_32(SMS_PORT_REGION(0x80164E30, 0, 0, 0), 0x38804E01);
+
 //// On Delfino from file select
 // SMS_WRITE_32(SMS_PORT_REGION(0x80164E44, 0, 0, 0), 0x38800702);
 //

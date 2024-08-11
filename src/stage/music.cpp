@@ -94,7 +94,8 @@ private:
 };
 
 static bool setMSoundEnterStageExtended(TFlagManager *manager, u32 flag) {
-    if (gpMarDirector->mAreaID >= SME::STAGE_ERTO && gpMarDirector->mAreaID <= SME::STAGE_LACRIMA_BACKHOUSE) {
+    if (gpMarDirector->mAreaID >= SME::STAGE_ERTO &&
+        gpMarDirector->mAreaID <= SME::STAGE_LACRIMA_BACKHOUSE) {
         if (gpMarDirector->mEpisodeID == 6) {
             *(u32 *)0x8040E200 = -16;
             *(u32 *)0x8040E204 = -16;
@@ -102,6 +103,7 @@ static bool setMSoundEnterStageExtended(TFlagManager *manager, u32 flag) {
             *(u32 *)0x8040E1EC = BGM_KAGEMARIO;
             *(u8 *)0x8040E1F9  = 6;
             *(u8 *)0x8040E1FC  = 1;
+            OSReport("MSoundEnterStageExtended: Episode 6\n");
         }
     }
     return manager->getBool(flag);
@@ -109,7 +111,8 @@ static bool setMSoundEnterStageExtended(TFlagManager *manager, u32 flag) {
 SMS_PATCH_BL(0x802B7A5C, setMSoundEnterStageExtended);
 
 static void *setInitMSStage(u8 area, u8 episode) {
-    if (area >= SME::STAGE_ERTO && area <= SME::STAGE_LACRIMA_BACKHOUSE) {
+    bool excluded = area == SME::STAGE_LACRIMA || area == SME::STAGE_LACRIMA_INSIDE;
+    if (!excluded && area >= SME::STAGE_ERTO && area <= SME::STAGE_LACRIMA_BACKHOUSE) {
         if (episode == 6) {
             Vec *posptr   = *(Vec **)((u8 *)gpMSound + 0xBC);
             auto *msstage = new MSStageDistFadeStream(posptr, 6000.0f, 1600.0f, 0x5A, true);

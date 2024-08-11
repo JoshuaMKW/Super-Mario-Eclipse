@@ -1,4 +1,6 @@
+#include <JSystem/JDrama/JDRNameRef.hxx>
 #include <JSystem/JParticle/JPAResourceManager.hxx>
+
 #include <SMS/MSound/MSound.hxx>
 #include <SMS/MSound/MSoundSESystem.hxx>
 #include <SMS/Manager/FlagManager.hxx>
@@ -9,6 +11,7 @@
 #include <BetterSMS/objects/generic.hxx>
 
 #include "settings.hxx"
+#include "stage.hxx"
 
 #pragma region CruiserDelfino
 
@@ -91,7 +94,106 @@ SMS_PATCH_BL(0x802B4470, loadIceStageWalkSandA);
 
 #pragma endregion
 
-#pragma region OutsideDelfinoExBehavior
+#pragma region OutsideDelfinoBehavior
+
+BETTER_SMS_FOR_CALLBACK void updateWarpStatesForCruiserCabin(TMarDirector *director) {
+    if (director->mAreaID != SME::STAGE_CRUISER) {
+        return;
+    }
+
+    size_t shine_count = TFlagManager::smInstance->getFlag(0x40000);
+
+    J3DGXColor enabled_color  = {0, 255, 0, 255};
+    J3DGXColor disabled_color = {200, 50, 50, 255};
+    J3DGXColor off_color      = {0, 0, 0, 255};
+    J3DGXColor on_color       = {255, 255, 255, 255};
+
+    JDrama::TNameRef *name_ref = TMarNameRefGen::getInstance()->getRootNameRef();
+
+    {
+        bool is_enabled = shine_count >= 120;
+
+        u16 key_code = JDrama::TNameRef::calcKeyCode("LanciaLight");
+        if (JDrama::TNameRef *p = name_ref->searchF(key_code, "LanciaLight")) {
+            TGenericRailObj *light_obj = reinterpret_cast<TGenericRailObj *>(p);
+            J3DTevStage *tev_stage     = light_obj->mActorData->mModel->mModelData->mStages[0];
+            J3DTevBlock *tev_block     = *(J3DTevBlock **)((u8 *)tev_stage + 0x28);
+            tev_block->setTevKColor(0, is_enabled ? enabled_color : disabled_color);
+
+            if (is_enabled &&
+                PSVECDistance(gpMarioAddress->mTranslation, light_obj->mTranslation) < 250.0f) {
+                director->setNextStage(SME::STAGE_LANCIA, nullptr);
+            }
+        }
+    }
+    {
+        bool is_enabled = shine_count >= 120;
+
+        u16 key_code = JDrama::TNameRef::calcKeyCode("VaporLight");
+        if (JDrama::TNameRef *p = name_ref->searchF(key_code, "VaporLight")) {
+            TGenericRailObj *light_obj = reinterpret_cast<TGenericRailObj *>(p);
+            J3DTevStage *tev_stage     = light_obj->mActorData->mModel->mModelData->mStages[0];
+            J3DTevBlock *tev_block     = *(J3DTevBlock **)((u8 *)tev_stage + 0x28);
+            tev_block->setTevKColor(0, is_enabled ? on_color : off_color);
+
+            if (is_enabled &&
+                PSVECDistance(gpMarioAddress->mTranslation, light_obj->mTranslation) < 200.0f) {
+                director->setNextStage(SME::STAGE_VAPORWAVE, nullptr);
+            }
+        }
+    }
+
+    {
+        bool is_enabled = shine_count >= 140;
+
+        u16 key_code = JDrama::TNameRef::calcKeyCode("CityLight");
+        if (JDrama::TNameRef *p = name_ref->searchF(key_code, "CityLight")) {
+            TGenericRailObj *light_obj = reinterpret_cast<TGenericRailObj *>(p);
+            J3DTevStage *tev_stage     = light_obj->mActorData->mModel->mModelData->mStages[0];
+            J3DTevBlock *tev_block     = *(J3DTevBlock **)((u8 *)tev_stage + 0x28);
+            tev_block->setTevKColor(0, is_enabled ? enabled_color : disabled_color);
+
+            if (is_enabled &&
+                PSVECDistance(gpMarioAddress->mTranslation, light_obj->mTranslation) < 250.0f) {
+                director->setNextStage(SME::STAGE_RED_LILY, nullptr);
+            }
+        }
+    }
+
+    {
+        bool is_enabled = shine_count >= 160;
+
+        u16 key_code = JDrama::TNameRef::calcKeyCode("YoshiLight");
+        if (JDrama::TNameRef *p = name_ref->searchF(key_code, "YoshiLight")) {
+            TGenericRailObj *light_obj = reinterpret_cast<TGenericRailObj *>(p);
+            J3DTevStage *tev_stage     = light_obj->mActorData->mModel->mModelData->mStages[0];
+            J3DTevBlock *tev_block     = *(J3DTevBlock **)((u8 *)tev_stage + 0x28);
+            tev_block->setTevKColor(0, is_enabled ? enabled_color : disabled_color);
+
+            if (is_enabled &&
+                PSVECDistance(gpMarioAddress->mTranslation, light_obj->mTranslation) < 250.0f) {
+                director->setNextStage(SME::STAGE_YOSHI_VILLAGE, nullptr);
+            }
+        }
+    }
+
+    {
+        bool is_enabled = shine_count >= 160;
+
+        u16 key_code = JDrama::TNameRef::calcKeyCode("PeachLight");
+        if (JDrama::TNameRef *p = name_ref->searchF(key_code, "PeachLight")) {
+            TGenericRailObj *light_obj = reinterpret_cast<TGenericRailObj *>(p);
+            J3DTevStage *tev_stage     = light_obj->mActorData->mModel->mModelData->mStages[0];
+            J3DTevBlock *tev_block     = *(J3DTevBlock **)((u8 *)tev_stage + 0x28);
+            tev_block->setTevKColor(0, is_enabled ? enabled_color : disabled_color);
+
+            if (is_enabled &&
+                PSVECDistance(gpMarioAddress->mTranslation, light_obj->mTranslation) < 250.0f) {
+                director->setNextStage(SME::STAGE_PEACH_BEACH, nullptr);
+            }
+        }
+    }
+}
 
 // This allows the redcoinswitch to be immediately pressed in extended stages
 // and for the player to have Fludd, while still being an ex stage.
@@ -126,6 +228,18 @@ static void checkForSamboFlowerDecrement(MActor *actor, const char *hit_anm_name
 }
 SMS_PATCH_BL(0x800E3F9C, checkForSamboFlowerDecrement);
 
+static void checkHinoKuri2Level(void *hinokuri, int level) {
+    if (gpMarDirector->mAreaID == SME::STAGE_LACRIMA_BACKHOUSE) {
+        setLevel__10THinokuri2Fi(hinokuri, 2);
+    } else {
+        setLevel__10THinokuri2Fi(hinokuri, level);
+    }
+}
+SMS_PATCH_BL(0x8005d5e4, checkHinoKuri2Level);
+SMS_WRITE_32(0x8005b54c, 0x60000000);
+
+#pragma region 2DWorldBehavior
+
 static BoundingBox s_begin_bound_box = {
     {-14900, 24000, 0   },
     {6000,   16000, 4000},
@@ -151,6 +265,22 @@ BETTER_SMS_FOR_CALLBACK void forcePlayerZOn2D(TMario *player, bool isMario) {
     if (!s_begin_bound_box.contains(player->mTranslation)) {
         player->mTranslation.z = clamp<f32>(player->mTranslation.z, -50.0f, 50.0f);
         return;
+    }
+}
+
+static void checkRideMovementCond(TMario *player) {
+    if (gpMarDirector->mAreaID != SME::STAGE_YOSHI_EX) {
+        player->checkRideMovement();
+    }
+}
+SMS_PATCH_BL(0x8024DF54, checkRideMovementCond);
+
+#pragma endregion
+
+BETTER_SMS_FOR_CALLBACK void resetCoinsOnUniqueStage(TMarDirector *director) {
+    if (SMS_getShineStage__FUc(gpApplication.mPrevScene.mAreaID) !=
+        SMS_getShineStage__FUc(gpApplication.mCurrentScene.mAreaID)) {
+        TFlagManager::smInstance->setFlag(0x40002, 0);
     }
 }
 

@@ -37,6 +37,7 @@ public:
     bool mIsPopped;
     f32 mForwardSpeed;
     TMario *mHoldingActor;
+    s32 mLivingTime;
 
     static TWaterEmitInfo *sEmitInfo;
 

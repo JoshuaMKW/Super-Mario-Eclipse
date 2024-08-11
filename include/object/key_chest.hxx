@@ -19,6 +19,10 @@ public:
     void touchPlayer(THitActor *) override;
     bool receiveMessage(THitActor *, u32) override;
 
+    void initMapCollisionData() override;
+    void initMapObj() override;
+    void setGroundCollision() override;
+
     void playIdleAnim();
     void playOpenAnim();
     void spawnShine();

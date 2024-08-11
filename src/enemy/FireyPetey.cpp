@@ -51,11 +51,11 @@ bool TNerveFPWait::execute(TSpineBase<TLiveActor> *spine) const {
 
     TVec3f distanceToMario = (target->mTranslation - *gpMarioPos);
 
-    if (distanceToMario.dot(distanceToMario) < params->mSLSwingLength.get()) {
+    /*if (distanceToMario.dot(distanceToMario) < params->mSLSwingLength.get()) {
         spine->pushNerve(&wait);
         spine->pushNerve(reinterpret_cast<TNerveBase<TLiveActor> *>(theNerve__13TNerveBPSwingFv()));
         return true;
-    }
+    }*/
     if (spine->mNerveTimer == 0) {
         target->changeBck(0x19);
         target->mState = TBossPakkun::BossPakkunState::NORMAL;
@@ -280,7 +280,7 @@ bool TNerveFPFireBreath::execute(TSpineBase<TLiveActor> *spine) const {
     bool isAnimationRunning = peteyMActor->checkCurAnmFromIndex(0x15, 0);
     if (isAnimationRunning) {
         J3DFrameCtrl *frameCtrl = peteyMActor->getFrameCtrl(0);
-        if ((frameCtrl->mCurFrame <= 25.0f) || (frameCtrl->mCurFrame >= 165.0)) {
+        if ((frameCtrl->mCurFrame <= 25.0f) || (frameCtrl->mCurFrame >= 210.0f)) {
             target->mState = TBossPakkun::BossPakkunState::NORMAL;
         } else {
             target->mState = TBossPakkun::BossPakkunState::MOUTH_OPEN;
@@ -350,7 +350,7 @@ bool TNerveFPSwallow::execute(TSpineBase<TLiveActor> *spine) const {
 
         if (target->_03[0] == 0) {
             target->_03[1] = 0;
-            spine->pushNerve(&wait);
+            //spine->setNerve(&wait);
             return true;
         }
         target->changeBck(0x1a);

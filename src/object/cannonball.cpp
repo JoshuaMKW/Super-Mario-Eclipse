@@ -8,6 +8,28 @@
 
 Mtx44 *TCannonBall::getTakingMtx() { return TMapObjBall::getTakingMtx(); }
 
+void TCannonBall::makeMActors() {
+    mActorKeeper = new TMActorKeeper(mLiveManager, 1);
+    if (mModelLoadFlags & 0x8000)
+        mActorKeeper->mModelFlags = 0x112F0000;
+    else
+        mActorKeeper->mModelFlags = 0x102F0000;
+
+    char modelPath[128];
+    snprintf(modelPath, 128, "%s.bmd", mModelName);
+
+    mActorData = mActorKeeper->createMActor(modelPath, getSDLModelFlag());
+
+    if (mModelLoadFlags & 0x4000) {
+        mActorData->setLightID(0);
+        mActorData->_40 = 0;
+    }
+
+    calcRootMatrix();
+    mActorData->calc();
+    mActorData->viewCalc();
+}
+
 void TCannonBall::checkGroundCollision(TVec3f *out) {
     mGroundY = gpMapCollisionData->checkGround(out->x, out->y + _C0, out->z, 8, &m_water_surface);
     if (mGroundY >= out->y && m_water_surface->isWaterSurface()) {
@@ -147,7 +169,7 @@ static ObjPhysicalInfo cannonBall_physical_info{
     ._00 = 13, .mPhysicalData = &cannonBall_physical_data, ._0C = 2};
 
 ObjData cannonBallData{.mMdlName  = "cannonball",
-                       .mObjectID = 0x440003A1 /*0x80000FFF*/,
+                       .mObjectID = 0x400003A1 /*0x80000FFF*/,
                        .mLiveManagerName =
                            gLiveManagerName,  // const_cast<char *>("木マネージャー")
                        .mObjKey           = gUnkManagerName,  // const_cast<char *>("cannonball"),
@@ -162,3 +184,11 @@ ObjData cannonBallData{.mMdlName  = "cannonball",
                        ._30               = 50.0f,
                        .mUnkFlags         = 0x02130000 /*0x02130100*/,
                        .mKeyCode          = cexp_calcKeyCode("CannonBall")};
+
+BETTER_SMS_FOR_CALLBACK void cannonBallCollideInteractor(THitActor* self, TMario* player) {
+    player->keepDistance(*self, 0.0f);
+    if (player->canTake(self)) {
+        player->mGrabTarget = (TTakeActor *)self;
+        player->changePlayerStatus(899, 0, false);
+    }
+}

@@ -61,7 +61,8 @@ BETTER_SMS_FOR_CALLBACK void createWaterBalloonAndThrow(TMario *player, bool isM
     if (player->mHeldObject || player->mAttributes.mHasFludd)
         return;
 
-    if (!(player->mController->mButtons.mFrameInput & TMarioGamePad::R))
+    if (!(player->mController->mButtons.mFrameInput & TMarioGamePad::R) ||
+        (player->mController->mMeaning & 0x600) != 0x600)
         return;
 
     auto *water_balloons =

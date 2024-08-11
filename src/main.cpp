@@ -102,6 +102,9 @@ extern void evSetLiveActorFlag(TSpcInterp *spc, u32 argc);
 extern void evFadeScreen(TSpcInterp *spc, u32 argc);
 extern void evIsFadingScreen(TSpcInterp *spc, u32 argc);
 
+// Objects
+extern void cannonBallCollideInteractor(THitActor *self, TMario *player);
+
 static BetterSMS::ModuleInfo sModuleInfo("Super Mario Eclipse", 1, 0, &gSettingsGroup);
 
 static void initModule() {
@@ -178,7 +181,7 @@ static void initModule() {
 
     Player::addInitCallback(initEclipseData);
     Player::addLoadAfterCallback(initializeWaterBalloons);
-    Player::addLoadAfterCallback(setPlayerPosRotOnLoad);
+    Player::addLoadAfterCallback(setPlayerStartPos);
 
     Stage::addInitCallback(resetTutorialIceStageCheckpoints);
     Stage::addInitCallback(resetTutorialCasinoStageCheckpoints);
@@ -192,7 +195,6 @@ static void initModule() {
     Player::addUpdateCallback(checkTutorialCollisionRespawn);
     Player::addUpdateCallback(createWaterBalloonAndThrow);
     Player::addUpdateCallback(adjustYoshiTongue);
-    Player::addLoadAfterCallback(setPlayerStartPos);
     Player::registerStateMachine(PlayerLaunchStarWait, holdPlayerState);
     Player::registerStateMachine(PlayerLaunchStarLaunch, launchPlayerState);
     Debug::addUpdateCallback(checkForCompletionAwards);
@@ -206,7 +208,10 @@ static void initModule() {
     Objects::registerObjectAsMapObj("JizoStone", &jizoStoneData, TJizoStone::instantiate);
     Objects::registerObjectAsMapObj("ButtonSwitch", &buttonSwitchData, TButtonSwitch::instantiate);
     Objects::registerObjectAsMapObj("WaterMine", &waterMineData, TWaterMine::instantiate);
+
     Objects::registerObjectAsMapObj("CannonBall", &cannonBallData, TCannonBall::instantiate);
+    Objects::registerObjectCollideInteractor(cannonBallData.mObjectID, cannonBallCollideInteractor);
+
     Objects::registerObjectAsMapObj("CannonBox", &cannonBoxData, TCannonBox::instantiate);
     Objects::registerObjectAsMisc("FireyPetey", TFireyPetey::instantiate);
     Objects::registerObjectAsMisc("FireyPeteyManager", TFireyPeteyManager::instantiate);
@@ -222,6 +227,10 @@ KURIBO_MODULE_BEGIN("Super Mario Eclipse", "JoshuaMK", SUPER_MARIO_ECLIPSE_VERSI
 KURIBO_MODULE_END()
 
 SMS_WRITE_32(0x802bf47c, 0x808da0d4);  // Use current heap for files
+
+// ObjHitCheck fixes for Bianco
+SMS_WRITE_32(SMS_PORT_REGION(0x8021B340, 0, 0, 0), 0x60638004);  // Allocate about 1.8x memory
+SMS_WRITE_32(SMS_PORT_REGION(0x8021B354, 0, 0, 0), 0x38E03000);  // Allocate about 1.8x array slices
 
 // static u32 sAddresses[0x10000] = {0};
 //

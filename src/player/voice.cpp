@@ -24,7 +24,7 @@ void SoundSESystem_startSoundActorInner(u32 soundId, JAISound **sound, JAIActor 
                                                                         param_4, param_5);
         if (!emario_status &&
             SME::TGlobals::getCharacterIDFromPlayer(gpMarioAddress) == SME::CharacterID::LUIGI) {
-            newSound->setPitch(0.891251, 3, 0);  // Down two semitones
+            newSound->setPitch(0.95, 3, 0);  // Down two semitones
             newSound->setTempoProportion(1.3, 5);
             newSound->setVolume(1.0, 0, 0);
         }

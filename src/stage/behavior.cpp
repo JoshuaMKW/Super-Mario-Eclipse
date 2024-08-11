@@ -268,6 +268,13 @@ BETTER_SMS_FOR_CALLBACK void forcePlayerZOn2D(TMario *player, bool isMario) {
     }
 }
 
+static void checkRideMovementCond(TMario *player) {
+    if (gpMarDirector->mAreaID != SME::STAGE_YOSHI_EX) {
+        player->checkRideMovement();
+    }
+}
+SMS_PATCH_BL(0x8024DF54, checkRideMovementCond);
+
 #pragma endregion
 
 BETTER_SMS_FOR_CALLBACK void resetCoinsOnUniqueStage(TMarDirector *director) {

@@ -21,6 +21,7 @@
 #include "object/cannonball.hxx"
 #include "object/cannonbox.hxx"
 #include "object/darkness_effect.hxx"
+#include "object/elevator_object.hxx"
 #include "object/follow_key.hxx"
 #include "object/jizo_stone.hxx"
 #include "object/key_chest.hxx"
@@ -202,7 +203,7 @@ static void initModule() {
     Objects::registerObjectAsMisc("DarknessEffect", TDarknessEffect::instantiate);
     Objects::registerObjectAsMapObj("Tornado", &tornadoData, TTornadoMapObj::instantiate);
     Objects::registerObjectAsMapObj("WaterBalloon", &waterBalloonData, TWaterBalloon::instantiate);
-    Objects::registerObjectAsMapObj("LaunchStar", &launchStarData, TLaunchStarObj::instantiate);
+    //Objects::registerObjectAsMapObj("LaunchStar", &launchStarData, TLaunchStarObj::instantiate);
     Objects::registerObjectAsMapObj("KeyFollow", &followKeyData, TFollowKey::instantiate);
     Objects::registerObjectAsMapObj("KeyChest", &keyChestData, TKeyChest::instantiate);
     Objects::registerObjectAsMapObj("JizoStone", &jizoStoneData, TJizoStone::instantiate);
@@ -213,6 +214,7 @@ static void initModule() {
     Objects::registerObjectCollideInteractor(cannonBallData.mObjectID, cannonBallCollideInteractor);
 
     Objects::registerObjectAsMapObj("CannonBox", &cannonBoxData, TCannonBox::instantiate);
+    Objects::registerObjectAsMapObj("ElevatorDoor", &elevatorObjectData, TElevatorObject::instantiate);
     Objects::registerObjectAsMisc("FireyPetey", TFireyPetey::instantiate);
     Objects::registerObjectAsMisc("FireyPeteyManager", TFireyPeteyManager::instantiate);
     Objects::registerObjectAsMisc("DarkZhine", TDarkZhine::instantiate);

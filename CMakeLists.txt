@@ -15,7 +15,7 @@ file(GLOB SUPER_MARIO_ECLIPSE_SRC
     "include/*/*.hxx"
 )
 
-add_executable(SuperMarioEclipse ${SUPER_MARIO_ECLIPSE_SRC})
+add_executable(SuperMarioEclipse ${SUPER_MARIO_ECLIPSE_SRC} "src/object/elevator_object.cpp")
 add_subdirectory(lib/BetterSunshineEngine)
 
 target_link_libraries(SuperMarioEclipse PUBLIC BetterSunshineEngine)

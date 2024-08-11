@@ -437,6 +437,11 @@ BETTER_SMS_FOR_CALLBACK void initializeStageInfo(TApplication *app) {
         //    BetterSMS::Stage::registerStageInfo(info->mNormalStageID info);
         //}
 
+        // Update Corona Stage Info
+        {
+             Stage::registerExStage(0x31, 9, -1);
+        }
+
         // Set up warps for base stages
         {
             // Delfino Plaza

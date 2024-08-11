@@ -116,6 +116,9 @@ static void setBlueCoinFlagOverride(TFlagManager *manager, u8 normalStage, u8 co
     }
 
     if (shineStage >= SME::STAGE_ERTO && shineStage < SME::STAGE_PEACH_CASTLE) {
+        if (shineStage >= SME::STAGE_UNUSED_73) {
+            shineStage -= 1;
+        }
         shineStage -= SME::STAGE_ERTO;
         if (coinID >= 20) {
             coinID = 0;
@@ -151,6 +154,9 @@ static bool getBlueCoinFlagOverride(TFlagManager *manager, u8 normalStage, u8 co
     }
 
     if (shineStage >= SME::STAGE_ERTO && shineStage < SME::STAGE_PEACH_CASTLE) {
+        if (shineStage >= SME::STAGE_UNUSED_73) {
+            shineStage -= 1;
+        }
         shineStage -= SME::STAGE_ERTO;
         if (coinID >= 20) {
             coinID = 0;

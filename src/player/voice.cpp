@@ -37,6 +37,7 @@ u32 playerVoiceProcess(TMario *player, MSound *sound, u32 soundID, s16 health, u
     if (player->_388 == 0) {
         SME::CharacterID player_id = SME::TGlobals::getCharacterIDFromPlayer(player);
         if (player_id == SME::CharacterID::MARIO) {
+            health = 8;
             switch (soundID) {
             case MSD_SE_MV41_JUMP_T_01: {
                 soundID = MSD_SE_MV21_JUMP_SMALL_01;
@@ -66,7 +67,9 @@ u32 playerVoiceProcess(TMario *player, MSound *sound, u32 soundID, s16 health, u
                     JAISound **sounds = (JAISound **)((u8 *)sound + 0x8C);
                     JAISound *sound = MSoundSE::startSoundActorInner(MSD_SE_MV41_JUMP_T_01, sounds,
                                                                      (JAIActor *)jai_actor, 1, 4);
-                    sound->setPortData(11, 0);
+                    if (sound) {
+                        sound->setPortData(11, 0);
+                    }
                 }
                 *(u32 *)((u8 *)sound + 0x94) = MSD_SE_MV41_JUMP_T_01;
                 return MSD_SE_MV41_JUMP_T_01;
@@ -77,7 +80,9 @@ u32 playerVoiceProcess(TMario *player, MSound *sound, u32 soundID, s16 health, u
                     JAISound **sounds = (JAISound **)((u8 *)sound + 0x8C);
                     JAISound *sound   = MSoundSE::startSoundActorInner(
                         MSD_SE_MV34_ACTION_T_01, sounds, (JAIActor *)jai_actor, 1, 4);
-                    sound->setPortData(11, 0);
+                    if (sound) {
+                        sound->setPortData(11, 0);
+                    }
                 }
                 *(u32 *)((u8 *)sound + 0x94) = MSD_SE_MV34_ACTION_T_01;
                 return MSD_SE_MV34_ACTION_T_01;
@@ -87,9 +92,10 @@ u32 playerVoiceProcess(TMario *player, MSound *sound, u32 soundID, s16 health, u
                 if (sound->gateCheck(MSD_SE_MV38_EXERT_INST_T_01)) {
                     JAISound **sounds = (JAISound **)((u8 *)sound + 0x8C);
                     JAISound *sound   = MSoundSE::startSoundActorInner(
-                        MSD_SE_MV38_EXERT_INST_T_01, sounds,
-                                                   (JAIActor *)jai_actor, 1, 4);
-                    sound->setPortData(11, 0);
+                        MSD_SE_MV38_EXERT_INST_T_01, sounds, (JAIActor *)jai_actor, 1, 4);
+                    if (sound) {
+                        sound->setPortData(11, 0);
+                    }
                 }
                 *(u32 *)((u8 *)sound + 0x94) = MSD_SE_MV38_EXERT_INST_T_01;
                 return MSD_SE_MV38_EXERT_INST_T_01;

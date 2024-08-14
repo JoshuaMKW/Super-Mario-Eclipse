@@ -10,7 +10,7 @@ void TCannonBox::loadAfter() { mObjectID = 0x40000F90; }
 void TCannonBox::control() {}
 
 bool TCannonBox::receiveMessage(THitActor *sender, u32 message) {
-    if (sender->mObjectID == 0x440003A1) {
+    if (sender->mObjectID == 0x400003A1) {
         TFlagManager::smInstance->incFlag(0x60005, 1);
         playCollectAnim();
         return true;

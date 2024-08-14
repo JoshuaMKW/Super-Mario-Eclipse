@@ -1,7 +1,15 @@
-#include <BetterSMS/sunscript.hxx>
+#include <Dolphin/string.h>
+#include <Dolphin/stdlib.h>
+#include <Dolphin/printf.h>
+
+#include <JSystem/JDrama/JDRNameRef.hxx>
+
+#include <SMS/System/MarNameRefGen.hxx>
 #include <SMS/Enemy/Conductor.hxx>
 #include <SMS/NPC/NpcBase.hxx>
 #include <SMS/raw_fn.hxx>
+
+#include <BetterSMS/sunscript.hxx>
 
 using namespace BetterSMS;
 
@@ -123,7 +131,7 @@ void evNpcMadOn(TSpcInterp *spc, u32 argc) {
         npc->mSpineBase->mNerveStack.pop();
     }
 
-    //npc->mGraphTracer->mGraph = (TGraphWeb *)0x803AFB48;                    // (null)
+    // npc->mGraphTracer->mGraph = (TGraphWeb *)0x803AFB48;                    // (null)
     npc->mSpineBase->setNerve((const TNerveBase<TLiveActor> *)0x8040E03C);  // TNerveNPCMad
     npc->mSpineBase->pushNerve(nerve);                                      // Old current
     npcMadIn__8TBaseNPCFv(npc);
@@ -212,4 +220,54 @@ void evSetLiveActorFlag(TSpcInterp *spc, u32 argc) {
     TLiveActor *src_actor        = (TLiveActor *)arg_slice.mValue;
     src_actor->mStateFlags.asU32 = set ? (src_actor->mStateFlags.asU32 | flags)
                                        : (src_actor->mStateFlags.asU32 & ~flags);
+}
+
+void evCheckBrokenWatermelon(TSpcInterp *spc, u32 argc) {
+    spc->verifyArgNum(3, &argc);
+
+    TSpcSlice arg_slice = Spc::Stack::popItem(spc);
+    if (arg_slice.mType != Spc::ValueType::INT) {
+        SpcTrace("Expected integer argument 2 for evCheckBrokenWatermelon!\n");
+        return;
+    }
+
+    u32 endInt = arg_slice.mValue;
+
+    arg_slice = Spc::Stack::popItem(spc);
+    if (arg_slice.mType != Spc::ValueType::INT) {
+        SpcTrace("Expected integer argument 1 for evCheckBrokenWatermelon!\n");
+        return;
+    }
+
+    u32 startInt = arg_slice.mValue;
+
+    arg_slice = Spc::Stack::popItem(spc);
+    if (arg_slice.mType != Spc::ValueType::STRING) {
+        SpcTrace("Expected string argument 0 for evCheckBrokenWatermelon!\n");
+        return;
+    }
+
+    const char *name = (const char *)arg_slice.mValue;
+
+    char formatBuf[128] = {};
+    snprintf(formatBuf, 64, "%s", name);
+    strcat(formatBuf, "%d\0");
+
+    char nameBuf[128] = {};
+    auto *nameRef = TMarNameRefGen::getInstance()->getRootNameRef();
+
+    size_t total_broken = 0;
+
+    for (size_t i = startInt; i < endInt; ++i) {
+        snprintf(nameBuf, 128, formatBuf, i);
+        u16 keyCode = JDrama::TNameRef::calcKeyCode(nameBuf);
+        if (JDrama::TNameRef *p = nameRef->searchF(keyCode, nameBuf)) {
+            TLiveActor *actor = reinterpret_cast<TLiveActor *>(p);
+            if ((actor->mStateFlags.asU32 & 3) != 0) {
+                total_broken++;
+            }
+        }
+    }
+
+    Spc::Stack::pushItem(spc, total_broken, Spc::ValueType::INT);
 }

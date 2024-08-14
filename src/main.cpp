@@ -29,6 +29,7 @@
 #include "object/tornado_obj.hxx"
 #include "object/water_balloon.hxx"
 #include "object/water_mine.hxx"
+#include "object/pizzabox.hxx"
 #include "p_settings.hxx"
 
 // Application
@@ -49,6 +50,7 @@ extern void resetForExStage(TMarDirector *director);
 extern void forcePlayerZOn2D(TMario *player, bool isMario);
 extern void resetCoinsOnUniqueStage(TMarDirector *director);
 extern void updateWarpStatesForCruiserCabin(TMarDirector *director);
+extern void warpContextUpdater(TMario *player, bool isMario);
 
 // Player
 extern void initializePoundJumpAnimation(TApplication *app);
@@ -102,6 +104,7 @@ extern void evIsInSightOfActor(TSpcInterp *spc, u32 argc);
 extern void evSetLiveActorFlag(TSpcInterp *spc, u32 argc);
 extern void evFadeScreen(TSpcInterp *spc, u32 argc);
 extern void evIsFadingScreen(TSpcInterp *spc, u32 argc);
+extern void evCheckBrokenWatermelon(TSpcInterp *spc, u32 argc);
 
 // Objects
 extern void cannonBallCollideInteractor(THitActor *self, TMario *player);
@@ -175,6 +178,7 @@ static void initModule() {
     Spc::registerBuiltinFunction("setLiveActorFlag", evSetLiveActorFlag);
     Spc::registerBuiltinFunction("fadeScreen", evFadeScreen);
     Spc::registerBuiltinFunction("isFadingScreen", evIsFadingScreen);
+    Spc::registerBuiltinFunction("checkBrokenWatermelon", evCheckBrokenWatermelon);
 
     Stage::addInitCallback(initCharacterArchives);
     Stage::addDraw2DCallback(updatePlayerHUD);
@@ -183,6 +187,7 @@ static void initModule() {
     Player::addInitCallback(initEclipseData);
     Player::addLoadAfterCallback(initializeWaterBalloons);
     Player::addLoadAfterCallback(setPlayerStartPos);
+    Player::addUpdateCallback(warpContextUpdater);
 
     Stage::addInitCallback(resetTutorialIceStageCheckpoints);
     Stage::addInitCallback(resetTutorialCasinoStageCheckpoints);
@@ -212,6 +217,9 @@ static void initModule() {
 
     Objects::registerObjectAsMapObj("CannonBall", &cannonBallData, TCannonBall::instantiate);
     Objects::registerObjectCollideInteractor(cannonBallData.mObjectID, cannonBallCollideInteractor);
+
+    Objects::registerObjectAsMapObj("PizzaBox", &pizzaBoxData, TPizzaBox::instantiate);
+    Objects::registerObjectCollideInteractor(pizzaBoxData.mObjectID, cannonBallCollideInteractor);
 
     Objects::registerObjectAsMapObj("CannonBox", &cannonBoxData, TCannonBox::instantiate);
     Objects::registerObjectAsMapObj("ElevatorDoor", &elevatorObjectData, TElevatorObject::instantiate);

@@ -78,8 +78,12 @@ void TButtonSwitch::initMapObj() {
 void TButtonSwitch::setGroundCollision() {
     auto *model = getModel();
     if (mCollisionManager) {
-        mCollisionManager->mCurrentMapCollision->_5C &= ~1;  // Enable
-        mCollisionManager->mCurrentMapCollision->moveMtx(*model->mJointArray);
+        if (mState == State::STATE_PRESSED || mState == State::STATE_PRESSING) {
+            mCollisionManager->mCurrentMapCollision->_5C |= 1;  // Disable
+        } else {
+            mCollisionManager->mCurrentMapCollision->_5C &= ~1;  // Enable
+            mCollisionManager->mCurrentMapCollision->moveMtx(*model->mJointArray);
+        }
     }
 }
 

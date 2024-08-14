@@ -107,7 +107,20 @@ static u32 shineStageCoinRecordIndex(u32 normalStage) {
     }
 }
 SMS_PATCH_BL(SMS_PORT_REGION(0x8017495C, 0, 0, 0), shineStageCoinRecordIndex);
-SMS_PATCH_BL(SMS_PORT_REGION(0x801BECC8, 0, 0, 0), shineStageCoinRecordIndex);
+
+static void shineStageCoinRecordUpdate() {
+    u32 normalStageID = gpApplication.mCurrentScene.mAreaID;
+    u32 shineStageID  = shineStageCoinRecordIndex(normalStageID);
+    if (normalStageID > TGameSequence::AREA_MARE) {
+        if (shineStageID == SMS_getShineStage__FUc(normalStageID)) {
+            // Under this circumstance the area has no record, see above.
+            TFlagManager::smInstance->incFlag(0x40002, 1);
+            return;
+        }
+    }
+    TFlagManager::smInstance->incGoldCoinFlag(shineStageID, 1);
+}
+SMS_PATCH_BL(SMS_PORT_REGION(0x801BECD8, 0, 0, 0), shineStageCoinRecordUpdate);
 
 static void setBlueCoinFlagOverride(TFlagManager *manager, u8 normalStage, u8 coinID) {
     s32 shineStage = SMS_getShineStage__FUc(normalStage);

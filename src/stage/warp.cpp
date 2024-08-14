@@ -10,48 +10,8 @@
 #include "settings.hxx"
 #include "stage.hxx"
 
-void setPlayerPosRotOnLoad(TMario *player) {
-    auto &cur_scene  = gpApplication.mCurrentScene;
-    auto &prev_scene = gpApplication.mPrevScene;
-
-    // if (cur_scene.mAreaID == 6 && cur_scene.mEpisodeID == 0 ||   // Daisy Cruiser
-    //     cur_scene.mAreaID == 32 && cur_scene.mEpisodeID == 0 ||  // Flip Panel
-    //     cur_scene.mAreaID == 76 && cur_scene.mEpisodeID == 0) {  // Casino Table
-    //     TFlagManager::smInstance->setFlag(0x40002, 0);
-    // }
-
-    // Daisy Cruiser
-    if (cur_scene.mAreaID == 68 && cur_scene.mEpisodeID == 0) {
-        if (prev_scene.mAreaID == 69) {
-            // From Mario's Dream
-            player->mTranslation = {-17030, 6518, 3750};
-            player->mAngle.y     = convertAngleFloatToS16(-180.0f);
-        } else if ((prev_scene.mAreaID == 76 && prev_scene.mEpisodeID == 0) ||
-                   (prev_scene.mAreaID == 92 && prev_scene.mEpisodeID == 0)) {
-            // From Casino
-            player->mTranslation = {5500, 1476, -1530};
-            player->mAngle.y     = convertAngleFloatToS16(60.0f);
-        } else if (prev_scene.mAreaID == 85 && prev_scene.mEpisodeID == 0) {
-            // From Planes and Trains
-            player->mTranslation = {6060, 6612, -960};
-            player->mAngle.y     = convertAngleFloatToS16(-60.0f);
-        } else {
-            player->mTranslation = {22400, 5400, 0};
-            player->mAngle.y     = convertAngleFloatToS16(90.0f);
-        }
-    }
-
-    // Vaporwave
-    if (cur_scene.mAreaID == 71 && cur_scene.mEpisodeID == 0) {
-        // From Memphis
-        if (prev_scene.mAreaID == 87 && prev_scene.mEpisodeID == 0) {
-            player->mTranslation = {-4450, 7130, -100};
-            player->mAngle.y     = convertAngleFloatToS16(60.0f);
-        }
-    }
-}
-
-static u8 s_no_exit_areas[] = {0, 1, 68};
+static u8 s_no_exit_areas[] = {TGameSequence::AREA_AIRPORT, TGameSequence::AREA_DOLPIC,
+                               SME::STAGE_CRUISER, SME::STAGE_PEACH_CASTLE};
 
 static void assignExitAreaStages(TApplication *app) {
     u32 *tpausemenu;
@@ -74,23 +34,28 @@ SMS_WRITE_32(SMS_PORT_REGION(0x80156B80, 0, 0, 0), 0x60000000);
 static void assignExitAreaDestination(JDrama::TFlagT<u16> flags, u16 flag) {
     flags.set(flag);
 
-    if (gpMarDirector->mAreaID == SME::STAGE_ISLE_DELFINO) {
+    switch (gpMarDirector->mAreaID) {
+    case SME::STAGE_ISLE_DELFINO:
+    case SME::STAGE_LIGHTHOUSE_BOSS:
         return;
-    }
-
-    if (gpMarDirector->mAreaID == SME::STAGE_LIGHTHOUSE_BOSS) {
-        return;
-    }
-
-    if (gpMarDirector->mAreaID == SME::STAGE_TUTORIAL) {
+    case SME::STAGE_TUTORIAL:
         gpApplication.mNextScene.mAreaID    = TGameSequence::AREA_OPTION;
         gpApplication.mNextScene.mEpisodeID = 0;
         return;
-    }
-
-    if (gpMarDirector->mAreaID == SME::STAGE_PEACH_CASTLE) {
+    case SME::STAGE_PEACH_CASTLE:
         gpApplication.mNextScene.mAreaID    = SME::STAGE_PEACH_CASTLE;
         gpApplication.mNextScene.mEpisodeID = 2;
+        return;
+    case SME::STAGE_VAPORWAVE:
+    case SME::STAGE_LANCIA:
+    case SME::STAGE_RED_LILY:
+    case SME::STAGE_YOSHI_VILLAGE:
+        gpApplication.mNextScene.mAreaID    = SME::STAGE_CRUISER;
+        gpApplication.mNextScene.mEpisodeID = 4;
+        return;
+    case SME::STAGE_CRUISER_EX:
+        gpApplication.mNextScene.mAreaID    = SME::STAGE_CRUISER;
+        gpApplication.mNextScene.mEpisodeID = 0;
         return;
     }
 
@@ -101,6 +66,7 @@ static void assignExitAreaDestination(JDrama::TFlagT<u16> flags, u16 flag) {
         return;
     }
 }
+SMS_PATCH_BL(SMS_PORT_REGION(0x80299230, 0, 0, 0), assignExitAreaDestination);
 SMS_PATCH_BL(SMS_PORT_REGION(0x80299808, 0, 0, 0), assignExitAreaDestination);
 
 static void assignShineExitDestination(TApplication *app, u8 area, u8 episode,
@@ -108,23 +74,28 @@ static void assignShineExitDestination(TApplication *app, u8 area, u8 episode,
     if (!(gpMarDirector->mCollectedShine->mType & 0x10)) {
         app->mNextScene.set(area, episode, flag);
 
-        if (gpMarDirector->mAreaID == SME::STAGE_ISLE_DELFINO) {
+        switch (gpMarDirector->mAreaID) {
+        case SME::STAGE_ISLE_DELFINO:
+        case SME::STAGE_LIGHTHOUSE_BOSS:
             return;
-        }
-
-        if (gpMarDirector->mAreaID == SME::STAGE_LIGHTHOUSE_BOSS) {
-            return;
-        }
-
-        if (gpMarDirector->mAreaID == SME::STAGE_TUTORIAL) {
+        case SME::STAGE_TUTORIAL:
             app->mNextScene.mAreaID    = TGameSequence::AREA_OPTION;
             app->mNextScene.mEpisodeID = 0;
             return;
-        }
-
-        if (gpMarDirector->mAreaID == SME::STAGE_PEACH_CASTLE) {
+        case SME::STAGE_PEACH_CASTLE:
             app->mNextScene.mAreaID    = SME::STAGE_PEACH_CASTLE;
             app->mNextScene.mEpisodeID = 2;
+            return;
+        case SME::STAGE_VAPORWAVE:
+        case SME::STAGE_LANCIA:
+        case SME::STAGE_RED_LILY:
+        case SME::STAGE_YOSHI_VILLAGE:
+            app->mNextScene.mAreaID    = SME::STAGE_CRUISER;
+            app->mNextScene.mEpisodeID = 4;
+            return;
+        case SME::STAGE_CRUISER_EX:
+            gpApplication.mNextScene.mAreaID    = SME::STAGE_CRUISER;
+            gpApplication.mNextScene.mEpisodeID = 0;
             return;
         }
 

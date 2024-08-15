@@ -47,13 +47,19 @@ static void assignExitAreaDestination(JDrama::TFlagT<u16> flags, u16 flag) {
         gpApplication.mNextScene.mEpisodeID = 2;
         return;
     case SME::STAGE_VAPORWAVE:
+    case SME::STAGE_VAPORWAVE_EX:
     case SME::STAGE_LANCIA:
+    case SME::STAGE_LANCIA_EX:
     case SME::STAGE_RED_LILY:
+    case SME::STAGE_RED_LILY_EX:
+    case SME::STAGE_PEACH_BEACH:
+    case SME::STAGE_PEACH_BEACH_EX:
     case SME::STAGE_YOSHI_VILLAGE:
+    case SME::STAGE_YOSHI_EX:
         gpApplication.mNextScene.mAreaID    = SME::STAGE_CRUISER;
         gpApplication.mNextScene.mEpisodeID = 4;
         return;
-    case SME::STAGE_CRUISER_EX:
+    case SME::STAGE_SPETTRO_EX:
         gpApplication.mNextScene.mAreaID    = SME::STAGE_CRUISER;
         gpApplication.mNextScene.mEpisodeID = 0;
         return;
@@ -87,15 +93,21 @@ static void assignShineExitDestination(TApplication *app, u8 area, u8 episode,
             app->mNextScene.mEpisodeID = 2;
             return;
         case SME::STAGE_VAPORWAVE:
+        case SME::STAGE_VAPORWAVE_EX:
         case SME::STAGE_LANCIA:
+        case SME::STAGE_LANCIA_EX:
         case SME::STAGE_RED_LILY:
+        case SME::STAGE_RED_LILY_EX:
+        case SME::STAGE_PEACH_BEACH:
+        case SME::STAGE_PEACH_BEACH_EX:
         case SME::STAGE_YOSHI_VILLAGE:
+        case SME::STAGE_YOSHI_EX:
             app->mNextScene.mAreaID    = SME::STAGE_CRUISER;
             app->mNextScene.mEpisodeID = 4;
             return;
-        case SME::STAGE_CRUISER_EX:
-            gpApplication.mNextScene.mAreaID    = SME::STAGE_CRUISER;
-            gpApplication.mNextScene.mEpisodeID = 0;
+        case SME::STAGE_SPETTRO_EX:
+            app->mNextScene.mAreaID    = SME::STAGE_CRUISER;
+            app->mNextScene.mEpisodeID = 0;
             return;
         }
 
@@ -138,6 +150,9 @@ static void checkMariosDreamWarp(JDrama::TFlagT<u16> flags, u16 flag) {
 
 // On Airstrip from file select
 SMS_WRITE_32(SMS_PORT_REGION(0x80164E30, 0, 0, 0), 0x38804E01);
+
+// On Airstrip movie from castle
+// SMS_WRITE_32(SMS_PORT_REGION(0x8029A1F0, 0, 0, 0), 0x38800000);
 
 //// On Delfino from file select
 // SMS_WRITE_32(SMS_PORT_REGION(0x80164E44, 0, 0, 0), 0x38800702);

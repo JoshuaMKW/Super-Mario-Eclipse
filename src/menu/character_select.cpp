@@ -485,13 +485,20 @@ static int flagCharacterSelectMenu(u8 state) {
 
     // No character select for secret courses
     if (Stage::isExStage(next_scene.mAreaID, next_scene.mEpisodeID)) {
-        OSReport("Ex stage\n");
         return state;
     }
 
     // No character select for diving stages
     if (Stage::isDivingStage(next_scene.mAreaID, next_scene.mEpisodeID)) {
-        OSReport("Diving stage\n");
+        return state;
+    }
+
+    // Intro stage
+    if (next_scene.mAreaID == SME::STAGE_PEACH_CASTLE && next_scene.mEpisodeID == 1) {
+        return state;
+    }
+
+    if (next_scene.mAreaID == TGameSequence::AREA_AIRPORT) {
         return state;
     }
 
@@ -523,13 +530,13 @@ static int flagCharacterSelectMenu(u8 state) {
         return state;
     }
 
-    sMario = true;
-    sLuigi = true;
-    sPiantissimo = true;
+    sMario       = true;
+    sLuigi       = TFlagManager::smInstance->getBool(0x30018);
+    sPiantissimo = TFlagManager::smInstance->getBool(0x30019);
 
     if (next_scene.mAreaID == SME::STAGE_MARIO_DREAM) {
         if (next_scene.mEpisodeID == 0) {
-            sLuigi = false;
+            sLuigi       = false;
             sPiantissimo = false;
         }
     }

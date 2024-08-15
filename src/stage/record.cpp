@@ -14,7 +14,7 @@ static u16 get_10bit_value(u32 *value, u32 mask, u32 shift) { return (*value & m
 
 static void set_10bit_flag(u32 *array, u8 index, u16 new_value) {
     u8 word_index = (index * 10) / 32;  // Determine which 32-bit word to use
-    u8 bit_offset = (index * 10) % 32;  // Determine the bit offset within the word
+    u8 bit_offset = 32 - ((index * 10) % 32);  // Determine the bit offset within the word
 
     if (bit_offset <= 22) {
         // If the 10-bit value fits within one 32-bit word
@@ -24,16 +24,14 @@ static void set_10bit_flag(u32 *array, u8 index, u16 new_value) {
         u8 remaining_bits = 10 - (32 - bit_offset);
         set_10bit_value(&array[word_index], 0x3FF << bit_offset, bit_offset,
                         new_value << remaining_bits);
-        set_10bit_value(&array[word_index + 1], (1 << remaining_bits) - 1, 0,
+        set_10bit_value(&array[word_index - 1], (1 << remaining_bits) - 1, 0,
                         new_value >> (10 - remaining_bits));
     }
 }
 
 static u16 get_10bit_flag(u32 *array, u8 index) {
     u8 word_index = (index * 10) / 32;  // Determine which 32-bit word to use
-    u8 bit_offset = (index * 10) % 32;  // Determine the bit offset within the word
-
-    OSReport("Word index: %d, Bit Offset: %d\n", word_index, bit_offset);
+    u8 bit_offset = 32 - (index * 10) % 32;  // Determine the bit offset within the word
 
     if (bit_offset <= 22) {
         // If the 10-bit value fits within one 32-bit word
@@ -43,7 +41,7 @@ static u16 get_10bit_flag(u32 *array, u8 index) {
         u8 remaining_bits = 10 - (32 - bit_offset);
         u16 lower_part =
             get_10bit_value(&array[word_index], 0x3FF << bit_offset, bit_offset) >> remaining_bits;
-        u16 upper_part = get_10bit_value(&array[word_index + 1], (1 << remaining_bits) - 1, 0);
+        u16 upper_part = get_10bit_value(&array[word_index - 1], (1 << remaining_bits) - 1, 0);
         return (upper_part << (10 - remaining_bits)) | lower_part;
     }
 }
@@ -54,7 +52,7 @@ static void flagManager2XSetter(TFlagManager *manager, u32 flags, s32 val) {
         *(u32 *)((u8 *)manager + 0x78 + (flags << 2)) = val;
     } else {
         if (flags > 0x14) {
-            flags -= 1;
+            flags -= 3;
         }
         flags -= 0xE;
         return set_10bit_flag((u32 *)((u8 *)manager + 0x78) + 0xE, flags, val);
@@ -68,7 +66,7 @@ static u32 flagManager2XGetter(TFlagManager *manager, u32 flags) {
         return *(u32 *)((u8 *)manager + 0x78 + (flags << 2));
     } else {
         if (flags > 0x14) {
-            flags -= 1;
+            flags -= 3;
         }
         flags -= 0xE;
         return get_10bit_flag((u32 *)((u8 *)manager + 0x78) + 0xE, flags);
@@ -88,20 +86,20 @@ static u32 shineStageCoinRecordIndex(u32 normalStage) {
         return 11;
     case SME::STAGE_LACRIMA:
         return 12;
-    case SME::STAGE_MARIO_DREAM:
+    case (SME::STAGE_MARIO_DREAM - 2):
         return 13;
-    case SME::STAGE_LANCIA:
-        return 14;
-    case SME::STAGE_VAPORWAVE:
-        return 15;
-    case SME::STAGE_YOSHI_VILLAGE:
+    case (SME::STAGE_LANCIA - 2):
         return 16;
-    case SME::STAGE_RED_LILY:
+    case (SME::STAGE_VAPORWAVE - 2):
+        return 17;
+    case (SME::STAGE_YOSHI_VILLAGE - 2):
         return 18;
-    case SME::STAGE_PEACH_BEACH:
+    case (SME::STAGE_RED_LILY - 2):
         return 19;
-    case SME::STAGE_SPETTRO_CASINO:
+    case (SME::STAGE_PEACH_BEACH - 2):
         return 20;
+    case (SME::STAGE_SPETTRO_CASINO - 2):
+        return 21;
     default:
         return stage;
     }
@@ -139,7 +137,7 @@ static void setBlueCoinFlagOverride(TFlagManager *manager, u8 normalStage, u8 co
         u32 flagID = shineStage * 20 + coinID + 0x1023A;
         if (!manager->getBool(flagID)) {
             manager->incFlag(0x40001, 1);
-            manager->setBool(flagID, true);
+            manager->setBool(true, flagID);
         }
         return;
     }
@@ -155,7 +153,7 @@ static void setBlueCoinFlagOverride(TFlagManager *manager, u8 normalStage, u8 co
     u32 flagID = (shineStage - 1) * 50 + coinID + 0x10078;
     if (!manager->getBool(flagID)) {
         manager->incFlag(0x40001, 1);
-        manager->setBool(flagID, true);
+        manager->setBool(true, flagID);
     }
 }
 SMS_PATCH_B(SMS_PORT_REGION(0x802944CC, 0, 0, 0), setBlueCoinFlagOverride);

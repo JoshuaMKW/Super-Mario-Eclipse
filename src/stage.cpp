@@ -111,6 +111,9 @@ BETTER_SMS_FOR_CALLBACK void initializeStageInfo(TApplication *app) {
             Stage::registerNormalStage(SME::STAGE_LIGHTHOUSE_BOSS, info->getShineStageID());
             Stage::registerExStage(SME::STAGE_LIGHTHOUSE_EX, info->getShineStageID(), 133);
 
+            SME::setSpawnTransRot(SME::STAGE_LIGHTHOUSE, -1, TVec3f(-1148.0f, 5506.0f, -1453.0f),
+                                  TVec3f(0.0f, 0.0f, 0.0f), SME::STAGE_LIGHTHOUSE_BOSS, 1);
+
             SME::setSpawnTransRot(SME::STAGE_LIGHTHOUSE, -1, TVec3f(13620.0f, -750.0f, 3840.0f),
                                   TVec3f(0.0f, -90.0f, 0.0f), TGameSequence::AREA_RICCO, -1);
 
@@ -373,7 +376,7 @@ BETTER_SMS_FOR_CALLBACK void initializeStageInfo(TApplication *app) {
             info->addScenario(204, 186);  // Giovane Creek
             info->addScenario(205, 187);  // Marea Reef
             info->addScenario(206, 188);  // Ricco Station
-            info->addScenario(-1, 189);   // Train Car
+            info->addScenario(220, 189);  // Train Car
             Stage::registerShineStage(info);
             Stage::registerNormalStage(SME::STAGE_ISLE_DELFINO, info->getShineStageID());
 

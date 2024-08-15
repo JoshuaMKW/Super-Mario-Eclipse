@@ -175,8 +175,12 @@ SMS_PATCH_BL(SMS_PORT_REGION(0x80286F6C, 0, 0, 0), r31PlayerVoices);
 SMS_PATCH_BL(SMS_PORT_REGION(0x80286FC4, 0, 0, 0), r31PlayerVoices);
 
 u32 omitGenericPlayerVoices(MSound *sound, u32 soundID, s16 health, u8 status) {
-    if (SME::TGlobals::getCharacterIDFromPlayer(gpMarioAddress) != SME::CharacterID::MARIO) {
-        return 0xFFFFFFFF;
+    SME::CharacterID player_id = SME::TGlobals::getCharacterIDFromPlayer(gpMarioAddress);
+    if (player_id == SME::CharacterID::PIANTISSIMO) {
+        if (soundID != MSD_SE_MA_VO_JUMP_BIG_0) {
+            return 0xFFFFFFFF;
+        }
+        soundID = MSD_SE_NPC_VA_MTMAN_JUMP2;  // Shine Get
     }
     return sound->startMarioVoice(soundID, health, status);
 }

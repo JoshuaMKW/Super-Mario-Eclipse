@@ -555,4 +555,17 @@ static int flagCharacterSelectMenu() {
 SMS_PATCH_BL(SMS_PORT_REGION(0x80176160, 0, 0, 0), flagCharacterSelectMenu);
 #endif
 
+BETTER_SMS_FOR_CALLBACK void checkForCharacterUnlocks(TMarDirector *director) {
+    // Luigi
+    if (TFlagManager::smInstance->getBool(0x10077)) {
+        TFlagManager::smInstance->setBool(true, 0x30018);
+    }
+
+    // Piantissimo
+    if (TFlagManager::smInstance->getBool(0x10018) && TFlagManager::smInstance->getBool(0x10041) &&
+        TFlagManager::smInstance->getBool(0x10036) && TFlagManager::smInstance->getShineFlag(135)) {
+        TFlagManager::smInstance->setBool(true, 0x30019);
+    }
+}
+
 SMS_WRITE_32(SMS_PORT_REGION(0x8017606C, 0, 0, 0), 0x38000000);

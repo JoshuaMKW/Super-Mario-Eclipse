@@ -479,6 +479,12 @@ static int flagCharacterSelectMenu(u8 state) {
         return state;
     }
 
+    bool has_luigi = TFlagManager::smInstance->getBool(0x30018);
+    bool has_piantissimo = TFlagManager::smInstance->getBool(0x30019);
+    if (!has_luigi && !has_piantissimo) {
+        return state;
+    }
+
     TGameSequence &next_scene = gpApplication.mNextScene;
     TGameSequence &cur_scene  = gpApplication.mCurrentScene;
     TGameSequence &prev_scene = gpApplication.mPrevScene;
@@ -531,8 +537,8 @@ static int flagCharacterSelectMenu(u8 state) {
     }
 
     sMario       = true;
-    sLuigi       = TFlagManager::smInstance->getBool(0x30018);
-    sPiantissimo = TFlagManager::smInstance->getBool(0x30019);
+    sLuigi       = has_luigi;
+    sPiantissimo = has_piantissimo;
 
     if (next_scene.mAreaID == SME::STAGE_MARIO_DREAM) {
         if (next_scene.mEpisodeID == 0) {

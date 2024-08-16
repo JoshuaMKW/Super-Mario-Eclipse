@@ -87,19 +87,19 @@ static u32 shineStageCoinRecordIndex(u32 normalStage) {
     case SME::STAGE_LACRIMA:
         return 12;
     case (SME::STAGE_MARIO_DREAM - 2):
-        return 13;
-    case (SME::STAGE_LANCIA - 2):
         return 16;
-    case (SME::STAGE_VAPORWAVE - 2):
+    case (SME::STAGE_LANCIA - 2):
         return 17;
-    case (SME::STAGE_YOSHI_VILLAGE - 2):
+    case (SME::STAGE_VAPORWAVE - 2):
         return 18;
-    case (SME::STAGE_RED_LILY - 2):
+    case (SME::STAGE_YOSHI_VILLAGE - 2):
         return 19;
-    case (SME::STAGE_PEACH_BEACH - 2):
+    case (SME::STAGE_RED_LILY - 2):
         return 20;
-    case (SME::STAGE_SPETTRO_CASINO - 2):
+    case (SME::STAGE_PEACH_BEACH - 2):
         return 21;
+    case (SME::STAGE_SPETTRO_CASINO - 2):
+        return 22;
     default:
         return stage;
     }

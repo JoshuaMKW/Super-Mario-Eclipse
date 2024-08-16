@@ -1,6 +1,7 @@
 #include <JSystem/JDrama/JDRNameRef.hxx>
 #include <JSystem/JParticle/JPAResourceManager.hxx>
 
+#include <SMS/GC2D/SelectMenu.hxx>
 #include <SMS/MSound/MSound.hxx>
 #include <SMS/MSound/MSoundSESystem.hxx>
 #include <SMS/Manager/FlagManager.hxx>
@@ -12,6 +13,21 @@
 
 #include "settings.hxx"
 #include "stage.hxx"
+
+static void setStageAfterShineSelect(TSelectMenu* menu) {
+    gpApplication.mNextScene.mEpisodeID = menu->mEpisodeID;
+
+    switch (gpApplication.mPrevScene.mAreaID) {
+    case TGameSequence::AREA_SIRENA: {
+        gpApplication.mNextScene.mAreaID = TGameSequence::AREA_PINNAPARCO;
+        break;
+    }
+    default:
+        break;
+    }
+}
+SMS_PATCH_BL(0x80176038, setStageAfterShineSelect);
+SMS_WRITE_32(0x80176044, 0x60000000);
 
 #pragma region CruiserDelfino
 

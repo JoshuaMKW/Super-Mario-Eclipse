@@ -347,4 +347,4 @@ void unlockSettings(TMarDirector *director) {
 }
 
 void forceYoshiUnlock(TMarDirector *director) { TFlagManager::smInstance->setBool(true, 0x1038F); }
-SMS_WRITE_32(0x801bbfac, 0x38600001);
+// SMS_WRITE_32(0x801bbfac, 0x38600001);

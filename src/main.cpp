@@ -86,6 +86,10 @@ extern void setTutorialVisited(TApplication *director);
 extern void resetCruiserUnlocked(TMarDirector *director);
 extern void checkForCruiserUnlocked(TMarDirector *director);
 
+extern void initializeShineBlueTracker(TMarDirector *director);
+extern void updateShineBlueTracker(TMarDirector *director);
+extern void renderShineBlueTracker(TMarDirector *director, const J2DOrthoGraph *graph);
+
 // SETTINGS
 extern void checkForCompletionAwards(TApplication *);
 
@@ -151,8 +155,12 @@ static void initModule() {
     Stage::addInitCallback(initToDefault);
     Stage::addUpdateCallback(manageShineDarkness);
 
+    Stage::addInitCallback(initializeShineBlueTracker);
+    Stage::addUpdateCallback(updateShineBlueTracker);
+    Stage::addDraw2DCallback(renderShineBlueTracker);
+
     // Demo
-    Stage::addInitCallback(forceYoshiUnlock);
+    // Stage::addInitCallback(forceYoshiUnlock);
     Stage::addUpdateCallback(unlockSettings);
     Game::addBootCallback(lockModuleSettings);
 

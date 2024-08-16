@@ -114,13 +114,13 @@ BETTER_SMS_FOR_CALLBACK void initializeStageInfo(TApplication *app) {
             SME::setSpawnTransRot(SME::STAGE_LIGHTHOUSE, -1, TVec3f(-1148.0f, 5506.0f, -1453.0f),
                                   TVec3f(0.0f, 0.0f, 0.0f), SME::STAGE_LIGHTHOUSE_BOSS, 1);
 
-            SME::setSpawnTransRot(SME::STAGE_LIGHTHOUSE, -1, TVec3f(13620.0f, -750.0f, 3840.0f),
+            SME::setSpawnTransRot(SME::STAGE_LIGHTHOUSE, -1, TVec3f(13620.0f, 750.0f, 3840.0f),
                                   TVec3f(0.0f, -90.0f, 0.0f), TGameSequence::AREA_RICCO, -1);
 
-            SME::setSpawnTransRot(SME::STAGE_LIGHTHOUSE, -1, TVec3f(-10750.0f, -500.0f, 5400.0f),
+            SME::setSpawnTransRot(SME::STAGE_LIGHTHOUSE, -1, TVec3f(-10750.0f, 350.0f, 5400.0f),
                                   TVec3f(0.0f, 90.0f, 0.0f), TGameSequence::AREA_PINNABEACH, -1);
 
-            SME::setSpawnTransRot(SME::STAGE_LIGHTHOUSE, -1, TVec3f(-270.0f, -1080.0f, -16800.0f),
+            SME::setSpawnTransRot(SME::STAGE_LIGHTHOUSE, -1, TVec3f(-270.0f, -80.0f, -16800.0f),
                                   TVec3f(0.0f, 0.0f, 0.0f), SME::STAGE_ISLE_DELFINO, 6);
         }
 
@@ -177,7 +177,7 @@ BETTER_SMS_FOR_CALLBACK void initializeStageInfo(TApplication *app) {
 
             SME::setSpawnTransRot(SME::STAGE_LACRIMA, -1, TVec3f(-9000.0f, 270.0f, 4400.0f),
                                   TVec3f(0.0f, 145.0f, 0.0f), SME::STAGE_ISLE_DELFINO,
-                                  4);  // Sonnolento Grove
+                                  3);  // Sonnolento Grove
 
             SME::setSpawnTransRot(SME::STAGE_LACRIMA_INSIDE, -1, TVec3f(-3300.0f, 235.0f, 9200.0f),
                                   TVec3f(0.0f, -160.0f, 0.0f), SME::STAGE_LACRIMA_BACKHOUSE, -1);
@@ -532,8 +532,8 @@ BETTER_SMS_FOR_CALLBACK void initializeStageInfo(TApplication *app) {
             // Pinna Beach
             {
                 SME::setSpawnTransRot(TGameSequence::AREA_PINNABEACH, -1,
-                                      TVec3f(-3500.0f, 120.0f, 12670.0f),
-                                      TVec3f(0.0f, 115.0f, 0.0f), SME::STAGE_LIGHTHOUSE, -1);
+                                      TVec3f(15500.0f, -80.0f, 8300.0f),
+                                      TVec3f(0.0f, -115.0f, 0.0f), SME::STAGE_LIGHTHOUSE, -1);
 
                 SME::setSpawnTransRot(TGameSequence::AREA_PINNABEACH, -1,
                                       TVec3f(-3500.0f, 400.0f, 2800.0f), TVec3f(0.0f, 0.0f, 0.0f),
@@ -654,6 +654,10 @@ BETTER_SMS_FOR_CALLBACK void warpContextUpdater(TMario *player, bool isMario) {
 }
 
 BETTER_SMS_FOR_CALLBACK void setPlayerStartPos(TMario *player) {
+    if (player->_388 != 0) {
+        return;
+    }
+
     TVec3f trans, rot;
     if (SME::getSpawnTransRot(&gpApplication, trans, rot)) {
         player->mTranslation = trans;
@@ -671,8 +675,39 @@ BETTER_SMS_FOR_CALLBACK void setPlayerStartPos(TMario *player) {
     }
 }
 
-void SME_extendedCorrectFlags(TFlagManager *manager) {
+static void SME_extendedCorrectFlags(TFlagManager *manager) {
     manager->correctFlag();
+    manager->setFlag(0x20012, 3080);  // Lighthouse Island
     manager->setFlag(0x20013, 2670);  // Red Lily City
 }
 SMS_PATCH_BL(0x802954f4, SME_extendedCorrectFlags);
+
+static size_t accumulateBlueCoinShinesForCalc() {
+    size_t count = 0;
+
+    {
+        size_t i = 0x46;
+        do {
+            count += TFlagManager::smInstance->getShineFlag(i);
+        } while (++i < 0x56);
+    }
+
+    {
+        size_t i = 0x6C;
+        do {
+            count += TFlagManager::smInstance->getShineFlag(i);
+        } while (++i < 0x74);
+    }
+
+    {
+        size_t i = 221;
+        do {
+            count += TFlagManager::smInstance->getShineFlag(i);
+        } while (++i < 239);
+    }
+
+    return count;
+}
+SMS_PATCH_BL(0x80147A80, accumulateBlueCoinShinesForCalc);
+SMS_WRITE_32(0x80147A84, 0x7C7D1B78);
+SMS_WRITE_32(0x80147A88, 0x4800004C);

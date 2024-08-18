@@ -48,7 +48,7 @@ extern void adjustYoshiTongue(TMario *player, bool isMario);
 extern void initializeStageInfo(TApplication *app);
 extern void resetForExStage(TMarDirector *director);
 extern void forcePlayerZOn2D(TMario *player, bool isMario);
-extern void resetCoinsOnUniqueStage(TMarDirector *director);
+extern void resetCoinsAndWarpOnUniqueStage(TMarDirector *director);
 extern void updateWarpStatesForCruiserCabin(TMarDirector *director);
 extern void warpContextUpdater(TMario *player, bool isMario);
 extern void checkForCharacterUnlocks(TMarDirector *director);
@@ -70,6 +70,10 @@ extern void resetFixedCameraOnLoad(TMarDirector *director);
 
 // HUD
 extern void updatePlayerHUD(TMarDirector *, const J2DOrthoGraph *);
+extern void resetBalloonMessagePool(TMarDirector *director);
+extern void checkBalloonMessagePool(TMarDirector *director);
+extern void fluddMessageSubsystemReset(TMarDirector *director);
+extern void fluddMessageSubsystem(TMarDirector *director);
 
 // GAME BEHAVIOR
 extern void lockModuleSettings(TApplication *app);
@@ -110,6 +114,9 @@ extern void evSetLiveActorFlag(TSpcInterp *spc, u32 argc);
 extern void evFadeScreen(TSpcInterp *spc, u32 argc);
 extern void evIsFadingScreen(TSpcInterp *spc, u32 argc);
 extern void evCheckBrokenWatermelon(TSpcInterp *spc, u32 argc);
+extern void evAppearShineFromNPCLocal(TSpcInterp *spc, u32 argc);
+extern void evAppearShineFromNPCLocalWithoutDemo(TSpcInterp *spc, u32 argc);
+extern void evAppearFluddTip(TSpcInterp *spc, u32 argc);
 
 // Objects
 extern void cannonBallCollideInteractor(THitActor *self, TMario *player);
@@ -164,7 +171,7 @@ static void initModule() {
     Stage::addUpdateCallback(unlockSettings);
     Game::addBootCallback(lockModuleSettings);
 
-    Stage::addInitCallback(resetCoinsOnUniqueStage);
+    Stage::addInitCallback(resetCoinsAndWarpOnUniqueStage);
     Stage::addInitCallback(resetForExStage);
     Stage::addInitCallback(resetCruiserUnlocked);
     Stage::addUpdateCallback(checkForCharacterUnlocks);
@@ -189,10 +196,18 @@ static void initModule() {
     Spc::registerBuiltinFunction("fadeScreen", evFadeScreen);
     Spc::registerBuiltinFunction("isFadingScreen", evIsFadingScreen);
     Spc::registerBuiltinFunction("checkBrokenWatermelon", evCheckBrokenWatermelon);
+    Spc::registerBuiltinFunction("appearShineFromNPCLocal", evAppearShineFromNPCLocal);
+    Spc::registerBuiltinFunction("appearShineFromNPCLocalWithoutDemo", evAppearShineFromNPCLocalWithoutDemo);
+    Spc::registerBuiltinFunction("appearFluddTip", evAppearFluddTip);
 
     Stage::addInitCallback(initCharacterArchives);
     Stage::addDraw2DCallback(updatePlayerHUD);
     Stage::addExitCallback(setTutorialVisited);
+
+    Stage::addInitCallback(resetBalloonMessagePool);
+    Stage::addUpdateCallback(checkBalloonMessagePool);
+    Stage::addInitCallback(fluddMessageSubsystemReset);
+    Stage::addUpdateCallback(fluddMessageSubsystem);
 
     Player::addInitCallback(initEclipseData);
     Player::addLoadAfterCallback(initializeWaterBalloons);

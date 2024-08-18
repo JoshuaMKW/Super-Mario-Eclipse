@@ -42,6 +42,8 @@
 
 constexpr size_t PlayerMax = 1;
 
+static SME::CharacterID s_player_id = SME::CharacterID::MARIO;
+
 static JKRMemArchive *sResourceArchive = nullptr;
 
 CharacterSelectDirector::~CharacterSelectDirector() { gpMSound->exitStage(); }
@@ -330,9 +332,17 @@ void CharacterSelectDirector::initializeLayout() {
 
     for (int i = 0; i < PlayerMax; ++i) {
         SelectionInfo s_info = SelectionInfo();
-        s_info.mIndex        = 0;
         s_info.mIsSelected   = false;
         s_info.mController   = gpApplication.mGamePads[i];
+
+        s_info.mIndex = (u8)SME::TGlobals::sCharacterIDList[i];
+        if (!mIsLuigi && s_info.mIndex == (u8)SME::CharacterID::LUIGI) {
+            s_info.mIndex = 0;
+        }
+
+        if (!mIsPiantissimo && s_info.mIndex == (u8)SME::CharacterID::PIANTISSIMO) {
+            s_info.mIndex = 0;
+        }
 
         CharacterInfo &info = mSelectScreen->mCharacterInfos.at(i);
 
@@ -469,9 +479,6 @@ BETTER_SMS_FOR_CALLBACK bool directCharacterSelectMenu(TApplication *app) {
 
 #if 1
 static int flagCharacterSelectMenu(u8 state) {
-    /*if (gpApplication.mContext != TApplication::CONTEXT_DIRECT_STAGE)
-        return state;*/
-
     if (state != TApplication::CONTEXT_DIRECT_STAGE)
         return state;
 
@@ -479,7 +486,7 @@ static int flagCharacterSelectMenu(u8 state) {
         return state;
     }
 
-    bool has_luigi = TFlagManager::smInstance->getBool(0x30018);
+    bool has_luigi       = TFlagManager::smInstance->getBool(0x30018);
     bool has_piantissimo = TFlagManager::smInstance->getBool(0x30019);
     if (!has_luigi && !has_piantissimo) {
         return state;
@@ -488,6 +495,10 @@ static int flagCharacterSelectMenu(u8 state) {
     TGameSequence &next_scene = gpApplication.mNextScene;
     TGameSequence &cur_scene  = gpApplication.mCurrentScene;
     TGameSequence &prev_scene = gpApplication.mPrevScene;
+
+    sMario       = true;
+    sLuigi       = has_luigi;
+    sPiantissimo = has_piantissimo;
 
     // No character select for secret courses
     if (Stage::isExStage(next_scene.mAreaID, next_scene.mEpisodeID)) {
@@ -518,7 +529,12 @@ static int flagCharacterSelectMenu(u8 state) {
 
     // No character select for Delfino Plaza
     if (next_scene.mAreaID == TGameSequence::AREA_DOLPIC) {
-        return state;
+        if (next_scene.mEpisodeID == 0 || next_scene.mEpisodeID == 1) {
+            sLuigi       = false;
+            sPiantissimo = false;
+        } else {
+            return state;
+        }
     }
 
     // No character select for options menu
@@ -536,13 +552,31 @@ static int flagCharacterSelectMenu(u8 state) {
         return state;
     }
 
-    sMario       = true;
-    sLuigi       = has_luigi;
-    sPiantissimo = has_piantissimo;
+    // Rollercoaster Missions
+    if (next_scene.mAreaID == TGameSequence::AREA_PINNABEACH) {
+        if (next_scene.mEpisodeID == 0 || next_scene.mEpisodeID == 7) {
+            sPiantissimo = false;
+        }
+    }
 
-    if (next_scene.mAreaID == SME::STAGE_MARIO_DREAM) {
+    // Minefield Mayhem
+    if (next_scene.mAreaID == SME::STAGE_WARSHIP) {
+        if (next_scene.mEpisodeID == 0) {
+            sPiantissimo = false;
+        }
+    }
+
+    // Mario's Nightmare
+    else if (next_scene.mAreaID == SME::STAGE_MARIO_DREAM) {
         if (next_scene.mEpisodeID == 0) {
             sLuigi       = false;
+            sPiantissimo = false;
+        }
+    }
+
+    // Peach Beach Fludd Missions
+    else if (next_scene.mAreaID == SME::STAGE_PEACH_BEACH) {
+        if (next_scene.mEpisodeID == 1 || next_scene.mEpisodeID == 2) {
             sPiantissimo = false;
         }
     }

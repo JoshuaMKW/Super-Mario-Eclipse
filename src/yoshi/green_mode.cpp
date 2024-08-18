@@ -132,6 +132,22 @@ SMS_WRITE_32(SMS_PORT_REGION(0x8027007C, 0x80267E08, 0, 0), 0x7C7E1B78);
 SMS_WRITE_32(SMS_PORT_REGION(0x80270080, 0x80267E0C, 0, 0), 0x60000000);
 SMS_WRITE_32(SMS_PORT_REGION(0x80270084, 0x80267E10, 0, 0), 0x60000000);
 
+static u32 isYoshiShineGet(TMario *player) {
+    if (player->mState == TMario::STATE_SLAM) {
+        return player->mState;
+    }
+    
+    if (player->mState == TMario::STATE_SHINE_C) {
+        if (player->mTranslation.y > player->mFloorBelow + 4.0f) {
+            return -1;
+        }
+    }
+
+    return player->mState;
+}
+SMS_PATCH_BL(SMS_PORT_REGION(0x80270040, 0x80267DCC, 0, 0), isYoshiShineGet);
+//SMS_WRITE_32(SMS_PORT_REGION(0x80270044, 0x80267DD0, 0, 0), 0x7C601B78);
+
 // 0x8026FE84 NEEDS ADDI R4, R3, 0
 static u32 isYoshiValidWaterFlutter(s32 anmIdx, u32 unk1, TMario *player) {
     if (Yoshi::isGreenYoshiAscendingWater(player))
@@ -155,6 +171,7 @@ static void fixYoshiJuiceDecrement() {
         yoshi->mCurJuice -= player->mFludd->mEmitInfo->mNum.get();
 }
 SMS_PATCH_BL(SMS_PORT_REGION(0x8026E810, 0x8026659C, 0, 0), fixYoshiJuiceDecrement);
+SMS_WRITE_32(SMS_PORT_REGION(0x80270B3C, 0, 0, 0), 0x38801000);
 
 BETTER_SMS_FOR_CALLBACK void adjustYoshiTongue(TMario *player, bool isMario) {
     if (!player->mYoshi)

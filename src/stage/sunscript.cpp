@@ -4,12 +4,16 @@
 
 #include <JSystem/JDrama/JDRNameRef.hxx>
 
+#include <SMS/MoveBG/Shine.hxx>
 #include <SMS/System/MarNameRefGen.hxx>
 #include <SMS/Enemy/Conductor.hxx>
+#include <SMS/Manager/ItemManager.hxx>
 #include <SMS/NPC/NpcBase.hxx>
 #include <SMS/raw_fn.hxx>
 
 #include <BetterSMS/sunscript.hxx>
+
+#include "message.hxx"
 
 using namespace BetterSMS;
 
@@ -51,6 +55,8 @@ void evNpcSetGraphWeb(TSpcInterp *spc, u32 argc) {
 
     TBaseNPC *npc             = (TBaseNPC *)arg_slice.mValue;
     npc->mGraphTracer->mGraph = graph;
+
+    Spc::Stack::pushItem(spc, 0, Spc::ValueType::INT);
 }
 
 void evNpcStepOn(TSpcInterp *spc, u32 argc) {
@@ -91,6 +97,8 @@ void evNpcStepOn(TSpcInterp *spc, u32 argc) {
 
     npc->mSpineBase->setNerve((const TNerveBase<TLiveActor> *)0x8040DFD4);  // TNerveNPCGraphWander
     npcStepIn__8TBaseNPCFv(npc);
+
+    Spc::Stack::pushItem(spc, 0, Spc::ValueType::INT);
 }
 
 void evNpcWaitOn(TSpcInterp *spc, u32 argc) {
@@ -112,6 +120,8 @@ void evNpcWaitOn(TSpcInterp *spc, u32 argc) {
     npc->mSpineBase->setNerve(
         (const TNerveBase<TLiveActor> *)0x8040DFF4);  // TNerveNPCWaitMarioApproach
     npcWaitIn__8TBaseNPCFv(npc);
+
+    Spc::Stack::pushItem(spc, 0, Spc::ValueType::INT);
 }
 
 void evNpcMadOn(TSpcInterp *spc, u32 argc) {
@@ -135,6 +145,8 @@ void evNpcMadOn(TSpcInterp *spc, u32 argc) {
     npc->mSpineBase->setNerve((const TNerveBase<TLiveActor> *)0x8040E03C);  // TNerveNPCMad
     npc->mSpineBase->pushNerve(nerve);                                      // Old current
     npcMadIn__8TBaseNPCFv(npc);
+
+    Spc::Stack::pushItem(spc, 0, Spc::ValueType::INT);
 }
 
 void evIsInSightOfActor(TSpcInterp *spc, u32 argc) {
@@ -220,6 +232,8 @@ void evSetLiveActorFlag(TSpcInterp *spc, u32 argc) {
     TLiveActor *src_actor        = (TLiveActor *)arg_slice.mValue;
     src_actor->mStateFlags.asU32 = set ? (src_actor->mStateFlags.asU32 | flags)
                                        : (src_actor->mStateFlags.asU32 & ~flags);
+
+    Spc::Stack::pushItem(spc, 0, Spc::ValueType::INT);
 }
 
 void evCheckBrokenWatermelon(TSpcInterp *spc, u32 argc) {
@@ -270,4 +284,125 @@ void evCheckBrokenWatermelon(TSpcInterp *spc, u32 argc) {
     }
 
     Spc::Stack::pushItem(spc, total_broken, Spc::ValueType::INT);
+}
+
+void evAppearShineFromNPCLocal(TSpcInterp* spc, u32 argc) {
+    spc->verifyArgNum(6, &argc);
+
+    f32 z = Spc::Stack::popItem(spc).getDataFloat();
+    f32 y = Spc::Stack::popItem(spc).getDataFloat();
+    f32 x = Spc::Stack::popItem(spc).getDataFloat();
+
+    TSpcSlice arg_slice = Spc::Stack::popItem(spc);
+    if (arg_slice.mType != Spc::ValueType::STRING) {
+        SpcTrace("Expected integer argument 2 for evAppearShineFromNPCLocal!\n");
+        return;
+    }
+
+    const char *camera_key = (const char *)arg_slice.mValue;
+
+    arg_slice              = Spc::Stack::popItem(spc);
+    if (arg_slice.mType != Spc::ValueType::STRING) {
+        SpcTrace("Expected integer argument 1 for evAppearShineFromNPCLocal!\n");
+        return;
+    }
+
+    TBaseNPC *npc = nullptr;
+    const char *npc_key = (const char *)arg_slice.mValue;
+    {
+        auto *nameRef = TMarNameRefGen::getInstance()->getRootNameRef();
+        u16 keyCode   = JDrama::TNameRef::calcKeyCode(npc_key);
+        if (JDrama::TNameRef *p = nameRef->searchF(keyCode, npc_key)) {
+            npc           = reinterpret_cast<TBaseNPC *>(p);
+        }
+    }
+
+    arg_slice = Spc::Stack::popItem(spc);
+    if (arg_slice.mType != Spc::ValueType::STRING) {
+        SpcTrace("Expected integer argument 0 for evAppearShineFromNPCLocal!\n");
+        return;
+    }
+
+    TShine *shine = nullptr;
+    const char *shine_key = (const char *)arg_slice.mValue;
+    {
+        auto *nameRef = TMarNameRefGen::getInstance()->getRootNameRef();
+        u16 keyCode   = JDrama::TNameRef::calcKeyCode(shine_key);
+        if (JDrama::TNameRef *p = nameRef->searchF(keyCode, shine_key)) {
+            shine           = reinterpret_cast<TShine *>(p);
+        }
+    }
+
+    if (strcmp(camera_key, "") == 0) {
+        shine->mInitialPosition = npc->mTranslation + TVec3f(x, y, z);
+        shine->mTranslation     = npc->mTranslation;
+        shine->appearWithTime(0x4B0, -1, -1, -1);
+    } else {
+        shine->mInitialPosition = npc->mTranslation + TVec3f(x, y, z);
+        gpItemManager->makeShineAppearWithDemo(shine_key, camera_key, npc->mTranslation.x,
+                                               npc->mTranslation.y, npc->mTranslation.z);
+    }
+
+    Spc::Stack::pushItem(spc, 0, Spc::ValueType::INT);
+}
+
+void evAppearShineFromNPCLocalWithoutDemo(TSpcInterp *spc, u32 argc) {
+    spc->verifyArgNum(5, &argc);
+
+    f32 z = Spc::Stack::popItem(spc).getDataFloat();
+    f32 y = Spc::Stack::popItem(spc).getDataFloat();
+    f32 x = Spc::Stack::popItem(spc).getDataFloat();
+
+    TSpcSlice arg_slice = Spc::Stack::popItem(spc);
+    if (arg_slice.mType != Spc::ValueType::STRING) {
+        SpcTrace("Expected integer argument 1 for evAppearShineFromNPCLocalWithoutDemo!\n");
+        return;
+    }
+
+    TBaseNPC *npc       = nullptr;
+    const char *npc_key = (const char *)arg_slice.mValue;
+    {
+        auto *nameRef = TMarNameRefGen::getInstance()->getRootNameRef();
+        u16 keyCode   = JDrama::TNameRef::calcKeyCode(npc_key);
+        if (JDrama::TNameRef *p = nameRef->searchF(keyCode, npc_key)) {
+            npc = reinterpret_cast<TBaseNPC *>(p);
+        }
+    }
+
+    arg_slice = Spc::Stack::popItem(spc);
+    if (arg_slice.mType != Spc::ValueType::STRING) {
+        SpcTrace("Expected integer argument 0 for evAppearShineFromNPCLocalWithoutDemo!\n");
+        return;
+    }
+
+    TShine *shine         = nullptr;
+    const char *shine_key = (const char *)arg_slice.mValue;
+    {
+        auto *nameRef = TMarNameRefGen::getInstance()->getRootNameRef();
+        u16 keyCode   = JDrama::TNameRef::calcKeyCode(shine_key);
+        if (JDrama::TNameRef *p = nameRef->searchF(keyCode, shine_key)) {
+            shine = reinterpret_cast<TShine *>(p);
+        }
+    }
+
+    shine->mTranslation     = npc->mTranslation;
+    shine->mInitialPosition = npc->mTranslation + TVec3f(x, y, z);
+    shine->appearWithTime(0x3B0, -1, -1, -1);
+    shine->mInitialPosition = npc->mTranslation + TVec3f(x, y, z);
+
+    Spc::Stack::pushItem(spc, 0, Spc::ValueType::INT);
+}
+
+static AtomBalloonMessageViewer s_msg_spc(-1, 0);
+
+void evAppearFluddTip(TSpcInterp* spc, u32 argc) {
+    spc->verifyArgNum(2, &argc);
+
+    u32 message_duration = Spc::Stack::popItem(spc).getDataInt();
+    u32 message_id = Spc::Stack::popItem(spc).getDataInt();
+
+    s_msg_spc = AtomBalloonMessageViewer(message_id, message_duration);
+    s_msg_spc.show();
+
+    Spc::Stack::pushItem(spc, 0, Spc::ValueType::INT);
 }

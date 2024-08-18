@@ -11,7 +11,21 @@
 #include "settings.hxx"
 #include "stage.hxx"
 
+extern bool gFromShineSelectForIntro;
+
 static bool isStartCameraPresent(const char *default_path) {
+    bool is_extended_area = gpApplication.mCurrentScene.mAreaID >= SME::STAGE_ERTO &&
+                            gpApplication.mCurrentScene.mAreaID <= SME::STAGE_TUTORIAL;
+    bool is_mare = gpApplication.mCurrentScene.mAreaID == TGameSequence::AREA_MARE;
+
+    if (!gFromShineSelectForIntro && (is_extended_area || is_mare) &&
+        SMS_getShineStage__FUc(gpApplication.mCurrentScene.mAreaID) ==
+            SMS_getShineStage__FUc(gpApplication.mPrevScene.mAreaID)) {
+        return false;
+    }
+
+    gFromShineSelectForIntro = false;
+
     char camera_name[32] = {};
     sprintf(camera_name, "startcamera%d", gpMarDirector->mEpisodeID);
 
@@ -27,15 +41,15 @@ static bool isStartCameraPresent(const char *default_path) {
 SMS_PATCH_BL(0x80298F64, isStartCameraPresent);
 
 static void extendedNextStateInitialize(TMarDirector *director, s8 next_state) {
-    bool is_extended_area = director->mAreaID >= SME::STAGE_ERTO &&
-                            director->mAreaID <= SME::STAGE_TUTORIAL;
+    bool is_extended_area =
+        director->mAreaID >= SME::STAGE_ERTO && director->mAreaID <= SME::STAGE_TUTORIAL;
     if (next_state != TMarDirector::STATE_INTRO_PLAYING || !is_extended_area) {
         director->nextStateInitialize(next_state);
         return;
     }
 
     director->mGamePads[0]->mState._02 = 1;
-    *(u32 *)((u8 *)director + 0x68) = 0;
+    *(u32 *)((u8 *)director + 0x68)    = 0;
 
     char camera_name[32] = {};
     sprintf(camera_name, "startcamera%d", director->mEpisodeID);

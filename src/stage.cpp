@@ -212,6 +212,10 @@ BETTER_SMS_FOR_CALLBACK void initializeStageInfo(TApplication *app) {
             Stage::registerNormalStage(SME::STAGE_CRUISER, info->getShineStageID());
             Stage::registerExStage(SME::STAGE_CRUISER_EX, info->getShineStageID(), 169);
 
+            SME::setSpawnTransRot(SME::STAGE_CRUISER, -1, TVec3f(8800.0f, 6610.0f, 0.0f),
+                                  TVec3f(0.0f, -90.0f, 0.0f), SME::STAGE_CRUISER,
+                                  4);  // Cruiser Cabin
+
             SME::setSpawnTransRot(SME::STAGE_CRUISER, -1, TVec3f(6060.0f, 6610.0f, -960.0f),
                                   TVec3f(0.0f, -60.0f, 0.0f), SME::STAGE_CRUISER_EX,
                                   8);  // Planes and Trains

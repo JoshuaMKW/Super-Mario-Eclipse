@@ -14,12 +14,40 @@
 #include "settings.hxx"
 #include "stage.hxx"
 
+bool gFromShineSelectForIntro = false;
+
 static void setStageAfterShineSelect(TSelectMenu* menu) {
     gpApplication.mNextScene.mEpisodeID = menu->mEpisodeID;
+    gFromShineSelectForIntro = true;
 
     switch (gpApplication.mPrevScene.mAreaID) {
     case TGameSequence::AREA_SIRENA: {
+        if (gpApplication.mCurrentScene.mAreaID != TGameSequence::AREA_PINNABEACH) {
+            break;
+        }
         gpApplication.mNextScene.mAreaID = TGameSequence::AREA_PINNAPARCO;
+        switch (menu->mEpisodeID) {
+        case 0:
+            gpApplication.mNextScene.mEpisodeID = 0;
+            break;
+        case 1:
+        case 2:
+            gpApplication.mNextScene.mEpisodeID = 1;
+            break;
+        case 3:
+        case 4:
+            gpApplication.mNextScene.mEpisodeID = 2;
+            break;
+        case 5:
+            gpApplication.mNextScene.mEpisodeID = 3;
+            break;
+        case 6:
+            gpApplication.mNextScene.mEpisodeID = 4;
+            break;
+        case 7:
+            gpApplication.mNextScene.mEpisodeID = 5;
+            break;
+        }
         break;
     }
     default:
@@ -213,15 +241,18 @@ BETTER_SMS_FOR_CALLBACK void updateWarpStatesForCruiserCabin(TMarDirector *direc
 
 // This allows the redcoinswitch to be immediately pressed in extended stages
 // and for the player to have Fludd, while still being an ex stage.
-static u8 disableExBehaviorForCruiserWorlds() {
-    if (gpApplication.mCurrentScene.mAreaID > 0x54) {
+static u8 disableExBehaviorForCruiserWorlds(u8 areaID) {
+    if (areaID > SME::STAGE_CRUISER_EX && areaID != SME::STAGE_LACRIMA_EX1) {
         return 0xFF;
     }
     return SMS_getShineIDofExStage__FUc(gpApplication.mCurrentScene.mAreaID);
 }
 SMS_PATCH_BL(0x801C08EC, disableExBehaviorForCruiserWorlds);
 SMS_PATCH_BL(0x80298B64, disableExBehaviorForCruiserWorlds);
-SMS_PATCH_BL(0x802A681C, disableExBehaviorForCruiserWorlds);
+
+// Cutscene to replace (ex cutscene: 5)
+static u8 disableExCutsceneForAll(u8 areaID) { return 0xFF; }
+SMS_PATCH_BL(0x802A681C, disableExCutsceneForAll);
 
 #pragma endregion
 
@@ -293,10 +324,14 @@ SMS_PATCH_BL(0x8024DF54, checkRideMovementCond);
 
 #pragma endregion
 
-BETTER_SMS_FOR_CALLBACK void resetCoinsOnUniqueStage(TMarDirector *director) {
+BETTER_SMS_FOR_CALLBACK void resetCoinsAndWarpOnUniqueStage(TMarDirector *director) {
     if (SMS_getShineStage__FUc(gpApplication.mPrevScene.mAreaID) !=
         SMS_getShineStage__FUc(gpApplication.mCurrentScene.mAreaID)) {
         TFlagManager::smInstance->setFlag(0x40002, 0);
+    }
+    TFlagManager::smInstance->setBool(false, 0x50010);
+    if (TFlagManager::smInstance->getFlag(0x40000) >= 239) {
+        TFlagManager::smInstance->setBool(true, 0x50004);
     }
 }
 
@@ -305,3 +340,22 @@ SMS_WRITE_32(SMS_PORT_REGION(0x80297A64, 0, 0, 0), 0x4800000C);
 
 // Disable fludd balloons
 // SMS_WRITE_32(0x8014A1EC, 0x4E800020);
+
+static bool isMareGateVisible() {
+    if (gpMarDirector->mAreaID == TGameSequence::AREA_DOLPIC && gpMarDirector->mEpisodeID == 3) {
+        return true;
+    }
+    return TFlagManager::smInstance->getBool(0x50004);
+}
+SMS_PATCH_BL(0x801E7124, isMareGateVisible);
+
+static u32 getScenarioForLateDolpic() {
+    size_t shine_count = TFlagManager::smInstance->getFlag(0x40000);
+    if (shine_count >= MaxShineCount) {
+        return 3;
+    } else if (shine_count == MaxShineCount - 1) {
+        return 4;
+    }
+    return 2;
+}
+SMS_PATCH_BL(0x8029962C, getScenarioForLateDolpic);

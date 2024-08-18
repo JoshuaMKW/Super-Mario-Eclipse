@@ -42,13 +42,40 @@ SMS_WRITE_32(SMS_PORT_REGION(0x801BC8D0, 0x801B4788, 0, 0), 0x48000134);
 
 #define EGG_CARD_EXCLAIM 11.0f
 
-static void initFreeEggCard(J3DFrameCtrl *frameCtrl) {
-    if (!Stage::getStageConfiguration()->mIsEggFree.get())
-        return;
+static void initFreeEggCard(TEggYoshi *egg) {
+    egg->decideRandomLoveFruit();
 
-    frameCtrl->mCurFrame = EGG_CARD_EXCLAIM;
+    J3DFrameCtrl *frameCtrl = egg->mActor->getFrameCtrl(MActor::BTP);
+
+    if (Stage::getStageConfiguration()->mIsEggFree.get()) {
+        frameCtrl->mCurFrame = EGG_CARD_EXCLAIM;
+        return;
+    }
+
+    if (egg->mState == 14) {
+        return;
+    }
+
+    switch (egg->mWantedFruit) {
+    case 0x40000390:
+        frameCtrl->mCurFrame = 9.0f;
+        break;
+    case 0x40000391:
+        frameCtrl->mCurFrame = 5.0f;
+        break;
+    case 0x40000392:
+        frameCtrl->mCurFrame = 7.0f;
+        break;
+    case 0x40000393:
+        frameCtrl->mCurFrame = 3.0f;
+        break;
+    case 0x40000394:
+        frameCtrl->mCurFrame = 1.0f;
+        break;
+    }
 }
-SMS_PATCH_B(SMS_PORT_REGION(0x801BC128, 0x801B3FE0, 0, 0), initFreeEggCard);
+SMS_PATCH_BL(SMS_PORT_REGION(0x801BC03C, 0, 0, 0), initFreeEggCard);
+SMS_PATCH_B(SMS_PORT_REGION(0x801BC040, 0, 0, 0), 0x801BC114);
 
 static u32 checkFreeEggCardA(J3DFrameCtrl *frameCtrl) {
     if (!Stage::getStageConfiguration()->mIsEggFree.get())

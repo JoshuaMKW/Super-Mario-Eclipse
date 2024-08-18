@@ -17,6 +17,7 @@
 #include <BetterSMS/player.hxx>
 
 #include "enemy/dark_zhine.hxx"
+#include "message.hxx"
 
 extern TVec3f *gpMarioPos;
 
@@ -92,66 +93,13 @@ static bool isMarioVulnerableToShock(TMario *player) {
            SMS_IsMarioTouchGround4cm__Fv(player);
 }
 
-class AtomMessageViewer;
-
-static AtomMessageViewer *s_message_queue[10] = {0};
-static size_t s_message_queue_head            = 0;
-static size_t s_message_queue_size            = 0;
-static s32 s_message_duration                 = -1;
-
-static void pushMessage(AtomMessageViewer *message) {
-    if (s_message_queue_size < 10) {
-        s_message_queue[(s_message_queue_head + s_message_queue_size) % 10] = message;
-        s_message_queue_size++;
-    }
-}
-
-static AtomMessageViewer *peekMessage() {
-    if (s_message_queue_size > 0) {
-        return s_message_queue[s_message_queue_head];
-    }
-    return nullptr;
-}
-
-static void popMessage() {
-    if (s_message_queue_size > 0) {
-        s_message_queue_head = (s_message_queue_head + 1) % 10;
-        s_message_queue_size--;
-    }
-}
-
-class AtomMessageViewer {
-public:
-    AtomMessageViewer() = delete;
-    AtomMessageViewer(u32 messageID, s32 duration)
-        : m_message_id(messageID), m_duration(duration), m_is_used(false) {}
-
-    u32 id() const { return m_message_id; }
-    s32 duration() const { return m_duration; }
-
-    void reset() { m_is_used = false; }
-
-    void show() {
-        if (m_is_used) {
-            return;
-        }
-        pushMessage(this);
-        m_is_used = true;
-    }
-
-private:
-    u32 m_message_id;
-    s32 m_duration;
-    bool m_is_used;
-};
-
-static AtomMessageViewer s_msg_sleep(104, 460);
-static AtomMessageViewer s_msg_pound_a(105, 500);
-static AtomMessageViewer s_msg_pound_b(106, 560);
-static AtomMessageViewer s_msg_pound_c(107, 560);
-static AtomMessageViewer s_msg_attack(108, 520);
-static AtomMessageViewer s_msg_last_point(109, 560);
-static AtomMessageViewer s_msg_finish(110, 580);
+static AtomBalloonMessageViewer s_msg_sleep(104, 120);
+static AtomBalloonMessageViewer s_msg_pound_a(105, 130);
+static AtomBalloonMessageViewer s_msg_pound_b(106, 140);
+static AtomBalloonMessageViewer s_msg_pound_c(107, 140);
+static AtomBalloonMessageViewer s_msg_attack(108, 130);
+static AtomBalloonMessageViewer s_msg_last_point(109, 140);
+static AtomBalloonMessageViewer s_msg_finish(110, 160);
 
 bool TNerveZhineSleep::execute(TSpineBase<TLiveActor> *spine) const {
     TDarkZhine *zhine  = static_cast<TDarkZhine *>(spine->mTarget);
@@ -875,10 +823,6 @@ void TDarkZhine::perform(u32 flags, JDrama::TGraphics *graphics) {
         m_pol_drops[i]->perform(flags, graphics);
     }
 
-    if ((flags & 1)) {
-        checkMessagePool();
-    }
-
     if ((flags & 2)) {
         if (isStunned()) {
             gpTargetArrow->mIsVisible = true;
@@ -914,6 +858,12 @@ bool TDarkZhine::receiveMessage(THitActor *sender, u32 message) {
         if (gpMSound->gateCheck(MSD_SE_BS_GESO_WATER_HIT)) {
             MSoundSE::startSoundActor(MSD_SE_BS_GESO_WATER_HIT, mTranslation, 0, nullptr, 0, 4);
         }
+
+        if (mSpineBase->getLatestNerve() == &s_zhine_nerve_sleep) {
+            mSpineBase->setNerve(&s_zhine_nerve_wake);
+            mSpineBase->pushNerve(&s_zhine_nerve_rise);
+        }
+
         return true;
     }
     TSpineEnemy::receiveMessage(sender, message);
@@ -1181,33 +1131,6 @@ void TDarkZhine::doWorldShake(f32 strength) {
     }
     if (gpMSound->gateCheck(6158)) {
         MSoundSE::startSoundActor(6158, mTranslation, 0, nullptr, 0, 4);
-    }
-}
-
-void TDarkZhine::checkMessagePool() {
-    bool is_console_ready = *(u16 *)((u8 *)gpMarDirector->mGCConsole + 0x3F4) == 0;
-
-    AtomMessageViewer *message = peekMessage();
-    if (!message) {
-        return;
-    }
-
-    if (s_message_duration == -1 && is_console_ready) {
-        s_message_duration = 0;
-        startAppearBalloon__11TGCConsole2FUlb(gpMarDirector->mGCConsole, message->id(), false);
-    } else if (s_message_duration++ == message->duration()) {
-        startDisappearBalloon__11TGCConsole2FUlb(gpMarDirector->mGCConsole, message->id(), true);
-    } else if (is_console_ready) {
-        popMessage();
-
-        AtomMessageViewer *next_message = peekMessage();
-        if (next_message) {
-            s_message_duration = 0;
-            startAppearBalloon__11TGCConsole2FUlb(gpMarDirector->mGCConsole, next_message->id(),
-                                                  false);
-        } else {
-            s_message_duration = -1;
-        }
     }
 }
 

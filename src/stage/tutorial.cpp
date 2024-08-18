@@ -12,6 +12,7 @@
 #include <BetterSMS/objects/generic.hxx>
 
 #include "settings.hxx"
+#include "stage.hxx"
 
 extern Settings::SettingsGroup gSettingsGroup;
 extern TutorialSetting gTutorialSetting;
@@ -84,6 +85,7 @@ static int sPiantaPitPlatformIndex = -1;
 
 static const int *sShouldFluddDialogue          = nullptr;
 static const BoundingBox *sCurrentCheckpointBox = nullptr;
+static int sLastCheckpointBox                   = -1;
 static int sActiveFluddDialogue                 = -1;
 
 static inline bool playerIsGrounded(TMario &player, bool includeWater) {
@@ -139,6 +141,11 @@ static bool processChips(TMario *player, TGenericRailObj *chip, TGenericRailObj 
             return true;
 
         if (PSVECDistance(chip->mTranslation, player->mTranslation) < 120.0f) {
+            if (sActiveFluddDialogue != -1) {
+                startDisappearBalloon__11TGCConsole2FUlb(gpMarDirector->mGCConsole,
+                                                         sActiveFluddDialogue, true);
+                sActiveFluddDialogue = -1;
+            }
             chip->makeObjDead();
             if (door) {
                 door->makeObjAppeared();
@@ -181,18 +188,13 @@ static s32 finalCameraCB(u32 param_1, u32 param_2) {
 static int processCheckpoints(const BoundingBox *boxes, const int *dialogues, int checkpointCount,
                               int currentCheckpoint, bool includeWater, bool playSound,
                               TMario *player, bool isMario) {
-    if (sShouldFluddDialogue && gpMarDirector->mGCConsole->mIsWaterCard) {
+    bool is_console_ready = *(u16 *)((u8 *)gpMarDirector->mGCConsole + 0x3F4) == 0;
+
+    if (sShouldFluddDialogue && gpMarDirector->mGCConsole->mIsWaterCard && is_console_ready) {
         startAppearBalloon__11TGCConsole2FUlb(gpMarDirector->mGCConsole, *sShouldFluddDialogue,
                                               false);
         sActiveFluddDialogue = *sShouldFluddDialogue;
         sShouldFluddDialogue = nullptr;
-    }
-
-    if (sActiveFluddDialogue != -1 && sCurrentCheckpointBox &&
-        !sCurrentCheckpointBox->contains(player->mTranslation, 1.25f)) {
-        startDisappearBalloon__11TGCConsole2FUlb(gpMarDirector->mGCConsole, sActiveFluddDialogue,
-                                                 true);
-        sActiveFluddDialogue = -1;
     }
 
     if (!isMario || currentCheckpoint >= checkpointCount || currentCheckpoint < -1)
@@ -226,14 +228,23 @@ static int processCheckpoints(const BoundingBox *boxes, const int *dialogues, in
     if (playerIsGrounded(*player, includeWater)) {
         for (int i = currentCheckpoint + 1; i < checkpointCount; ++i) {
             if (boxes[i].contains(player->mTranslation)) {
+                if (sActiveFluddDialogue != -1) {
+                    startDisappearBalloon__11TGCConsole2FUlb(gpMarDirector->mGCConsole,
+                                                             sActiveFluddDialogue, true);
+                    sActiveFluddDialogue = -1;
+                }
+
                 sCurrentCheckpointBox = &boxes[i];
                 currentCheckpoint     = i;
+
                 if (player->mFludd) {
                     restoreFluddWater(*player->mFludd);
                 }
+
                 if (dialogues[i] != -1) {
                     sShouldFluddDialogue = &dialogues[i];
                 }
+
                 if (i == checkpointCount - 1) {
                     if (playSound && gpMSound->gateCheck(MSD_SE_BS_UNG_TEATH_FLASH)) {
                         MSoundSE::startSoundSystemSE(MSD_SE_BS_UNG_TEATH_FLASH, 0, nullptr, 0);
@@ -301,7 +312,7 @@ BETTER_SMS_FOR_CALLBACK void resetTutorialIceStageCheckpoints(TMarDirector *dire
 }
 
 BETTER_SMS_FOR_CALLBACK void checkTutorialIceStageCheckpoints(TMario *player, bool isMario) {
-    if (gpMarDirector->mAreaID != 80)
+    if (gpMarDirector->mAreaID != SME::STAGE_TUTORIAL)
         return;
 
     if (sDoorSoundActive && !sTutorialDoors[3]->mActorData->isCurAnmAlreadyEnd(MActor::BCK)) {
@@ -388,7 +399,7 @@ BETTER_SMS_FOR_CALLBACK void resetTutorialCasinoStageCheckpoints(TMarDirector *d
 }
 
 BETTER_SMS_FOR_CALLBACK void checkTutorialCasinoStageCheckpoints(TMario *player, bool isMario) {
-    if (gpMarDirector->mAreaID != 80)
+    if (gpMarDirector->mAreaID != SME::STAGE_TUTORIAL)
         return;
 
     bool isExitActive =
@@ -425,7 +436,7 @@ BETTER_SMS_FOR_CALLBACK void resetTutorialPiantaPitStageCheckpoints(TMarDirector
 }
 
 BETTER_SMS_FOR_CALLBACK void checkTutorialPiantaPitStageCheckpoints(TMario *player, bool isMario) {
-    if (gpMarDirector->mAreaID != 80)
+    if (gpMarDirector->mAreaID != SME::STAGE_TUTORIAL)
         return;
 
     bool isExitActive =
@@ -482,9 +493,9 @@ BETTER_SMS_FOR_CALLBACK void checkTutorialCollisionRespawn(TMario *player, bool 
 
 BETTER_SMS_FOR_CALLBACK void setIntroStage(TApplication *application) {
     if (gTutorialSetting.getBool()) {
-        BetterSMS::Application::setIntroStage(15, 0);
+        BetterSMS::Application::setIntroStage(TGameSequence::AREA_OPTION, 0);
     } else {
-        BetterSMS::Application::setIntroStage(80, 0);
+        BetterSMS::Application::setIntroStage(SME::STAGE_TUTORIAL, 0);
     }
 }
 

@@ -109,7 +109,7 @@ BETTER_SMS_FOR_CALLBACK void initializeShineBlueTracker(TMarDirector *director) 
         s_stage_shines_collected +=
             TFlagManager::smInstance->getFlag(0x10064 + (shineStage - 2));  // 100 coins
         s_stage_shines_max = 11;
-        s_stage_blues_max  = 20;
+        s_stage_blues_max  = 30;
         break;
     }
     case TGameSequence::AREA_MONTE: {
@@ -122,7 +122,7 @@ BETTER_SMS_FOR_CALLBACK void initializeShineBlueTracker(TMarDirector *director) 
         }
         s_stage_shines_collected += TFlagManager::smInstance->getFlag(0x10064 + 8);  // 100 coins
         s_stage_shines_max = 11;
-        s_stage_blues_max  = 20;
+        s_stage_blues_max  = 30;
         break;
     }
     case TGameSequence::AREA_MARE: {
@@ -135,14 +135,14 @@ BETTER_SMS_FOR_CALLBACK void initializeShineBlueTracker(TMarDirector *director) 
         }
         s_stage_shines_collected += TFlagManager::smInstance->getFlag(0x10064 + 7);  // 100 coins
         s_stage_shines_max = 11;
-        s_stage_blues_max  = 20;
+        s_stage_blues_max  = 30;
         break;
     }
     case SME::STAGE_ERTO:
     case SME::STAGE_LIGHTHOUSE:
     case SME::STAGE_WARSHIP:
     case SME::STAGE_LACRIMA: {
-        const u32 shine_id = 120 + (shineStage - SME::STAGE_ERTO);
+        const u32 shine_id = 120 + (shineStage - SME::STAGE_ERTO) * 10;
         for (u32 i = shine_id; i < shine_id + 10; ++i) {
             s_stage_shines_collected += TFlagManager::smInstance->getShineFlag(i);
         }
@@ -184,11 +184,8 @@ BETTER_SMS_FOR_CALLBACK void initializeShineBlueTracker(TMarDirector *director) 
     case (SME::STAGE_MARIO_DREAM - 2):
     case (SME::STAGE_LANCIA - 2):
     case (SME::STAGE_VAPORWAVE - 2):
-    case (SME::STAGE_YOSHI_VILLAGE - 2):
-    case (SME::STAGE_RED_LILY - 2):
-    case (SME::STAGE_PEACH_BEACH - 2):
-    case (SME::STAGE_SPETTRO_CASINO - 2): {
-        const u32 shine_id = 171;
+    case (SME::STAGE_YOSHI_VILLAGE - 2): {
+        const u32 shine_id = 171 + (shineStage - (SME::STAGE_MARIO_DREAM - 2)) * 4;
         for (u32 i = shine_id; i < shine_id + 4; ++i) {
             s_stage_shines_collected += TFlagManager::smInstance->getShineFlag(i);
         }
@@ -196,7 +193,24 @@ BETTER_SMS_FOR_CALLBACK void initializeShineBlueTracker(TMarDirector *director) 
             s_stage_blues_collected += TFlagManager::smInstance->getBlueCoinFlag(shineStage, i);
         }
         s_stage_shines_collected += TFlagManager::smInstance->getShineFlag(
-            213 + (shineStage - SMS_getShineStage__FUc(SME::STAGE_MARIO_DREAM)));  // 100 coins
+            213 +
+            (shineStage - (SMS_getShineStage__FUc(SME::STAGE_MARIO_DREAM) - 2)));  // 100 coins
+        s_stage_shines_max = 5;
+        s_stage_blues_max  = 10;
+        break;
+    }
+    case (SME::STAGE_RED_LILY - 2):
+    case (SME::STAGE_PEACH_BEACH - 2):
+    case (SME::STAGE_SPETTRO_CASINO - 2): {
+        const u32 shine_id = 187 + (shineStage - (SME::STAGE_RED_LILY - 2)) * 4;
+        for (u32 i = shine_id; i < shine_id + 4; ++i) {
+            s_stage_shines_collected += TFlagManager::smInstance->getShineFlag(i);
+        }
+        for (u32 i = 0; i < 10; ++i) {
+            s_stage_blues_collected += TFlagManager::smInstance->getBlueCoinFlag(shineStage, i);
+        }
+        s_stage_shines_collected += TFlagManager::smInstance->getShineFlag(
+            217 + (shineStage - (SMS_getShineStage__FUc(SME::STAGE_RED_LILY) - 2)));  // 100 coins
         s_stage_shines_max = 5;
         s_stage_blues_max  = 10;
         break;
@@ -272,9 +286,9 @@ BETTER_SMS_FOR_CALLBACK void renderShineBlueTracker(TMarDirector *director,
     }
 
     s16 adjust = BetterSMS::getScreenRatioAdjustX();
-    s_shine_text_back->draw(420 + adjust + 1, 55 + 1);
-    s_shine_text_front->draw(420 + adjust, 55);
+    s_shine_text_back->draw(20 - adjust + 1, 270 + 1);
+    s_shine_text_front->draw(20 - adjust, 270);
 
-    s_blue_text_back->draw(420 + adjust + 1, 75 + 1);
-    s_blue_text_front->draw(420 + adjust, 75);
+    s_blue_text_back->draw(20 - adjust + 1, 290 + 1);
+    s_blue_text_front->draw(20 - adjust, 290);
 }

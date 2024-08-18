@@ -216,7 +216,6 @@ public:
     bool doGroundPound(bool attack, bool *illegal_out);
     void doWorldShake(f32 strength);
     void launchPolDrop();
-    void checkMessagePool();
 
     f32 calcNextAngle(f32 turn_power, f32 offset, bool indiscriminate = false);
 

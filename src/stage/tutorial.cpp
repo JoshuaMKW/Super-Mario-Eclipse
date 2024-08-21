@@ -500,6 +500,10 @@ BETTER_SMS_FOR_CALLBACK void setIntroStage(TApplication *application) {
 }
 
 BETTER_SMS_FOR_CALLBACK void setTutorialVisited(TApplication *application) {
+    if (application->mCurrentScene.mAreaID != SME::STAGE_TUTORIAL) {
+        return;
+    }
+
     gTutorialSetting.setBool(true);
 
     s32 cardStatus = Settings::mountCard();

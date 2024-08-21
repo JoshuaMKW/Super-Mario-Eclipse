@@ -11,14 +11,18 @@
 #include <BetterSMS/module.hxx>
 #include <BetterSMS/objects/generic.hxx>
 
+#include "globals.hxx"
 #include "settings.hxx"
 #include "stage.hxx"
 
 bool gFromShineSelectForIntro = false;
 
-static void setStageAfterShineSelect(TSelectMenu* menu) {
+static void setStageAfterShineSelect(TSelectMenu *menu) {
     gpApplication.mNextScene.mEpisodeID = menu->mEpisodeID;
-    gFromShineSelectForIntro = true;
+    gFromShineSelectForIntro            = true;
+
+    // Reset coins
+    TFlagManager::smInstance->setFlag(0x40002, 0);
 
     switch (gpApplication.mPrevScene.mAreaID) {
     case TGameSequence::AREA_SIRENA: {
@@ -171,7 +175,7 @@ BETTER_SMS_FOR_CALLBACK void updateWarpStatesForCruiserCabin(TMarDirector *direc
         }
     }
     {
-        bool is_enabled = shine_count >= 120;
+        bool is_enabled = shine_count >= 100;
 
         u16 key_code = JDrama::TNameRef::calcKeyCode("VaporLight");
         if (JDrama::TNameRef *p = name_ref->searchF(key_code, "VaporLight")) {
@@ -222,7 +226,7 @@ BETTER_SMS_FOR_CALLBACK void updateWarpStatesForCruiserCabin(TMarDirector *direc
     }
 
     {
-        bool is_enabled = shine_count >= 160;
+        bool is_enabled = shine_count >= 180;
 
         u16 key_code = JDrama::TNameRef::calcKeyCode("PeachLight");
         if (JDrama::TNameRef *p = name_ref->searchF(key_code, "PeachLight")) {
@@ -324,14 +328,48 @@ SMS_PATCH_BL(0x8024DF54, checkRideMovementCond);
 
 #pragma endregion
 
-BETTER_SMS_FOR_CALLBACK void resetCoinsAndWarpOnUniqueStage(TMarDirector *director) {
-    if (SMS_getShineStage__FUc(gpApplication.mPrevScene.mAreaID) !=
-        SMS_getShineStage__FUc(gpApplication.mCurrentScene.mAreaID)) {
+BETTER_SMS_FOR_CALLBACK void resetCoinsOnStageExit(TApplication* app) {
+    // Set coins to 0
+    OSReport("Area ID: %d\n", app->mCurrentScene.mAreaID);
+    OSReport("Prev Area ID: %d\n", app->mPrevScene.mAreaID);
+    OSReport("Next Area ID: %d\n", app->mNextScene.mAreaID);
+    if (SMS_getShineStage__FUc(gpApplication.mCurrentScene.mAreaID) !=
+        SMS_getShineStage__FUc(gpApplication.mNextScene.mAreaID)) {
         TFlagManager::smInstance->setFlag(0x40002, 0);
     }
+}
+
+BETTER_SMS_FOR_CALLBACK void resetStateForStage(TMarDirector *director) {
+    if (director->mAreaID == TGameSequence::AREA_OPTION) {
+        SME::TGlobals::sCharacterIDList[0] = SME::CharacterID::MARIO;
+        SME::TGlobals::sCharacterIDList[1] = SME::CharacterID::LUIGI;
+        SME::TGlobals::sCharacterIDList[2] = SME::CharacterID::PIANTISSIMO;
+        SME::TGlobals::sCharacterIDList[3] = SME::CharacterID::SHADOW_MARIO;
+        TFlagManager::smInstance->resetCard();
+        memset(((u8 *)TFlagManager::smInstance) + 0xF4, 0, 0x18C);
+        return;
+    }
+
+    // Reset shine select behavior flag
     TFlagManager::smInstance->setBool(false, 0x50010);
+
+    // Force unlock maregate at 239 shines or more
     if (TFlagManager::smInstance->getFlag(0x40000) >= 239) {
         TFlagManager::smInstance->setBool(true, 0x50004);
+    }
+
+    // Force unlock all gates, yoshi, and nozzles post-corona mountain
+    if (TFlagManager::smInstance->getBool(0x10077)) {
+        // Set the nozzle flags
+        *((u8 *)TFlagManager::smInstance + 0x6C) |= 0xC0;
+        *((u8 *)TFlagManager::smInstance + 0x6D) |= 0xFF;
+        *((u8 *)TFlagManager::smInstance + 0x6E) |= 0x7F;
+
+        TFlagManager::smInstance->setBool(true, 0x10384);  // Bianco gate
+        TFlagManager::smInstance->setBool(true, 0x10385);  // M on statue
+        TFlagManager::smInstance->setBool(true, 0x10386);  // Ricco gate
+        TFlagManager::smInstance->setBool(true, 0x10387);  // Gelato gate
+        TFlagManager::smInstance->setBool(true, 0x1038F);  // Yoshi unlocked
     }
 }
 
@@ -359,3 +397,58 @@ static u32 getScenarioForLateDolpic() {
     return 2;
 }
 SMS_PATCH_BL(0x8029962C, getScenarioForLateDolpic);
+
+static u32 s_shadow_mario_shines[] = {0x6, 0x10, 0x1A, 0x24, 0x2E, 0x38, 0x42, 126, 136, 146, 156};
+
+static u32 checkIsFloodedPlazaCriteria() {
+    for (u32 shine_id : s_shadow_mario_shines) {
+        if (!TFlagManager::smInstance->getShineFlag(shine_id)) {
+            return false;
+        }
+    }
+    return true;
+}
+SMS_PATCH_BL(0x80299644, checkIsFloodedPlazaCriteria);
+SMS_PATCH_B(0x8029964C, 0x80299670);
+
+// DEBS 80142a00
+
+s32 s_dolpic_11_debs_list[]  = {22, 23, 24, -1};
+s32 s_final_boss_debs_list[] = {20, 21, -1};
+
+SMS_ASM_FUNC static void setDolpic11DEBSList(TGCConsole2 *console2) {
+    SMS_ASM_BLOCK("lis 3, s_dolpic_11_debs_list@h      \r\t"
+                  "ori 3, 3, s_dolpic_11_debs_list@l   \r\t"
+                  "stw 3, 0x574 (30)                   \r\t"
+                  "lis 3, 0x8014                       \r\t"
+                  "ori 3, 3, 0x5D04                    \r\t"
+                  "mtctr 3                             \r\t"
+                  "bctr                                \r\t");
+}
+SMS_WRITE_32(0x803C0360, setDolpic11DEBSList);
+
+SMS_ASM_FUNC static void setFinalBossDEBSList(TGCConsole2 *console2) {
+    SMS_ASM_BLOCK("lis 3, s_final_boss_debs_list@h      \r\t"
+                  "ori 3, 3, s_final_boss_debs_list@l   \r\t"
+                  "stw 3, 0x574 (30)                    \r\t"
+                  "lis 3, 0x8014                        \r\t"
+                  "ori 3, 3, 0x5D04                     \r\t"
+                  "mtctr 3                              \r\t"
+                  "bctr                                 \r\t");
+}
+SMS_WRITE_32(0x803C0364, setFinalBossDEBSList);
+
+
+static JDrama::TNameRef *checkForMareGate(JDrama::TNameRef *actor, u16 keycode, const char *name) {
+    JDrama::TNameRef *ret      = actor->searchF(keycode, name);
+
+    const char *mare_gate_name = (const char *)0x8037576C;
+    JDrama::TNameRef *mare_gate =
+        actor->searchF(JDrama::TNameRef::calcKeyCode(mare_gate_name), mare_gate_name);
+
+    return mare_gate ? ret : nullptr;
+}
+SMS_PATCH_BL(0x8002e548, checkForMareGate);
+
+// Jump table for episodes: 803c0354
+// 80145cf0 is null

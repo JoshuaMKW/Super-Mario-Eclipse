@@ -14,6 +14,7 @@
 #include <BetterSMS/stage.hxx>
 #include <BetterSMS/sunscript.hxx>
 
+#include "enemy/bowser_car.hxx"
 #include "enemy/dark_zhine.hxx"
 #include "enemy/firey_petey.hxx"
 #include "menu/character_select.hxx"
@@ -48,10 +49,11 @@ extern void adjustYoshiTongue(TMario *player, bool isMario);
 extern void initializeStageInfo(TApplication *app);
 extern void resetForExStage(TMarDirector *director);
 extern void forcePlayerZOn2D(TMario *player, bool isMario);
-extern void resetCoinsAndWarpOnUniqueStage(TMarDirector *director);
+extern void resetStateForStage(TMarDirector *director);
 extern void updateWarpStatesForCruiserCabin(TMarDirector *director);
 extern void warpContextUpdater(TMario *player, bool isMario);
 extern void checkForCharacterUnlocks(TMarDirector *director);
+extern void resetCoinsOnStageExit(TApplication *app);
 
 // Player
 extern void initializePoundJumpAnimation(TApplication *app);
@@ -171,7 +173,7 @@ static void initModule() {
     Stage::addUpdateCallback(unlockSettings);
     Game::addBootCallback(lockModuleSettings);
 
-    Stage::addInitCallback(resetCoinsAndWarpOnUniqueStage);
+    Stage::addInitCallback(resetStateForStage);
     Stage::addInitCallback(resetForExStage);
     Stage::addInitCallback(resetCruiserUnlocked);
     Stage::addUpdateCallback(checkForCharacterUnlocks);
@@ -203,6 +205,7 @@ static void initModule() {
     Stage::addInitCallback(initCharacterArchives);
     Stage::addDraw2DCallback(updatePlayerHUD);
     Stage::addExitCallback(setTutorialVisited);
+    Stage::addExitCallback(resetCoinsOnStageExit);
 
     Stage::addInitCallback(resetBalloonMessagePool);
     Stage::addUpdateCallback(checkBalloonMessagePool);
@@ -252,6 +255,8 @@ static void initModule() {
     Objects::registerObjectAsMisc("FireyPeteyManager", TFireyPeteyManager::instantiate);
     Objects::registerObjectAsMisc("DarkZhine", TDarkZhine::instantiate);
     Objects::registerObjectAsMisc("DarkZhineManager", TDarkZhineManager::instantiate);
+    Objects::registerObjectAsMisc("BossBowserCar", TBossBowserCar::instantiate);
+    Objects::registerObjectAsMisc("BossBowserCarManager", TBossBowserCarManager::instantiate);
 }
 
 // Definition block

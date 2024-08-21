@@ -14,7 +14,8 @@ static TLightContext sLightContext;
 static u8 sBrightLevel = 255;
 
 #define MIN_DARKNESS 100
-#define MAX_DARKNESS 180
+#define MIN_DARKNESS_CORONA 180
+#define MAX_DARKNESS 210
 #define MIN_SIZE     0.0f
 #define MAX_SIZE     500000.0f
 #define GROW_BASE    4500.0f
@@ -22,6 +23,7 @@ static u8 sBrightLevel = 255;
 
 void initializeParameters(TLightContext::ActiveType type, TVec3f pos, u8 layer_count,
                           JUtility::TColor color, f32 scale, f32 layer_scale, u8 brightness) {
+    bool isCoronaMountainBeat  = TFlagManager::smInstance->getBool(0x10077);
     sLightContext.mLightType   = type;
     sLightContext.mTranslation = pos;
     sLightContext.mColor       = color;
@@ -29,7 +31,7 @@ void initializeParameters(TLightContext::ActiveType type, TVec3f pos, u8 layer_c
     sLightContext.mLayerScale  = layer_scale;
     sLightContext.mLayerCount  = layer_count;
     sBrightLevel               = brightness;
-    SME::TGlobals::setMinDarkness(MIN_DARKNESS);
+    SME::TGlobals::setMinDarkness(isCoronaMountainBeat ? MIN_DARKNESS_CORONA : MIN_DARKNESS);
 }
 
 void initToDefault(TMarDirector *director) {

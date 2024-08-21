@@ -226,7 +226,7 @@ BETTER_SMS_FOR_CALLBACK void initializeStageInfo(TApplication *app) {
 
             SME::setSpawnTransRot(SME::STAGE_CRUISER, -1, TVec3f(5500.0f, 1476.0f, -1530.0f),
                                   TVec3f(0.0f, 60.0f, 0.0f), SME::STAGE_SPETTRO_CASINO,
-                                  4);  // Spettro Casino
+                                  -1);  // Spettro Casino
         }
 
         // Register Mario's Dream stage info
@@ -475,6 +475,11 @@ BETTER_SMS_FOR_CALLBACK void initializeStageInfo(TApplication *app) {
                 SME::setSpawnTransRot(TGameSequence::AREA_DOLPIC, -1,
                                       TVec3f(13700.0f, 300.0f, -12700.0f),
                                       TVec3f(0.0f, -50.0f, 0.0f), SME::STAGE_ERTO, -1);
+
+                SME::setSpawnTransRot(TGameSequence::AREA_DOLPIC, -1,
+                                      TVec3f(-7500.0f, 285.0f, 4700.0f), TVec3f(0.0f, 170.0f, 0.0f),
+                                      TGameSequence::AREA_DOLPICEX0,
+                                      0);  // Ricco Station
             }
 
             // Bianco Hills
@@ -528,16 +533,16 @@ BETTER_SMS_FOR_CALLBACK void initializeStageInfo(TApplication *app) {
                                       TVec3f(0.0f, -170.0f, 0.0f), TGameSequence::AREA_SIRENA, -1);
 
                 SME::setSpawnTransRot(TGameSequence::AREA_MAMMA, -1,
-                                      TVec3f(27000.0f, -80.0f, 10100.0f), TVec3f(0.0f, 90.0f, 0.0f),
+                                      TVec3f(17000.0f, -80.0f, 9000.0f), TVec3f(0.0f, -110.0f, 0.0f),
                                       SME::STAGE_ISLE_DELFINO,
                                       6);  // Marea Reef
             }
 
             // Pinna Beach
             {
-                SME::setSpawnTransRot(TGameSequence::AREA_PINNABEACH, -1,
-                                      TVec3f(15500.0f, -80.0f, 8300.0f),
-                                      TVec3f(0.0f, -115.0f, 0.0f), SME::STAGE_LIGHTHOUSE, -1);
+                //SME::setSpawnTransRot(TGameSequence::AREA_PINNABEACH, -1,
+                //                      TVec3f(15500.0f, -80.0f, 8300.0f),
+                //                      TVec3f(0.0f, -115.0f, 0.0f), SME::STAGE_LIGHTHOUSE, -1);
 
                 SME::setSpawnTransRot(TGameSequence::AREA_PINNABEACH, -1,
                                       TVec3f(-3500.0f, 400.0f, 2800.0f), TVec3f(0.0f, 0.0f, 0.0f),
@@ -624,7 +629,7 @@ BETTER_SMS_FOR_CALLBACK void initializeStageInfo(TApplication *app) {
                                       TGameSequence::AREA_MAREBOSS, -1);
 
                 SME::setSpawnTransRot(TGameSequence::AREA_MARE, -1,
-                                      TVec3f(-120.0f, -80.0f, -2000.0f), TVec3f(0.0f, -30.0f, 0.0f),
+                                      TVec3f(-7150.0f, -80.0f, -5150.0f), TVec3f(0.0f, 15.0f, 0.0f),
                                       TGameSequence::AREA_MAREEX0, -1);
             }
 
@@ -662,8 +667,12 @@ BETTER_SMS_FOR_CALLBACK void setPlayerStartPos(TMario *player) {
         return;
     }
 
+    bool is_important_area = false;
+    is_important_area |= (gpApplication.mCurrentScene.mAreaID == TGameSequence::AREA_SIRENA &&
+                          gpApplication.mCurrentScene.mEpisodeID == 5);
+
     TVec3f trans, rot;
-    if (SME::getSpawnTransRot(&gpApplication, trans, rot)) {
+    if (!is_important_area && SME::getSpawnTransRot(&gpApplication, trans, rot)) {
         player->mTranslation = trans;
         player->mRotation    = rot;
         player->mAngle.y     = convertAngleFloatToS16(rot.y);

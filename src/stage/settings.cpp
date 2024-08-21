@@ -12,7 +12,24 @@ extern Settings::SettingsGroup gSettingsGroup;
 extern BugsExploitsSetting gBugsSetting;
 extern MirrorModeFlag gMirrorModeSetting;
 
-static const char *sDirectors[] = {"JoshuaMK", "Tempo", "UncleMeat", "epicwade"};
+static const char *sMarioBros[] = {"JoshuaMK", "Tempo", "Leif Erikson (FATHER)"};
+
+class MarioBrosCreditSetting final : public Settings::IntSetting {
+public:
+    MarioBrosCreditSetting() : IntSetting("The Mario Bros", &mIndex) {
+        mValueRange = {0, (sizeof(sMarioBros) / sizeof(const char *)) - 1, 1};
+    }
+    ~MarioBrosCreditSetting() override {}
+
+    void load(JSUMemoryInputStream &in) override {}
+    void save(JSUMemoryOutputStream &out) override {}
+    void getValueName(char *dst) const override { strcpy(dst, sMarioBros[mIndex]); }
+
+private:
+    int mIndex;
+};
+
+static const char *sDirectors[] = {"JoshuaMK", "Tempo", "UncleMeat", "Epicwade"};
 
 class DirectorCreditSetting final : public Settings::IntSetting {
 public:
@@ -46,7 +63,7 @@ private:
     int mIndex;
 };
 
-static const char *sStageDesigners[] = {"UncleMeat", "Tempo", "epicwade"};
+static const char *sStageDesigners[] = {"UncleMeat", "Tempo", "Epicwade", "Portable Productions"};
 
 class StageCreditSetting final : public Settings::IntSetting {
 public:
@@ -63,7 +80,7 @@ private:
     int mIndex;
 };
 
-static const char *sComposers[] = {"Trevor Scott", "StevenShockley"};
+static const char *sComposers[] = {"Trevor Scott", "StevenShockley", "Portable Productions"};
 
 class ComposerCreditSetting final : public Settings::IntSetting {
 public:
@@ -80,7 +97,7 @@ private:
     int mIndex;
 };
 
-static const char *sSoundDesigners[] = {"Trevor Scott", "StevenShockley"};
+static const char *sSoundDesigners[] = {"Trevor Scott", "StevenShockley", "Portable Productions"};
 
 class SoundDesignCreditSetting final : public Settings::IntSetting {
 public:
@@ -131,6 +148,37 @@ private:
     int mIndex;
 };
 
+static const char *sBetaTesters[] = {"MasterMario777",
+                                     "Flash",
+                                     "Hailbot",
+                                     "syrupyy",
+                                     "timenoe",
+                                     "Multi",
+                                     "Ghostly",
+                                     "Epicwade",
+                                     "Leif Erikson (FATHER)",
+                                     "Portable Productions",
+                                     "Tempo",
+                                     "Baris Eren Kaplan",
+                                     "Bacon.24",
+                                     "MondoKRUEL!",
+                                     "StevenShockley"};
+
+class BetaTestersCreditSetting final : public Settings::IntSetting {
+public:
+    BetaTestersCreditSetting() : IntSetting("Beta Testers", &mIndex) {
+        mValueRange = {0, (sizeof(sBetaTesters) / sizeof(const char *)) - 1, 1};
+    }
+    ~BetaTestersCreditSetting() override {}
+
+    void load(JSUMemoryInputStream &in) override {}
+    void save(JSUMemoryOutputStream &out) override {}
+    void getValueName(char *dst) const override { strcpy(dst, sBetaTesters[mIndex]); }
+
+private:
+    int mIndex;
+};
+
 static const char *sSpecialThanks[] = {
     "Xayr", "Halleester",  "Portable Productions", "Henk_Wasmachine",
     "Gonz", "Truegamer02", "zachthepillow",        "MissB"};
@@ -150,6 +198,7 @@ private:
     int mIndex;
 };
 
+MarioBrosCreditSetting sMarioBrosCreditSetting;
 DirectorCreditSetting sDirectorCreditSetting;
 ProgrammerCreditSetting sProgrammerCreditSetting;
 StageCreditSetting sStageCreditSetting;
@@ -157,9 +206,11 @@ ComposerCreditSetting sComposerCreditSetting;
 SoundDesignCreditSetting sSoundDesignCreditSetting;
 TextureCreditSetting sTextureCreditSetting;
 CharacterCreditSetting sCharacterCreditSetting;
+BetaTestersCreditSetting sBetaTestersCreditSetting;
 SpecialThanksCreditSetting sSpecialThanksCreditSetting;
 
 void initDemoCredits(Settings::SettingsGroup &group) {
+    group.addSetting(&sMarioBrosCreditSetting);
     group.addSetting(&sDirectorCreditSetting);
     group.addSetting(&sProgrammerCreditSetting);
     group.addSetting(&sStageCreditSetting);
@@ -167,6 +218,7 @@ void initDemoCredits(Settings::SettingsGroup &group) {
     group.addSetting(&sSoundDesignCreditSetting);
     group.addSetting(&sTextureCreditSetting);
     group.addSetting(&sCharacterCreditSetting);
+    group.addSetting(&sBetaTestersCreditSetting);
     group.addSetting(&sSpecialThanksCreditSetting);
 }
 
@@ -176,9 +228,9 @@ void lockModuleSettings(TApplication *app) {
     optional<ModuleInfo> engine_module   = BetterSMS::getModuleInfo("Better Sunshine Engine");
     optional<ModuleInfo> movement_module = BetterSMS::getModuleInfo("Better Sunshine Moveset");
 
-    /*SMS_ASSERT(movement_module,
+    SMS_ASSERT(movement_module,
                "Super Mario Eclipse requires the Better Sunshine Movement module to be present and "
-               "loaded. Please restore \"BetterSunshineMovement.kxe\" to \"./Kuribo!/Mods/\"!");*/
+               "loaded. Please restore \"BetterSunshineMovement.kxe\" to \"./Kuribo!/Mods/\"!");
 
     Settings::SettingsGroup *engine_settings = engine_module->mSettings;
     {

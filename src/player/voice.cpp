@@ -43,8 +43,50 @@ u32 playerVoiceProcess(TMario *player, MSound *sound, u32 soundID, s16 health, u
                 soundID = MSD_SE_MV21_JUMP_SMALL_01;
                 break;
             }
+            case MSD_SE_MV41_JUMP_T_02: {
+                soundID = MSD_SE_MV21_JUMP_SMALL_02;
+                break;
+            }
+            case MSD_SE_MV41_JUMP_T_03: {
+                soundID = MSD_SE_MV21_JUMP_SMALL_03;
+                break;
+            }
             case MSD_SE_MV34_ACTION_T_01: {
                 soundID = MSD_SE_MV13_ACTION_SMALL_01;
+                break;
+            }
+            case MSD_SE_MV34_ACTION_T_02: {
+                soundID = MSD_SE_MV13_ACTION_SMALL_02;
+                break;
+            }
+            case MSD_SE_MV34_ACTION_T_03: {
+                soundID = MSD_SE_MV13_ACTION_SMALL_03;
+                break;
+            }
+            case MSD_SE_MV42_JUMP_HUGE_T_01: {
+                soundID = MSD_SE_MV25A_JUMP_HUGE_01;
+                break;
+            }
+            case MSD_SE_MV42_JUMP_HUGE_T_02: {
+                soundID = MSD_SE_MV25A_JUMP_HUGE_02;
+                break;
+            }
+            case MSD_SE_MV46A_OPEN_DOOR_T_01: {
+                soundID = MSD_SE_MV31_OPEN_DOOR_01;
+                break;
+            }
+            case MSD_SE_MV46A_OPEN_DOOR_T_02: {
+                soundID = MSD_SE_MV31_OPEN_DOOR_02;
+                break;
+            }
+            case MSD_SE_MV46B_NEXT_STG_T_01:
+            case MSD_SE_MV46B_NEXT_STG_T_02:
+            case MSD_SE_MV46B_NEXT_STG_T_03: {
+                soundID = -2;
+                break;
+            }
+            case MSD_SE_MV38_EXERT_INST_T_01: {
+                soundID = MSD_SE_MV15_EXERT_INST_01;
                 break;
             }
             default:

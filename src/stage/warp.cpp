@@ -266,6 +266,7 @@ static void assignShineExitDestination(TApplication *app, u8 area, u8 episode,
             app->mNextScene.mEpisodeID = 2;
             return;
         case SME::STAGE_CRUISER:
+        case SME::STAGE_CRUISER_EX:
             app->mNextScene.mAreaID    = SME::STAGE_CRUISER;
             app->mNextScene.mEpisodeID = 0;
             return;
@@ -275,6 +276,8 @@ static void assignShineExitDestination(TApplication *app, u8 area, u8 episode,
             app->mNextScene.mAreaID    = SME::STAGE_LACRIMA;
             app->mNextScene.mEpisodeID = 0xFF;
             TFlagManager::smInstance->setBool(true, 0x50010);
+            return;
+        case TGameSequence::AREA_DOLPICEX0:
             return;
         case TGameSequence::AREA_BIANCO:
         case TGameSequence::AREA_BIANCOBOSS:
@@ -334,6 +337,11 @@ static void assignShineExitDestination(TApplication *app, u8 area, u8 episode,
             return;
         case SME::STAGE_LIGHTHOUSE_BOSS:
             app->mNextScene.mAreaID    = app->mPrevScene.mAreaID;
+            app->mNextScene.mEpisodeID = 0xFF;
+            TFlagManager::smInstance->setBool(true, 0x50010);
+            return;
+        case SME::STAGE_PIANTA_PIT:
+            app->mNextScene.mAreaID    = TGameSequence::AREA_MONTE;
             app->mNextScene.mEpisodeID = 0xFF;
             TFlagManager::smInstance->setBool(true, 0x50010);
             return;

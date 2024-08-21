@@ -340,8 +340,12 @@ void CharacterSelectDirector::initializeLayout() {
             s_info.mIndex = 0;
         }
 
-        if (!mIsPiantissimo && s_info.mIndex == (u8)SME::CharacterID::PIANTISSIMO) {
-            s_info.mIndex = 0;
+        if (s_info.mIndex == (u8)SME::CharacterID::PIANTISSIMO) {
+            if (!mIsPiantissimo) {
+                s_info.mIndex = 0;
+            } else if (!mIsLuigi) {
+                s_info.mIndex = 1;
+            }
         }
 
         CharacterInfo &info = mSelectScreen->mCharacterInfos.at(i);
@@ -555,6 +559,14 @@ static int flagCharacterSelectMenu(u8 state) {
     // Rollercoaster Missions
     if (next_scene.mAreaID == TGameSequence::AREA_PINNABEACH) {
         if (next_scene.mEpisodeID == 0 || next_scene.mEpisodeID == 7) {
+            sPiantissimo = false;
+        }
+    }
+
+    // Ertoruption
+    if (next_scene.mAreaID == SME::STAGE_ERTO) {
+        if (next_scene.mEpisodeID == 0) {
+            sLuigi       = false;
             sPiantissimo = false;
         }
     }

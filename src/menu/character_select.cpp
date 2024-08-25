@@ -563,6 +563,18 @@ static int flagCharacterSelectMenu(u8 state) {
         }
     }
 
+    if (next_scene.mAreaID == TGameSequence::AREA_MARE) {
+        if (next_scene.mEpisodeID == 2 || next_scene.mEpisodeID == 3 ||
+            next_scene.mEpisodeID == 7) {
+            sPiantissimo = false;
+        }
+    }
+
+    if (next_scene.mAreaID == TGameSequence::AREA_COROEX6) {
+        sLuigi       = false;
+        sPiantissimo = false;
+    }
+
     // Ertoruption
     if (next_scene.mAreaID == SME::STAGE_ERTO) {
         if (next_scene.mEpisodeID == 0) {

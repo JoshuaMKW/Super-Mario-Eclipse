@@ -50,9 +50,6 @@ BETTER_SMS_FOR_CALLBACK void initializeShineBlueTracker(TMarDirector *director) 
         break;
     }
     case TGameSequence::AREA_DOLPIC: {
-        s_stage_shines_collected += TFlagManager::smInstance->getFlag(0x10058);
-        s_stage_shines_max = 1;
-
         // Blue coin shines
         for (u32 i = 0x10046; i <= 0x10055; ++i) {
             s_stage_shines_collected += TFlagManager::smInstance->getFlag(i);
@@ -71,7 +68,7 @@ BETTER_SMS_FOR_CALLBACK void initializeShineBlueTracker(TMarDirector *director) 
             s_stage_shines_max += 1;
         }
 
-        for (u32 i = 0x10059; i <= 0x10063; ++i) {
+        for (u32 i = 0x10057; i <= 0x10063; ++i) {
             s_stage_shines_collected += TFlagManager::smInstance->getFlag(i);
             s_stage_shines_max += 1;
         }
@@ -120,7 +117,7 @@ BETTER_SMS_FOR_CALLBACK void initializeShineBlueTracker(TMarDirector *director) 
             s_stage_blues_collected +=
                 TFlagManager::smInstance->getBlueCoinFlag(director->mAreaID, i);
         }
-        s_stage_shines_collected += TFlagManager::smInstance->getFlag(0x10064 + 7);  // 100 coins
+        s_stage_shines_collected += TFlagManager::smInstance->getFlag(0x10064 + 6);  // 100 coins
         s_stage_shines_max = 11;
         s_stage_blues_max  = 30;
         break;
@@ -134,7 +131,7 @@ BETTER_SMS_FOR_CALLBACK void initializeShineBlueTracker(TMarDirector *director) 
             s_stage_blues_collected +=
                 TFlagManager::smInstance->getBlueCoinFlag(director->mAreaID, i);
         }
-        s_stage_shines_collected += TFlagManager::smInstance->getFlag(0x10064 + 6);  // 100 coins
+        s_stage_shines_collected += TFlagManager::smInstance->getFlag(0x10064 + 5);  // 100 coins
         s_stage_shines_max = 11;
         s_stage_blues_max  = 30;
         break;
@@ -198,7 +195,8 @@ BETTER_SMS_FOR_CALLBACK void initializeShineBlueTracker(TMarDirector *director) 
     case (SME::STAGE_LANCIA - 2):
     case (SME::STAGE_VAPORWAVE - 2):
     case (SME::STAGE_YOSHI_VILLAGE - 2): {
-        const u32 shine_id = 171 + (shineStage - (SME::STAGE_MARIO_DREAM - 2)) * 4;
+        const u32 shine_id =
+            171 + (shineStage - SMS_getShineStage__FUc(SME::STAGE_MARIO_DREAM)) * 4;
         for (u32 i = shine_id; i < shine_id + 4; ++i) {
             s_stage_shines_collected += TFlagManager::smInstance->getShineFlag(i);
         }
@@ -207,8 +205,7 @@ BETTER_SMS_FOR_CALLBACK void initializeShineBlueTracker(TMarDirector *director) 
                 TFlagManager::smInstance->getBlueCoinFlag(director->mAreaID, i);
         }
         s_stage_shines_collected += TFlagManager::smInstance->getShineFlag(
-            213 +
-            (shineStage - (SMS_getShineStage__FUc(SME::STAGE_MARIO_DREAM) - 2)));  // 100 coins
+            213 + (shineStage - SMS_getShineStage__FUc(SME::STAGE_MARIO_DREAM)));  // 100 coins
         s_stage_shines_max = 5;
         s_stage_blues_max  = 10;
         break;
@@ -216,7 +213,7 @@ BETTER_SMS_FOR_CALLBACK void initializeShineBlueTracker(TMarDirector *director) 
     case (SME::STAGE_RED_LILY - 2):
     case (SME::STAGE_PEACH_BEACH - 2):
     case (SME::STAGE_SPETTRO_CASINO - 2): {
-        const u32 shine_id = 187 + (shineStage - (SME::STAGE_RED_LILY - 2)) * 4;
+        const u32 shine_id = 187 + (shineStage - SMS_getShineStage__FUc(SME::STAGE_RED_LILY)) * 4;
         for (u32 i = shine_id; i < shine_id + 4; ++i) {
             s_stage_shines_collected += TFlagManager::smInstance->getShineFlag(i);
         }
@@ -225,7 +222,7 @@ BETTER_SMS_FOR_CALLBACK void initializeShineBlueTracker(TMarDirector *director) 
                 TFlagManager::smInstance->getBlueCoinFlag(director->mAreaID, i);
         }
         s_stage_shines_collected += TFlagManager::smInstance->getShineFlag(
-            217 + (shineStage - (SMS_getShineStage__FUc(SME::STAGE_RED_LILY) - 2)));  // 100 coins
+            217 + (shineStage - SMS_getShineStage__FUc(SME::STAGE_RED_LILY)));  // 100 coins
         s_stage_shines_max = 5;
         s_stage_blues_max  = 10;
         break;

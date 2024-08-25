@@ -245,9 +245,18 @@ static void assignOnDeathDestination(TGameSequence *sequence, u8 area, u8 episod
 }
 SMS_PATCH_BL(SMS_PORT_REGION(0x80299808, 0, 0, 0), assignOnDeathDestination);
 
+extern bool gHadLuigiBefore;
+extern bool gHadPiantissimoBefore;
+
 static void assignShineExitDestination(TApplication *app, u8 area, u8 episode,
                                        JDrama::TFlagT<u16> flag) {
     if (!(gpMarDirector->mCollectedShine->mType & 0x10)) {
+        if (!gHadPiantissimoBefore && TFlagManager::smInstance->getBool(0x30019)) {
+            gpMarDirector->fireStreamingMovie(31);
+        } else if (!gHadLuigiBefore && TFlagManager::smInstance->getBool(0x30018)) {
+            gpMarDirector->fireStreamingMovie(33);
+        }
+
         app->mNextScene.set(area, episode, flag);
 
         switch (gpMarDirector->mAreaID) {
@@ -295,11 +304,10 @@ static void assignShineExitDestination(TApplication *app, u8 area, u8 episode,
             TFlagManager::smInstance->setBool(true, 0x50010);
             return;
         case TGameSequence::AREA_SIRENA:
-        case TGameSequence::AREA_SIRENAEX0:
-        case TGameSequence::AREA_SIRENAEX1:
         case TGameSequence::AREA_DELFINO:
         case TGameSequence::AREA_DELFINOBOSS:
         case TGameSequence::AREA_CASINO:
+        case TGameSequence::AREA_SIRENAEX0:
         case TGameSequence::AREA_COROEX5:
             app->mNextScene.mAreaID    = TGameSequence::AREA_SIRENA;
             app->mNextScene.mEpisodeID = 0xFF;
@@ -308,6 +316,7 @@ static void assignShineExitDestination(TApplication *app, u8 area, u8 episode,
         case TGameSequence::AREA_PINNABEACH:
         case TGameSequence::AREA_PINNAPARCO:
         case TGameSequence::AREA_PINNABOSS:
+        case TGameSequence::AREA_SIRENAEX1:
         case TGameSequence::AREA_COROEX4:
             app->mNextScene.mAreaID    = TGameSequence::AREA_PINNABEACH;
             app->mNextScene.mEpisodeID = 0xFF;
@@ -453,7 +462,8 @@ static void setNextStage_ChangeStageOverride(TMarDirector *director, u16 warpID)
     bool isFloodedPlaza =
         director->mAreaID == TGameSequence::AREA_DOLPIC && director->mEpisodeID == 9;
     if (!isFloodedPlaza && warpID == TGameSequence::AREA_COROEX6) {
-        if (!TFlagManager::smInstance->getFlag(0x10077)) {
+        if (!TFlagManager::smInstance->getFlag(0x10077) ||
+            TFlagManager::smInstance->getFlag(0x40000) >= 240) {
             warpID = 0x31;
         }
     }

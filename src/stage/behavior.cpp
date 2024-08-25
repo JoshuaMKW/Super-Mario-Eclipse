@@ -16,6 +16,8 @@
 #include "stage.hxx"
 
 bool gFromShineSelectForIntro = false;
+bool gHadLuigiBefore          = false;
+bool gHadPiantissimoBefore    = false;
 
 static void setStageAfterShineSelect(TSelectMenu *menu) {
     gpApplication.mNextScene.mEpisodeID = menu->mEpisodeID;
@@ -330,9 +332,6 @@ SMS_PATCH_BL(0x8024DF54, checkRideMovementCond);
 
 BETTER_SMS_FOR_CALLBACK void resetCoinsOnStageExit(TApplication* app) {
     // Set coins to 0
-    OSReport("Area ID: %d\n", app->mCurrentScene.mAreaID);
-    OSReport("Prev Area ID: %d\n", app->mPrevScene.mAreaID);
-    OSReport("Next Area ID: %d\n", app->mNextScene.mAreaID);
     if (SMS_getShineStage__FUc(gpApplication.mCurrentScene.mAreaID) !=
         SMS_getShineStage__FUc(gpApplication.mNextScene.mAreaID)) {
         TFlagManager::smInstance->setFlag(0x40002, 0);
@@ -340,6 +339,9 @@ BETTER_SMS_FOR_CALLBACK void resetCoinsOnStageExit(TApplication* app) {
 }
 
 BETTER_SMS_FOR_CALLBACK void resetStateForStage(TMarDirector *director) {
+    gHadLuigiBefore       = TFlagManager::smInstance->getBool(0x30018);
+    gHadPiantissimoBefore = TFlagManager::smInstance->getBool(0x30019);
+
     if (director->mAreaID == TGameSequence::AREA_OPTION) {
         SME::TGlobals::sCharacterIDList[0] = SME::CharacterID::MARIO;
         SME::TGlobals::sCharacterIDList[1] = SME::CharacterID::LUIGI;
@@ -350,8 +352,18 @@ BETTER_SMS_FOR_CALLBACK void resetStateForStage(TMarDirector *director) {
         return;
     }
 
+    if (director->mAreaID == TGameSequence::AREA_DOLPIC) {
+        if (director->mEpisodeID == 4) {
+            SME::TGlobals::sCharacterIDList[0] = SME::CharacterID::MARIO;
+        }
+    }
+
     // Reset shine select behavior flag
     TFlagManager::smInstance->setBool(false, 0x50010);
+
+    if (director->mAreaID != TGameSequence::AREA_COROEX6) {
+        TFlagManager::smInstance->setFlag(0x40004, TWaterGun::Hover);
+    }
 
     // Force unlock maregate at 239 shines or more
     if (TFlagManager::smInstance->getFlag(0x40000) >= 239) {

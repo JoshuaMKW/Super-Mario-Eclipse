@@ -63,7 +63,8 @@ private:
     int mIndex;
 };
 
-static const char *sStageDesigners[] = {"UncleMeat", "Tempo", "Epicwade", "Portable Productions"};
+static const char *sStageDesigners[] = {"UncleMeat", "Tempo", "Epicwade", "Portable Productions",
+                                        "Brace"};
 
 class StageCreditSetting final : public Settings::IntSetting {
 public:
@@ -114,7 +115,7 @@ private:
     int mIndex;
 };
 
-static const char *sTextures[] = {"UncleMeat", "Fecal-Matter-Photoshops", "ShaneMGD"};
+static const char *sTextures[] = {"UncleMeat", "Fecal-Matter-Photoshops", "ShaneMGD", "Purple Twirler"};
 
 class TextureCreditSetting final : public Settings::IntSetting {
 public:
@@ -180,7 +181,7 @@ private:
 };
 
 static const char *sSpecialThanks[] = {
-    "Xayr", "Halleester",  "Portable Productions", "Henk_Wasmachine",
+    "Xayr", "Halleester",  "Portable Productions", "Brace", "Henk_Wasmachine",
     "Gonz", "Truegamer02", "zachthepillow",        "MissB"};
 
 class SpecialThanksCreditSetting final : public Settings::IntSetting {

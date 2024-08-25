@@ -533,16 +533,16 @@ BETTER_SMS_FOR_CALLBACK void initializeStageInfo(TApplication *app) {
                                       TVec3f(0.0f, -170.0f, 0.0f), TGameSequence::AREA_SIRENA, -1);
 
                 SME::setSpawnTransRot(TGameSequence::AREA_MAMMA, -1,
-                                      TVec3f(17000.0f, -80.0f, 9000.0f), TVec3f(0.0f, -110.0f, 0.0f),
-                                      SME::STAGE_ISLE_DELFINO,
+                                      TVec3f(17000.0f, -80.0f, 9000.0f),
+                                      TVec3f(0.0f, -110.0f, 0.0f), SME::STAGE_ISLE_DELFINO,
                                       6);  // Marea Reef
             }
 
             // Pinna Beach
             {
-                //SME::setSpawnTransRot(TGameSequence::AREA_PINNABEACH, -1,
-                //                      TVec3f(15500.0f, -80.0f, 8300.0f),
-                //                      TVec3f(0.0f, -115.0f, 0.0f), SME::STAGE_LIGHTHOUSE, -1);
+                // SME::setSpawnTransRot(TGameSequence::AREA_PINNABEACH, -1,
+                //                       TVec3f(15500.0f, -80.0f, 8300.0f),
+                //                       TVec3f(0.0f, -115.0f, 0.0f), SME::STAGE_LIGHTHOUSE, -1);
 
                 SME::setSpawnTransRot(TGameSequence::AREA_PINNABEACH, -1,
                                       TVec3f(-3500.0f, 400.0f, 2800.0f), TVec3f(0.0f, 0.0f, 0.0f),
@@ -670,6 +670,8 @@ BETTER_SMS_FOR_CALLBACK void setPlayerStartPos(TMario *player) {
     bool is_important_area = false;
     is_important_area |= (gpApplication.mCurrentScene.mAreaID == TGameSequence::AREA_SIRENA &&
                           gpApplication.mCurrentScene.mEpisodeID == 5);
+    is_important_area |= (gpApplication.mCurrentScene.mAreaID == TGameSequence::AREA_MONTE &&
+                          gpApplication.mCurrentScene.mEpisodeID == 5);
 
     TVec3f trans, rot;
     if (!is_important_area && SME::getSpawnTransRot(&gpApplication, trans, rot)) {
@@ -686,7 +688,32 @@ BETTER_SMS_FOR_CALLBACK void setPlayerStartPos(TMario *player) {
             player->mAngle.y     = convertAngleFloatToS16(-130.0f);
         }
     }
+
+    if (gpApplication.mCurrentScene.mAreaID == SME::STAGE_PEACH_CASTLE &&
+        gpApplication.mPrevScene.mAreaID == SME::STAGE_PEACH_CASTLE) {
+        if (gpApplication.mCurrentScene.mEpisodeID == 0) {
+            if (gpApplication.mPrevScene.mEpisodeID == 2) {
+                if (s_prev_player_pos.y > 34000.0f && s_prev_player_pos.z < -5000.0f) {
+                    player->mTranslation = TVec3f(-220.0f, 950.0f, 11200.0f);
+                    player->mRotation    = TVec3f(0.0f, 0.0f, 0.0f);
+                    player->mAngle.y     = convertAngleFloatToS16(0.0f);
+                } else {
+                    player->mTranslation = TVec3f(0.0f, 1470.0f, 2500.0f);
+                    player->mRotation    = TVec3f(0.0f, 180.0f, 0.0f);
+                    player->mAngle.y     = convertAngleFloatToS16(180.0f);
+                }
+            }
+        } else if (gpApplication.mCurrentScene.mEpisodeID == 2) {
+            if (gpApplication.mPrevScene.mEpisodeID == 0 && s_prev_player_pos.y > 900.0f &&
+                s_prev_player_pos.z > 10000.0f) {
+                player->mTranslation = TVec3f(0.0f, 35270.0f, -5600.0f);
+                player->mRotation    = TVec3f(0.0f, 0.0f, 0.0f);
+                player->mAngle.y     = convertAngleFloatToS16(0.0f);
+            }
+        }
+    }
 }
+
 
 static void SME_extendedCorrectFlags(TFlagManager *manager) {
     manager->correctFlag();

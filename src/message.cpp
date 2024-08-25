@@ -4,6 +4,7 @@
 #include <SMS/Manager/FlagManager.hxx>
 #include <SMS/raw_fn.hxx>
 
+#include "globals.hxx"
 #include "message.hxx"
 #include "stage.hxx"
 
@@ -44,7 +45,8 @@ BETTER_SMS_FOR_CALLBACK void checkBalloonMessagePool(TMarDirector *director) {
     bool is_water_card    = director->mGCConsole->mIsWaterCard;
 
     AtomBalloonMessageViewer *message = AtomBalloonMessageViewer::peekMessage();
-    if (!message || !is_water_card) {
+    if (!message || !is_water_card ||
+        SME::TGlobals::getCharacterIDFromPlayer(gpMarioAddress) == SME::CharacterID::PIANTISSIMO) {
         return;
     }
 

@@ -1,3 +1,4 @@
+#include <SMS/Manager/FlagManager.hxx>
 #include <SMS/System/MarDirector.hxx>
 
 #include <BetterSMS/libs/constmath.hxx>
@@ -5,11 +6,11 @@
 
 #include "camera.hxx"
 
-static bool sIsFixedCameraMode = false;
+static bool sIsFixedCameraMode   = false;
 static bool sIsFixedCameraLerped = false;
 static TVec3f sFixedCameraPos;
 static TVec3f sFixedCameraLookAt;
-static f32 sFixedCameraFovy = 50.0f;
+static f32 sFixedCameraFovy              = 50.0f;
 static JDrama::TActor *sFixedCameraActor = nullptr;
 
 bool SME::isCameraFixedMode() { return sIsFixedCameraMode; }
@@ -31,8 +32,16 @@ f32 SME::getCameraFixedFovy() { return sFixedCameraFovy; }
 void SME::setCameraFixedFovy(f32 fovy) { sFixedCameraFovy = fovy; }
 
 extern void ControlCamera2D(CPolarSubCamera *camera);
+extern void ControlBowserKillCam(CPolarSubCamera *camera);
 
 static void controlCameraByCodeExt(CPolarSubCamera *camera) {
+    if (gpMarDirector->mAreaID == TGameSequence::AREA_DOLPIC && gpMarDirector->mEpisodeID == 4) {
+        if (TFlagManager::smInstance->getFlag(0x6001B)) {
+            ControlBowserKillCam(camera);
+            return;
+        }
+    }
+
     if (SME::isCameraFixedMode()) {
         *(s32 *)((u8 *)camera->mInbetween + 0x4) = 0;
 
@@ -41,6 +50,12 @@ static void controlCameraByCodeExt(CPolarSubCamera *camera) {
             TVec3f diff = camera->mTranslation - sFixedCameraActor->mTranslation;
             diff.y      = 0;
             diff.normalize();
+
+            if (gpMarDirector->mAreaID == TGameSequence::AREA_DOLPIC &&
+                gpMarDirector->mEpisodeID == 4) {
+                diff.scale(3.0f);
+            }
+
             diff.scale(600.0f);
             diff.y    = 150.0f;
             followPos = sFixedCameraActor->mTranslation + diff;

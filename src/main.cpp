@@ -13,6 +13,7 @@
 #include <BetterSMS/player.hxx>
 #include <BetterSMS/stage.hxx>
 #include <BetterSMS/sunscript.hxx>
+#include <BetterSMS/thp.hxx>
 
 #include "enemy/bowser_car.hxx"
 #include "enemy/dark_zhine.hxx"
@@ -31,6 +32,7 @@
 #include "object/water_balloon.hxx"
 #include "object/water_mine.hxx"
 #include "object/pizzabox.hxx"
+#include "object/iron_crate.hxx"
 #include "p_settings.hxx"
 
 // Application
@@ -54,6 +56,7 @@ extern void updateWarpStatesForCruiserCabin(TMarDirector *director);
 extern void warpContextUpdater(TMario *player, bool isMario);
 extern void checkForCharacterUnlocks(TMarDirector *director);
 extern void resetCoinsOnStageExit(TApplication *app);
+extern void reset100CoinState(TMarDirector *director);
 
 // Player
 extern void initializePoundJumpAnimation(TApplication *app);
@@ -154,6 +157,11 @@ static void initModule() {
     Game::setMaxShines(MaxShineCount);
     Application::showSettingsOnFirstBoot(true);
 
+    THP::addTHP(30, "vacation.thp");
+    THP::addTHP(31, "piantissimo_join.thp");
+    THP::addTHP(32, "piantissimo.thp");
+    THP::addTHP(33, "luigi.thp");
+
     // Register callbacks
     Application::registerContextCallback(CONTEXT_CHARACTER_SELECT, directCharacterSelectMenu);
     Game::addInitCallback(initializeStageInfo);
@@ -164,6 +172,7 @@ static void initModule() {
     Stage::addInitCallback(initToDefault);
     Stage::addUpdateCallback(manageShineDarkness);
 
+    Stage::addInitCallback(reset100CoinState);
     Stage::addInitCallback(initializeShineBlueTracker);
     Stage::addUpdateCallback(updateShineBlueTracker);
     Stage::addDraw2DCallback(renderShineBlueTracker);
@@ -236,12 +245,13 @@ static void initModule() {
     Objects::registerObjectAsMisc("DarknessEffect", TDarknessEffect::instantiate);
     Objects::registerObjectAsMapObj("Tornado", &tornadoData, TTornadoMapObj::instantiate);
     Objects::registerObjectAsMapObj("WaterBalloon", &waterBalloonData, TWaterBalloon::instantiate);
-    //Objects::registerObjectAsMapObj("LaunchStar", &launchStarData, TLaunchStarObj::instantiate);
+    Objects::registerObjectAsMapObj("LaunchStar", &launchStarData, TLaunchStarObj::instantiate);
     Objects::registerObjectAsMapObj("KeyFollow", &followKeyData, TFollowKey::instantiate);
     Objects::registerObjectAsMapObj("KeyChest", &keyChestData, TKeyChest::instantiate);
     Objects::registerObjectAsMapObj("JizoStone", &jizoStoneData, TJizoStone::instantiate);
     Objects::registerObjectAsMapObj("ButtonSwitch", &buttonSwitchData, TButtonSwitch::instantiate);
     Objects::registerObjectAsMapObj("WaterMine", &waterMineData, TWaterMine::instantiate);
+    Objects::registerObjectAsMapObj("IronCrate", &ironCrateData, TIronCrate::instantiate);
 
     Objects::registerObjectAsMapObj("CannonBall", &cannonBallData, TCannonBall::instantiate);
     Objects::registerObjectCollideInteractor(cannonBallData.mObjectID, cannonBallCollideInteractor);

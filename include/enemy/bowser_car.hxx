@@ -9,7 +9,12 @@
 #include <BetterSMS/module.hxx>
 #include <Manager/PollutionManager.hxx>
 
-#define ZHINE_POL_DROP_COUNT 4
+class TNerveBowserTalk : public TNerveBase<TLiveActor> {
+public:
+    TNerveBowserTalk() {}
+    virtual ~TNerveBowserTalk() = default;
+    virtual bool execute(TSpineBase<TLiveActor> *) const;
+};
 
 class TNerveBowserIdle : public TNerveBase<TLiveActor> {
     friend class TDarkZhine;
@@ -44,15 +49,6 @@ class TNerveBowserFire : public TNerveBase<TLiveActor> {
 public:
     TNerveBowserFire(){};
     virtual ~TNerveBowserFire() = default;
-    virtual bool execute(TSpineBase<TLiveActor> *) const;
-};
-
-class TNerveBowserPreShoot : public TNerveBase<TLiveActor> {
-    friend class TDarkZhine;
-
-public:
-    TNerveBowserPreShoot(){};
-    virtual ~TNerveBowserPreShoot() = default;
     virtual bool execute(TSpineBase<TLiveActor> *) const;
 };
 
@@ -110,12 +106,12 @@ public:
     virtual bool execute(TSpineBase<TLiveActor> *) const;
 };
 
-class TNerveBowserAngry : public TNerveBase<TLiveActor> {
+class TNerveBowserShock : public TNerveBase<TLiveActor> {
     friend class TDarkZhine;
 
 public:
-    TNerveBowserAngry(){};
-    virtual ~TNerveBowserAngry() = default;
+    TNerveBowserShock(){};
+    virtual ~TNerveBowserShock() = default;
     virtual bool execute(TSpineBase<TLiveActor> *) const;
 };
 
@@ -159,6 +155,7 @@ public:
     void kill() override;
     void requestShadow() override;
     Mtx44 *getTakingMtx() override;
+    J3DFrameCtrl *playAnimation(const char *anm_name, f32 blend_ratio);
 
     bool isDefeated() const { return m_health_points == 0; }
     bool isHardMode() const { return m_health_points < 3; }
@@ -197,7 +194,7 @@ public:
     bool moveToNextNode(f32 speed);
     void readRailFlag();
 
-    void processIdle();
+    bool processIdle();
 
     void calcReflectingVelocity(TBGCheckData *data, f32 speed, TVec3f &out);
     void calcReflectingAngle(TBGCheckData *data, f32 *angle);
@@ -205,25 +202,61 @@ public:
     void checkForActorContact();
     bool isPlayerAttacking(TMario *);
     bool isPlayerPounding(TMario *);
+    TSpineEnemy *isBombWithinAndAttack(f32 radius, f32 height);
+    f32 getHighestGround(const TVec3f &point, f32 radius, const TBGCheckData **out);
 
     void doWorldShake(f32 strength);
 
-    f32 calcNextAngle(const TVec3f &target, f32 turn_power, f32 offset, bool indiscriminate = false);
+    f32 calcNextAngle(const TVec3f &target, f32 turn_power, f32 offset,
+                      bool indiscriminate = false);
 
     void spawnShine();
 
     JDrama::TActor *m_target;
     const TBGCheckData *m_damage_ground;
     TVec3f m_damage_pos;
+
+    f32 m_highest_ground_y;
+    const TBGCheckData *m_highest_ground;
+
     f32 m_wave_point;
     int m_nerve_status;
     int m_wet_count;
+    bool m_last_fire;
+    bool m_last_taunt;
+    bool m_intro_ended;
+    f32 m_rocket_angle;
+    TVec3f m_rocket_hit_pos;
+    s32 m_shock_wait_time;
+
+    int m_propeller_index;
+    int m_gun_l_index;
+    int m_gun_r_index;
+    int m_head_index;
+    int m_hand_index;
+    int m_fire_index;
+
+    f32 m_target_gun_l_angle;
+    f32 m_target_gun_r_angle;
+
+    f32 m_current_gun_l_angle;
+    f32 m_current_gun_r_angle;
+
+    // Graph Tracer
+    f32 m_travel_speed;
+    f32 m_target_tilt;
+    f32 m_target_tilt_speed;
+
+    TVec3f m_base_translation;
+
+    TVec3f m_fire_joint_pos;
+
+    size_t m_bullets_shot;
 
 private:
     bool m_stunned;
     bool m_invincible;
     bool m_hostile;
-    bool m_last_taunt;
 
     TVec3f m_ground_point;
 
@@ -237,18 +270,12 @@ private:
     f32 m_forward_speed;
     f32 m_model_ofs_y;
 
-    TVec3f m_base_translation;
-
     TVec3f m_target_point;
-    int m_propeller_index;
-    int m_head_index;
-    int m_hand_index;
-    int m_fire_index;
-
-    // Graph Tracer
-    f32 mTravelSpeed;
 
     Mtx m_taking_mtx;
+
+    f32 m_current_tilt;
+    f32 m_current_tilt_speed;
 };
 
 class TBossBowserCarManager : public TEnemyManager {

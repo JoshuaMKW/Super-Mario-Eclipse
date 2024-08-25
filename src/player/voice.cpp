@@ -22,7 +22,7 @@ void SoundSESystem_startSoundActorInner(u32 soundId, JAISound **sound, JAIActor 
     if (soundId != 0x78FE) {
         auto *newSound = MSoundSESystem::MSoundSE::startSoundActorInner(soundId, sound, origin,
                                                                         param_4, param_5);
-        if (!emario_status &&
+        if (!emario_status && newSound &&
             SME::TGlobals::getCharacterIDFromPlayer(gpMarioAddress) == SME::CharacterID::LUIGI) {
             newSound->setPitch(0.95, 3, 0);  // Down two semitones
             newSound->setTempoProportion(1.3, 5);
@@ -63,8 +63,9 @@ u32 playerVoiceProcess(TMario *player, MSound *sound, u32 soundID, s16 health, u
                 soundID = MSD_SE_MV13_ACTION_SMALL_03;
                 break;
             }
+            case MSD_SE_MV25A_JUMP_HUGE_01:
             case MSD_SE_MV42_JUMP_HUGE_T_01: {
-                soundID = MSD_SE_MV25A_JUMP_HUGE_01;
+                soundID = MSD_SE_MV25A_JUMP_HUGE_02;
                 break;
             }
             case MSD_SE_MV42_JUMP_HUGE_T_02: {

@@ -1,4 +1,5 @@
 #include <SMS/Manager/FlagManager.hxx>
+#include <SMS/Manager/ItemManager.hxx>
 #include <SMS/raw_fn.hxx>
 
 #include <BetterSMS/module.hxx>
@@ -14,35 +15,33 @@ static u16 get_10bit_value(u32 *value, u32 mask, u32 shift) { return (*value & m
 
 static void set_10bit_flag(u32 *array, u8 index, u16 new_value) {
     u8 word_index = (index * 10) / 32;  // Determine which 32-bit word to use
-    u8 bit_offset = 32 - ((index * 10) % 32);  // Determine the bit offset within the word
+    u8 bit_offset = (index * 10) % 32;  // Calculate the bit offset for big-endian
 
-    if (bit_offset <= 22) {
-        // If the 10-bit value fits within one 32-bit word
-        set_10bit_value(&array[word_index], 0x3FF << bit_offset, bit_offset, new_value);
-    } else {
+    if (bit_offset >= 22) {
         // If the 10-bit value spans two 32-bit words
-        u8 remaining_bits = 10 - (32 - bit_offset);
-        set_10bit_value(&array[word_index], 0x3FF << bit_offset, bit_offset,
-                        new_value << remaining_bits);
-        set_10bit_value(&array[word_index - 1], (1 << remaining_bits) - 1, 0,
-                        new_value >> (10 - remaining_bits));
+        u8 shift = bit_offset - 21;
+        set_10bit_value(&array[word_index], 0x3FF >> shift, 0, new_value >> shift);
+        set_10bit_value(&array[word_index + 1], 0x3FF << (32 - shift), 32 - shift, new_value);
+    } else {
+        // If the 10-bit value fits within one 32-bit word
+        u8 shift = 21 - bit_offset;
+        set_10bit_value(&array[word_index], 0x3FF << shift, shift, new_value);
     }
 }
 
 static u16 get_10bit_flag(u32 *array, u8 index) {
     u8 word_index = (index * 10) / 32;  // Determine which 32-bit word to use
-    u8 bit_offset = 32 - (index * 10) % 32;  // Determine the bit offset within the word
+    u8 bit_offset = (index * 10) % 32;  // Calculate the bit offset for big-endian
 
-    if (bit_offset <= 22) {
-        // If the 10-bit value fits within one 32-bit word
-        return get_10bit_value(&array[word_index], 0x3FF << bit_offset, bit_offset);
-    } else {
+    if (bit_offset >= 22) {
         // If the 10-bit value spans two 32-bit words
-        u8 remaining_bits = 10 - (32 - bit_offset);
-        u16 lower_part =
-            get_10bit_value(&array[word_index], 0x3FF << bit_offset, bit_offset) >> remaining_bits;
-        u16 upper_part = get_10bit_value(&array[word_index - 1], (1 << remaining_bits) - 1, 0);
-        return (upper_part << (10 - remaining_bits)) | lower_part;
+        u8 shift = bit_offset - 21;
+        return (get_10bit_value(&array[word_index], 0x3FF >> shift, 0) << shift) |
+               get_10bit_value(&array[word_index + 1], 0x3FF << (32 - shift), 32 - shift);
+    } else {
+        // If the 10-bit value fits within one 32-bit word
+        u8 shift = 21 - bit_offset;
+        return get_10bit_value(&array[word_index], 0x3FF << shift, shift);
     }
 }
 
@@ -106,6 +105,26 @@ static u32 shineStageCoinRecordIndex(u32 normalStage) {
 }
 SMS_PATCH_BL(SMS_PORT_REGION(0x8017495C, 0, 0, 0), shineStageCoinRecordIndex);
 
+constexpr static const char *sShineKey =
+    "\x83\x56\x83\x83\x83\x43\x83\x93\x81\x69\x82\x50\x82\x4F\x82\x4F\x96\x87\x83"
+    "\x52\x83\x43\x83\x93\x97\x70\x81\x6A\x00\x00";
+
+constexpr static const char *sShineDemoKey =
+    "\x83\x56\x83\x83\x83\x43\x83\x93\x81\x69\x82\x50\x82\x4F\x82\x4F\x96\x87\x83"
+    "\x52\x83\x43\x83\x93\x97\x70\x81\x6A\x83\x4A\x83\x81\x83\x89\x00\x00";
+
+static void spawn100CoinShine(const TVec3f &position) {
+    auto *nameref = TMarNameRefGen::getInstance()->getRootNameRef();
+
+    u16 keycode = JDrama::TNameRef::calcKeyCode(sShineKey);
+    if (nameref->searchF(keycode, sShineKey)) {
+        gpItemManager->makeShineAppearWithDemo(sShineKey, sShineDemoKey, position.x, position.y,
+                                               position.z);
+    }
+}
+
+static bool sIs100ShineSpawned = false;
+
 static void shineStageCoinRecordUpdate() {
     u32 normalStageID = gpApplication.mCurrentScene.mAreaID;
     u32 shineStageID  = shineStageCoinRecordIndex(normalStageID);
@@ -113,6 +132,18 @@ static void shineStageCoinRecordUpdate() {
         if (shineStageID == SMS_getShineStage__FUc(normalStageID)) {
             // Under this circumstance the area has no record, see above.
             TFlagManager::smInstance->incFlag(0x40002, 1);
+
+            // BetterSMS fixes this in incGoldCoinFlag path
+            // so we only do it ourselves when the func isn't called.
+            size_t coins = TFlagManager::smInstance->getFlag(0x40002);
+            if (BetterSMS::areExploitsPatched()) {
+                if (!sIs100ShineSpawned && coins > 99) {
+                    spawn100CoinShine(*gpMarioPos);
+                    sIs100ShineSpawned = true;
+                }
+            } else if (coins == 100) {
+                spawn100CoinShine(*gpMarioPos);
+            }
             return;
         }
     }
@@ -186,3 +217,31 @@ static bool getBlueCoinFlagOverride(TFlagManager *manager, u8 normalStage, u8 co
     return manager->getBool((shineStage - 1) * 50 + coinID + 0x10078);
 }
 SMS_PATCH_B(SMS_PORT_REGION(0x80294580, 0, 0, 0), getBlueCoinFlagOverride);
+
+static size_t countBlueCoinShines() {
+    size_t count = 0;
+    for (u32 i = 0x46; i < 0x56; i++) {
+        count += TFlagManager::smInstance->getBool(0x10000 + i);
+    }
+    for (u32 i = 0x6C; i < 0x74; i++) {
+        count += TFlagManager::smInstance->getBool(0x10000 + i);
+    }
+    for (u32 i = 221; i < 239; ++i) {
+        count += TFlagManager::smInstance->getShineFlag(i);
+    }
+    return count;
+}
+SMS_PATCH_BL(0x80146bfc, countBlueCoinShines);
+SMS_WRITE_32(0x80146c00, 0x7c791b78);
+SMS_PATCH_B(0x80146c04, 0x80146c50);
+
+SMS_PATCH_BL(0x801475c8, countBlueCoinShines);
+SMS_WRITE_32(0x801475cc, 0x7c7c1b78);
+SMS_PATCH_B(0x801475d0, 0x8014761c);
+
+SMS_PATCH_BL(0x8014df4c, countBlueCoinShines);
+SMS_WRITE_32(0x8014df50, 0x7c771b78);
+SMS_PATCH_B(0x8014df54, 0x8014dfa0);
+
+// STATIC RESETTER
+BETTER_SMS_FOR_EXPORT void reset100CoinState(TMarDirector *director) { sIs100ShineSpawned = false; }

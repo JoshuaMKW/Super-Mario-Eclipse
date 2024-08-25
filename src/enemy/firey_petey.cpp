@@ -316,7 +316,7 @@ bool TNerveFPFireBreath::execute(TSpineBase<TLiveActor> *spine) const {
                         mFire->mVelocity.x = 50.0f * sinf(angleToRadians(target->mRotation.y));
                         mFire->mVelocity.y = 0;
                         mFire->mVelocity.z = 50.0f * cosf(angleToRadians(target->mRotation.y));
-                        mFire->mTranslation.set(*reinterpret_cast<TVec3f *>(&emitterFire->_00[84]));
+                        mFire->mTranslation.set(*reinterpret_cast<TVec3f *>(((u8 *)emitterFire) + 0x15C));
                         mFire->mTranslation.y -= 237.5f;
                         mFire->mLifetime = 30 * 4;
                     }
@@ -343,6 +343,11 @@ bool TNerveFPSwallow::execute(TSpineBase<TLiveActor> *spine) const {
     if (spine->mNerveTimer == 0) {
         target->changeBck(0x1a);
     }
+
+    if ((target->mTranslation.y - target->mGroundY) > 50.0f) {
+        return true;
+    }
+
     if (target->_03[2] < params->mSLWaterMarkLimit.get()) {
         auto positonMatrix = target->getModel()->mJointArray[0x12];
         gpMarioParticleManager->emitAndBindToMtxPtr(0x15d, positonMatrix, 1, target);
@@ -350,7 +355,6 @@ bool TNerveFPSwallow::execute(TSpineBase<TLiveActor> *spine) const {
 
         if (target->_03[0] == 0) {
             target->_03[1] = 0;
-            //spine->setNerve(&wait);
             return true;
         }
         target->changeBck(0x1a);
@@ -527,7 +531,6 @@ void TFireyPetey::gotHipDropDamage() {
             if (gpMSound->gateCheck(0x284d)) {
                 MSoundSE::startSoundActor(0x284d, mTranslation, 0, nullptr, 0x0, 4);
             }
-            mSpineBase->pushNerve(&takeoff);
             mSpineBase->pushNerve(
                 reinterpret_cast<TNerveBase<TLiveActor> *>(theNerve__13TNerveBPGetUpFv()));
             mSpineBase->setNerve(

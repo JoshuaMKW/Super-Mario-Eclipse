@@ -274,9 +274,11 @@ static void assignExitAreaDestination(TGameSequence *sequence, u8 area, u8 episo
     case TGameSequence::AREA_PINNABOSS:
     case TGameSequence::AREA_SIRENAEX1:
     case TGameSequence::AREA_COROEX4:
-        gpApplication.mNextScene.mAreaID    = TGameSequence::AREA_PINNABEACH;
-        gpApplication.mNextScene.mEpisodeID = 0xFF;
-        TFlagManager::smInstance->setBool(true, 0x50010);
+        if (z_pressed) {
+            gpApplication.mNextScene.mAreaID    = TGameSequence::AREA_PINNABEACH;
+            gpApplication.mNextScene.mEpisodeID = 0xFF;
+            TFlagManager::smInstance->setBool(true, 0x50010);
+        }
         return;
     case TGameSequence::AREA_MARE:
     case TGameSequence::AREA_MAREUNDERSEA:

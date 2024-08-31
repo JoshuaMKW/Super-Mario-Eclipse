@@ -55,7 +55,7 @@ static bool s_first_pound     = true;
 #define BOWSER_ANM_IDX_STUN  4
 #define BOWSER_ANM_IDX_WAKE  5
 
-#define BOWSER_FLY_HEIGHT         500.0f
+#define BOWSER_FLY_HEIGHT         700.0f
 #define BOWSER_FLY_WAVE_AMPLITUDE 80.0f
 #define BOWSER_FLY_WAVE_FREQUENCY (1.0f / 30.0f);
 #define BOWSER_GRAVITY            0.98f
@@ -131,8 +131,17 @@ static int propellorCallback(J3DNode *node, int joint_index) {
     // tmtx[2][3] = 0.0f;
 
     Mtx rotmtx;
-    PSMTXRotRad(rotmtx, 'y',
-                gpBowserCar->m_wave_point * 5.0f + angleToRadians(gpBowserCar->mRotation.y));
+    if (gpBowserCar->mSpineBase->getLatestNerve() != &s_bowser_nerve_shock) {
+        PSMTXRotRad(rotmtx, 'y',
+                    (gpBowserCar->m_wave_point * 5.0f + angleToRadians(gpBowserCar->mRotation.y)));
+    } else {
+        f32 amplitude = (cosf(gpBowserCar->m_wave_point) * sinf(gpBowserCar->m_wave_point)) -
+                        (sin(gpBowserCar->m_wave_point * 3.0f) * 0.5f);
+        PSMTXRotRad(rotmtx, 'y',
+                    gpBowserCar->m_wave_point * amplitude +
+                        angleToRadians(gpBowserCar->mRotation.y));
+    }
+
     PSMTXConcat(tmtx, rotmtx, tmtx);
     // tmtx[0][3] = x;
     // tmtx[1][3] = y;
@@ -363,6 +372,8 @@ static bool isRocketInUse() {
     return any_attacking || any_possessed;
 }
 
+AtomBalloonMessageViewer s_bomb_message(145, 200);
+
 TBossBowserCar::TBossBowserCar(const char *name)
     : TSpineEnemy(name), m_ground_point(), m_stunned(false), m_invincible(false), m_hostile(true),
       m_anm_index(0), m_bounding_point(), m_target(nullptr), m_health_points(5), m_damage_timer(0),
@@ -382,7 +393,7 @@ void TBossBowserCar::init(TLiveManager *manager) {
     mActorData->calc();
     mActorData->viewCalc();
 
-    initHitActor(0x8000011, 10, 0x81000000, 350.0f, 750.0f, 350.0f, 750.0f);
+    initHitActor(0x8000011, 10, 0x81000000, 370.0f, 800.0f, 370.0f, 800.0f);
     initAnmSound();
 
     mShadowRadius = 500.0f;
@@ -390,7 +401,7 @@ void TBossBowserCar::init(TLiveManager *manager) {
     mStateFlags.asU32 |= 0x8;
 
     mSpineBase->setNerve(&s_bowser_nerve_talk);
-    m_health_points = 1;
+    m_health_points = 5;
     m_model_ofs_y   = 50.0f;
 
     m_propeller_index = ((JUTNameTab *)mActorData->mModel->mModelData->_B0)->getIndex("prop") - 1;
@@ -420,6 +431,7 @@ void TBossBowserCar::init(TLiveManager *manager) {
     m_intro_ended = false;
 
     s_has_bgm_started = false;
+    s_bomb_message.reset();
 }
 
 void TBossBowserCar::load(JSUMemoryInputStream &in) { TSpineEnemy::load(in); }
@@ -506,11 +518,16 @@ bool TBossBowserCar::receiveMessage(THitActor *sender, u32 message) {
         f32 water_magnitude = water_speed->magnitude();
         if (water_magnitude > 26.0f) {
             J3DModel *model = getModel();
-            TVec3f head_pos = {model->mJointArray[m_head_index][0][3],
-                               model->mJointArray[m_head_index][1][3],
-                               model->mJointArray[m_head_index][2][3]};
 
-            if (PSVECDistance(head_pos, sender->mTranslation) < mReceiveRadius) {
+            if (!isHardMode()) {
+                TVec3f head_pos = {model->mJointArray[m_head_index][0][3],
+                                   model->mJointArray[m_head_index][1][3],
+                                   model->mJointArray[m_head_index][2][3]};
+
+                if (PSVECDistance(head_pos, sender->mTranslation) < mReceiveRadius) {
+                    m_wet_count = Min(m_wet_count + 4, 255);
+                }
+            } else {
                 m_wet_count = Min(m_wet_count + 4, 255);
             }
 
@@ -619,13 +636,36 @@ void TBossBowserCar::control() {
 
     m_highest_ground_y = getHighestGround(m_base_translation, 500.0f, &m_highest_ground);
 
-    if (TSpineEnemy *bomb = isBombWithinAndAttack(mReceiveRadius * 1.1f, mReceiveHeight * 1.1f)) {
+    if (TSpineEnemy *bomb = isBombWithinAndAttack(mReceiveRadius * 1.3f, mReceiveHeight * 1.2f)) {
         m_health_points -= 1;
         m_rocket_hit_pos = bomb->mTranslation;
         m_rocket_angle   = radiansToAngle(
             atan2f(m_rocket_hit_pos.y - mTranslation.y, m_rocket_hit_pos.x - mTranslation.x));
         mSpineBase->setNerve(&s_bowser_nerve_shot);
         bomb->kill();
+    }
+
+    m_invincible_timer = Max(0, m_invincible_timer - 1);
+
+    if (mSpineBase->getLatestNerve() != &s_bowser_nerve_throw) {
+        if (TSpineEnemy *bombhei = static_cast<TSpineEnemy *>(mHeldObject)) {
+            // Drop the object
+            TVec3f throw_speed = {10.0f, 10.0f, 10.0f};
+
+            TVec3f direction = {sinf(angleToRadians(mRotation.y)), 0.0f,
+                                cosf(angleToRadians(mRotation.y))};
+            direction.y      = 0.0f;
+
+            PSVECNormalize(direction, direction);
+            direction *= throw_speed;
+            direction.scale(0.5f + (rand() % 100) * 0.005f);
+            direction.y = 15.0f;
+
+            bombhei->mSpeed  = direction;
+            bombhei->mHolder = nullptr;
+            bombhei->ensureTakeSituation();
+            mHeldObject = nullptr;
+        }
     }
 }
 
@@ -686,7 +726,7 @@ void TBossBowserCar::calcRootMatrix() {
 
 void TBossBowserCar::reset() {
     setStunned(false);
-    setInvincible(true);
+    setInvincibleTimer(0);
     mTranslation       = m_bounding_point;
     mRotation          = TVec3f::zero();
     m_base_translation = mTranslation;
@@ -749,7 +789,7 @@ Mtx44 *TBossBowserCar::getTakingMtx() {
     return (Mtx44 *)m_taking_mtx;
 }
 
-J3DFrameCtrl *TBossBowserCar::playAnimation(const char *anm_name, f32 blend_ratio) {
+J3DFrameCtrl *TBossBowserCar::playAnimation(const char *anm_name, f32 delta, f32 blend_ratio) {
     J3DFrameCtrl *frameCtrl = mActorData->getFrameCtrl(MActor::BCK);
 
     if (mActorData->mBckInfo) {
@@ -758,6 +798,7 @@ J3DFrameCtrl *TBossBowserCar::playAnimation(const char *anm_name, f32 blend_rati
     }
 
     mActorData->setBck(anm_name);
+    mActorData->setFrameRate(SMSGetAnmFrameRate() * delta * 0.5f, MActor::BCK);
     return frameCtrl;
 }
 
@@ -978,6 +1019,10 @@ bool TBossBowserCar::isPlayerPounding(TMario *player) {
 }
 
 TSpineEnemy *TBossBowserCar::isBombWithinAndAttack(f32 radius, f32 height) {
+    if (isInvincible()) {
+        return nullptr;
+    }
+
     // Avoid invincible states
     if (mSpineBase->getLatestNerve() == &s_bowser_nerve_shot ||
         mSpineBase->getLatestNerve() == &s_bowser_nerve_rise) {
@@ -995,6 +1040,11 @@ TSpineEnemy *TBossBowserCar::isBombWithinAndAttack(f32 radius, f32 height) {
             if (!isDamageToCannon__8TBombHeiFv(enemy)) {
                 continue;
             }
+
+            if (enemy->mTranslation.y < mTranslation.y) {
+                continue;
+            }
+
             // Check if the bomb is within the ecliptic radius
             TVec3f diff = {enemy->mTranslation.x - mTranslation.x,
                            enemy->mTranslation.y - mTranslation.y,
@@ -1102,6 +1152,7 @@ void TBossBowserCarManager::load(JSUMemoryInputStream &in) {
     gpResourceManager->load("/scene/bowsercar/jpa/ms_kp_smoke_a.jpa", 0x1b5);
     gpResourceManager->load("/scene/bowsercar/jpa/ms_kp_spark_a.jpa", 0x1b6);
     gpResourceManager->load("/scene/bowsercar/jpa/ms_kp_spark_b.jpa", 0x1b7);
+    gpResourceManager->load("/scene/map/map/ms_kp_hipdrop.jpa", 0x1b8);
 }
 
 bool TNerveBowserIdle::execute(TSpineBase<TLiveActor> *spine) const {
@@ -1113,8 +1164,24 @@ bool TNerveBowserIdle::execute(TSpineBase<TLiveActor> *spine) const {
     bowser->m_target_gun_r_angle = 0.0f;
 
     if (spine->mNerveTimer == 0) {
-        bowser->playAnimation("bowser_idle", 0.5f);
-        bowser->mActorData->setFrameRate(0.8f, MActor::BCK);
+        bowser->playAnimation("bowser_idle", 0.8f, 0.5f);
+    }
+
+    if (gpMarDirector->mNextStateA != 0 || !TFlagManager::smInstance->getFlag(0x6000B)) {
+        if (bowser->moveToNextNode(bowser->m_travel_speed)) {
+            int nextIndex = web->getRandomNextIndex(bowser->mGraphTracer->mCurrentNode,
+                                                    bowser->mGraphTracer->mPreviousNode, -1);
+            bowser->mGraphTracer->moveTo(nextIndex);
+
+            if (!bowser->m_last_taunt) {
+                bowser->mSpineBase->pushNerve(&s_bowser_nerve_taunt);
+                bowser->m_last_taunt = true;
+                return true;
+            }
+
+            bowser->m_last_taunt = false;
+            return false;
+        }
     }
 
     if (bowser->isHardMode() ||
@@ -1130,25 +1197,6 @@ bool TNerveBowserIdle::execute(TSpineBase<TLiveActor> *spine) const {
     }
 
     if (web) {
-        if (gpMarDirector->mNextStateA != 0 && !bowser->m_intro_ended) {
-            if (bowser->moveToNextNode(bowser->m_travel_speed)) {
-                int nextIndex = web->getRandomNextIndex(bowser->mGraphTracer->mCurrentNode,
-                                                        bowser->mGraphTracer->mPreviousNode, -1);
-                bowser->mGraphTracer->moveTo(nextIndex);
-
-                if (!bowser->m_last_taunt) {
-                    bowser->mSpineBase->pushNerve(&s_bowser_nerve_taunt);
-                    bowser->m_last_taunt = true;
-                    return true;
-                }
-
-                bowser->m_last_taunt = false;
-                return false;
-            }
-        }
-
-        bowser->m_intro_ended = true;
-
         if (bowser->isHardMode()) {
             if (bowser->moveToNextNode(bowser->m_travel_speed * 1.2f)) {
                 bowser->m_last_fire = false;
@@ -1209,8 +1257,7 @@ bool TNerveBowserTaunt::execute(TSpineBase<TLiveActor> *spine) const {
     bowser->mGravity = 0.0f;
 
     if (spine->mNerveTimer == 0) {
-        bowser->playAnimation("bowser_taunt", 0.5f);
-        bowser->mActorData->setFrameRate(0.9f, MActor::BCK);
+        bowser->playAnimation("bowser_taunt", 0.9f, 0.5f);
         if (gpMSound->gateCheck(MSD_SE_BS_KOOPA_VO_LAUGH)) {
             JAISound *sound = MSoundSE::startSoundActor(MSD_SE_BS_KOOPA_VO_LAUGH,
                                                         bowser->mTranslation, 0, nullptr, 0, 4);
@@ -1239,8 +1286,7 @@ bool TNerveBowserThrow::execute(TSpineBase<TLiveActor> *spine) const {
     bowser->mGravity = 0.0f;
 
     if (spine->mNerveTimer == 0) {
-        bowser->playAnimation("bowser_throw", 0.5f);
-        bowser->mActorData->setFrameRate(0.5f, MActor::BCK);
+        bowser->playAnimation("bowser_throw", 0.5f, 0.5f);
         if (gpMSound->gateCheck(MSD_SE_BS_KOOPA_VO_THREAT_0)) {
             MSoundSE::startSoundActor(MSD_SE_BS_KOOPA_VO_THREAT_0, bowser->mTranslation, 0, nullptr,
                                       0, 4);
@@ -1321,8 +1367,7 @@ bool TNerveBowserFire::execute(TSpineBase<TLiveActor> *spine) const {
 
     if (spine->mNerveTimer == 0) {
         bowser->m_nerve_status = 0;
-        bowser->playAnimation("bowser_fire_begin", 0.5f);
-        bowser->mActorData->setFrameRate(1.2f, MActor::BCK);
+        bowser->playAnimation("bowser_fire_begin", 1.2f, 0.5f);
 
         if (gpMSound->gateCheck(MSD_SE_BS_KOOPA_FIRE_START)) {
             JAISound *sound = MSoundSE::startSoundActor(MSD_SE_BS_KOOPA_FIRE_START,
@@ -1365,14 +1410,12 @@ bool TNerveBowserFire::execute(TSpineBase<TLiveActor> *spine) const {
                 0x1a7, &bowser->m_fire_joint_pos, 1, &s_fire_particle_callback, bowser);
 #endif
 
-            for (int i = 0x1a7; i > 0x1a4; i--) {
-                gpMarioParticleManager->emitAndBindToMtxPtr(i, *fire_mtx, 1, bowser);
-            }
             gpMarioParticleManager->emitAndBindToMtxPtr(0x1a7, *fire_mtx, 1, bowser);
 
-            JPABaseEmitter *emitterFire =
-                gpMarioParticleManager->emitAndBindToMtxPtr(0x1a6, *fire_mtx, 1, bowser);
-            *(JPACallBackBase<> **)((u8 *)emitterFire + 0x110) = &s_fire_particle_callback;
+            if (JPABaseEmitter *emitterFire =
+                    gpMarioParticleManager->emitAndBindToMtxPtr(0x1a6, *fire_mtx, 1, bowser)) {
+                *(JPACallBackBase<> **)((u8 *)emitterFire + 0x110) = &s_fire_particle_callback;
+            }
 
             gpMarioParticleManager->emitAndBindToMtxPtr(0x1a5, *fire_mtx, 1, bowser);
             gpMarioParticleManager->emitAndBindToMtxPtr(0x1a4, *fire_mtx, 1, bowser);
@@ -1383,8 +1426,7 @@ bool TNerveBowserFire::execute(TSpineBase<TLiveActor> *spine) const {
     if (bowser->mActorData->isCurAnmAlreadyEnd(MActor::BCK)) {
         if (bowser->m_nerve_status == 0) {
             bowser->m_nerve_status = 1;
-            bowser->playAnimation("bowser_fire_loop", 0.5f);
-            bowser->mActorData->setFrameRate(0.7f, MActor::BCK);
+            bowser->playAnimation("bowser_fire_loop", 0.7f, 0.5f);
         } else if (bowser->m_nerve_status == 2) {
             bowser->m_nerve_status = 0;
             spine->pushNerve(&s_bowser_nerve_idle);
@@ -1395,8 +1437,7 @@ bool TNerveBowserFire::execute(TSpineBase<TLiveActor> *spine) const {
     if (spine->mNerveTimer > 700) {
         if (bowser->m_nerve_status == 1) {
             bowser->m_nerve_status = 2;
-            bowser->playAnimation("bowser_fire_end", 0.5f);
-            bowser->mActorData->setFrameRate(0.7f, MActor::BCK);
+            bowser->playAnimation("bowser_fire_end", 0.7f, 0.5f);
         }
     }
 
@@ -1411,8 +1452,9 @@ bool TNerveBowserShoot::execute(TSpineBase<TLiveActor> *spine) const {
         bowser->calcNextAngle(bowser->m_target->mTranslation, BOWSER_TURN_POWER, 0.0f);
 
     if (spine->mNerveTimer == 0) {
-        bowser->playAnimation("bowser_taunt", 0.5f);
-        bowser->mActorData->setFrameRate(0.9f, MActor::BCK);
+        bowser->m_nerve_status = 0;
+
+        bowser->playAnimation("bowser_taunt", 0.9f, 0.5f);
 
         if (gpMSound->gateCheck(MSD_SE_BS_KOOPA_VO_LAUGH)) {
             MSoundSE::startSoundActor(MSD_SE_BS_KOOPA_VO_LAUGH, bowser->mTranslation, 0, nullptr, 0,
@@ -1423,6 +1465,11 @@ bool TNerveBowserShoot::execute(TSpineBase<TLiveActor> *spine) const {
         bowser->m_target_gun_r_angle = (((f32)(rand() % 100) * 0.01f) - 0.5f) * M_PI * 0.15;
 
         bowser->m_bullets_shot = 0;
+    }
+
+    if (bowser->m_nerve_status == 0 && bowser->mActorData->isCurAnmAlreadyEnd(MActor::BCK)) {
+        bowser->m_nerve_status = 1;
+        bowser->playAnimation("bowser_idle", 0.7f, 0.5f);
     }
 
     if (spine->mNerveTimer > 0 && (spine->mNerveTimer % 120) == 0) {
@@ -1486,8 +1533,7 @@ bool TNerveBowserWet::execute(TSpineBase<TLiveActor> *spine) const {
     bowser->m_target_tilt_speed = 1.0f;
 
     if (spine->mNerveTimer == 0) {
-        bowser->playAnimation("bowser_water_begin", 0.5f);
-        bowser->mActorData->setFrameRate(1.0f, MActor::BCK);
+        bowser->playAnimation("bowser_water_begin", 1.0f, 0.5f);
 
         TSpineEnemy *bombhei = static_cast<TSpineEnemy *>(bowser->mHeldObject);
         if (bombhei) {
@@ -1519,8 +1565,7 @@ bool TNerveBowserWet::execute(TSpineBase<TLiveActor> *spine) const {
     if (bowser->mActorData->isCurAnmAlreadyEnd(MActor::BCK)) {
         if (bowser->m_nerve_status == 0) {
             bowser->m_nerve_status = 1;
-            bowser->playAnimation("bowser_water_loop", 0.5f);
-            bowser->mActorData->setFrameRate(0.7f, MActor::BCK);
+            bowser->playAnimation("bowser_water_loop", 0.7f, 0.5f);
         } else if (bowser->m_nerve_status == 3) {
             bowser->m_nerve_status = 0;
             spine->pushNerve(&s_bowser_nerve_idle);
@@ -1530,8 +1575,7 @@ bool TNerveBowserWet::execute(TSpineBase<TLiveActor> *spine) const {
 
     if (bowser->m_nerve_status == 2) {
         bowser->m_nerve_status = 3;
-        bowser->playAnimation("bowser_water_end", 0.5f);
-        bowser->mActorData->setFrameRate(0.7f, MActor::BCK);
+        bowser->playAnimation("bowser_water_end", 0.7f, 0.5f);
     }
 
     return false;
@@ -1544,8 +1588,7 @@ bool TNerveBowserStun::execute(TSpineBase<TLiveActor> *spine) const {
     bowser->setStunned(true);
 
     if (spine->mNerveTimer == 0) {
-        bowser->playAnimation("bowser_stun_begin", 0.5f);
-        bowser->mActorData->setFrameRate(1.0f, MActor::BCK);
+        bowser->playAnimation("bowser_stun_begin", 1.0f, 0.5f);
         bowser->m_target_tilt       = 0.5f;
         bowser->m_target_tilt_speed = 0.5f;
     }
@@ -1553,8 +1596,7 @@ bool TNerveBowserStun::execute(TSpineBase<TLiveActor> *spine) const {
     if (bowser->mActorData->isCurAnmAlreadyEnd(MActor::BCK)) {
         if (bowser->m_nerve_status == 0) {
             bowser->m_nerve_status = 1;
-            bowser->playAnimation("bowser_stun_loop", 0.5f);
-            bowser->mActorData->setFrameRate(0.7f, MActor::BCK);
+            bowser->playAnimation("bowser_stun_loop", 0.7f, 0.5f);
         } else if (bowser->m_nerve_status == 2) {
             bowser->m_nerve_status = 0;
             spine->pushNerve(&s_bowser_nerve_rise);
@@ -1581,8 +1623,7 @@ bool TNerveBowserStun::execute(TSpineBase<TLiveActor> *spine) const {
             bowser->m_nerve_status      = 2;
             bowser->m_target_tilt       = 0.0f;
             bowser->m_target_tilt_speed = 0.5f;
-            bowser->playAnimation("bowser_stun_end", 0.5f);
-            bowser->mActorData->setFrameRate(0.7f, MActor::BCK);
+            bowser->playAnimation("bowser_stun_end", 0.7f, 0.5f);
         }
     }
 
@@ -1599,11 +1640,23 @@ bool TNerveBowserShot::execute(TSpineBase<TLiveActor> *spine) const {
 
         TVec3f forward      = bowser->mTranslation - s_fly_away_point;
         bowser->mRotation.y = bowser->calcNextAngle(forward, BOWSER_TURN_POWER, 0.0f);
+
+        TSpineEnemy *bombhei = static_cast<TSpineEnemy *>(bowser->mHeldObject);
+        if (bombhei) {
+            TVec3f throw_speed = {sinf(rand() % 10), 0.0f, sinf(rand() % 10)};
+            PSVECNormalize(throw_speed, throw_speed);
+            throw_speed.scale(10.0f);
+            throw_speed.y = 20.0f;
+
+            bombhei->mSpeed  = throw_speed;
+            bombhei->mHolder = nullptr;
+            bombhei->ensureTakeSituation();
+            bowser->mHeldObject = nullptr;
+        }
     }
 
     if (spine->mNerveTimer == 0) {
-        bowser->playAnimation("bowser_shot", 0.5f);
-        bowser->mActorData->setFrameRate(0.9f, MActor::BCK);
+        bowser->playAnimation("bowser_shot", 0.9f, 0.5f);
         if (gpMSound->gateCheck(MSD_SE_BS_KOOPA_VO_DAMAGE_0)) {
             MSoundSE::startSoundActor(MSD_SE_BS_KOOPA_VO_DAMAGE_0, bowser->mTranslation, 0, nullptr,
                                       0, 4);
@@ -1665,8 +1718,7 @@ bool TNerveBowserRecover::execute(TSpineBase<TLiveActor> *spine) const {
     bowser->mGravity = 0.0f;
 
     if (spine->mNerveTimer == 0) {
-        bowser->playAnimation("bowser_recover", 0.5f);
-        bowser->mActorData->setFrameRate(0.8f, MActor::BCK);
+        bowser->playAnimation("bowser_recover", 0.8f, 0.5f);
 
         if (gpMSound->gateCheck(MSD_SE_BS_KOOPA_VO_THREAT_1)) {
             MSoundSE::startSoundActor(MSD_SE_BS_KOOPA_VO_THREAT_1, bowser->mTranslation, 0, nullptr,
@@ -1694,8 +1746,7 @@ bool TNerveBowserRise::execute(TSpineBase<TLiveActor> *spine) const {
         ((bowser->m_highest_ground_y + BOWSER_FLY_HEIGHT) - bowser->mTranslation.y) * 0.015f;
 
     if (spine->mNerveTimer == 0) {
-        bowser->playAnimation("bowser_recover", 0.5f);
-        bowser->mActorData->setFrameRate(0.8f, MActor::BCK);
+        bowser->playAnimation("bowser_recover", 0.8f, 0.5f);
         if (gpMSound->gateCheck(MSD_SE_BS_KOOPA_VO_THREAT_1)) {
             MSoundSE::startSoundActor(MSD_SE_BS_KOOPA_VO_THREAT_1, bowser->mTranslation, 0, nullptr,
                                       0, 4);
@@ -1718,8 +1769,7 @@ bool TNerveBowserShock::execute(TSpineBase<TLiveActor> *spine) const {
     bowser->m_target_tilt_speed = 2.0f;
 
     if (spine->mNerveTimer == 0) {
-        bowser->playAnimation("bowser_shock_begin", 0.5f);
-        bowser->mActorData->setFrameRate(1.0f, MActor::BCK);
+        bowser->playAnimation("bowser_shock_begin", 1.0f, 0.5f);
 
         TSpineEnemy *bombhei = static_cast<TSpineEnemy *>(bowser->mHeldObject);
         if (bombhei) {
@@ -1731,6 +1781,10 @@ bool TNerveBowserShock::execute(TSpineBase<TLiveActor> *spine) const {
             bombhei->ensureTakeSituation();
             bowser->mHeldObject = nullptr;
         }
+
+        bowser->setInvincibleTimer(200);
+
+        s_bomb_message.show();
     }
 
     if ((spine->mNerveTimer % 200) == 0) {
@@ -1760,8 +1814,7 @@ bool TNerveBowserShock::execute(TSpineBase<TLiveActor> *spine) const {
     if (bowser->mActorData->isCurAnmAlreadyEnd(MActor::BCK)) {
         if (bowser->m_nerve_status == 0) {
             bowser->m_nerve_status = 1;
-            bowser->playAnimation("bowser_shock_loop", 0.5f);
-            bowser->mActorData->setFrameRate(0.7f, MActor::BCK);
+            bowser->playAnimation("bowser_shock_loop", 0.7f, 0.5f);
         } else if (bowser->m_nerve_status == 3) {
             bowser->m_nerve_status = 0;
             spine->pushNerve(&s_bowser_nerve_rise);
@@ -1803,8 +1856,7 @@ bool TNerveBowserShock::execute(TSpineBase<TLiveActor> *spine) const {
 
         if (bowser->m_shock_wait_time <= 0) {
             bowser->m_nerve_status = 3;
-            bowser->playAnimation("bowser_shock_end", 0.5f);
-            bowser->mActorData->setFrameRate(0.7f, MActor::BCK);
+            bowser->playAnimation("bowser_shock_end", 0.7f, 0.5f);
         }
     }
 
@@ -1822,8 +1874,7 @@ bool TNerveBowserPreKill::execute(TSpineBase<TLiveActor> *spine) const {
     ControlBowserPrekillCam_(gpCamera);
 
     if (spine->mNerveTimer == 0) {
-        bowser->playAnimation("bowser_dead_start", 0.5f);
-        bowser->mActorData->setFrameRate(1.0f, MActor::BCK);
+        bowser->playAnimation("bowser_dead_start", 1.0f, 0.5f);
 
         if (gpMSound->gateCheck(MSD_SE_OBJ_SANDBOMB_BANG)) {
             JAISound *sound = MSoundSE::startSoundActor(MSD_SE_OBJ_SANDBOMB_BANG,
@@ -1835,6 +1886,10 @@ bool TNerveBowserPreKill::execute(TSpineBase<TLiveActor> *spine) const {
 
         TFlagManager::smInstance->setFlag(0x6001B, true);
         gpMarioAddress->mInvincibilityFrames = 600;
+
+        if (gpMarioAddress->mHealth < 8) {
+            gpMarioAddress->incHP(8 - gpMarioAddress->mHealth);
+        }
     }
 
     if (spine->mNerveTimer == 180) {
@@ -1867,8 +1922,7 @@ bool TNerveBowserKill::execute(TSpineBase<TLiveActor> *spine) const {
     ControlBowserKillCam_(gpCamera);
 
     if (spine->mNerveTimer == 0) {
-        bowser->playAnimation("bowser_dead_end", 0.5f);
-        bowser->mActorData->setFrameRate(0.5f, MActor::BCK);
+        bowser->playAnimation("bowser_dead_end", 0.5f, 0.5f);
 
         if (gpMSound->gateCheck(MSD_SE_BS_KOOPA_VO_DAMAGE_1)) {
             JAISound *sound = MSoundSE::startSoundActor(MSD_SE_BS_KOOPA_VO_DAMAGE_1,
@@ -1879,8 +1933,7 @@ bool TNerveBowserKill::execute(TSpineBase<TLiveActor> *spine) const {
         }
 
         if (gpMSound->gateCheck(MSD_SE_OBJ_SANDBOMB_BANG)) {
-            MSoundSE::startSoundSystemSE(MSD_SE_OBJ_SANDBOMB_BANG, 0,
-                                      nullptr, 0);
+            MSoundSE::startSoundSystemSE(MSD_SE_OBJ_SANDBOMB_BANG, 0, nullptr, 0);
         }
 
         if (gpMSound->gateCheck(MSD_SE_OBJ_GLASS_BREAK)) {
@@ -1901,7 +1954,8 @@ bool TNerveBowserKill::execute(TSpineBase<TLiveActor> *spine) const {
         forward.scale(0.1f);
         bomb_pos -= forward;
 
-        if (THitActor *explosion = (THitActor *)gpConductor->makeOneEnemyAppear(bomb_pos, s_explosion_name, 1)) {
+        if (THitActor *explosion =
+                (THitActor *)gpConductor->makeOneEnemyAppear(bomb_pos, s_explosion_name, 1)) {
             explosion->mScale.scale(2.0f);
         }
 
@@ -1928,15 +1982,14 @@ bool TNerveBowserTalk::execute(TSpineBase<TLiveActor> *spine) const {
 
     if (spine->mNerveTimer == 0) {
         bowser->m_nerve_status = 0;
-        bowser->playAnimation("bowser_idle", 0.5f);
+        bowser->playAnimation("bowser_idle", 1.0f, 0.5f);
     }
 
     if (bowser->m_nerve_status == 0) {
         if (gpMarDirector->mCurState == TMarDirector::STATE_NORMAL &&
             gpMarDirector->mNextStateA == 2) {
             bowser->m_nerve_status = 1;
-            bowser->playAnimation("bowser_taunt", 0.5f);
-            bowser->mActorData->setFrameRate(0.9f, MActor::BCK);
+            bowser->playAnimation("bowser_taunt", 0.9f, 0.5f);
             bowser->mActorData->getFrameCtrl(MActor::BCK)->mAnimState = J3DFrameCtrl::LOOP;
         }
     } else if (bowser->m_nerve_status == 1) {

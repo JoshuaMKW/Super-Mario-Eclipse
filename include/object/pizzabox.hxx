@@ -12,7 +12,7 @@ public:
     }
 
     TPizzaBox(const char *name)
-        : TMapObjBall(name) {}
+        : TMapObjBall(name), mRotationalVelocity(0.0f) {}
     ~TPizzaBox() override = default;
 
     void loadAfter() override {

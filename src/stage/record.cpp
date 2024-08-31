@@ -128,7 +128,7 @@ static bool sIs100ShineSpawned = false;
 static void shineStageCoinRecordUpdate() {
     u32 normalStageID = gpApplication.mCurrentScene.mAreaID;
     u32 shineStageID  = shineStageCoinRecordIndex(normalStageID);
-    if (normalStageID > TGameSequence::AREA_MARE) {
+    if (normalStageID > TGameSequence::AREA_CORONABOSS) {
         if (shineStageID == SMS_getShineStage__FUc(normalStageID)) {
             // Under this circumstance the area has no record, see above.
             TFlagManager::smInstance->incFlag(0x40002, 1);
@@ -242,6 +242,10 @@ SMS_PATCH_B(0x801475d0, 0x8014761c);
 SMS_PATCH_BL(0x8014df4c, countBlueCoinShines);
 SMS_WRITE_32(0x8014df50, 0x7c771b78);
 SMS_PATCH_B(0x8014df54, 0x8014dfa0);
+
+SMS_PATCH_BL(0x8015120c, countBlueCoinShines);
+SMS_WRITE_32(0x80151210, 0x7c781b78);
+SMS_PATCH_B(0x80151214, 0x80151260);
 
 // STATIC RESETTER
 BETTER_SMS_FOR_EXPORT void reset100CoinState(TMarDirector *director) { sIs100ShineSpawned = false; }

@@ -43,8 +43,10 @@
 constexpr size_t PlayerMax = 1;
 
 static SME::CharacterID s_player_id = SME::CharacterID::MARIO;
-
 static JKRMemArchive *sResourceArchive = nullptr;
+
+bool gHadLuigiBefore                   = false;
+bool gHadPiantissimoBefore             = false;
 
 CharacterSelectDirector::~CharacterSelectDirector() { gpMSound->exitStage(); }
 
@@ -481,8 +483,44 @@ BETTER_SMS_FOR_CALLBACK bool directCharacterSelectMenu(TApplication *app) {
     return false;
 }
 
+extern bool gHadLuigiBefore;
+extern bool gHadPiantissimoBefore;
+static bool s_unlock_played        = false;
+static bool s_shine_select_waiting = false;
+static u8 s_last_context           = 0;
+
+static void correctHadBeforeState(TFlagManager *manager) {
+    manager->correctFlag();
+
+    gHadLuigiBefore = manager->getFlag(0x10077);
+    gHadPiantissimoBefore = manager->getBool(0x10018) && manager->getBool(0x10041) &&
+                            manager->getBool(0x10036) && manager->getShineFlag(135);
+
+    manager->setFlag(0x30018, gHadLuigiBefore);
+    manager->setFlag(0x30019, gHadPiantissimoBefore);
+}
+SMS_PATCH_BL(SMS_PORT_REGION(0x8029437C, 0, 0, 0), correctHadBeforeState);
+
+static bool checkForUnlockMovie(u8 state) {
+    if (gpApplication.mContext != TApplication::CONTEXT_DIRECT_STAGE) {
+        return false;
+    }
+
+    if (!gHadPiantissimoBefore && TFlagManager::smInstance->getBool(0x30019)) {
+        gpApplication.mCutSceneID = 31;
+        gHadPiantissimoBefore     = true;
+        return true;
+    }
+
+    return false;
+}
+
 #if 1
 static int flagCharacterSelectMenu(u8 state) {
+    if (checkForUnlockMovie(state)) {
+        return TApplication::CONTEXT_DIRECT_MOVIE;
+    }
+
     if (state != TApplication::CONTEXT_DIRECT_STAGE)
         return state;
 
@@ -504,56 +542,58 @@ static int flagCharacterSelectMenu(u8 state) {
     sLuigi       = has_luigi;
     sPiantissimo = has_piantissimo;
 
-    // No character select for secret courses
-    if (Stage::isExStage(next_scene.mAreaID, next_scene.mEpisodeID)) {
-        return state;
-    }
-
-    // No character select for diving stages
-    if (Stage::isDivingStage(next_scene.mAreaID, next_scene.mEpisodeID)) {
-        return state;
-    }
-
     // Intro stage
-    if (next_scene.mAreaID == SME::STAGE_PEACH_CASTLE && next_scene.mEpisodeID == 1) {
+    if (next_scene.mAreaID == SME::STAGE_PEACH_CASTLE && next_scene.mEpisodeID <= 4) {
         return state;
     }
 
-    if (next_scene.mAreaID == TGameSequence::AREA_AIRPORT) {
-        return state;
-    }
-
-    // No character select for intra-areas
-    if (cur_scene.mEpisodeID != 0xFF) {
-        if (SMS_getShineStage__FUc(next_scene.mAreaID) ==
-            SMS_getShineStage__FUc(cur_scene.mAreaID)) {
+    if (next_scene.mAreaID != SME::STAGE_PEACH_CASTLE) {
+        // No character select for secret courses
+        if (Stage::isExStage(next_scene.mAreaID, next_scene.mEpisodeID)) {
             return state;
         }
-    }
 
-    // No character select for Delfino Plaza
-    if (next_scene.mAreaID == TGameSequence::AREA_DOLPIC) {
-        if (next_scene.mEpisodeID == 0 || next_scene.mEpisodeID == 1) {
-            sLuigi       = false;
-            sPiantissimo = false;
-        } else {
+        // No character select for diving stages
+        if (Stage::isDivingStage(next_scene.mAreaID, next_scene.mEpisodeID)) {
             return state;
         }
-    }
 
-    // No character select for options menu
-    if (next_scene.mAreaID == TGameSequence::AREA_OPTION) {
-        return state;
-    }
+        if (next_scene.mAreaID == TGameSequence::AREA_AIRPORT) {
+            return state;
+        }
 
-    // No character select for junction rooms
-    if (next_scene.mAreaID == SME::STAGE_ISLE_DELFINO) {
-        return state;
-    }
+        // No character select for intra-areas
+        if (cur_scene.mEpisodeID != 0xFF) {
+            if (SMS_getShineStage__FUc(next_scene.mAreaID) ==
+                SMS_getShineStage__FUc(cur_scene.mAreaID)) {
+                return state;
+            }
+        }
 
-    // No character select for Daisy Cruiser
-    if (next_scene.mAreaID == SME::STAGE_CRUISER) {
-        return state;
+        // No character select for Delfino Plaza
+        if (next_scene.mAreaID == TGameSequence::AREA_DOLPIC) {
+            if (next_scene.mEpisodeID == 0 || next_scene.mEpisodeID == 1) {
+                sLuigi       = false;
+                sPiantissimo = false;
+            } else {
+                return state;
+            }
+        }
+
+        // No character select for options menu
+        if (next_scene.mAreaID == TGameSequence::AREA_OPTION) {
+            return state;
+        }
+
+        // No character select for junction rooms
+        if (next_scene.mAreaID == SME::STAGE_ISLE_DELFINO) {
+            return state;
+        }
+
+        // No character select for Daisy Cruiser
+        if (next_scene.mAreaID == SME::STAGE_CRUISER) {
+            return state;
+        }
     }
 
     // Rollercoaster Missions

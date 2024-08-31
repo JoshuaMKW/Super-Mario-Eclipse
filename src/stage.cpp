@@ -65,12 +65,12 @@ BETTER_SMS_FOR_CALLBACK void initializeStageInfo(TApplication *app) {
         // Register Erto Rock stage info
         {
             Stage::ShineAreaInfo *info = new Stage::ShineAreaInfo(SME::STAGE_ERTO, 'er_0');
-            info->addScenario(120, 72);
+            info->addScenario(125, 72);
             info->addScenario(121, 73);
             info->addScenario(122, 74);
             info->addScenario(123, 75);
             info->addScenario(124, 76);
-            info->addScenario(125, 77);
+            info->addScenario(120, 77);
             info->addScenario(126, 78);
             info->addScenario(127, 79);
             info->addExScenario(207, 203);  // 100 coin shine
@@ -129,8 +129,8 @@ BETTER_SMS_FOR_CALLBACK void initializeStageInfo(TApplication *app) {
             Stage::ShineAreaInfo *info = new Stage::ShineAreaInfo(SME::STAGE_WARSHIP, 'wr_0');
             info->addScenario(140, 92);
             info->addScenario(141, 93);
-            info->addScenario(142, 94);
-            info->addScenario(143, 95);
+            info->addScenario(143, 94);
+            info->addScenario(142, 95);
             info->addScenario(144, 96);
             info->addScenario(145, 97);
             info->addScenario(146, 98);
@@ -628,9 +628,9 @@ BETTER_SMS_FOR_CALLBACK void initializeStageInfo(TApplication *app) {
                                       TVec3f(3400.0f, 340.0f, 1700.0f), TVec3f(0.0f, -40.0f, 0.0f),
                                       TGameSequence::AREA_MAREBOSS, -1);
 
-                SME::setSpawnTransRot(TGameSequence::AREA_MARE, -1,
+                /*SME::setSpawnTransRot(TGameSequence::AREA_MARE, -1,
                                       TVec3f(-7150.0f, -80.0f, -5150.0f), TVec3f(0.0f, 15.0f, 0.0f),
-                                      TGameSequence::AREA_MAREEX0, -1);
+                                      TGameSequence::AREA_MAREEX0, -1);*/
             }
 
             // Corona Mountain
@@ -707,8 +707,8 @@ BETTER_SMS_FOR_CALLBACK void setPlayerStartPos(TMario *player) {
             if (gpApplication.mPrevScene.mEpisodeID == 0 && s_prev_player_pos.y > 900.0f &&
                 s_prev_player_pos.z > 10000.0f) {
                 player->mTranslation = TVec3f(0.0f, 35270.0f, -5600.0f);
-                player->mRotation    = TVec3f(0.0f, 0.0f, 0.0f);
-                player->mAngle.y     = convertAngleFloatToS16(0.0f);
+                player->mRotation    = TVec3f(0.0f, 180.0f, 0.0f);
+                player->mAngle.y     = convertAngleFloatToS16(180.0f);
             }
         }
     }

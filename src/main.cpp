@@ -35,6 +35,12 @@
 #include "object/iron_crate.hxx"
 #include "p_settings.hxx"
 
+extern BugsExploitsSetting gBugsSetting;
+extern MirrorModeFlag gMirrorModeSetting;
+extern DarknessSetting gDarknessSetting;
+extern Settings::SwitchSetting gLivesSetting;
+extern Settings::SwitchSetting gSkipMovieSetting;
+
 // Application
 extern bool directCharacterSelectMenu(TApplication *app);
 extern void setIntroStage(TApplication *application);
@@ -133,6 +139,10 @@ static void initModule() {
     // gSettingsGroup.addSetting(&gHUDSetting);
     gSettingsGroup.addSetting(&gBugsSetting);
     gSettingsGroup.addSetting(&gTutorialSetting);
+    gSettingsGroup.addSetting(&gMirrorModeSetting);
+    gSettingsGroup.addSetting(&gLivesSetting);
+    gSettingsGroup.addSetting(&gDarknessSetting);
+    gSettingsGroup.addSetting(&gSkipMovieSetting);
 
     extern void initDemoCredits(Settings::SettingsGroup & group);
     initDemoCredits(gSettingsGroup);
@@ -157,10 +167,13 @@ static void initModule() {
     Game::setMaxShines(MaxShineCount);
     Application::showSettingsOnFirstBoot(true);
 
-    THP::addTHP(30, "vacation.thp");
     THP::addTHP(31, "piantissimo_join.thp");
     THP::addTHP(32, "piantissimo.thp");
     THP::addTHP(33, "luigi.thp");
+    THP::addTHP(34, "vacationAA.thp");
+    THP::addTHP(35, "vacationAB.thp");
+    THP::addTHP(36, "vacationAC.thp");
+    THP::addTHP(37, "postcard.thp");
 
     // Register callbacks
     Application::registerContextCallback(CONTEXT_CHARACTER_SELECT, directCharacterSelectMenu);

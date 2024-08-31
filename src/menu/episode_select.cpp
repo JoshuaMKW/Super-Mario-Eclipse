@@ -13,4 +13,4 @@ static void startEpisodeSelect(void *selectMenu) {
         startOpenWindow__11TSelectMenuFv(selectMenu);
     }
 }
-SMS_PATCH_BL(SMS_PORT_REGION(0x80175F58, 0x8016BEFC, 0, 0), startEpisodeSelect);
+//SMS_PATCH_BL(SMS_PORT_REGION(0x80175F58, 0x8016BEFC, 0, 0), startEpisodeSelect);

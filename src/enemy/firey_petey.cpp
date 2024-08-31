@@ -14,8 +14,8 @@
 
 #include <BetterSMS/libs/constmath.hxx>
 #include <BetterSMS/module.hxx>
-#include <BetterSMS/player.hxx>
 #include <BetterSMS/music.hxx>
+#include <BetterSMS/player.hxx>
 
 #include <enemy/firey_petey.hxx>
 
@@ -120,7 +120,8 @@ bool TNerveFPFly::execute(TSpineBase<TLiveActor> *spine) const {
     f32 magnitude = travelVector.magnitude();
 
     if (magnitude < 100.0f) {
-        if ((target->mGraphTracer->mGraph->mNodes[target->mGraphTracer->mCurrentNode].mRailNode->mFlags &
+        if ((target->mGraphTracer->mGraph->mNodes[target->mGraphTracer->mCurrentNode]
+                 .mRailNode->mFlags &
              0x800) != 0) {
             spine->pushNerve(&hover);
             return true;
@@ -280,7 +281,7 @@ bool TNerveFPFireBreath::execute(TSpineBase<TLiveActor> *spine) const {
     bool isAnimationRunning = peteyMActor->checkCurAnmFromIndex(0x15, 0);
     if (isAnimationRunning) {
         J3DFrameCtrl *frameCtrl = peteyMActor->getFrameCtrl(0);
-        if ((frameCtrl->mCurFrame <= 25.0f) || (frameCtrl->mCurFrame >= 210.0f)) {
+        if ((frameCtrl->mCurFrame <= 25.0f) || (frameCtrl->mCurFrame >= 250.0f)) {
             target->mState = TBossPakkun::BossPakkunState::NORMAL;
         } else {
             target->mState = TBossPakkun::BossPakkunState::MOUTH_OPEN;
@@ -316,7 +317,8 @@ bool TNerveFPFireBreath::execute(TSpineBase<TLiveActor> *spine) const {
                         mFire->mVelocity.x = 50.0f * sinf(angleToRadians(target->mRotation.y));
                         mFire->mVelocity.y = 0;
                         mFire->mVelocity.z = 50.0f * cosf(angleToRadians(target->mRotation.y));
-                        mFire->mTranslation.set(*reinterpret_cast<TVec3f *>(((u8 *)emitterFire) + 0x15C));
+                        mFire->mTranslation.set(
+                            *reinterpret_cast<TVec3f *>(((u8 *)emitterFire) + 0x15C));
                         mFire->mTranslation.y -= 237.5f;
                         mFire->mLifetime = 30 * 4;
                     }
@@ -355,6 +357,7 @@ bool TNerveFPSwallow::execute(TSpineBase<TLiveActor> *spine) const {
 
         if (target->_03[0] == 0) {
             target->_03[1] = 0;
+            spine->pushNerve(&wait);
             return true;
         }
         target->changeBck(0x1a);
@@ -390,6 +393,9 @@ bool TNerveFPTumbleIn::execute(TSpineBase<TLiveActor> *spine) const {
 bool TNerveFPTumbleOut::execute(TSpineBase<TLiveActor> *spine) const {
     TFireyPetey *target       = reinterpret_cast<TFireyPetey *>(spine->mTarget);
     TBossPakkunParams *params = reinterpret_cast<TBossPakkunParams *>(target->getSaveParam());
+
+    target->mState = TBossPakkun::BossPakkunState::NORMAL;
+
     if (spine->mNerveTimer == 0) {
         target->changeBck(0xE);
         gpCameraShake->startShake(UnknownShake10, 1.0);
@@ -531,6 +537,8 @@ void TFireyPetey::gotHipDropDamage() {
             if (gpMSound->gateCheck(0x284d)) {
                 MSoundSE::startSoundActor(0x284d, mTranslation, 0, nullptr, 0x0, 4);
             }
+            mSpineBase->mNerveStack.clear();
+            mSpineBase->pushNerve(&takeoff);
             mSpineBase->pushNerve(
                 reinterpret_cast<TNerveBase<TLiveActor> *>(theNerve__13TNerveBPGetUpFv()));
             mSpineBase->setNerve(
@@ -659,6 +667,7 @@ bool TFPHeadHit::receiveMessage(THitActor *sender, u32 msg) {
                 mParent->_03[1] = params->mSLWaterHitTimer.get();
                 // Replace with custom nerve
                 if (mParent->mSpineBase->getLatestNerve() != &swallow) {
+                    mParent->mSpineBase->mNerveStack.clear();
                     mParent->mSpineBase->setNerve(&swallow);
                     return true;
                 }
@@ -740,7 +749,6 @@ void TFireyPeteyManager::load(JSUMemoryInputStream &inputStream) {
     gpResourceManager->load("/scene/bosspakkun/jpa/ms_kp_fire_e.jpa", 0x1a7);
 }
 
-
-static bool isFireyPeteyFlyMode(TMarDirector* director) { return director->mAreaID != 55; }
+static bool isFireyPeteyFlyMode(TMarDirector *director) { return director->mAreaID != 55; }
 SMS_PATCH_BL(0x80093EE0, isFireyPeteyFlyMode);
 SMS_WRITE_32(0x80093EE4, 0x2C030001);

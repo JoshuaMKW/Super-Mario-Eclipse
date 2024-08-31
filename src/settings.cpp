@@ -4,6 +4,14 @@
 BugsExploitsSetting gBugsSetting;
 MirrorModeFlag gMirrorModeSetting;
 TutorialSetting gTutorialSetting;
+DarknessSetting gDarknessSetting;
+
+static bool sLivesValue = false;
+Settings::SwitchSetting gLivesSetting("Infinite Lives", &sLivesValue);
+
+static bool sMovieValue = false;
+Settings::SwitchSetting gSkipMovieSetting("Skippable Movies", &sMovieValue);
+
 Settings::SettingsGroup gSettingsGroup(1, 1, Settings::Priority::GAME);
 
 bool BugsExploitsSetting::sIsUnlocked = false;

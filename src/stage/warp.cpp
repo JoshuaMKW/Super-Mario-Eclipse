@@ -10,6 +10,9 @@
 #include "settings.hxx"
 #include "stage.hxx"
 
+extern bool gHadLuigiBefore;
+extern bool gHadPiantissimoBefore;
+
 static u8 s_no_exit_areas[] = {TGameSequence::AREA_AIRPORT, TGameSequence::AREA_DOLPIC,
                                SME::STAGE_CRUISER};
 
@@ -195,9 +198,15 @@ SMS_WRITE_32(SMS_PORT_REGION(0x80299338, 0, 0, 0), 0x60000000);
 static void assignExitAreaDestination(TGameSequence *sequence, u8 area, u8 episode, u16 flags) {
     sequence->set(area, episode, flags);
 
+    if (!gHadPiantissimoBefore && TFlagManager::smInstance->getBool(0x30019)) {
+        gpMarDirector->fireStreamingMovie(31);
+    }
+
+    TMarioGamePad *gpGamePad = gpApplication.mGamePads[0];
+    bool z_pressed           = (gpGamePad->mButtons.mInput & TMarioGamePad::EButtons::Z) != 0;
+
     switch (gpMarDirector->mAreaID) {
     case SME::STAGE_ISLE_DELFINO:
-    case SME::STAGE_LIGHTHOUSE_BOSS:
         return;
     case SME::STAGE_TUTORIAL:
         gpApplication.mNextScene.mAreaID    = TGameSequence::AREA_OPTION;
@@ -211,6 +220,85 @@ static void assignExitAreaDestination(TGameSequence *sequence, u8 area, u8 episo
         gpApplication.mNextScene.mAreaID    = SME::STAGE_PEACH_CASTLE;
         gpApplication.mNextScene.mEpisodeID = 2;
         return;
+    case SME::STAGE_CRUISER:
+    case SME::STAGE_CRUISER_EX:
+        gpApplication.mNextScene.mAreaID    = SME::STAGE_CRUISER;
+        gpApplication.mNextScene.mEpisodeID = 0;
+        return;
+    case SME::STAGE_LACRIMA:
+    case SME::STAGE_LACRIMA_INSIDE:
+    case SME::STAGE_LACRIMA_BACKHOUSE:
+    case SME::STAGE_LACRIMA_EX0:
+    case SME::STAGE_LACRIMA_EX1:
+        if (z_pressed) {
+            gpApplication.mNextScene.mAreaID    = SME::STAGE_LACRIMA;
+            gpApplication.mNextScene.mEpisodeID = 0xFF;
+            TFlagManager::smInstance->setBool(true, 0x50010);
+        }
+        return;
+    case TGameSequence::AREA_DOLPICEX0:
+        return;
+    case TGameSequence::AREA_BIANCO:
+    case TGameSequence::AREA_BIANCOBOSS:
+    case TGameSequence::AREA_COROEX0:
+    case TGameSequence::AREA_COROEX1:
+        if (z_pressed) {
+            gpApplication.mNextScene.mAreaID    = TGameSequence::AREA_BIANCO;
+            gpApplication.mNextScene.mEpisodeID = 0xFF;
+            TFlagManager::smInstance->setBool(true, 0x50010);
+        }
+        return;
+    case TGameSequence::AREA_RICCO:
+    case TGameSequence::AREA_RICCOBOSS:
+    case TGameSequence::AREA_COROEX2:
+        if (z_pressed) {
+            gpApplication.mNextScene.mAreaID    = TGameSequence::AREA_RICCO;
+            gpApplication.mNextScene.mEpisodeID = 0xFF;
+            TFlagManager::smInstance->setBool(true, 0x50010);
+        }
+        return;
+    case TGameSequence::AREA_SIRENA:
+    case TGameSequence::AREA_DELFINO:
+    case TGameSequence::AREA_DELFINOBOSS:
+    case TGameSequence::AREA_CASINO:
+    case TGameSequence::AREA_SIRENAEX0:
+    case TGameSequence::AREA_COROEX5:
+        if (z_pressed) {
+            gpApplication.mNextScene.mAreaID    = TGameSequence::AREA_SIRENA;
+            gpApplication.mNextScene.mEpisodeID = 0xFF;
+            TFlagManager::smInstance->setBool(true, 0x50010);
+        }
+        return;
+    case TGameSequence::AREA_PINNABEACH:
+    case TGameSequence::AREA_PINNAPARCO:
+    case TGameSequence::AREA_PINNABOSS:
+    case TGameSequence::AREA_SIRENAEX1:
+    case TGameSequence::AREA_COROEX4:
+        gpApplication.mNextScene.mAreaID    = TGameSequence::AREA_PINNABEACH;
+        gpApplication.mNextScene.mEpisodeID = 0xFF;
+        TFlagManager::smInstance->setBool(true, 0x50010);
+        return;
+    case TGameSequence::AREA_MARE:
+    case TGameSequence::AREA_MAREUNDERSEA:
+    case TGameSequence::AREA_MAREBOSS:
+        if (z_pressed) {
+            gpApplication.mNextScene.mAreaID    = TGameSequence::AREA_MARE;
+            gpApplication.mNextScene.mEpisodeID = 0xFF;
+            TFlagManager::smInstance->setBool(true, 0x50010);
+        }
+        return;
+    case TGameSequence::AREA_MAMMA:
+    case TGameSequence::AREA_MONTE:
+    case SME::STAGE_ERTO:
+    case SME::STAGE_LIGHTHOUSE:
+    case SME::STAGE_WARSHIP: {
+        if (z_pressed) {
+            gpApplication.mNextScene.mAreaID    = gpApplication.mCurrentScene.mAreaID;
+            gpApplication.mNextScene.mEpisodeID = 0xFF;
+            TFlagManager::smInstance->setBool(true, 0x50010);
+        }
+        return;
+    }
     case SME::STAGE_VAPORWAVE:
     case SME::STAGE_VAPORWAVE_EX:
     case SME::STAGE_LANCIA:
@@ -221,42 +309,79 @@ static void assignExitAreaDestination(TGameSequence *sequence, u8 area, u8 episo
     case SME::STAGE_PEACH_BEACH_EX:
     case SME::STAGE_YOSHI_VILLAGE:
     case SME::STAGE_YOSHI_EX:
-        gpApplication.mNextScene.mAreaID    = SME::STAGE_CRUISER;
-        gpApplication.mNextScene.mEpisodeID = 4;
-        return;
     case SME::STAGE_SPETTRO_CASINO:
-    case SME::STAGE_SPETTRO_EX:
-        gpApplication.mNextScene.mAreaID    = SME::STAGE_CRUISER;
-        gpApplication.mNextScene.mEpisodeID = 0;
+    case SME::STAGE_SPETTRO_EX: {
+        if (z_pressed) {
+            if (SMS_isExMap__Fv()) {
+                gpApplication.mNextScene.mAreaID    = gpApplication.mPrevScene.mAreaID;
+                gpApplication.mNextScene.mEpisodeID = 0xFF;
+            } else {
+                gpApplication.mNextScene.mAreaID    = gpApplication.mCurrentScene.mAreaID;
+                gpApplication.mNextScene.mEpisodeID = 0xFF;
+            }
+            TFlagManager::smInstance->setBool(true, 0x50010);
+        } else {
+            gpApplication.mNextScene.mAreaID    = SME::STAGE_CRUISER;
+            gpApplication.mNextScene.mEpisodeID = 0;
+        }
+        return;
+    }
+    case SME::STAGE_LIGHTHOUSE_BOSS:
+        if (z_pressed) {
+            gpApplication.mNextScene.mAreaID    = gpApplication.mPrevScene.mAreaID;
+            gpApplication.mNextScene.mEpisodeID = 0xFF;
+            TFlagManager::smInstance->setBool(true, 0x50010);
+        }
+        return;
+    case SME::STAGE_PIANTA_PIT:
+        if (z_pressed) {
+            gpApplication.mNextScene.mAreaID    = TGameSequence::AREA_MONTE;
+            gpApplication.mNextScene.mEpisodeID = 0xFF;
+            TFlagManager::smInstance->setBool(true, 0x50010);
+        }
+        return;
+    case TGameSequence::AREA_CORONABOSS:
+        return;
+    }
+
+    if (SMS_isExMap__Fv()) {
+        if (z_pressed) {
+            gpApplication.mNextScene.mAreaID    = gpApplication.mPrevScene.mAreaID;
+            gpApplication.mNextScene.mEpisodeID = 0xFF;
+            TFlagManager::smInstance->setBool(true, 0x50010);
+        }
         return;
     }
 
     if (gpMarDirector->mAreaID >= SME::STAGE_CRUISER &&
         gpMarDirector->mAreaID < SME::STAGE_ERTO_EX) {
-        gpApplication.mNextScene.mAreaID    = SME::STAGE_CRUISER;
-        gpApplication.mNextScene.mEpisodeID = 0;
+        if (z_pressed) {
+            gpApplication.mNextScene.mAreaID    = gpApplication.mCurrentScene.mAreaID;
+            gpApplication.mNextScene.mEpisodeID = 0xFF;
+            TFlagManager::smInstance->setBool(true, 0x50010);
+        } else {
+            gpApplication.mNextScene.mAreaID    = SME::STAGE_CRUISER;
+            gpApplication.mNextScene.mEpisodeID = 0;
+        }
         return;
     }
 }
-SMS_PATCH_BL(SMS_PORT_REGION(0x80299230, 0, 0, 0), assignExitAreaDestination);
+SMS_PATCH_BL(SMS_PORT_REGION(0x80299230, 0x802910C8, 0, 0), assignExitAreaDestination);
 
 static void assignOnDeathDestination(TGameSequence *sequence, u8 area, u8 episode, u16 flags) {
     gpApplication.mNextScene = gpApplication.mCurrentScene;
 }
 SMS_PATCH_BL(SMS_PORT_REGION(0x80299808, 0, 0, 0), assignOnDeathDestination);
 
-extern bool gHadLuigiBefore;
-extern bool gHadPiantissimoBefore;
-
 static void assignShineExitDestination(TApplication *app, u8 area, u8 episode,
                                        JDrama::TFlagT<u16> flag) {
-    if (!(gpMarDirector->mCollectedShine->mType & 0x10)) {
-        if (!gHadPiantissimoBefore && TFlagManager::smInstance->getBool(0x30019)) {
-            gpMarDirector->fireStreamingMovie(31);
-        } else if (!gHadLuigiBefore && TFlagManager::smInstance->getBool(0x30018)) {
-            gpMarDirector->fireStreamingMovie(33);
-        }
+    // Piantissimo
+    if (TFlagManager::smInstance->getBool(0x10018) && TFlagManager::smInstance->getBool(0x10041) &&
+        TFlagManager::smInstance->getBool(0x10036) && TFlagManager::smInstance->getShineFlag(135)) {
+        TFlagManager::smInstance->setBool(true, 0x30019);
+    }
 
+    if (!(gpMarDirector->mCollectedShine->mType & 0x10)) {
         app->mNextScene.set(area, episode, flag);
 
         switch (gpMarDirector->mAreaID) {

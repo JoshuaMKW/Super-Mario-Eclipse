@@ -155,7 +155,7 @@ public:
     void kill() override;
     void requestShadow() override;
     Mtx44 *getTakingMtx() override;
-    J3DFrameCtrl *playAnimation(const char *anm_name, f32 blend_ratio);
+    J3DFrameCtrl *playAnimation(const char *anm_name, f32 delta, f32 blend_ratio);
 
     bool isDefeated() const { return m_health_points == 0; }
     bool isHardMode() const { return m_health_points < 3; }
@@ -163,8 +163,8 @@ public:
     void setStunned(bool stunned) { m_stunned = stunned; }
     bool isStunned() const { return m_stunned; }
 
-    void setInvincible(bool invincible) { m_invincible = invincible; }
-    bool isInvincible() const { return m_invincible; }
+    void setInvincibleTimer(bool timer) { m_invincible_timer = timer; }
+    bool isInvincible() const { return m_invincible_timer > 0; }
 
     void setHostile(bool hostile) { m_hostile = hostile; }
     bool isHostile() const { return m_hostile; }
@@ -252,6 +252,8 @@ public:
     TVec3f m_fire_joint_pos;
 
     size_t m_bullets_shot;
+
+    int m_invincible_timer;
 
 private:
     bool m_stunned;

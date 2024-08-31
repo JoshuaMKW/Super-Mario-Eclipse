@@ -62,7 +62,7 @@ public:
     // clang-format on
 
 private:
-    bool mBugsExploitsValue;
+    bool mBugsExploitsValue = false;
     static bool sIsUnlocked;
 };
 
@@ -95,12 +95,12 @@ public:
     }
 
 private:
-    bool mMirrorModeFlag;
+    bool mMirrorModeFlag = false;
 };
 
 class TutorialSetting final : public Settings::SwitchSetting {
 public:
-    TutorialSetting() : SwitchSetting("Bugs/Exploits", &mTutorialValue) {}
+    TutorialSetting() : SwitchSetting("__tutorial_flag", &mTutorialValue) {}
     ~TutorialSetting() override {}
 
     bool isUnlocked() const override { return false; }
@@ -114,5 +114,18 @@ public:
     void save(JSUMemoryOutputStream &out) override { out.write(&mTutorialValue, 1); }
 
 private:
-    bool mTutorialValue;
+    bool mTutorialValue = false;
+};
+
+class DarknessSetting final : public Settings::SwitchSetting {
+public:
+    DarknessSetting() : SwitchSetting("Darkness", &mDarknessValue) {}
+    ~DarknessSetting() override {}
+
+    void getValueName(char* dst) const override {
+        getBool() ? strncpy(dst, "ECLIPSED", 10) : strncpy(dst, "REGULAR", 9);
+    }
+
+private:
+    bool mDarknessValue = true;
 };

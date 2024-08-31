@@ -98,24 +98,7 @@ private:
     int mIndex;
 };
 
-static const char *sSoundDesigners[] = {"Trevor Scott", "StevenShockley", "Portable Productions"};
-
-class SoundDesignCreditSetting final : public Settings::IntSetting {
-public:
-    SoundDesignCreditSetting() : IntSetting("Sound Design", &mIndex) {
-        mValueRange = {0, (sizeof(sSoundDesigners) / sizeof(const char *)) - 1, 1};
-    }
-    ~SoundDesignCreditSetting() override {}
-
-    void load(JSUMemoryInputStream &in) override {}
-    void save(JSUMemoryOutputStream &out) override {}
-    void getValueName(char *dst) const override { strcpy(dst, sSoundDesigners[mIndex]); }
-
-private:
-    int mIndex;
-};
-
-static const char *sTextures[] = {"UncleMeat", "Fecal-Matter-Photoshops", "ShaneMGD", "Purple Twirler"};
+static const char *sTextures[] = {"UncleMeat", "Some-Crappy-Edits", "ShaneMGD", "Purple Twirler"};
 
 class TextureCreditSetting final : public Settings::IntSetting {
 public:
@@ -204,7 +187,6 @@ DirectorCreditSetting sDirectorCreditSetting;
 ProgrammerCreditSetting sProgrammerCreditSetting;
 StageCreditSetting sStageCreditSetting;
 ComposerCreditSetting sComposerCreditSetting;
-SoundDesignCreditSetting sSoundDesignCreditSetting;
 TextureCreditSetting sTextureCreditSetting;
 CharacterCreditSetting sCharacterCreditSetting;
 BetaTestersCreditSetting sBetaTestersCreditSetting;
@@ -216,7 +198,6 @@ void initDemoCredits(Settings::SettingsGroup &group) {
     group.addSetting(&sProgrammerCreditSetting);
     group.addSetting(&sStageCreditSetting);
     group.addSetting(&sComposerCreditSetting);
-    group.addSetting(&sSoundDesignCreditSetting);
     group.addSetting(&sTextureCreditSetting);
     group.addSetting(&sCharacterCreditSetting);
     group.addSetting(&sBetaTestersCreditSetting);
@@ -331,7 +312,18 @@ void lockModuleSettings(TApplication *app) {
 void unlockSettings(TMarDirector *director) {
     size_t shine_count = TFlagManager::smInstance->getFlag(0x40000);
 
-    bool update_save = false;
+    bool update_save                   = false;
+
+    optional<ModuleInfo> engine_module       = BetterSMS::getModuleInfo("Better Sunshine Engine");
+    Settings::SettingsGroup *engine_settings = engine_module->mSettings;
+    {
+        {
+            auto *setting =
+                reinterpret_cast<BugsSetting *>(engine_settings->getSetting("Bug Fixes"));
+            setting->setBool(true);
+            setting->lock();
+        }
+    }
 
     if (shine_count >= MaxShineCount && !gBugsSetting.isUnlocked()) {
         gBugsSetting.unlock();

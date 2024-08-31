@@ -40,6 +40,11 @@ static void controlCameraByCodeExt(CPolarSubCamera *camera) {
             ControlBowserKillCam(camera);
             return;
         }
+
+        if (TFlagManager::smInstance->getFlag(0x6001C)) {
+            ControlBowserKillCam(camera);
+            return;
+        }
     }
 
     if (SME::isCameraFixedMode()) {
@@ -117,10 +122,15 @@ static void controlCameraByCodeExt(CPolarSubCamera *camera) {
 }
 SMS_PATCH_BL(0x80023148, controlCameraByCodeExt);
 
+extern void initBowserCameraData();
+
 BETTER_SMS_FOR_CALLBACK void resetFixedCameraOnLoad(TMarDirector *director) {
     SME::setCameraFixedMode(false, false);
     SME::setCameraFixedPos(TVec3f::zero());
     SME::setCameraFixedLookAt(TVec3f::zero());
     SME::setCameraFixedFovy(50.0f);
     SME::setCameraFixedFollowActor(nullptr);
+
+    // Lazy
+    initBowserCameraData();
 }

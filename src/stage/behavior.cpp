@@ -15,9 +15,10 @@
 #include "settings.hxx"
 #include "stage.hxx"
 
+extern bool gHadLuigiBefore;
+extern bool gHadPiantissimoBefore;
+
 bool gFromShineSelectForIntro = false;
-bool gHadLuigiBefore          = false;
-bool gHadPiantissimoBefore    = false;
 
 static void setStageAfterShineSelect(TSelectMenu *menu) {
     gpApplication.mNextScene.mEpisodeID = menu->mEpisodeID;
@@ -248,7 +249,9 @@ BETTER_SMS_FOR_CALLBACK void updateWarpStatesForCruiserCabin(TMarDirector *direc
 // This allows the redcoinswitch to be immediately pressed in extended stages
 // and for the player to have Fludd, while still being an ex stage.
 static u8 disableExBehaviorForCruiserWorlds(u8 areaID) {
-    if (areaID > SME::STAGE_CRUISER_EX && areaID != SME::STAGE_LACRIMA_EX1) {
+    if (areaID == SME::STAGE_VAPORWAVE_EX || areaID == SME::STAGE_YOSHI_EX ||
+        areaID == SME::STAGE_PEACH_BEACH_EX || areaID == SME::STAGE_PEACH_CASTLE ||
+        areaID == SME::STAGE_ISLE_DELFINO) {
         return 0xFF;
     }
     return SMS_getShineIDofExStage__FUc(gpApplication.mCurrentScene.mAreaID);
@@ -330,7 +333,7 @@ SMS_PATCH_BL(0x8024DF54, checkRideMovementCond);
 
 #pragma endregion
 
-BETTER_SMS_FOR_CALLBACK void resetCoinsOnStageExit(TApplication* app) {
+BETTER_SMS_FOR_CALLBACK void resetCoinsOnStageExit(TApplication *app) {
     // Set coins to 0
     if (SMS_getShineStage__FUc(gpApplication.mCurrentScene.mAreaID) !=
         SMS_getShineStage__FUc(gpApplication.mNextScene.mAreaID)) {
@@ -341,6 +344,8 @@ BETTER_SMS_FOR_CALLBACK void resetCoinsOnStageExit(TApplication* app) {
 BETTER_SMS_FOR_CALLBACK void resetStateForStage(TMarDirector *director) {
     gHadLuigiBefore       = TFlagManager::smInstance->getBool(0x30018);
     gHadPiantissimoBefore = TFlagManager::smInstance->getBool(0x30019);
+
+    setWaterCameraFir__12MSSeCallBackFb(false);
 
     if (director->mAreaID == TGameSequence::AREA_OPTION) {
         SME::TGlobals::sCharacterIDList[0] = SME::CharacterID::MARIO;
@@ -361,7 +366,8 @@ BETTER_SMS_FOR_CALLBACK void resetStateForStage(TMarDirector *director) {
     // Reset shine select behavior flag
     TFlagManager::smInstance->setBool(false, 0x50010);
 
-    if (director->mAreaID != TGameSequence::AREA_COROEX6) {
+    if (SMS_getShineStage__FUc(gpApplication.mCurrentScene.mAreaID) !=
+        SMS_getShineStage__FUc(gpApplication.mPrevScene.mAreaID)) {
         TFlagManager::smInstance->setFlag(0x40004, TWaterGun::Hover);
     }
 
@@ -394,6 +400,11 @@ SMS_WRITE_32(SMS_PORT_REGION(0x80297A64, 0, 0, 0), 0x4800000C);
 static bool isMareGateVisible() {
     if (gpMarDirector->mAreaID == TGameSequence::AREA_DOLPIC && gpMarDirector->mEpisodeID == 3) {
         return true;
+    }
+    if (gpMarDirector->mAreaID == TGameSequence::AREA_DOLPIC) {
+        if (gpMarDirector->mEpisodeID == 4 || gpMarDirector->mEpisodeID == 9) {
+            return false;
+        }
     }
     return TFlagManager::smInstance->getBool(0x50004);
 }
@@ -450,17 +461,16 @@ SMS_ASM_FUNC static void setFinalBossDEBSList(TGCConsole2 *console2) {
 }
 SMS_WRITE_32(0x803C0364, setFinalBossDEBSList);
 
-
-static JDrama::TNameRef *checkForMareGate(JDrama::TNameRef *actor, u16 keycode, const char *name) {
-    JDrama::TNameRef *ret      = actor->searchF(keycode, name);
-
-    const char *mare_gate_name = (const char *)0x8037576C;
-    JDrama::TNameRef *mare_gate =
-        actor->searchF(JDrama::TNameRef::calcKeyCode(mare_gate_name), mare_gate_name);
-
-    return mare_gate ? ret : nullptr;
+static bool checkForMareGate(JDrama::TNameRef *actor, u16 keycode, const char *name) {
+    if (gpMarDirector->mAreaID == TGameSequence::AREA_DOLPIC && gpMarDirector->mEpisodeID == 3) {
+        return false;
+    }
+    if (gpMarDirector->mAreaID == TGameSequence::AREA_DOLPIC && gpMarDirector->mEpisodeID == 4) {
+        TFlagManager::smInstance->setBool(true, 0x50004);
+    }
+    return TFlagManager::smInstance->getBool(0x50004);
 }
-SMS_PATCH_BL(0x8002e548, checkForMareGate);
+SMS_PATCH_BL(0x8002e5d0, checkForMareGate);
 
 // Jump table for episodes: 803c0354
 // 80145cf0 is null

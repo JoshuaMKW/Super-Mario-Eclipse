@@ -21,6 +21,8 @@ static u8 sBrightLevel = 255;
 #define GROW_BASE    4500.0f
 #define GROW_POWER   1.5f
 
+extern DarknessSetting gDarknessSetting;
+
 void initializeParameters(TLightContext::ActiveType type, TVec3f pos, u8 layer_count,
                           JUtility::TColor color, f32 scale, f32 layer_scale, u8 brightness) {
     bool isCoronaMountainBeat  = TFlagManager::smInstance->getBool(0x10077);
@@ -28,10 +30,27 @@ void initializeParameters(TLightContext::ActiveType type, TVec3f pos, u8 layer_c
     sLightContext.mTranslation = pos;
     sLightContext.mColor       = color;
     sLightContext.mBaseScale   = scale;
-    sLightContext.mLayerScale  = layer_scale;
-    sLightContext.mLayerCount  = layer_count;
     sBrightLevel               = brightness;
-    SME::TGlobals::setMinDarkness(isCoronaMountainBeat ? MIN_DARKNESS_CORONA : MIN_DARKNESS);
+
+    u8 minDarkness = 0;
+
+    if (type == TLightContext::ActiveType::STATIC) {
+        if (gDarknessSetting.getBool()) {
+            minDarkness               = isCoronaMountainBeat ? MIN_DARKNESS_CORONA : MIN_DARKNESS;
+            sLightContext.mLayerScale = layer_scale;
+            sLightContext.mLayerCount = layer_count;
+        } else {
+            minDarkness = isCoronaMountainBeat ? MIN_DARKNESS_CORONA + 30 : MIN_DARKNESS + 90;
+            sLightContext.mLayerScale = 0.1f;
+            sLightContext.mLayerCount = 5;
+        }
+    } else {
+        minDarkness               = isCoronaMountainBeat ? MIN_DARKNESS_CORONA : MIN_DARKNESS;
+        sLightContext.mLayerScale = layer_scale;
+        sLightContext.mLayerCount = layer_count;
+    }
+
+    SME::TGlobals::setMinDarkness(minDarkness);
 }
 
 void initToDefault(TMarDirector *director) {
@@ -43,10 +62,10 @@ void TLightContext::process(TModelWaterManager &manager) {
     u32 shinesCollected       = TFlagManager::smInstance->getFlag(0x40000);
     bool isCoronaMountainBeat = TFlagManager::smInstance->getBool(0x10077);
 
-    manager.mLayerCount = isCoronaMountainBeat ? 1 : sLightContext.mLayerCount;
-
     switch (mLightType) {
     case TLightContext::ActiveType::STATIC: {
+        manager.mLayerCount = isCoronaMountainBeat ? 1 : sLightContext.mLayerCount;
+
         if (sBrightLevel != 255)
             manager.mDarkLevel = sBrightLevel;
         else if (shinesCollected >= MaxShineCount) {

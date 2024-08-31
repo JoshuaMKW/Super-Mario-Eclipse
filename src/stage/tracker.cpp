@@ -84,7 +84,8 @@ BETTER_SMS_FOR_CALLBACK void initializeShineBlueTracker(TMarDirector *director) 
         }
 
         s_stage_shines_collected += TFlagManager::smInstance->getFlag(0x1006B);  // 100 coins
-        s_stage_shines_max += 1;
+        s_stage_shines_collected += TFlagManager::smInstance->getShineFlag(239);  // 100 coins
+        s_stage_shines_max += 2;
 
         s_stage_blues_max = 20;
         break;

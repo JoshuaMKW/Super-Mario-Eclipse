@@ -1,3 +1,4 @@
+#include <SMS/GC2D/SunGlass.hxx>
 #include <SMS/Manager/FlagManager.hxx>
 
 #include <BetterSMS/libs/constmath.hxx>
@@ -58,13 +59,23 @@ void initToDefault(TMarDirector *director) {
                          0.5, 255);
 }
 
+static TSunGlass *sSunGlassRef = nullptr;
+static const char *sSunGlassRefName =
+    "\x83\x54\x83\x93\x83\x4F\x83\x89\x83\x58\x83\x74\x83\x46\x81\x5B\x83\x5F";
+
+void initSunGlassReference(TSunGlass *sunglass, JSUMemoryInputStream *in) {
+    sSunGlassRef = sunglass;
+    load__Q26JDrama8TNameRefFR20JSUMemoryInputStream(sunglass, in);
+}
+SMS_PATCH_BL(0x8017d194, initSunGlassReference);
+
 void TLightContext::process(TModelWaterManager &manager) {
     u32 shinesCollected       = TFlagManager::smInstance->getFlag(0x40000);
     bool isCoronaMountainBeat = TFlagManager::smInstance->getBool(0x10077);
 
     switch (mLightType) {
     case TLightContext::ActiveType::STATIC: {
-        manager.mLayerCount = isCoronaMountainBeat ? 1 : sLightContext.mLayerCount;
+        manager.mLayerCount = sLightContext.mLayerCount;
 
         if (sBrightLevel != 255)
             manager.mDarkLevel = sBrightLevel;
@@ -94,8 +105,10 @@ void TLightContext::process(TModelWaterManager &manager) {
                 mPrevShineCount = shinesCollected;
                 mSizeMorphing   = true;
                 mStepContext    = 0.0f;
-                OSReport("PrevSize: %f, NextSize: %f\n", mPrevSize, mNextSize);
             } else {
+                sSunGlassRef->mToAlpha        = Min(255 - manager.mDarkLevel, 100);
+                sSunGlassRef->mColor.a = sSunGlassRef->mToAlpha;
+                manager.LightType.mShowShadow = manager.mDarkLevel < 255 && !isCoronaMountainBeat;
                 break;
             }
         }
@@ -130,6 +143,10 @@ void TLightContext::process(TModelWaterManager &manager) {
             manager.mSphereStep = cur * mLayerScale;
             mSizeMorphing       = false;
         }
+
+        sSunGlassRef->mToAlpha        = Min(255 - manager.mDarkLevel, 100);
+        sSunGlassRef->mColor.a        = sSunGlassRef->mToAlpha;
+        manager.LightType.mShowShadow = manager.mDarkLevel < 255 && !isCoronaMountainBeat;
         break;
     }
     case TLightContext::ActiveType::FOLLOWPLAYER: {
@@ -137,6 +154,7 @@ void TLightContext::process(TModelWaterManager &manager) {
         manager.mSphereStep = mBaseScale * mLayerScale;
         manager.mSize       = mBaseScale;
         manager.mColor      = mColor;
+        manager.LightType.mShowShadow = manager.mDarkLevel < 255;
         gShineShadowPos     = gpMarioAddress->mTranslation;
         break;
     }
@@ -147,17 +165,18 @@ void TLightContext::process(TModelWaterManager &manager) {
                 static_cast<f32>(sBrightLevel), 255.0f,
                 clamp(1.0f - ((21000.0f - ((f32 *)gpCamera)[0x134 / 4]) / 8000.0f), 0.0f, 1.0f));
         }
+
         manager.mSphereStep = mBaseScale * mLayerScale;
         manager.mSize       = mBaseScale;
         manager.mColor      = mColor;
+        manager.LightType.mShowShadow = manager.mDarkLevel < 255;
         gShineShadowPos     = gpCamera->mTranslation + mTranslation;
         break;
     }
     default:
+        manager.LightType.mShowShadow = manager.mDarkLevel < 255;
         break;
     }
-
-    manager.LightType.mShowShadow = manager.mDarkLevel < 255;
 }
 
 static void initShineShadow() {
@@ -210,3 +229,7 @@ static bool checkIfActive() {
 }
 SMS_PATCH_BL(0x8027C6A4, checkIfActive);
 SMS_WRITE_32(0x8027C6A8, 0x28030001);
+
+SMS_WRITE_32(0x8017D1E0, 0x60000000);
+SMS_WRITE_32(0x8017D5C0, 0x60000000);
+SMS_WRITE_32(0x8017D654, 0x60000000);

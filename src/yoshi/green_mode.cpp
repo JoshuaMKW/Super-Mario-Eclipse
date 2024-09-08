@@ -82,6 +82,8 @@ static u32 calcYoshiSwimVelocity(TMario *player, u32 arg1) {
         return player->jumpProcess(arg1);
     }
 
+    player->mSwimParams = player_data->mDefaultAttrs.mSwimParams;
+
     if (!player->mYoshi)
         return player->jumpProcess(arg1);
 
@@ -99,8 +101,6 @@ static u32 calcYoshiSwimVelocity(TMario *player, u32 arg1) {
         else
             player_data->mYoshiWaterSpeed.y -= 0.34375f;
     }
-
-    player->mSwimParams = player_data->mDefaultAttrs.mSwimParams;
     // Check for underwater
     if (player->isUnderWater()) {
 #define SCALE_PARAM(param, scale) param.set(param.get() * scale)

@@ -122,10 +122,47 @@ public:
     DarknessSetting() : SwitchSetting("Darkness", &mDarknessValue) {}
     ~DarknessSetting() override {}
 
-    void getValueName(char* dst) const override {
+    void getValueName(char *dst) const override {
         getBool() ? strncpy(dst, "ECLIPSED", 10) : strncpy(dst, "REGULAR", 9);
     }
 
 private:
     bool mDarknessValue = true;
+};
+
+class SpeedrunSetting final : public Settings::IntSetting {
+public:
+    enum Kind { NONE, ANY, SHINE_121, SHINE_197, SHINE_240, SHINE_240_EX };
+
+    SpeedrunSetting() : IntSetting("Speedrun Mode", &mSpeedrunSetting), mSpeedrunSetting(NONE) {
+        mValueRange = {0, 5, 1};
+    }
+    ~SpeedrunSetting() override {}
+
+    void getValueName(char *dst) const override {
+        switch (getInt()) {
+        default:
+        case Kind::NONE:
+            strncpy(dst, "OFF", 4);
+            break;
+        case Kind::ANY:
+            strncpy(dst, "ANY PERCENT", 12);
+            break;
+        case Kind::SHINE_121:
+            strncpy(dst, "121 SHINES", 11);
+            break;
+        case Kind::SHINE_197:
+            strncpy(dst, "197 SHINES", 11);
+            break;
+        case Kind::SHINE_240:
+            strncpy(dst, "240 SHINES", 11);
+            break;
+        case Kind::SHINE_240_EX:
+            strncpy(dst, "240+ PERCENT", 13);
+            break;
+        }
+    }
+
+private:
+    int mSpeedrunSetting;
 };

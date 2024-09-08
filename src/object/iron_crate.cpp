@@ -216,10 +216,10 @@ void TIronCrate::calc() {
     // emitAndScale(0x1C6, 1, &mTranslation, scale);
 }
 
-static hit_data ironCrate_hit_data{.mAttackRadius  = 250.0f,
-                                   .mAttackHeight  = 250.0f,
-                                   .mReceiveRadius = 250.0f,
-                                   .mReceiveHeight = 250.0f};
+static hit_data ironCrate_hit_data{.mAttackRadius  = 220.0f,
+                                   .mAttackHeight  = 220.0f,
+                                   .mReceiveRadius = 170.0f,
+                                   .mReceiveHeight = 170.0f};
 
 static obj_hit_info ironCrate_collision_data{
     ._00 = 1, .mType = 0xDC000000, ._08 = 0, .mHitData = &ironCrate_hit_data};

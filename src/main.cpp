@@ -25,14 +25,14 @@
 #include "object/darkness_effect.hxx"
 #include "object/elevator_object.hxx"
 #include "object/follow_key.hxx"
+#include "object/iron_crate.hxx"
 #include "object/jizo_stone.hxx"
 #include "object/key_chest.hxx"
 #include "object/launch_star.hxx"
+#include "object/pizzabox.hxx"
 #include "object/tornado_obj.hxx"
 #include "object/water_balloon.hxx"
 #include "object/water_mine.hxx"
-#include "object/pizzabox.hxx"
-#include "object/iron_crate.hxx"
 #include "p_settings.hxx"
 
 extern BugsExploitsSetting gBugsSetting;
@@ -40,6 +40,7 @@ extern MirrorModeFlag gMirrorModeSetting;
 extern DarknessSetting gDarknessSetting;
 extern Settings::SwitchSetting gLivesSetting;
 extern Settings::SwitchSetting gSkipMovieSetting;
+extern SpeedrunSetting gSpeedrunSetting;
 
 // Application
 extern bool directCharacterSelectMenu(TApplication *app);
@@ -132,7 +133,16 @@ extern void evAppearFluddTip(TSpcInterp *spc, u32 argc);
 // Objects
 extern void cannonBallCollideInteractor(THitActor *self, TMario *player);
 
+// SPEEDRUN STUFF
+extern void checkForCPUOverclock(TMarDirector *app);
+extern void initCPUOverclock(TApplication *app);
+extern void renderCPUOverclock(TMarDirector *director, const J2DOrthoGraph *graph);
+extern void updateSpeedrunTimer(TApplication *app);
+extern void renderSpeedrunTimer(TApplication *app, const J2DOrthoGraph *graph);
+
 static BetterSMS::ModuleInfo sModuleInfo("Super Mario Eclipse", 1, 0, &gSettingsGroup);
+
+extern void initDemoCredits();
 
 static void initModule() {
     // Register settings
@@ -143,9 +153,8 @@ static void initModule() {
     gSettingsGroup.addSetting(&gLivesSetting);
     gSettingsGroup.addSetting(&gDarknessSetting);
     gSettingsGroup.addSetting(&gSkipMovieSetting);
+    gSettingsGroup.addSetting(&gSpeedrunSetting);
 
-    extern void initDemoCredits(Settings::SettingsGroup & group);
-    initDemoCredits(gSettingsGroup);
     {
         auto &saveInfo        = gSettingsGroup.getSaveInfo();
         saveInfo.mSaveName    = Settings::getGroupName(gSettingsGroup);
@@ -163,6 +172,8 @@ static void initModule() {
 
     // Register module
     BetterSMS::registerModule(sModuleInfo);
+
+    initDemoCredits();
 
     Game::setMaxShines(MaxShineCount);
     Application::showSettingsOnFirstBoot(true);
@@ -221,7 +232,8 @@ static void initModule() {
     Spc::registerBuiltinFunction("isFadingScreen", evIsFadingScreen);
     Spc::registerBuiltinFunction("checkBrokenWatermelon", evCheckBrokenWatermelon);
     Spc::registerBuiltinFunction("appearShineFromNPCLocal", evAppearShineFromNPCLocal);
-    Spc::registerBuiltinFunction("appearShineFromNPCLocalWithoutDemo", evAppearShineFromNPCLocalWithoutDemo);
+    Spc::registerBuiltinFunction("appearShineFromNPCLocalWithoutDemo",
+                                 evAppearShineFromNPCLocalWithoutDemo);
     Spc::registerBuiltinFunction("appearFluddTip", evAppearFluddTip);
 
     Stage::addInitCallback(initCharacterArchives);
@@ -273,13 +285,20 @@ static void initModule() {
     Objects::registerObjectCollideInteractor(pizzaBoxData.mObjectID, cannonBallCollideInteractor);
 
     Objects::registerObjectAsMapObj("CannonBox", &cannonBoxData, TCannonBox::instantiate);
-    Objects::registerObjectAsMapObj("ElevatorDoor", &elevatorObjectData, TElevatorObject::instantiate);
+    Objects::registerObjectAsMapObj("ElevatorDoor", &elevatorObjectData,
+                                    TElevatorObject::instantiate);
     Objects::registerObjectAsMisc("FireyPetey", TFireyPetey::instantiate);
     Objects::registerObjectAsMisc("FireyPeteyManager", TFireyPeteyManager::instantiate);
     Objects::registerObjectAsMisc("DarkZhine", TDarkZhine::instantiate);
     Objects::registerObjectAsMisc("DarkZhineManager", TDarkZhineManager::instantiate);
     Objects::registerObjectAsMisc("BossBowserCar", TBossBowserCar::instantiate);
     Objects::registerObjectAsMisc("BossBowserCarManager", TBossBowserCarManager::instantiate);
+
+    Game::addBootCallback(initCPUOverclock);
+    Stage::addUpdateCallback(checkForCPUOverclock);
+    Game::addLoopCallback(updateSpeedrunTimer);
+    Stage::addDraw2DCallback(renderCPUOverclock);
+    Game::addPostDrawCallback(renderSpeedrunTimer);
 }
 
 // Definition block

@@ -501,6 +501,8 @@ bool TBossBowserCar::receiveMessage(THitActor *sender, u32 message) {
         m_health_points -= 1;
         m_damage_timer = 120;
 
+        setInvincibleTimer(120);
+
         TVec3f direction = {mTranslation.x - sender->mTranslation.x, 0.0f,
                             mTranslation.z - sender->mTranslation.z};
         m_rocket_angle   = radiansToAngle(atan2f(direction.y, direction.x));
@@ -643,6 +645,8 @@ void TBossBowserCar::control() {
             atan2f(m_rocket_hit_pos.y - mTranslation.y, m_rocket_hit_pos.x - mTranslation.x));
         mSpineBase->setNerve(&s_bowser_nerve_shot);
         bomb->kill();
+
+        setInvincibleTimer(120);
     }
 
     m_invincible_timer = Max(0, m_invincible_timer - 1);
@@ -977,14 +981,9 @@ void TBossBowserCar::checkForActorContact() {
             TMario *player = static_cast<TMario *>(mCollidingObjs[i]);
 
             if (!isStunned()) {
-                if (isPlayerAttacking(player) && !isInvincible()) {
-                    break;
-                }
-
                 if (isHostile() && !isDefeated()) {
                     player->damageExec(this, 1, 2, 0, 16.0f, 0x19, 0.0f, 160);
                 }
-            } else {
             }
         }
     }
@@ -1781,8 +1780,6 @@ bool TNerveBowserShock::execute(TSpineBase<TLiveActor> *spine) const {
             bombhei->ensureTakeSituation();
             bowser->mHeldObject = nullptr;
         }
-
-        bowser->setInvincibleTimer(200);
 
         s_bomb_message.show();
     }

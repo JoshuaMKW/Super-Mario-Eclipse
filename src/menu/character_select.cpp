@@ -42,11 +42,11 @@
 
 constexpr size_t PlayerMax = 1;
 
-static SME::CharacterID s_player_id = SME::CharacterID::MARIO;
+static SME::CharacterID s_player_id    = SME::CharacterID::MARIO;
 static JKRMemArchive *sResourceArchive = nullptr;
 
-bool gHadLuigiBefore                   = false;
-bool gHadPiantissimoBefore             = false;
+bool gHadLuigiBefore       = false;
+bool gHadPiantissimoBefore = false;
 
 CharacterSelectDirector::~CharacterSelectDirector() { gpMSound->exitStage(); }
 
@@ -492,7 +492,7 @@ static u8 s_last_context           = 0;
 static void correctHadBeforeState(TFlagManager *manager) {
     manager->correctFlag();
 
-    gHadLuigiBefore = manager->getFlag(0x10077);
+    gHadLuigiBefore       = manager->getFlag(0x10077);
     gHadPiantissimoBefore = manager->getBool(0x10018) && manager->getBool(0x10041) &&
                             manager->getBool(0x10036) && manager->getShineFlag(135);
 
@@ -603,6 +603,12 @@ static int flagCharacterSelectMenu(u8 state) {
         }
     }
 
+    if (next_scene.mAreaID == TGameSequence::AREA_PINNAPARCO) {
+        if (next_scene.mEpisodeID == 0 || next_scene.mEpisodeID == 5) {
+            sPiantissimo = false;
+        }
+    }
+
     if (next_scene.mAreaID == TGameSequence::AREA_MARE) {
         if (next_scene.mEpisodeID == 2 || next_scene.mEpisodeID == 3 ||
             next_scene.mEpisodeID == 7) {
@@ -617,7 +623,7 @@ static int flagCharacterSelectMenu(u8 state) {
 
     // Ertoruption
     if (next_scene.mAreaID == SME::STAGE_ERTO) {
-        if (next_scene.mEpisodeID == 0) {
+        if (next_scene.mEpisodeID == 6) {
             sLuigi       = false;
             sPiantissimo = false;
         }

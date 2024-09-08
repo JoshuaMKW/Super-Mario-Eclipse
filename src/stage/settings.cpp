@@ -132,6 +132,23 @@ private:
     int mIndex;
 };
 
+static const char *sAnimators[] = {"Fludd-Stop"};
+
+class AnimatorsCreditSetting final : public Settings::IntSetting {
+public:
+    AnimatorsCreditSetting() : IntSetting("Animators", &mIndex) {
+        mValueRange = {0, (sizeof(sAnimators) / sizeof(const char *)) - 1, 1};
+    }
+    ~AnimatorsCreditSetting() override {}
+
+    void load(JSUMemoryInputStream &in) override {}
+    void save(JSUMemoryOutputStream &out) override {}
+    void getValueName(char *dst) const override { strcpy(dst, sAnimators[mIndex]); }
+
+private:
+    int mIndex;
+};
+
 static const char *sBetaTesters[] = {"MasterMario777",
                                      "Flash",
                                      "Hailbot",
@@ -164,7 +181,7 @@ private:
 };
 
 static const char *sSpecialThanks[] = {
-    "Xayr", "Halleester",  "Portable Productions", "Brace", "Henk_Wasmachine",
+    "Xayr", "Halleester",  "Portable Productions", "Gamma", "Brace", "Henk_Wasmachine",
     "Gonz", "Truegamer02", "zachthepillow",        "MissB"};
 
 class SpecialThanksCreditSetting final : public Settings::IntSetting {
@@ -182,26 +199,33 @@ private:
     int mIndex;
 };
 
-MarioBrosCreditSetting sMarioBrosCreditSetting;
-DirectorCreditSetting sDirectorCreditSetting;
-ProgrammerCreditSetting sProgrammerCreditSetting;
-StageCreditSetting sStageCreditSetting;
-ComposerCreditSetting sComposerCreditSetting;
-TextureCreditSetting sTextureCreditSetting;
-CharacterCreditSetting sCharacterCreditSetting;
-BetaTestersCreditSetting sBetaTestersCreditSetting;
-SpecialThanksCreditSetting sSpecialThanksCreditSetting;
+static Settings::SettingsGroup sCreditsGroup(1, 0, Settings::Priority::GAME);
+static BetterSMS::ModuleInfo sModuleInfo("Super Mario Eclipse Credits", 1, 0, &sCreditsGroup);
 
-void initDemoCredits(Settings::SettingsGroup &group) {
-    group.addSetting(&sMarioBrosCreditSetting);
-    group.addSetting(&sDirectorCreditSetting);
-    group.addSetting(&sProgrammerCreditSetting);
-    group.addSetting(&sStageCreditSetting);
-    group.addSetting(&sComposerCreditSetting);
-    group.addSetting(&sTextureCreditSetting);
-    group.addSetting(&sCharacterCreditSetting);
-    group.addSetting(&sBetaTestersCreditSetting);
-    group.addSetting(&sSpecialThanksCreditSetting);
+static MarioBrosCreditSetting sMarioBrosCreditSetting;
+static DirectorCreditSetting sDirectorCreditSetting;
+static ProgrammerCreditSetting sProgrammerCreditSetting;
+static StageCreditSetting sStageCreditSetting;
+static ComposerCreditSetting sComposerCreditSetting;
+static TextureCreditSetting sTextureCreditSetting;
+static CharacterCreditSetting sCharacterCreditSetting;
+static AnimatorsCreditSetting sAnimatorsCreditSetting;
+static BetaTestersCreditSetting sBetaTestersCreditSetting;
+static SpecialThanksCreditSetting sSpecialThanksCreditSetting;
+
+void initDemoCredits() {
+    sCreditsGroup.addSetting(&sMarioBrosCreditSetting);
+    sCreditsGroup.addSetting(&sDirectorCreditSetting);
+    sCreditsGroup.addSetting(&sProgrammerCreditSetting);
+    sCreditsGroup.addSetting(&sStageCreditSetting);
+    sCreditsGroup.addSetting(&sComposerCreditSetting);
+    sCreditsGroup.addSetting(&sTextureCreditSetting);
+    sCreditsGroup.addSetting(&sCharacterCreditSetting);
+    sCreditsGroup.addSetting(&sAnimatorsCreditSetting);
+    sCreditsGroup.addSetting(&sBetaTestersCreditSetting);
+    sCreditsGroup.addSetting(&sSpecialThanksCreditSetting);
+    sCreditsGroup.setIOValid(false);
+    BetterSMS::registerModule(sModuleInfo);
 }
 
 bool isGameCompletedPrior() { return gBugsSetting.isUnlocked(); }
@@ -248,48 +272,56 @@ void lockModuleSettings(TApplication *app) {
             {
                 auto *setting = movement_settings->getSetting("Long Jump");
                 setting->setInt(2);
+                setting->emit();
                 setting->setUserEditable(false, BetterSMS::Settings::Priority::GAME);
             }
 
             {
                 auto *setting = movement_settings->getSetting("Back Flip");
                 setting->setBool(true);
+                setting->emit();
                 setting->setUserEditable(false, BetterSMS::Settings::Priority::GAME);
             }
 
             {
                 auto *setting = movement_settings->getSetting("Hover Burst");
                 setting->setBool(true);
+                setting->emit();
                 setting->setUserEditable(false, BetterSMS::Settings::Priority::GAME);
             }
 
             {
                 auto *setting = movement_settings->getSetting("Hover Slide");
                 setting->setBool(true);
+                setting->emit();
                 setting->setUserEditable(false, BetterSMS::Settings::Priority::GAME);
             }
 
             {
                 auto *setting = movement_settings->getSetting("Rocket Dive");
                 setting->setBool(true);
+                setting->emit();
                 setting->setUserEditable(false, BetterSMS::Settings::Priority::GAME);
             }
 
             {
                 auto *setting = movement_settings->getSetting("Fast Turbo");
                 setting->setBool(true);
+                setting->emit();
                 setting->setUserEditable(false, BetterSMS::Settings::Priority::GAME);
             }
 
             {
                 auto *setting = movement_settings->getSetting("Fast Dive/Rollout");
                 setting->setBool(true);
+                setting->emit();
                 setting->setUserEditable(false, BetterSMS::Settings::Priority::GAME);
             }
 
             {
                 auto *setting = movement_settings->getSetting("Fall Damage");
                 setting->setInt(1);
+                setting->emit();
                 setting->setUserEditable(false, BetterSMS::Settings::Priority::GAME);
             }
         }
@@ -303,6 +335,7 @@ void lockModuleSettings(TApplication *app) {
             {
                 auto *setting = mirror_settings->getSetting("Is Enabled");
                 setting->setBool(false);
+                setting->emit();
                 setting->setUserEditable(false, BetterSMS::Settings::Priority::GAME);
             }
         }

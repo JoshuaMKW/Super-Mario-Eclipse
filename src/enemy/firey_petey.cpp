@@ -276,7 +276,7 @@ bool TNerveFPFireBreath::execute(TSpineBase<TLiveActor> *spine) const {
             target->mFire[i]->mVelocity.z = 0.0f;
             target->mFire[i]->mLifetime   = 0;
         }
-        peteyMActor->setFrameRate(SMSGetAnmFrameRate__Fv() * 1.5f, 0);
+        peteyMActor->setFrameRate(SMSGetAnmFrameRate__Fv() * 1.3f, 0);
     }
     bool isAnimationRunning = peteyMActor->checkCurAnmFromIndex(0x15, 0);
     if (isAnimationRunning) {

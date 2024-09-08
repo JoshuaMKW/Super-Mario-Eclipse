@@ -27,6 +27,9 @@ static void setStageAfterShineSelect(TSelectMenu *menu) {
     // Reset coins
     TFlagManager::smInstance->setFlag(0x40002, 0);
 
+    // Reset balloons
+    TFlagManager::smInstance->setFlag(0x30005, 0);
+
     switch (gpApplication.mPrevScene.mAreaID) {
     case TGameSequence::AREA_SIRENA: {
         if (gpApplication.mCurrentScene.mAreaID != TGameSequence::AREA_PINNABEACH) {
@@ -212,7 +215,7 @@ BETTER_SMS_FOR_CALLBACK void updateWarpStatesForCruiserCabin(TMarDirector *direc
     }
 
     {
-        bool is_enabled = shine_count >= 160;
+        bool is_enabled = shine_count >= 180;
 
         u16 key_code = JDrama::TNameRef::calcKeyCode("YoshiLight");
         if (JDrama::TNameRef *p = name_ref->searchF(key_code, "YoshiLight")) {
@@ -229,7 +232,7 @@ BETTER_SMS_FOR_CALLBACK void updateWarpStatesForCruiserCabin(TMarDirector *direc
     }
 
     {
-        bool is_enabled = shine_count >= 180;
+        bool is_enabled = shine_count >= 160;
 
         u16 key_code = JDrama::TNameRef::calcKeyCode("PeachLight");
         if (JDrama::TNameRef *p = name_ref->searchF(key_code, "PeachLight")) {
@@ -463,10 +466,10 @@ SMS_WRITE_32(0x803C0364, setFinalBossDEBSList);
 
 static bool checkForMareGate(JDrama::TNameRef *actor, u16 keycode, const char *name) {
     if (gpMarDirector->mAreaID == TGameSequence::AREA_DOLPIC && gpMarDirector->mEpisodeID == 3) {
-        return false;
+        TFlagManager::smInstance->setBool(true, 0x50004);
     }
     if (gpMarDirector->mAreaID == TGameSequence::AREA_DOLPIC && gpMarDirector->mEpisodeID == 4) {
-        TFlagManager::smInstance->setBool(true, 0x50004);
+        return false;
     }
     return TFlagManager::smInstance->getBool(0x50004);
 }

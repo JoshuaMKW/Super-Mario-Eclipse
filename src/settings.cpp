@@ -5,6 +5,7 @@ BugsExploitsSetting gBugsSetting;
 MirrorModeFlag gMirrorModeSetting;
 TutorialSetting gTutorialSetting;
 DarknessSetting gDarknessSetting;
+SpeedrunSetting gSpeedrunSetting;
 
 static bool sLivesValue = false;
 Settings::SwitchSetting gLivesSetting("Infinite Lives", &sLivesValue);

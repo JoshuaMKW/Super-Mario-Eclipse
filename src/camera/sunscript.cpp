@@ -7,6 +7,12 @@
 
 using namespace BetterSMS;
 
+void evIsFixedCameraMode(TSpcInterp* spc, u32 argc) {
+    spc->verifyArgNum(0, &argc);
+
+    Spc::Stack::pushItem(spc, SME::isCameraFixedMode(), Spc::ValueType::INT);
+}
+
 void evSetFixedCameraState(TSpcInterp *spc, u32 argc) {
     spc->verifyArgNum(2, &argc);
 

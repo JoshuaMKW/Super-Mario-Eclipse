@@ -66,10 +66,10 @@ BETTER_SMS_FOR_CALLBACK void initializeStageInfo(TApplication *app) {
         {
             Stage::ShineAreaInfo *info = new Stage::ShineAreaInfo(SME::STAGE_ERTO, 'er_0');
             info->addScenario(125, 72);
-            info->addScenario(121, 73);
+            info->addScenario(124, 76);
             info->addScenario(122, 74);
             info->addScenario(123, 75);
-            info->addScenario(124, 76);
+            info->addScenario(121, 73);
             info->addScenario(120, 77);
             info->addScenario(126, 78);
             info->addScenario(127, 79);
@@ -144,7 +144,7 @@ BETTER_SMS_FOR_CALLBACK void initializeStageInfo(TApplication *app) {
 
             SME::setSpawnTransRot(SME::STAGE_WARSHIP, -1, TVec3f(-18000.0f, 180.0f, 13240.0f),
                                   TVec3f(0.0f, 100.0f, 0.0f), SME::STAGE_ISLE_DELFINO,
-                                  5);  // Rugivosa Marsh
+                                  4);  // Rugivosa Marsh
         }
 
         // Register Hotel Lacrima stage info
@@ -714,11 +714,25 @@ BETTER_SMS_FOR_CALLBACK void setPlayerStartPos(TMario *player) {
     }
 }
 
+extern bool gHadLuigiBefore;
+extern bool gHadPiantissimoBefore;
 
 static void SME_extendedCorrectFlags(TFlagManager *manager) {
     manager->correctFlag();
     manager->setFlag(0x20012, 3080);  // Lighthouse Island
     manager->setFlag(0x20013, 2670);  // Red Lily City
+
+    gHadLuigiBefore       = manager->getFlag(0x10077);
+    gHadPiantissimoBefore = manager->getBool(0x10018) && manager->getBool(0x10041) &&
+                            manager->getBool(0x10036) && manager->getShineFlag(135);
+
+    manager->setFlag(0x30018, gHadLuigiBefore);        // Luigi
+    manager->setFlag(0x30019, gHadPiantissimoBefore);  // Piantissimo
+
+    // Normalize extra blue coin slots
+    for (size_t i = 0x1033E; i < 0x10366; ++i) {
+        manager->setFlag(i, 0);
+    }
 }
 SMS_PATCH_BL(0x802954f4, SME_extendedCorrectFlags);
 

@@ -376,8 +376,9 @@ AtomBalloonMessageViewer s_bomb_message(145, 200);
 
 TBossBowserCar::TBossBowserCar(const char *name)
     : TSpineEnemy(name), m_ground_point(), m_stunned(false), m_invincible(false), m_hostile(true),
-      m_anm_index(0), m_bounding_point(), m_target(nullptr), m_health_points(5), m_damage_timer(0),
-      m_forward_speed(0.0f), m_model_ofs_y(0.0f) {
+      m_anm_index(0), m_bounding_point(), m_target(nullptr), m_health_points(5),
+      m_invincible_timer(0), m_rocket_angle(0.0f), m_damage_timer(0), m_forward_speed(0.0f),
+      m_model_ofs_y(0.0f) {
     gpBowserCar = this;
 }
 
@@ -497,6 +498,12 @@ void TBossBowserCar::perform(u32 flags, JDrama::TGraphics *graphics) {
 
 #define MESSAGE_TOUCH_WATER 15
 bool TBossBowserCar::receiveMessage(THitActor *sender, u32 message) {
+    if (m_invincible_timer > 0 || mSpineBase->getLatestNerve() == &s_bowser_nerve_shot ||
+        mSpineBase->getLatestNerve() == &s_bowser_nerve_prekill ||
+        mSpineBase->getLatestNerve() == &s_bowser_nerve_kill) {
+        return false;
+    }
+
     if (sender->mObjectID == 0x1000002B) {
         m_health_points -= 1;
         m_damage_timer = 120;
@@ -506,10 +513,16 @@ bool TBossBowserCar::receiveMessage(THitActor *sender, u32 message) {
         TVec3f direction = {mTranslation.x - sender->mTranslation.x, 0.0f,
                             mTranslation.z - sender->mTranslation.z};
         m_rocket_angle   = radiansToAngle(atan2f(direction.y, direction.x));
+        if (isnan(m_rocket_angle)) {
+            m_rocket_angle = 0.0f;
+        }
 
         TSpineEnemy *rocket   = (TSpineEnemy *)sender;
         rocket->mPerformFlags = 0xFFFF;  // Render it gone completely
         rocket->kill();
+        rocket->mTranslation = {0.0f, -10000.0f, 0.0f};
+
+        m_wet_count = 0;
 
         mSpineBase->setNerve(&s_bowser_nerve_shot);
         return true;
@@ -570,8 +583,7 @@ bool TBossBowserCar::receiveMessage(THitActor *sender, u32 message) {
         }
     }
 
-    TSpineEnemy::receiveMessage(sender, message);
-    return false;
+    return TSpineEnemy::receiveMessage(sender, message);
 }
 
 void TBossBowserCar::loadAfter() {
@@ -638,15 +650,24 @@ void TBossBowserCar::control() {
 
     m_highest_ground_y = getHighestGround(m_base_translation, 500.0f, &m_highest_ground);
 
-    if (TSpineEnemy *bomb = isBombWithinAndAttack(mReceiveRadius * 1.3f, mReceiveHeight * 1.2f)) {
-        m_health_points -= 1;
-        m_rocket_hit_pos = bomb->mTranslation;
-        m_rocket_angle   = radiansToAngle(
-            atan2f(m_rocket_hit_pos.y - mTranslation.y, m_rocket_hit_pos.x - mTranslation.x));
-        mSpineBase->setNerve(&s_bowser_nerve_shot);
-        bomb->kill();
+    if (m_invincible_timer == 0 && mSpineBase->getLatestNerve() != &s_bowser_nerve_shot &&
+        mSpineBase->getLatestNerve() != &s_bowser_nerve_prekill &&
+        mSpineBase->getLatestNerve() != &s_bowser_nerve_kill) {
+        if (TSpineEnemy *bomb =
+                isBombWithinAndAttack(mReceiveRadius * 1.3f, mReceiveHeight * 1.2f)) {
+            m_health_points -= 1;
+            m_rocket_hit_pos = bomb->mTranslation;
+            m_rocket_angle   = radiansToAngle(
+                atan2f(m_rocket_hit_pos.y - mTranslation.y, m_rocket_hit_pos.x - mTranslation.x));
+            if (isnan(m_rocket_angle)) {
+                m_rocket_angle = 0.0f;
+            }
+            m_wet_count = 0;
+            mSpineBase->setNerve(&s_bowser_nerve_shot);
+            bomb->kill();
 
-        setInvincibleTimer(120);
+            setInvincibleTimer(120);
+        }
     }
 
     m_invincible_timer = Max(0, m_invincible_timer - 1);
@@ -680,6 +701,9 @@ void TBossBowserCar::moveObject() {
 
     if (!isDefeated()) {
         mSpeed.scale(BOWSER_BRAKE_FACTOR);
+        if (PSVECMag(mSpeed) < 0.01f) {
+            mSpeed = TVec3f::zero();
+        }
     }
 
     mSpeed.y = Max(mSpeed.y - mGravity, -30.0f);
@@ -1001,21 +1025,7 @@ bool TBossBowserCar::isPlayerAttacking(TMario *player) {
     return true;
 }
 
-bool TBossBowserCar::isPlayerPounding(TMario *player) {
-    if (player->mSpeed.y >= 0.0f) {
-        return false;
-    }
-
-    if (player->mState == TMario::STATE_G_POUND || player->mState == 0x24DF) {
-        return true;
-    }
-
-    if (player->mPrevState == TMario::STATE_G_POUND || player->mPrevState == 0x24DF) {
-        return true;
-    }
-
-    return false;
-}
+bool TBossBowserCar::isPlayerPounding(TMario *player) { return false; }
 
 TSpineEnemy *TBossBowserCar::isBombWithinAndAttack(f32 radius, f32 height) {
     if (isInvincible()) {
@@ -1536,7 +1546,8 @@ bool TNerveBowserWet::execute(TSpineBase<TLiveActor> *spine) const {
 
         TSpineEnemy *bombhei = static_cast<TSpineEnemy *>(bowser->mHeldObject);
         if (bombhei) {
-            TVec3f throw_speed = {sinf(rand() % 10), 0.0f, sinf(rand() % 10)};
+            f32 angle          = ((f32)(rand() % 100) / 100.0f) * 2.0f * M_PI;
+            TVec3f throw_speed = {sinf(angle), 0.0f, cosf(angle)};
             PSVECNormalize(throw_speed, throw_speed);
             throw_speed.scale(10.0f);
             throw_speed.y = 20.0f;
@@ -1642,8 +1653,8 @@ bool TNerveBowserShot::execute(TSpineBase<TLiveActor> *spine) const {
 
         TSpineEnemy *bombhei = static_cast<TSpineEnemy *>(bowser->mHeldObject);
         if (bombhei) {
-            TVec3f throw_speed = {sinf(rand() % 10), 0.0f, sinf(rand() % 10)};
-            PSVECNormalize(throw_speed, throw_speed);
+            f32 angle          = ((f32)(rand() % 100) / 100.0f) * 2.0f * M_PI;
+            TVec3f throw_speed = {sinf(angle), 0.0f, cosf(angle)};
             throw_speed.scale(10.0f);
             throw_speed.y = 20.0f;
 
@@ -1683,7 +1694,8 @@ bool TNerveBowserShot::execute(TSpineBase<TLiveActor> *spine) const {
 
         TSpineEnemy *bombhei = static_cast<TSpineEnemy *>(bowser->mHeldObject);
         if (bombhei) {
-            TVec3f throw_speed = {sinf(rand() % 10), 0.0f, sinf(rand() % 10)};
+            f32 angle          = ((f32)(rand() % 100) / 100.0f) * 2.0f * M_PI;
+            TVec3f throw_speed = {sinf(angle), 0.0f, cosf(angle)};
             PSVECNormalize(throw_speed, throw_speed);
             throw_speed.scale(10.0f);
             throw_speed.y = 20.0f;
@@ -1799,9 +1811,12 @@ bool TNerveBowserShock::execute(TSpineBase<TLiveActor> *spine) const {
         TSpineEnemy *bombhei = static_cast<TSpineEnemy *>(
             gpConductor->makeOneEnemyAppear(bowser->mTranslation, bomb_name, 1));
         if (bombhei) {
-            TVec3f throw_speed = {sinf(rand() % 10), 0.0f, sinf(rand() % 10)};
+            f32 angle = ((f32)(rand() % 100) / 100.0f) * 2.0f * M_PI;
+            f32 power = (f32)(rand() % 100) / 100.0f;
+
+            TVec3f throw_speed = {sinf(angle), 0.0f, cosf(angle)};
             PSVECNormalize(throw_speed, throw_speed);
-            throw_speed.scale(10.0f);
+            throw_speed.scale(7.0f * power);
             throw_speed.y = 20.0f;
 
             bombhei->mSpeed = throw_speed;
@@ -1887,6 +1902,9 @@ bool TNerveBowserPreKill::execute(TSpineBase<TLiveActor> *spine) const {
         if (gpMarioAddress->mHealth < 8) {
             gpMarioAddress->incHP(8 - gpMarioAddress->mHealth);
         }
+
+        gpConductor->killEnemiesWithin(gpMarioAddress->mTranslation, 2000.0f);
+        bowser->mStateFlags.asU32 &= ~0x41;
     }
 
     if (spine->mNerveTimer == 180) {
@@ -1919,7 +1937,7 @@ bool TNerveBowserKill::execute(TSpineBase<TLiveActor> *spine) const {
     ControlBowserKillCam_(gpCamera);
 
     if (spine->mNerveTimer == 0) {
-        bowser->playAnimation("bowser_dead_end", 0.5f, 0.5f);
+        bowser->playAnimation("bowser_dead_end", 0.5f, 1.0f);
 
         if (gpMSound->gateCheck(MSD_SE_BS_KOOPA_VO_DAMAGE_1)) {
             JAISound *sound = MSoundSE::startSoundActor(MSD_SE_BS_KOOPA_VO_DAMAGE_1,

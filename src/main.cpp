@@ -110,6 +110,7 @@ extern void renderShineBlueTracker(TMarDirector *director, const J2DOrthoGraph *
 extern void checkForCompletionAwards(TApplication *);
 
 // SPC
+extern void evIsFixedCameraMode(TSpcInterp *spc, u32 argc);
 extern void evSetFixedCameraState(TSpcInterp *spc, u32 argc);
 extern void evSetFixedCameraPos(TSpcInterp *spc, u32 argc);
 extern void evSetFixedCameraLookAt(TSpcInterp *spc, u32 argc);
@@ -137,6 +138,7 @@ extern void cannonBallCollideInteractor(THitActor *self, TMario *player);
 extern void checkForCPUOverclock(TMarDirector *app);
 extern void initCPUOverclock(TApplication *app);
 extern void renderCPUOverclock(TMarDirector *director, const J2DOrthoGraph *graph);
+extern void stopSpeedrunTimerOnStageExit(TApplication *app);
 extern void updateSpeedrunTimer(TApplication *app);
 extern void renderSpeedrunTimer(TApplication *app, const J2DOrthoGraph *graph);
 
@@ -216,6 +218,7 @@ static void initModule() {
 
     Stage::addInitCallback(resetFixedCameraOnLoad);
 
+    Spc::registerBuiltinFunction("isFixedCameraMode", evIsFixedCameraMode);
     Spc::registerBuiltinFunction("setFixedCameraState", evSetFixedCameraState);
     Spc::registerBuiltinFunction("setFixedCameraPos", evSetFixedCameraPos);
     Spc::registerBuiltinFunction("setFixedCameraLookAt", evSetFixedCameraLookAt);
@@ -296,8 +299,8 @@ static void initModule() {
 
     Game::addBootCallback(initCPUOverclock);
     Stage::addUpdateCallback(checkForCPUOverclock);
+    Stage::addExitCallback(stopSpeedrunTimerOnStageExit);
     Game::addLoopCallback(updateSpeedrunTimer);
-    Stage::addDraw2DCallback(renderCPUOverclock);
     Game::addPostDrawCallback(renderSpeedrunTimer);
 }
 

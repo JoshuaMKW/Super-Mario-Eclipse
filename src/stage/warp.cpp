@@ -7,6 +7,7 @@
 #include <BetterSMS/libs/constmath.hxx>
 #include <BetterSMS/module.hxx>
 
+#include "camera.hxx"
 #include "settings.hxx"
 #include "stage.hxx"
 
@@ -375,6 +376,24 @@ static void assignOnDeathDestination(TGameSequence *sequence, u8 area, u8 episod
 }
 SMS_PATCH_BL(SMS_PORT_REGION(0x80299808, 0, 0, 0), assignOnDeathDestination);
 
+static void assignOnDeathExDestination() {
+    u8 *area;
+    SMS_FROM_GPR(28, area);
+
+    if (*area == SME::STAGE_PEACH_CASTLE) {
+        return;
+    }
+
+    gpApplication.mNextScene.mAreaID = *area;
+    gpApplication.mNextScene.mEpisodeID = 0;
+}
+SMS_PATCH_BL(SMS_PORT_REGION(0x8029943C, 0, 0, 0), assignOnDeathExDestination);
+SMS_WRITE_32(SMS_PORT_REGION(0x80299440, 0, 0, 0), 0x60000000);
+SMS_WRITE_32(SMS_PORT_REGION(0x80299444, 0, 0, 0), 0x60000000);
+SMS_WRITE_32(SMS_PORT_REGION(0x80299448, 0, 0, 0), 0x60000000);
+SMS_WRITE_32(SMS_PORT_REGION(0x8029944C, 0, 0, 0), 0x60000000);
+SMS_WRITE_32(SMS_PORT_REGION(0x80299450, 0, 0, 0), 0x60000000);
+
 static void assignShineExitDestination(TApplication *app, u8 area, u8 episode,
                                        JDrama::TFlagT<u16> flag) {
     // Piantissimo
@@ -583,11 +602,17 @@ SMS_WRITE_32(SMS_PORT_REGION(0x80164E30, 0, 0, 0), 0x38804E01);
 // SMS_WRITE_32(SMS_PORT_REGION(0x802991F8, 0, 0, 0), 0x38000006);
 // SMS_WRITE_32(SMS_PORT_REGION(0x80299200, 0, 0, 0), 0x38600000);
 
+static u32 s_shadow_mario_shines[] = {0x6, 0x10, 0x1A, 0x24, 0x2E, 0x38, 0x42, 126, 136, 146, 156};
+
 static void setNextStage_ChangeStageOverride(TMarDirector *director, u16 warpID) {
     TFlagManager::smInstance->setBool(false, 0x50010);
 
-    bool isFloodedPlaza =
-        director->mAreaID == TGameSequence::AREA_DOLPIC && director->mEpisodeID == 9;
+    bool isFloodedPlaza = !TFlagManager::smInstance->getFlag(0x10077);
+
+    for (u32 shine_id : s_shadow_mario_shines) {
+        isFloodedPlaza &= TFlagManager::smInstance->getShineFlag(shine_id);
+    }
+
     if (!isFloodedPlaza && warpID == TGameSequence::AREA_COROEX6) {
         if (!TFlagManager::smInstance->getFlag(0x10077) ||
             TFlagManager::smInstance->getFlag(0x40000) >= 240) {
@@ -607,3 +632,10 @@ static void setNextStage_ChangeStageOverride(TMarDirector *director, u16 warpID)
     director->setNextStage(warpID, nullptr);
 }
 SMS_PATCH_BL(SMS_PORT_REGION(0x801C1790, 0, 0, 0), setNextStage_ChangeStageOverride);
+
+static bool checkForPauseValidFilter(TMario *player) {
+    return (player->mState & 0x800) != 0 ||
+           (gpApplication.mFader->mFadeStatus != TSMSFader::FADE_OFF) || SME::isCameraFixedMode();
+}
+SMS_PATCH_BL(SMS_PORT_REGION(0x80297AA8, 0, 0, 0), checkForPauseValidFilter);
+SMS_WRITE_32(SMS_PORT_REGION(0x80297AAC, 0, 0, 0), 0x2C030000);

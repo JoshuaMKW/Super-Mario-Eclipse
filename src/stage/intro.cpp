@@ -18,10 +18,13 @@ static bool isStartCameraPresent(const char *default_path) {
                             gpApplication.mCurrentScene.mAreaID <= SME::STAGE_TUTORIAL;
     bool is_mare = gpApplication.mCurrentScene.mAreaID == TGameSequence::AREA_MARE;
 
-    if (!gFromShineSelectForIntro && (is_extended_area || is_mare) &&
-        SMS_getShineStage__FUc(gpApplication.mCurrentScene.mAreaID) ==
-            SMS_getShineStage__FUc(gpApplication.mPrevScene.mAreaID)) {
-        return false;
+    if (gpApplication.mCurrentScene.mAreaID != TGameSequence::AREA_DOLPIC &&
+        gpApplication.mCurrentScene.mAreaID != SME::STAGE_CRUISER) {
+        if (!gFromShineSelectForIntro && (is_extended_area || is_mare) &&
+            SMS_getShineStage__FUc(gpApplication.mCurrentScene.mAreaID) ==
+                SMS_getShineStage__FUc(gpApplication.mPrevScene.mAreaID)) {
+            return false;
+        }
     }
 
     gFromShineSelectForIntro = false;

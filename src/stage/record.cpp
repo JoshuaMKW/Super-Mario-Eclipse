@@ -157,7 +157,7 @@ static void setBlueCoinFlagOverride(TFlagManager *manager, u8 normalStage, u8 co
         shineStage = TGameSequence::AREA_DOLPIC;
     }
 
-    if (shineStage >= SME::STAGE_ERTO && shineStage < SME::STAGE_PEACH_CASTLE) {
+    if (shineStage >= SME::STAGE_ERTO && shineStage < SME::STAGE_PEACH_CASTLE - 2) {
         if (shineStage >= SME::STAGE_UNUSED_73 - 2) {
             shineStage -= 1;
         }

@@ -30,6 +30,7 @@ namespace SME {
             s16 mColdFrequency   = 0;
             f32 mAirDec          = 0;
             f32 mAirInc          = 0;
+            int mRocketTimer     = 0;
         };
 
         inline PlayerState *getEclipseData(TMario *player) {

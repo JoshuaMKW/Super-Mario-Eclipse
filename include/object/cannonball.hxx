@@ -2,6 +2,7 @@
 
 #include <Dolphin/types.h>
 #include <SMS/MapObj/MapObjBall.hxx>
+#include <SMS/Manager/MarioParticleManager.hxx>
 
 #include <BetterSMS/module.hxx>
 
@@ -31,6 +32,22 @@ public:
         mStateFlags.asU32 |= 0x100000;  // Enable grabbing
     }
 
+    void perform(u32 flags, JDrama::TGraphics *graphics) override {
+        TMapObjBall::perform(flags, graphics);
+
+        if ((flags & 2)) {
+            if (m_was_dead && (mObjectType & 1) == 0) {
+                if (JPABaseEmitter *emitter =
+                        gpMarioParticleManager->emit(0xC, &mTranslation, 0, nullptr)) {
+                    /*emitter->mSize1 = {3.0f, 3.0f, 3.0f};
+                    emitter->mSize3 = {3.0f, 3.0f, 3.0f};*/
+                }
+            }
+
+            m_was_dead = (mObjectType & 1);
+        }
+    }
+
     Mtx44 *getTakingMtx() override;
     void makeMActors() override;
 
@@ -50,6 +67,7 @@ private:
     const TBGCheckData *m_water_surface;
     f32 m_water_surface_y;
     bool m_was_in_air;
+    bool m_was_dead;
 };
 
 extern ObjData cannonBallData;

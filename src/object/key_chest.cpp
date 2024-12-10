@@ -11,6 +11,7 @@
 #include <SMS/M3DUtil/MActor.hxx>
 #include <SMS/M3DUtil/MActorKeeper.hxx>
 #include <SMS/MSound/MSoundSESystem.hxx>
+#include <SMS/Manager/FlagManager.hxx>
 #include <SMS/Manager/ItemManager.hxx>
 #include <SMS/Manager/ModelWaterManager.hxx>
 #include <SMS/Map/BGCheck.hxx>
@@ -34,6 +35,8 @@ void TKeyChest::initMapObj() {
         mCollisionManager->changeCollision(0);
         mCollisionManager->mCurrentMapCollision->setAllActor(this);
     }
+
+    TFlagManager::smInstance->setFlag(0x50020, false);
 }
 
 void TKeyChest::setGroundCollision() {
@@ -100,6 +103,7 @@ void TKeyChest::spawnShine() {
         shine->mTranslation.y += 100.0f;
         shine->appearWithDemo("TreasureCamera");
     }
+    TFlagManager::smInstance->setFlag(0x50020, true);
 }
 
 void TKeyChest::touchPlayer(THitActor *actor) {

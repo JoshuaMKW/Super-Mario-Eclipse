@@ -14,8 +14,8 @@ using namespace BetterSMS;
 static TLightContext sLightContext;
 static u8 sBrightLevel = 255;
 
-#define MIN_DARKNESS 100
-#define MIN_DARKNESS_CORONA 180
+#define MIN_DARKNESS 130
+#define MIN_DARKNESS_CORONA 190
 #define MAX_DARKNESS 210
 #define MIN_SIZE     0.0f
 #define MAX_SIZE     500000.0f
@@ -41,7 +41,7 @@ void initializeParameters(TLightContext::ActiveType type, TVec3f pos, u8 layer_c
             sLightContext.mLayerScale = layer_scale;
             sLightContext.mLayerCount = layer_count;
         } else {
-            minDarkness = isCoronaMountainBeat ? MIN_DARKNESS_CORONA + 30 : MIN_DARKNESS + 90;
+            minDarkness = isCoronaMountainBeat ? MIN_DARKNESS_CORONA + 20 : MIN_DARKNESS + 70;
             sLightContext.mLayerScale = 0.1f;
             sLightContext.mLayerCount = 5;
         }
@@ -155,6 +155,7 @@ void TLightContext::process(TModelWaterManager &manager) {
         manager.mSize       = mBaseScale;
         manager.mColor      = mColor;
         manager.LightType.mShowShadow = manager.mDarkLevel < 255;
+        manager.mLayerCount           = sLightContext.mLayerCount;
         gShineShadowPos     = gpMarioAddress->mTranslation;
         break;
     }
@@ -170,11 +171,13 @@ void TLightContext::process(TModelWaterManager &manager) {
         manager.mSize       = mBaseScale;
         manager.mColor      = mColor;
         manager.LightType.mShowShadow = manager.mDarkLevel < 255;
+        manager.mLayerCount           = sLightContext.mLayerCount;
         gShineShadowPos     = gpCamera->mTranslation + mTranslation;
         break;
     }
     default:
         manager.LightType.mShowShadow = manager.mDarkLevel < 255;
+        manager.mLayerCount = sLightContext.mLayerCount;
         break;
     }
 }

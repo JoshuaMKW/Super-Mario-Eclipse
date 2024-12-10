@@ -132,10 +132,10 @@ private:
 
 class SpeedrunSetting final : public Settings::IntSetting {
 public:
-    enum Kind { NONE, ANY, SHINE_121, SHINE_197, SHINE_240, SHINE_240_EX };
+    enum Kind { NONE, ANY, SHINE_121, SHINE_197, SHINE_240, SHINE_240_EX, ILS };
 
     SpeedrunSetting() : IntSetting("Speedrun Mode", &mSpeedrunSetting), mSpeedrunSetting(NONE) {
-        mValueRange = {0, 5, 1};
+        mValueRange = {0, 6, 1};
     }
     ~SpeedrunSetting() override {}
 
@@ -158,7 +158,10 @@ public:
             strncpy(dst, "240 SHINES", 11);
             break;
         case Kind::SHINE_240_EX:
-            strncpy(dst, "240+ PERCENT", 13);
+            strncpy(dst, "240ex PERCENT", 14);
+            break;
+        case Kind::ILS:
+            strncpy(dst, "IL TIMER", 9);
             break;
         }
     }

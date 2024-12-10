@@ -197,7 +197,7 @@ void CharacterSelectDirector::initializeDramaHierarchy() {
 
         auto *orthoProj                = new JDrama::TOrthoProj();
         orthoProj->mProjectionField[0] = -BetterSMS::getScreenRatioAdjustX();
-        orthoProj->mProjectionField[2] = BetterSMS::getScreenRenderWidth();
+        orthoProj->mProjectionField[2] = 600.0f + BetterSMS::getScreenRatioAdjustX();
         screen->assignCamera(orthoProj);
 
         screen->assignViewObj(group2D);
@@ -213,9 +213,8 @@ void CharacterSelectDirector::initializeLayout() {
     const int screenRenderHeight = 480;
     const int screenAdjustX      = BetterSMS::getScreenRatioAdjustX();
 
-    const f32 icon_ratio = scaleLinearAtAnchor(BetterSMS::getScreenToFullScreenRatio(), 1.8f, 1.0f);
-    const f32 poster_ratio =
-        scaleLinearAtAnchor(BetterSMS::getScreenToFullScreenRatio(), 1.2f, 1.0f);
+    const f32 icon_ratio = BetterSMS::getScreenToFullScreenRatio();
+    const f32 poster_ratio = BetterSMS::getScreenToFullScreenRatio();
 
     const int margin_width = 10;
     const int poster_width = 130;
@@ -517,6 +516,12 @@ static bool checkForUnlockMovie(u8 state) {
 
 #if 1
 static int flagCharacterSelectMenu(u8 state) {
+    // Only here for time sake
+    if (gpApplication.mContext == TApplication::CONTEXT_DIRECT_STAGE) {
+        *(*(u8 **)0x8040D05C + 0x98) = 0;
+        setWaterCameraFir__12MSSeCallBackFb(false);
+    }
+
     if (checkForUnlockMovie(state)) {
         return TApplication::CONTEXT_DIRECT_MOVIE;
     }

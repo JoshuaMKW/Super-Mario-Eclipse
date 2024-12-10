@@ -81,18 +81,31 @@ BETTER_SMS_FOR_CALLBACK void checkForCruiserUnlocked(TMarDirector *director) {
 
     s_cruiser_checked = true;
 
-    auto *nameRef = TMarNameRefGen::getInstance()->getRootNameRef();
-    u16 keyCode   = JDrama::TNameRef::calcKeyCode("mini_cruiser");
-    if (JDrama::TNameRef *p = nameRef->searchF(keyCode, "mini_cruiser")) {
-        TGenericRailObj *cruiser = reinterpret_cast<TGenericRailObj *>(p);
+    bool post_corona = TFlagManager::smInstance->getBool(0x10077);  // Corona Mountain beaten
 
-        bool cruiser_unlocked =
-            TFlagManager::smInstance->getBool(0x10077);  // Corona Mountain beaten
+    {
+        auto *nameRef = TMarNameRefGen::getInstance()->getRootNameRef();
+        u16 keyCode   = JDrama::TNameRef::calcKeyCode("mini_cruiser");
+        if (JDrama::TNameRef *p = nameRef->searchF(keyCode, "mini_cruiser")) {
+            TGenericRailObj *cruiser = reinterpret_cast<TGenericRailObj *>(p);
+            if (post_corona) {
+                cruiser->makeObjAppeared();
+            } else {
+                cruiser->makeObjDead();
+            }
+        }
+    }
 
-        if (cruiser_unlocked) {
-            cruiser->makeObjAppeared();
-        } else {
-            cruiser->makeObjDead();
+    {
+        auto *nameRef = TMarNameRefGen::getInstance()->getRootNameRef();
+        u16 keyCode   = JDrama::TNameRef::calcKeyCode("brush_object");
+        if (JDrama::TNameRef *p = nameRef->searchF(keyCode, "brush_object")) {
+            TGenericRailObj *brush = reinterpret_cast<TGenericRailObj *>(p);
+            if (post_corona) {
+                brush->makeObjAppeared();
+            } else {
+                brush->makeObjDead();
+            }
         }
     }
 }
@@ -347,8 +360,6 @@ BETTER_SMS_FOR_CALLBACK void resetCoinsOnStageExit(TApplication *app) {
 BETTER_SMS_FOR_CALLBACK void resetStateForStage(TMarDirector *director) {
     gHadLuigiBefore       = TFlagManager::smInstance->getBool(0x30018);
     gHadPiantissimoBefore = TFlagManager::smInstance->getBool(0x30019);
-
-    setWaterCameraFir__12MSSeCallBackFb(false);
 
     if (director->mAreaID == TGameSequence::AREA_OPTION) {
         SME::TGlobals::sCharacterIDList[0] = SME::CharacterID::MARIO;

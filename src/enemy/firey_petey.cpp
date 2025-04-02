@@ -81,16 +81,16 @@ bool TNerveFPWait::execute(TSpineBase<TLiveActor> *spine) const {
 
             if (target->_118 < target->_114) {
                 u32 *unk = ((target->_11C) + (target->_118) * 0x10);
-                unk[0]   = target->_F4;
+                unk[0]   = (u32)target->mTarget;
                 unk[1]   = target->_F8;
                 unk[2]   = target->_FC;
                 unk[3]   = target->_100;
                 target->_118++;
             }
-            target->_F4  = 0;
-            target->_F8  = (target->mTranslation.x + randomX);
-            target->_FC  = target->mTranslation.y;
-            target->_100 = (target->mTranslation.z + randomZ);
+            target->mTarget = 0;
+            target->_F8     = (target->mTranslation.x + randomX);
+            target->_FC     = target->mTranslation.y;
+            target->_100    = (target->mTranslation.z + randomZ);
             spine->pushNerve(
                 reinterpret_cast<TNerveBase<TLiveActor> *>(theNerve__13TNerveBPPivotFv()));
 

@@ -435,7 +435,7 @@ void CharacterSelectDirector::setup(JDrama::TDisplay *display) {
     mDisplay           = display;
 
     for (int i = 0; i < 4; ++i) {
-        gpApplication.mGamePads[i]->mState.mReadInput = false;
+        gpApplication.mGamePads[i]->mState._06 = true;
     }
 
     SMSRumbleMgr->reset();
@@ -462,6 +462,13 @@ s32 CharacterSelectDirector::exit() {
         for (auto &s_info : mSelectScreen->mSelectionInfos) {
             SME::TGlobals::sCharacterIDList[i++] =
                 mSelectScreen->mCharacterInfos.at(s_info.mIndex).mPlayer;
+        }
+    }
+
+    s32 switch_state = fader->mFadeStatus == TSMSFader::FADE_ON ? 5 : 1;
+    if (switch_state == 5) {
+        for (int i = 0; i < 4; ++i) {
+            gpApplication.mGamePads[i]->mState._06 = false;
         }
     }
 

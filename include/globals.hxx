@@ -20,13 +20,9 @@ namespace SME {
 
         static bool isFreePlayMode() { return sIsFreePlay; }
 
-        static u8 getMinDarkness() { return sMinDarkness; }
-        static void setMinDarkness(u8 val) { sMinDarkness = val; }
-
         static void *sPRMFile;
 
         static CharacterID sCharacterIDList[4];
-        static u8 sMinDarkness;
 
         static bool sIsFreePlay;
     };

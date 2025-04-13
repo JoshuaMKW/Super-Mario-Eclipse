@@ -116,6 +116,9 @@ BETTER_SMS_FOR_CALLBACK void initCPUOverclock(TApplication *app) {
     sOverclockTextbox->mCharSizeY      = 13;
     sOverclockTextbox->mGradientTop    = {255, 255, 255, 100};
     sOverclockTextbox->mGradientBottom = {255, 255, 255, 100};
+    sOverclockTextbox->mHBinding       = J2DTextBoxHBinding::Center;
+    sOverclockTextbox->mRect.mX1       = 0;
+    sOverclockTextbox->mRect.mX2       = 600;
 
     sTimerTextboxF                  = new J2DTextBox(gpSystemFont->mFont, "");
     sTimerTextboxF->mStrPtr         = sTimerBuffer;
@@ -379,15 +382,15 @@ BETTER_SMS_FOR_CALLBACK void renderSpeedrunTimer(TApplication *app, const J2DOrt
     sTimerTextboxF->draw(x, 457);
 
     if (sWideLayout) {
-        sLoadTimerTextboxB->draw(x + 103, 457 + 1);
-        sLoadTimerTextboxF->draw(x + 102, 457);
+        sLoadTimerTextboxB->draw(x + 107, 457 + 1);
+        sLoadTimerTextboxF->draw(x + 106, 457);
     } else {
         sLoadTimerTextboxB->draw(x + 95, 457 + 1);
         sLoadTimerTextboxF->draw(x + 94, 457);
     }
 
     if (sIsCPUOverclocked) {
-        sOverclockTextbox->draw(226, 456);
+        sOverclockTextbox->draw(242, 456);
     }
 }
 

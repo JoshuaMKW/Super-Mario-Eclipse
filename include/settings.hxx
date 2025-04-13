@@ -117,17 +117,40 @@ private:
     bool mTutorialValue = false;
 };
 
-class DarknessSetting final : public Settings::SwitchSetting {
+class DarknessSetting final : public Settings::IntSetting {
 public:
-    DarknessSetting() : SwitchSetting("Darkness", &mDarknessValue) {}
+    enum Kind { REGULAR, ECLIPSED, VANILLA };
+
+    DarknessSetting() : IntSetting("Darkness", &mDarknessValue) { mValueRange = {0, 2, 1};
+    }
     ~DarknessSetting() override {}
 
     void getValueName(char *dst) const override {
-        getBool() ? strncpy(dst, "ECLIPSED", 10) : strncpy(dst, "REGULAR", 9);
+        switch (getInt()) {
+        case Kind::REGULAR:
+            strncpy(dst, "REGULAR", 9);
+            break;
+        case Kind::ECLIPSED:
+            strncpy(dst, "ECLIPSED", 10);
+            break;
+        case Kind::VANILLA:
+            strncpy(dst, "VANILLA", 8);
+            break;
+        }
     }
 
+    void load(JSUMemoryInputStream &in) override {
+        int x;
+        in.read((u8 *)(&x) + 3, 1);
+        if (x < REGULAR || x > VANILLA)
+            x = REGULAR;  // Reset value if corrupt
+        setInt(x);
+    }
+
+    void save(JSUMemoryOutputStream &out) override { out.write((u8 *)(&mDarknessValue) + 3, 1); }
+
 private:
-    bool mDarknessValue = true;
+    int mDarknessValue = ECLIPSED;
 };
 
 class SpeedrunSetting final : public Settings::IntSetting {

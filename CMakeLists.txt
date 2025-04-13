@@ -25,7 +25,7 @@ target_include_directories(SuperMarioEclipse PUBLIC "include")
 target_compile_options(SuperMarioEclipse PUBLIC ${SMS_COMPILE_FLAGS})
 target_link_options(SuperMarioEclipse PUBLIC ${SMS_LINK_FLAGS})
 
-list(APPEND SUPER_MARIO_ECLIPSE_CONFIG_DEFINES "KURIBO_NO_TYPES" "SUPER_MARIO_ECLIPSE_VERSION=\"v1.0\"")
+list(APPEND SUPER_MARIO_ECLIPSE_CONFIG_DEFINES "KURIBO_NO_TYPES" "SUPER_MARIO_ECLIPSE_VERSION=\"v1.0.5\"")
 
 target_compile_definitions(SuperMarioEclipse PUBLIC ${SUPER_MARIO_ECLIPSE_CONFIG_DEFINES})
 

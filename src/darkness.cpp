@@ -13,14 +13,15 @@ using namespace BetterSMS;
 
 static TLightContext sLightContext;
 static u8 sBrightLevel = 255;
+static u8 sMinDarkness = 0;
 
-#define MIN_DARKNESS 130
+#define MIN_DARKNESS        130
 #define MIN_DARKNESS_CORONA 190
-#define MAX_DARKNESS 210
-#define MIN_SIZE     0.0f
-#define MAX_SIZE     500000.0f
-#define GROW_BASE    4500.0f
-#define GROW_POWER   1.5f
+#define MAX_DARKNESS        210
+#define MIN_SIZE            0.0f
+#define MAX_SIZE            500000.0f
+#define GROW_BASE           4500.0f
+#define GROW_POWER          1.5f
 
 extern DarknessSetting gDarknessSetting;
 
@@ -36,22 +37,31 @@ void initializeParameters(TLightContext::ActiveType type, TVec3f pos, u8 layer_c
     u8 minDarkness = 0;
 
     if (type == TLightContext::ActiveType::STATIC) {
-        if (gDarknessSetting.getBool()) {
-            minDarkness               = isCoronaMountainBeat ? MIN_DARKNESS_CORONA : MIN_DARKNESS;
+        switch (gDarknessSetting.getInt()) {
+        case DarknessSetting::ECLIPSED: {
+            sMinDarkness              = isCoronaMountainBeat ? MIN_DARKNESS_CORONA : MIN_DARKNESS;
             sLightContext.mLayerScale = layer_scale;
             sLightContext.mLayerCount = layer_count;
-        } else {
-            minDarkness = isCoronaMountainBeat ? MIN_DARKNESS_CORONA + 20 : MIN_DARKNESS + 70;
+            break;
+        }
+        case DarknessSetting::REGULAR: {
+            sMinDarkness = isCoronaMountainBeat ? MIN_DARKNESS_CORONA + 20 : MIN_DARKNESS + 70;
             sLightContext.mLayerScale = 0.1f;
             sLightContext.mLayerCount = 5;
+            break;
+        }
+        case DarknessSetting::VANILLA: {
+            sMinDarkness = isCoronaMountainBeat ? MIN_DARKNESS_CORONA + 20 : MIN_DARKNESS + 70;
+            sLightContext.mLayerScale = 0.1f;
+            sLightContext.mLayerCount = 5;
+            break;
+        }
         }
     } else {
-        minDarkness               = isCoronaMountainBeat ? MIN_DARKNESS_CORONA : MIN_DARKNESS;
+        sMinDarkness              = isCoronaMountainBeat ? MIN_DARKNESS_CORONA : MIN_DARKNESS;
         sLightContext.mLayerScale = layer_scale;
         sLightContext.mLayerCount = layer_count;
     }
-
-    SME::TGlobals::setMinDarkness(minDarkness);
 }
 
 void initToDefault(TMarDirector *director) {
@@ -72,6 +82,10 @@ SMS_PATCH_BL(0x8017d194, initSunGlassReference);
 void TLightContext::process(TModelWaterManager &manager) {
     u32 shinesCollected       = TFlagManager::smInstance->getFlag(0x40000);
     bool isCoronaMountainBeat = TFlagManager::smInstance->getBool(0x10077);
+
+    if (gDarknessSetting.getInt() == DarknessSetting::VANILLA) {
+        return;
+    }
 
     switch (mLightType) {
     case TLightContext::ActiveType::STATIC: {
@@ -99,7 +113,7 @@ void TLightContext::process(TModelWaterManager &manager) {
                     powf(GROW_BASE * ((f32)shinesCollected / (f32)MaxShineCount), GROW_POWER);
                 mPrevDarkness = manager.mDarkLevel;
                 mNextDarkness =
-                    lerp<u8>(SME::TGlobals::getMinDarkness(), MAX_DARKNESS,
+                    lerp<u8>(sMinDarkness, MAX_DARKNESS,
                              static_cast<f32>(shinesCollected) / static_cast<f32>(MaxShineCount));
 
                 mPrevShineCount = shinesCollected;
@@ -107,7 +121,7 @@ void TLightContext::process(TModelWaterManager &manager) {
                 mStepContext    = 0.0f;
             } else {
                 sSunGlassRef->mToAlpha        = Min(255 - manager.mDarkLevel, 100);
-                sSunGlassRef->mColor.a = sSunGlassRef->mToAlpha;
+                sSunGlassRef->mColor.a        = sSunGlassRef->mToAlpha;
                 manager.LightType.mShowShadow = manager.mDarkLevel < 255 && !isCoronaMountainBeat;
                 break;
             }
@@ -150,13 +164,13 @@ void TLightContext::process(TModelWaterManager &manager) {
         break;
     }
     case TLightContext::ActiveType::FOLLOWPLAYER: {
-        manager.mDarkLevel  = sBrightLevel;
-        manager.mSphereStep = mBaseScale * mLayerScale;
-        manager.mSize       = mBaseScale;
-        manager.mColor      = mColor;
+        manager.mDarkLevel            = sBrightLevel;
+        manager.mSphereStep           = mBaseScale * mLayerScale;
+        manager.mSize                 = mBaseScale;
+        manager.mColor                = mColor;
         manager.LightType.mShowShadow = manager.mDarkLevel < 255;
         manager.mLayerCount           = sLightContext.mLayerCount;
-        gShineShadowPos     = gpMarioAddress->mTranslation;
+        gShineShadowPos               = gpMarioAddress->mTranslation;
         break;
     }
     case TLightContext::ActiveType::FOLLOWCAMERA: {
@@ -167,24 +181,34 @@ void TLightContext::process(TModelWaterManager &manager) {
                 clamp(1.0f - ((21000.0f - ((f32 *)gpCamera)[0x134 / 4]) / 8000.0f), 0.0f, 1.0f));
         }
 
-        manager.mSphereStep = mBaseScale * mLayerScale;
-        manager.mSize       = mBaseScale;
-        manager.mColor      = mColor;
+        manager.mSphereStep           = mBaseScale * mLayerScale;
+        manager.mSize                 = mBaseScale;
+        manager.mColor                = mColor;
         manager.LightType.mShowShadow = manager.mDarkLevel < 255;
         manager.mLayerCount           = sLightContext.mLayerCount;
-        gShineShadowPos     = gpCamera->mTranslation + mTranslation;
+        gShineShadowPos               = gpCamera->mTranslation + mTranslation;
         break;
     }
     default:
         manager.LightType.mShowShadow = manager.mDarkLevel < 255;
-        manager.mLayerCount = sLightContext.mLayerCount;
+        manager.mLayerCount           = sLightContext.mLayerCount;
         break;
     }
 }
 
 static void initShineShadow() {
-    if (sLightContext.mLightType == TLightContext::ActiveType::DISABLED)
+    if (sLightContext.mLightType == TLightContext::ActiveType::DISABLED) {
         return;
+    }
+
+    if (gDarknessSetting.getInt() == DarknessSetting::VANILLA) {
+        if (sLightContext.mLightType == TLightContext::ActiveType::STATIC) {
+            if (gpMarDirector->mAreaID != TGameSequence::AREA_DOLPIC) {
+                sLightContext.mLightType = TLightContext::ActiveType::DISABLED;
+            }
+        }
+        return;
+    }
 
     u32 shinesCollected = TFlagManager::smInstance->getFlag(0x40000);
     // bool isCoronaMountainBeat = TFlagManager::smInstance->getBool(0x10077);
@@ -208,7 +232,7 @@ static void initShineShadow() {
 
             if (sBrightLevel == 255)
                 gpModelWaterManager->mDarkLevel =
-                    lerp<u8>(SME::TGlobals::getMinDarkness(), MAX_DARKNESS,
+                    lerp<u8>(sMinDarkness, MAX_DARKNESS,
                              static_cast<f32>(shinesCollected) / static_cast<f32>(MaxShineCount));
             else
                 gpModelWaterManager->mDarkLevel = sBrightLevel;

@@ -63,11 +63,13 @@ s32 CharacterSelectDirector::direct() {
         gpMSound->initSound();
         gpMSound->enterStage(MS_WAVE_DOLPIC, 1, 2);
 
-        Music::setMaxVolume(0x7F);
-        Music::setVolume(0x7F, 0x7F);
-        Music::setLooping(true);
-        Music::queueSong("character_select");
-        Music::playSong();
+        if (!BetterSMS::isWiiMode() || BetterSMS::isGameEmulated()) {
+            Music::setMaxVolume(0x7F);
+            Music::setVolume(0x7F, 0x7F);
+            Music::setLooping(true);
+            Music::queueSong("character_select");
+            Music::playSong();
+        }
 
         fader->startFadeinT(0.8f);
 
@@ -90,7 +92,10 @@ s32 CharacterSelectDirector::direct() {
             if (SMS_CHECK_RESET_FLAG(gpApplication.mGamePads[0])) {
                 mSelectScreen->mShouldReadInput = false;
                 fader->startWipe(TSMSFader::WipeRequest::FADE_DIAMOND_OUT, 1.0f, 0.0f);
-                Music::stopSong(1.0f);
+
+                if (!BetterSMS::isWiiMode() || BetterSMS::isGameEmulated()) {
+                    Music::stopSong(1.0f);
+                }
             }
         } else if (fader->mFadeStatus == TSMSFader::FADE_ON) {
             return TApplication::CONTEXT_GAME_INTRO;
@@ -558,6 +563,12 @@ static int flagCharacterSelectMenu(u8 state) {
     if (next_scene.mAreaID == SME::STAGE_PEACH_CASTLE && next_scene.mEpisodeID <= 4) {
         return state;
     }
+
+    #if 0
+    if (next_scene.mAreaID == SME::STAGE_PEACH_CASTLE) {
+        return state;
+    }
+    #endif
 
     if (next_scene.mAreaID != SME::STAGE_PEACH_CASTLE) {
         // No character select for secret courses

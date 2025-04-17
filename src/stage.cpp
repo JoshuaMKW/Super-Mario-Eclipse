@@ -651,6 +651,10 @@ BETTER_SMS_FOR_CALLBACK void resetForExStage(TMarDirector *director) {
     if (!BetterSMS::Stage::isExStage(director->mAreaID, director->mEpisodeID))
         return;
 
+    // Workaround for hybrid state of memphis stage
+    if (director->mAreaID == SME::STAGE_VAPORWAVE_EX)
+        return;
+
     TFlagManager::smInstance->setFlag(0x40002, 0);
 }
 

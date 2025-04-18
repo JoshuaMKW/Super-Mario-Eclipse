@@ -266,6 +266,10 @@ BETTER_SMS_FOR_CALLBACK void initializeStageInfo(TApplication *app) {
             Stage::registerShineStage(info);
             Stage::registerNormalStage(SME::STAGE_VAPORWAVE, info->getShineStageID());
             Stage::registerExStage(SME::STAGE_VAPORWAVE_EX, info->getShineStageID(), 182);
+
+            // Memphis
+            SME::setSpawnTransRot(SME::STAGE_VAPORWAVE, -1, TVec3f(-3700.0f, 7120.0f, -130.0f),
+                                  TVec3f(0.0f, 30.0f, 0.0f), SME::STAGE_VAPORWAVE_EX, 0);
         }
 
         // Register Yoshi Village stage info

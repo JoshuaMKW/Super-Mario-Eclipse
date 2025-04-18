@@ -8,6 +8,7 @@
 #include "darkness.hxx"
 #include "globals.hxx"
 #include "settings.hxx"
+#include "stage.hxx"
 
 using namespace BetterSMS;
 
@@ -73,7 +74,10 @@ static TSunGlass *sSunGlassRef = nullptr;
 static const char *sSunGlassRefName =
     "\x83\x54\x83\x93\x83\x4F\x83\x89\x83\x58\x83\x74\x83\x46\x81\x5B\x83\x5F";
 
+static bool sStageSunGlassSet = false;
+
 void initSunGlassReference(TSunGlass *sunglass, JSUMemoryInputStream *in) {
+    sStageSunGlassSet = false;
     sSunGlassRef = sunglass;
     load__Q26JDrama8TNameRefFR20JSUMemoryInputStream(sunglass, in);
 }
@@ -85,6 +89,28 @@ void TLightContext::process(TModelWaterManager &manager) {
 
     if (gDarknessSetting.getInt() == DarknessSetting::VANILLA) {
         return;
+    }
+
+    if (!sStageSunGlassSet) {
+        sStageSunGlassSet = true;
+
+        // Disabling the light in stages where it makes no sense
+        switch (gpMarDirector->mAreaID) {
+        case SME::STAGE_MARIO_DREAM:
+        case SME::STAGE_VAPORWAVE:
+        case SME::STAGE_SPETTRO_CASINO:
+        case SME::STAGE_TUTORIAL:
+            sSunGlassRef->mToAlpha = 0;
+            sSunGlassRef->mColor.a = 0;
+            return;
+        default:
+            if (SMS_isExMap__Fv(gpMarDirector->mAreaID)) {
+                sSunGlassRef->mToAlpha = 0;
+                sSunGlassRef->mColor.a = 0;
+                return;
+            }
+            break;
+        }
     }
 
     switch (mLightType) {

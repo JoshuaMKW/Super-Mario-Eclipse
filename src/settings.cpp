@@ -13,7 +13,7 @@ Settings::SwitchSetting gLivesSetting("Infinite Lives", &sLivesValue);
 static bool sMovieValue = false;
 Settings::SwitchSetting gSkipMovieSetting("Skippable Movies", &sMovieValue);
 
-Settings::SettingsGroup gSettingsGroup(1, 1, Settings::Priority::GAME);
+Settings::SettingsGroup gSettingsGroup(1, 2, Settings::Priority::GAME);
 
 bool BugsExploitsSetting::sIsUnlocked = false;
 

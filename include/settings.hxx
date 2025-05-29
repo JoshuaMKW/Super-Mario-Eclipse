@@ -141,13 +141,13 @@ public:
 
     void load(JSUMemoryInputStream &in) override {
         int x;
-        in.read((u8 *)(&x) + 3, 1);
+        in.read(&x, 4);
         if (x < REGULAR || x > VANILLA)
             x = REGULAR;  // Reset value if corrupt
         setInt(x);
     }
 
-    void save(JSUMemoryOutputStream &out) override { out.write((u8 *)(&mDarknessValue) + 3, 1); }
+    void save(JSUMemoryOutputStream &out) override { out.write(&mDarknessValue, 4); }
 
 private:
     int mDarknessValue = ECLIPSED;

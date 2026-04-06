@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.8)
 
-project(SuperMarioEclipse VERSION 1.0)
+project(SuperMarioEclipse VERSION 1.1)
 
 set(CMAKE_CXX_STANDARD 20)
 

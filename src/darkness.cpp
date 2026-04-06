@@ -96,6 +96,7 @@ void TLightContext::process(TModelWaterManager &manager) {
 
         // Disabling the light in stages where it makes no sense
         switch (gpMarDirector->mAreaID) {
+        case TGameSequence::AREA_OPTION:
         case SME::STAGE_MARIO_DREAM:
         case SME::STAGE_VAPORWAVE:
         case SME::STAGE_SPETTRO_CASINO:
@@ -283,6 +284,33 @@ static bool checkIfActive() {
 SMS_PATCH_BL(0x8027C6A4, checkIfActive);
 SMS_WRITE_32(0x8027C6A8, 0x28030001);
 
+
+static bool checkIfValidStateForSunGlassTint() {
+    if (gDarknessSetting.getInt() == DarknessSetting::VANILLA) {
+        return gpMarDirector->mAreaID == TGameSequence::AREA_DOLPIC;
+    }
+
+    switch (gpMarDirector->mAreaID) {
+    case TGameSequence::AREA_OPTION:
+    case SME::STAGE_MARIO_DREAM:
+    case SME::STAGE_VAPORWAVE:
+    case SME::STAGE_SPETTRO_CASINO:
+    case SME::STAGE_TUTORIAL:
+        return false;
+    default:
+        if (SMS_isExMap__Fv(gpMarDirector->mAreaID)) {
+            return false;
+        }
+        break;
+    }
+
+    return true;
+}
+SMS_PATCH_BL(0x8017D1D0, checkIfValidStateForSunGlassTint);
+SMS_WRITE_32(0x8017D1D4, 0x28030001);
+SMS_WRITE_32(0x8017D1D8, 0x38600000);
+SMS_WRITE_32(0x8017D1DC, 0x40820070);
 SMS_WRITE_32(0x8017D1E0, 0x60000000);
+
 SMS_WRITE_32(0x8017D5C0, 0x60000000);
 SMS_WRITE_32(0x8017D654, 0x60000000);

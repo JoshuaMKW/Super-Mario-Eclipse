@@ -545,9 +545,10 @@ static int flagCharacterSelectMenu(u8 state) {
         return state;
     }
 
+    bool has_shadow_mario = TFlagManager::smInstance->getFlag(0x40000) >= 240;  // All 240 shines collected
     bool has_luigi       = TFlagManager::smInstance->getBool(0x30018);
     bool has_piantissimo = TFlagManager::smInstance->getBool(0x30019);
-    if (!has_luigi && !has_piantissimo) {
+    if (!has_luigi && !has_piantissimo && !has_shadow_mario) {
         return state;
     }
 
@@ -558,6 +559,7 @@ static int flagCharacterSelectMenu(u8 state) {
     sMario       = true;
     sLuigi       = has_luigi;
     sPiantissimo = has_piantissimo;
+    sShadowMario = has_shadow_mario;
 
     // Intro stage
     if (next_scene.mAreaID == SME::STAGE_PEACH_CASTLE && next_scene.mEpisodeID <= 4) {
@@ -598,6 +600,7 @@ static int flagCharacterSelectMenu(u8 state) {
             if (next_scene.mEpisodeID == 0 || next_scene.mEpisodeID == 1) {
                 sLuigi       = false;
                 sPiantissimo = false;
+                sShadowMario = false;
             } else {
                 return state;
             }

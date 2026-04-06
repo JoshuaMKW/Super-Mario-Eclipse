@@ -64,6 +64,7 @@ extern void warpContextUpdater(TMario *player, bool isMario);
 extern void checkForCharacterUnlocks(TMarDirector *director);
 extern void resetCoinsOnStageExit(TApplication *app);
 extern void reset100CoinState(TMarDirector *director);
+extern void SetPlayerVoiceType(TMario *mario);
 
 // Player
 extern void initializePoundJumpAnimation(TApplication *app);
@@ -260,6 +261,8 @@ static void initModule() {
     Player::addUpdateCallback(checkTutorialIceStageCheckpoints);
     Player::addUpdateCallback(checkTutorialCasinoStageCheckpoints);
     Player::addUpdateCallback(checkTutorialPiantaPitStageCheckpoints);
+
+    Player::addLoadAfterCallback(SetPlayerVoiceType);
 
     Stage::addInitCallback(initColdState);
     Player::addUpdateCallback(processColdState);

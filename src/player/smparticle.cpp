@@ -17,7 +17,7 @@ SMS_PATCH_BL(0x802b44e8, smParticleInit);
 
 void doSMParticle(TMario *player, bool cool) {
     SME::CharacterID charID = SME::TGlobals::getCharacterIDFromPlayer(gpMarioAddress);
-    if (player->_388 != 0 || charID != SME::CharacterID::SHADOW_MARIO) {
+    if (charID != SME::CharacterID::SHADOW_MARIO) {
         return;
     }
 
@@ -27,19 +27,21 @@ void doSMParticle(TMario *player, bool cool) {
     const TVec3f yOffset  = {0.0f, 50.0f, 0.0f};
     data->mParticleOffset = player->mTranslation + yOffset;
 
-    bool mIsLongJump = (player->mState == 0x2000880) && (player->mAnimationID == 246);
+    bool mIsLongJump = (player->mState == 0x2000880) && (player->mAnimationID == 246) && !player->mFludd->isEmitting();
 
     if (mIsLongJump) {
         data->mParticle1 =
             gpMarioParticleManager->emitAndBindToPosPtr(426, &data->mParticleOffset, 1, nullptr);
         data->mParticle2 =
             gpMarioParticleManager->emitAndBindToPosPtr(427, &data->mParticleOffset, 1, nullptr);
-        player->mAttributes.mIsVisible = true;
+        player->mAttributes.mIsVisible = true; //mIsVisible is a bad name i hate it
     } else if (!mIsLongJump) {
         player->mAttributes.mIsVisible = false;
     }
-    if (data->mLastLongJump && !mIsLongJump &&
-        SME::TGlobals::getCharacterIDFromPlayer(gpMarioAddress) == SME::CharacterID::SHADOW_MARIO) {
+    if (!data->mLastLongJump && mIsLongJump) { //Start
+        gpMarioParticleManager->emit(237, &player->mTranslation, 0, nullptr);
+    }
+    if (data->mLastLongJump && !mIsLongJump) { //End
         gpMarioParticleManager->emit(237, &player->mTranslation, 0, nullptr);
     }
     data->mLastLongJump = mIsLongJump;

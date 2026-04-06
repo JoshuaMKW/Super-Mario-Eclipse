@@ -142,6 +142,14 @@ BETTER_SMS_FOR_CALLBACK void initializeStageInfo(TApplication *app) {
             Stage::registerNormalStage(SME::STAGE_WARSHIP, info->getShineStageID());
             Stage::registerExStage(SME::STAGE_WARSHIP_EX, info->getShineStageID(), 144);
 
+            // Enforce correct spawn for episode 1 (starts with sunscript crucial for progression)
+            SME::setSpawnTransRot(SME::STAGE_WARSHIP, 0, TVec3f(-1072.0f, 170.0f, 12595.0f),
+                                  TVec3f(0.0f, 150.0f, 0.0f), -1, -1);
+
+            // Enforce correct spawn for episode 2 (starts with sunscript crucial for progression)
+            SME::setSpawnTransRot(SME::STAGE_WARSHIP, 1, TVec3f(-9700.0f, 470.0f, 13300.0f),
+                                  TVec3f(0.0f, 170.0f, 0.0f), -1, -1);
+
             SME::setSpawnTransRot(SME::STAGE_WARSHIP, -1, TVec3f(-18000.0f, 180.0f, 13240.0f),
                                   TVec3f(0.0f, 100.0f, 0.0f), SME::STAGE_ISLE_DELFINO,
                                   4);  // Rugivosa Marsh

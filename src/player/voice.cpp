@@ -230,3 +230,6 @@ u32 omitGenericPlayerVoices(MSound *sound, u32 soundID, s16 health, u8 status) {
 }
 SMS_PATCH_BL(SMS_PORT_REGION(0x80012D38, 0, 0, 0), omitGenericPlayerVoices);
 SMS_PATCH_BL(SMS_PORT_REGION(0x801E6DA0, 0, 0, 0), omitGenericPlayerVoices);
+
+// Restore multiple jump sounds to mario rollout (JP behavior)
+SMS_WRITE_32(SMS_PORT_REGION(0x80013C68, 0, 0, 0), 0x60000000);

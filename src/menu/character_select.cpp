@@ -354,6 +354,16 @@ void CharacterSelectDirector::initializeLayout() {
             }
         }
 
+        if (s_info.mIndex == (u8)SME::CharacterID::SHADOW_MARIO) {
+            if (!mIsShadowMario) {
+                s_info.mIndex = 0;
+            } else if (!mIsLuigi && !mIsPiantissimo) {
+                s_info.mIndex = 1;
+            } else if (!mIsLuigi ^ !mIsPiantissimo) {
+                s_info.mIndex = 2;
+            }
+        }
+
         CharacterInfo &info = mSelectScreen->mCharacterInfos.at(i);
 
         char tex_path[32];

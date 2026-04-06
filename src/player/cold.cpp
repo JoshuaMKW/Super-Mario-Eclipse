@@ -11,6 +11,7 @@ static bool sTriedToFind       = false;
 
 void SME::Player::setCold(TMario *player, s16 timer, s16 frequency) {
     auto *data = getEclipseData(player);
+
     if (data->mColdTimer <= 0) {
         data->mAirDec = player->mSwimParams.mAirDec.get();
         data->mAirInc = player->mSwimParams.mAirInc.get();
@@ -24,11 +25,13 @@ void SME::Player::setCold(TMario *player, s16 timer, s16 frequency) {
             sSunGlassRef->mLerpTimer  = 0;
             sSunGlassRef->mIsUpdating = true;
         }
+
+        data->mColdDamageTimer = 1;
+        data->mColdFrequency   = frequency;
     }
-    data->mColdDamageTimer = 1;
-    data->mColdTimer       = timer;
-    data->mColdTimerStart  = timer;
-    data->mColdFrequency   = frequency;
+
+    data->mColdTimer      = timer;
+    data->mColdTimerStart = timer;
 }
 
 BETTER_SMS_FOR_CALLBACK void initColdState(TMarDirector *director) {
@@ -50,7 +53,7 @@ BETTER_SMS_FOR_CALLBACK void processColdState(TMario *player, bool isMario) {
 
     if ((player->mState & TMario::STATE_WATERBORN)) {
         if (gpMarDirector->mAreaID == 70) {
-            SME::Player::setCold(player, 700, 300);
+            SME::Player::setCold(player, 700, 600);
         }
     }
 

@@ -276,7 +276,7 @@ bool TNerveFPFireBreath::execute(TSpineBase<TLiveActor> *spine) const {
             target->mFire[i]->mVelocity.z = 0.0f;
             target->mFire[i]->mLifetime   = 0;
         }
-        peteyMActor->setFrameRate(SMSGetAnmFrameRate__Fv() * 1.3f, 0);
+        peteyMActor->setFrameRate(SMSGetAnmFrameRate__Fv() * 1.1f, 0);
     }
     bool isAnimationRunning = peteyMActor->checkCurAnmFromIndex(0x15, 0);
     if (isAnimationRunning) {
@@ -289,7 +289,6 @@ bool TNerveFPFireBreath::execute(TSpineBase<TLiveActor> *spine) const {
     }
     bool isBckRunning = peteyMActor->checkCurBckFromIndex(0x14);
     if (isBckRunning) {
-        peteyMActor->setFrameRate(SMSGetAnmFrameRate__Fv(), 0);
         isAnimationRunning = peteyMActor->checkCurAnmFromIndex(0x14, 0);
         if (isAnimationRunning) {
             J3DFrameCtrl *frameCtrl = peteyMActor->getFrameCtrl(0);
@@ -334,6 +333,7 @@ bool TNerveFPFireBreath::execute(TSpineBase<TLiveActor> *spine) const {
     if (isAnimationFinished) {
         target->mState = TBossPakkun::BossPakkunState::NORMAL;
         target->changeBck(0x14);
+        peteyMActor->setFrameRate(SMSGetAnmFrameRate__Fv(), 0);
         target->rumblePad(1, target->mTranslation);
     }
     return false;

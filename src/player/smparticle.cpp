@@ -1,6 +1,9 @@
 #include <smparticle.hxx>
-void smPlayerInit(TMario *player) {
+#include <SMS/MSound/MSound.hxx>
+#include <SMS/MSound/MSoundSESystem.hxx>
+#include <SMS/rand.h>
 
+void smPlayerInit(TMario *player) {
     SME::CharacterID charID = SME::TGlobals::getCharacterIDFromPlayer(gpMarioAddress);
     if (charID == SME::CharacterID::SHADOW_MARIO) {
         Player::registerData(player, "SMPData", new SMParticleData);
@@ -40,6 +43,12 @@ void doSMParticle(TMario *player, bool cool) {
     }
     if (!data->mLastLongJump && mIsLongJump) { //Start
         gpMarioParticleManager->emit(237, &player->mTranslation, 0, nullptr);
+        JAISound *sound = MSoundSE::startSoundActor(MSD_SE_MA_BOTTLE_WIND, player->mTranslation, 0, nullptr, 0x0,
+                                  4);
+        if (sound) {
+            sound->setPitch(0.9f + 0.2f * ((f32)rand() / 32767.0f), 3, 0);
+            sound->setTempoProportion(1.5f, 3);
+        }
     }
     if (data->mLastLongJump && !mIsLongJump) { //End
         gpMarioParticleManager->emit(237, &player->mTranslation, 0, nullptr);

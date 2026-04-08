@@ -47,6 +47,7 @@ static JKRMemArchive *sResourceArchive = nullptr;
 
 bool gHadLuigiBefore       = false;
 bool gHadPiantissimoBefore = false;
+bool gHadShadowMarioBefore = false;
 
 CharacterSelectDirector::~CharacterSelectDirector() { gpMSound->exitStage(); }
 
@@ -506,6 +507,7 @@ BETTER_SMS_FOR_CALLBACK bool directCharacterSelectMenu(TApplication *app) {
 
 extern bool gHadLuigiBefore;
 extern bool gHadPiantissimoBefore;
+extern bool gHadShadowMarioBefore;
 static bool s_unlock_played        = false;
 static bool s_shine_select_waiting = false;
 static u8 s_last_context           = 0;
@@ -516,9 +518,11 @@ static void correctHadBeforeState(TFlagManager *manager) {
     gHadLuigiBefore       = manager->getFlag(0x10077);
     gHadPiantissimoBefore = manager->getBool(0x10018) && manager->getBool(0x10041) &&
                             manager->getBool(0x10036) && manager->getShineFlag(135);
+    gHadShadowMarioBefore = manager->getFlag(0x40000) >= 240;  // All 240 shines collected
 
     manager->setFlag(0x30018, gHadLuigiBefore);
     manager->setFlag(0x30019, gHadPiantissimoBefore);
+    manager->setFlag(0x3001A, gHadShadowMarioBefore);
 }
 SMS_PATCH_BL(SMS_PORT_REGION(0x8029437C, 0, 0, 0), correctHadBeforeState);
 
@@ -532,6 +536,12 @@ static bool checkForUnlockMovie(u8 state) {
         gHadPiantissimoBefore     = true;
         return true;
     }
+
+    //if (!gHadShadowMarioBefore && TFlagManager::smInstance->getFlag(0x40000) >= 240) {
+    //    gpApplication.mCutSceneID = 38;
+    //    gHadShadowMarioBefore     = true;
+    //    return true;
+    //}
 
     return false;
 }

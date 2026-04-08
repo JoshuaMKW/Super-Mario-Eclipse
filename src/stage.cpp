@@ -732,6 +732,7 @@ BETTER_SMS_FOR_CALLBACK void setPlayerStartPos(TMario *player) {
 
 extern bool gHadLuigiBefore;
 extern bool gHadPiantissimoBefore;
+extern bool gHadShadowMarioBefore;
 
 static void SME_extendedCorrectFlags(TFlagManager *manager) {
     manager->correctFlag();
@@ -741,9 +742,11 @@ static void SME_extendedCorrectFlags(TFlagManager *manager) {
     gHadLuigiBefore       = manager->getFlag(0x10077);
     gHadPiantissimoBefore = manager->getBool(0x10018) && manager->getBool(0x10041) &&
                             manager->getBool(0x10036) && manager->getShineFlag(135);
+    gHadShadowMarioBefore = manager->getFlag(0x40000) >= 240;
 
     manager->setFlag(0x30018, gHadLuigiBefore);        // Luigi
     manager->setFlag(0x30019, gHadPiantissimoBefore);  // Piantissimo
+    manager->setFlag(0x3001A, gHadShadowMarioBefore);  // Piantissimo
 
     // Normalize extra blue coin slots
     for (size_t i = 0x1033E; i < 0x10366; ++i) {

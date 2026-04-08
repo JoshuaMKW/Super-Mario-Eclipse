@@ -17,6 +17,7 @@
 
 extern bool gHadLuigiBefore;
 extern bool gHadPiantissimoBefore;
+extern bool gHadShadowMarioBefore;
 
 bool gFromShineSelectForIntro = false;
 
@@ -360,6 +361,7 @@ BETTER_SMS_FOR_CALLBACK void resetCoinsOnStageExit(TApplication *app) {
 BETTER_SMS_FOR_CALLBACK void resetStateForStage(TMarDirector *director) {
     gHadLuigiBefore       = TFlagManager::smInstance->getBool(0x30018);
     gHadPiantissimoBefore = TFlagManager::smInstance->getBool(0x30019);
+    gHadShadowMarioBefore = TFlagManager::smInstance->getBool(0x30020);
 
     if (director->mAreaID == TGameSequence::AREA_OPTION) {
         SME::TGlobals::sCharacterIDList[0] = SME::CharacterID::MARIO;

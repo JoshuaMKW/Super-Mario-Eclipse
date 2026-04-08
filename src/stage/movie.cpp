@@ -56,15 +56,20 @@ static s32 decideNextMode_ext(TMovieDirector *director, s32 *out) {
         return TApplication::CONTEXT_DIRECT_MOVIE;
     }
 
-    s32 ret = director->decideNextMode(out);
-
+    // Postcard
     if (gpApplication.mCutSceneID == 37) {
-        gpApplication.mNextScene.mAreaID = TGameSequence::AREA_DOLPIC;
+        gpApplication.mCutSceneID = 38;
+        return TApplication::CONTEXT_DIRECT_MOVIE;
+    }
+
+    // Shadow Mario unlock
+    if (gpApplication.mCutSceneID == 38) {
+        gpApplication.mNextScene.mAreaID    = TGameSequence::AREA_DOLPIC;
         gpApplication.mNextScene.mEpisodeID = 3;
         return TApplication::CONTEXT_DIRECT_STAGE;
     }
-
-    return ret;
+    
+    return director->decideNextMode(out);
 }
 SMS_PATCH_BL(SMS_PORT_REGION(0x802B5F48, 0, 0, 0), decideNextMode_ext);
 SMS_PATCH_BL(SMS_PORT_REGION(0x802B606C, 0, 0, 0), decideNextMode_ext);

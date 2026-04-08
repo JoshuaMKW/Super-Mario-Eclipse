@@ -189,6 +189,7 @@ static void initModule() {
     THP::addTHP(35, "vacationAB.thp");
     THP::addTHP(36, "vacationAC.thp");
     THP::addTHP(37, "postcard.thp");
+    THP::addTHP(38, "shadow_mario.thp");
 
     // Register callbacks
     Application::registerContextCallback(CONTEXT_CHARACTER_SELECT, directCharacterSelectMenu);

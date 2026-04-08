@@ -34,6 +34,7 @@
 #include "object/water_balloon.hxx"
 #include "object/water_mine.hxx"
 #include "p_settings.hxx"
+#include "smparticle.hxx"
 
 extern BugsExploitsSetting gBugsSetting;
 extern MirrorModeFlag gMirrorModeSetting;
@@ -216,6 +217,9 @@ static void initModule() {
     Stage::addUpdateCallback(checkForCruiserUnlocked);
     Stage::addUpdateCallback(updateWarpStatesForCruiserCabin);
     Player::addUpdateCallback(forcePlayerZOn2D);
+
+    Player::addLoadAfterCallback(smPlayerInit);
+    Player::addUpdateCallback(doSMParticle);
 
     Stage::addInitCallback(resetFixedCameraOnLoad);
 

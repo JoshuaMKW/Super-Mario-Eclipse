@@ -288,6 +288,7 @@ static void initModule() {
     Objects::registerObjectAsMapObj("ButtonSwitch", &buttonSwitchData, TButtonSwitch::instantiate);
     Objects::registerObjectAsMapObj("WaterMine", &waterMineData, TWaterMine::instantiate);
     Objects::registerObjectAsMapObj("IronCrate", &ironCrateData, TIronCrate::instantiate);
+    Objects::registerObjectAsMapObj("EMarioPortal", &emarioPortalData, TEMarioPortal::instantiate);
 
     Objects::registerObjectAsMapObj("CannonBall", &cannonBallData, TCannonBall::instantiate);
     Objects::registerObjectCollideInteractor(cannonBallData.mObjectID, cannonBallCollideInteractor);

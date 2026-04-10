@@ -17,7 +17,7 @@ public:
 
     void control() override;
     void initMapObj() override;
-    bool receiveMessage(THitActor *sender, u32 message);
+    bool receiveMessage(THitActor *sender, u32 message) override;
 
 protected:
     TBGCheckData *getNearestSurface(const TVec3f &at, const TVec3f &look_nrm);

@@ -61,6 +61,22 @@ void TEMarioPortal::control() {
     }
 }
 
+//void TEMarioPortal::init() {
+//    mLiveManager = manager;
+//    mLiveManager->manageActor(this);
+//
+//    // Initialize the model
+//    mActorKeeper              = new TMActorKeeper(mLiveManager, 15);
+//    mActorKeeper->mModelFlags = 0x102F0000;
+//    mActorData                = mActorKeeper->createMActor("emario_portal.bmd", 0);
+//    mActorData->setLightType(1);
+//    mActorData->calc();
+//    mActorData->viewCalc();
+//
+//    initHitActor(0x8000011, 10, 0x81000000, 370.0f, 800.0f, 370.0f, 800.0f);
+//    initAnmSound();
+//}
+
 void TEMarioPortal::initMapObj() {
     TMapObjGeneral::initMapObj();
 
@@ -111,7 +127,7 @@ static obj_hit_info emarioPortal_collision_data{
 ObjData emarioPortalData{.mMdlName          = "emario_portal",
                          .mObjectID         = 0x80000412 /*0x80000FFF*/,
                          .mLiveManagerName  = gLiveManagerName,
-                         .mObjKey           = gUnkManagerName,
+                         .mObjKey           = nullptr,
                          .mAnimInfo         = nullptr,
                          .mObjCollisionData = &emarioPortal_collision_data,
                          .mMapCollisionInfo = nullptr,

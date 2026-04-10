@@ -35,6 +35,7 @@ namespace SME {
             int mRocketTimer     = 0;
 
             TEMarioPortal *mPortals[2] = {nullptr, nullptr};
+            int mWhichPortal           = 0;
         };
 
         inline PlayerState *getEclipseData(TMario *player) {

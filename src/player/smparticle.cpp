@@ -19,153 +19,163 @@ void smParticleInit(JPAResourceManager *manager, const char *poggies, u8 numbah)
 }
 SMS_PATCH_BL(0x802b44e8, smParticleInit);
 
+// Returns true if the ray hits the triangle, and outputs the exact distance 't'
+static bool rayIntersectsTriangle(const TVec3f &ray_origin, const TVec3f &ray_dir, const TVec3f &v0,
+                                  const TVec3f &v1, const TVec3f &v2, f32 &out_t) {
+    const f32 EPSILON = 0.00001f;
+    TVec3f edge1, edge2, h, s, q;
+    f32 a, f, u, v;
 
-static bool isPointInsideTriangle(const TVec3f &p, const TVec3f &a, const TVec3f &b,
-                                  const TVec3f &c) {
-    // Calculate edge vectors
-    TVec3f v0, v1, v2;
-    v0.x = c.x - a.x;
-    v0.y = c.y - a.y;
-    v0.z = c.z - a.z;
-    v1.x = b.x - a.x;
-    v1.y = b.y - a.y;
-    v1.z = b.z - a.z;
-    v2.x = p.x - a.x;
-    v2.y = p.y - a.y;
-    v2.z = p.z - a.z;
+    // Find vectors for two edges sharing v0
+    edge1.x = v1.x - v0.x;
+    edge1.y = v1.y - v0.y;
+    edge1.z = v1.z - v0.z;
+    edge2.x = v2.x - v0.x;
+    edge2.y = v2.y - v0.y;
+    edge2.z = v2.z - v0.z;
 
-    // Calculate dot products
-    const f32 dot00 = v0.x * v0.x + v0.y * v0.y + v0.z * v0.z;
-    const f32 dot01 = v0.x * v1.x + v0.y * v1.y + v0.z * v1.z;
-    const f32 dot02 = v0.x * v2.x + v0.y * v2.y + v0.z * v2.z;
-    const f32 dot11 = v1.x * v1.x + v1.y * v1.y + v1.z * v1.z;
-    const f32 dot12 = v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
+    // h = ray_dir cross edge2
+    h.x = ray_dir.y * edge2.z - ray_dir.z * edge2.y;
+    h.y = ray_dir.z * edge2.x - ray_dir.x * edge2.z;
+    h.z = ray_dir.x * edge2.y - ray_dir.y * edge2.x;
 
-    // Calculate barycentric coordinates
-    const f32 denom = (dot00 * dot11 - dot01 * dot01);
+    // a = edge1 dot h
+    a = edge1.x * h.x + edge1.y * h.y + edge1.z * h.z;
 
-    // Prevent divide by zero if the triangle is degenerate
-    if (denom > -0.0001f && denom < 0.0001f) {
+    // If 'a' is near zero, the ray is parallel to the triangle.
+    if (a > -EPSILON && a < EPSILON)
         return false;
+
+    f = 1.0f / a;
+
+    // s = ray_origin - v0
+    s.x = ray_origin.x - v0.x;
+    s.y = ray_origin.y - v0.y;
+    s.z = ray_origin.z - v0.z;
+
+    // Calculate U parameter and test bounds (EARLY OUT 1)
+    u = f * (s.x * h.x + s.y * h.y + s.z * h.z);
+    if (u < 0.0f || u > 1.0f)
+        return false;
+
+    // q = s cross edge1
+    q.x = s.y * edge1.z - s.z * edge1.y;
+    q.y = s.z * edge1.x - s.x * edge1.z;
+    q.z = s.x * edge1.y - s.y * edge1.x;
+
+    // Calculate V parameter and test bounds (EARLY OUT 2)
+    v = f * (ray_dir.x * q.x + ray_dir.y * q.y + ray_dir.z * q.z);
+    if (v < 0.0f || u + v > 1.0f)
+        return false;
+
+    // Calculate t, ray intersects triangle!
+    f32 t = f * (edge2.x * q.x + edge2.y * q.y + edge2.z * q.z);
+
+    // Check if the hit is in front of the camera, not behind it
+    if (t > EPSILON) {
+        out_t = t;
+        return true;
     }
-
-    const f32 invDenom = 1.0f / denom;
-    const f32 u        = (dot11 * dot02 - dot01 * dot12) * invDenom;
-    const f32 v        = (dot00 * dot12 - dot01 * dot02) * invDenom;
-
-    // Added a tiny -0.01f epsilon to prevent rays from slipping through cracks
-    return (u >= -0.01f) && (v >= -0.01f) && (u + v <= 1.01f);
+    return false;
 }
 
-static bool renderSMParticleAtLookPoint(TMario *player, TVec3f &look_point_out) {
+// Disgusting AI slop because I'm lazy
+static bool renderSMParticleAtLookPoint(TMario *player, TVec3f &look_point_out,
+                                        TVec3f &look_nrm_out) {
     CPolarSubCamera *camera = gpCamera;
-    //if (!camera->isLButtonCameraSpecifyMode(*(u32 *)camera->_00)) {
-    //    return false;  // It should only render in Y-cam
-    //}
+    if (!camera->isLButtonCameraSpecifyMode(camera->mMode))
+        return false;
 
-    // Cast a ray from the camera to the look point and check if it hits something
     const TVec3f ray_origin = camera->mTranslation;
-
-    TVec3f ray_direction = camera->mTargetPos - ray_origin;
+    TVec3f ray_direction    = camera->mTargetPos - ray_origin;
     PSVECNormalize(ray_direction, ray_direction);
 
-    TVec3f ray_dir_step = ray_direction;
-    ray_dir_step.scale(50.0f);
-
-    const TBGCheckData *surfaces[4] = {};
-
-    // Check for collision with the stage geometry
-    TVec3f sample_pos       = ray_origin;
+    // OPTIMIZATION: We can take larger steps now.
+    const f32 STEP_SIZE     = 80.0f;
     const f32 push_out_dist = 15.0f;
 
-    for (size_t i = 0; i < 60; ++i) {
-        TVec3f next_pos = sample_pos + ray_dir_step;
+    f32 closest_t                       = 99999.0f;
+    const TBGCheckData *closest_surface = nullptr;
+    f32 current_ray_dist                = 0.0f;
 
-        const TBGCheckData *hit_surface = nullptr;
+    for (size_t i = 0; i < 38; ++i) {  // 38 * 80 = 3040 max distance
+        TVec3f sample_pos;
+        sample_pos.x = ray_origin.x + (ray_direction.x * current_ray_dist);
+        sample_pos.y = ray_origin.y + (ray_direction.y * current_ray_dist);
+        sample_pos.z = ray_origin.z + (ray_direction.z * current_ray_dist);
 
-        // ==========================================
-        // 1. GROUND CHECK
-        // ==========================================
-        if (true) {
-            const TBGCheckData *groundSurface = nullptr;
-            const f32 ground_height           = gpMapCollisionData->checkGround(
-                next_pos.x, next_pos.y + 50.0f, next_pos.z, 0, &groundSurface);
+        const TBGCheckData *surfaces_to_test[3] = {nullptr, nullptr, nullptr};
+        size_t test_count                       = 0;
 
-            // If the ray dipped below the sloped floor's height at this step
-            if (groundSurface && sample_pos.y > ground_height && next_pos.y <= ground_height) {
-                hit_surface = groundSurface;
-            }
+        // 1. DIRECTIONAL CULLING FOR GROUND/ROOF
+        if (ray_direction.y < 0.0f) {
+            gpMapCollisionData->checkGround(sample_pos.x, sample_pos.y + STEP_SIZE, sample_pos.z, 0,
+                                            &surfaces_to_test[test_count]);
+            if (surfaces_to_test[test_count])
+                test_count++;
+        } else if (ray_direction.y > 0.0f) {
+            gpMapCollisionData->checkRoof(sample_pos.x, sample_pos.y - STEP_SIZE, sample_pos.z, 0,
+                                          &surfaces_to_test[test_count]);
+            if (surfaces_to_test[test_count])
+                test_count++;
         }
 
-        // ==========================================
-        // 2. ROOF CHECK
-        // ==========================================
-        if (!hit_surface) {
-            const TBGCheckData *roofSurface = nullptr;
-            const f32 roof_height = gpMapCollisionData->checkRoof(next_pos.x, next_pos.y - 50.0f,
-                                                                  next_pos.z, 0, &roofSurface);
+        // 2. WALL QUERY
+        TBGWallCheckRecord record;
+        record.mPosition    = sample_pos;
+        record.mCollideMax  = 1;
+        record.mIgnoreFlags = 0;
+        record.mRadius      = STEP_SIZE;  // Sweep radius matches step size
 
-            if (roofSurface && sample_pos.y < roof_height && next_pos.y >= roof_height) {
-                hit_surface = roofSurface;
-            }
+        if (gpMapCollisionData->checkWalls(&record) > 0) {
+            surfaces_to_test[test_count] = record.mWalls[0];
+            test_count++;
         }
 
-        // ==========================================
-        // 3. WALL CHECK
-        // ==========================================
-        if (!hit_surface) {
-            TBGWallCheckRecord record;
-            record.mPosition    = next_pos;
-            record.mCollideMax  = 1;
-            record.mIgnoreFlags = 0;
-            record.mRadius      = 50.0f;
+        // 3. FAST MÖLLER-TRUMBORE INTERSECTION
+        for (size_t j = 0; j < test_count; ++j) {
+            const TBGCheckData *surf = surfaces_to_test[j];
+            f32 hit_t                = 0.0f;
 
-            if (gpMapCollisionData->checkWalls(&record) > 0) {
-                hit_surface = record.mWalls[0];
-            }
-        }
+            if (rayIntersectsTriangle(ray_origin, ray_direction, surf->mVertices[0],
+                                      surf->mVertices[1], surf->mVertices[2], hit_t)) {
 
-        // ==========================================
-        // 4. EXACT RAY-PLANE INTERSECTION
-        // ==========================================
-        if (hit_surface) {
-            const TVec3f &nrm = hit_surface->mNormal;
-            const f32 denom =
-                nrm.x * ray_direction.x + nrm.y * ray_direction.y + nrm.z * ray_direction.z;
-
-            // Ensure we are facing the surface
-            if (denom < -0.001f) {
-                const f32 t = ((hit_surface->mVertices[0].x - ray_origin.x) * nrm.x +
-                               (hit_surface->mVertices[0].y - ray_origin.y) * nrm.y +
-                               (hit_surface->mVertices[0].z - ray_origin.z) * nrm.z) /
-                              denom;
-
-                // Reconstruct the hit point
-                TVec3f hit_point = ray_origin;
-                hit_point.x += ray_direction.x * t;
-                hit_point.y += ray_direction.y * t;
-                hit_point.z += ray_direction.z * t;
-
-                // Did we actually hit the triangle, or just its infinite plane?
-                if (isPointInsideTriangle(hit_point, hit_surface->mVertices[0],
-                                          hit_surface->mVertices[1], hit_surface->mVertices[2])) {
-
-                    // Push out along the normal.
-                    look_point_out.x = hit_point.x + (nrm.x * push_out_dist);
-                    look_point_out.y = hit_point.y + (nrm.y * push_out_dist);
-                    look_point_out.z = hit_point.z + (nrm.z * push_out_dist);
-
-                    if (JPABaseEmitter *emitter =
-                            gpMarioParticleManager->emit(237, &look_point_out, 0, nullptr)) {
-                        emitter->mSize1 = {0.2f, 0.2f, 0.2f};
-                    }
-                    return true;
+                // If this is the closest hit we've seen so far, save it
+                if (hit_t < closest_t) {
+                    closest_t       = hit_t;
+                    closest_surface = surf;
                 }
-                // If we missed the triangle, do nothing. The loop will continue.
             }
         }
 
-        sample_pos = next_pos;
+        // EARLY OUT: If we found a hit, AND the hit happened inside or behind our current
+        // sweep sphere, we don't need to keep marching forward. We found the closest wall.
+        if (closest_surface && closest_t <= current_ray_dist + STEP_SIZE) {
+            break;
+        }
+
+        current_ray_dist += STEP_SIZE;
+    }
+
+    // ==========================================
+    // 4. FINALIZE POINT
+    // ==========================================
+    if (closest_surface) {
+        look_nrm_out = closest_surface->mNormal;
+
+        // Calculate exact point based on closest_t
+        look_point_out.x =
+            ray_origin.x + (ray_direction.x * closest_t) + (look_nrm_out.x * push_out_dist);
+        look_point_out.y =
+            ray_origin.y + (ray_direction.y * closest_t) + (look_nrm_out.y * push_out_dist);
+        look_point_out.z =
+            ray_origin.z + (ray_direction.z * closest_t) + (look_nrm_out.z * push_out_dist);
+
+        if (JPABaseEmitter *emitter =
+                gpMarioParticleManager->emit(237, &look_point_out, 0, nullptr)) {
+            emitter->mSize1 = {0.2f, 0.2f, 0.2f};
+        }
+        return true;
     }
 
     return false;
@@ -177,13 +187,37 @@ void doSMParticle(TMario *player, bool cool) {
         return;
     }
 
-    TVec3f look_point;
-    if (renderSMParticleAtLookPoint(player, look_point)) {
-        //OSReport("Look point: (%f, %f, %f)\n", look_point.x, look_point.y, look_point.z);
+    SME::Player::PlayerState *player_state =
+        (SME::Player::PlayerState *)Player::getRegisteredData(player, SME::Player::data_key);
+
+    if (!player_state->mPortals[0] || !player_state->mPortals[1]) {
+        player_state->mPortals[0] = new TEMarioPortal("__PortalBegin");
+        player_state->mPortals[1] = new TEMarioPortal("__PortalEnd");
+
+        player_state->mPortals[0]->initAndRegister("emario_portal");
+        player_state->mPortals[1]->initAndRegister("emario_portal");
+
+        player_state->mPortals[0]->linkTo(player_state->mPortals[1]);
+        player_state->mPortals[1]->linkTo(player_state->mPortals[0]);
+    }
+
+    TVec3f look_point, look_nrm;
+    if (renderSMParticleAtLookPoint(player, look_point, look_nrm)) {
+        if ((player->mController->mButtons.mFrameInput & TMarioGamePad::R) == TMarioGamePad::R) {
+
+            TEMarioPortal *portal = player_state->mPortals[player_state->mWhichPortal];
+            if (portal) {
+                portal->mTranslation = look_point;
+                portal->mRotation.y  = atan2f(player->mTranslation.x - look_point.x,
+                                              player->mTranslation.z - look_point.z);
+                portal->closePortal();
+                portal->openPortal(look_point, look_nrm);
+            }
+            player_state->mWhichPortal = player_state->mWhichPortal == 0 ? 1 : 0;
+        }
     }
 
     SMParticleData *data = (SMParticleData *)Player::getRegisteredData(player, "SMPData");
-    SME::TGlobals::getCharacterIDFromPlayer(gpMarioAddress) == SME::CharacterID::SHADOW_MARIO;
 
     const TVec3f yOffset  = {0.0f, 50.0f, 0.0f};
     data->mParticleOffset = player->mTranslation + yOffset;
@@ -196,9 +230,9 @@ void doSMParticle(TMario *player, bool cool) {
             gpMarioParticleManager->emitAndBindToPosPtr(426, &data->mParticleOffset, 1, nullptr);
         data->mParticle2 =
             gpMarioParticleManager->emitAndBindToPosPtr(427, &data->mParticleOffset, 1, nullptr);
-        player->mAttributes.mIsVisible = true;  // mIsVisible is a bad name i hate it
+        player->mAttributes.mIsInvisible = true;
     } else if (!mIsLongJump) {
-        player->mAttributes.mIsVisible = false;
+        player->mAttributes.mIsInvisible = false;
     }
     if (!data->mLastLongJump && mIsLongJump) {  // Start
         gpMarioParticleManager->emit(237, &player->mTranslation, 0, nullptr);

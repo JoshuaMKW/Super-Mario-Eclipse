@@ -41,14 +41,15 @@ void TWaterMine::control() {
     }
 
     for (size_t i = 0; i < mNumObjs; ++i) {
-        if (mCollidingObjs[i]->mObjectID == 0x1000002B || mCollidingObjs[i]->mObjectID == 0x4000022E) {
+        if (mCollidingObjs[i]->mObjectID == 0x1000002B ||
+            mCollidingObjs[i]->mObjectID == 0x4000022E) {
             playFragmentAnim();
 
             if (PSVECDistance(gpMarioAddress->mTranslation, mTranslation) < 600.0f) {
                 // Hurt player
                 gpMarioAddress->decHP(gpMarioAddress->mHealth);
-                gpMarioAddress->mAttributes.mIsVisible = true;
-                gpMarioAddress->mTranslation.y         = mTranslation.y - 200.0f;
+                gpMarioAddress->mAttributes.mIsInvisible = true;
+                gpMarioAddress->mTranslation.y           = mTranslation.y - 200.0f;
             }
 
             m_is_hit = true;
@@ -62,8 +63,8 @@ void TWaterMine::control() {
             // Hurt player
             TMario *player = reinterpret_cast<TMario *>(mCollidingObjs[i]);
             player->decHP(player->mHealth);
-            player->mAttributes.mIsVisible = true;
-            player->mTranslation.y = mTranslation.y - 200.0f;
+            player->mAttributes.mIsInvisible = true;
+            player->mTranslation.y           = mTranslation.y - 200.0f;
             break;
         }
     }
@@ -77,8 +78,8 @@ static const char *s_column_water_name =
     "\x83\x47\x83\x74\x83\x46\x83\x4E\x83\x67\x94\x9A\x94\xAD\x90\x85\x92\x8C\x83\x7D\x83\x6C\x81"
     "\x5B\x83\x57\x83\x83\x81\x5B";
 
-static const char *s_explosion_name =
-    "\x83\x47\x83\x74\x83\x46\x83\x4E\x83\x67\x94\x9A\x94\xAD\x83\x7D\x83\x6C\x81\x5B\x83\x57\x83\x83\x81\x5B";
+static const char *s_explosion_name = "\x83\x47\x83\x74\x83\x46\x83\x4E\x83\x67\x94\x9A\x94\xAD\x83"
+                                      "\x7D\x83\x6C\x81\x5B\x83\x57\x83\x83\x81\x5B";
 
 void TWaterMine::playFragmentAnim() {
     mActorData->setBck("seamine_fragment");
@@ -110,8 +111,8 @@ bool TWaterMine::receiveMessage(THitActor *sender, u32 message) {
         if (PSVECDistance(gpMarioAddress->mTranslation, mTranslation) < 600.0f) {
             // Hurt player
             gpMarioAddress->decHP(gpMarioAddress->mHealth);
-            gpMarioAddress->mAttributes.mIsVisible = true;
-            gpMarioAddress->mTranslation.y         = mTranslation.y - 200.0f;
+            gpMarioAddress->mAttributes.mIsInvisible = true;
+            gpMarioAddress->mTranslation.y           = mTranslation.y - 200.0f;
         }
 
         m_is_hit = true;
@@ -154,11 +155,11 @@ static hit_data waterMine_hit_data{.mAttackRadius  = 100.0f,
 static obj_hit_info waterMine_collision_data{
     ._00 = 1, .mType = 0xDC000000, ._08 = 0, .mHitData = &waterMine_hit_data};
 
-ObjData waterMineData{.mMdlName  = "seamine",
-                      .mObjectID = 0x80000410 /*0x80000FFF*/,
+ObjData waterMineData{.mMdlName         = "seamine",
+                      .mObjectID        = 0x80000410 /*0x80000FFF*/,
                       .mLiveManagerName = gLiveManagerName,  // const_cast<char *>("木マネージャー")
-                      .mObjKey           = gUnkManagerName,  // const_cast<char *>("waterballoon"),
-                      .mAnimInfo         = nullptr,
+                      .mObjKey          = gUnkManagerName,   // const_cast<char *>("waterballoon"),
+                      .mAnimInfo        = nullptr,
                       .mObjCollisionData = &waterMine_collision_data,
                       .mMapCollisionInfo = nullptr,
                       .mSoundInfo        = nullptr,
@@ -167,6 +168,5 @@ ObjData waterMineData{.mMdlName  = "seamine",
                       ._28               = nullptr,
                       .mBckMoveData      = nullptr,
                       ._30               = 50.0f,
-                      .mUnkFlags =
-                          0x0 /*0x02130100*/,  // | 0x100 = disable movement (freeze)
-                      .mKeyCode = cexp_calcKeyCode("WaterMine")};
+                      .mUnkFlags = 0x0 /*0x02130100*/,  // | 0x100 = disable movement (freeze)
+                      .mKeyCode  = cexp_calcKeyCode("WaterMine")};

@@ -64,13 +64,11 @@ s32 CharacterSelectDirector::direct() {
         gpMSound->initSound();
         gpMSound->enterStage(MS_WAVE_DOLPIC, 1, 2);
 
-        if (!BetterSMS::isWiiMode() || BetterSMS::isGameEmulated()) {
-            Music::setMaxVolume(0x7F);
-            Music::setVolume(0x7F, 0x7F);
-            Music::setLooping(true);
-            Music::queueSong("character_select");
-            Music::playSong();
-        }
+        Music::setMaxVolume(0x7F);
+        Music::setVolume(0x7F, 0x7F);
+        Music::setLooping(true);
+        Music::queueSong("character_select");
+        Music::playSong();
 
         fader->startFadeinT(0.5f);
 

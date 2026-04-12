@@ -21,8 +21,8 @@ public:
     bool receiveMessage(THitActor *sender, u32 message) override;
 
 protected:
-    TBGCheckData *getNearestSurface(const TVec3f &at, const TVec3f &look_nrm);
-    TVec3f getRotationFromNormal(const TVec3f &nrm);
+    void transportActor(TLiveActor *actor);
+    void transportPlayer(TMario *player);
 
 private:
     bool m_is_closed;

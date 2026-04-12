@@ -22,3 +22,5 @@ BETTER_SMS_FOR_CALLBACK void initEclipseData(TMario *player, bool isMario) {
         TFlagManager::smInstance->setFlag(0x20001, 99);
     }
 }
+
+//SMS_WRITE_32(0x8028900c, 0x60000000);

@@ -86,34 +86,54 @@ static bool renderSMParticleAtLookPoint(TMario *player, TVec3f &look_point_out,
     if (!camera->isLButtonCameraSpecifyMode(camera->mMode))
         return false;
 
+    SME::Player::PlayerState *player_state =
+        (SME::Player::PlayerState *)Player::getRegisteredData(player, SME::Player::data_key);
+
     const TVec3f ray_origin = camera->mTranslation;
     TVec3f ray_direction    = camera->mTargetPos - ray_origin;
     PSVECNormalize(ray_direction, ray_direction);
 
     // OPTIMIZATION: We can take larger steps now.
-    const f32 STEP_SIZE     = 80.0f;
+    const f32 STEP_SIZE     = 120.0f;
     const f32 push_out_dist = 15.0f;
 
     f32 closest_t                       = 99999.0f;
     const TBGCheckData *closest_surface = nullptr;
     f32 current_ray_dist                = 0.0f;
 
-    for (size_t i = 0; i < 38; ++i) {  // 38 * 80 = 3040 max distance
+    for (size_t i = 0; i < 50; ++i) {  // 40 * 100 = 4000 max distance
+        next_sample_point:
+        
         TVec3f sample_pos;
         sample_pos.x = ray_origin.x + (ray_direction.x * current_ray_dist);
         sample_pos.y = ray_origin.y + (ray_direction.y * current_ray_dist);
         sample_pos.z = ray_origin.z + (ray_direction.z * current_ray_dist);
 
+        // Check if the sample point is within the radius of each portal
+        for (size_t j = 0; j < 2; ++j) {
+            const TEMarioPortal *portal = player_state->mPortals[j];
+
+            const TVec3f &portal_pos = portal->mTranslation;
+            f32 dist_sq = (sample_pos.x - portal_pos.x) * (sample_pos.x - portal_pos.x) +
+                          (sample_pos.y - portal_pos.y) * (sample_pos.y - portal_pos.y) +
+                          (sample_pos.z - portal_pos.z) * (sample_pos.z - portal_pos.z);
+
+            if (dist_sq < portal->mReceiveRadius * portal->mReceiveRadius) {
+                return false;  // If we're inside a portal's radius, we can't trust the collision
+                               // data. Bail out.
+            }
+        }
+
         const TBGCheckData *surfaces_to_test[3] = {nullptr, nullptr, nullptr};
         size_t test_count                       = 0;
 
         // 1. DIRECTIONAL CULLING FOR GROUND/ROOF
-        if (ray_direction.y < 0.0f) {
+        if (ray_direction.y < 0.5f) {
             gpMapCollisionData->checkGround(sample_pos.x, sample_pos.y + STEP_SIZE, sample_pos.z, 0,
                                             &surfaces_to_test[test_count]);
             if (surfaces_to_test[test_count])
                 test_count++;
-        } else if (ray_direction.y > 0.0f) {
+        } else if (ray_direction.y > -0.5f) {
             gpMapCollisionData->checkRoof(sample_pos.x, sample_pos.y - STEP_SIZE, sample_pos.z, 0,
                                           &surfaces_to_test[test_count]);
             if (surfaces_to_test[test_count])
@@ -170,16 +190,62 @@ static bool renderSMParticleAtLookPoint(TMario *player, TVec3f &look_point_out,
             ray_origin.y + (ray_direction.y * closest_t) + (look_nrm_out.y * push_out_dist);
         look_point_out.z =
             ray_origin.z + (ray_direction.z * closest_t) + (look_nrm_out.z * push_out_dist);
-
-        if (JPABaseEmitter *emitter =
-                gpMarioParticleManager->emit(237, &look_point_out, 0, nullptr)) {
-            emitter->mSize1 = {0.2f, 0.2f, 0.2f};
-        }
         return true;
     }
 
     return false;
 }
+
+static bool s_is_valid_look_point = false;
+static TVec3f s_look_point, s_look_nrm;
+
+static char s_look_point_thread_stack[0x2000];
+static OSThread s_look_point_thread;
+
+static OSMutex s_look_point_mutex;
+
+static OSMessage s_look_point_msg;
+static OSMessageQueue s_look_point_msg_queue;
+
+static void *computeLookPointForEMarioPortal(void *param) {
+    TMario *player = (TMario *)param;
+    while (true) {
+        OSMessage dummy;
+        OSReceiveMessage(&s_look_point_msg_queue, &dummy, OS_MESSAGE_BLOCK);
+
+        TVec3f look_point, look_nrm;
+        bool is_valid = renderSMParticleAtLookPoint(player, look_point, look_nrm);
+
+        OSLockMutex(&s_look_point_mutex);
+
+        s_is_valid_look_point = is_valid;
+        if (s_is_valid_look_point) {
+            s_look_point = look_point;
+            s_look_nrm   = look_nrm;
+        } else {
+            s_look_point = TVec3f::zero();
+            s_look_nrm   = TVec3f::zero();
+        }
+
+        OSUnlockMutex(&s_look_point_mutex);
+    }
+    return nullptr;
+}
+
+BETTER_SMS_FOR_CALLBACK void createLookPointThreadOnPlayerInit(TMario *player, bool isMario) {
+    OSInitMutex(&s_look_point_mutex);
+    OSInitMessageQueue(&s_look_point_msg_queue, &s_look_point_msg, 1);
+    OSCreateThread(&s_look_point_thread, computeLookPointForEMarioPortal, player,
+                   s_look_point_thread_stack + sizeof(s_look_point_thread_stack),
+                   sizeof(s_look_point_thread_stack), (OSPriority)22, OS_THREAD_ATTR_DETACH);
+    OSResumeThread(&s_look_point_thread);
+}
+
+BETTER_SMS_FOR_CALLBACK void killLookPointThreadOnStageExit(TApplication *app) {
+    OSCancelThread(&s_look_point_thread);
+}
+
+static int s_wakeup_thread_counter = 0;
 
 void doSMParticle(TMario *player, bool cool) {
     SME::CharacterID charID = SME::TGlobals::getCharacterIDFromPlayer(gpMarioAddress);
@@ -201,20 +267,32 @@ void doSMParticle(TMario *player, bool cool) {
         player_state->mPortals[1]->linkTo(player_state->mPortals[0]);
     }
 
-    TVec3f look_point, look_nrm;
-    if (renderSMParticleAtLookPoint(player, look_point, look_nrm)) {
+    OSLockMutex(&s_look_point_mutex);
+    if (s_is_valid_look_point) {
+        if ((s_wakeup_thread_counter % 12) == 0) {
+            if (JPABaseEmitter *emitter =
+                    gpMarioParticleManager->emit(237, &s_look_point, 0, nullptr)) {
+                emitter->mSize1 = {0.2f, 0.2f, 0.2f};
+            }
+        }
+
         if ((player->mController->mButtons.mFrameInput & TMarioGamePad::R) == TMarioGamePad::R) {
 
             TEMarioPortal *portal = player_state->mPortals[player_state->mWhichPortal];
             if (portal) {
-                portal->mTranslation = look_point;
-                portal->mRotation.y  = atan2f(player->mTranslation.x - look_point.x,
-                                              player->mTranslation.z - look_point.z);
+                portal->mTranslation = s_look_point;
+                portal->mRotation.y  = atan2f(player->mTranslation.x - s_look_point.x,
+                                              player->mTranslation.z - s_look_point.z);
                 portal->closePortal();
-                portal->openPortal(look_point, look_nrm);
+                portal->openPortal(s_look_point, s_look_nrm);
             }
             player_state->mWhichPortal = player_state->mWhichPortal == 0 ? 1 : 0;
         }
+    }
+    OSUnlockMutex(&s_look_point_mutex);
+
+    if ((s_wakeup_thread_counter++ % 3) == 0) {
+        OSSendMessage(&s_look_point_msg_queue, (OSMessage)1, OS_MESSAGE_NOBLOCK);
     }
 
     SMParticleData *data = (SMParticleData *)Player::getRegisteredData(player, "SMPData");

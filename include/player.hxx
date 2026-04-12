@@ -5,6 +5,8 @@
 
 #include <BetterSMS/player.hxx>
 
+#include "object/emario_portal.hxx"
+
 namespace SME {
 
     enum class CharacterID : u8 { MARIO, LUIGI, PIANTISSIMO, SHADOW_MARIO };
@@ -31,6 +33,9 @@ namespace SME {
             f32 mAirDec          = 0;
             f32 mAirInc          = 0;
             int mRocketTimer     = 0;
+
+            TEMarioPortal *mPortals[2] = {nullptr, nullptr};
+            int mWhichPortal           = 0;
         };
 
         inline PlayerState *getEclipseData(TMario *player) {

@@ -65,6 +65,13 @@ BETTER_SMS_FOR_CALLBACK void createWaterBalloonAndThrow(TMario *player, bool isM
         (player->mController->mMeaning & 0x600) != 0x600)
         return;
 
+    // Shadow Mario needs to be able to place portals in Y-cam, so deny waterballoons in that case
+    if (SME::TGlobals::getCharacterIDFromPlayer(player) == SME::CharacterID::SHADOW_MARIO) {
+        if (gpCamera->isLButtonCameraSpecifyMode(gpCamera->mMode)) {
+            return;
+        }
+    }
+
     auto *water_balloons =
         reinterpret_cast<BalloonBuf *>(Player::getRegisteredData(player, "sme_balloon_info"));
 

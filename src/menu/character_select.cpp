@@ -64,15 +64,13 @@ s32 CharacterSelectDirector::direct() {
         gpMSound->initSound();
         gpMSound->enterStage(MS_WAVE_DOLPIC, 1, 2);
 
-        if (!BetterSMS::isWiiMode() || BetterSMS::isGameEmulated()) {
-            Music::setMaxVolume(0x7F);
-            Music::setVolume(0x7F, 0x7F);
-            Music::setLooping(true);
-            Music::queueSong("character_select");
-            Music::playSong();
-        }
+        Music::setMaxVolume(0x7F);
+        Music::setVolume(0x7F, 0x7F);
+        Music::setLooping(true);
+        Music::queueSong("character_select");
+        Music::playSong();
 
-        fader->startFadeinT(0.8f);
+        fader->startFadeinT(0.5f);
 
         if (mSelectScreen->mCharacterInfos.size() == 1) {
             for (auto &s_info : mSelectScreen->mSelectionInfos) {
@@ -219,7 +217,7 @@ void CharacterSelectDirector::initializeLayout() {
     const int screenRenderHeight = 480;
     const int screenAdjustX      = BetterSMS::getScreenRatioAdjustX();
 
-    const f32 icon_ratio = BetterSMS::getScreenToFullScreenRatio();
+    const f32 icon_ratio   = BetterSMS::getScreenToFullScreenRatio();
     const f32 poster_ratio = BetterSMS::getScreenToFullScreenRatio();
 
     const int margin_width = 10;
@@ -470,10 +468,21 @@ s32 CharacterSelectDirector::exit() {
     TSMSFader *fader = gpApplication.mFader;
     if (fader->mFadeStatus == TSMSFader::FADE_OFF) {
         mSelectScreen->mShouldReadInput = false;
+
         if (mExitWaitTimer++ > SMSGetVSyncTimesPerSec() * 1.5f) {
             gpApplication.mFader->startFadeoutT(0.3f);
             Music::stopSong(1.0f);
+        } else if (mExitWaitTimer > 2) {
+            for (auto &s_info : mSelectScreen->mSelectionInfos) {
+                if ((s_info.mController->mButtons.mFrameInput & TMarioGamePad::A) ==
+                    TMarioGamePad::A) {
+                    gpApplication.mFader->startFadeoutT(0.3f);
+                    Music::stopSong(1.0f);
+                    break;
+                }
+            }
         }
+
         int i = 0;
         for (auto &s_info : mSelectScreen->mSelectionInfos) {
             SME::TGlobals::sCharacterIDList[i++] =
@@ -537,11 +546,11 @@ static bool checkForUnlockMovie(u8 state) {
         return true;
     }
 
-    //if (!gHadShadowMarioBefore && TFlagManager::smInstance->getFlag(0x40000) >= 240) {
-    //    gpApplication.mCutSceneID = 38;
-    //    gHadShadowMarioBefore     = true;
-    //    return true;
-    //}
+    // if (!gHadShadowMarioBefore && TFlagManager::smInstance->getFlag(0x40000) >= 240) {
+    //     gpApplication.mCutSceneID = 38;
+    //     gHadShadowMarioBefore     = true;
+    //     return true;
+    // }
 
     return false;
 }
@@ -565,7 +574,8 @@ static int flagCharacterSelectMenu(u8 state) {
         return state;
     }
 
-    bool has_shadow_mario = TFlagManager::smInstance->getFlag(0x40000) >= 240;  // All 240 shines collected
+    bool has_shadow_mario =
+        TFlagManager::smInstance->getFlag(0x40000) >= 240;  // All 240 shines collected
     bool has_luigi       = TFlagManager::smInstance->getBool(0x30018);
     bool has_piantissimo = TFlagManager::smInstance->getBool(0x30019);
     if (!has_luigi && !has_piantissimo && !has_shadow_mario) {
@@ -586,11 +596,11 @@ static int flagCharacterSelectMenu(u8 state) {
         return state;
     }
 
-    #if 0
+#if 0
     if (next_scene.mAreaID == SME::STAGE_PEACH_CASTLE) {
         return state;
     }
-    #endif
+#endif
 
     if (next_scene.mAreaID != SME::STAGE_PEACH_CASTLE) {
         // No character select for secret courses

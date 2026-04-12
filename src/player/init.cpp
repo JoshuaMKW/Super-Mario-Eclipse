@@ -14,9 +14,13 @@
 extern Settings::SwitchSetting gLivesSetting;
 
 BETTER_SMS_FOR_CALLBACK void initEclipseData(TMario *player, bool isMario) {
-    BetterSMS::Player::registerData(player, SME::Player::data_key, new SME::Player::PlayerState());
+    auto *player_state = new SME::Player::PlayerState();
+
+    BetterSMS::Player::registerData(player, SME::Player::data_key, player_state);
 
     if (gLivesSetting.getBool()) {
         TFlagManager::smInstance->setFlag(0x20001, 99);
     }
 }
+
+//SMS_WRITE_32(0x8028900c, 0x60000000);

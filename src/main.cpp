@@ -7,6 +7,7 @@
 
 #include <BetterSMS/application.hxx>
 #include <BetterSMS/debug.hxx>
+#include <BetterSMS/fps.hxx>
 #include <BetterSMS/game.hxx>
 #include <BetterSMS/module.hxx>
 #include <BetterSMS/object.hxx>
@@ -78,6 +79,9 @@ extern bool launchPlayerState(TMario *player);
 extern void initColdState(TMarDirector *director);
 extern void processColdState(TMario *player, bool isMario);
 extern void setPlayerStartPos(TMario *player);
+
+extern void createLookPointThreadOnPlayerInit(TMario *player, bool isMario);
+extern void killLookPointThreadOnStageExit(TApplication *director);
 
 // Camera
 extern void resetFixedCameraOnLoad(TMarDirector *director);
@@ -181,6 +185,7 @@ static void initModule() {
 
     Game::setMaxShines(MaxShineCount);
     Application::showSettingsOnFirstBoot(true);
+    FPS::setSMSFaderFrameRate(1.5f);
 
     THP::addTHP(31, "piantissimo_join.thp");
     THP::addTHP(32, "piantissimo.thp");
@@ -219,8 +224,10 @@ static void initModule() {
     Stage::addUpdateCallback(updateWarpStatesForCruiserCabin);
     Player::addUpdateCallback(forcePlayerZOn2D);
 
+    Player::addInitCallback(createLookPointThreadOnPlayerInit);
     Player::addLoadAfterCallback(smPlayerInit);
     Player::addUpdateCallback(doSMParticle);
+    Stage::addExitCallback(killLookPointThreadOnStageExit);
 
     Stage::addInitCallback(resetFixedCameraOnLoad);
 
@@ -288,6 +295,7 @@ static void initModule() {
     Objects::registerObjectAsMapObj("ButtonSwitch", &buttonSwitchData, TButtonSwitch::instantiate);
     Objects::registerObjectAsMapObj("WaterMine", &waterMineData, TWaterMine::instantiate);
     Objects::registerObjectAsMapObj("IronCrate", &ironCrateData, TIronCrate::instantiate);
+    Objects::registerObjectAsMapObj("EMarioPortal", &emarioPortalData, TEMarioPortal::instantiate);
 
     Objects::registerObjectAsMapObj("CannonBall", &cannonBallData, TCannonBall::instantiate);
     Objects::registerObjectCollideInteractor(cannonBallData.mObjectID, cannonBallCollideInteractor);

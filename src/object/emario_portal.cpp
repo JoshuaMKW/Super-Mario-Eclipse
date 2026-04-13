@@ -193,7 +193,7 @@ void TEMarioPortal::control() {
     for (size_t i = 0; i < mNumObjs; ++i) {
         if (mCollidingObjs[i]->mObjectID == OBJECT_ID_MARIO) {
             transportPlayer(reinterpret_cast<TMario *>(mCollidingObjs[i]));
-        } else {
+        } else if ((mCollidingObjs[i]->mObjectID & 0x18000000) == 0) {
             transportActor(reinterpret_cast<TLiveActor *>(mCollidingObjs[i]));
         }
     }

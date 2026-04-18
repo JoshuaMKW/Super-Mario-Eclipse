@@ -233,6 +233,9 @@ static void *computeLookPointForEMarioPortal(void *param) {
 }
 
 BETTER_SMS_FOR_CALLBACK void createLookPointThreadOnPlayerInit(TMario *player, bool isMario) {
+    if (!isMario) {
+        return;
+    }
     OSInitMutex(&s_look_point_mutex);
     OSInitMessageQueue(&s_look_point_msg_queue, &s_look_point_msg, 1);
     OSCreateThread(&s_look_point_thread, computeLookPointForEMarioPortal, player,
@@ -247,7 +250,11 @@ BETTER_SMS_FOR_CALLBACK void killLookPointThreadOnStageExit(TApplication *app) {
 
 static int s_wakeup_thread_counter = 0;
 
-void doSMParticle(TMario *player, bool cool) {
+void doSMParticle(TMario *player, bool isMario) {
+    if (!isMario) {
+        return;
+    }
+    
     SME::CharacterID charID = SME::TGlobals::getCharacterIDFromPlayer(gpMarioAddress);
     if (charID != SME::CharacterID::SHADOW_MARIO) {
         return;

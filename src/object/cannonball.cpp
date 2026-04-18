@@ -1,7 +1,6 @@
 ﻿#include "object/cannonball.hxx"
 
 #include <SMS/Enemy/Conductor.hxx>
-#include <SMS/MSound/MSoundSESystem.hxx>
 #include <SMS/Manager/MarioParticleManager.hxx>
 #include <SMS/Map/MapCollisionData.hxx>
 #include <SMS/raw_fn.hxx>
@@ -52,29 +51,37 @@ void TCannonBall::checkGroundCollision(TVec3f *out) {
 }
 
 void TCannonBall::touchGround(TVec3f *out) {
-    TMapObjBall::touchGround(out);
-
-    if (m_was_in_air && mState != 6) {
-        if (gpMSound->gateCheck(MSD_SE_NPC_MONTE_C_METAL_DW)) {
-            MSoundSE::startSoundActor(MSD_SE_NPC_MONTE_C_METAL_DW, mTranslation, 0, nullptr, 0, 4);
-        }
-
-        if (gpMSound->gateCheck(MSD_SE_MA_HIP_ATTACK)) {
-            MSoundSE::startSoundActor(MSD_SE_MA_HIP_ATTACK, mTranslation, 0, nullptr, 0, 4);
-        }
-
-        gpMarioParticleManager->emit(20, &mTranslation, 0, nullptr);
-        gpMarioParticleManager->emit(19, &mTranslation, 0, nullptr);
-        gpMarioParticleManager->emit(18, &mTranslation, 0, nullptr);
-
-        if (mFloorBelow->mOwner) {
-            if (mFloorBelow->mOwner->mObjectID == 0x40000F90) {
-                mFloorBelow->mOwner->receiveMessage(this, 0);
-                makeObjDead();
-            }
-        }
-
+    if (mFloorBelow->mType == 1536 || mFloorBelow->mType == 2048) {
+        makeObjDefault();
+        makeObjDead();  // Necessary to have default persist
+        m_respawn_timer = 240;  // 2 seconds
         m_was_in_air = false;
+    } else {
+        TMapObjBall::touchGround(out);
+
+        if (m_was_in_air && mState != 6) {
+            if (gpMSound->gateCheck(MSD_SE_NPC_MONTE_C_METAL_DW)) {
+                MSoundSE::startSoundActor(MSD_SE_NPC_MONTE_C_METAL_DW, mTranslation, 0, nullptr, 0,
+                                          4);
+            }
+
+            if (gpMSound->gateCheck(MSD_SE_MA_HIP_ATTACK)) {
+                MSoundSE::startSoundActor(MSD_SE_MA_HIP_ATTACK, mTranslation, 0, nullptr, 0, 4);
+            }
+
+            gpMarioParticleManager->emit(20, &mTranslation, 0, nullptr);
+            gpMarioParticleManager->emit(19, &mTranslation, 0, nullptr);
+            gpMarioParticleManager->emit(18, &mTranslation, 0, nullptr);
+
+            if (mFloorBelow->mOwner) {
+                if (mFloorBelow->mOwner->mObjectID == 0x40000F90) {
+                    mFloorBelow->mOwner->receiveMessage(this, 0);
+                    makeObjDead();
+                }
+            }
+
+            m_was_in_air = false;
+        }
     }
 
     // if (mState == 6) {

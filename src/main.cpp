@@ -136,6 +136,7 @@ extern void evCheckBrokenWatermelon(TSpcInterp *spc, u32 argc);
 extern void evAppearShineFromNPCLocal(TSpcInterp *spc, u32 argc);
 extern void evAppearShineFromNPCLocalWithoutDemo(TSpcInterp *spc, u32 argc);
 extern void evAppearFluddTip(TSpcInterp *spc, u32 argc);
+extern void evStartAppearJetBalloon(TSpcInterp *spc, u32 argc);
 
 // Objects
 extern void cannonBallCollideInteractor(THitActor *self, TMario *player);
@@ -186,6 +187,7 @@ static void initModule() {
     Game::setMaxShines(MaxShineCount);
     Application::showSettingsOnFirstBoot(true);
     FPS::setSMSFaderFrameRate(1.5f);
+    FPS::setShineSelectFrameRate(2.0f);
 
     THP::addTHP(31, "piantissimo_join.thp");
     THP::addTHP(32, "piantissimo.thp");
@@ -251,6 +253,7 @@ static void initModule() {
     Spc::registerBuiltinFunction("appearShineFromNPCLocalWithoutDemo",
                                  evAppearShineFromNPCLocalWithoutDemo);
     Spc::registerBuiltinFunction("appearFluddTip", evAppearFluddTip);
+    Spc::registerBuiltinFunction("startAppearJetBalloonEx", evStartAppearJetBalloon);
 
     Stage::addInitCallback(initCharacterArchives);
     Stage::addDraw2DCallback(updatePlayerHUD);

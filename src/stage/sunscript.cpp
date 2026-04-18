@@ -406,3 +406,14 @@ void evAppearFluddTip(TSpcInterp* spc, u32 argc) {
 
     Spc::Stack::pushItem(spc, 0, Spc::ValueType::INT);
 }
+
+void evStartAppearJetBalloon(TSpcInterp *spc, u32 argc) {
+    spc->verifyArgNum(2, &argc);
+
+    u32 balloon_count = Spc::Stack::popItem(spc).getDataInt();
+    u32 balloon_type = Spc::Stack::popItem(spc).getDataInt();
+
+    startAppearJetBalloon__11TGCConsole2Fii(gpMarDirector->mGCConsole, balloon_type, balloon_count);
+
+    Spc::Stack::pushItem(spc, 0, Spc::ValueType::INT);
+}

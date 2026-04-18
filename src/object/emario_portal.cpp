@@ -5,6 +5,25 @@
 
 #include <SMS/Camera/PolarSubCamera.hxx>
 
+#include <SMS/raw_fn.hxx>
+
+// Exploits unused padding bytes in every actor
+static bool IsLiveActor(JDrama::TActor *actor) { return ((bool *)actor)[0xE]; }
+
+// Patching constructors
+static JDrama::TFlagT<u16> *flagNotLiveActor(JDrama::TActor *actor) {
+    ((bool *)actor)[0xE] = false;
+    return (JDrama::TFlagT<u16> *)&actor->mPerformFlags;
+}
+SMS_PATCH_BL(0x80223EAC, flagNotLiveActor);
+
+static u32 flagLiveActor(THitActor *actor) {
+    ((bool *)actor)[0xE] = true;
+    return 0x803AB71C;
+}
+SMS_PATCH_BL(0x80218E94, flagLiveActor);
+SMS_WRITE_32(0x80218E90, 0x60000000);
+
 static TVec3f NormalToEulerAngles(const TVec3f &normal) {
     TVec3f euler = TVec3f::zero();
 
@@ -92,7 +111,7 @@ TEMarioPortal::TEMarioPortal(const char *name) : TMapObjGeneral(name) {
     m_is_closing = false;
     m_is_opening = false;
 
-    m_init_scale = mScale;
+    m_init_scale   = mScale;
     m_target_scale = mScale;
 
     m_interp = 0.0f;
@@ -115,10 +134,10 @@ void TEMarioPortal::openPortal(const TVec3f &at, const TVec3f &look_nrm) {
     makeObjAppeared();
 
     if (gpMSound->gateCheck(MSD_SE_MA_WARP_EX)) {
-        JAISound *sound = MSoundSE::startSoundActor(
-            MSD_SE_MA_WARP_EX, mTranslation, 0, nullptr, 0, 4);
+        JAISound *sound =
+            MSoundSE::startSoundActor(MSD_SE_MA_WARP_EX, mTranslation, 0, nullptr, 0, 4);
         if (sound) {
-            //sound->setVolume(0.2f, 0, 0);
+            // sound->setVolume(0.2f, 0, 0);
             sound->setPitch(0.5f, 3, 0);
             sound->setTempoProportion(1.5f, 0);
         }
@@ -141,9 +160,9 @@ void TEMarioPortal::closePortal() {
     // ctrl->mFrameRate = 1.0f;
     // mModelLoadFlags &= ~0x100;
 
-    //mActorData->
+    // mActorData->
 
-    m_init_scale = mScale;
+    m_init_scale   = mScale;
     m_target_scale = {0.0f, 0.0f, 0.0f};
     m_interp       = 0.0f;
 
@@ -156,7 +175,9 @@ void TEMarioPortal::control() {
             JAISound *sound = MSoundSE::startSoundActor(
                 MSD_SE_OBJ_QUAKE, reinterpret_cast<Vec *>(&mTranslation), 0, nullptr, 0, 4);
             if (sound) {
-                sound->setVolume(0.2f, 0, 0);
+                f32 dist   = PSVECDistance(mTranslation, gpCamera->mTranslation);
+                f32 volume = lerp<f32>(0.25f, 0.0f, clamp(dist / 5000.0f, 0.0f, 1.0f));
+                sound->setVolume(volume, 0, 0);
                 sound->setPitch(1.5f, 3, 0);
             }
         }
@@ -170,8 +191,8 @@ void TEMarioPortal::control() {
         m_interp += SMSGetAnmFrameRate() * 0.01f;
         if (m_interp >= 1.0f) {
             m_is_closing = false;
-            //m_is_closed  = true;
-            m_interp     = 1.0f;
+            // m_is_closed  = true;
+            m_interp = 1.0f;
         }
     } else if (m_is_opening) {
         float in_out_t = m_interp * m_interp * (3.0f - 2.0f * m_interp);
@@ -185,7 +206,7 @@ void TEMarioPortal::control() {
             m_interp     = 1.0f;
         }
     }
-    
+
     if (m_linked_portal->m_is_closed) {
         return;  // Don't check for collisions if the linked portal is closed
     }
@@ -193,7 +214,7 @@ void TEMarioPortal::control() {
     for (size_t i = 0; i < mNumObjs; ++i) {
         if (mCollidingObjs[i]->mObjectID == OBJECT_ID_MARIO) {
             transportPlayer(reinterpret_cast<TMario *>(mCollidingObjs[i]));
-        } else if ((mCollidingObjs[i]->mObjectID & 0x18000000) == 0) {
+        } else if (IsLiveActor(mCollidingObjs[i])) {
             transportActor(reinterpret_cast<TLiveActor *>(mCollidingObjs[i]));
         }
     }
@@ -218,12 +239,12 @@ void TEMarioPortal::control() {
 void TEMarioPortal::initMapObj() {
     TMapObjGeneral::initMapObj();
     closePortal();
-    //mActorData->setBtkFromIndex(0);
-    //mActorData->setFrameRate(SMSGetAnmFrameRate(), MActor::BTK);
-    // if (mCollisionManager) {
-    //     mCollisionManager->changeCollision(0);
-    //     mCollisionManager->mCurrentMapCollision->setAllActor(this);
-    // }
+    // mActorData->setBtkFromIndex(0);
+    // mActorData->setFrameRate(SMSGetAnmFrameRate(), MActor::BTK);
+    //  if (mCollisionManager) {
+    //      mCollisionManager->changeCollision(0);
+    //      mCollisionManager->mCurrentMapCollision->setAllActor(this);
+    //  }
 }
 
 bool TEMarioPortal::receiveMessage(THitActor *sender, u32 message) {
@@ -338,7 +359,7 @@ void TEMarioPortal::transportActor(TLiveActor *actor) {
     f32 final_pitch_rad = atan2f(-final_forward.y, horizontal_dist);
 
     // Assign the new angles to the TVec3f
-    //actor->mRotation.x = radiansToAngle(final_pitch_rad);
+    // actor->mRotation.x = radiansToAngle(final_pitch_rad);
     actor->mRotation.y = radiansToAngle(final_yaw_rad);
     // actor->mRotation.z remains untouched to prevent unwanted sideways barrel-rolling
 
@@ -483,7 +504,8 @@ void TEMarioPortal::transportPlayer(TMario *player) {
         }
     }
 
-    if (player->mState == TMario::STATE_SLAMSTART) {
+    if (player->mState == TMario::STATE_SLAMSTART || player->mState == TMario::STATE_F_KNCK_H ||
+        player->mState == TMario::STATE_KNCK_LND || player->mState == TMario::STATE_KNCK_GND || player->mState == 0x208BA) {
         player->changePlayerStatus(TMario::STATE_FALL, 0, false);
     }
 }
@@ -497,7 +519,7 @@ static obj_hit_info emarioPortal_collision_data{
     ._00 = 1, .mType = 0xDC000000, ._08 = 0, .mHitData = &emarioPortal_hit_data};
 
 ObjData emarioPortalData{.mMdlName          = "emario_portal",
-                         .mObjectID         = 0x80000412 /*0x80000FFF*/,
+                         .mObjectID         = 0x30000412 /*0x80000FFF*/,
                          .mLiveManagerName  = gLiveManagerName,
                          .mObjKey           = gUnkManagerName,
                          .mAnimInfo         = nullptr,

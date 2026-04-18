@@ -87,30 +87,34 @@ void TLightContext::process(TModelWaterManager &manager) {
     u32 shinesCollected       = TFlagManager::smInstance->getFlag(0x40000);
     bool isCoronaMountainBeat = TFlagManager::smInstance->getBool(0x10077);
 
-    if (gDarknessSetting.getInt() == DarknessSetting::VANILLA) {
-        return;
-    }
+    if (gDarknessSetting.getInt() != DarknessSetting::VANILLA) {
+        if (!sStageSunGlassSet) {
+            sStageSunGlassSet = true;
 
-    if (!sStageSunGlassSet) {
-        sStageSunGlassSet = true;
-
-        // Disabling the light in stages where it makes no sense
-        switch (gpMarDirector->mAreaID) {
-        case TGameSequence::AREA_OPTION:
-        case SME::STAGE_MARIO_DREAM:
-        case SME::STAGE_VAPORWAVE:
-        case SME::STAGE_SPETTRO_CASINO:
-        case SME::STAGE_TUTORIAL:
-            sSunGlassRef->mToAlpha = 0;
-            sSunGlassRef->mColor.a = 0;
-            return;
-        default:
-            if (SMS_isExMap__Fv(gpMarDirector->mAreaID)) {
+            // Disabling the light in stages where it makes no sense
+            switch (gpMarDirector->mAreaID) {
+            case TGameSequence::AREA_OPTION:
+            case SME::STAGE_MARIO_DREAM:
+            case SME::STAGE_VAPORWAVE:
+            case SME::STAGE_SPETTRO_CASINO:
+            case SME::STAGE_TUTORIAL:
                 sSunGlassRef->mToAlpha = 0;
                 sSunGlassRef->mColor.a = 0;
                 return;
+            default:
+                if (SMS_isExMap__Fv(gpMarDirector->mAreaID)) {
+                    sSunGlassRef->mToAlpha = 0;
+                    sSunGlassRef->mColor.a = 0;
+                    return;
+                }
+                break;
             }
-            break;
+        }
+    }
+
+    if (gDarknessSetting.getInt() == DarknessSetting::VANILLA) {
+        if (mLightType == TLightContext::ActiveType::STATIC) {
+            return;
         }
     }
 

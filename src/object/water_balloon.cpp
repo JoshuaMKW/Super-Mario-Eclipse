@@ -87,10 +87,18 @@ void TWaterBalloon::thrown() {
 }
 
 void TWaterBalloon::touchActor(THitActor *actor) {
-#if 1
+#if 0
     if (strcmp(actor->mKeyName, "daisycruiser") == 0)
         return;
 #endif
+
+    // Do not collide with dead actors
+    if ((actor->mObjectID & 0x18000000) == 0) {
+        TLiveActor *liveActor = reinterpret_cast<TLiveActor *>(actor);
+        if (liveActor->mStateFlags.asFlags.mIsObjDead) {
+            return;
+        }
+    }
 
     if (actor->mObjectID != OBJECT_ID_MARIO) {  // Not Mario
         blast({0.0f, 1.0f, 0.0f});

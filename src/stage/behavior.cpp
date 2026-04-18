@@ -331,15 +331,37 @@ BETTER_SMS_FOR_CALLBACK void forcePlayerZOn2D(TMario *player, bool isMario) {
     }
 
     if (s_secret_a_bound_box.contains(player->mTranslation)) {
-        player->mTranslation.z = clamp<f32>(player->mTranslation.z, 150.0f, 250.0f);
+        player->mTranslation.z = clamp<f32>(player->mTranslation.z, 200.0f, 200.0f);
         return;
     }
 
     if (!s_begin_bound_box.contains(player->mTranslation)) {
-        player->mTranslation.z = clamp<f32>(player->mTranslation.z, -50.0f, 50.0f);
+        player->mTranslation.z = clamp<f32>(player->mTranslation.z, 0.0f, 0.0f);
         return;
     }
 }
+
+static MActor *forceLiveActorZOn2D() {
+    TLiveActor *actor;
+    SMS_FROM_GPR(27, actor);
+
+    if (gpMarDirector->mAreaID != 88) {
+        return actor->mActorData;
+    }
+
+    if (s_secret_a_bound_box.contains(actor->mTranslation)) {
+        actor->mTranslation.z = clamp<f32>(actor->mTranslation.z, 200.0f, 200.0f);
+        return actor->mActorData;
+    }
+
+    if (!s_begin_bound_box.contains(actor->mTranslation)) {
+        actor->mTranslation.z = clamp<f32>(actor->mTranslation.z, 0.0f, 0.0f);
+        return actor->mActorData;
+    }
+
+    return actor->mActorData;
+}
+SMS_PATCH_BL(0x80217F20, forceLiveActorZOn2D);
 
 static void checkRideMovementCond(TMario *player) {
     if (gpMarDirector->mAreaID != SME::STAGE_YOSHI_EX) {

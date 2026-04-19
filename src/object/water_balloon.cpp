@@ -100,6 +100,11 @@ void TWaterBalloon::touchActor(THitActor *actor) {
         }
     }
 
+    // Don't explode on portals!
+    if (actor->mObjectID == 0x30000412) {
+        return;
+    }
+
     if (actor->mObjectID != OBJECT_ID_MARIO) {  // Not Mario
         blast({0.0f, 1.0f, 0.0f});
         return;

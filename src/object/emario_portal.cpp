@@ -272,6 +272,10 @@ bool TEMarioPortal::receiveMessage(THitActor *sender, u32 message) {
 }
 
 void TEMarioPortal::transportActor(TLiveActor *actor) {
+    if (actor->mObjectID == mObjectID) {
+        return;  // Don't portal portals
+    }
+
     // Get Mario's velocity
     const TVec3f &actor_vel = actor->mSpeed;
 
@@ -379,6 +383,10 @@ void TEMarioPortal::transportActor(TLiveActor *actor) {
 }
 
 void TEMarioPortal::transportPlayer(TMario *player) {
+    if (player->mState == TMario::STATE_SHINE_C) {
+        return;  // Don't warp the player while they are collecting a shine
+    }
+
     // Get Mario's velocity
     const TVec3f &player_vel = player->mSpeed;
 
@@ -490,7 +498,7 @@ void TEMarioPortal::transportPlayer(TMario *player) {
 
     // 4. Apply the fully mapped 3D offset to place the camera relative to Mario
     Vec new_camera_pos = {new_look_at.x + new_offset.x,
-                          new_look_at.y +
+                          new_look_at.y -
                               new_offset.y,  // We use the newly mapped Y, not the original!
                           new_look_at.z + new_offset.z};
 

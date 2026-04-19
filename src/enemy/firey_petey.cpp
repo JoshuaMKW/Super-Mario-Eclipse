@@ -109,7 +109,7 @@ bool TNerveFPFly::execute(TSpineBase<TLiveActor> *spine) const {
         target->changeBck(0xB);
         target->goToRandomNextGraphNode();
         if (target->_13 == 0) {
-            MSBgm::startBGM(BGM_BOSS);
+            //MSBgm::startBGM(BGM_BOSS);
             target->_13 = 1;
         }
     }
@@ -177,8 +177,8 @@ bool TNerveFPBreakSleep::execute(TSpineBase<TLiveActor> *spine) const {
     TFireyPetey *target = reinterpret_cast<TFireyPetey *>(spine->mTarget);
     if (spine->mNerveTimer == 0) {
         target->changeBck(0x0E);
-        MSBgm::stopTrackBGMs('\a', 10);
-        Music::pauseSong(0.2f);
+        //MSBgm::stopTrackBGMs('\a', 10);
+        //Music::pauseSong(0.2f);
     }
     if (!target->mActorData->curAnmEndsNext(0, nullptr)) {
         return false;

@@ -1,6 +1,7 @@
 #include <JSystem/JDrama/JDRNameRef.hxx>
 #include <JSystem/JParticle/JPAResourceManager.hxx>
 
+#include <SMS/Camera/CameraMarioData.hxx>
 #include <SMS/GC2D/SelectMenu.hxx>
 #include <SMS/MSound/MSound.hxx>
 #include <SMS/MSound/MSoundSESystem.hxx>
@@ -509,6 +510,15 @@ static bool checkForMareGate(JDrama::TNameRef *actor, u16 keycode, const char *n
     return TFlagManager::smInstance->getBool(0x50004);
 }
 SMS_PATCH_BL(0x8002e5d0, checkForMareGate);
+
+static bool checkForSunFlareAndGlow(TCameraMarioData* cameraData) {
+    if (gpMarDirector->mAreaID == 1 && gpMarDirector->mEpisodeID == 4) {
+        return true;  // Pretend Mario is indoors
+    }
+    return isMarioIndoor__16TCameraMarioDataCFv(cameraData);
+}
+SMS_PATCH_BL(0x8002D18C, checkForSunFlareAndGlow);
+SMS_PATCH_BL(0x8002D9CC, checkForSunFlareAndGlow);
 
 // Jump table for episodes: 803c0354
 // 80145cf0 is null

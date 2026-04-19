@@ -1,5 +1,6 @@
 #include <SMS/GC2D/SunGlass.hxx>
 #include <SMS/Manager/FlagManager.hxx>
+#include <SMS/Manager/ItemManager.hxx>
 
 #include <BetterSMS/libs/constmath.hxx>
 #include <BetterSMS/module.hxx>
@@ -73,12 +74,13 @@ void initToDefault(TMarDirector *director) {
 static TSunGlass *sSunGlassRef = nullptr;
 static const char *sSunGlassRefName =
     "\x83\x54\x83\x93\x83\x4F\x83\x89\x83\x58\x83\x74\x83\x46\x81\x5B\x83\x5F";
+static bool (*sLightMutator)(TLightContext *context) = nullptr;
 
 static bool sStageSunGlassSet = false;
 
 void initSunGlassReference(TSunGlass *sunglass, JSUMemoryInputStream *in) {
     sStageSunGlassSet = false;
-    sSunGlassRef = sunglass;
+    sSunGlassRef      = sunglass;
     load__Q26JDrama8TNameRefFR20JSUMemoryInputStream(sunglass, in);
 }
 SMS_PATCH_BL(0x8017d194, initSunGlassReference);
@@ -87,28 +89,32 @@ void TLightContext::process(TModelWaterManager &manager) {
     u32 shinesCollected       = TFlagManager::smInstance->getFlag(0x40000);
     bool isCoronaMountainBeat = TFlagManager::smInstance->getBool(0x10077);
 
+    bool shouldAffectSunglass = []() {
+        // Disabling the light in stages where it makes no sense
+        switch (gpMarDirector->mAreaID) {
+        case TGameSequence::AREA_OPTION:
+        case TGameSequence::AREA_CASINO:
+        case TGameSequence::AREA_DELFINO:
+        case TGameSequence::AREA_DELFINOBOSS:
+        case SME::STAGE_LACRIMA_INSIDE:
+        case SME::STAGE_LACRIMA_BACKHOUSE:
+        case SME::STAGE_MARIO_DREAM:
+        case SME::STAGE_VAPORWAVE:
+        case SME::STAGE_SPETTRO_CASINO:
+        case SME::STAGE_TUTORIAL:
+            return false;
+        default:
+            if (SMS_isExMap__Fv(gpMarDirector->mAreaID)) {
+                return false;
+            }
+            break;
+        }
+        return true;
+    }();
+
     if (gDarknessSetting.getInt() != DarknessSetting::VANILLA) {
         if (!sStageSunGlassSet) {
             sStageSunGlassSet = true;
-
-            // Disabling the light in stages where it makes no sense
-            switch (gpMarDirector->mAreaID) {
-            case TGameSequence::AREA_OPTION:
-            case SME::STAGE_MARIO_DREAM:
-            case SME::STAGE_VAPORWAVE:
-            case SME::STAGE_SPETTRO_CASINO:
-            case SME::STAGE_TUTORIAL:
-                sSunGlassRef->mToAlpha = 0;
-                sSunGlassRef->mColor.a = 0;
-                return;
-            default:
-                if (SMS_isExMap__Fv(gpMarDirector->mAreaID)) {
-                    sSunGlassRef->mToAlpha = 0;
-                    sSunGlassRef->mColor.a = 0;
-                    return;
-                }
-                break;
-            }
         }
     }
 
@@ -118,13 +124,21 @@ void TLightContext::process(TModelWaterManager &manager) {
         }
     }
 
+    if (sLightMutator) {
+        if (sLightMutator(this)) {
+            sLightMutator = nullptr;
+        }
+    }
+
     switch (mLightType) {
     case TLightContext::ActiveType::STATIC: {
         manager.mLayerCount = sLightContext.mLayerCount;
 
-        if (sBrightLevel != 255)
-            manager.mDarkLevel = sBrightLevel;
-        else if (shinesCollected >= MaxShineCount) {
+        if (sBrightLevel != 255) {
+            manager.mDarkLevel            = sBrightLevel;
+            manager.LightType.mShowShadow = true;
+            break;
+        } else if (shinesCollected >= MaxShineCount) {
             if (manager.mDarkLevel < 255)
                 manager.mDarkLevel += 1;
             else
@@ -151,8 +165,10 @@ void TLightContext::process(TModelWaterManager &manager) {
                 mSizeMorphing   = true;
                 mStepContext    = 0.0f;
             } else {
-                sSunGlassRef->mToAlpha        = Min(255 - manager.mDarkLevel, 100);
-                sSunGlassRef->mColor.a        = sSunGlassRef->mToAlpha;
+                if (shouldAffectSunglass) {
+                    sSunGlassRef->mToAlpha = Min(255 - manager.mDarkLevel, 100);
+                    sSunGlassRef->mColor.a = sSunGlassRef->mToAlpha;
+                }
                 manager.LightType.mShowShadow = manager.mDarkLevel < 255 && !isCoronaMountainBeat;
                 break;
             }
@@ -189,8 +205,10 @@ void TLightContext::process(TModelWaterManager &manager) {
             mSizeMorphing       = false;
         }
 
-        sSunGlassRef->mToAlpha        = Min(255 - manager.mDarkLevel, 100);
-        sSunGlassRef->mColor.a        = sSunGlassRef->mToAlpha;
+        if (shouldAffectSunglass) {
+            sSunGlassRef->mToAlpha = Min(255 - manager.mDarkLevel, 100);
+            sSunGlassRef->mColor.a = sSunGlassRef->mToAlpha;
+        }
         manager.LightType.mShowShadow = manager.mDarkLevel < 255 && !isCoronaMountainBeat;
         break;
     }
@@ -237,6 +255,10 @@ static void initShineShadow() {
             if (gpMarDirector->mAreaID != TGameSequence::AREA_DOLPIC) {
                 sLightContext.mLightType = TLightContext::ActiveType::DISABLED;
             }
+        } else {
+            if (gpMarDirector->mAreaID < SME::STAGE_ERTO) {
+                sLightContext.mLightType = TLightContext::ActiveType::DISABLED;
+            }
         }
         return;
     }
@@ -244,7 +266,7 @@ static void initShineShadow() {
     u32 shinesCollected = TFlagManager::smInstance->getFlag(0x40000);
     // bool isCoronaMountainBeat = TFlagManager::smInstance->getBool(0x10077);
 
-    if (shinesCollected < MaxShineCount ||
+    if (shinesCollected < MaxShineCount || sBrightLevel != 255 ||
         sLightContext.mLightType == TLightContext::ActiveType::FOLLOWPLAYER ||
         sLightContext.mLightType == TLightContext::ActiveType::FOLLOWCAMERA) {
         sLightContext.mPrevShineCount = shinesCollected;
@@ -288,7 +310,6 @@ static bool checkIfActive() {
 SMS_PATCH_BL(0x8027C6A4, checkIfActive);
 SMS_WRITE_32(0x8027C6A8, 0x28030001);
 
-
 static bool checkIfValidStateForSunGlassTint() {
     if (gDarknessSetting.getInt() == DarknessSetting::VANILLA) {
         return gpMarDirector->mAreaID == TGameSequence::AREA_DOLPIC;
@@ -296,6 +317,11 @@ static bool checkIfValidStateForSunGlassTint() {
 
     switch (gpMarDirector->mAreaID) {
     case TGameSequence::AREA_OPTION:
+    case TGameSequence::AREA_CASINO:
+    case TGameSequence::AREA_DELFINO:
+    case TGameSequence::AREA_DELFINOBOSS:
+    case SME::STAGE_LACRIMA_INSIDE:
+    case SME::STAGE_LACRIMA_BACKHOUSE:
     case SME::STAGE_MARIO_DREAM:
     case SME::STAGE_VAPORWAVE:
     case SME::STAGE_SPETTRO_CASINO:
@@ -318,3 +344,18 @@ SMS_WRITE_32(0x8017D1E0, 0x60000000);
 
 SMS_WRITE_32(0x8017D5C0, 0x60000000);
 SMS_WRITE_32(0x8017D654, 0x60000000);
+
+static bool casinoLightMutator(TLightContext *context) {
+    if (sBrightLevel++ == 255) {
+        context->mLightType = TLightContext::ActiveType::DISABLED;
+        return true;
+    }
+    return false;
+}
+
+static void casinoBossReviveLightWhenShineDemo(TItemManager *manager, const char *shine,
+                                               const char *demo, f32 x, f32 y, f32 z) {
+    sLightMutator = casinoLightMutator;
+    manager->makeShineAppearWithDemo(shine, demo, x, y, z);
+}
+SMS_PATCH_BL(0x800bf85c, casinoBossReviveLightWhenShineDemo);

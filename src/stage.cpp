@@ -647,6 +647,10 @@ BETTER_SMS_FOR_CALLBACK void initializeStageInfo(TApplication *app) {
 
             // Corona Mountain
             {
+                SME::setSpawnTransRot(TGameSequence::AREA_COROEX4 - 1, -1,
+                                      TVec3f(-3000.0f, 610.0f, 22960.0f), TVec3f(0.0f, 90.0f, 0.0f),
+                                      SME::STAGE_ISLE_DELFINO, 0);  // Boilente Crypt
+
                 SME::setSpawnTransRot(TGameSequence::AREA_COROEX6, -1,
                                       TVec3f(-3000.0f, 610.0f, 22960.0f), TVec3f(0.0f, 90.0f, 0.0f),
                                       SME::STAGE_ISLE_DELFINO, 0);  // Boilente Crypt

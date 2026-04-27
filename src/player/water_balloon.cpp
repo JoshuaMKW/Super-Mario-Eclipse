@@ -70,6 +70,13 @@ BETTER_SMS_FOR_CALLBACK void createWaterBalloonAndThrow(TMario *player, bool isM
         if (gpCamera->isLButtonCameraSpecifyMode(gpCamera->mMode)) {
             return;
         }
+
+        SME::Player::PlayerState *player_state =
+            (SME::Player::PlayerState *)Player::getRegisteredData(player, SME::Player::data_key);
+
+        if (player_state->mPortalToggle) {
+            return;
+        }
     }
 
     auto *water_balloons =

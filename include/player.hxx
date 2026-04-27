@@ -36,6 +36,9 @@ namespace SME {
 
             TEMarioPortal *mPortals[2] = {nullptr, nullptr};
             int mWhichPortal           = 0;
+            bool mPortalToggle         = false;
+            float mPortalScreenVLerp   = 0.0f;
+            int mPortalTimer           = 0;
         };
 
         inline PlayerState *getEclipseData(TMario *player) {

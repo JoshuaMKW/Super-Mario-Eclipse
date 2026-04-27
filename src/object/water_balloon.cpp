@@ -92,6 +92,11 @@ void TWaterBalloon::touchActor(THitActor *actor) {
         return;
 #endif
 
+    // Sirena Hotel sunken
+    if (actor->mObjectID == 0x08000004) {
+        return;
+    }
+
     // Do not collide with dead actors
     if ((actor->mObjectID & 0x18000000) == 0) {
         TLiveActor *liveActor = reinterpret_cast<TLiveActor *>(actor);

@@ -7,6 +7,8 @@
 
 #include <SMS/raw_fn.hxx>
 
+#include "player.hxx"
+
 // Exploits unused padding bytes in every actor
 static bool IsLiveActor(JDrama::TActor *actor) { return ((bool *)actor)[0xE]; }
 
@@ -387,6 +389,13 @@ void TEMarioPortal::transportPlayer(TMario *player) {
         return;  // Don't warp the player while they are collecting a shine
     }
 
+    // Avoid portaling for so many frames
+    SME::Player::PlayerState *player_state =
+        (SME::Player::PlayerState *)Player::getRegisteredData(player, SME::Player::data_key);
+    if (player_state->mPortalTimer > 0) {
+        return;
+    }
+
     // Get Mario's velocity
     const TVec3f &player_vel = player->mSpeed;
 
@@ -516,6 +525,8 @@ void TEMarioPortal::transportPlayer(TMario *player) {
         player->mState == TMario::STATE_KNCK_LND || player->mState == TMario::STATE_KNCK_GND || player->mState == 0x208BA) {
         player->changePlayerStatus(TMario::STATE_FALL, 0, false);
     }
+
+    player_state->mPortalTimer = 60;
 }
 
 static hit_data emarioPortal_hit_data{.mAttackRadius  = 290.0f,

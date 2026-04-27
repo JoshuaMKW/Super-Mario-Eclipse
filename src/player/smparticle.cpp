@@ -82,15 +82,65 @@ static bool rayIntersectsTriangle(const TVec3f &ray_origin, const TVec3f &ray_di
 // Disgusting AI slop because I'm lazy
 static bool renderSMParticleAtLookPoint(TMario *player, TVec3f &look_point_out,
                                         TVec3f &look_nrm_out) {
-    CPolarSubCamera *camera = gpCamera;
-    if (!camera->isLButtonCameraSpecifyMode(camera->mMode))
-        return false;
-
     SME::Player::PlayerState *player_state =
         (SME::Player::PlayerState *)Player::getRegisteredData(player, SME::Player::data_key);
 
+    float screenVLerp = 1.0f - player_state->mPortalScreenVLerp;
+
+    // Only allow portals when toggled or in Y cam
+    CPolarSubCamera *camera = gpCamera;
+    if (!camera->isLButtonCameraSpecifyMode(camera->mMode)) {
+        if (!player_state->mPortalToggle) {
+            return false;
+        }
+    } else {
+        screenVLerp = 0.5f;
+    }
+
     const TVec3f ray_origin = camera->mTranslation;
-    TVec3f ray_direction    = camera->mTargetPos - ray_origin;
+
+    // Get the base forward vector
+    TVec3f forward;
+    forward.x = camera->mTargetPos.x - ray_origin.x;
+    forward.y = camera->mTargetPos.y - ray_origin.y;
+    forward.z = camera->mTargetPos.z - ray_origin.z;
+    PSVECNormalize(forward, forward);
+
+    // Get the global world up vector
+    TVec3f world_up = camera->mUpVector;
+    PSVECNormalize(world_up, world_up);
+
+    // Calculate true RIGHT vector (Forward cross World Up)
+    TVec3f right;
+    right.x = forward.y * world_up.z - forward.z * world_up.y;
+    right.y = forward.z * world_up.x - forward.x * world_up.z;
+    right.z = forward.x * world_up.y - forward.y * world_up.x;
+    PSVECNormalize(right, right);
+
+    // Calculate true LOCAL UP vector (Right cross Forward)
+    TVec3f cam_up;
+    cam_up.x = right.y * forward.z - right.z * forward.y;
+    cam_up.y = right.z * forward.x - right.x * forward.z;
+    cam_up.z = right.x * forward.y - right.y * forward.x;
+    PSVECNormalize(cam_up, cam_up);
+
+    // Map the 0.0->1.0 lerp to a -1.0->1.0 Normalized Device Coordinate
+    // Usually, screenVLerp 0.0 is the top (+1.0) and 1.0 is the bottom (-1.0).
+    f32 vertical_ndc = 1.0f - (screenVLerp * 2.0f);
+
+    // Calculate vertical spread based on the camera's Field of View.
+    // Try to find the real FOV in your camera struct (e.g., camera->mFovy).
+    // If you don't have it readily available in CPolarSubCamera, ~45-60
+    // degrees is standard. 45 is a safe fallback.
+    f32 fov_deg         = 45.0f;
+    f32 fov_rad         = fov_deg * (3.14159f / 180.0f);
+    f32 vertical_offset = tanf(fov_rad * 0.5f) * vertical_ndc;
+
+    // Build the final un-projected ray direction
+    TVec3f ray_direction;
+    ray_direction.x = forward.x + (cam_up.x * vertical_offset);
+    ray_direction.y = forward.y + (cam_up.y * vertical_offset);
+    ray_direction.z = forward.z + (cam_up.z * vertical_offset);
     PSVECNormalize(ray_direction, ray_direction);
 
     // OPTIMIZATION: We can take larger steps now.
@@ -99,9 +149,9 @@ static bool renderSMParticleAtLookPoint(TMario *player, TVec3f &look_point_out,
 
     f32 closest_t                       = 99999.0f;
     const TBGCheckData *closest_surface = nullptr;
-    f32 current_ray_dist                = 0.0f;
+    f32 current_ray_dist                = 240.0f;
 
-    for (size_t i = 0; i < 50; ++i) {  // 40 * 100 = 4000 max distance
+    for (size_t i = 0; i < 48; ++i) {  // 48 * 120 + 240 = 6000 max distance
         next_sample_point:
         
         TVec3f sample_pos;
@@ -128,12 +178,14 @@ static bool renderSMParticleAtLookPoint(TMario *player, TVec3f &look_point_out,
         size_t test_count                       = 0;
 
         // 1. DIRECTIONAL CULLING FOR GROUND/ROOF
-        if (ray_direction.y < 0.5f) {
+        if (ray_direction.y < 0.9f) {
             gpMapCollisionData->checkGround(sample_pos.x, sample_pos.y + STEP_SIZE, sample_pos.z, 0,
                                             &surfaces_to_test[test_count]);
             if (surfaces_to_test[test_count])
                 test_count++;
-        } else if (ray_direction.y > -0.5f) {
+        }
+        
+        if (ray_direction.y > -0.9f) {
             gpMapCollisionData->checkRoof(sample_pos.x, sample_pos.y - STEP_SIZE, sample_pos.z, 0,
                                           &surfaces_to_test[test_count]);
             if (surfaces_to_test[test_count])
@@ -275,16 +327,37 @@ void doSMParticle(TMario *player, bool isMario) {
     }
 
     OSLockMutex(&s_look_point_mutex);
+
+    if (player_state->mPortalToggle) {
+        if (player->mController->mButtons.mAnalogR > 0.1f) {
+            player_state->mPortalScreenVLerp += 0.0025f;
+        } else {
+            player_state->mPortalScreenVLerp -= 0.0025f;
+        }
+    } else {
+        player_state->mPortalScreenVLerp = 0.0f;
+    }
+
+
+    player_state->mPortalScreenVLerp = Clamp(player_state->mPortalScreenVLerp, 0.0f, 1.0f);
+
+    if ((player->mController->mButtons.mFrameInput & TMarioGamePad::X)) {
+        player_state->mPortalToggle ^= true;
+    }
+
+    if (player_state->mPortalTimer > 0) {
+        player_state->mPortalTimer -= 1;
+    }
+
     if (s_is_valid_look_point) {
-        if ((s_wakeup_thread_counter % 12) == 0) {
+        if ((s_wakeup_thread_counter % 9) == 0) {
             if (JPABaseEmitter *emitter =
                     gpMarioParticleManager->emit(237, &s_look_point, 0, nullptr)) {
-                emitter->mSize1 = {0.2f, 0.2f, 0.2f};
+                emitter->mSize1 = {0.1f, 0.1f, 0.1f};
             }
         }
 
         if ((player->mController->mButtons.mFrameInput & TMarioGamePad::R) == TMarioGamePad::R) {
-
             TEMarioPortal *portal = player_state->mPortals[player_state->mWhichPortal];
             if (portal) {
                 portal->mTranslation = s_look_point;
@@ -294,6 +367,7 @@ void doSMParticle(TMario *player, bool isMario) {
                 portal->openPortal(s_look_point, s_look_nrm);
             }
             player_state->mWhichPortal = player_state->mWhichPortal == 0 ? 1 : 0;
+            player_state->mPortalScreenVLerp = 0.0f;
         }
     }
     OSUnlockMutex(&s_look_point_mutex);

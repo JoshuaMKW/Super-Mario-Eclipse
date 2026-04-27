@@ -166,7 +166,8 @@ void TLightContext::process(TModelWaterManager &manager) {
                 mStepContext    = 0.0f;
             } else {
                 if (shouldAffectSunglass) {
-                    sSunGlassRef->mToAlpha = Min(255 - manager.mDarkLevel, 100);
+                    //sSunGlassRef->mToAlpha = Min(255 - manager.mDarkLevel, 100);
+                    sSunGlassRef->mToAlpha = lerp<u8>(0, 60, manager.mDarkLevel / 255.0f);
                     sSunGlassRef->mColor.a = sSunGlassRef->mToAlpha;
                 }
                 manager.LightType.mShowShadow = manager.mDarkLevel < 255 && !isCoronaMountainBeat;
@@ -206,7 +207,7 @@ void TLightContext::process(TModelWaterManager &manager) {
         }
 
         if (shouldAffectSunglass) {
-            sSunGlassRef->mToAlpha = Min(255 - manager.mDarkLevel, 100);
+            sSunGlassRef->mToAlpha = lerp<u8>(0, 60, manager.mDarkLevel / 255.0f);
             sSunGlassRef->mColor.a = sSunGlassRef->mToAlpha;
         }
         manager.LightType.mShowShadow = manager.mDarkLevel < 255 && !isCoronaMountainBeat;

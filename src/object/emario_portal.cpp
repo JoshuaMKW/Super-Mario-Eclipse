@@ -382,6 +382,11 @@ void TEMarioPortal::transportActor(TLiveActor *actor) {
     }
 
     actor->mTranslation = m_linked_portal->mTranslation + push_out;
+
+    // Is this an OrangeSeal?
+    if (actor->mObjectID == 0x10000024) {
+        actor->mCollisionManager->mCurrentMapCollision->remove();
+    }
 }
 
 void TEMarioPortal::transportPlayer(TMario *player) {
@@ -522,7 +527,8 @@ void TEMarioPortal::transportPlayer(TMario *player) {
     }
 
     if (player->mState == TMario::STATE_SLAMSTART || player->mState == TMario::STATE_F_KNCK_H ||
-        player->mState == TMario::STATE_KNCK_LND || player->mState == TMario::STATE_KNCK_GND || player->mState == 0x208BA) {
+        player->mState == TMario::STATE_KNCK_LND || player->mState == TMario::STATE_KNCK_GND ||
+        player->mState == 0x208BA) {
         player->changePlayerStatus(TMario::STATE_FALL, 0, false);
     }
 
@@ -555,3 +561,14 @@ ObjData emarioPortalData{.mMdlName          = "emario_portal",
 
 // Work around to make indirect texturing on portal not crash the game
 SMS_WRITE_32(SMS_PORT_REGION(0x802281F4, 0, 0, 0), 0x60000000);
+
+// This allows portals to render through the water layer (thx Nintendo)
+static void dontSetLightTypeWhenIndirectPortal(MActor *actor) {
+    TLiveActor *obj;
+    SMS_FROM_GPR(31, obj);
+
+    if (obj->mObjectID != 0x30000412) {
+        actor->setLightType(3);
+    }
+}
+SMS_PATCH_BL(SMS_PORT_REGION(0x801B1A9C, 0, 0, 0), dontSetLightTypeWhenIndirectPortal);

@@ -10,17 +10,30 @@
 #include <JSystem/JUtility/JUTTexture.hxx>
 #include <SMS/MoveBG/Coin.hxx>
 
+#include <BetterSMS/module.hxx>
+
 class TStarBit final : public TCoin {
     static const JUtility::TColor sStarBitColorArray[6];
 
 public:
-    TStarBit(const char *name);
-    virtual ~TStarBit();
+    BETTER_SMS_FOR_CALLBACK static JDrama::TNameRef *instantiate() {
+        return new TStarBit("StarBit");
+    }
 
-    virtual void perform(u32, JDrama::TGraphics *) override;
-    virtual void control() override;
-    virtual void touchWater(THitActor *) override;
-    virtual void taken(THitActor *) override;
+    TStarBit(const char *name);
+    ~TStarBit() override;
+
+    void appear() override;
+    void bind() override;
+    void load(JSUMemoryInputStream &in) override;
+    void loadAfter() override;
+    void makeMActors() override;
+    void perform(u32, JDrama::TGraphics *) override;
+    bool receiveMessage(THitActor *sender, u32 message) override;
+    void moveObject() override;
+    void touchGround(TVec3f *) override;
+    void touchWater(THitActor *) override;
+    void taken(THitActor *) override;
 
     JUtility::TColor getColor() const { return mColor; }
     void setColor(JUtility::TColor color) { mColor = color; }
@@ -37,9 +50,14 @@ public:
 private:
     bool mIsBouncing;
     bool mIsMoving;
+    bool mIsAttracting;
+    TVec3f *mAttractionPoint;
     f32 mBounceSpeedY;
     JPABaseEmitter *mGlowEffect;
     f32 mGlowSize;
     f32 mGlowAnmSpeed;
+    int mGlowTick;
     JUtility::TColor mColor;
 };
+
+extern ObjData starBitData;

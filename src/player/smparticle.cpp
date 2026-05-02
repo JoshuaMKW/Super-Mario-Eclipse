@@ -1,8 +1,19 @@
 #include <SMS/MSound/MSound.hxx>
 #include <SMS/MSound/MSoundSESystem.hxx>
 #include <SMS/Map/MapCollisionData.hxx>
+#include <SMS/Player/MarioDraw.hxx>
 #include <SMS/rand.h>
-#include <smparticle.hxx>
+
+#include <BetterSMS/module.hxx>
+#include <BetterSMS/player.hxx>
+
+#include "smparticle.hxx"
+
+constexpr int PortalAnimationID = 197;
+
+BETTER_SMS_FOR_CALLBACK void initializePortalAnimation(TApplication *app) {
+    Player::addAnimationDataEx(PortalAnimationID, "draw_p", false, true);
+}
 
 void smPlayerInit(TMario *player) {
     SME::CharacterID charID = SME::TGlobals::getCharacterIDFromPlayer(gpMarioAddress);
@@ -315,6 +326,10 @@ void doSMParticle(TMario *player, bool isMario) {
     SME::Player::PlayerState *player_state =
         (SME::Player::PlayerState *)Player::getRegisteredData(player, SME::Player::data_key);
 
+    if (player->mState != TMario::STATE_IDLE) {
+        player_state->mPortalCasting = false;  // Portal casting is a completely visual flag
+    }
+
     if (!player_state->mPortals[0] || !player_state->mPortals[1]) {
         player_state->mPortals[0] = new TEMarioPortal("__PortalBegin");
         player_state->mPortals[1] = new TEMarioPortal("__PortalEnd");
@@ -368,6 +383,7 @@ void doSMParticle(TMario *player, bool isMario) {
             }
             player_state->mWhichPortal = player_state->mWhichPortal == 0 ? 1 : 0;
             player_state->mPortalScreenVLerp = 0.0f;
+            player_state->mPortalCasting     = true;
         }
     }
     OSUnlockMutex(&s_look_point_mutex);
@@ -407,3 +423,22 @@ void doSMParticle(TMario *player, bool isMario) {
     }
     data->mLastLongJump = mIsLongJump;
 }
+
+// Shadow Mario does a portal cast animation only when idle, and it's cancellable
+static void setIdleAnimationBasedOnPortalCast(TMario *player, int animID, f32 animSpeed) {
+    SME::Player::PlayerState *player_state =
+        (SME::Player::PlayerState *)Player::getRegisteredData(player, SME::Player::data_key);
+
+    if (player->mAnimationID == PortalAnimationID) {
+        if (player->mModelData->mFrameCtrl->mAnimFlags.mIsAnmDead) {
+            player_state->mPortalCasting = false;
+        }
+    }
+
+    if (player_state->mPortalCasting) {
+        animID = PortalAnimationID;  // Portal cast animation
+    }
+
+    player->setAnimation(animID, animSpeed);
+}
+SMS_PATCH_BL(SMS_PORT_REGION(0x802660F0, 0, 0, 0), setIdleAnimationBasedOnPortalCast);

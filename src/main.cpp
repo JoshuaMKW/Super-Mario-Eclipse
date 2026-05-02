@@ -31,6 +31,7 @@
 #include "object/key_chest.hxx"
 #include "object/launch_star.hxx"
 #include "object/pizzabox.hxx"
+#include "object/star_bit.hxx"
 #include "object/tornado_obj.hxx"
 #include "object/water_balloon.hxx"
 #include "object/water_mine.hxx"
@@ -80,6 +81,7 @@ extern void initColdState(TMarDirector *director);
 extern void processColdState(TMario *player, bool isMario);
 extern void setPlayerStartPos(TMario *player);
 
+extern void initializePortalAnimation(TApplication *app);
 extern void createLookPointThreadOnPlayerInit(TMario *player, bool isMario);
 extern void killLookPointThreadOnStageExit(TApplication *director);
 
@@ -226,6 +228,7 @@ static void initModule() {
     Stage::addUpdateCallback(updateWarpStatesForCruiserCabin);
     Player::addUpdateCallback(forcePlayerZOn2D);
 
+    Game::addInitCallback(initializePortalAnimation);
     Player::addInitCallback(createLookPointThreadOnPlayerInit);
     Player::addLoadAfterCallback(smPlayerInit);
     Player::addUpdateCallback(doSMParticle);
@@ -299,6 +302,7 @@ static void initModule() {
     Objects::registerObjectAsMapObj("WaterMine", &waterMineData, TWaterMine::instantiate);
     Objects::registerObjectAsMapObj("IronCrate", &ironCrateData, TIronCrate::instantiate);
     Objects::registerObjectAsMapObj("EMarioPortal", &emarioPortalData, TEMarioPortal::instantiate);
+    Objects::registerObjectAsMapObj("StarBit", &starBitData, TStarBit::instantiate);
 
     Objects::registerObjectAsMapObj("CannonBall", &cannonBallData, TCannonBall::instantiate);
     Objects::registerObjectCollideInteractor(cannonBallData.mObjectID, cannonBallCollideInteractor);

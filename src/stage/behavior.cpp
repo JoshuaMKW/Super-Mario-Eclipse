@@ -6,11 +6,14 @@
 #include <SMS/MSound/MSound.hxx>
 #include <SMS/MSound/MSoundSESystem.hxx>
 #include <SMS/Manager/FlagManager.hxx>
+#include <SMS/Enemy/SmallEnemy.hxx>
 #include <SMS/raw_fn.hxx>
 
 #include <BetterSMS/libs/boundbox.hxx>
 #include <BetterSMS/module.hxx>
 #include <BetterSMS/objects/generic.hxx>
+
+#include "object/star_bit.hxx"
 
 #include "globals.hxx"
 #include "settings.hxx"
@@ -511,14 +514,62 @@ static bool checkForMareGate(JDrama::TNameRef *actor, u16 keycode, const char *n
 }
 SMS_PATCH_BL(0x8002e5d0, checkForMareGate);
 
-static bool checkForSunFlareAndGlow(TCameraMarioData* cameraData) {
+// The final boss and night castle both don't want the flare
+static bool checkForSunFlare(TCameraMarioData* cameraData) {
+    if (gpMarDirector->mAreaID == 1 && gpMarDirector->mEpisodeID == 4) {
+        return true;  // Pretend Mario is indoors
+    }
+    if (gpMarDirector->mAreaID == 77 && gpMarDirector->mEpisodeID == 1) {
+        return true;  // Pretend Mario is indoors
+    }
+    return isMarioIndoor__16TCameraMarioDataCFv(cameraData);
+}
+SMS_PATCH_BL(0x8002D18C, checkForSunFlare);
+
+// Only the final boss doesn't want a glow
+static bool checkForSunGlow(TCameraMarioData *cameraData) {
     if (gpMarDirector->mAreaID == 1 && gpMarDirector->mEpisodeID == 4) {
         return true;  // Pretend Mario is indoors
     }
     return isMarioIndoor__16TCameraMarioDataCFv(cameraData);
 }
-SMS_PATCH_BL(0x8002D18C, checkForSunFlareAndGlow);
-SMS_PATCH_BL(0x8002D9CC, checkForSunFlareAndGlow);
+SMS_PATCH_BL(0x8002D9CC, checkForSunGlow);
+
+// In StarGlow Road, we want to enforce starbits!
+static void initAndRegisterCoinOrStarBit() {
+    TCoin *newCoin;
+    if (gpMarDirector->mAreaID == SME::STAGE_RED_LILY_EX) {
+        newCoin = new TStarBit("\x83\x52\x83\x43\x83\x93\x00\x00");
+        newCoin->initAndRegister("starbit");
+        newCoin->mRegisterName = "coin";
+
+        // Very hacky: extend loop to have more starbits ready (uses r28 so hard to patch naturally)
+        PowerPC::writeU32((u32 *)0x801BFE48, 0x2C1C0064);
+    } else {
+        newCoin = new TCoin("\x83\x52\x83\x43\x83\x93\x00\x00");
+        newCoin->initAndRegister("coin");
+
+        // Very hacky: extend loop to have more starbits ready (uses r28 so hard to patch naturally)
+        PowerPC::writeU32((u32 *)0x801BFE48, 0x2C1C0014);
+    }
+}
+SMS_PATCH_BL(0x801BFE40, initAndRegisterCoinOrStarBit);
+SMS_PATCH_BL(0x801BFF04, initAndRegisterCoinOrStarBit);
+SMS_WRITE_32(0x801BFE20, 0x38600000);  // Remove original alloc
+SMS_WRITE_32(0x801BFEE4, 0x38600000);  // Remove original alloc
+
+static void initSmallEnemyStarBitCount() {
+    TSmallEnemy *enemy;
+    SMS_FROM_GPR(30, enemy);
+
+    // Coin
+    if (enemy->_17C == 100) {
+        enemy->_18C = 5;
+    } else {
+        enemy->_18C = 1;
+    }
+}
+SMS_PATCH_BL(0x8006D968, initSmallEnemyStarBitCount);
 
 // Jump table for episodes: 803c0354
 // 80145cf0 is null

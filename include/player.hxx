@@ -40,6 +40,7 @@ namespace SME {
             int mPortalTimer           = 0;
             bool mPortalToggle         = false;
             bool mPortalCasting        = false;
+            int mPortalCastTimer       = 0;
         };
 
         inline PlayerState *getEclipseData(TMario *player) {

@@ -20,6 +20,8 @@ public:
     void initMapObj() override;
     bool receiveMessage(THitActor *sender, u32 message) override;
 
+    void calcRootMatrix() override;
+
 protected:
     void transportActor(TLiveActor *actor);
     void transportPlayer(TMario *player);

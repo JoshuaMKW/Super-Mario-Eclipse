@@ -17,13 +17,15 @@ static TLightContext sLightContext;
 static u8 sBrightLevel = 255;
 static u8 sMinDarkness = 0;
 
-#define MIN_DARKNESS        130
-#define MIN_DARKNESS_CORONA 190
-#define MAX_DARKNESS        210
-#define MIN_SIZE            0.0f
-#define MAX_SIZE            500000.0f
-#define GROW_BASE           4500.0f
-#define GROW_POWER          1.5f
+#define MIN_DARKNESS                 132
+#define MIN_DARKNESS_ECLIPSED        110
+#define MIN_DARKNESS_CORONA          190
+#define MIN_DARKNESS_CORONA_ECLIPSED 170
+#define MAX_DARKNESS                 210
+#define MIN_SIZE                     0.0f
+#define MAX_SIZE                     500000.0f
+#define GROW_BASE                    4500.0f
+#define GROW_POWER                   1.5f
 
 extern DarknessSetting gDarknessSetting;
 
@@ -41,20 +43,15 @@ void initializeParameters(TLightContext::ActiveType type, TVec3f pos, u8 layer_c
     if (type == TLightContext::ActiveType::STATIC) {
         switch (gDarknessSetting.getInt()) {
         case DarknessSetting::ECLIPSED: {
-            sMinDarkness              = isCoronaMountainBeat ? MIN_DARKNESS_CORONA : MIN_DARKNESS;
+            sMinDarkness              = isCoronaMountainBeat ? MIN_DARKNESS_CORONA_ECLIPSED
+                                                             : MIN_DARKNESS_ECLIPSED;
             sLightContext.mLayerScale = layer_scale;
             sLightContext.mLayerCount = layer_count;
             break;
         }
         case DarknessSetting::REGULAR: {
-            sMinDarkness = isCoronaMountainBeat ? MIN_DARKNESS_CORONA + 20 : MIN_DARKNESS + 70;
-            sLightContext.mLayerScale = 0.1f;
-            sLightContext.mLayerCount = 5;
-            break;
-        }
-        case DarknessSetting::VANILLA: {
-            sMinDarkness = isCoronaMountainBeat ? MIN_DARKNESS_CORONA + 20 : MIN_DARKNESS + 70;
-            sLightContext.mLayerScale = 0.1f;
+            sMinDarkness = isCoronaMountainBeat ? MIN_DARKNESS_CORONA : MIN_DARKNESS;
+            sLightContext.mLayerScale = 0.05f;
             sLightContext.mLayerCount = 5;
             break;
         }
@@ -112,10 +109,12 @@ void TLightContext::process(TModelWaterManager &manager) {
         return true;
     }();
 
-    if (gDarknessSetting.getInt() != DarknessSetting::VANILLA) {
+    if (gDarknessSetting.getInt() == DarknessSetting::ECLIPSED) {
         if (!sStageSunGlassSet) {
             sStageSunGlassSet = true;
         }
+    } else {
+        shouldAffectSunglass = false;
     }
 
     if (gDarknessSetting.getInt() == DarknessSetting::VANILLA) {
@@ -166,7 +165,7 @@ void TLightContext::process(TModelWaterManager &manager) {
                 mStepContext    = 0.0f;
             } else {
                 if (shouldAffectSunglass) {
-                    //sSunGlassRef->mToAlpha = Min(255 - manager.mDarkLevel, 100);
+                    // sSunGlassRef->mToAlpha = Min(255 - manager.mDarkLevel, 100);
                     sSunGlassRef->mToAlpha = lerp<u8>(0, 60, manager.mDarkLevel / 255.0f);
                     sSunGlassRef->mColor.a = sSunGlassRef->mToAlpha;
                 }
@@ -247,10 +246,6 @@ void TLightContext::process(TModelWaterManager &manager) {
 }
 
 static void initShineShadow() {
-    if (sLightContext.mLightType == TLightContext::ActiveType::DISABLED) {
-        return;
-    }
-
     if (gDarknessSetting.getInt() == DarknessSetting::VANILLA) {
         if (sLightContext.mLightType == TLightContext::ActiveType::STATIC) {
             if (gpMarDirector->mAreaID != TGameSequence::AREA_DOLPIC) {
@@ -261,6 +256,10 @@ static void initShineShadow() {
                 sLightContext.mLightType = TLightContext::ActiveType::DISABLED;
             }
         }
+        return;
+    }
+
+    if (sLightContext.mLightType == TLightContext::ActiveType::DISABLED) {
         return;
     }
 

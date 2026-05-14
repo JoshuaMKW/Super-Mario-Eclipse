@@ -121,6 +121,7 @@ TEMarioPortal::TEMarioPortal(const char *name) : TMapObjGeneral(name) {
 
 void TEMarioPortal::openPortal(const TVec3f &at, const TVec3f &look_nrm) {
     mTranslation = at;
+    mTranslation.y -= 145.0f;
     mRotation    = NormalToEulerAngles(look_nrm);
     m_look_nrm   = look_nrm;
 
@@ -273,6 +274,8 @@ bool TEMarioPortal::receiveMessage(THitActor *sender, u32 message) {
     return false;
 }
 
+void TEMarioPortal::calcRootMatrix() { TMapObjGeneral::calcRootMatrix(); }
+
 void TEMarioPortal::transportActor(TLiveActor *actor) {
     if (actor->mObjectID == mObjectID) {
         return;  // Don't portal portals
@@ -281,14 +284,24 @@ void TEMarioPortal::transportActor(TLiveActor *actor) {
     // Get Mario's velocity
     const TVec3f &actor_vel = actor->mSpeed;
 
+    TVec3f portal_point     = mTranslation;
+    portal_point.y += 145.0f;  // The portal's "center" is actually 145 units above its origin, so
+                               // we need to account for that in our calculations
+    
+    TVec3f warp_point = m_linked_portal->mTranslation;
+    warp_point.y += 145.0f;  // The portal's "center" is actually 145 units above its origin, so we
+                             // need to account for that in our calculations
+
     // Check if Mario's movement is towards the portal
     f32 approach_dot =
         actor_vel.x * m_look_nrm.x + actor_vel.y * m_look_nrm.y + actor_vel.z * m_look_nrm.z;
 
-    const TVec3f &actor_pos = actor->mTranslation;
+    TVec3f actor_pos = actor->mTranslation;
+    //actor_pos.y += 50.0f;  // Mario's position is technically at his feet, but we want to check
+    //                        // from his center
 
     // 1. Vector from Portal Center to Mario
-    const TVec3f v = actor_pos - mTranslation;
+    const TVec3f v = actor_pos - portal_point;
 
     // 2. Thickness Check (Dot product with normal)
     // How far is Mario "above" or "below" the face of the portal?
@@ -381,7 +394,7 @@ void TEMarioPortal::transportActor(TLiveActor *actor) {
         }
     }
 
-    actor->mTranslation = m_linked_portal->mTranslation + push_out;
+    actor->mTranslation = warp_point + push_out;
 
     // Is this an OrangeSeal?
     if (actor->mObjectID == 0x10000024) {
@@ -404,6 +417,14 @@ void TEMarioPortal::transportPlayer(TMario *player) {
     // Get Mario's velocity
     const TVec3f &player_vel = player->mSpeed;
 
+    TVec3f portal_point = mTranslation;
+    portal_point.y += 145.0f;  // The portal's "center" is actually 145 units above its origin, so we
+                             // need to account for that in our calculations
+
+    TVec3f warp_point = m_linked_portal->mTranslation;
+    warp_point.y += 145.0f;  // The portal's "center" is actually 145 units above its origin, so we
+                             // need to account for that in our calculations
+
     // Check if Mario's movement is towards the portal
     f32 approach_dot =
         player_vel.x * m_look_nrm.x + player_vel.y * m_look_nrm.y + player_vel.z * m_look_nrm.z;
@@ -411,10 +432,12 @@ void TEMarioPortal::transportPlayer(TMario *player) {
         return;
     }
 
-    const TVec3f &player_pos = player->mTranslation;
+    TVec3f player_pos = player->mTranslation;
+    player_pos.y += 50.0f;  // Mario's position is technically at his feet, but we want to check
+                            // from his center
 
     // 1. Vector from Portal Center to Mario
-    const TVec3f v = player_pos - mTranslation;
+    const TVec3f v = player_pos - portal_point;
 
     // 2. Thickness Check (Dot product with normal)
     // How far is Mario "above" or "below" the face of the portal?
@@ -495,7 +518,7 @@ void TEMarioPortal::transportPlayer(TMario *player) {
     TVec3f push_out = m_linked_portal->m_look_nrm;
     push_out.scale(80.0f);
 
-    player->mTranslation = m_linked_portal->mTranslation + push_out;
+    player->mTranslation = warp_point + push_out;
 
     TVec3f camera_pos = gpCamera->mTranslation;
     TVec3f look_at    = gpCamera->mTargetPos;
@@ -541,7 +564,7 @@ static hit_data emarioPortal_hit_data{.mAttackRadius  = 290.0f,
                                       .mReceiveHeight = 290.0f};
 
 static obj_hit_info emarioPortal_collision_data{
-    ._00 = 1, .mType = 0xDC000000, ._08 = 0, .mHitData = &emarioPortal_hit_data};
+    ._00 = 1, .mType = 0xDC000000, .mVisualOfsY = -145.0f, .mHitData = &emarioPortal_hit_data};
 
 ObjData emarioPortalData{.mMdlName          = "emario_portal",
                          .mObjectID         = 0x30000412 /*0x80000FFF*/,

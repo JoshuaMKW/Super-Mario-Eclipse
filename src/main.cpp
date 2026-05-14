@@ -44,6 +44,7 @@ extern DarknessSetting gDarknessSetting;
 extern Settings::SwitchSetting gLivesSetting;
 extern Settings::SwitchSetting gSkipMovieSetting;
 extern SpeedrunSetting gSpeedrunSetting;
+extern Settings::SwitchSetting gSunglassSetting;
 
 // Application
 extern bool directCharacterSelectMenu(TApplication *app);
@@ -165,6 +166,7 @@ static void initModule() {
     gSettingsGroup.addSetting(&gDarknessSetting);
     gSettingsGroup.addSetting(&gSkipMovieSetting);
     gSettingsGroup.addSetting(&gSpeedrunSetting);
+    gSettingsGroup.addSetting(&gSunglassSetting);
 
     {
         auto &saveInfo        = gSettingsGroup.getSaveInfo();

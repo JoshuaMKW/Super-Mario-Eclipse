@@ -187,7 +187,7 @@ static hit_data launch_star_hit_data{.mAttackRadius  = 300.0f,
                                      .mReceiveHeight = 400.0f};
 
 static obj_hit_info launch_star_collision_data{
-    ._00 = 1, .mType = 0xFC000000, ._08 = 0, .mHitData = &launch_star_hit_data};
+    ._00 = 1, .mType = 0xFC000000, .mVisualOfsY = 0.0f, .mHitData = &launch_star_hit_data};
 
 static sound_data launch_star_sound_data{
     ._00             = 0xFFFFFFFF,

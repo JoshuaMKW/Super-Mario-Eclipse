@@ -111,7 +111,7 @@ static hit_data pizzaBox_hit_data{.mAttackRadius  = 70.0f,
                                   .mReceiveHeight = 20.0f};
 
 static obj_hit_info pizzaBox_collision_data{
-    ._00 = 1, .mType = 0xDC000000, ._08 = 0, .mHitData = &pizzaBox_hit_data};
+    ._00 = 1, .mType = 0xDC000000, .mVisualOfsY = 0.0f, .mHitData = &pizzaBox_hit_data};
 
 static sound_data pizzaBox_sound_data{
     ._00             = 0xFFFFFFFF,

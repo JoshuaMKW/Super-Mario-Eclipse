@@ -328,6 +328,7 @@ void doSMParticle(TMario *player, bool isMario) {
 
     if (player->mState != TMario::STATE_IDLE) {
         player_state->mPortalCasting = false;  // Portal casting is a completely visual flag
+        player_state->mPortalCastTimer = 0;
     }
 
     if (!player_state->mPortals[0] || !player_state->mPortals[1]) {
@@ -344,13 +345,10 @@ void doSMParticle(TMario *player, bool isMario) {
     OSLockMutex(&s_look_point_mutex);
 
     if (player_state->mPortalToggle) {
-        if (player->mController->mButtons.mAnalogR > 0.1f) {
-            player_state->mPortalScreenVLerp += 0.0025f;
-        } else {
-            player_state->mPortalScreenVLerp -= 0.0025f;
-        }
+        player_state->mPortalScreenVLerp +=
+            0.01f * (player->mController->mButtons.mAnalogR - 0.5f);
     } else {
-        player_state->mPortalScreenVLerp = 0.0f;
+        player_state->mPortalScreenVLerp = 0.5f;
     }
 
 
@@ -358,10 +356,31 @@ void doSMParticle(TMario *player, bool isMario) {
 
     if ((player->mController->mButtons.mFrameInput & TMarioGamePad::X)) {
         player_state->mPortalToggle ^= true;
+        player_state->mPortalScreenVLerp = 0.5f;
     }
 
     if (player_state->mPortalTimer > 0) {
         player_state->mPortalTimer -= 1;
+    }
+
+    if (player_state->mPortalCasting) {
+        if (player_state->mPortalCastTimer == 0 && gpMSound->gateCheck(MSD_SE_MA_ROLL_B)) {
+            MSoundSE::startSoundActor(MSD_SE_MA_ROLL_B, player->mTranslation, 0, nullptr, 0, 4);
+        }
+
+        if (player_state->mPortalCastTimer == 30 && gpMSound->gateCheck(MSD_SE_MA_ROLL_D)) {
+            MSoundSE::startSoundActor(MSD_SE_MA_ROLL_D, player->mTranslation, 0, nullptr, 0, 4);
+        }
+
+        if (player_state->mPortalCastTimer == 70 && gpMSound->gateCheck(MSD_SE_MA_ROLL_F)) {
+            MSoundSE::startSoundActor(MSD_SE_MA_ROLL_F, player->mTranslation, 0, nullptr, 0, 4);
+        }
+
+        if (player_state->mPortalCastTimer == 110 && gpMSound->gateCheck(MSD_SE_MA_ROLL_C)) {
+            MSoundSE::startSoundActor(MSD_SE_MA_ROLL_C, player->mTranslation, 0, nullptr, 0, 4);
+        }
+
+        player_state->mPortalCastTimer++;
     }
 
     if (s_is_valid_look_point) {
@@ -382,8 +401,9 @@ void doSMParticle(TMario *player, bool isMario) {
                 portal->openPortal(s_look_point, s_look_nrm);
             }
             player_state->mWhichPortal = player_state->mWhichPortal == 0 ? 1 : 0;
-            player_state->mPortalScreenVLerp = 0.0f;
+            player_state->mPortalScreenVLerp = 0.5f;
             player_state->mPortalCasting     = true;
+            player_state->mPortalCastTimer   = 0;
         }
     }
     OSUnlockMutex(&s_look_point_mutex);
@@ -432,10 +452,14 @@ static void setIdleAnimationBasedOnPortalCast(TMario *player, int animID, f32 an
     if (player->mAnimationID == PortalAnimationID) {
         if (player->mModelData->mFrameCtrl->mAnimFlags.mIsAnmDead) {
             player_state->mPortalCasting = false;
+            player_state->mPortalCastTimer = 0;
         }
     }
 
     if (player_state->mPortalCasting) {
+        if (player_state->mPortalCastTimer == 0) {
+            player->setAnimation(0, 1.0f);
+        }
         animID = PortalAnimationID;  // Portal cast animation
     }
 

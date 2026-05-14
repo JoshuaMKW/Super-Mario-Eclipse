@@ -564,7 +564,7 @@ static void initSmallEnemyStarBitCount() {
 
     // Coin
     if (enemy->_17C == 100) {
-        enemy->_18C = 5;
+        enemy->_18C = 3;
     } else {
         enemy->_18C = 1;
     }

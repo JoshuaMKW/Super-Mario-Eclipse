@@ -13,7 +13,10 @@ Settings::SwitchSetting gLivesSetting("Infinite Lives", &sLivesValue);
 static bool sMovieValue = false;
 Settings::SwitchSetting gSkipMovieSetting("Skippable Movies", &sMovieValue);
 
-Settings::SettingsGroup gSettingsGroup(1, 2, Settings::Priority::GAME);
+static bool sSunglassValue = false;
+Settings::SwitchSetting gSunglassSetting("Persistent Shades", &sSunglassValue);
+
+Settings::SettingsGroup gSettingsGroup(1, 3, Settings::Priority::GAME);
 
 bool BugsExploitsSetting::sIsUnlocked = false;
 

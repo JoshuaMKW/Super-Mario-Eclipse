@@ -56,6 +56,7 @@ BETTER_SMS_FOR_CALLBACK void checkBalloonMessagePool(TMarDirector *director) {
         return;
     }
 
+#if 0
     if (!is_console_ready) {
         s_message_duration++;
     }
@@ -73,6 +74,20 @@ BETTER_SMS_FOR_CALLBACK void checkBalloonMessagePool(TMarDirector *director) {
             s_message_duration = -1;
         }
     }
+#else
+    //if (!is_console_ready) {
+    //    s_message_duration++;
+    //}
+
+    const float message_duration_nrm = message->duration() * BetterSMS::getFrameRate() / 30.0f;
+
+    if (s_message_duration++ >= message_duration_nrm) {
+        AtomBalloonMessageViewer::popMessage();
+        startDisappearBalloon__11TGCConsole2FUlb(director->mGCConsole, message->id(), true);
+        s_message_duration = -1;
+        return;
+    }
+    #endif
 }
 
 static AtomBalloonMessageViewer s_erto_message_a(111, 200);

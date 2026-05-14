@@ -153,7 +153,7 @@ static hit_data waterMine_hit_data{.mAttackRadius  = 100.0f,
                                    .mReceiveHeight = 100.0f};
 
 static obj_hit_info waterMine_collision_data{
-    ._00 = 1, .mType = 0xDC000000, ._08 = 0, .mHitData = &waterMine_hit_data};
+    ._00 = 1, .mType = 0xDC000000, .mVisualOfsY = 0.0f, .mHitData = &waterMine_hit_data};
 
 ObjData waterMineData{.mMdlName         = "seamine",
                       .mObjectID        = 0x80000410 /*0x80000FFF*/,

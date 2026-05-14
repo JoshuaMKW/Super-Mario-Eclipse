@@ -12,6 +12,7 @@
 #include "player.hxx"
 
 extern Settings::SwitchSetting gLivesSetting;
+extern Settings::SwitchSetting gSunglassSetting;
 
 BETTER_SMS_FOR_CALLBACK void initEclipseData(TMario *player, bool isMario) {
     auto *player_state = new SME::Player::PlayerState();
@@ -21,6 +22,33 @@ BETTER_SMS_FOR_CALLBACK void initEclipseData(TMario *player, bool isMario) {
     if (gLivesSetting.getBool()) {
         TFlagManager::smInstance->setFlag(0x20001, 99);
     }
+
+    if (gSunglassSetting.getBool()) {
+        if (TFlagManager::smInstance->getFlag(0x3001B) != 0) {
+            /*player->wearGlass();*/
+            ((u16 *)player->mCap)[2] |= 4;
+
+            if (TFlagManager::smInstance->getShineFlag(119)) {
+                player->mAttributes.mIsShineShirt = true;
+            }
+        }
+    }
 }
+
+static void hookForSunglassWear(TMario *player) {
+    player->emitGetEffect();
+    TFlagManager::smInstance->setFlag(0x3001B, 1);
+}
+SMS_PATCH_BL(SMS_PORT_REGION(0x80247FC8, 0, 0, 0), hookForSunglassWear);
+
+static void hookForSunglassUnwear(TMario *player) {
+    player->emitGetEffect();
+    TFlagManager::smInstance->setFlag(0x3001B, 0);
+}
+SMS_PATCH_BL(SMS_PORT_REGION(0x80247F7C, 0, 0, 0), hookForSunglassUnwear);
+
+// Sunglasses no longer fade the screen
+SMS_WRITE_32(SMS_PORT_REGION(0x8028ADE8, 0, 0, 0), 0x60000000);
+SMS_WRITE_32(SMS_PORT_REGION(0x8028AE24, 0, 0, 0), 0x60000000);
 
 //SMS_WRITE_32(0x8028900c, 0x60000000);

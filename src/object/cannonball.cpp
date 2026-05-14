@@ -141,7 +141,7 @@ static hit_data cannonBall_hit_data{.mAttackRadius  = 50.0f,
                                     .mReceiveHeight = 50.0f};
 
 static obj_hit_info cannonBall_collision_data{
-    ._00 = 1, .mType = 0xDC000000, ._08 = 0, .mHitData = &cannonBall_hit_data};
+    ._00 = 1, .mType = 0xDC000000, .mVisualOfsY = 0.0f, .mHitData = &cannonBall_hit_data};
 
 static sound_data cannonBall_sound_data{
     ._00             = 0xFFFFFFFF,

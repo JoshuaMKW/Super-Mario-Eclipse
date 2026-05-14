@@ -185,7 +185,7 @@ static hit_data tornado_hit_data{.mAttackRadius  = 550.0f,
                                  .mReceiveHeight = 550.0f};
 
 static obj_hit_info tornado_collision_data{
-    ._00 = 1, .mType = 0xFC000000, ._08 = 0, .mHitData = &tornado_hit_data};
+    ._00 = 1, .mType = 0xFC000000, .mVisualOfsY = 0.0f, .mHitData = &tornado_hit_data};
 
 static sound_data tornado_sound_data{
     ._00             = 0x20B5,

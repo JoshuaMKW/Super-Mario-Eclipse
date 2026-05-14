@@ -248,7 +248,7 @@ static hit_data waterBalloon_hit_data{.mAttackRadius  = 40.0f,
                                       .mReceiveHeight = 50.0f};
 
 static obj_hit_info waterBalloon_collision_data{
-    ._00 = 1, .mType = 0xDC000000, ._08 = 0, .mHitData = &waterBalloon_hit_data};
+    ._00 = 1, .mType = 0xDC000000, .mVisualOfsY = 0.0f, .mHitData = &waterBalloon_hit_data};
 
 static sound_data waterBalloon_sound_data{
     ._00             = 0xFFFFFFFF,

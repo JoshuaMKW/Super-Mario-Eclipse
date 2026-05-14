@@ -127,7 +127,7 @@ static hit_data keyChest_hit_data{.mAttackRadius  = 300.0f,
                                   .mReceiveHeight = 300.0f};
 
 static obj_hit_info keyChest_collision_data{
-    ._00 = 1, .mType = 0xFC000000, ._08 = 0, .mHitData = &keyChest_hit_data};
+    ._00 = 1, .mType = 0xFC000000, .mVisualOfsY = 0.0f, .mHitData = &keyChest_hit_data};
 
 ObjData keyChestData{.mMdlName  = "key_chest",
                      .mObjectID = 0x80000400 /*0x80000FFF*/,

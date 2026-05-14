@@ -738,6 +738,32 @@ extern bool gHadLuigiBefore;
 extern bool gHadPiantissimoBefore;
 extern bool gHadShadowMarioBefore;
 
+static void SME_extendedCorrectFlagsWithBetterSMSPatch(TFlagManager *manager) {
+    // Replicate the BetterSMS patch since we are clobbering it
+    memset(((u8 *)manager) + 0x1F4, 0, 0x8C);
+    // ==================
+
+    manager->correctFlag();
+    manager->setFlag(0x20012, 3080);  // Lighthouse Island
+    manager->setFlag(0x20013, 2670);  // Red Lily City
+
+    gHadLuigiBefore       = manager->getFlag(0x10077);
+    gHadPiantissimoBefore = manager->getBool(0x10018) && manager->getBool(0x10041) &&
+                            manager->getBool(0x10036) && manager->getShineFlag(135);
+    gHadShadowMarioBefore = manager->getFlag(0x40000) >= 240;  // All 240 shines collected
+
+    manager->setFlag(0x30018, gHadLuigiBefore);        // Luigi
+    manager->setFlag(0x30019, gHadPiantissimoBefore);  // Piantissimo
+    manager->setFlag(0x3001A, gHadShadowMarioBefore);  // Piantissimo
+    manager->setFlag(0x3001B, 0);     // Player had shades and/or shirt
+
+    // Normalize extra blue coin slots
+    for (size_t i = 0x1033E; i < 0x10366; ++i) {
+        manager->setFlag(i, 0);
+    }
+}
+SMS_PATCH_BL(SMS_PORT_REGION(0x80293DE4, 0, 0, 0), SME_extendedCorrectFlagsWithBetterSMSPatch);
+
 static void SME_extendedCorrectFlags(TFlagManager *manager) {
     manager->correctFlag();
     manager->setFlag(0x20012, 3080);  // Lighthouse Island
@@ -746,18 +772,21 @@ static void SME_extendedCorrectFlags(TFlagManager *manager) {
     gHadLuigiBefore       = manager->getFlag(0x10077);
     gHadPiantissimoBefore = manager->getBool(0x10018) && manager->getBool(0x10041) &&
                             manager->getBool(0x10036) && manager->getShineFlag(135);
-    gHadShadowMarioBefore = manager->getFlag(0x40000) >= 240;
+    gHadShadowMarioBefore = manager->getFlag(0x40000) >= 240;  // All 240 shines collected
 
     manager->setFlag(0x30018, gHadLuigiBefore);        // Luigi
     manager->setFlag(0x30019, gHadPiantissimoBefore);  // Piantissimo
     manager->setFlag(0x3001A, gHadShadowMarioBefore);  // Piantissimo
+    manager->setFlag(0x3001B, 0);                      // Player had shades and/or shirt
 
     // Normalize extra blue coin slots
     for (size_t i = 0x1033E; i < 0x10366; ++i) {
         manager->setFlag(i, 0);
     }
 }
-SMS_PATCH_BL(0x802954f4, SME_extendedCorrectFlags);
+SMS_PATCH_BL(SMS_PORT_REGION(0x80294038, 0, 0, 0), SME_extendedCorrectFlags);
+SMS_PATCH_BL(SMS_PORT_REGION(0x8029437C, 0, 0, 0), SME_extendedCorrectFlags);
+SMS_PATCH_BL(SMS_PORT_REGION(0x802944F4, 0, 0, 0), SME_extendedCorrectFlags);
 
 static size_t accumulateBlueCoinShinesForCalc() {
     size_t count = 0;

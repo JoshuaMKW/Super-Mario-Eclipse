@@ -222,7 +222,7 @@ static hit_data ironCrate_hit_data{.mAttackRadius  = 220.0f,
                                    .mReceiveHeight = 170.0f};
 
 static obj_hit_info ironCrate_collision_data{
-    ._00 = 1, .mType = 0xDC000000, ._08 = 0, .mHitData = &ironCrate_hit_data};
+    ._00 = 1, .mType = 0xDC000000, .mVisualOfsY = 0.0f, .mHitData = &ironCrate_hit_data};
 
 ObjData ironCrateData{.mMdlName  = "rocketbox",
                       .mObjectID = 0x80000412 /*0x80000FFF*/,

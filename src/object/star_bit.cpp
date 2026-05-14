@@ -253,7 +253,7 @@ static hit_data starbit_hit_data{.mAttackRadius  = 300.0f,
                                  .mReceiveHeight = 300.0f};
 
 static obj_hit_info starbit_collision_data{
-    ._00 = 1, .mType = 0x81000000, ._08 = 0, .mHitData = &starbit_hit_data};
+    ._00 = 1, .mType = 0x81000000, .mVisualOfsY = 0.0f, .mHitData = &starbit_hit_data};
 
 static sound_data starbit_sound_data{
     ._00             = 0xFFFFFFFF,

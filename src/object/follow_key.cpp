@@ -175,7 +175,7 @@ static hit_data follow_key_hit_data{.mAttackRadius  = 100.0f,
                                     .mReceiveHeight = 100.0f};
 
 static obj_hit_info follow_key_collision_data{
-    ._00 = 1, .mType = 0xFC000000, ._08 = 0, .mHitData = &follow_key_hit_data};
+    ._00 = 1, .mType = 0xFC000000, .mVisualOfsY = 0.0f, .mHitData = &follow_key_hit_data};
 
 ObjData followKeyData{.mMdlName  = "key_follow",
                       .mObjectID = 0x80000400 /*0x80000FFF*/,

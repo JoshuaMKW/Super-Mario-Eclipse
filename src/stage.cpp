@@ -376,6 +376,8 @@ BETTER_SMS_FOR_CALLBACK void initializeStageInfo(TApplication *app) {
             info->addScenario(-1, 200);
             info->addScenario(-1, 201);
             info->addScenario(-1, 202);
+            info->addScenario(-1, 203);
+            info->addScenario(-1, 204);
             Stage::registerShineStage(info);
             Stage::registerNormalStage(SME::STAGE_PEACH_CASTLE, info->getShineStageID());
         }
@@ -668,10 +670,16 @@ BETTER_SMS_FOR_CALLBACK void resetForExStage(TMarDirector *director) {
         return;
 
     // Workaround for hybrid state of memphis stage
-    if (director->mAreaID == SME::STAGE_VAPORWAVE_EX)
+    switch (director->mAreaID) {
+    case SME::STAGE_VAPORWAVE_EX:
+    case SME::STAGE_LACRIMA_EX1:
+    case SME::STAGE_RED_LILY_EX:
+    case SME::STAGE_YOSHI_EX:
         return;
-
-    TFlagManager::smInstance->setFlag(0x40002, 0);
+    default:
+        TFlagManager::smInstance->setFlag(0x40002, 0);
+        return;
+    }
 }
 
 TVec3f s_prev_player_pos = {0.0f, 0.0f, 0.0f};
@@ -754,7 +762,7 @@ static void SME_extendedCorrectFlagsWithBetterSMSPatch(TFlagManager *manager) {
 
     manager->setFlag(0x30018, gHadLuigiBefore);        // Luigi
     manager->setFlag(0x30019, gHadPiantissimoBefore);  // Piantissimo
-    manager->setFlag(0x3001A, gHadShadowMarioBefore);  // Piantissimo
+    manager->setFlag(0x3001A, gHadShadowMarioBefore);  // Shadow Mario
     manager->setFlag(0x3001B, 0);     // Player had shades and/or shirt
 
     // Normalize extra blue coin slots
@@ -776,7 +784,7 @@ static void SME_extendedCorrectFlags(TFlagManager *manager) {
 
     manager->setFlag(0x30018, gHadLuigiBefore);        // Luigi
     manager->setFlag(0x30019, gHadPiantissimoBefore);  // Piantissimo
-    manager->setFlag(0x3001A, gHadShadowMarioBefore);  // Piantissimo
+    manager->setFlag(0x3001A, gHadShadowMarioBefore);  // Shadow Mario
     manager->setFlag(0x3001B, 0);                      // Player had shades and/or shirt
 
     // Normalize extra blue coin slots

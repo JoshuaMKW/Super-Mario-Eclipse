@@ -19,6 +19,10 @@ BETTER_SMS_FOR_CALLBACK void initEclipseData(TMario *player, bool isMario) {
 
     BetterSMS::Player::registerData(player, SME::Player::data_key, player_state);
 
+    if (!isMario) {
+        return;
+    }
+
     if (gLivesSetting.getBool()) {
         TFlagManager::smInstance->setFlag(0x20001, 99);
     }
@@ -31,6 +35,8 @@ BETTER_SMS_FOR_CALLBACK void initEclipseData(TMario *player, bool isMario) {
             if (TFlagManager::smInstance->getShineFlag(119)) {
                 player->mAttributes.mIsShineShirt = true;
             }
+
+            TFlagManager::smInstance->setFlag(0x5000D, 1);
         }
     }
 }

@@ -28,6 +28,16 @@ void ControlCamera2D(CPolarSubCamera *camera) {
 
     camera->mProjectionFovy = 50.0f;
 
+    auto module_info = BetterSMS::getModuleInfo("Better Sunshine Engine");
+    if (module_info) {
+        Settings::SingleSetting *setting = module_info->mSettings->getSetting("Aspect Ratio");
+        if (setting) {
+            if (setting->getInt() == 1) {
+                camera->mProjectionFovy *= 1.0f / 0.75f;
+            }
+        }
+    }
+
     camera->mAnglePitch = 0;
     camera->mAngleYaw   = convertAngleFloatToS16(-180.0f);
 

@@ -223,48 +223,14 @@ void TEMarioPortal::control() {
     }
 }
 
-// void TEMarioPortal::init() {
-//     mLiveManager = manager;
-//     mLiveManager->manageActor(this);
-//
-//     // Initialize the model
-//     mActorKeeper              = new TMActorKeeper(mLiveManager, 15);
-//     mActorKeeper->mModelFlags = 0x102F0000;
-//     mActorData                = mActorKeeper->createMActor("emario_portal.bmd", 0);
-//     mActorData->setLightType(1);
-//     mActorData->calc();
-//     mActorData->viewCalc();
-//
-//     initHitActor(0x8000011, 10, 0x81000000, 370.0f, 800.0f, 370.0f, 800.0f);
-//     initAnmSound();
-// }
-
 void TEMarioPortal::initMapObj() {
     TMapObjGeneral::initMapObj();
     closePortal();
-    // mActorData->setBtkFromIndex(0);
-    // mActorData->setFrameRate(SMSGetAnmFrameRate(), MActor::BTK);
-    //  if (mCollisionManager) {
-    //      mCollisionManager->changeCollision(0);
-    //      mCollisionManager->mCurrentMapCollision->setAllActor(this);
-    //  }
+
+    mStateFlags.asU32 &= ~0x100;
 }
 
 bool TEMarioPortal::receiveMessage(THitActor *sender, u32 message) {
-    // if (sender->mObjectID == 0x1000002B || sender->mObjectID == 0x4000022E) {
-    //     playFragmentAnim();
-
-    //    if (PSVECDistance(gpMarioAddress->mTranslation, mTranslation) < 600.0f) {
-    //        // Hurt player
-    //        gpMarioAddress->decHP(gpMarioAddress->mHealth);
-    //        gpMarioAddress->mAttributes.mIsVisible = true;
-    //        gpMarioAddress->mTranslation.y         = mTranslation.y - 200.0f;
-    //    }
-
-    //    m_is_hit = true;
-
-    //    return true;
-    //}
     OSReport("[EMarioPortal] Received msg %lu for sender 0x%08X\n", message, sender);
 
     if (TMapObjGeneral::receiveMessage(sender, message)) {

@@ -17,7 +17,7 @@ public:
 
     TCannonBall(const char *name)
         : TMapObjBall(name), m_water_surface(nullptr), m_water_surface_y(0.0f),
-          m_was_in_air(false) {}
+          m_was_in_air(false), m_respawn_timer(0) {}
     ~TCannonBall() override = default;
 
     void load(JSUMemoryInputStream &in) override {
@@ -65,7 +65,7 @@ public:
             m_was_dead = (mObjectType & 1);
         }
 
-        if (!mStateFlags.asFlags.mIsObjDead && !mHolder && !m_was_in_air) {
+        if ((mStateFlags.asU32 & 0x3) == 0 && !mHolder && !m_was_in_air) {
             TVec3f target_arrow_pos = mTranslation;
             target_arrow_pos.y += 200.0f;
 

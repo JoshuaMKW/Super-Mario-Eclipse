@@ -387,7 +387,7 @@ BETTER_SMS_FOR_CALLBACK void resetCoinsOnStageExit(TApplication *app) {
 BETTER_SMS_FOR_CALLBACK void resetStateForStage(TMarDirector *director) {
     gHadLuigiBefore       = TFlagManager::smInstance->getBool(0x30018);
     gHadPiantissimoBefore = TFlagManager::smInstance->getBool(0x30019);
-    gHadShadowMarioBefore = TFlagManager::smInstance->getBool(0x30020);
+    gHadShadowMarioBefore = TFlagManager::smInstance->getBool(0x3001A);
 
     if (director->mAreaID == TGameSequence::AREA_OPTION) {
         SME::TGlobals::sCharacterIDList[0] = SME::CharacterID::MARIO;
@@ -535,10 +535,12 @@ static bool checkForSunGlow(TCameraMarioData *cameraData) {
 }
 SMS_PATCH_BL(0x8002D9CC, checkForSunGlow);
 
+static bool stageWantsStarbits() { return gpMarDirector->mAreaID == SME::STAGE_RED_LILY_EX; }
+
 // In StarGlow Road, we want to enforce starbits!
-static void initAndRegisterCoinOrStarBit() {
+static TCoin *initAndRegisterCoinOrStarBit() {
     TCoin *newCoin;
-    if (gpMarDirector->mAreaID == SME::STAGE_RED_LILY_EX) {
+    if (stageWantsStarbits()) {
         newCoin = new TStarBit("\x83\x52\x83\x43\x83\x93\x00\x00");
         newCoin->initAndRegister("starbit");
         newCoin->mRegisterName = "coin";
@@ -552,11 +554,13 @@ static void initAndRegisterCoinOrStarBit() {
         // Very hacky: extend loop to have more starbits ready (uses r28 so hard to patch naturally)
         PowerPC::writeU32((u32 *)0x801BFE48, 0x2C1C0014);
     }
+    return newCoin;
 }
 SMS_PATCH_BL(0x801BFE40, initAndRegisterCoinOrStarBit);
 SMS_PATCH_BL(0x801BFF04, initAndRegisterCoinOrStarBit);
 SMS_WRITE_32(0x801BFE20, 0x38600000);  // Remove original alloc
 SMS_WRITE_32(0x801BFEE4, 0x38600000);  // Remove original alloc
+SMS_WRITE_32(0x801BFF0C, 0x60000000);  // Allow the method to forward its pointer
 
 static void initSmallEnemyStarBitCount() {
     TSmallEnemy *enemy;
@@ -564,12 +568,71 @@ static void initSmallEnemyStarBitCount() {
 
     // Coin
     if (enemy->_17C == 100) {
-        enemy->_18C = 3;
+        enemy->_18C = stageWantsStarbits() ? 3 : 1;
     } else {
         enemy->_18C = 1;
     }
 }
 SMS_PATCH_BL(0x8006D968, initSmallEnemyStarBitCount);
+
+static bool s_starbit_hud_initialized = false;
+
+BETTER_SMS_FOR_CALLBACK void initMakeCoinStarbitHUD(TMarDirector* director) {
+    s_starbit_hud_initialized = false;
+}
+
+BETTER_SMS_FOR_CALLBACK void maybeMakeCoinStarbitHUD(TMarDirector *director, const J2DOrthoGraph *graph) {
+    char buffer[64];
+    char namebuf[32];
+
+    if (s_starbit_hud_initialized) {
+        return;
+    }
+
+    auto *console = director->mGCConsole;
+
+    if (stageWantsStarbits())
+    {
+        J2DPicture *coin_icon =
+            reinterpret_cast<J2DPicture *>(console->mMainScreen->search('c_ic'));
+
+        auto *timg = reinterpret_cast<ResTIMG *>(
+            JKRFileLoader::getGlbResource("/game_6/timg/starbit_icon.bti"));
+        if (timg)
+            coin_icon->changeTexture(timg, 0);
+    }
+
+    s_starbit_hud_initialized = true;
+}
+
+BETTER_SMS_FOR_CALLBACK void checkForCastleInteriorWarp(TMarDirector *director) {
+    if (gpMarDirector->mAreaID != SME::STAGE_PEACH_CASTLE || gpMarDirector->mEpisodeID != 2) {
+        return;
+    }
+
+    if (gpMarDirector->mCurState != TMarDirector::STATE_NORMAL) {
+        return;
+    }
+
+    TVec3f castle_warp = TVec3f::zero();
+    if (PSVECDistance(gpMarioAddress->mTranslation, castle_warp) > 350.0f) {
+        return;
+    }
+
+    TVec3f castle_light = TVec3f(0.0f, 3400.0f, -1200.0f);
+    TVec3f light_dir    = castle_light - castle_warp;
+    PSVECNormalize(light_dir, light_dir);
+
+    TVec3f camera_dir = gpCamera->mTargetPos - gpCamera->mTranslation;
+    PSVECNormalize(camera_dir, camera_dir);
+
+    if (PSVECDotProduct(light_dir, camera_dir) < 0.85f) {
+        return;
+    }
+
+    u16 stage_id = (((int)SME::STAGE_PEACH_CASTLE + 1) << 8) | 32;
+    director->setNextStage(stage_id, nullptr);
+}
 
 // Jump table for episodes: 803c0354
 // 80145cf0 is null

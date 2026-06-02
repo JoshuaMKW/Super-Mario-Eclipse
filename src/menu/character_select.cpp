@@ -517,6 +517,7 @@ BETTER_SMS_FOR_CALLBACK bool directCharacterSelectMenu(TApplication *app) {
 extern bool gHadLuigiBefore;
 extern bool gHadPiantissimoBefore;
 extern bool gHadShadowMarioBefore;
+extern bool gShadowMarioMovieReroutes;
 static bool s_unlock_played        = false;
 static bool s_shine_select_waiting = false;
 static u8 s_last_context           = 0;
@@ -532,11 +533,13 @@ static bool checkForUnlockMovie(u8 state) {
         return true;
     }
 
-    // if (!gHadShadowMarioBefore && TFlagManager::smInstance->getFlag(0x40000) >= 240) {
-    //     gpApplication.mCutSceneID = 38;
-    //     gHadShadowMarioBefore     = true;
-    //     return true;
-    // }
+     if (!TFlagManager::smInstance->getFlag(0x1037A) && TFlagManager::smInstance->getFlag(0x40000) >= 240) {
+         TFlagManager::smInstance->setFlag(0x1037A, true);
+         gpApplication.mCutSceneID = 38;
+         gHadShadowMarioBefore     = true;
+         gShadowMarioMovieReroutes = false;
+         return true;
+     }
 
     return false;
 }

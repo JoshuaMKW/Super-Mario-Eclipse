@@ -149,21 +149,25 @@ private:
     int mIndex;
 };
 
-static const char *sBetaTesters[] = {"MasterMario777",
-                                     "Flash",
-                                     "Hailbot",
-                                     "syrupyy",
-                                     "timenoe",
-                                     "Multi",
-                                     "Ghostly",
-                                     "Epicwade",
-                                     "Leif Erikson (FATHER)",
-                                     "Portable Productions",
-                                     "Tempo",
-                                     "Baris Eren Kaplan",
-                                     "Bacon.24",
-                                     "MondoKRUEL!",
-                                     "StevenShockley"};
+static const char *sBetaTesters[] = {
+    "MasterMario777",
+    "Flash",
+    "Hailbot",
+    "syrupyy",
+    "timenoe",
+    "Multi",
+    "Ghostly",
+    "Epicwade",
+    "Leif Erikson (FATHER)",
+    "Portable Productions",
+    "Tempo",
+    "Baris Eren Kaplan",
+    "Bacon.24",
+    "MondoKRUEL!",
+    "StevenShockley",
+    "Lulzy",
+    "MadTyro",
+};
 
 class BetaTestersCreditSetting final : public Settings::IntSetting {
 public:
@@ -182,7 +186,7 @@ private:
 
 static const char *sSpecialThanks[] = {
     "Xayr", "Halleester",  "Portable Productions", "Gamma", "Brace", "Henk_Wasmachine",
-    "Gonz", "Truegamer02", "zachthepillow",        "MissB"};
+    "Gonz", "Truegamer02", "zachthepillow",        "MissB", "Sean.O"};
 
 class SpecialThanksCreditSetting final : public Settings::IntSetting {
 public:
@@ -345,7 +349,7 @@ void lockModuleSettings(TApplication *app) {
 void unlockSettings(TMarDirector *director) {
     size_t shine_count = TFlagManager::smInstance->getFlag(0x40000);
 
-    bool update_save                   = false;
+    bool update_save = false;
 
     optional<ModuleInfo> engine_module       = BetterSMS::getModuleInfo("Better Sunshine Engine");
     Settings::SettingsGroup *engine_settings = engine_module->mSettings;

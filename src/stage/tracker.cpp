@@ -411,34 +411,18 @@ BETTER_SMS_FOR_CALLBACK void initializeShineBlueTracker(TMarDirector *director) 
 }
 
 BETTER_SMS_FOR_CALLBACK void updateShineBlueTracker(TMarDirector *director) {
-#if 0
-    size_t shine_count = TFlagManager::smInstance->getFlag(0x40000);
-    size_t blue_count  = TFlagManager::smInstance->getFlag(0x40001);
-
-    if (shine_count != s_shine_counter) {
-        s_stage_shines_collected += (shine_count - s_shine_counter);
-        s_shine_counter = shine_count;
-    }
-
-    if (blue_count != s_blue_counter) {
-        s_stage_blues_collected += (blue_count - s_blue_counter);
-        s_blue_counter = blue_count;
-    }
-
-    snprintf(s_shine_text_buffer, 64, "Shine Sprites: %lu/%lu", s_stage_shines_collected,
-             s_stage_shines_max);
-    snprintf(s_blue_text_buffer, 64, "Blue Coins: %lu/%lu", s_stage_blues_collected,
-             s_stage_blues_max);
-#else
     bool is_scrolled = false;
-    if ((gpMarioAddress->mController->mButtons.mRapidInput & TMarioGamePad::L)) {
-        s_current_area = getAdjacentTrackerStage(s_current_area, CycleDirection::Previous);
-        is_scrolled    = true;
-    }
 
-    if ((gpMarioAddress->mController->mButtons.mRapidInput & TMarioGamePad::R)) {
-        s_current_area = getAdjacentTrackerStage(s_current_area, CycleDirection::Next);
-        is_scrolled    = true;
+    if (director->mCurState == TMarDirector::STATE_PAUSE_MENU) {
+        if ((gpMarioAddress->mController->mButtons.mRapidInput & TMarioGamePad::L)) {
+            s_current_area = getAdjacentTrackerStage(s_current_area, CycleDirection::Previous);
+            is_scrolled    = true;
+        }
+
+        if ((gpMarioAddress->mController->mButtons.mRapidInput & TMarioGamePad::R)) {
+            s_current_area = getAdjacentTrackerStage(s_current_area, CycleDirection::Next);
+            is_scrolled    = true;
+        }
     }
 
     if (is_scrolled) {
@@ -472,7 +456,6 @@ BETTER_SMS_FOR_CALLBACK void updateShineBlueTracker(TMarDirector *director) {
                  (u32)s_area_progression_info.m_stage_blues_collected,
                  (u32)s_area_progression_info.m_stage_blues_max);
     }
-#endif
 }
 
 BETTER_SMS_FOR_CALLBACK void renderShineBlueTracker(TMarDirector *director,

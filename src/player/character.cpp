@@ -235,9 +235,23 @@ SMS_PATCH_BL(SMS_PORT_REGION(0x8026707C, 0, 0, 0), getGlobalPlayerSplashTex);
 // SMS_PATCH_BL(SMS_PORT_REGION(0x802474C0, 0, 0, 0), applyShadowEffects);
 const char *player_fnames[] = {"mario", "luigi", "piantissimo", "shadow_mario"};
 
+static int s_cached_ids[4] = {-1, -1, -1, -1};
+
+BETTER_SMS_FOR_CALLBACK void initPlayerHUDState(TMarDirector *director) {
+    s_cached_ids[0] = -1;
+    s_cached_ids[1] = -1;
+    s_cached_ids[2] = -1;
+    s_cached_ids[3] = -1;
+}
+
 BETTER_SMS_FOR_CALLBACK void updatePlayerHUD(TMarDirector *director, const J2DOrthoGraph *graph) {
     char buffer[64];
     char namebuf[32];
+
+    int cur_id = static_cast<int>(SME::TGlobals::getCharacterIDFromPlayer(gpMarioAddress));
+    if (cur_id == s_cached_ids[0]) {
+        return;  // No need to update if the character hasn't changed
+    }
 
     auto *console = director->mGCConsole;
 
@@ -249,7 +263,8 @@ BETTER_SMS_FOR_CALLBACK void updatePlayerHUD(TMarDirector *director, const J2DOr
                  player_fnames[static_cast<int>(
                      SME::TGlobals::getCharacterIDFromPlayer(gpMarioAddress))]);
 
-        auto *timg = reinterpret_cast<ResTIMG *>(JKRFileLoader::getGlbResource(buffer));
+        const ResTIMG *timg =
+            reinterpret_cast<const ResTIMG *>(JKRFileLoader::getGlbResource(buffer));
         if (timg)
             marioIcon->changeTexture(timg, 0);
     }
@@ -262,8 +277,11 @@ BETTER_SMS_FOR_CALLBACK void updatePlayerHUD(TMarDirector *director, const J2DOr
                  player_fnames[static_cast<int>(
                      SME::TGlobals::getCharacterIDFromPlayer(gpMarioAddress))]);
 
-        auto *timg = reinterpret_cast<ResTIMG *>(JKRFileLoader::getGlbResource(buffer));
+        const ResTIMG *timg =
+            reinterpret_cast<const ResTIMG *>(JKRFileLoader::getGlbResource(buffer));
         if (timg)
             marioName->changeTexture(timg, 0);
     }
+
+    s_cached_ids[0] = cur_id;
 }

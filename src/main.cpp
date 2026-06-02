@@ -69,6 +69,10 @@ extern void checkForCharacterUnlocks(TMarDirector *director);
 extern void resetCoinsOnStageExit(TApplication *app);
 extern void reset100CoinState(TMarDirector *director);
 extern void SetPlayerVoiceType(TMario *mario);
+extern void checkForCastleInteriorWarp(TMarDirector *director);
+
+extern void initMakeCoinStarbitHUD(TMarDirector *director);
+extern void maybeMakeCoinStarbitHUD(TMarDirector *director, const J2DOrthoGraph *graph);
 
 // Player
 extern void initializePoundJumpAnimation(TApplication *app);
@@ -85,11 +89,13 @@ extern void setPlayerStartPos(TMario *player);
 extern void initializePortalAnimation(TApplication *app);
 extern void createLookPointThreadOnPlayerInit(TMario *player, bool isMario);
 extern void killLookPointThreadOnStageExit(TApplication *director);
+extern void checkForHideReticleOnPaused(TMarDirector *director, const J2DOrthoGraph *graph);
 
 // Camera
 extern void resetFixedCameraOnLoad(TMarDirector *director);
 
 // HUD
+extern void initPlayerHUDState(TMarDirector *director);
 extern void updatePlayerHUD(TMarDirector *, const J2DOrthoGraph *);
 extern void resetBalloonMessagePool(TMarDirector *director);
 extern void checkBalloonMessagePool(TMarDirector *director);
@@ -235,6 +241,7 @@ static void initModule() {
     Player::addLoadAfterCallback(smPlayerInit);
     Player::addUpdateCallback(doSMParticle);
     Stage::addExitCallback(killLookPointThreadOnStageExit);
+    Stage::addDraw2DCallback(checkForHideReticleOnPaused);
 
     Stage::addInitCallback(resetFixedCameraOnLoad);
 
@@ -261,9 +268,14 @@ static void initModule() {
     Spc::registerBuiltinFunction("startAppearJetBalloonEx", evStartAppearJetBalloon);
 
     Stage::addInitCallback(initCharacterArchives);
+    Stage::addInitCallback(initPlayerHUDState);
     Stage::addDraw2DCallback(updatePlayerHUD);
     Stage::addExitCallback(setTutorialVisited);
     Stage::addExitCallback(resetCoinsOnStageExit);
+
+    Stage::addUpdateCallback(checkForCastleInteriorWarp);
+    Stage::addInitCallback(initMakeCoinStarbitHUD);
+    Stage::addDraw2DCallback(maybeMakeCoinStarbitHUD);
 
     Stage::addInitCallback(resetBalloonMessagePool);
     Stage::addUpdateCallback(checkBalloonMessagePool);

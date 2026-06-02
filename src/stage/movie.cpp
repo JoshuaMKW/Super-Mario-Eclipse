@@ -4,10 +4,12 @@
 #include <BetterSMS/module.hxx>
 #include <BetterSMS/thp.hxx>
 
-#include "stage.hxx"
 #include "settings.hxx"
+#include "stage.hxx"
 
 extern Settings::SwitchSetting gSkipMovieSetting;
+
+bool gShadowMarioMovieReroutes = true;
 
 static s32 decideNextMode_ext(TMovieDirector *director, s32 *out) {
     if (gpApplication.mCutSceneID == 31) {
@@ -23,7 +25,7 @@ static s32 decideNextMode_ext(TMovieDirector *director, s32 *out) {
     }
 
     if (gpApplication.mCutSceneID == 33) {
-        gpApplication.mNextScene.mAreaID = TGameSequence::AREA_DOLPIC;
+        gpApplication.mNextScene.mAreaID    = TGameSequence::AREA_DOLPIC;
         gpApplication.mNextScene.mEpisodeID = 2;
         BetterSMS::triggerAutoSave();
         return TApplication::CONTEXT_DIRECT_STAGE;
@@ -58,17 +60,29 @@ static s32 decideNextMode_ext(TMovieDirector *director, s32 *out) {
 
     // Postcard
     if (gpApplication.mCutSceneID == 37) {
-        gpApplication.mCutSceneID = 38;
-        return TApplication::CONTEXT_DIRECT_MOVIE;
-    }
-
-    // Shadow Mario unlock
-    if (gpApplication.mCutSceneID == 38) {
+        if (!TFlagManager::smInstance->getFlag(0x1037A)) {
+            TFlagManager::smInstance->setFlag(0x1037A, true);
+            gpApplication.mCutSceneID = 38;
+            return TApplication::CONTEXT_DIRECT_MOVIE;
+        }
         gpApplication.mNextScene.mAreaID    = TGameSequence::AREA_DOLPIC;
         gpApplication.mNextScene.mEpisodeID = 3;
         return TApplication::CONTEXT_DIRECT_STAGE;
     }
-    
+
+    // Shadow Mario unlock
+    if (gpApplication.mCutSceneID == 38) {
+        if (!gShadowMarioMovieReroutes) {
+            gShadowMarioMovieReroutes = true;
+            return gpApplication.mNextScene.mEpisodeID == 0xFF
+                       ? TApplication::CONTEXT_DIRECT_SHINE_SELECT
+                       : TApplication::CONTEXT_DIRECT_STAGE;
+        }
+        gpApplication.mNextScene.mAreaID    = TGameSequence::AREA_DOLPIC;
+        gpApplication.mNextScene.mEpisodeID = 3;
+        return TApplication::CONTEXT_DIRECT_STAGE;
+    }
+
     return director->decideNextMode(out);
 }
 SMS_PATCH_BL(SMS_PORT_REGION(0x802B5F48, 0, 0, 0), decideNextMode_ext);

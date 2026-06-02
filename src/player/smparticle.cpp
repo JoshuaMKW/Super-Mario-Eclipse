@@ -8,6 +8,7 @@
 #include <BetterSMS/player.hxx>
 
 #include "smparticle.hxx"
+#include <BetterSMS/libs/constmath.hxx>
 
 constexpr int PortalAnimationID = 197;
 
@@ -143,7 +144,7 @@ static bool renderSMParticleAtLookPoint(TMario *player, TVec3f &look_point_out,
     // Try to find the real FOV in your camera struct (e.g., camera->mFovy).
     // If you don't have it readily available in CPolarSubCamera, ~45-60
     // degrees is standard. 45 is a safe fallback.
-    f32 fov_deg         = 45.0f;
+    f32 fov_deg         = gpCamera->mProjectionFovy;
     f32 fov_rad         = fov_deg * (3.14159f / 180.0f);
     f32 vertical_offset = tanf(fov_rad * 0.5f) * vertical_ndc;
 
@@ -154,21 +155,27 @@ static bool renderSMParticleAtLookPoint(TMario *player, TVec3f &look_point_out,
     ray_direction.z = forward.z + (cam_up.z * vertical_offset);
     PSVECNormalize(ray_direction, ray_direction);
 
-    // OPTIMIZATION: We can take larger steps now.
-    const f32 STEP_SIZE     = 120.0f;
+    const f32 CAMERA_CLEARANCE =
+        150.0f;  // Tweak this to be slightly larger than the camera's collision radius
+    TVec3f advanced_origin;
+    advanced_origin.x = ray_origin.x + (ray_direction.x * CAMERA_CLEARANCE);
+    advanced_origin.y = ray_origin.y + (ray_direction.y * CAMERA_CLEARANCE);
+    advanced_origin.z = ray_origin.z + (ray_direction.z * CAMERA_CLEARANCE);
+
+    const f32 STEP_SIZE     = 39.0f;
     const f32 push_out_dist = 15.0f;
 
     f32 closest_t                       = 99999.0f;
     const TBGCheckData *closest_surface = nullptr;
-    f32 current_ray_dist                = 240.0f;
+    f32 current_ray_dist                = 0.0f;
 
-    for (size_t i = 0; i < 48; ++i) {  // 48 * 120 + 240 = 6000 max distance
-        next_sample_point:
-        
+    for (size_t i = 0; i < 150; ++i) {  // 150 * 39 + 150 = 6000 max distance
+    next_sample_point:
+
         TVec3f sample_pos;
-        sample_pos.x = ray_origin.x + (ray_direction.x * current_ray_dist);
-        sample_pos.y = ray_origin.y + (ray_direction.y * current_ray_dist);
-        sample_pos.z = ray_origin.z + (ray_direction.z * current_ray_dist);
+        sample_pos.x = advanced_origin.x + (ray_direction.x * current_ray_dist);
+        sample_pos.y = advanced_origin.y + (ray_direction.y * current_ray_dist);
+        sample_pos.z = advanced_origin.z + (ray_direction.z * current_ray_dist);
 
         // Check if the sample point is within the radius of each portal
         for (size_t j = 0; j < 2; ++j) {
@@ -195,7 +202,7 @@ static bool renderSMParticleAtLookPoint(TMario *player, TVec3f &look_point_out,
             if (surfaces_to_test[test_count])
                 test_count++;
         }
-        
+
         if (ray_direction.y > -0.9f) {
             gpMapCollisionData->checkRoof(sample_pos.x, sample_pos.y - STEP_SIZE, sample_pos.z, 0,
                                           &surfaces_to_test[test_count]);
@@ -220,7 +227,11 @@ static bool renderSMParticleAtLookPoint(TMario *player, TVec3f &look_point_out,
             const TBGCheckData *surf = surfaces_to_test[j];
             f32 hit_t                = 0.0f;
 
-            if (rayIntersectsTriangle(ray_origin, ray_direction, surf->mVertices[0],
+            if (PSVECDotProduct(surf->mNormal, ray_direction) >= 0.0f) {
+                continue;  // Skip back-facing surfaces to avoid hitting the inside of walls
+            }
+
+            if (rayIntersectsTriangle(advanced_origin, ray_direction, surf->mVertices[0],
                                       surf->mVertices[1], surf->mVertices[2], hit_t)) {
 
                 // If this is the closest hit we've seen so far, save it
@@ -248,11 +259,11 @@ static bool renderSMParticleAtLookPoint(TMario *player, TVec3f &look_point_out,
 
         // Calculate exact point based on closest_t
         look_point_out.x =
-            ray_origin.x + (ray_direction.x * closest_t) + (look_nrm_out.x * push_out_dist);
+            advanced_origin.x + (ray_direction.x * closest_t) + (look_nrm_out.x * push_out_dist);
         look_point_out.y =
-            ray_origin.y + (ray_direction.y * closest_t) + (look_nrm_out.y * push_out_dist);
+            advanced_origin.y + (ray_direction.y * closest_t) + (look_nrm_out.y * push_out_dist);
         look_point_out.z =
-            ray_origin.z + (ray_direction.z * closest_t) + (look_nrm_out.z * push_out_dist);
+            advanced_origin.z + (ray_direction.z * closest_t) + (look_nrm_out.z * push_out_dist);
         return true;
     }
 
@@ -295,31 +306,54 @@ static void *computeLookPointForEMarioPortal(void *param) {
     return nullptr;
 }
 
+static J2DPicture *s_reticle_picture        = nullptr;
+static J2DPicture *s_brush_picture          = nullptr;
+static J2DPicture *s_brush_disabled_picture = nullptr;
+static J2DPicture *s_x_button_picture       = nullptr;
+static J2DPicture *s_back_picture           = nullptr;
+static J2DPane *s_brush_card_pane           = nullptr;
+
+static int s_x_button_counter = 0;
+
 BETTER_SMS_FOR_CALLBACK void createLookPointThreadOnPlayerInit(TMario *player, bool isMario) {
     if (!isMario) {
         return;
     }
+
     OSInitMutex(&s_look_point_mutex);
     OSInitMessageQueue(&s_look_point_msg_queue, &s_look_point_msg, 1);
     OSCreateThread(&s_look_point_thread, computeLookPointForEMarioPortal, player,
                    s_look_point_thread_stack + sizeof(s_look_point_thread_stack),
                    sizeof(s_look_point_thread_stack), (OSPriority)22, OS_THREAD_ATTR_DETACH);
     OSResumeThread(&s_look_point_thread);
+
+    s_x_button_counter = 0;
 }
 
 BETTER_SMS_FOR_CALLBACK void killLookPointThreadOnStageExit(TApplication *app) {
     OSCancelThread(&s_look_point_thread);
+
+    s_reticle_picture        = nullptr;
+    s_brush_picture          = nullptr;
+    s_brush_disabled_picture = nullptr;
+    s_x_button_picture       = nullptr;
+    s_back_picture           = nullptr;
+    s_brush_card_pane        = nullptr;
 }
 
 static int s_wakeup_thread_counter = 0;
+static JUTRect s_brush_card_rect;
 
 void doSMParticle(TMario *player, bool isMario) {
     if (!isMario) {
         return;
     }
-    
+
+    J2DScreen *the_screen = gpMarDirector->mGCConsole->mMainScreen;
+
     SME::CharacterID charID = SME::TGlobals::getCharacterIDFromPlayer(gpMarioAddress);
     if (charID != SME::CharacterID::SHADOW_MARIO) {
+        ((J2DPicture *)the_screen->search('sm_0'))->mIsVisible = false;
         return;
     }
 
@@ -327,7 +361,7 @@ void doSMParticle(TMario *player, bool isMario) {
         (SME::Player::PlayerState *)Player::getRegisteredData(player, SME::Player::data_key);
 
     if (player->mState != TMario::STATE_IDLE) {
-        player_state->mPortalCasting = false;  // Portal casting is a completely visual flag
+        player_state->mPortalCasting   = false;  // Portal casting is a completely visual flag
         player_state->mPortalCastTimer = 0;
     }
 
@@ -342,21 +376,152 @@ void doSMParticle(TMario *player, bool isMario) {
         player_state->mPortals[1]->linkTo(player_state->mPortals[0]);
     }
 
+    if (!s_reticle_picture) {
+        s_reticle_picture = (J2DPicture *)the_screen->search('s_rt');
+        SMS_ASSERT(s_reticle_picture, "Couldn't find reticle picture for portal casting!");
+
+        s_brush_picture = (J2DPicture *)the_screen->search('s_br');
+        SMS_ASSERT(s_brush_picture, "Couldn't find brush picture for portal casting!");
+
+        s_brush_disabled_picture = (J2DPicture *)the_screen->search('s_bd');
+        SMS_ASSERT(s_brush_disabled_picture,
+                   "Couldn't find brush disabled picture for portal casting!");
+
+        s_x_button_picture = (J2DPicture *)the_screen->search('xbsm');
+        SMS_ASSERT(s_x_button_picture,
+                   "Couldn't find brush disabled picture for portal casting!");
+
+        s_back_picture = (J2DPicture *)the_screen->search('smba');
+        SMS_ASSERT(s_back_picture,
+                   "Couldn't find brush disabled picture for portal casting!");
+
+        s_brush_disabled_picture->mIsVisible = true;
+
+        {
+            s_brush_card_pane = the_screen->search('sm_0');
+            s_brush_card_rect = s_brush_card_pane->mRect;
+
+            s_brush_card_pane->mRect.mX1 =
+                s_brush_card_rect.mX1 + BetterSMS::getScreenRatioAdjustX();
+            s_brush_card_pane->mRect.mX2 =
+                s_brush_card_rect.mX2 + BetterSMS::getScreenRatioAdjustX();
+        }
+    }
+
+    if (gpMarDirector->mCurState != TMarDirector::STATE_NORMAL) {
+        s_reticle_picture->mIsVisible = false;
+        return;  // Only allow portal casting in normal gameplay, not cutscenes or demos
+    }
+
+    if (gpMarDirector->mNextStateA == 1 || gpMarDirector->mNextStateA == 2) {
+        s_reticle_picture->mIsVisible = false;
+        return;  // Don't allow portal casting if we're talking to NPCs
+    }
+
     OSLockMutex(&s_look_point_mutex);
 
+    const bool is_y_cam = gpCamera->isLButtonCameraSpecifyMode(gpCamera->mMode);
+
     if (player_state->mPortalToggle) {
-        player_state->mPortalScreenVLerp +=
-            0.01f * (player->mController->mButtons.mAnalogR - 0.5f);
+        player_state->mPortalScreenVLerp += 0.01f * (player->mController->mButtons.mAnalogR - 0.5f);
     } else {
         player_state->mPortalScreenVLerp = 0.5f;
     }
 
-
     player_state->mPortalScreenVLerp = Clamp(player_state->mPortalScreenVLerp, 0.0f, 1.0f);
 
-    if ((player->mController->mButtons.mFrameInput & TMarioGamePad::X)) {
-        player_state->mPortalToggle ^= true;
+    if (!is_y_cam) {
+        if ((player->mController->mButtons.mFrameInput & TMarioGamePad::X)) {
+            player_state->mPortalToggle ^= true;
+            player_state->mPortalScreenVLerp = 0.5f;
+
+            if (player_state->mPortalToggle) {
+                if (gpMSound->gateCheck(MSD_SE_SY_E3_MENU_CURSOR2)) {
+                    JAISound *sound = MSoundSE::startSoundSystemSE(MSD_SE_SY_E3_MENU_CURSOR2, 0, nullptr, 0);
+                    if (sound) {
+                        sound->setVolume(2.0f, 0, 0);
+                    }
+                }
+            } else {
+                if (gpMSound->gateCheck(MSD_SE_SY_E3_MENU_CURSOR1)) {
+                    JAISound *sound =
+                        MSoundSE::startSoundSystemSE(MSD_SE_SY_E3_MENU_CURSOR1, 0, nullptr, 0);
+                    if (sound) {
+                        sound->setVolume(2.0f, 0, 0);
+                    }
+                }
+            }
+        }
+    }
+
+    // const f32 screen_height       = SMSGetGameRenderHeight__Fv();
+    const f32 screen_height = (f32)(the_screen->mRect.mY2 - the_screen->mRect.mY1);  // Usually 480
+    const f32 efb_height =
+        SMSGetGameRenderHeight__Fv();  // The true 3D render height of Super Mario Sunshine
+
+    if (is_y_cam) {
         player_state->mPortalScreenVLerp = 0.5f;
+
+        s_reticle_picture->mIsVisible        = true;
+        s_brush_picture->mIsVisible          = true;
+        s_brush_disabled_picture->mIsVisible = false;
+
+        int reticle_width  = s_reticle_picture->mRect.mX2 - s_reticle_picture->mRect.mX1;
+        int reticle_height = s_reticle_picture->mRect.mY2 - s_reticle_picture->mRect.mY1;
+
+        int screen_x = ((the_screen->mRect.mX2 - the_screen->mRect.mX1) - reticle_width) / 2;
+
+        // Anchor at the center of the UI
+        int screen_y = screen_height * 0.5f;
+        screen_y -= reticle_height / 2;  // Center the PNG vertically
+
+        s_reticle_picture->mRect.move(screen_x, screen_y);
+
+        if (!s_is_valid_look_point) {
+            s_reticle_picture->mColorMask =
+                JUtility::TColor(255, 100, 0, 255);  // Red tint if we don't have a valid point
+        } else {
+            s_reticle_picture->mColorMask =
+                JUtility::TColor(255, 255, 255, 255);  // Red tint if we don't have a valid point
+        }
+    } else if (player_state->mPortalToggle) {
+        s_reticle_picture->mIsVisible        = true;
+        s_brush_picture->mIsVisible          = true;
+        s_brush_disabled_picture->mIsVisible = false;
+
+        int reticle_width  = s_reticle_picture->mRect.mX2 - s_reticle_picture->mRect.mX1;
+        int reticle_height = s_reticle_picture->mRect.mY2 - s_reticle_picture->mRect.mY1;
+
+        int screen_x = ((the_screen->mRect.mX2 - the_screen->mRect.mX1) - reticle_width) / 2;
+
+        f32 vertical_ndc = (player_state->mPortalScreenVLerp * 2.0f) - 1.0f;
+
+        // --- THE FIX ---
+        // 1. Find the physical center of the screen (keeps your reticle perfectly centered)
+        f32 center_y = screen_height * 0.5f;
+
+        // 2. Set the max travel distance to the 3D bounds (restricts the overshoot)
+        f32 movement_amplitude = efb_height * 0.5f;
+
+        // 3. Start at the center, and move by the scaled amplitude
+        int screen_y = center_y - (vertical_ndc * movement_amplitude);
+
+        // 4. Offset the pivot so the image centers correctly on the coordinate
+        screen_y -= reticle_height / 2;
+
+        s_reticle_picture->mRect.move(screen_x, screen_y);
+
+        if (!s_is_valid_look_point) {
+            s_reticle_picture->mColorMask =
+                JUtility::TColor(255, 100, 0, 255);  // Red tint if we don't have a valid point
+        } else {
+            s_reticle_picture->mColorMask =
+                JUtility::TColor(255, 255, 255, 255);  // Red tint if we don't have a valid point
+        }
+    } else {
+        s_reticle_picture->mIsVisible        = false;
+        s_brush_picture->mIsVisible          = false;
+        s_brush_disabled_picture->mIsVisible = true;
     }
 
     if (player_state->mPortalTimer > 0) {
@@ -383,6 +548,20 @@ void doSMParticle(TMario *player, bool isMario) {
         player_state->mPortalCastTimer++;
     }
 
+    s_x_button_counter++;
+
+    if (s_x_button_picture->mIsVisible) {
+        if (s_x_button_counter > 180) {
+            s_x_button_picture->mIsVisible = false;
+            s_x_button_counter             = 0;
+        }
+    } else {
+        if (s_x_button_counter > 60) {
+            s_x_button_picture->mIsVisible = true;
+            s_x_button_counter = 0;
+        }
+    }
+
     if (s_is_valid_look_point) {
         if ((s_wakeup_thread_counter % 9) == 0) {
             if (JPABaseEmitter *emitter =
@@ -400,7 +579,7 @@ void doSMParticle(TMario *player, bool isMario) {
                 portal->closePortal();
                 portal->openPortal(s_look_point, s_look_nrm);
             }
-            player_state->mWhichPortal = player_state->mWhichPortal == 0 ? 1 : 0;
+            player_state->mWhichPortal       = player_state->mWhichPortal == 0 ? 1 : 0;
             player_state->mPortalScreenVLerp = 0.5f;
             player_state->mPortalCasting     = true;
             player_state->mPortalCastTimer   = 0;
@@ -451,7 +630,7 @@ static void setIdleAnimationBasedOnPortalCast(TMario *player, int animID, f32 an
 
     if (player->mAnimationID == PortalAnimationID) {
         if (player->mModelData->mFrameCtrl->mAnimFlags.mIsAnmDead) {
-            player_state->mPortalCasting = false;
+            player_state->mPortalCasting   = false;
             player_state->mPortalCastTimer = 0;
         }
     }
@@ -466,3 +645,33 @@ static void setIdleAnimationBasedOnPortalCast(TMario *player, int animID, f32 an
     player->setAnimation(animID, animSpeed);
 }
 SMS_PATCH_BL(SMS_PORT_REGION(0x802660F0, 0, 0, 0), setIdleAnimationBasedOnPortalCast);
+
+BETTER_SMS_FOR_CALLBACK void checkForHideReticleOnPaused(TMarDirector *director,
+                                                         const J2DOrthoGraph *graph) {
+    if (director->mCurState == TMarDirector::STATE_PAUSE_MENU) {
+        if (s_reticle_picture) {
+            s_reticle_picture->mIsVisible = false;
+        }
+    }
+}
+
+//static bool hasWaterCardOpen() {
+//    TGCConsole2 *gcConsole;
+//    SMS_FROM_GPR(31, gcConsole);
+//
+//    SME::CharacterID charID = SME::TGlobals::getCharacterIDFromPlayer(gpMarioAddress);
+//    if (charID == SME::CharacterID::SHADOW_MARIO) {
+//        return gcConsole->mIsWaterCard;
+//    }
+//
+//    if (gpMarioAddress->mYoshi->mState != TYoshi::State::MOUNTED &&
+//        !gpMarioAddress->mAttributes.mHasFludd && !gcConsole->mWaterCardFalling &&
+//        gcConsole->mIsWaterCard)
+//        startDisappearTank__11TGCConsole2Fv(gcConsole);
+//    else if (gpMarioAddress->mYoshi->mState == TYoshi::State::MOUNTED)
+//        gpMarioAddress->mAttributes.mHasFludd = true;
+//
+//    return gcConsole->mIsWaterCard;
+//}
+//SMS_PATCH_BL(SMS_PORT_REGION(0x8014206C, 0x80136C80, 0, 0), hasWaterCardOpen);
+//SMS_WRITE_32(SMS_PORT_REGION(0x80142070, 0x80136C84, 0, 0), 0x28030000);

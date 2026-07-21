@@ -113,15 +113,13 @@ public:
     virtual bool receiveMessage(THitActor *sender, u32 msg) override;
 };
 
-class TFPFire : public THitActor {
+class TFireyPetey;
+
+class TFPFireParticleCallback : public JPACallBackBase<> {
 public:
-    TFPFire(const char *);
-    virtual ~TFPFire(){};
+    TFireyPetey *mFireyPetey = nullptr;
 
-    virtual void perform(u32, JDrama::TGraphics *) override;
-
-    TVec3f mVelocity;  // 0x006c
-    u32 mLifetime;
+    void execute(JPABaseEmitter *emitter);
 };
 
 class TFireyPetey : public TBossPakkun {
@@ -141,7 +139,7 @@ public:
     s16 mNumTornados;
     TMActorKeeper *mMActorKeeperSecondary;
     TKukkuBall *mKukkuBall[NUM_GOOP_DROPS];
-    TFPFire *mFire[10];
+    TFPFireParticleCallback *m_fire_particle_callback;
 };
 
 class TFireyPeteyManager : public TBossPakkunManager {

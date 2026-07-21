@@ -232,6 +232,9 @@ BETTER_SMS_FOR_CALLBACK void fluddMessageSubsystem(TMarDirector *director) {
         break;
     }
     case SME::STAGE_CRUISER: {
+        if (director->mEpisodeID == 4) {
+            break;
+        }
         if (is_player_swimming &&
             isPlayerWithinDisc(TVec3f(-18400.0f, 5600.0f, -1500.0f), 3000.0f, 1000.0f)) {
             s_cruiser_message_a.show();

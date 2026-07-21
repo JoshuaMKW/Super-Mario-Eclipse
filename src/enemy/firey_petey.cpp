@@ -45,6 +45,45 @@ static TNerveFPTumbleOut tumbleOut;
 
 #define MAX_TORNADOS 1
 
+namespace J3DSys {
+    extern Mtx mCurrentMtx;
+}
+
+void TFPFireParticleCallback::execute(JPABaseEmitter *emitter) {
+    emitter->setGlobalRTMatrix(mFireyPetey->mActorData->mModel->mJointArray[0x10]);
+
+    JSUPtrLink *link = emitter->mParticleList.mFirst;
+    while (link) {
+        JPABaseParticle *particle = static_cast<JPABaseParticle *>(link->mItemPtr);
+
+        TVec3f pos;
+        particle->getCurrentPosition(pos);
+
+        f32 distance = PSVECDistance(pos, gpMarioAddress->mTranslation);
+
+        f32 threshold = 150.0f * (particle->mTimerLerp) + 300.0f;
+
+        if (PSVECDistance(pos, gpMarioAddress->mTranslation) < threshold &&
+            !gpMarioAddress->isInvincible()) {
+            gpMarioAddress->changePlayerDropping(0x20464, 0);
+            gpMarioAddress->decHP(1);
+            gpMarioAddress->dropObject();
+            gpMarioAddress->changePlayerStatus(0x208B7, 1, false);
+            gpMarioAddress->mInvincibilityFrames = 256;
+            gpMarioAddress->mSpeed.y += 20.0f;
+
+            gpMarioParticleManager->emitAndBindToPosPtr(6, &gpMarioAddress->mTranslation, 0,
+                                                        nullptr);
+            if (gpMSound->gateCheck(0x1813)) {
+                MSoundSE::startSoundActor(0x1813, gpMarioAddress->mTranslation, 0, nullptr, 0,
+                                            4);
+            }
+        }
+
+        link = link->mNextLink;
+    }
+}
+
 bool TNerveFPWait::execute(TSpineBase<TLiveActor> *spine) const {
     TFireyPetey *target       = reinterpret_cast<TFireyPetey *>(spine->mTarget);
     TBossPakkunParams *params = reinterpret_cast<TBossPakkunParams *>(target->getSaveParam());
@@ -109,7 +148,7 @@ bool TNerveFPFly::execute(TSpineBase<TLiveActor> *spine) const {
         target->changeBck(0xB);
         target->goToRandomNextGraphNode();
         if (target->_13 == 0) {
-            //MSBgm::startBGM(BGM_BOSS);
+            // MSBgm::startBGM(BGM_BOSS);
             target->_13 = 1;
         }
     }
@@ -177,8 +216,8 @@ bool TNerveFPBreakSleep::execute(TSpineBase<TLiveActor> *spine) const {
     TFireyPetey *target = reinterpret_cast<TFireyPetey *>(spine->mTarget);
     if (spine->mNerveTimer == 0) {
         target->changeBck(0x0E);
-        //MSBgm::stopTrackBGMs('\a', 10);
-        //Music::pauseSong(0.2f);
+        // MSBgm::stopTrackBGMs('\a', 10);
+        // Music::pauseSong(0.2f);
     }
     if (!target->mActorData->curAnmEndsNext(0, nullptr)) {
         return false;
@@ -268,14 +307,6 @@ bool TNerveFPFireBreath::execute(TSpineBase<TLiveActor> *spine) const {
     if (spine->mNerveTimer == 0x0) {
         target->changeBck(0x15);
 
-        // Set positions of collision
-        for (int i = 0; i < 10; i++) {
-            target->mFire[i]->mTranslation.set(target->mTranslation);
-            target->mFire[i]->mVelocity.x = 0.0f;
-            target->mFire[i]->mVelocity.y = 0.0f;
-            target->mFire[i]->mVelocity.z = 0.0f;
-            target->mFire[i]->mLifetime   = 0;
-        }
         peteyMActor->setFrameRate(SMSGetAnmFrameRate__Fv() * 1.1f, 0);
     }
     bool isAnimationRunning = peteyMActor->checkCurAnmFromIndex(0x15, 0);
@@ -293,34 +324,21 @@ bool TNerveFPFireBreath::execute(TSpineBase<TLiveActor> *spine) const {
         if (isAnimationRunning) {
             J3DFrameCtrl *frameCtrl = peteyMActor->getFrameCtrl(0);
 
+            Mtx *fire_mtx = &target->mActorData->mModel->mJointArray[0x10];
+
             // Joint 0xC
             if (frameCtrl->mCurFrame >= 15.0f && frameCtrl->mCurFrame <= 46.0f) {
                 if (spine->mNerveTimer % 10 == 0) {
-                    JPABaseEmitter *emitterFire = gpMarioParticleManager->emitAndBindToMtxPtr(
-                        0x1a7, target->mActorData->mModel->mJointArray[0x10], 1, target);
+                    gpMarioParticleManager->emitAndBindToMtxPtr(0x1a7, *fire_mtx, 1, target);
 
-                    for (int i = 0x1a6; i > 0x1a2; i--) {
-                        gpMarioParticleManager->emitAndBindToMtxPtr(
-                            i, target->mActorData->mModel->mJointArray[0x10], 1, target);
-                    }
-                    TFPFire *mFire;
-                    bool found = false;
-                    for (int i = 0; i < 10; i++) {
-                        if (target->mFire[i]->mLifetime == 0) {
-                            mFire = target->mFire[i];
-                            found = true;
-                            break;
-                        }
-                    }
-                    if (found) {
-                        mFire->mVelocity.x = 50.0f * sinf(angleToRadians(target->mRotation.y));
-                        mFire->mVelocity.y = 0;
-                        mFire->mVelocity.z = 50.0f * cosf(angleToRadians(target->mRotation.y));
-                        mFire->mTranslation.set(
-                            *reinterpret_cast<TVec3f *>(((u8 *)emitterFire) + 0x15C));
-                        mFire->mTranslation.y -= 237.5f;
-                        mFire->mLifetime = 30 * 4;
-                    }
+                    JPABaseEmitter *emitterFireCb =
+                        gpMarioParticleManager->emitAndBindToMtxPtr(0x1a6, *fire_mtx, 1, target);
+                    *(JPACallBackBase<> **)((u8 *)emitterFireCb + 0x110) =
+                        target->m_fire_particle_callback;
+
+                    gpMarioParticleManager->emitAndBindToMtxPtr(0x1a5, *fire_mtx, 1, target);
+                    gpMarioParticleManager->emitAndBindToMtxPtr(0x1a4, *fire_mtx, 1, target);
+                    gpMarioParticleManager->emitAndBindToMtxPtr(0x1a3, *fire_mtx, 1, target);
                 }
             }
         }
@@ -448,8 +466,10 @@ bool TNerveFPTumble::execute(TSpineBase<TLiveActor> *spine) const {
 }
 
 TFireyPetey::TFireyPetey(const char *test)
-    : TBossPakkun(test), mMActorKeeperSecondary(nullptr), mKukkuBall{}, mFire{} {
+    : TBossPakkun(test), mMActorKeeperSecondary(nullptr), mKukkuBall{} {
     mNumTornados = MAX_TORNADOS;
+    m_fire_particle_callback              = new TFPFireParticleCallback();
+    m_fire_particle_callback->mFireyPetey = this;
 }
 
 void TFireyPetey::init(TLiveManager *liveManager) {
@@ -479,11 +499,6 @@ void TFireyPetey::init(TLiveManager *liveManager) {
         mKukkuBall[i]->mActorData = mMActorKeeperSecondary->createMActor("torifun.bmd", 3);
         mKukkuBall[i]->init();
     }
-
-    for (int i = 0; i < 10; i++) {
-        mFire[i] = new TFPFire("fire\n");
-        group->mViewObjList.insert(group->mViewObjList.end(), mFire[i]);
-    }
 }
 
 void TFireyPetey::perform(u32 flags, JDrama::TGraphics *graphics) {
@@ -491,11 +506,6 @@ void TFireyPetey::perform(u32 flags, JDrama::TGraphics *graphics) {
     for (int i = 0; i < NUM_GOOP_DROPS; i++) {
         if (mKukkuBall[i] != nullptr) {
             mKukkuBall[i]->perform(flags, graphics);
-        }
-    }
-    for (int i = 0; i < 10; i++) {
-        if (mFire[i] != nullptr) {
-            mFire[i]->perform(flags, graphics);
         }
     }
 }
@@ -585,23 +595,6 @@ void TFPTornado::perform(u32 flags, JDrama::TGraphics *graphics) {
     gpPollution->stamp(1, mTranslation.x, mTranslation.y, mTranslation.z, 384.0f);
 }
 
-TFPFire::TFPFire(const char *name) : THitActor(name), mVelocity(0.0f, 0.0f, 0.0f), mLifetime(0) {
-    initHitActor(0x10000005, 5, 0x80000000, 275.0f, 275.0f, 100.0f, 100.0f);
-}
-
-void TFPFire::perform(u32 flags, JDrama::TGraphics *graphics) {
-    THitActor::perform(flags, graphics);
-    if (mLifetime > 0) {
-        for (int i = 0; i < mNumObjs; i = i + 1) {
-            if (mCollidingObjs[i]->mObjectID == OBJECT_ID_MARIO) {
-                mCollidingObjs[i]->receiveMessage(this, MESSAGE_MARIO_BURN);
-            }
-        }
-        mTranslation.add(mVelocity);
-        mLifetime--;
-    }
-}
-
 bool TFPNavel::receiveMessage(THitActor *sender, u32 msg) {
 
     if (sender->mObjectID == 0x1000001) {
@@ -644,15 +637,15 @@ bool TFPHeadHit::receiveMessage(THitActor *sender, u32 msg) {
             float angle;
 
             if (zPosDifference == 0.0f) {
-                if (xPosDifference < zPosDifference) {
+                if (xPosDifference < 0.0f) {
                     angle = -90.0f;
                 } else {
                     angle = 90.0f;
                 }
-            } else if (zPosDifference < 0) {
-                angle = 180.0f - RADIANS_TO_DEGREES(matan__Fff(-zPosDifference, xPosDifference));
+            } else if (zPosDifference < 0.0f) {
+                angle = 180.0f - convertAngleS16ToFloat(matan(-zPosDifference, xPosDifference));
             } else {
-                angle = RADIANS_TO_DEGREES(matan__Fff(zPosDifference, xPosDifference));
+                angle = convertAngleS16ToFloat(matan(zPosDifference, xPosDifference));
             }
 
             float wrappedAngle = MsWrap(mParent->mRotation.y, angle - 180.0f, angle + 180.0f);

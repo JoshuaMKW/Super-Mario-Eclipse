@@ -231,8 +231,6 @@ void TEMarioPortal::initMapObj() {
 }
 
 bool TEMarioPortal::receiveMessage(THitActor *sender, u32 message) {
-    OSReport("[EMarioPortal] Received msg %lu for sender 0x%08X\n", message, sender);
-
     if (TMapObjGeneral::receiveMessage(sender, message)) {
         return true;
     }

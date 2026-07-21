@@ -491,6 +491,10 @@ BETTER_SMS_FOR_CALLBACK void initializeStageInfo(TApplication *app) {
                                       TVec3f(0.0f, -50.0f, 0.0f), SME::STAGE_ERTO, -1);
 
                 SME::setSpawnTransRot(TGameSequence::AREA_DOLPIC, -1,
+                                      TVec3f(13700.0f, 300.0f, -12700.0f),
+                                      TVec3f(0.0f, -50.0f, 0.0f), SME::STAGE_ERTO_EX, -1);
+
+                SME::setSpawnTransRot(TGameSequence::AREA_DOLPIC, -1,
                                       TVec3f(-7500.0f, 285.0f, 4700.0f), TVec3f(0.0f, 170.0f, 0.0f),
                                       TGameSequence::AREA_DOLPICEX0,
                                       0);  // Ricco Station

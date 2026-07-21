@@ -312,6 +312,21 @@ static void assignExitAreaDestination(TGameSequence *sequence, u8 area, u8 episo
     case SME::STAGE_PEACH_BEACH_EX:
     case SME::STAGE_YOSHI_VILLAGE:
     case SME::STAGE_YOSHI_EX:
+        if (z_pressed) {
+            if (SMS_isExMap__Fv()) {
+                gpApplication.mNextScene.mAreaID    = gpApplication.mPrevScene.mAreaID;
+                gpApplication.mNextScene.mEpisodeID = 0xFF;
+            } else {
+                gpApplication.mNextScene.mAreaID    = gpApplication.mCurrentScene.mAreaID;
+                gpApplication.mNextScene.mEpisodeID = 0xFF;
+            }
+            TFlagManager::smInstance->setBool(true, 0x50010);
+        } else {
+            gpApplication.mNextScene.mAreaID    = SME::STAGE_CRUISER;
+            gpApplication.mNextScene.mEpisodeID = 4;
+        }
+        return;
+    case SME::STAGE_MARIO_DREAM:
     case SME::STAGE_SPETTRO_CASINO:
     case SME::STAGE_SPETTRO_EX: {
         if (z_pressed) {
